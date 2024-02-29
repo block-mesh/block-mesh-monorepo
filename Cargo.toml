@@ -1,0 +1,21 @@
+[workspace]
+members = ["libs/*"]
+resolver = "2"
+
+[workspace.package]
+authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
+
+[patch.crates-io]
+## aes-gcm-siv 0.10.3 and curve25519-dalek 3.x pin zeroize to <1.4
+## which conflicts with other dependencies requiring zeroize ^1.5.
+## We’re patching both crates to unpin zeroize.
+##
+## For aes-gcm-siv we’re using the same revision Solana uses in
+## an (as of now) unreleased commit, see
+## https://github.com/solana-labs/solana/commit/01f1bf27994d9813fadfcd134befd3a449aaa0bd
+##
+## For curve25519-dalek we’re using commit from a PR, see
+## https://github.com/dalek-cryptography/curve25519-dalek/pull/606
+aes-gcm-siv = { git = "https://github.com/RustCrypto/AEADs", rev = "6105d7a5591aefa646a95d12b5e8d3f55a9214ef" }
+curve25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dalek", rev = "8274d5cbb6fc3f38cdc742b4798173895cd2a290" }
+
