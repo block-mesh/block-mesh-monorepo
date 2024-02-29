@@ -1,4 +1,4 @@
-use crate::database::domain::provider_node_status::ProviderNodeStatus;
+use crate::domain::provider_node_status::ProviderNodeStatus;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

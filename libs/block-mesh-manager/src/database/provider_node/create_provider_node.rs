@@ -1,4 +1,4 @@
-use crate::database::domain::provider_node_status::ProviderNodeStatus;
+use crate::domain::provider_node_status::ProviderNodeStatus;
 use anyhow::anyhow;
 use chrono::Utc;
 use sqlx::{Postgres, Transaction};

@@ -1,2 +1,1 @@
-pub mod domain;
-pub mod queries;
+mod provider_node;
