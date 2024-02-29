@@ -1,0 +1,33 @@
+# https://github.com/LukeMathWalker/zero-to-production/blob/main/.github/workflows/general.yml
+name: FMT
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - master
+env:
+  RUSTC_VERSION: 1.75.0
+  SQLX_OFFLINE: true
+  SQLX_OFFLINE_DIR: .sqlx
+  CARGO_TERM_COLOR: always
+  SQLX_VERSION: 0.7.3
+  SQLX_FEATURES: "rustls,postgres"
+jobs:
+  fmt:
+    name: Rustfmt
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ env.RUSTC_VERSION }}
+          components: rustfmt
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: rustfmt-sqlx-${{ env.SQLX_VERSION }}
+          cache-all-crates: true
+      - name: Enforce formatting
+        run: cargo fmt --check
