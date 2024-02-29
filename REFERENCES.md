@@ -4,6 +4,10 @@
 
 * [ZK solana](https://dev.to/zeref101/building-your-first-zk-program-on-solana-2nhn)
 
+## Uptime Monitor
+
+* [Uptime monitor by Shuttle](https://www.shuttle.rs/blog/2024/02/08/uptime-monitoring-rust)
+
 ## Proxy
 
 ### High Priority
