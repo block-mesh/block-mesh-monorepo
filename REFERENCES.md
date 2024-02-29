@@ -1,13 +1,19 @@
 # REFERENCES
 
-## High Priority
+## ZK
+
+* [ZK solana](https://dev.to/zeref101/building-your-first-zk-program-on-solana-2nhn)
+
+## Proxy
+
+### High Priority
 
 * [Cloudflare pingora](https://github.com/cloudflare/pingora) - [pingora block](https://blog.cloudflare.com/pingora-open-source)
 * [anyip.io rust SOCKS5](https://github.com/dizda/fast-socks5) - use by [anyip](https://anyip.io/)
 * [rust libp2p](https://github.com/libp2p/rust-libp2p)
 * [shadowsocks](https://crates.io/crates/shadowsocks-rust)
 
-## Other
+### Other
 
 * [Decentralized VPNs](https://www.alchemy.com/best/decentralized-vpns)
 * [API rate limiting by Shuttle](https://www.shuttle.rs/blog/2024/02/22/api-rate-limiting-rust)
