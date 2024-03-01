@@ -1,34 +1,21 @@
 #!/usr/bin/env bash
 set -x
-_PWD="$(pwd)"
-ROOT="$(git rev-parse --show-toplevel)"
+export APP_ENVIRONMENT="local"
+export _PWD="$(pwd)"
+export ROOT="$(git rev-parse --show-toplevel)"
+source "${ROOT}/scripts/setup.sh"
 cd "${ROOT}/libs/block-mesh-manager" || exit
 set +x
+source "${ROOT}/scripts/setup.sh"
 export DATABASE_URL="postgres://postgres:password@localhost:5555/block-mesh"
-"${ROOT}/scripts/init_db.sh"
-if [ "$?" -ne 0 ]
-then
-    printf "\n init_db.sh failed\n"
-    exit 1
-fi
-"${ROOT}/scripts/build.sh"
-if [ "$?" -ne 0 ]
-then
-    printf "\n build.sh failed\n"
-    exit 1
-fi
-
-#"${ROOT}/target/debug/backend" &
-#export backend=$!
-
+ensure "${ROOT}/scripts/init_db.sh"
+ensure "${ROOT}/scripts/build.sh"
+"${ROOT}/target/debug/block-mesh-manager" &
+export backend=$!
 function cleanup()
 {
-  echo "Killing $backend and $frontend"
-  kill $backend
-  kill $frontend
+  echo "Killing ${backend}"
+  kill "${backend}"
 }
-
 trap cleanup SIGINT EXIT
-
-wait $backend
-wait $frontend
+wait "${backend}"

@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 set -x
 set -eo pipefail
-
-_PWD="$(pwd)"
-ROOT="$(git rev-parse --show-toplevel)"
+export _PWD="$(pwd)"
+export ROOT="$(git rev-parse --show-toplevel)"
+source "${ROOT}/scripts/setup.sh"
 cd "${ROOT}/libs/block-mesh-manager" || exit
 if ! command -v psql &> /dev/null
 then
@@ -38,9 +38,9 @@ then
   DOCKERS="$(docker ps -a -q --filter ancestor=postgres:15.3-alpine3.18 --format="{{.ID}}")"
   if [ -n "$DOCKERS" ]
   then
-    docker rm --force --volumes $DOCKERS
+    ensure docker rm --force --volumes $DOCKERS
   fi
-  docker run \
+  ensure docker run \
     -e POSTGRES_USER=${DB_USER} \
     -e POSTGRES_PASSWORD=${DB_PASSWORD} \
     -e POSTGRES_DB=${DB_NAME} \
@@ -58,13 +58,10 @@ do
 done
 
 >&2 echo "Postgres is up and running on port ${DB_PORT}!"
-
 set -x
 export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}"
-sqlx database create
-sqlx migrate run --source migrations
-cargo sqlx prepare
-
+ensure sqlx database create
+ensure sqlx migrate run --source migrations
+ensure cargo sqlx prepare
 >&2 echo "Postgres has been migrated, ready to go!"
-
 cd "${_PWD}"
