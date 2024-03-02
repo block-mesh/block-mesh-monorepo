@@ -1,0 +1,10 @@
+application:
+  port: 8000
+  base_url: http://127.0.0.1
+database:
+  host: 127.0.0.1
+  port: 5555
+  username: "postgres"
+  password: "password"
+  name: "block-mesh"
+  require_ssl: false
