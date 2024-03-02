@@ -1,4 +1,6 @@
 #![forbid(unsafe_code)]
+#![deny(elided_lifetimes_in_paths)]
+#![deny(unreachable_pub)]
 
 use block_mesh_manager::configuration::get_configuration::get_configuration;
 use block_mesh_manager::domain::secret::Secret;

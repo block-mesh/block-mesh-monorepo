@@ -7,6 +7,9 @@ authors.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+askama = { workspace = true, features = ["with-axum"] }
+askama_axum = { workspace = true }
+tokio-stream = { workspace = true, features = ["sync"] }
 serde = { workspace = true, features = ["derive"] }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
@@ -27,6 +30,7 @@ tracing-subscriber = { workspace = true, features = ["env-filter"] }
 tracing-appender = { workspace = true }
 tracing-bunyan-formatter = { workspace = true }
 tracing-log = { workspace = true }
+http = { workspace = true }
 
 
 [dependencies.sqlx]
