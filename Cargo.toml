@@ -20,6 +20,15 @@ aes-gcm-siv = { git = "https://github.com/RustCrypto/AEADs", rev = "6105d7a5591a
 curve25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dalek", rev = "8274d5cbb6fc3f38cdc742b4798173895cd2a290" }
 
 [workspace.dependencies]
+env_logger = { version = "0.11.2" }
+structopt = { version = "0.3.26" }
+prometheus = { version = "0.13.3" }
+pingora = { version = "0.1.0" }
+pingora-core = { version = "0.1.0" }
+pingora-http = { version = "0.1.0" }
+pingora-load-balancing = { version = "0.1.0" }
+pingora-proxy = { version = "0.1.0" }
+pingora-limits = { version = "0.1.0" }
 askama = { version = "0.12.1", features = ["with-axum"] }
 askama_axum = { version = "0.4.0" }
 tokio-stream = { version = "0.1.14", features = ["sync"] }
@@ -78,6 +87,7 @@ axum-login = { version = "0.13.1" }
 tower-sessions-sqlx-store = { version = "0.10.0", features = ["postgres"] }
 enum-iterator = { version = "2.0.0" }
 once_cell = { version = "1.18.0" }
+log = { version = "0.4.21" }
 
 [workspace.dependencies.rand]
 version = "0.8.5"

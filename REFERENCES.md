@@ -1,5 +1,9 @@
 # REFERENCES
 
+## HTMX
+
+* [HTML with rust - by Shuttle](https://www.shuttle.rs/blog/2023/10/25/htmx-with-rust)
+
 ## ZK
 
 * [ZK solana](https://dev.to/zeref101/building-your-first-zk-program-on-solana-2nhn)
@@ -16,6 +20,10 @@
 * [anyip.io rust SOCKS5](https://github.com/dizda/fast-socks5) - use by [anyip](https://anyip.io/)
 * [rust libp2p](https://github.com/libp2p/rust-libp2p)
 * [shadowsocks](https://crates.io/crates/shadowsocks-rust)
+* [ureq](https://github.com/algesten/ureq)
+* [good socks?](https://github.com/ark0f/hyper-socks2/issues/18)
+    * [async socks5 ***?](https://github.com/ark0f/async-socks5)
+    * [hyper socks2 *******](https://github.com/ark0f/hyper-socks2)
 
 ### Other
 

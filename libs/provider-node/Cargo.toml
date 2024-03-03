@@ -7,3 +7,15 @@ authors.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+env_logger = { workspace = true }
+pingora = { workspace = true }
+pingora-core = { workspace = true }
+pingora-http = { workspace = true }
+pingora-load-balancing = { workspace = true }
+pingora-proxy = { workspace = true }
+pingora-limits = { workspace = true }
+async-trait = { workspace = true }
+log = { workspace = true }
+prometheus = { workspace = true }
+structopt = { workspace = true }
+
