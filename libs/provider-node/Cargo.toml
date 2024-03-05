@@ -7,3 +7,10 @@ authors.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+axum = { workspace = true }
+hyper = { workspace = true, features = ["full"] }
+tower = { workspace = true, features = ["util"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+tokio = { workspace = true, features = ["full"] }
+hyper-util = { workspace = true }
