@@ -1,21 +1,14 @@
-use axum::{
-    body::Body,
-    extract::Request,
-    http::{Method, StatusCode},
-    response::{IntoResponse, Response},
-    routing::get,
-    Router,
-};
-
+use axum::{body::Body, extract::Request, http::Method, routing::get, Router};
 use hyper::body::Incoming;
 use hyper::server::conn::http1;
-use hyper::upgrade::Upgraded;
+use hyper_util::rt::TokioIo;
+use provider_node::proxy_server::proxy::proxy;
+use provider_node::token_management::channels::{init_channels, TX};
 use std::net::SocketAddr;
-use tokio::net::{TcpListener, TcpStream};
+use tokio::net::TcpListener;
+use tokio::sync::broadcast;
 use tower::Service;
 use tower::ServiceExt;
-
-use hyper_util::rt::TokioIo;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
 
 #[tokio::main]
@@ -27,6 +20,14 @@ async fn main() {
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
+
+    let mut rx1 = init_channels();
+
+    let _recv_task = tokio::spawn(async move {
+        while let Ok(msg) = rx1.recv().await {
+            println!(">>> got {:?}", msg);
+        }
+    });
 
     let router_svc = Router::new().route("/", get(|| async { "OK" }));
 
@@ -67,47 +68,4 @@ async fn main() {
             }
         });
     }
-}
-
-async fn proxy(req: Request) -> Result<Response, hyper::Error> {
-    tracing::trace!(?req);
-    println!("proxy reg {:?}", req);
-
-    if let Some(host_addr) = req.uri().authority().map(|auth| auth.to_string()) {
-        tokio::task::spawn(async move {
-            match hyper::upgrade::on(req).await {
-                Ok(upgraded) => {
-                    if let Err(e) = tunnel(upgraded, host_addr).await {
-                        tracing::warn!("server io error: {}", e);
-                    };
-                }
-                Err(e) => tracing::warn!("upgrade error: {}", e),
-            }
-        });
-
-        Ok(Response::new(Body::empty()))
-    } else {
-        tracing::warn!("CONNECT host is not socket addr: {:?}", req.uri());
-        Ok((
-            StatusCode::BAD_REQUEST,
-            "CONNECT must be to a socket address",
-        )
-            .into_response())
-    }
-}
-
-async fn tunnel(upgraded: Upgraded, addr: String) -> std::io::Result<()> {
-    let mut server = TcpStream::connect(addr).await?;
-    let mut upgraded = TokioIo::new(upgraded);
-
-    let (from_client, from_server) =
-        tokio::io::copy_bidirectional(&mut upgraded, &mut server).await?;
-
-    tracing::debug!(
-        "client wrote {} bytes and received {} bytes",
-        from_client,
-        from_server
-    );
-
-    Ok(())
 }
