@@ -6,7 +6,6 @@ use axum::response::{IntoResponse, Response};
 
 pub async fn proxy(req: Request) -> Result<Response, hyper::Error> {
     tracing::trace!(?req);
-    println!("proxy reg {:?}", req);
 
     if let Some(host_addr) = req.uri().authority().map(|auth| auth.to_string()) {
         tokio::task::spawn(async move {

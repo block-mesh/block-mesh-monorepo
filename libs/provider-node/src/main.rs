@@ -3,10 +3,11 @@ use hyper::body::Incoming;
 use hyper::server::conn::http1;
 use hyper_util::rt::TokioIo;
 use provider_node::proxy_server::proxy::proxy;
-use provider_node::token_management::channels::{init_channels, TX};
+use provider_node::token_management::channels::{
+    init_channels, init_token_manager, update_token_manager,
+};
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use tokio::sync::broadcast;
 use tower::Service;
 use tower::ServiceExt;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -21,10 +22,12 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
+    init_token_manager();
     let mut rx1 = init_channels();
 
     let _recv_task = tokio::spawn(async move {
         while let Ok(msg) = rx1.recv().await {
+            update_token_manager(&msg).await;
             println!(">>> got {:?}", msg);
         }
     });

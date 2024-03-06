@@ -17,3 +17,4 @@ hyper-util = { workspace = true }
 once_cell = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 uuid = { workspace = true, features = ["v4"] }
+rustc-hash = { workpace = true }
