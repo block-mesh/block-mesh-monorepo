@@ -1,0 +1,19 @@
+[package]
+name = "worker-rust"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+worker = { workspace = true }
+tracing = { workspace = true }
+tracing-web = { workspace = true }
+tracing-subscriber = { workspace = true, features = ['time', 'json'] }
+time = { workspace = true, features = ['wasm-bindgen'] }
+
+[profile.release]
+lto = true
+strip = true
+codegen-units = 1
