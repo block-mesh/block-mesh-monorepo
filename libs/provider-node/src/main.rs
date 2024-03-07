@@ -2,12 +2,17 @@ use axum::{body::Body, extract::Request, http::Method, routing::get, Router};
 use hyper::body::Incoming;
 use hyper::server::conn::http1;
 use hyper_util::rt::TokioIo;
+use provider_node::app_state::AppState;
 use provider_node::proxy_server::proxy::proxy;
+use provider_node::routes::health_check::health_check;
 use provider_node::token_management::channels::{
-    init_channels, init_token_manager, update_token_manager,
+    update_token_manager, ChannelMessage, TokenManagerHashMap,
 };
+use rustc_hash::FxHashMap;
 use std::net::SocketAddr;
+use std::sync::Arc;
 use tokio::net::TcpListener;
+use tokio::sync::broadcast;
 use tower::Service;
 use tower::ServiceExt;
 use tracing_subscriber::{layer::SubscriberExt, util::SubscriberInitExt};
@@ -17,29 +22,33 @@ async fn main() {
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "http_proxy=trace,tower_http=debug".into()),
+                .unwrap_or_else(|_| "trace".into()),
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    init_token_manager();
-    let mut rx1 = init_channels();
+    let mut token_manager: TokenManagerHashMap = FxHashMap::default().into();
+    let (tx, mut rx) = broadcast::channel::<ChannelMessage>(16);
 
-    let _recv_task = tokio::spawn(async move {
-        while let Ok(msg) = rx1.recv().await {
-            update_token_manager(&msg).await;
-            println!(">>> got {:?}", msg);
+    let _ = tokio::spawn(async move {
+        while let Ok(msg) = rx.recv().await {
+            update_token_manager(&msg, &mut token_manager).await;
         }
     });
 
-    let router_svc = Router::new().route("/", get(|| async { "OK" }));
+    let app_state = Arc::new(AppState { tx });
+    let router_svc = Router::new()
+        .route("/health_check", get(health_check))
+        .route("/", get(|| async { "OK" }))
+        .with_state(app_state.clone());
 
     let tower_service = tower::service_fn(move |req: Request<_>| {
+        let app_state = app_state.clone();
         let router_svc = router_svc.clone();
         let req = req.map(Body::new);
         async move {
             if req.method() == Method::CONNECT {
-                proxy(req).await
+                proxy(app_state, req).await
             } else {
                 router_svc.oneshot(req).await.map_err(|err| match err {})
             }
@@ -52,7 +61,6 @@ async fn main() {
 
     let addr = SocketAddr::from(([127, 0, 0, 1], 3000));
     tracing::debug!("listening on {}", addr);
-    println!("listening on {}", addr);
 
     let listener = TcpListener::bind(addr).await.unwrap();
     loop {
@@ -67,7 +75,7 @@ async fn main() {
                 .with_upgrades()
                 .await
             {
-                println!("Failed to serve connection: {:?}", err);
+                tracing::error!("Failed to serve connection: {:?}", err);
             }
         });
     }
