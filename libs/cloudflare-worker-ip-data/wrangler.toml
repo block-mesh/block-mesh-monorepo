@@ -1,4 +1,4 @@
-name = "worker-rust"
+name = "cloudflare-worker-ip-data"
 main = "build/worker/shim.mjs"
 compatibility_date = "2023-12-01"
 
