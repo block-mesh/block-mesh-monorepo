@@ -21,7 +21,6 @@ pub async fn proxy(app_state: Arc<AppState>, req: Request) -> Result<Response, h
                 Err(e) => tracing::warn!("upgrade error: {}", e),
             }
         });
-
         Ok(Response::new(Body::empty()))
     } else {
         tracing::warn!("CONNECT host is not socket addr: {:?}", req.uri());
