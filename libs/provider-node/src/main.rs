@@ -27,10 +27,10 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer())
         .init();
 
-    let mut token_manager: TokenManagerHashMap = FxHashMap::default().into();
+    let mut token_manager: TokenManagerHashMap = FxHashMap::default();
     let (tx, mut rx) = broadcast::channel::<ChannelMessage>(16);
 
-    let _ = tokio::spawn(async move {
+    tokio::spawn(async move {
         while let Ok(msg) = rx.recv().await {
             update_token_manager(&msg, &mut token_manager).await;
         }

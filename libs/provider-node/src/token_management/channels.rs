@@ -20,21 +20,16 @@ pub struct ChannelMessage {
 
 #[tracing::instrument(name = "update_token_manager")]
 pub async fn update_token_manager(msg: &ChannelMessage, token_manager: &mut TokenManagerHashMap) {
-    if !token_manager.contains_key(&msg.token) {
-        token_manager.insert(
-            msg.token,
-            TokenDetails {
-                token: msg.token,
-                bandwidth_allowance: 0,
-                bandwidth_used: 0,
-            },
-        );
-    } else {
-        let details = token_manager.get_mut(&msg.token).unwrap();
-        details.bandwidth_used += msg.download;
-        details.bandwidth_used += msg.upload;
-    }
-
+    token_manager
+        .entry(msg.token)
+        .or_insert_with(|| TokenDetails {
+            token: msg.token,
+            bandwidth_allowance: 0,
+            bandwidth_used: 0,
+        });
+    let details = token_manager.get_mut(&msg.token).unwrap();
+    details.bandwidth_used += msg.download;
+    details.bandwidth_used += msg.upload;
     tracing::info!(">>> token manager: {:?}", token_manager.get(&msg.token));
 }
 
