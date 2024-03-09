@@ -36,7 +36,7 @@ impl IPData {
     }
 
     pub async fn get_ip_api_is_response(&mut self) {
-        let ip = vec![
+        let ip = [
             self.cf_connecting_ip.as_ref(),
             self.x_real_ip.as_ref(),
             self.x_forwarded_for.as_ref(),
