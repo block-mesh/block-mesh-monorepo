@@ -1,0 +1,25 @@
+{
+  "scripts": {
+    "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
+    "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
+    "solita": "npx ts-node solita.ts"
+  },
+  "dependencies": {
+    "@coral-xyz/anchor": "0.29.0",
+    "@metaplex-foundation/beet-solana": "0.4.1",
+    "@metaplex-foundation/solita": "0.20.1",
+    "@solana/spl-token": "0.3.11",
+    "@solana/web3.js": "1.89.1",
+    "keccak256": "1.0.6"
+  },
+  "devDependencies": {
+    "chai": "5.1.0",
+    "mocha": "10.3.0",
+    "ts-mocha": "10.0.0",
+    "@types/bn.js": "5.1.5",
+    "@types/chai": "4.3.12",
+    "@types/mocha": "10.0.6",
+    "typescript": "5.4.2",
+    "prettier": "3.2.5"
+  }
+}
