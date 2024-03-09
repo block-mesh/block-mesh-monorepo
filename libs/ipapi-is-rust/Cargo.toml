@@ -10,9 +10,9 @@ authors.workspace = true
 tracing = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
-reqwest = { workspace = true, default-features = false, features = [
+reqwest = { workspace = true, features = [
   "json",
 ] }
 
 [dev-dependencies]
-tokio = { workspace = true, default-features = false }
+tokio = { workspace = true }

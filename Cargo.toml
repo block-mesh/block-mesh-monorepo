@@ -2,6 +2,7 @@
 overflow-checks = true
 lto = "fat"
 codegen-units = 1
+#strip = true
 [profile.release.build-override]
 opt-level = 3
 incremental = false
@@ -29,6 +30,7 @@ aes-gcm-siv = { git = "https://github.com/RustCrypto/AEADs", rev = "6105d7a5591a
 curve25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dalek", rev = "8274d5cbb6fc3f38cdc742b4798173895cd2a290" }
 
 [workspace.dependencies]
+bytemuck = { version = "1.4.0", features = ["derive", "min_const_generics"] }
 env_logger = { version = "0.11.2" }
 structopt = { version = "0.3.26" }
 prometheus = { version = "0.13.3" }
