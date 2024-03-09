@@ -12,6 +12,6 @@ impl ProviderNode {
 
     pub const SIZE: usize = 8 + /* discriminator */
         std::mem::size_of::<u8>() + /* bump */
-        std::mem::size_of::<Pubkey>() + /* signer */
+        std::mem::size_of::<Pubkey>() + /* owner */
         64; /* padding */
 }

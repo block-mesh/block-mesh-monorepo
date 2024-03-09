@@ -19,4 +19,8 @@ pub mod blockmesh_program {
     pub fn create_provider_node(ctx: Context<CreateProviderNodeContext>) -> Result<()> {
         create_provider_node::create_provider_node(ctx)
     }
+
+    pub fn create_token_usage(ctx: Context<CreateTokenUsageContext>) -> Result<()> {
+        create_token_usage::create_token_usage(ctx)
+    }
 }
