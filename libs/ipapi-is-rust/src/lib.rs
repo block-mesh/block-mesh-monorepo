@@ -1,8 +1,4 @@
-mod response;
-
-pub fn add(left: usize, right: usize) -> usize {
-    left + right
-}
+pub mod response;
 
 pub async fn get_ip_info(ip: &str) -> Result<response::IpApiIsResponse, reqwest::Error> {
     let url = format!("https://api.ipapi.is?q={}", ip);

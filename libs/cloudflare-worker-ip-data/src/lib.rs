@@ -1,3 +1,5 @@
+use ipapi_is_rust::get_ip_info;
+use ipapi_is_rust::response::IpApiIsResponse;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use tracing_subscriber::fmt::format::Pretty;
@@ -19,6 +21,7 @@ struct IPData {
     x_real_ip: Option<String>,
     x_forwarded_for: Option<String>,
     cf_ipcountry: Option<String>,
+    ip_api_is_response: Option<IpApiIsResponse>,
 }
 
 impl IPData {
@@ -28,6 +31,28 @@ impl IPData {
             x_real_ip: headers.get("x-real-ip").map(|s| s.to_string()),
             x_forwarded_for: headers.get("x-forwarded-for").map(|s| s.to_string()),
             cf_ipcountry: headers.get("cf-ipcountry").map(|s| s.to_string()),
+            ip_api_is_response: None,
+        }
+    }
+
+    pub async fn get_ip_api_is_response(&mut self) {
+        let ip = vec![
+            self.cf_connecting_ip.as_ref(),
+            self.x_real_ip.as_ref(),
+            self.x_forwarded_for.as_ref(),
+        ];
+        let ip = ip.iter().find(|ip| ip.is_some());
+        if let Some(ip) = ip {
+            let ip = ip.as_ref().unwrap();
+            let response = get_ip_info(ip).await;
+            match response {
+                Ok(response) => {
+                    self.ip_api_is_response = Some(response);
+                }
+                Err(e) => {
+                    tracing::error!("Error getting IP info: {:?}", e);
+                }
+            }
         }
     }
 }
@@ -54,7 +79,8 @@ async fn main(req: Request, _env: Env, _ctx: Context) -> Result<Response> {
             headers.insert(k.clone(), v.clone());
         }
     });
-    let ip_data = IPData::new(headers);
+    let mut ip_data = IPData::new(headers);
+    ip_data.get_ip_api_is_response().await;
     tracing::info!("IP Data: {:?}", ip_data);
     Response::from_json(&ip_data)
 }
