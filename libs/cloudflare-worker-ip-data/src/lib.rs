@@ -25,6 +25,7 @@ struct IPData {
 }
 
 impl IPData {
+    #[tracing::instrument(name = "IPData::new")]
     pub fn new(headers: FxHashMap<String, String>) -> Self {
         Self {
             cf_connecting_ip: headers.get("cf-connecting-ip").map(|s| s.to_string()),
@@ -35,6 +36,7 @@ impl IPData {
         }
     }
 
+    #[tracing::instrument(name = "IPData::get_ip_api_is_response", skip(self))]
     pub async fn get_ip_api_is_response(&mut self) {
         let ip = [
             self.cf_connecting_ip.as_ref(),
