@@ -20,7 +20,7 @@ pub struct DataCenter {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct ASN {
+pub struct Asn {
     pub asn: u32,
     pub abuser_score: String,
     pub route: String,
@@ -67,7 +67,7 @@ pub struct IpApiIsResponse {
     pub is_abuser: bool,
     pub company: Company,
     pub datacenter: DataCenter,
-    pub asn: ASN,
+    pub asn: Asn,
     pub location: Location,
     pub elapsed_ms: f64,
 }
