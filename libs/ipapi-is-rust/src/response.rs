@@ -65,9 +65,9 @@ pub struct IpApiIsResponse {
     pub is_proxy: bool,
     pub is_vpn: bool,
     pub is_abuser: bool,
-    pub company: Company,
-    pub datacenter: DataCenter,
-    pub asn: Asn,
-    pub location: Location,
+    pub company: Option<Company>,
+    pub datacenter: Option<DataCenter>,
+    pub asn: Option<Asn>,
+    pub location: Option<Location>,
     pub elapsed_ms: f64,
 }
