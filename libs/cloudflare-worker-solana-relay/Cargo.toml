@@ -1,5 +1,5 @@
 [package]
-name = "cloudflare-worker-ip-data"
+name = "cloudflare-worker-solana-relay"
 version = "0.1.0"
 edition = "2021"
 
@@ -15,6 +15,4 @@ time = { workspace = true, features = ['wasm-bindgen'] }
 serde = { workspace = true, features = ['derive'] }
 serde_json = { workspace = true }
 rustc-hash = { workspace = true }
-ipapi-is-rust = { path = "../ipapi-is-rust" }
-
-
+solana-sdk = { workspace = true }
