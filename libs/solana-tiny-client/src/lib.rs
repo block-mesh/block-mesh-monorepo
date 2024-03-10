@@ -1,3 +1,5 @@
+pub mod client;
+pub mod errors;
 pub mod general;
 pub mod methods;
 

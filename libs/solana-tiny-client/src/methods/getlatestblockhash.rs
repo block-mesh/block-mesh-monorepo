@@ -1,16 +1,26 @@
-use crate::general::commitment::CommitmentParams;
+use crate::general::commitment::{Commitment, CommitmentParams};
 use crate::general::context::Context;
 use crate::general::jsonrpc::Jsonrpc;
 use crate::general::methods::Methods;
-
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GetLatestBlockhashInput {
-    pub(crate) id: u64,
-    pub(crate) jsonrpc: Jsonrpc,
-    pub(crate) method: Methods,
-    pub(crate) params: [CommitmentParams; 1],
+    id: u64,
+    jsonrpc: Jsonrpc,
+    method: Methods,
+    params: [CommitmentParams; 1],
+}
+
+impl GetLatestBlockhashInput {
+    pub fn new(commitment: Commitment) -> Self {
+        GetLatestBlockhashInput {
+            id: 1,
+            jsonrpc: Jsonrpc::Jsonrpc,
+            method: Methods::GetLatestBlockhash,
+            params: [CommitmentParams { commitment }],
+        }
+    }
 }
 
 #[allow(non_snake_case)]
@@ -35,60 +45,17 @@ pub struct GetLatestBlockhashOutput {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::client::rpc_client::RpcClient;
     use crate::general::commitment::Commitment;
     use crate::PUBLIC_URLS;
-    use reqwest::header::CONTENT_TYPE;
 
     #[tokio::test]
     async fn test_get_latest_blockhash() {
-        let body = GetLatestBlockhashInput {
-            id: 1,
-            jsonrpc: Jsonrpc::Jsonrpc,
-            method: Methods::GetLatestBlockhash,
-            params: [CommitmentParams {
-                commitment: Commitment::Processed,
-            }],
-        };
-
-        let body_json = serde_json::to_string(&body)
-            .map_err(|e| println!("GetLatestBlockHash (0) => {:?}", e))
-            .unwrap();
-
-        println!("body_json: {:?}", body_json);
-
-        let dynamic_json: serde_json::Value = reqwest::Client::new()
-            .post(PUBLIC_URLS[2])
-            .header(CONTENT_TYPE, "application/json")
-            .json(&body)
-            .send()
-            .await
-            .unwrap()
-            .json()
+        let response = RpcClient::new(PUBLIC_URLS[2].to_string(), Commitment::Confirmed)
+            .get_latest_blockhash(None, None)
             .await
             .unwrap();
-
-        println!("dynamic_json: {:?}", dynamic_json);
-
-        let response = reqwest::Client::new()
-            .post(PUBLIC_URLS[2])
-            .header(CONTENT_TYPE, "application/json")
-            .json(&body)
-            .send()
-            .await
-            .map_err(|e| println!("GetLatestBlockHash (1) => {:?}", e))
-            .unwrap();
-
-        println!("GetLatestBlockHash (*) => {:?}", response);
-
-        let response = response
-            .json::<GetLatestBlockhashOutput>()
-            .await
-            .map_err(|e| {
-                println!("GetLatestBlockHash (2) => {:?}", e);
-            })
-            .unwrap();
-
-        println!("GetLatestBlockHash (3) => {:?}", response);
+        assert!(response.result.value.blockhash.len() > 0);
+        assert!(response.result.value.lastValidBlockHeight > 0);
     }
 }
