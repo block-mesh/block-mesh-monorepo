@@ -25,22 +25,22 @@ impl GetLatestBlockhashInput {
 
 #[allow(non_snake_case)]
 #[derive(Debug, Serialize, Deserialize)]
-struct GetLatestBlockhashOutputValue {
-    blockhash: String,
-    lastValidBlockHeight: u64,
+pub struct GetLatestBlockhashOutputValue {
+    pub blockhash: String,
+    pub lastValidBlockHeight: u64,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GetLatestBlockhashOutputResult {
-    context: Context,
-    value: GetLatestBlockhashOutputValue,
+    pub context: Context,
+    pub value: GetLatestBlockhashOutputValue,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct GetLatestBlockhashOutput {
     id: u64,
     jsonrpc: Jsonrpc,
-    result: GetLatestBlockhashOutputResult,
+    pub result: GetLatestBlockhashOutputResult,
 }
 
 #[cfg(test)]

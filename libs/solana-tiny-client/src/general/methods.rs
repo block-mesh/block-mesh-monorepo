@@ -4,4 +4,6 @@ use serde::{Deserialize, Serialize};
 pub enum Methods {
     #[serde(rename = "getLatestBlockhash")]
     GetLatestBlockhash,
+    #[serde(rename = "sendTransaction")]
+    SendTransaction,
 }

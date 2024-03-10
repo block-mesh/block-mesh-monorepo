@@ -1,4 +1,3 @@
-use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use tracing_subscriber::fmt::format::Pretty;
 use tracing_subscriber::fmt::time::UtcTime;
@@ -20,7 +19,18 @@ fn start() {
         .init();
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct RequestBody {
+    pub pubkey: String,
+    pub nonce: String,
+    pub signed_message: String,
+}
+
 #[event(fetch)]
 async fn main(req: Request, _env: Env, _ctx: Context) -> Result<Response> {
-    Response::ok("Hello, world!")
+    if req.method() != Method::Post {
+        return Response::error("Only POST Method allowed", 405);
+    }
+
+    Response::ok(format!("Hello, world! method = {:?}", req.method()))
 }

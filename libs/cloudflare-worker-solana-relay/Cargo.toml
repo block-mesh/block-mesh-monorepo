@@ -16,3 +16,4 @@ serde = { workspace = true, features = ['derive'] }
 serde_json = { workspace = true }
 rustc-hash = { workspace = true }
 solana-sdk = { workspace = true }
+solana-tiny-client = { path = "../solana-tiny-client" }
