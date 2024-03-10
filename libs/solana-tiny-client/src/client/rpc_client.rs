@@ -38,8 +38,7 @@ impl RpcClient {
         url: Option<&str>,
         commitment: Option<Commitment>,
     ) -> anyhow::Result<GetLatestBlockhashOutput> {
-        let body =
-            GetLatestBlockhashInput::new(commitment.unwrap_or(self.default_commitment.clone()));
+        let body = GetLatestBlockhashInput::new(commitment.unwrap_or(self.default_commitment));
         let response = self
             .client
             .post(url.unwrap_or(self.default_url.as_str()))
