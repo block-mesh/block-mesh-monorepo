@@ -4,4 +4,14 @@ use anchor_lang::prelude::*;
 pub enum ErrorCode {
     #[msg("Numerical overflow")]
     NumericalOverflow,
+    #[msg("Latest Provider Node Report Cannot Be Lower Than Previous Report")]
+    LatestProviderNodeReportCannotBeLowerThanPreviousReport,
+    #[msg("Latest Client Report Cannot Be Lower Than Previous Report")]
+    LatestClientReportCannotBeLowerThanPreviousReport,
+    #[msg("Signer Is Not A Valid Provider Node")]
+    SignerNotProviderNode,
+    #[msg("Signer Is Not A Valid Client")]
+    ClientNotProviderNode,
+    #[msg("Mismatch On Reported Usage")]
+    MismatchOnReportedUsage,
 }
