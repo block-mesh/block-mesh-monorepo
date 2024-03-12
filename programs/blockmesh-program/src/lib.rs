@@ -1,10 +1,11 @@
-mod error;
-mod instructions;
-mod state;
-mod utils;
-
+#![allow(ambiguous_glob_reexports)]
 use anchor_lang::prelude::*;
-use instructions::*;
+pub mod error;
+pub mod instructions;
+pub mod state;
+pub mod utils;
+
+pub use instructions::*;
 
 declare_id!("GzscdwWG2FwpA6iqB6yYKEESvvw773c1iAzmJatXLcve");
 

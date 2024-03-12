@@ -7,6 +7,9 @@ authors.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+anchor-lang = { workspace = true }
+blockmesh-program = { path = "../../programs/blockmesh-program" }
+solana-sdk = { workspace = true }
 axum = { workspace = true }
 hyper = { workspace = true, features = ["full"] }
 tower = { workspace = true, features = ["util"] }
