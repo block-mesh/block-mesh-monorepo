@@ -5,12 +5,15 @@ use hyper_util::rt::TokioIo;
 use provider_node::app_state::AppState;
 use provider_node::proxy_server::proxy::proxy;
 use provider_node::routes::health_check::health_check;
+use provider_node::solana::manager::SolanaManager;
 use provider_node::token_management::channels::{
     update_token_manager, ChannelMessage, TokenManagerHashMap,
 };
 use rustc_hash::FxHashMap;
+use solana_sdk::signature::Signer;
 use std::net::SocketAddr;
 use std::sync::Arc;
+use tokio::fs::try_exists;
 use tokio::net::TcpListener;
 use tokio::sync::broadcast;
 use tower::Service;
@@ -26,6 +29,12 @@ async fn main() {
         )
         .with(tracing_subscriber::fmt::layer())
         .init();
+
+    let mut solana_manager = SolanaManager::new().await.unwrap();
+    solana_manager
+        .create_provider_account_if_needed()
+        .await
+        .unwrap();
 
     let mut token_manager: TokenManagerHashMap = FxHashMap::default();
     let (tx, mut rx) = broadcast::channel::<ChannelMessage>(16);
