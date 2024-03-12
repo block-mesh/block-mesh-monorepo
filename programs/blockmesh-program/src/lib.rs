@@ -7,7 +7,7 @@ pub mod utils;
 
 pub use instructions::*;
 
-declare_id!("GzscdwWG2FwpA6iqB6yYKEESvvw773c1iAzmJatXLcve");
+declare_id!("CfaL9sdaEK49r4WLAtVh2vVgAZuv2eKbb6jSB5jDCMSF");
 
 #[program]
 pub mod blockmesh_program {
