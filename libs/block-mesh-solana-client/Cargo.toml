@@ -1,5 +1,5 @@
 [package]
-name = "provider-node"
+name = "block-mesh-solana-client"
 version = "0.1.0"
 edition = "2021"
 authors.workspace = true
@@ -10,17 +10,12 @@ authors.workspace = true
 anyhow = { workspace = true }
 anchor-lang = { workspace = true }
 blockmesh-program = { path = "../../programs/blockmesh-program" }
-block-mesh-solana-client = { path = "../block-mesh-solana-client" }
 solana-client = { workspace = true }
 solana-sdk = { workspace = true }
-axum = { workspace = true }
-hyper = { workspace = true, features = ["full"] }
-tower = { workspace = true, features = ["util"] }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
 tokio = { workspace = true, features = ["full"] }
 hyper-util = { workspace = true }
-once_cell = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 uuid = { workspace = true, features = ["v4"] }
 rustc-hash = { workspace = true }
