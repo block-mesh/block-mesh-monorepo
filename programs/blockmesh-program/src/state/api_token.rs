@@ -28,5 +28,13 @@ impl ApiToken {
     pub const SIZE: usize = 8 + /* discriminator */
         std::mem::size_of::<u8>() + /* bump */
         std::mem::size_of::<Pubkey>() + /* owner */
+        std::mem::size_of::<Pubkey>() + /* client */
+        std::mem::size_of::<Pubkey>() + /* provider_node */
+        std::mem::size_of::<Pubkey>() + /* api_token */
+        std::mem::size_of::<u64>() + /* bandwidth_paid */
+        std::mem::size_of::<u64>() + /* bandwidth_used */
+        std::mem::size_of::<DisputeStatus>() + /* dispute_status */
+        std::mem::size_of::<u64>() + /* latest_client_report */
+        std::mem::size_of::<u64>() + /* latest_provider_node_report */
         64; /* padding */
 }

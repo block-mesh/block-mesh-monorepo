@@ -37,7 +37,6 @@ pub struct SolanaManager {
     provider_account: Option<Pubkey>,
     client: Option<Pubkey>,
     rpc_client: Arc<RpcClient>,
-    mode: SolanaManagerMode,
 }
 
 impl SolanaManager {
@@ -63,7 +62,6 @@ impl SolanaManager {
             provider_account: None,
             rpc_client: Arc::new(get_client()),
             client: None,
-            mode,
         })
     }
 
@@ -77,7 +75,7 @@ impl SolanaManager {
         let api_token_address = get_api_token_address(
             &self.program_id,
             &self.keypair.pubkey(),
-            &provider_node_address.0,
+            &provider_node_owner,
         );
 
         let account = get_account(&self.rpc_client, &api_token_address.0)

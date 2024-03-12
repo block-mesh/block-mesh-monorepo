@@ -35,7 +35,7 @@ async fn main() {
             tracing_subscriber::EnvFilter::try_from_default_env()
                 .unwrap_or_else(|_| "trace".into()),
         )
-        .with(tracing_subscriber::fmt::layer())
+        .with(tracing_subscriber::fmt::layer().with_ansi(false))
         .init();
     let provider_node_owner =
         Pubkey::from_str("CERqu7FToQX6c1VGhDojaaFTcMX2H8vBPBbwmPnKfQdY").unwrap();
@@ -55,11 +55,13 @@ async fn main() {
         .await
         .unwrap();
     let client = reqwest::Client::builder().proxy(proxy).build().unwrap();
-
-    let response = client
+    let response: serde_json::Value = client
         .get("https://api.ipify.org?format=json")
         .send()
         .await
+        .unwrap()
+        .json()
+        .await
         .unwrap();
-    println!("{:?}", response);
+    println!("FINAL RESPONSE => {:?}", response);
 }
