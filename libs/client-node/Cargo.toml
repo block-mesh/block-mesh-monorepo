@@ -1,5 +1,5 @@
 [package]
-name = "provider-node"
+name = "client-node"
 version = "0.1.0"
 edition = "2021"
 authors.workspace = true
@@ -24,3 +24,5 @@ once_cell = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 uuid = { workspace = true, features = ["v4"] }
 rustc-hash = { workspace = true }
+ipapi-is-rust = { path = "../ipapi-is-rust" }
+serde_json = { workspace = true }

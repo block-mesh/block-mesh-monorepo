@@ -17,6 +17,10 @@ import * as beetSolana from '@metaplex-foundation/beet-solana'
 export type ProviderNodeArgs = {
   bump: number
   owner: web3.PublicKey
+  ipv4: number[] /* size: 4 */
+  port: number
+  active: boolean
+  reportBandwidthLimit: beet.bignum
 }
 
 export const providerNodeDiscriminator = [212, 96, 225, 26, 241, 140, 245, 52]
@@ -28,13 +32,27 @@ export const providerNodeDiscriminator = [212, 96, 225, 26, 241, 140, 245, 52]
  * @category generated
  */
 export class ProviderNode implements ProviderNodeArgs {
-  private constructor(readonly bump: number, readonly owner: web3.PublicKey) {}
+  private constructor(
+    readonly bump: number,
+    readonly owner: web3.PublicKey,
+    readonly ipv4: number[] /* size: 4 */,
+    readonly port: number,
+    readonly active: boolean,
+    readonly reportBandwidthLimit: beet.bignum
+  ) {}
 
   /**
    * Creates a {@link ProviderNode} instance from the provided args.
    */
   static fromArgs(args: ProviderNodeArgs) {
-    return new ProviderNode(args.bump, args.owner)
+    return new ProviderNode(
+      args.bump,
+      args.owner,
+      args.ipv4,
+      args.port,
+      args.active,
+      args.reportBandwidthLimit
+    )
   }
 
   /**
@@ -142,6 +160,20 @@ export class ProviderNode implements ProviderNodeArgs {
     return {
       bump: this.bump,
       owner: this.owner.toBase58(),
+      ipv4: this.ipv4,
+      port: this.port,
+      active: this.active,
+      reportBandwidthLimit: (() => {
+        const x = <{ toNumber: () => number }>this.reportBandwidthLimit
+        if (typeof x.toNumber === 'function') {
+          try {
+            return x.toNumber()
+          } catch (_) {
+            return x
+          }
+        }
+        return x
+      })(),
     }
   }
 }
@@ -160,6 +192,10 @@ export const providerNodeBeet = new beet.BeetStruct<
     ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['bump', beet.u8],
     ['owner', beetSolana.publicKey],
+    ['ipv4', beet.uniformFixedSizeArray(beet.u8, 4)],
+    ['port', beet.u16],
+    ['active', beet.bool],
+    ['reportBandwidthLimit', beet.u64],
   ],
   ProviderNode.fromArgs,
   'ProviderNode'

@@ -35,6 +35,134 @@ createErrorFromNameLookup.set(
 )
 
 /**
+ * LatestProviderNodeReportCannotBeLowerThanPreviousReport: 'Latest Provider Node Report Cannot Be Lower Than Previous Report'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class LatestProviderNodeReportCannotBeLowerThanPreviousReportError extends Error {
+  readonly code: number = 0x1771
+  readonly name: string =
+    'LatestProviderNodeReportCannotBeLowerThanPreviousReport'
+  constructor() {
+    super('Latest Provider Node Report Cannot Be Lower Than Previous Report')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(
+        this,
+        LatestProviderNodeReportCannotBeLowerThanPreviousReportError
+      )
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(
+  0x1771,
+  () => new LatestProviderNodeReportCannotBeLowerThanPreviousReportError()
+)
+createErrorFromNameLookup.set(
+  'LatestProviderNodeReportCannotBeLowerThanPreviousReport',
+  () => new LatestProviderNodeReportCannotBeLowerThanPreviousReportError()
+)
+
+/**
+ * LatestClientReportCannotBeLowerThanPreviousReport: 'Latest Client Report Cannot Be Lower Than Previous Report'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class LatestClientReportCannotBeLowerThanPreviousReportError extends Error {
+  readonly code: number = 0x1772
+  readonly name: string = 'LatestClientReportCannotBeLowerThanPreviousReport'
+  constructor() {
+    super('Latest Client Report Cannot Be Lower Than Previous Report')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(
+        this,
+        LatestClientReportCannotBeLowerThanPreviousReportError
+      )
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(
+  0x1772,
+  () => new LatestClientReportCannotBeLowerThanPreviousReportError()
+)
+createErrorFromNameLookup.set(
+  'LatestClientReportCannotBeLowerThanPreviousReport',
+  () => new LatestClientReportCannotBeLowerThanPreviousReportError()
+)
+
+/**
+ * SignerNotProviderNode: 'Signer Is Not A Valid Provider Node'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class SignerNotProviderNodeError extends Error {
+  readonly code: number = 0x1773
+  readonly name: string = 'SignerNotProviderNode'
+  constructor() {
+    super('Signer Is Not A Valid Provider Node')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, SignerNotProviderNodeError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1773, () => new SignerNotProviderNodeError())
+createErrorFromNameLookup.set(
+  'SignerNotProviderNode',
+  () => new SignerNotProviderNodeError()
+)
+
+/**
+ * ClientNotProviderNode: 'Signer Is Not A Valid Client'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class ClientNotProviderNodeError extends Error {
+  readonly code: number = 0x1774
+  readonly name: string = 'ClientNotProviderNode'
+  constructor() {
+    super('Signer Is Not A Valid Client')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, ClientNotProviderNodeError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1774, () => new ClientNotProviderNodeError())
+createErrorFromNameLookup.set(
+  'ClientNotProviderNode',
+  () => new ClientNotProviderNodeError()
+)
+
+/**
+ * MismatchOnReportedUsage: 'Mismatch On Reported Usage'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class MismatchOnReportedUsageError extends Error {
+  readonly code: number = 0x1775
+  readonly name: string = 'MismatchOnReportedUsage'
+  constructor() {
+    super('Mismatch On Reported Usage')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, MismatchOnReportedUsageError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1775, () => new MismatchOnReportedUsageError())
+createErrorFromNameLookup.set(
+  'MismatchOnReportedUsage',
+  () => new MismatchOnReportedUsageError()
+)
+
+/**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors
  * @category generated

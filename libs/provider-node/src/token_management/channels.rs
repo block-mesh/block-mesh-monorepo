@@ -30,7 +30,7 @@ pub async fn update_token_manager(msg: &ChannelMessage, token_manager: &mut Toke
     let details = token_manager.get_mut(&msg.token).unwrap();
     details.bandwidth_used += msg.download;
     details.bandwidth_used += msg.upload;
-    tracing::info!(">>> token manager: {:?}", token_manager.get(&msg.token));
+    tracing::info!(">>> api_token manager: {:?}", token_manager.get(&msg.token));
 }
 
 #[tracing::instrument(name = "send_message")]
