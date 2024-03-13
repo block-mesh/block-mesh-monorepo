@@ -75,7 +75,7 @@ impl SolanaManager {
         let api_token_address = get_api_token_address(
             &self.program_id,
             &self.keypair.pubkey(),
-            &provider_node_owner,
+            provider_node_owner,
         );
 
         let account = get_account(&self.rpc_client, &api_token_address.0)

@@ -50,7 +50,7 @@ async fn main() {
         .unwrap();
 
     let nonce = "im a nonce";
-    let signed_message = sign_message(&nonce, &solana_manager.get_keypair()).unwrap();
+    let signed_message = sign_message(nonce, &solana_manager.get_keypair()).unwrap();
     let proxy = get_proxy("http://127.0.0.1:3000", nonce, &signed_message)
         .await
         .unwrap();
