@@ -19,9 +19,17 @@ function cleanup()
 #  "127.0.0.1:3000" \
 #  "https://example.com"
 
-PROVIDER_NODE_KEYPAIR=example-keys/provider-node.json cargo run -p provider-node &> demo_logs/provider-node.log &
+cargo run -p provider-node -- \
+  --keypair-path example-keys/provider-node.json \
+  &> demo_logs/provider-node.log &
 export PROVIDER_NODE_PID=$!
-CLIENT_KEYPAIR=example-keys/client.json cargo run -p client-node &> demo_logs/client-node.log &
+
+sleep 2
+
+cargo run -p client-node -- \
+  --keypair-path example-keys/client.json \
+  --provider-node-owner CERqu7FToQX6c1VGhDojaaFTcMX2H8vBPBbwmPnKfQdY \
+  &> demo_logs/client-node.log &
 export CLIENT_NODE_PID=$!
 
 trap cleanup SIGINT EXIT
