@@ -110,7 +110,7 @@ tracing-web = { version = "0.1" }
 time = { version = "0.3", features = ['wasm-bindgen'] }
 ipgeolocate = { version = "0.3.5" }
 ipinfo = { version = "3.0.0" }
-
+cargo-husky = { version = "1.5.0", features = ["precommit-hook", "run-cargo-clippy", "run-cargo-fmt"] }
 
 [workspace.dependencies.rand]
 version = "0.8.5"
@@ -137,3 +137,4 @@ features = [
   "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
   "serde", # Enable serialization/deserialization of UUIDs
 ]
+

@@ -16,3 +16,4 @@ reqwest = { workspace = true, features = [
 
 [dev-dependencies]
 tokio = { workspace = true }
+cargo-husky = { workspace = true }
