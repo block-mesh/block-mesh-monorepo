@@ -6,29 +6,11 @@ use crate::helpers::{
 };
 use crate::provider_node::create_provider_node::create_provider_node_instruction;
 use anyhow::anyhow;
-use serde::{Deserialize, Serialize};
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::{Keypair, Signer};
-use std::fmt::Debug;
-use std::str::FromStr;
 use std::sync::Arc;
 use tokio::fs::try_exists;
-
-#[derive(Clone, Serialize, Deserialize)]
-pub enum SolanaManagerMode {
-    ProviderNode,
-    Client,
-}
-
-impl Debug for SolanaManagerMode {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            SolanaManagerMode::ProviderNode => write!(f, "ProviderNode"),
-            SolanaManagerMode::Client => write!(f, "Client"),
-        }
-    }
-}
 
 #[derive(Clone)]
 pub struct SolanaManager {
@@ -45,20 +27,15 @@ impl SolanaManager {
     }
 
     #[tracing::instrument(name = "SolanaManager::new")]
-    pub async fn new(mode: SolanaManagerMode) -> anyhow::Result<Self> {
-        let envar_name = match mode {
-            SolanaManagerMode::ProviderNode => "PROVIDER_NODE_KEYPAIR",
-            SolanaManagerMode::Client => "CLIENT_KEYPAIR",
-        };
-        let keypair_envar = std::env::var(envar_name)?;
-        try_exists(&keypair_envar).await?;
-        let keypair = solana_sdk::signature::read_keypair_file(&keypair_envar)
+    pub async fn new(keypair_path: &str, program_id: &Pubkey) -> anyhow::Result<Self> {
+        try_exists(&keypair_path).await?;
+        let keypair = solana_sdk::signature::read_keypair_file(&keypair_path)
             .map_err(|e| anyhow!("Error reading keypair file: {}", e))?;
 
         tracing::info!("Provider Node pubkey {}", keypair.pubkey());
         Ok(Self {
             keypair: Arc::new(keypair),
-            program_id: Pubkey::from_str("CfaL9sdaEK49r4WLAtVh2vVgAZuv2eKbb6jSB5jDCMSF")?,
+            program_id: *program_id,
             provider_account: None,
             rpc_client: Arc::new(get_client()),
             client: None,

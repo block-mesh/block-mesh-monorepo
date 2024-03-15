@@ -1,5 +1,9 @@
+mod cli_args;
+
+use crate::cli_args::ClientNodeCliArgs;
 use block_mesh_solana_client::helpers::sign_message;
-use block_mesh_solana_client::manager::{SolanaManager, SolanaManagerMode};
+use block_mesh_solana_client::manager::SolanaManager;
+use clap::Parser;
 use serde::{Deserialize, Serialize};
 use solana_client::client_error::reqwest;
 use solana_client::client_error::reqwest::Proxy;
@@ -37,9 +41,15 @@ async fn main() {
         )
         .with(tracing_subscriber::fmt::layer().with_ansi(false))
         .init();
-    let provider_node_owner =
-        Pubkey::from_str("CERqu7FToQX6c1VGhDojaaFTcMX2H8vBPBbwmPnKfQdY").unwrap();
-    let mut solana_manager = SolanaManager::new(SolanaManagerMode::Client).await.unwrap();
+
+    let client_node_cli_args = ClientNodeCliArgs::parse();
+    let provider_node_owner = Pubkey::from_str(&client_node_cli_args.provider_node_owner).unwrap();
+    let mut solana_manager = SolanaManager::new(
+        &client_node_cli_args.keypair_path,
+        &client_node_cli_args.program_id,
+    )
+    .await
+    .unwrap();
     solana_manager
         .create_client_account_if_needed()
         .await
