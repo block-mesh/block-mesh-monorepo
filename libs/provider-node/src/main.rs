@@ -1,9 +1,11 @@
 use axum::{body::Body, extract::Request, http::Method, routing::get, Router};
-use block_mesh_solana_client::manager::{SolanaManager, SolanaManagerMode};
+use block_mesh_solana_client::manager::SolanaManager;
+use clap::Parser;
 use hyper::body::Incoming;
 use hyper::server::conn::http1;
 use hyper_util::rt::TokioIo;
 use provider_node::app_state::AppState;
+use provider_node::cli_args::ProviderNodeCliArgs;
 use provider_node::proxy_server::proxy::proxy;
 use provider_node::routes::health_check::health_check;
 use provider_node::token_management::channels::{
@@ -27,10 +29,14 @@ async fn main() {
         )
         .with(tracing_subscriber::fmt::layer().with_ansi(false))
         .init();
+    let provider_node_cli_args = ProviderNodeCliArgs::parse();
 
-    let mut solana_manager = SolanaManager::new(SolanaManagerMode::ProviderNode)
-        .await
-        .unwrap();
+    let mut solana_manager = SolanaManager::new(
+        &provider_node_cli_args.keypair_path,
+        &provider_node_cli_args.program_id,
+    )
+    .await
+    .unwrap();
     solana_manager
         .create_provider_account_if_needed()
         .await
