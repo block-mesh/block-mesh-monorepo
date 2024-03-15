@@ -1,6 +1,6 @@
 use crate::configuration::database_settings::DatabaseSettings;
-use crate::domain::secret::Secret;
 use anyhow::anyhow;
+use secret::Secret;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use sqlx::{ConnectOptions, PgPool};
 use std::str::FromStr;

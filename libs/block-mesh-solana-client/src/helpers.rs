@@ -100,3 +100,28 @@ pub fn validate_signature(
     let signature = Signature::from_str(signature)?;
     Ok(signature.verify(&public_key.to_bytes(), message.as_bytes()))
 }
+
+pub struct CloneableKeypair(Keypair);
+
+impl CloneableKeypair {
+    pub fn new(keypair: Keypair) -> Self {
+        Self(keypair)
+    }
+
+    pub fn pubkey(&self) -> Pubkey {
+        self.0.pubkey()
+    }
+
+    pub fn keypair(&self) -> Keypair {
+        let clone = self.clone();
+        clone.0
+    }
+}
+
+impl Clone for CloneableKeypair {
+    fn clone(&self) -> Self {
+        let bytes = self.0.to_bytes();
+        let keypair = Keypair::from_bytes(&bytes).unwrap();
+        Self(keypair)
+    }
+}

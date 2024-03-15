@@ -19,3 +19,21 @@ hyper-util = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 uuid = { workspace = true, features = ["v4"] }
 rustc-hash = { workspace = true }
+secret = { path = "../secret" }
+
+[dependencies.sqlx]
+optional = true
+workspace = true
+default-features = false
+features = [
+  "any",
+  "runtime-tokio-rustls",
+  "macros",
+  "postgres",
+  "uuid",
+  "chrono",
+  "migrate",
+]
+
+[features]
+sqlx = ["dep:sqlx"]
