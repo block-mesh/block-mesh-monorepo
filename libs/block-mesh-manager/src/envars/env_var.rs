@@ -1,4 +1,4 @@
-use crate::domain::secret::Secret;
+use secret::Secret;
 use std::fmt::Display;
 use std::path::PathBuf;
 

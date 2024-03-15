@@ -1,6 +1,6 @@
-use crate::domain::secret::Secret;
 use crate::envars::app_env_var::AppEnvVar;
 use crate::envars::env_var::EnvVar;
+use secret::Secret;
 
 pub fn get_env_var_or_panic(key: AppEnvVar) -> EnvVar {
     match std::env::var(key.to_string()) {

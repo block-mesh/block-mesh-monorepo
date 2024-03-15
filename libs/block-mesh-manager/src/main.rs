@@ -3,7 +3,6 @@
 #![deny(unreachable_pub)]
 
 use block_mesh_manager::configuration::get_configuration::get_configuration;
-use block_mesh_manager::domain::secret::Secret;
 use block_mesh_manager::envars::app_env_var::AppEnvVar;
 use block_mesh_manager::envars::env_var::EnvVar;
 use block_mesh_manager::envars::get_env_var_or_panic::get_env_var_or_panic;
@@ -12,6 +11,7 @@ use block_mesh_manager::startup::application::{AppState, Application};
 use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
 use block_mesh_manager::startup::report_exit::report_exit;
 use block_mesh_manager::telemetry::subscriber::{get_subscriber, init_subscriber};
+use secret::Secret;
 use std::sync::Arc;
 
 #[tokio::main]

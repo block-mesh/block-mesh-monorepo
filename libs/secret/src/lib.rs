@@ -1,4 +1,6 @@
+#[cfg(feature = "sqlx")]
 use sqlx::database::HasValueRef;
+#[cfg(feature = "sqlx")]
 use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::{Debug, Display};
@@ -43,6 +45,7 @@ where
     }
 }
 
+#[cfg(feature = "sqlx")]
 impl<T> sqlx::Type<Postgres> for Secret<T>
 where
     T: Clone + sqlx::Type<Postgres>,
@@ -52,6 +55,7 @@ where
     }
 }
 
+#[cfg(feature = "sqlx")]
 impl<T> sqlx::Decode<'_, Postgres> for Secret<T>
 where
     T: Clone,
@@ -65,6 +69,7 @@ where
     }
 }
 
+#[cfg(feature = "sqlx")]
 impl<T> sqlx::Encode<'_, Postgres> for Secret<T>
 where
     T: Clone,
@@ -83,6 +88,15 @@ where
     T: Clone,
 {
     fn as_ref(&self) -> &T {
+        &self.0
+    }
+}
+
+impl<T> Secret<T>
+where
+    T: Clone,
+{
+    pub fn expose_secret(&self) -> &T {
         &self.0
     }
 }
