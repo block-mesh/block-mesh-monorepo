@@ -34,3 +34,7 @@
 * [SOCK5 forwarder](https://github.com/ihciah/socks5-forwarder)
 * [rust socks](https://github.com/sfackler/rust-socks/tree/master)
 * [rust socks5](https://github.com/yfaming/yimu-rs)
+
+#### Solana Macros
+
+* [thlorenz/solana-macros](https://github.com/thlorenz/sol-contracts/blob/master/packages/sol-common/rust/src/lib.rs)
