@@ -5,8 +5,8 @@
 </p>
 
 BlockMesh, is an innovative, open and secure network that allows you to easily monetize your excess bandwidth.
-Giving you a great opportunity to passively profit and participate in the frontline of AI data layer, online privacy, open source and blockchain industries.
-
+Giving you a great opportunity to passively profit and participate in the frontline of AI data layer, online privacy,
+open source and blockchain industries.
 
 ## Repository Structure
 
@@ -18,7 +18,7 @@ Giving you a great opportunity to passively profit and participate in the frontl
 * [libs/client-node](libs/client-node/) - The BlockMesh network client users run,
   it creates a local `proxy` that manages the interaction with `solana` and forward requests to BlockMesh network.
 * [libs/cloudflare-worker-ip-data](libs/cloudflare-worker-ip-data/) - A cloudflare worker that pings `IP` data providers
-  and responds with the data back to the caller.
+  and responds with the data back to the caller - `curl https://cloudflare-worker-ip-data.blockmesh.xyz/`.
 * [lib/cloudflare-worker-solana-relay](libs/cloudflare-worker-solana-relay/) - A cloudflare worker that relays requests
   to `solana`.
 * [libs/ipapi-is-rust](libs/ipapi-is-rust/) - A rust library for [ipapi.is](https://ipapi.is/) types.

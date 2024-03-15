@@ -74,7 +74,7 @@ async fn main() {
         tower_service.clone().call(request)
     });
 
-    let addr = SocketAddr::from(([127, 0, 0, 1], provider_node_cli_args.port));
+    let addr = SocketAddr::from(([0, 0, 0, 0], provider_node_cli_args.port));
     tracing::debug!("listening on {}", addr);
 
     let listener = TcpListener::bind(addr).await.unwrap();

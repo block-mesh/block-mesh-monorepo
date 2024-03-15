@@ -16,5 +16,4 @@ serde = { workspace = true, features = ['derive'] }
 serde_json = { workspace = true }
 rustc-hash = { workspace = true }
 ipapi-is-rust = { path = "../ipapi-is-rust" }
-
-
+ipgeolocate = { workspace = true }
