@@ -29,7 +29,7 @@ impl SolanaManager {
     #[tracing::instrument(name = "SolanaManager::new")]
     pub async fn new(keypair_path: &str, program_id: &Pubkey) -> anyhow::Result<Self> {
         try_exists(&keypair_path).await?;
-        let keypair = solana_sdk::signature::read_keypair_file(&keypair_path)
+        let keypair = solana_sdk::signature::read_keypair_file(keypair_path)
             .map_err(|e| anyhow!("Error reading keypair file: {}", e))?;
 
         tracing::info!("Provider Node pubkey {}", keypair.pubkey());
