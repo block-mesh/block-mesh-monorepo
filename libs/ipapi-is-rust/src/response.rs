@@ -31,8 +31,8 @@ pub struct Asn {
     pub domain: String,
     pub abuse: String,
     pub r#type: String,
-    pub created: String,
-    pub updated: String,
+    pub created: Option<String>,
+    pub updated: Option<String>,
     pub rir: String,
     pub whois: String,
 }

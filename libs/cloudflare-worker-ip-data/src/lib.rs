@@ -1,5 +1,6 @@
 use ipapi_is_rust::get_ip_info;
 use ipapi_is_rust::response::IpApiIsResponse;
+use ipgeolocate::{Locator, Service};
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use tracing_subscriber::fmt::format::Pretty;
@@ -16,13 +17,56 @@ static IP_HEADERS: [&str; 4] = [
 ];
 
 #[derive(Debug, Serialize, Deserialize)]
+pub struct LocatorDe {
+    /// Returns the IP address.
+    pub ip: String,
+    /// Latitude of the IP address.
+    pub latitude: String,
+    /// Longitude of the IP address.
+    pub longitude: String,
+    /// City of the IP address.
+    pub city: String,
+    /// Region or state of the IP address.
+    pub region: String,
+    /// Country of the IP address.
+    pub country: String,
+    /// Timezone of the IP address.
+    pub timezone: String,
+    /// ISP of the IP address
+    pub isp: String,
+}
+
+impl LocatorDe {
+    pub fn new(locator: Locator) -> Self {
+        Self {
+            ip: locator.ip,
+            latitude: locator.latitude,
+            longitude: locator.longitude,
+            city: locator.city,
+            region: locator.region,
+            country: locator.country,
+            timezone: locator.timezone,
+            isp: locator.isp,
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize)]
 struct IPData {
     cf_connecting_ip: Option<String>,
     x_real_ip: Option<String>,
     x_forwarded_for: Option<String>,
     cf_ipcountry: Option<String>,
     ip_api_is_response: Option<IpApiIsResponse>,
+    ip_geolocate_response: Option<LocatorDe>,
 }
+
+static IP_GEO_LOCATE_SERVICES: [Service; 4] = [
+    Service::IpWhois,
+    Service::IpApi,
+    Service::IpApiCo,
+    Service::FreeGeoIp,
+];
 
 impl IPData {
     #[tracing::instrument(name = "IPData::new")]
@@ -33,6 +77,7 @@ impl IPData {
             x_forwarded_for: headers.get("x-forwarded-for").map(|s| s.to_string()),
             cf_ipcountry: headers.get("cf-ipcountry").map(|s| s.to_string()),
             ip_api_is_response: None,
+            ip_geolocate_response: None,
         }
     }
 
@@ -53,6 +98,18 @@ impl IPData {
                 }
                 Err(e) => {
                     tracing::error!("Error getting IP info: {:?}", e);
+                }
+            }
+            for service in IP_GEO_LOCATE_SERVICES {
+                let response = Locator::get(ip, service).await;
+                match response {
+                    Ok(response) => {
+                        self.ip_geolocate_response = Some(LocatorDe::new(response));
+                        break;
+                    }
+                    Err(e) => {
+                        tracing::error!("Error getting IP info: {:?}", e);
+                    }
                 }
             }
         }

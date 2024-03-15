@@ -2,7 +2,7 @@
 
 This is a simple worker that returns the IP data of a request.
 
-`curl https://cloudflare-worker-ip-data.ohaddahan.workers.dev`
+`curl "https://cloudflare-worker-ip-data.blockmesh.xyz/"`
 
 ```json
 {
