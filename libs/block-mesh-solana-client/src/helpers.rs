@@ -71,6 +71,25 @@ pub async fn get_recent_blockhash(client: &Arc<RpcClient>) -> anyhow::Result<Has
         .map_err(|e| anyhow!("error: Solana: get_recent_blockhash failed: {}", e))
 }
 
+pub async fn build_txn_and_send_and_confirm(
+    client: &Arc<RpcClient>,
+    instructions: Vec<Instruction>,
+    payer: &Pubkey,
+    signer: &Keypair,
+) -> anyhow::Result<Signature> {
+    let latest_blockhash = get_recent_blockhash(client).await?;
+    let txn = create_transaction(instructions, payer, signer, latest_blockhash)?;
+    let signature = send_and_confirm_transaction(client, &txn)
+        .await
+        .map_err(|e| {
+            anyhow!(
+                "build_txn_and_send_and_confirm::Error sending transaction: {}",
+                e.to_string()
+            )
+        })?;
+    Ok(signature)
+}
+
 pub async fn send_and_confirm_transaction(
     client: &Arc<RpcClient>,
     txn: &Transaction,

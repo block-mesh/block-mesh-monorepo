@@ -7,7 +7,7 @@ pub mod utils;
 
 pub use instructions::*;
 
-declare_id!("CfaL9sdaEK49r4WLAtVh2vVgAZuv2eKbb6jSB5jDCMSF");
+declare_id!("FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ");
 
 #[program]
 pub mod blockmesh_program {
@@ -43,5 +43,12 @@ pub mod blockmesh_program {
 
     pub fn sync_token_usage(ctx: Context<SyncTokenUsageContext>) -> Result<()> {
         sync_token_usage::sync_token_usage(ctx)
+    }
+
+    pub fn update_provider_node(
+        ctx: Context<UpdateProviderNodeContext>,
+        args: UpdateProviderNodeArgs,
+    ) -> Result<()> {
+        update_provider_node::update_provider_node(ctx, args)
     }
 }

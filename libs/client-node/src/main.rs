@@ -1,13 +1,13 @@
 mod cli_args;
 
 use crate::cli_args::ClientNodeCliArgs;
-use block_mesh_solana_client::helpers::sign_message;
+use block_mesh_solana_client::helpers::{get_provider_node_address, sign_message};
 use block_mesh_solana_client::manager::SolanaManager;
+use blockmesh_program::state::provider_node::ProviderNode;
 use clap::Parser;
 use serde::{Deserialize, Serialize};
 use solana_client::client_error::reqwest;
 use solana_client::client_error::reqwest::Proxy;
-use solana_sdk::pubkey::Pubkey;
 use std::net::IpAddr;
 use std::str::FromStr;
 use tracing_subscriber::layer::SubscriberExt;
@@ -44,7 +44,7 @@ async fn main() {
         .init();
 
     let client_node_cli_args = ClientNodeCliArgs::parse();
-    let provider_node_owner = Pubkey::from_str(&client_node_cli_args.provider_node_owner).unwrap();
+    let provider_node_owner = client_node_cli_args.provider_node_owner;
     let mut solana_manager = SolanaManager::new(
         &client_node_cli_args.keypair_path,
         &client_node_cli_args.program_id,
@@ -60,11 +60,27 @@ async fn main() {
         .await
         .unwrap();
 
-    let nonce = "im a nonce";
-    let signed_message = sign_message(nonce, &solana_manager.get_keypair()).unwrap();
-    let proxy = get_proxy("http://127.0.0.1:3000", nonce, &signed_message)
+    let provider_node_address =
+        get_provider_node_address(&client_node_cli_args.program_id, &provider_node_owner);
+
+    let provider_node_account: ProviderNode = solana_manager
+        .get_deserialized_account(&provider_node_address.0)
         .await
         .unwrap();
+
+    let proxy_url = format!(
+        "http://{}.{}.{}.{}:{}",
+        provider_node_account.ipv4[0],
+        provider_node_account.ipv4[1],
+        provider_node_account.ipv4[2],
+        provider_node_account.ipv4[3],
+        provider_node_account.port
+    );
+    tracing::info!("Proxy URL: {}", proxy_url);
+    let nonce = "im a nonce";
+    let signed_message = sign_message(nonce, &solana_manager.get_keypair()).unwrap();
+
+    let proxy = get_proxy(&proxy_url, nonce, &signed_message).await.unwrap();
 
     let local_address = IpAddr::from_str("0.0.0.0").unwrap();
 
@@ -73,13 +89,28 @@ async fn main() {
         .proxy(proxy)
         .build()
         .unwrap();
-    let response: serde_json::Value = client
-        .get("https://api.ipify.org?format=json")
-        .send()
-        .await
-        .unwrap()
-        .json()
-        .await
-        .unwrap();
-    println!("FINAL RESPONSE => {:?}", response);
+    match client_node_cli_args.response_type {
+        cli_args::ResponseType::Json => {
+            let response: serde_json::Value = client
+                .get(&client_node_cli_args.target)
+                .send()
+                .await
+                .unwrap()
+                .json()
+                .await
+                .unwrap();
+            println!("FINAL RESPONSE => {:?}", response);
+        }
+        cli_args::ResponseType::Text => {
+            let response: String = client
+                .get(&client_node_cli_args.target)
+                .send()
+                .await
+                .unwrap()
+                .text()
+                .await
+                .unwrap();
+            println!("FINAL RESPONSE => {:?}", response);
+        }
+    }
 }
