@@ -201,6 +201,10 @@ impl SolanaManager {
                     );
                     None
                 } else {
+                    tracing::info!(
+                        "create_or_update_provider_account_if_needed::Provider need to be updated: {:?}",
+                        &provider_node_address.0.to_string()
+                    );
                     let instruction = update_provider_node_instruction(
                         self.program_id,
                         ip_addr.octets(),
@@ -209,9 +213,6 @@ impl SolanaManager {
                         self.get_pubkey(),
                         provider_node_address.0,
                     );
-                    tracing::info!(
-                    "create_or_update_provider_account_if_needed::Provider node account already exists: {:?}",
-                    &provider_node_address.0.to_string());
                     Some(instruction)
                 }
             }
