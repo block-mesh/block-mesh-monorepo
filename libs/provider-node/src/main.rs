@@ -6,13 +6,15 @@ use hyper::server::conn::http1;
 use hyper_util::rt::TokioIo;
 use provider_node::app_state::AppState;
 use provider_node::cli_args::ProviderNodeCliArgs;
+use provider_node::ip_getter::get_ip;
 use provider_node::proxy_server::proxy::proxy;
 use provider_node::routes::health_check::health_check;
 use provider_node::token_management::channels::{
     update_token_manager, ChannelMessage, TokenManagerHashMap,
 };
 use rustc_hash::FxHashMap;
-use std::net::SocketAddr;
+use std::net::{IpAddr, SocketAddr};
+use std::process::exit;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tokio::sync::broadcast;
@@ -30,6 +32,19 @@ async fn main() {
         .with(tracing_subscriber::fmt::layer().with_ansi(false))
         .init();
     let provider_node_cli_args = ProviderNodeCliArgs::parse();
+    let ip_addr = get_ip().await.unwrap();
+    tracing::info!("IP address: {}", ip_addr);
+
+    let ip_addr = match ip_addr {
+        IpAddr::V4(ip) => {
+            tracing::info!("IP address: {}", ip);
+            ip
+        }
+        _ => {
+            tracing::error!("IP address is not IPv4");
+            exit(1);
+        }
+    };
 
     let mut solana_manager = SolanaManager::new(
         &provider_node_cli_args.keypair_path,
@@ -38,7 +53,7 @@ async fn main() {
     .await
     .unwrap();
     solana_manager
-        .create_provider_account_if_needed()
+        .create_or_update_provider_account_if_needed(ip_addr, provider_node_cli_args.port)
         .await
         .unwrap();
 

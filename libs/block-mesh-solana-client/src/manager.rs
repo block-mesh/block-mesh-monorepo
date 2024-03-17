@@ -1,18 +1,21 @@
 use crate::api_token::create_api_token_instruction::create_api_token_instruction;
 use crate::client::create_client::create_client_instruction;
 use crate::helpers::{
-    create_transaction, get_account, get_api_token_address, get_client, get_client_address,
-    get_provider_node_address, get_recent_blockhash, send_and_confirm_transaction,
-    CloneableKeypair,
+    build_txn_and_send_and_confirm, get_account, get_api_token_address, get_client,
+    get_client_address, get_provider_node_address, CloneableKeypair,
 };
 use crate::provider_node::create_provider_node::create_provider_node_instruction;
+use crate::provider_node::update_provider_node::update_provider_node_instruction;
 use anchor_lang::AccountDeserialize;
 use anyhow::anyhow;
+use blockmesh_program::state::provider_node::ProviderNode;
 use secret::Secret;
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_sdk::account::Account;
+use solana_sdk::instruction::Instruction;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Keypair;
+use std::net::Ipv4Addr;
 use std::sync::Arc;
 use tokio::fs::try_exists;
 
@@ -51,12 +54,27 @@ impl SolanaManager {
     }
 
     #[tracing::instrument(name = "SolanaManager::deserialize", ret, err)]
-    pub async fn deserialize<T>(account: Account) -> anyhow::Result<T>
+    pub fn deserialize<T>(account: Account) -> anyhow::Result<T>
     where
         T: std::fmt::Debug + AccountDeserialize,
     {
         let result: T = T::try_deserialize(&mut account.data.as_slice())?;
         Ok(result)
+    }
+
+    #[tracing::instrument(name = "get_deserialized_account", skip(self, address), ret, err)]
+    pub async fn get_deserialized_account<T>(&self, address: &Pubkey) -> anyhow::Result<T>
+    where
+        T: std::fmt::Debug + AccountDeserialize,
+    {
+        let account = get_account(&self.rpc_client, address).await?;
+        match account {
+            Some(account) => {
+                let result: T = T::try_deserialize(&mut account.data.as_slice())?;
+                Ok(result)
+            }
+            None => Err(anyhow!("Account not found")),
+        }
     }
 
     #[tracing::instrument(name = "create_api_token_if_needed", skip(self), ret, err)]
@@ -95,22 +113,13 @@ impl SolanaManager {
                     api_token_address.0,
                     provider_node_address.0,
                 );
-
-                let latest_blockhash = get_recent_blockhash(&self.rpc_client).await?;
-                let txn = create_transaction(
+                let signature = build_txn_and_send_and_confirm(
+                    &self.rpc_client,
                     vec![instruction],
                     &self.get_pubkey(),
                     &self.get_keypair(),
-                    latest_blockhash,
-                )?;
-                let signature = send_and_confirm_transaction(&self.rpc_client, &txn)
-                    .await
-                    .map_err(|e| {
-                        anyhow!(
-                            "create_api_token_if_needed::Error sending transaction: {}",
-                            e.to_string()
-                        )
-                    })?;
+                )
+                .await?;
                 tracing::info!(
                     "create_api_token_if_needed::ApiToken account created: {}",
                     signature
@@ -143,21 +152,13 @@ impl SolanaManager {
             None => {
                 let instruction =
                     create_client_instruction(self.program_id, self.get_pubkey(), client_address.0);
-                let latest_blockhash = get_recent_blockhash(&self.rpc_client).await?;
-                let txn = create_transaction(
+                let signature = build_txn_and_send_and_confirm(
+                    &self.rpc_client,
                     vec![instruction],
                     &self.get_pubkey(),
                     &self.get_keypair(),
-                    latest_blockhash,
-                )?;
-                let signature = send_and_confirm_transaction(&self.rpc_client, &txn)
-                    .await
-                    .map_err(|e| {
-                        anyhow!(
-                            "create_client_account_if_needed::Error sending transaction: {}",
-                            e.to_string()
-                        )
-                    })?;
+                )
+                .await?;
                 tracing::info!(
                     "create_client_account_if_needed::Client account created: {}",
                     signature
@@ -167,56 +168,78 @@ impl SolanaManager {
         }
     }
 
-    #[tracing::instrument(name = "create_provider_account_if_needed", skip(self), ret, err)]
-    pub async fn create_provider_account_if_needed(&mut self) -> anyhow::Result<()> {
+    #[tracing::instrument(
+        name = "create_or_update_provider_account_if_needed",
+        skip(self),
+        ret,
+        err
+    )]
+    pub async fn create_or_update_provider_account_if_needed(
+        &mut self,
+        ip_addr: Ipv4Addr,
+        port: u16,
+    ) -> anyhow::Result<()> {
         let provider_node_address = get_provider_node_address(&self.program_id, &self.get_pubkey());
         self.provider_account = Some(provider_node_address.0);
         let account = get_account(&self.rpc_client, &provider_node_address.0)
             .await
             .map_err(|e| {
                 anyhow!(
-                    "create_provider_account_if_needed::Error getting provider node account: {}",
+                    "create_or_update_provider_account_if_needed::Error getting provider node account: {}",
                     e.to_string()
                 )
             })?;
-        match account {
-            Some(_) => {
-                tracing::info!(
-                    "create_provider_account_if_needed::Provider node account already exists: {:?}",
-                    &provider_node_address.0.to_string()
-                );
-                Ok(())
+        let instruction: Option<Instruction> = match account {
+            Some(account) => {
+                let provider_node_account: ProviderNode = SolanaManager::deserialize(account)?;
+                if provider_node_account.ipv4 == ip_addr.octets()
+                    && provider_node_account.port == port
+                {
+                    tracing::info!(
+                        "create_or_update_provider_account_if_needed::Provider node account already exists, data matches current, nothing to do: {:?}",
+                        &provider_node_address.0.to_string()
+                    );
+                    None
+                } else {
+                    let instruction = update_provider_node_instruction(
+                        self.program_id,
+                        ip_addr.octets(),
+                        port,
+                        100,
+                        self.get_pubkey(),
+                        provider_node_address.0,
+                    );
+                    tracing::info!(
+                    "create_or_update_provider_account_if_needed::Provider node account already exists: {:?}",
+                    &provider_node_address.0.to_string());
+                    Some(instruction)
+                }
             }
             None => {
                 let instruction = create_provider_node_instruction(
                     self.program_id,
-                    [127, 0, 0, 1],
-                    3000,
+                    ip_addr.octets(),
+                    port,
                     100,
                     self.get_pubkey(),
                     provider_node_address.0,
                 );
-                let latest_blockhash = get_recent_blockhash(&self.rpc_client).await?;
-                let txn = create_transaction(
-                    vec![instruction],
-                    &self.get_pubkey(),
-                    &self.get_keypair(),
-                    latest_blockhash,
-                )?;
-                let signature = send_and_confirm_transaction(&self.rpc_client, &txn)
-                    .await
-                    .map_err(|e| {
-                        anyhow!(
-                            "create_provider_account_if_needed::Error sending transaction: {}",
-                            e.to_string()
-                        )
-                    })?;
-                tracing::info!(
-                    "create_provider_account_if_needed::Provider node account created: {}",
-                    signature
-                );
-                Ok(())
+                Some(instruction)
             }
+        };
+        if let Some(instruction) = instruction {
+            let signature = build_txn_and_send_and_confirm(
+                &self.rpc_client,
+                vec![instruction],
+                &self.get_pubkey(),
+                &self.get_keypair(),
+            )
+            .await?;
+            tracing::info!(
+                "create_or_update_provider_account_if_needed::Transaction sent: {}",
+                signature
+            );
         }
+        Ok(())
     }
 }

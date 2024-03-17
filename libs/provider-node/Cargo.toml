@@ -26,3 +26,4 @@ serde = { workspace = true, features = ["derive"] }
 uuid = { workspace = true, features = ["v4"] }
 rustc-hash = { workspace = true }
 block-mesh-constants = { path = "../block-mesh-constants" }
+serde_json = { workspace = true }
