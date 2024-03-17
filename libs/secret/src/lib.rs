@@ -2,6 +2,7 @@
 use sqlx::database::HasValueRef;
 #[cfg(feature = "sqlx")]
 use sqlx::{Decode, Postgres};
+#[cfg(feature = "sqlx")]
 use std::error::Error;
 use std::fmt::{Debug, Display};
 

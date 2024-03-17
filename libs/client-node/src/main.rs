@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use solana_client::client_error::reqwest;
 use solana_client::client_error::reqwest::Proxy;
 use solana_sdk::pubkey::Pubkey;
+use std::net::IpAddr;
 use std::str::FromStr;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
@@ -64,7 +65,14 @@ async fn main() {
     let proxy = get_proxy("http://127.0.0.1:3000", nonce, &signed_message)
         .await
         .unwrap();
-    let client = reqwest::Client::builder().proxy(proxy).build().unwrap();
+
+    let local_address = IpAddr::from_str("0.0.0.0").unwrap();
+
+    let client = reqwest::Client::builder()
+        .local_address(local_address)
+        .proxy(proxy)
+        .build()
+        .unwrap();
     let response: serde_json::Value = client
         .get("https://api.ipify.org?format=json")
         .send()
