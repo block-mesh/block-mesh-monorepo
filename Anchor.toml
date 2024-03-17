@@ -7,7 +7,7 @@ seeds = false
 skip-lint = false
 
 [programs.localnet]
-blockmesh-program = "CfaL9sdaEK49r4WLAtVh2vVgAZuv2eKbb6jSB5jDCMSF"
+blockmesh-program = "FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ"
 
 [registry]
 url = "https://api.apr.dev"
