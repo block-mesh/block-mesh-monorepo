@@ -36,4 +36,4 @@ jobs:
           --no-default-features
           --locked
       - name: Linting
-        run: cargo clippy -- -D warnings
+        run: cargo clippy --all -- -D warnings

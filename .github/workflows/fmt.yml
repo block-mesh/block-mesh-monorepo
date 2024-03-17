@@ -30,4 +30,4 @@ jobs:
           key: rustfmt-sqlx-${{ env.SQLX_VERSION }}
           cache-all-crates: true
       - name: Enforce formatting
-        run: cargo fmt --check
+        run: cargo fmt --all -- --check
