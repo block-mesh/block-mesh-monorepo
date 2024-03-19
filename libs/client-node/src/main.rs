@@ -83,9 +83,7 @@ async fn main() {
         solana_manager.get_pubkey(),
         solana_manager.get_api_token(),
     );
-    // TODO - need to register with proxy here
-
-    let _register_result = register_token(
+    register_token(
         &format!("http://{}/register", proxy_url),
         &solana_manager_header,
     )
