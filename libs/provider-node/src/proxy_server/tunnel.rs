@@ -2,14 +2,16 @@ use crate::app_state::AppState;
 use crate::token_management::channels::{send_message, ChannelMessage};
 use hyper::upgrade::Upgraded;
 use hyper_util::rt::TokioIo;
+use solana_sdk::pubkey::Pubkey;
 use std::sync::Arc;
 use tokio::net::TcpStream;
 
-#[tracing::instrument(name = "tunnel", skip(), ret, err)]
+#[tracing::instrument(name = "tunnel", skip(app_state), ret, err)]
 pub async fn tunnel(
     app_state: Arc<AppState>,
     upgraded: Upgraded,
     addr: String,
+    api_token: Pubkey,
 ) -> std::io::Result<()> {
     let mut server = TcpStream::connect(addr).await?;
     let mut upgraded = TokioIo::new(upgraded);
@@ -25,7 +27,7 @@ pub async fn tunnel(
         ChannelMessage {
             upload: from_client,
             download: from_server,
-            token: Default::default(),
+            api_token,
         },
     );
     Ok(())

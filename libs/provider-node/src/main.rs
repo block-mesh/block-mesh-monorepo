@@ -1,3 +1,4 @@
+use axum::routing::post;
 use axum::{body::Body, extract::Request, http::Method, routing::get, Router};
 use block_mesh_solana_client::manager::SolanaManager;
 use clap::Parser;
@@ -8,7 +9,7 @@ use provider_node::app_state::AppState;
 use provider_node::cli_args::ProviderNodeCliArgs;
 use provider_node::ip_getter::get_ip;
 use provider_node::proxy_server::proxy::proxy;
-use provider_node::routes::health_check::health_check;
+use provider_node::routes;
 use provider_node::token_management::channels::{
     update_token_manager, ChannelMessage, TokenManagerHashMap,
 };
@@ -53,22 +54,31 @@ async fn main() {
     .await
     .unwrap();
     solana_manager
-        .create_or_update_provider_account_if_needed(ip_addr, provider_node_cli_args.port)
+        .create_or_update_provider_node_if_needed(ip_addr, provider_node_cli_args.port)
         .await
         .unwrap();
 
-    let mut token_manager: TokenManagerHashMap = FxHashMap::default();
+    let solana_manager = Arc::new(tokio::sync::RwLock::new(solana_manager));
+    let token_manager: TokenManagerHashMap = FxHashMap::default();
+    let token_manager = Arc::new(tokio::sync::RwLock::new(token_manager));
     let (tx, mut rx) = broadcast::channel::<ChannelMessage>(16);
 
+    let tkn = token_manager.clone();
     tokio::spawn(async move {
         while let Ok(msg) = rx.recv().await {
-            update_token_manager(&msg, &mut token_manager).await;
+            let token_manager = tkn.clone();
+            update_token_manager(&msg, token_manager).await;
         }
     });
 
-    let app_state = Arc::new(AppState { tx });
+    let app_state = Arc::new(AppState {
+        tx,
+        token_manager,
+        solana_manager,
+    });
     let router_svc = Router::new()
-        .route("/health_check", get(health_check))
+        .route("/health_check", get(routes::health_check::handler))
+        .route("/register", post(routes::register_client::handler))
         .route("/", get(|| async { "OK" }))
         .with_state(app_state.clone());
 

@@ -1,5 +1,6 @@
 use crate::api_token::create_api_token_instruction::create_api_token_instruction;
 use crate::client::create_client::create_client_instruction;
+use crate::client::update_latest_client_report::update_latest_client_report_instruction;
 use crate::helpers::{
     build_txn_and_send_and_confirm, get_account, get_api_token_address, get_client,
     get_client_address, get_provider_node_address, CloneableKeypair,
@@ -10,6 +11,7 @@ use anchor_lang::AccountDeserialize;
 use anyhow::anyhow;
 use blockmesh_program::state::provider_node::ProviderNode;
 use secret::Secret;
+use serde::{Deserialize, Serialize};
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_sdk::account::Account;
 use solana_sdk::instruction::Instruction;
@@ -23,9 +25,29 @@ use tokio::fs::try_exists;
 pub struct SolanaManager {
     keypair: Arc<Secret<CloneableKeypair>>,
     program_id: Pubkey,
-    provider_account: Option<Pubkey>,
+    provider_node: Option<Pubkey>,
     client: Option<Pubkey>,
+    api_token: Option<Pubkey>,
     rpc_client: Arc<RpcClient>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SolanaManagerAuth {
+    pub nonce: String,
+    pub signed_message: String,
+    pub pubkey: Pubkey,
+    pub api_token: Pubkey,
+}
+
+impl SolanaManagerAuth {
+    pub fn new(nonce: String, signed_message: String, pubkey: Pubkey, api_token: Pubkey) -> Self {
+        Self {
+            nonce,
+            signed_message,
+            pubkey,
+            api_token,
+        }
+    }
 }
 
 impl SolanaManager {
@@ -35,6 +57,10 @@ impl SolanaManager {
 
     pub fn get_pubkey(&self) -> Pubkey {
         self.keypair.clone().expose_secret().pubkey()
+    }
+
+    pub fn get_api_token(&self) -> Pubkey {
+        self.api_token.unwrap()
     }
 
     #[tracing::instrument(name = "SolanaManager::new")]
@@ -47,9 +73,10 @@ impl SolanaManager {
         Ok(Self {
             keypair: Arc::new(keypair),
             program_id: *program_id,
-            provider_account: None,
+            provider_node: None,
             rpc_client: Arc::new(get_client()),
             client: None,
+            api_token: None,
         })
     }
 
@@ -96,6 +123,8 @@ impl SolanaManager {
                     e.to_string()
                 )
             })?;
+
+        self.api_token = Some(api_token_address.0);
 
         match account {
             Some(_) => {
@@ -169,23 +198,23 @@ impl SolanaManager {
     }
 
     #[tracing::instrument(
-        name = "create_or_update_provider_account_if_needed",
+        name = "create_or_update_provider_node_if_needed",
         skip(self),
         ret,
         err
     )]
-    pub async fn create_or_update_provider_account_if_needed(
+    pub async fn create_or_update_provider_node_if_needed(
         &mut self,
         ip_addr: Ipv4Addr,
         port: u16,
     ) -> anyhow::Result<()> {
         let provider_node_address = get_provider_node_address(&self.program_id, &self.get_pubkey());
-        self.provider_account = Some(provider_node_address.0);
+        self.provider_node = Some(provider_node_address.0);
         let account = get_account(&self.rpc_client, &provider_node_address.0)
             .await
             .map_err(|e| {
                 anyhow!(
-                    "create_or_update_provider_account_if_needed::Error getting provider node account: {}",
+                    "create_or_update_provider_node_if_needed::Error getting provider node account: {}",
                     e.to_string()
                 )
             })?;
@@ -196,13 +225,13 @@ impl SolanaManager {
                     && provider_node_account.port == port
                 {
                     tracing::info!(
-                        "create_or_update_provider_account_if_needed::Provider node account already exists, data matches current, nothing to do: {:?}",
+                        "create_or_update_provider_node_if_needed::Provider node account already exists, data matches current, nothing to do: {:?}",
                         &provider_node_address.0.to_string()
                     );
                     None
                 } else {
                     tracing::info!(
-                        "create_or_update_provider_account_if_needed::Provider need to be updated: {:?}",
+                        "create_or_update_provider_node_if_needed::Provider need to be updated: {:?}",
                         &provider_node_address.0.to_string()
                     );
                     let instruction = update_provider_node_instruction(
@@ -237,10 +266,40 @@ impl SolanaManager {
             )
             .await?;
             tracing::info!(
-                "create_or_update_provider_account_if_needed::Transaction sent: {}",
+                "create_or_update_provider_node_if_needed::Transaction sent: {}",
                 signature
             );
         }
+        Ok(())
+    }
+
+    #[tracing::instrument(name = "update_latest_client_report", skip(self), ret, err)]
+    pub async fn update_latest_client_report(
+        &self,
+        provider_node_owner: &Pubkey,
+        latest_client_report: u64,
+    ) -> anyhow::Result<()> {
+        let provider_node_address =
+            get_provider_node_address(&self.program_id, provider_node_owner);
+        let instruction = update_latest_client_report_instruction(
+            self.program_id,
+            self.get_pubkey(),
+            self.client.unwrap(),
+            self.api_token.unwrap(),
+            provider_node_address.0,
+            latest_client_report,
+        );
+        let signature = build_txn_and_send_and_confirm(
+            &self.rpc_client,
+            vec![instruction],
+            &self.get_pubkey(),
+            &self.get_keypair(),
+        )
+        .await?;
+        tracing::info!(
+            "update_latest_client_report::Transaction sent: {}",
+            signature
+        );
         Ok(())
     }
 }

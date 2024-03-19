@@ -1,5 +1,5 @@
 use anyhow::anyhow;
-use block_mesh_constants::BLOCK_MESH_IP_WORKER;
+use block_mesh_common::constants::BLOCK_MESH_IP_WORKER;
 use solana_client::client_error::reqwest;
 use std::net::IpAddr;
 use std::str::FromStr;

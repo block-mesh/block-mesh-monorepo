@@ -1,4 +1,4 @@
-use block_mesh_constants::BLOCK_MESH_PROGRAM_ID;
+use block_mesh_common::constants::BLOCK_MESH_PROGRAM_ID;
 use clap::{Parser, ValueEnum};
 
 use serde::{Deserialize, Serialize};
@@ -35,4 +35,6 @@ pub struct ClientNodeCliArgs {
     pub target: String,
     #[arg(value_enum, default_value_t = ResponseType::Json)]
     pub response_type: ResponseType,
+    #[arg(long)]
+    pub proxy_override: Option<String>,
 }
