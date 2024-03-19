@@ -68,14 +68,19 @@ async fn main() {
         .await
         .unwrap();
 
-    let proxy_url = format!(
-        "http://{}.{}.{}.{}:{}",
-        provider_node_account.ipv4[0],
-        provider_node_account.ipv4[1],
-        provider_node_account.ipv4[2],
-        provider_node_account.ipv4[3],
-        provider_node_account.port
-    );
+    let proxy_url = match client_node_cli_args.proxy_override {
+        Some(proxy_override) => proxy_override,
+        None => {
+            format!(
+                "http://{}.{}.{}.{}:{}",
+                provider_node_account.ipv4[0],
+                provider_node_account.ipv4[1],
+                provider_node_account.ipv4[2],
+                provider_node_account.ipv4[3],
+                provider_node_account.port
+            )
+        }
+    };
     tracing::info!("Proxy URL: {}", proxy_url);
     let nonce = "im a nonce";
     let signed_message = sign_message(nonce, &solana_manager.get_keypair()).unwrap();

@@ -53,7 +53,7 @@ async fn main() {
     .await
     .unwrap();
     solana_manager
-        .create_or_update_provider_account_if_needed(ip_addr, provider_node_cli_args.port)
+        .create_or_update_provider_node_if_needed(ip_addr, provider_node_cli_args.port)
         .await
         .unwrap();
 

@@ -35,4 +35,6 @@ pub struct ClientNodeCliArgs {
     pub target: String,
     #[arg(value_enum, default_value_t = ResponseType::Json)]
     pub response_type: ResponseType,
+    #[arg(long)]
+    pub proxy_override: Option<String>,
 }
