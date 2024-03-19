@@ -94,27 +94,22 @@ async fn main() {
         .proxy(proxy)
         .build()
         .unwrap();
+
+    let response: reqwest::Response = client
+        .get(&client_node_cli_args.target)
+        .send()
+        .await
+        .unwrap();
+
+    let _content_length = response.content_length().unwrap();
+
     match client_node_cli_args.response_type {
         cli_args::ResponseType::Json => {
-            let response: serde_json::Value = client
-                .get(&client_node_cli_args.target)
-                .send()
-                .await
-                .unwrap()
-                .json()
-                .await
-                .unwrap();
+            let response: serde_json::Value = response.json().await.unwrap();
             println!("FINAL RESPONSE => {:?}", response);
         }
         cli_args::ResponseType::Text => {
-            let response: String = client
-                .get(&client_node_cli_args.target)
-                .send()
-                .await
-                .unwrap()
-                .text()
-                .await
-                .unwrap();
+            let response: String = response.text().await.unwrap();
             println!("FINAL RESPONSE => {:?}", response);
         }
     }

@@ -1,4 +1,4 @@
-use block_mesh_constants::BLOCK_MESH_PROGRAM_ID;
+use block_mesh_common::constants::BLOCK_MESH_PROGRAM_ID;
 use clap::Parser;
 use solana_sdk::pubkey::Pubkey;
 use std::str::FromStr;
