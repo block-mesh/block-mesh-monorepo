@@ -1,36 +1,54 @@
+use anchor_lang::prelude::Pubkey;
+use block_mesh_solana_client::manager::SolanaManagerAuth;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 use tokio::sync::broadcast::Sender;
-use uuid::Uuid;
-pub type TokenManagerHashMap = FxHashMap<Uuid, TokenDetails>;
+use tokio::sync::RwLock;
+
+pub type TokenManagerHashMap = FxHashMap<Pubkey, TokenDetails>;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct TokenDetails {
-    token: Uuid,
-    bandwidth_allowance: u64,
-    bandwidth_used: u64,
+    pub bandwidth_allowance: u64,
+    pub bandwidth_used: u64,
+    pub nonce: String,
+    pub signed_message: String,
+    pub pubkey: Pubkey,
+    pub api_token: Pubkey,
+}
+
+impl TokenDetails {
+    pub fn is_valid(&self, solana_manager_auth: &SolanaManagerAuth) -> bool {
+        self.nonce == solana_manager_auth.nonce
+            && self.signed_message == solana_manager_auth.signed_message
+            && self.pubkey == solana_manager_auth.pubkey
+            && self.api_token == solana_manager_auth.api_token
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChannelMessage {
     pub upload: u64,
     pub download: u64,
-    pub token: Uuid,
+    pub api_token: Pubkey,
 }
 
 #[tracing::instrument(name = "update_token_manager")]
-pub async fn update_token_manager(msg: &ChannelMessage, token_manager: &mut TokenManagerHashMap) {
-    token_manager
-        .entry(msg.token)
-        .or_insert_with(|| TokenDetails {
-            token: msg.token,
-            bandwidth_allowance: 0,
-            bandwidth_used: 0,
-        });
-    let details = token_manager.get_mut(&msg.token).unwrap();
-    details.bandwidth_used += msg.download;
-    details.bandwidth_used += msg.upload;
-    tracing::info!(">>> api_token manager: {:?}", token_manager.get(&msg.token));
+pub async fn update_token_manager(
+    msg: &ChannelMessage,
+    token_manager: Arc<RwLock<TokenManagerHashMap>>,
+) {
+    let mut token_manager = token_manager.write().await;
+    match token_manager.get_mut(&msg.api_token) {
+        Some(details) => {
+            details.bandwidth_used += msg.download;
+            details.bandwidth_used += msg.upload;
+        }
+        None => {
+            tracing::error!("api_token not found: {:?}", msg.api_token);
+        }
+    }
 }
 
 #[tracing::instrument(name = "send_message")]

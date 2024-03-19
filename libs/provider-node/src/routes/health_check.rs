@@ -1,4 +1,4 @@
 #[tracing::instrument(name = "health_check")]
-pub async fn health_check() -> &'static str {
+pub async fn handler() -> &'static str {
     "OK"
 }

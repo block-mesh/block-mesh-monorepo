@@ -1,34 +1,26 @@
 mod cli_args;
+mod managment;
 
 use crate::cli_args::ClientNodeCliArgs;
+use crate::managment::register::register_token;
 use block_mesh_solana_client::helpers::{get_provider_node_address, sign_message};
-use block_mesh_solana_client::manager::SolanaManager;
+use block_mesh_solana_client::manager::{SolanaManager, SolanaManagerAuth};
 use blockmesh_program::state::provider_node::ProviderNode;
 use clap::Parser;
-use serde::{Deserialize, Serialize};
 use solana_client::client_error::reqwest;
 use solana_client::client_error::reqwest::Proxy;
 use std::net::IpAddr;
 use std::str::FromStr;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
-
-#[derive(Debug, Deserialize, Serialize)]
-struct ProxyAuthentication {
-    nonce: String,
-    signed_message: String,
-}
+use uuid::Uuid;
 
 pub async fn get_proxy(
     proxy_url: &str,
-    nonce: &str,
-    signed_message: &str,
+    solana_manager_header: &SolanaManagerAuth,
 ) -> anyhow::Result<Proxy> {
     let proxy = Proxy::all(proxy_url)?;
-    let json = serde_json::to_string(&ProxyAuthentication {
-        nonce: nonce.to_string(),
-        signed_message: signed_message.to_string(),
-    })?;
+    let json = serde_json::to_string(solana_manager_header)?;
     let proxy = proxy.custom_http_auth(json.parse().unwrap()); // Proxy-Authorization
     Ok(proxy)
 }
@@ -82,13 +74,25 @@ async fn main() {
         }
     };
     tracing::info!("Proxy URL: {}", proxy_url);
-    let nonce = "im a nonce";
-    let signed_message = sign_message(nonce, &solana_manager.get_keypair()).unwrap();
+    let nonce = Uuid::new_v4().to_string();
+    let signed_message = sign_message(&nonce, &solana_manager.get_keypair()).unwrap();
 
-    let proxy = get_proxy(&proxy_url, nonce, &signed_message).await.unwrap();
+    let solana_manager_header = SolanaManagerAuth::new(
+        nonce,
+        signed_message,
+        solana_manager.get_pubkey(),
+        solana_manager.get_api_token(),
+    );
+    // TODO - need to register with proxy here
 
+    let _register_result = register_token(
+        &format!("http://{}/register", proxy_url),
+        &solana_manager_header,
+    )
+    .await
+    .unwrap();
+    let proxy = get_proxy(&proxy_url, &solana_manager_header).await.unwrap();
     let local_address = IpAddr::from_str("0.0.0.0").unwrap();
-
     let client = reqwest::Client::builder()
         .local_address(local_address)
         .proxy(proxy)
@@ -106,11 +110,11 @@ async fn main() {
     match client_node_cli_args.response_type {
         cli_args::ResponseType::Json => {
             let response: serde_json::Value = response.json().await.unwrap();
-            println!("FINAL RESPONSE => {:?}", response);
+            tracing::info!("FINAL RESPONSE => {:?}", response);
         }
         cli_args::ResponseType::Text => {
             let response: String = response.text().await.unwrap();
-            println!("FINAL RESPONSE => {:?}", response);
+            tracing::info!("FINAL RESPONSE => {:?}", response);
         }
     }
 }

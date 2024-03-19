@@ -11,6 +11,7 @@ use anchor_lang::AccountDeserialize;
 use anyhow::anyhow;
 use blockmesh_program::state::provider_node::ProviderNode;
 use secret::Secret;
+use serde::{Deserialize, Serialize};
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_sdk::account::Account;
 use solana_sdk::instruction::Instruction;
@@ -30,6 +31,25 @@ pub struct SolanaManager {
     rpc_client: Arc<RpcClient>,
 }
 
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct SolanaManagerAuth {
+    pub nonce: String,
+    pub signed_message: String,
+    pub pubkey: Pubkey,
+    pub api_token: Pubkey,
+}
+
+impl SolanaManagerAuth {
+    pub fn new(nonce: String, signed_message: String, pubkey: Pubkey, api_token: Pubkey) -> Self {
+        Self {
+            nonce,
+            signed_message,
+            pubkey,
+            api_token,
+        }
+    }
+}
+
 impl SolanaManager {
     pub fn get_keypair(&self) -> Keypair {
         self.keypair.clone().expose_secret().keypair()
@@ -37,6 +57,10 @@ impl SolanaManager {
 
     pub fn get_pubkey(&self) -> Pubkey {
         self.keypair.clone().expose_secret().pubkey()
+    }
+
+    pub fn get_api_token(&self) -> Pubkey {
+        self.api_token.unwrap()
     }
 
     #[tracing::instrument(name = "SolanaManager::new")]
@@ -99,6 +123,8 @@ impl SolanaManager {
                     e.to_string()
                 )
             })?;
+
+        self.api_token = Some(api_token_address.0);
 
         match account {
             Some(_) => {
