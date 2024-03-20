@@ -1,4 +1,6 @@
-use serde::{Deserialize, Serialize};
+mod pages;
+
+use crate::pages::home::HOME_PAGE;
 use tracing_subscriber::fmt::format::Pretty;
 use tracing_subscriber::fmt::time::UtcTime;
 use tracing_subscriber::prelude::*;
@@ -19,18 +21,7 @@ fn start() {
         .init();
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RequestBody {
-    pub pubkey: String,
-    pub nonce: String,
-    pub signed_message: String,
-}
-
 #[event(fetch)]
-async fn main(req: Request, _env: Env, _ctx: Context) -> Result<Response> {
-    if req.method() != Method::Post {
-        return Response::error("Only POST Method allowed", 405);
-    }
-
-    Response::ok(format!("Hello, world! method = {:?}", req.method()))
+async fn main(_req: Request, _env: Env, _ctx: Context) -> Result<Response> {
+    Response::from_html(HOME_PAGE)
 }
