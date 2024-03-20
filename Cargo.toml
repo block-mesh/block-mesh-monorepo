@@ -10,6 +10,7 @@ codegen-units = 1
 
 [workspace]
 members = ["libs/*", "programs/*"]
+exclude = ["libs/renaissance-hackathon"]
 resolver = "2"
 
 [workspace.package]

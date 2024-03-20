@@ -10,6 +10,8 @@ open source and blockchain industries.
 
 ## Repository Structure
 
+* [libs/renaissance-hackathon](libs/renaissance-hackathon) -
+  BlockMesh [Colosseum Renaissance hackathon entry](https://www.colosseum.org/renaissance)
 * [programs/blockmesh-program](programs/blockmesh-program/) - [Anchor](https://www.anchor-lang.com/)
   [Solana](https://solana.com/) program , manages the state of the BlockMesh network.
 * [libs/block-mesh-manager](libs/block-mesh-manager/) - The BlockMesh network server.
@@ -22,7 +24,7 @@ open source and blockchain industries.
 * [lib/cloudflare-worker-solana-relay](libs/cloudflare-worker-solana-relay/) - A cloudflare worker that relays requests
   to `solana`.
 * [libs/ipapi-is-rust](libs/ipapi-is-rust/) - A rust library for [ipapi.is](https://ipapi.is/) types.
-* [libs/landing-site](libs/landing-site/) - The BlockMesh network landing site.
+* [libs/cloudflare-landing-page](libs/cloudflare-landing-page) - The BlockMesh network landing site.
 * [libs/provider-node](libs/provider-node/) - The `provider-node` client,
   manages interactions with `solana` and incoming requests from `client-node`.
 * [libs/solana-tiny-client](libs/solana-tiny-client/) - A tiny `solana` client with minimal dependencies
