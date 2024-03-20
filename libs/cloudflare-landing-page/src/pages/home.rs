@@ -4,6 +4,8 @@ pub static HOME_PAGE: &str = r###"
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlockMesh Network</title>
+  <link rel="icon" type="image/x-icon" href="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public">
   <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body>
