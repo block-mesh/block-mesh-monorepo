@@ -8,13 +8,6 @@ on:
     types: [opened, synchronize, reopened]
     branches:
       - master
-env:
-  RUSTC_VERSION: 1.75.0
-  SQLX_OFFLINE: true
-  SQLX_OFFLINE_DIR: .sqlx
-  CARGO_TERM_COLOR: always
-  SQLX_VERSION: 0.7.3
-  SQLX_FEATURES: "rustls,postgres"
 jobs:
   clippy:
     name: Clippy
@@ -23,16 +16,16 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
-          toolchain: ${{ env.RUSTC_VERSION }}
+          toolchain: ${{ vars.RUSTC_VERSION }}
           components: clippy
       - uses: Swatinem/rust-cache@v2
         with:
-          key: clippy-sqlx-${{ env.SQLX_VERSION }}
+          key: clippy-sqlx-${{ vars.SQLX_VERSION }}
           cache-all-crates: true
       - name: Install sqlx-cli
         run: cargo install sqlx-cli
-          --version=${{ env.SQLX_VERSION }}
-          --features ${{ env.SQLX_FEATURES }}
+          --version=${{ vars.SQLX_VERSION }}
+          --features ${{ vars.SQLX_FEATURES }}
           --no-default-features
           --locked
       - name: Linting
