@@ -1,5 +1,6 @@
 #![deny(warnings)]
 use bytes::Bytes;
+use clap::Parser;
 use http_body_util::{combinators::BoxBody, BodyExt, Empty, Full};
 use hyper::client::conn::http1::Builder;
 use hyper::server::conn::http1;
@@ -8,25 +9,27 @@ use hyper::upgrade::Upgraded;
 use hyper::{http, Method, Request, Response};
 use hyper_util::rt::TokioIo;
 use std::net::SocketAddr;
+use std::str::FromStr;
+use tokio::net::TcpStream;
 
-use tokio::net::{TcpListener, TcpStream};
+#[derive(Parser, Debug)]
+pub struct CliArgs {
+    #[arg(long, default_value = "127.0.0.1")]
+    pub ip: String,
+    #[arg(long, default_value = "5000")]
+    pub port: u16,
+}
 
-// To try this example:
-// 1. cargo run --example http_proxy
-// 2. config http_proxy in command line
-//    $ export http_proxy=http://127.0.0.1:8100
-//    $ export https_proxy=http://127.0.0.1:8100
-// 3. send requests
-//    $ curl -i https://www.some_domain.com/
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let addr = SocketAddr::from(([127, 0, 0, 1], 8100));
+    let args = CliArgs::parse();
+    let addr = SocketAddr::from_str(format!("{}:{}", args.ip, args.port).as_str())
+        .expect("Failed to parse address");
+    while let Ok(stream) = TcpStream::connect(addr).await {
+        println!("Connected to http://{}", addr);
+        let mut buffer = [0; 1];
 
-    let listener = TcpListener::bind(addr).await?;
-    println!("Listening on http://{}", addr);
-
-    loop {
-        let (stream, _) = listener.accept().await?;
+        stream.peek(&mut buffer).await?;
         let io = TokioIo::new(stream);
 
         tokio::task::spawn(async move {
@@ -41,6 +44,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             }
         });
     }
+    Ok(())
 }
 
 async fn proxy(
