@@ -29,6 +29,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         println!("Connected to http://{}", addr);
         let mut buffer = [0; 1];
 
+        println!("Peeking");
         stream.peek(&mut buffer).await?;
         let io = TokioIo::new(stream);
 
@@ -128,19 +129,19 @@ fn full<T: Into<Bytes>>(chunk: T) -> BoxBody<Bytes, hyper::Error> {
 // Create a TCP connection to host:port, build a tunnel between the connection and
 // the upgraded connection
 async fn tunnel(upgraded: Upgraded, addr: String) -> std::io::Result<()> {
+    println!("tunneling to {}", addr);
     // Connect to remote server
-    let mut server = TcpStream::connect(addr).await?;
+    let mut server = TcpStream::connect(addr.clone()).await?;
+    println!("connected to {}", addr);
     let mut upgraded = TokioIo::new(upgraded);
-
+    println!("upgraded connection");
     // Proxying data
     let (from_client, from_server) =
         tokio::io::copy_bidirectional(&mut upgraded, &mut server).await?;
-
     // Print message when done
     println!(
         "client wrote {} bytes and received {} bytes",
         from_client, from_server
     );
-
     Ok(())
 }

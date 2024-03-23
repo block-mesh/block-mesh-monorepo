@@ -25,13 +25,13 @@ pub async fn connect_streams_via_channel(
                     println!("{}: Connection closed by client", context);
                     break;
                 }
-                println!("{}: sending msg {:?}", context, buf);
+                println!("{}: sending msg", context);
                 let _ = sender.send(buf);
             }
         });
         tokio::spawn(async move {
             while let Ok(msg) = receiver.recv().await {
-                println!("{}: msg {:?}", context, msg);
+                println!("{}: recv msg {:?}", context, msg.len());
                 write.write_all(&msg).await.expect("Failed to write data");
             }
         });
