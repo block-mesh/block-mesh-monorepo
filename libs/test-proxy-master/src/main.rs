@@ -2,10 +2,7 @@ use futures_util::future::join;
 use std::fmt::Display;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use tokio::sync::broadcast;
-use tokio::sync::broadcast::{Receiver, Sender};
-
-use crate::connect_streams_via_channel::connect_streams_via_channel;
+use tokio::sync::mpsc;
 
 mod connect_streams_via_channel;
 
@@ -32,12 +29,10 @@ impl Display for Context {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let (pool_sender, mut pool_receiver) = mpsc::unbounded_channel();
+
     let addr_clients = SocketAddr::from(([127, 0, 0, 1], 4000));
     let addr_proxies = SocketAddr::from(([127, 0, 0, 1], 5000));
-    let (client_sender, client_receiver): (Sender<Vec<u8>>, Receiver<Vec<u8>>) =
-        broadcast::channel(16);
-    let (proxy_sender, proxy_receiver): (Sender<Vec<u8>>, Receiver<Vec<u8>>) =
-        broadcast::channel(16);
 
     let client_listener = TcpListener::bind(addr_clients).await?;
     println!("Listening on http://{}", addr_clients);
@@ -45,24 +40,23 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     println!("Listening on http://{}", addr_proxies);
 
     let task_1 = tokio::task::spawn(async move {
-        connect_streams_via_channel(
-            client_listener,
-            client_sender,
-            proxy_receiver,
-            Context::Client,
-        )
-        .await
+        while let Ok((stream, _addr)) = proxy_listener.accept().await {
+            pool_sender.send(stream).unwrap();
+        }
     });
 
     let task_2 = tokio::task::spawn(async move {
-        connect_streams_via_channel(
-            proxy_listener,
-            proxy_sender,
-            client_receiver,
-            Context::Proxy,
-        )
-        .await
+        while let Ok((mut stream, _addr)) = client_listener.accept().await {
+            // Simple round-robin
+            let mut proxy = pool_receiver.recv().await.unwrap();
+            tokio::spawn(async move {
+                tokio::io::copy_bidirectional(&mut stream, &mut proxy)
+                    .await
+                    .unwrap()
+            });
+        }
     });
+
     let _ret = join(task_1, task_2).await;
     Ok(())
 }
