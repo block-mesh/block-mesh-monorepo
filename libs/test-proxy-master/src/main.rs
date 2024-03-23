@@ -1,35 +1,15 @@
 use futures_util::future::join;
-use std::fmt::Display;
 use std::net::SocketAddr;
-use tokio::net::TcpListener;
+use tokio::net::{TcpListener, TcpStream};
 use tokio::sync::mpsc;
-
-mod connect_streams_via_channel;
-
-#[derive(Debug, Clone, Copy)]
-pub enum Direction {
-    FromUpgraded,
-    FromServer,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum Context {
-    Client,
-    Proxy,
-}
-
-impl Display for Context {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Context::Client => write!(f, "client"),
-            Context::Proxy => write!(f, "proxy"),
-        }
-    }
-}
+use tokio::sync::mpsc::{UnboundedReceiver, UnboundedSender};
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let (pool_sender, mut pool_receiver) = mpsc::unbounded_channel();
+    let (pool_sender, mut pool_receiver): (
+        UnboundedSender<TcpStream>,
+        UnboundedReceiver<TcpStream>,
+    ) = mpsc::unbounded_channel();
 
     let addr_clients = SocketAddr::from(([127, 0, 0, 1], 4000));
     let addr_proxies = SocketAddr::from(([127, 0, 0, 1], 5000));
