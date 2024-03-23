@@ -16,10 +16,8 @@ use provider_node::token_management::channels::{
 use rustc_hash::FxHashMap;
 use std::net::{IpAddr, SocketAddr};
 use std::process::exit;
-use std::str::FromStr;
 use std::sync::Arc;
-use tokio::net::TcpStream;
-use tokio::signal;
+use tokio::net::TcpListener;
 use tokio::sync::broadcast;
 use tower::Service;
 use tower::ServiceExt;
@@ -85,13 +83,11 @@ async fn main() {
         .with_state(app_state.clone());
 
     let tower_service = tower::service_fn(move |req: Request<_>| {
-        println!("Request: {:?}", req);
         let app_state = app_state.clone();
         let router_svc = router_svc.clone();
         let req = req.map(Body::new);
         async move {
             if req.method() == Method::CONNECT {
-                println!("CONNECT request");
                 proxy(app_state, req).await
             } else {
                 router_svc.oneshot(req).await.map_err(|err| match err {})
@@ -102,22 +98,25 @@ async fn main() {
     let hyper_service = hyper::service::service_fn(move |request: Request<Incoming>| {
         tower_service.clone().call(request)
     });
-    // let addr = SocketAddr::from(([0, 0, 0, 0], provider_node_cli_args.port));
-    let addr = SocketAddr::from_str(&provider_node_cli_args.proxy_manager_address).unwrap();
+
+    let addr = SocketAddr::from(([0, 0, 0, 0], provider_node_cli_args.port));
     tracing::debug!("listening on {}", addr);
-    let stream = TcpStream::connect(addr).await.unwrap();
-    let io = TokioIo::new(stream);
-    let hyper_service = hyper_service.clone();
-    tokio::task::spawn(async move {
-        if let Err(err) = http1::Builder::new()
-            .preserve_header_case(true)
-            .title_case_headers(true)
-            .serve_connection(io, hyper_service)
-            .with_upgrades()
-            .await
-        {
-            tracing::error!("Failed to serve connection: {:?}", err);
-        }
-    });
-    signal::ctrl_c().await.expect("failed to listen for event");
+
+    let listener = TcpListener::bind(addr).await.unwrap();
+    loop {
+        let (stream, _) = listener.accept().await.unwrap();
+        let io = TokioIo::new(stream);
+        let hyper_service = hyper_service.clone();
+        tokio::task::spawn(async move {
+            if let Err(err) = http1::Builder::new()
+                .preserve_header_case(true)
+                .title_case_headers(true)
+                .serve_connection(io, hyper_service)
+                .with_upgrades()
+                .await
+            {
+                tracing::error!("Failed to serve connection: {:?}", err);
+            }
+        });
+    }
 }

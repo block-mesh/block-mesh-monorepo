@@ -11,6 +11,4 @@ pub struct ProviderNodeCliArgs {
     pub program_id: Pubkey,
     #[arg(long, default_value = "3000")]
     pub port: u16,
-    #[arg(long)]
-    pub proxy_manager_address: String,
 }
