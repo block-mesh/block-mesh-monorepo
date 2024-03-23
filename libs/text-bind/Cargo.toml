@@ -1,5 +1,5 @@
 [package]
-name = "proxy-manager-test"
+name = "test-bind"
 version = "0.1.0"
 edition = "2021"
 authors.workspace = true
@@ -14,3 +14,4 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
 tokio = { workspace = true, features = ["full"] }
 hyper-util = { workspace = true }
+rustc-hash = { workspace = true }
