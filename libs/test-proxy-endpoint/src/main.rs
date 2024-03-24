@@ -1,12 +1,13 @@
 #![deny(warnings)]
 use bytes::Bytes;
 use clap::Parser;
+use http::header;
 use http_body_util::{combinators::BoxBody, BodyExt, Empty, Full};
 use hyper::client::conn::http1::Builder;
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
 use hyper::upgrade::Upgraded;
-use hyper::{http, Method, Request, Response};
+use hyper::{client, http, Method, Request, Response};
 use hyper_util::rt::TokioIo;
 use std::net::SocketAddr;
 use std::str::FromStr;
@@ -27,23 +28,38 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .expect("Failed to parse address");
     while let Ok(stream) = TcpStream::connect(addr).await {
         println!("Connected to http://{}", addr);
-        let mut buffer = [0; 1];
 
-        println!("Peeking");
-        stream.peek(&mut buffer).await?;
-        let io = TokioIo::new(stream);
+        // Initial registration
 
-        tokio::task::spawn(async move {
-            if let Err(err) = http1::Builder::new()
-                .preserve_header_case(true)
-                .title_case_headers(true)
-                .serve_connection(io, service_fn(proxy))
-                .with_upgrades()
-                .await
-            {
-                println!("Failed to serve connection: {:?}", err);
-            }
-        });
+        let (mut send_request, conn) = client::conn::http1::Builder::new()
+            .handshake(TokioIo::new(stream))
+            .await?;
+
+        tokio::spawn(conn.with_upgrades());
+
+        let req = Request::builder()
+            .method(Method::CONNECT)
+            // whatever
+            .uri(addr.to_string())
+            .header(header::UPGRADE, "foobar")
+            .header("custom-header", "I want connect xxx")
+            .body(empty())
+            .unwrap();
+
+        let res = send_request.send_request(req).await?;
+
+        let stream = hyper::upgrade::on(res).await?;
+
+        // Start Proxy
+        if let Err(err) = http1::Builder::new()
+            .preserve_header_case(true)
+            .title_case_headers(true)
+            .serve_connection(stream, service_fn(proxy))
+            .with_upgrades()
+            .await
+        {
+            println!("Failed to serve connection: {:?}", err);
+        }
     }
     Ok(())
 }
