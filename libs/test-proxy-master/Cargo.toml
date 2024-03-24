@@ -19,3 +19,4 @@ bytes = { workspace = true }
 once_cell = { workspace = true }
 futures-util = { workspace = true }
 anyhow = { workspace = true }
+httparse = { workspace = true }

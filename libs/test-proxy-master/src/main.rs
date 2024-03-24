@@ -1,6 +1,9 @@
 use futures_util::future::join;
 use std::net::SocketAddr;
-use tokio::net::TcpListener;
+use tokio::{
+    io::{AsyncReadExt, AsyncWriteExt},
+    net::TcpListener,
+};
 
 mod proxy_pool;
 
@@ -25,12 +28,35 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let task_2 = tokio::task::spawn(async move {
         while let Ok((mut stream, _addr)) = client_listener.accept().await {
-            // Simple round-robin
-            let mut proxy = pool.get().await.unwrap();
+            let pool = pool.clone();
             tokio::spawn(async move {
-                tokio::io::copy_bidirectional(&mut stream, &mut proxy)
-                    .await
-                    .unwrap()
+                let mut buf = Vec::new();
+
+                loop {
+                    let mut headers = [httparse::EMPTY_HEADER; 64];
+                    let mut req = httparse::Request::new(&mut headers);
+
+                    let n = stream.read_buf(&mut buf).await?;
+
+                    if n == 0 {
+                        return Ok(());
+                    }
+
+                    if let Ok(httparse::Status::Complete(len)) = req.parse(&buf) {
+                        // We can pick proxy by req
+                        let mut proxy = pool.get().await.unwrap();
+
+                        // We can modify the request here
+                        proxy.write_all(&buf[..len]).await?;
+
+                        // Write the rest of the buffer
+                        proxy.write_all(&buf[len..]).await?;
+                        tokio::io::copy_bidirectional(&mut stream, &mut proxy).await?;
+                        break;
+                    }
+                }
+
+                Ok::<(), std::io::Error>(())
             });
         }
     });
