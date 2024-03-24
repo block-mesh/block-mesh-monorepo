@@ -1,7 +1,7 @@
 use crate::clients_endpoint::listen_for_clients_connecting;
 use crate::proxy_endpoint::listen_for_proxies_connecting;
 use block_mesh_common::tracing::setup_tracing;
-use futures_util::future::join;
+use futures_util::future::join_all;
 use proxy_pool::ProxyPool;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
@@ -30,6 +30,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let clients_listener_task = tokio::task::spawn(async move {
         listen_for_clients_connecting(proxy_listener_pool, client_listener).await;
     });
-    let _ = join(proxy_listener_task, clients_listener_task).await;
+    let _ = join_all(vec![proxy_listener_task, clients_listener_task]).await;
     Ok(())
 }
