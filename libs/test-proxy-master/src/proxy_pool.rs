@@ -1,6 +1,5 @@
-use std::sync::Arc;
-
 use hyper::upgrade::Upgraded;
+use std::sync::Arc;
 use tokio::sync::Mutex;
 
 #[derive(Debug, Clone, Default)]

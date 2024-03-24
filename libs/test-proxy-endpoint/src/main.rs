@@ -1,4 +1,4 @@
-#![deny(warnings)]
+use block_mesh_common::tracing::setup_tracing;
 use bytes::Bytes;
 use clap::Parser;
 use http::header;
@@ -23,12 +23,12 @@ pub struct CliArgs {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    setup_tracing();
     let args = CliArgs::parse();
     let addr = SocketAddr::from_str(format!("{}:{}", args.ip, args.port).as_str())
         .expect("Failed to parse address");
     while let Ok(stream) = TcpStream::connect(addr).await {
-        println!("Connected to http://{}", addr);
-
+        tracing::info!("Connected to {}", addr);
         // Initial registration
 
         let (mut send_request, conn) = client::conn::http1::Builder::new()
@@ -36,6 +36,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .await?;
 
         tokio::spawn(conn.with_upgrades());
+
+        // let req = Request::builder()
+        //     .method(Method::POST)
+        //     // whatever
+        //     .uri(addr.to_string())
+        //     .header(header::UPGRADE, "foobar")
+        //     .header("custom-header", "I want connect xxx")
+        //     .body(empty())
+        //     .unwrap();
+        // let _res = send_request.send_request(req).await?;
 
         let req = Request::builder()
             .method(Method::CONNECT)
@@ -67,7 +77,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 async fn proxy(
     req: Request<hyper::body::Incoming>,
 ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
-    println!("req: {:?}", req);
+    tracing::info!("req: {:?}", req);
 
     if Method::CONNECT == req.method() {
         // Received an HTTP request like:
