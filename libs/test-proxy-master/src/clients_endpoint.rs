@@ -1,9 +1,9 @@
 use crate::proxy_pool::ProxyPool;
 use hyper_util::rt::TokioIo;
 use tokio::io::{AsyncReadExt, AsyncWriteExt};
-// use tokio::io::{AsyncReadExt, AsyncWriteExt};
 use tokio::net::TcpListener;
 
+#[tracing::instrument(name = "listen_for_clients_connecting")]
 pub async fn listen_for_clients_connecting(pool: ProxyPool, client_listener: TcpListener) {
     while let Ok((mut stream, _addr)) = client_listener.accept().await {
         let pool = pool.clone();

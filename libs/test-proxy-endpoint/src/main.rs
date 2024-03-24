@@ -68,12 +68,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .with_upgrades()
             .await
         {
-            println!("Failed to serve connection: {:?}", err);
+            tracing::info!("Failed to serve connection: {:?}", err);
         }
     }
     Ok(())
 }
 
+#[tracing::instrument(name = "proxy", ret, err)]
 async fn proxy(
     req: Request<hyper::body::Incoming>,
 ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
@@ -98,16 +99,16 @@ async fn proxy(
                 match hyper::upgrade::on(req).await {
                     Ok(upgraded) => {
                         if let Err(e) = tunnel(upgraded, addr).await {
-                            eprintln!("server io error: {}", e);
+                            tracing::error!("server io error: {}", e);
                         };
                     }
-                    Err(e) => eprintln!("upgrade error: {}", e),
+                    Err(e) => tracing::error!("upgrade error: {}", e),
                 }
             });
 
             Ok(Response::new(empty()))
         } else {
-            eprintln!("CONNECT host is not socket addr: {:?}", req.uri());
+            tracing::error!("CONNECT host is not socket addr: {:?}", req.uri());
             let mut resp = Response::new(full("CONNECT must be to a socket address"));
             *resp.status_mut() = http::StatusCode::BAD_REQUEST;
 
@@ -127,7 +128,7 @@ async fn proxy(
             .await?;
         tokio::task::spawn(async move {
             if let Err(err) = conn.await {
-                println!("Connection failed: {:?}", err);
+                tracing::info!("Connection failed: {:?}", err);
             }
         });
 
@@ -154,20 +155,22 @@ fn full<T: Into<Bytes>>(chunk: T) -> BoxBody<Bytes, hyper::Error> {
 
 // Create a TCP connection to host:port, build a tunnel between the connection and
 // the upgraded connection
+#[tracing::instrument(name = "tunnel", ret, err)]
 async fn tunnel(upgraded: Upgraded, addr: String) -> std::io::Result<()> {
-    println!("tunneling to {}", addr);
+    tracing::info!("tunneling to {}", addr);
     // Connect to remote server
     let mut server = TcpStream::connect(addr.clone()).await?;
-    println!("connected to {}", addr);
+    tracing::info!("connected to {}", addr);
     let mut upgraded = TokioIo::new(upgraded);
-    println!("upgraded connection");
+    tracing::info!("upgraded connection");
     // Proxying data
     let (from_client, from_server) =
         tokio::io::copy_bidirectional(&mut upgraded, &mut server).await?;
     // Print message when done
-    println!(
+    tracing::info!(
         "client wrote {} bytes and received {} bytes",
-        from_client, from_server
+        from_client,
+        from_server
     );
     Ok(())
 }

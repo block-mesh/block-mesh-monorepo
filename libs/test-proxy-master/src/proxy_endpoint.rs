@@ -29,11 +29,11 @@ pub async fn listen_for_proxies_connecting(pool: ProxyPool, proxy_listener: TcpL
     }
 }
 
+#[tracing::instrument(name = "handle_request", ret, err)]
 pub async fn handle_request(
     pool: ProxyPool,
     req: Request<hyper::body::Incoming>,
 ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
-    tracing::info!("handle_request: {:?}", req);
     if Method::CONNECT == req.method() {
         tracing::info!("CONNECT request");
 
