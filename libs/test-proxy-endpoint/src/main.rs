@@ -1,12 +1,14 @@
-#![deny(warnings)]
+use block_mesh_common::http::{empty, full, host_addr};
+use block_mesh_common::tracing::setup_tracing;
 use bytes::Bytes;
 use clap::Parser;
-use http_body_util::{combinators::BoxBody, BodyExt, Empty, Full};
+use http::header;
+use http_body_util::{combinators::BoxBody, BodyExt};
 use hyper::client::conn::http1::Builder;
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
 use hyper::upgrade::Upgraded;
-use hyper::{http, Method, Request, Response};
+use hyper::{client, http, Method, Request, Response};
 use hyper_util::rt::TokioIo;
 use std::net::SocketAddr;
 use std::str::FromStr;
@@ -22,36 +24,63 @@ pub struct CliArgs {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
+    setup_tracing();
     let args = CliArgs::parse();
     let addr = SocketAddr::from_str(format!("{}:{}", args.ip, args.port).as_str())
         .expect("Failed to parse address");
     while let Ok(stream) = TcpStream::connect(addr).await {
-        println!("Connected to http://{}", addr);
-        let mut buffer = [0; 1];
+        tracing::info!("Connected to {}", addr);
+        // Initial registration
+        let (mut send_request, conn) = client::conn::http1::Builder::new()
+            .handshake(TokioIo::new(stream))
+            .await?;
 
-        println!("Peeking");
-        stream.peek(&mut buffer).await?;
-        let io = TokioIo::new(stream);
+        tokio::spawn(conn.with_upgrades());
 
-        tokio::task::spawn(async move {
-            if let Err(err) = http1::Builder::new()
-                .preserve_header_case(true)
-                .title_case_headers(true)
-                .serve_connection(io, service_fn(proxy))
-                .with_upgrades()
-                .await
-            {
-                println!("Failed to serve connection: {:?}", err);
-            }
-        });
+        // TODO: register proxy-endpoint in proxy-master
+
+        // let req = Request::builder()
+        //     .method(Method::POST)
+        //     // whatever
+        //     .uri(addr.to_string())
+        //     .header(header::UPGRADE, "foobar")
+        //     .header("custom-header", "I want connect xxx")
+        //     .body(empty())
+        //     .unwrap();
+        // let _res = send_request.send_request(req).await?;
+
+        let req = Request::builder()
+            .method(Method::CONNECT)
+            // whatever
+            .uri(addr.to_string())
+            .header(header::UPGRADE, "foobar")
+            .header("custom-header", "I want connect xxx")
+            .body(empty())
+            .unwrap();
+
+        let res = send_request.send_request(req).await?;
+
+        let stream = hyper::upgrade::on(res).await?;
+
+        // Start Proxy
+        if let Err(err) = http1::Builder::new()
+            .preserve_header_case(true)
+            .title_case_headers(true)
+            .serve_connection(stream, service_fn(proxy))
+            .with_upgrades()
+            .await
+        {
+            tracing::info!("Failed to serve connection: {:?}", err);
+        }
     }
     Ok(())
 }
 
+#[tracing::instrument(name = "proxy", ret, err)]
 async fn proxy(
     req: Request<hyper::body::Incoming>,
 ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
-    println!("req: {:?}", req);
+    tracing::info!("req: {:?}", req);
 
     if Method::CONNECT == req.method() {
         // Received an HTTP request like:
@@ -72,22 +101,23 @@ async fn proxy(
                 match hyper::upgrade::on(req).await {
                     Ok(upgraded) => {
                         if let Err(e) = tunnel(upgraded, addr).await {
-                            eprintln!("server io error: {}", e);
+                            tracing::error!("server io error: {}", e);
                         };
                     }
-                    Err(e) => eprintln!("upgrade error: {}", e),
+                    Err(e) => tracing::error!("upgrade error: {}", e),
                 }
             });
 
             Ok(Response::new(empty()))
         } else {
-            eprintln!("CONNECT host is not socket addr: {:?}", req.uri());
+            tracing::error!("CONNECT host is not socket addr: {:?}", req.uri());
             let mut resp = Response::new(full("CONNECT must be to a socket address"));
             *resp.status_mut() = http::StatusCode::BAD_REQUEST;
 
             Ok(resp)
         }
     } else {
+        tracing::info!("NOT CONNECT request");
         let host = req.uri().host().expect("uri has no host");
         let port = req.uri().port_u16().unwrap_or(80);
 
@@ -101,7 +131,7 @@ async fn proxy(
             .await?;
         tokio::task::spawn(async move {
             if let Err(err) = conn.await {
-                println!("Connection failed: {:?}", err);
+                tracing::info!("Connection failed: {:?}", err);
             }
         });
 
@@ -110,38 +140,14 @@ async fn proxy(
     }
 }
 
-fn host_addr(uri: &http::Uri) -> Option<String> {
-    uri.authority().map(|auth| auth.to_string())
-}
-
-fn empty() -> BoxBody<Bytes, hyper::Error> {
-    Empty::<Bytes>::new()
-        .map_err(|never| match never {})
-        .boxed()
-}
-
-fn full<T: Into<Bytes>>(chunk: T) -> BoxBody<Bytes, hyper::Error> {
-    Full::new(chunk.into())
-        .map_err(|never| match never {})
-        .boxed()
-}
-
 // Create a TCP connection to host:port, build a tunnel between the connection and
 // the upgraded connection
+#[tracing::instrument(name = "tunnel", ret, err)]
 async fn tunnel(upgraded: Upgraded, addr: String) -> std::io::Result<()> {
-    println!("tunneling to {}", addr);
-    // Connect to remote server
     let mut server = TcpStream::connect(addr.clone()).await?;
-    println!("connected to {}", addr);
     let mut upgraded = TokioIo::new(upgraded);
-    println!("upgraded connection");
-    // Proxying data
     let (from_client, from_server) =
         tokio::io::copy_bidirectional(&mut upgraded, &mut server).await?;
-    // Print message when done
-    println!(
-        "client wrote {} bytes and received {} bytes",
-        from_client, from_server
-    );
+    tracing::info!(from_client, from_server);
     Ok(())
 }

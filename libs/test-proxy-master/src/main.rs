@@ -1,68 +1,34 @@
-use futures_util::future::join;
-use std::fmt::Display;
+use crate::clients_endpoint::listen_for_clients_connecting;
+use crate::proxy_endpoint::listen_for_proxies_connecting;
+use block_mesh_common::tracing::setup_tracing;
+use futures_util::future::join_all;
+use proxy_pool::ProxyPool;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
-use tokio::sync::broadcast;
-use tokio::sync::broadcast::{Receiver, Sender};
 
-use crate::connect_streams_via_channel::connect_streams_via_channel;
-
-mod connect_streams_via_channel;
-
-#[derive(Debug, Clone, Copy)]
-pub enum Direction {
-    FromUpgraded,
-    FromServer,
-}
-
-#[derive(Debug, Clone, Copy)]
-pub enum Context {
-    Client,
-    Proxy,
-}
-
-impl Display for Context {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Context::Client => write!(f, "client"),
-            Context::Proxy => write!(f, "proxy"),
-        }
-    }
-}
+mod clients_endpoint;
+mod proxy_endpoint;
+mod proxy_pool;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    let addr_clients = SocketAddr::from(([127, 0, 0, 1], 4000));
+    setup_tracing();
+    let pool = ProxyPool::default();
     let addr_proxies = SocketAddr::from(([127, 0, 0, 1], 5000));
-    let (client_sender, client_receiver): (Sender<Vec<u8>>, Receiver<Vec<u8>>) =
-        broadcast::channel(16);
-    let (proxy_sender, proxy_receiver): (Sender<Vec<u8>>, Receiver<Vec<u8>>) =
-        broadcast::channel(16);
-
-    let client_listener = TcpListener::bind(addr_clients).await?;
-    println!("Listening on http://{}", addr_clients);
     let proxy_listener = TcpListener::bind(addr_proxies).await?;
-    println!("Listening on http://{}", addr_proxies);
+    tracing::info!("Listening on for proxies on: {}", addr_proxies);
+    let addr_clients = SocketAddr::from(([127, 0, 0, 1], 4000));
+    let client_listener = TcpListener::bind(addr_clients).await?;
+    tracing::info!("Listening on for clients on: {}", addr_clients);
 
-    let task_1 = tokio::task::spawn(async move {
-        connect_streams_via_channel(
-            client_listener,
-            client_sender,
-            proxy_receiver,
-            Context::Client,
-        )
-        .await
+    let proxy_listener_pool = pool.clone();
+    let proxy_listener_task = tokio::task::spawn(async move {
+        listen_for_proxies_connecting(proxy_listener_pool, proxy_listener).await
     });
-
-    let task_2 = tokio::task::spawn(async move {
-        connect_streams_via_channel(
-            proxy_listener,
-            proxy_sender,
-            client_receiver,
-            Context::Proxy,
-        )
-        .await
+    let proxy_listener_pool = pool.clone();
+    let clients_listener_task = tokio::task::spawn(async move {
+        listen_for_clients_connecting(proxy_listener_pool, client_listener).await;
     });
-    let _ret = join(task_1, task_2).await;
+    let _ = join_all(vec![proxy_listener_task, clients_listener_task]).await;
     Ok(())
 }
