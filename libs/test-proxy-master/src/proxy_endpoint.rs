@@ -1,5 +1,5 @@
 use crate::proxy_pool::ProxyPool;
-use crate::utils::empty;
+use block_mesh_common::http::empty;
 use bytes::Bytes;
 use http_body_util::combinators::BoxBody;
 use hyper::server;
@@ -18,7 +18,7 @@ pub async fn listen_for_proxies_connecting(pool: ProxyPool, proxy_listener: TcpL
                 .title_case_headers(true)
                 .serve_connection(
                     TokioIo::new(stream),
-                    service_fn(move |req| handle_request(pool.clone(), req)),
+                    service_fn(move |req| handle_proxy_request(pool.clone(), req)),
                 )
                 .with_upgrades()
                 .await
@@ -29,14 +29,12 @@ pub async fn listen_for_proxies_connecting(pool: ProxyPool, proxy_listener: TcpL
     }
 }
 
-#[tracing::instrument(name = "handle_request", ret, err)]
-pub async fn handle_request(
+#[tracing::instrument(name = "handle_proxy_request", ret, err)]
+async fn handle_proxy_request(
     pool: ProxyPool,
     req: Request<hyper::body::Incoming>,
 ) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
     if Method::CONNECT == req.method() {
-        tracing::info!("CONNECT request");
-
         // Received an HTTP request like:
         // ```
         // CONNECT www.domain.com:443 HTTP/1.1
@@ -56,7 +54,7 @@ pub async fn handle_request(
                     // We can put proxy along with req here
                     pool.put(upgraded).await;
                 }
-                Err(e) => eprintln!("upgrade error: {}", e),
+                Err(e) => tracing::error!("upgrade error: {}", e),
             }
         });
         Ok(Response::new(empty()))

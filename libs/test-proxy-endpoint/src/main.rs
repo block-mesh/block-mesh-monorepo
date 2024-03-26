@@ -1,8 +1,9 @@
+use block_mesh_common::http::{empty, full, host_addr};
 use block_mesh_common::tracing::setup_tracing;
 use bytes::Bytes;
 use clap::Parser;
 use http::header;
-use http_body_util::{combinators::BoxBody, BodyExt, Empty, Full};
+use http_body_util::{combinators::BoxBody, BodyExt};
 use hyper::client::conn::http1::Builder;
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
@@ -30,12 +31,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     while let Ok(stream) = TcpStream::connect(addr).await {
         tracing::info!("Connected to {}", addr);
         // Initial registration
-
         let (mut send_request, conn) = client::conn::http1::Builder::new()
             .handshake(TokioIo::new(stream))
             .await?;
 
         tokio::spawn(conn.with_upgrades());
+
+        // TODO: register proxy-endpoint in proxy-master
 
         // let req = Request::builder()
         //     .method(Method::POST)
@@ -115,6 +117,7 @@ async fn proxy(
             Ok(resp)
         }
     } else {
+        tracing::info!("NOT CONNECT request");
         let host = req.uri().host().expect("uri has no host");
         let port = req.uri().port_u16().unwrap_or(80);
 
@@ -137,40 +140,14 @@ async fn proxy(
     }
 }
 
-fn host_addr(uri: &http::Uri) -> Option<String> {
-    uri.authority().map(|auth| auth.to_string())
-}
-
-fn empty() -> BoxBody<Bytes, hyper::Error> {
-    Empty::<Bytes>::new()
-        .map_err(|never| match never {})
-        .boxed()
-}
-
-fn full<T: Into<Bytes>>(chunk: T) -> BoxBody<Bytes, hyper::Error> {
-    Full::new(chunk.into())
-        .map_err(|never| match never {})
-        .boxed()
-}
-
 // Create a TCP connection to host:port, build a tunnel between the connection and
 // the upgraded connection
 #[tracing::instrument(name = "tunnel", ret, err)]
 async fn tunnel(upgraded: Upgraded, addr: String) -> std::io::Result<()> {
-    tracing::info!("tunneling to {}", addr);
-    // Connect to remote server
     let mut server = TcpStream::connect(addr.clone()).await?;
-    tracing::info!("connected to {}", addr);
     let mut upgraded = TokioIo::new(upgraded);
-    tracing::info!("upgraded connection");
-    // Proxying data
     let (from_client, from_server) =
         tokio::io::copy_bidirectional(&mut upgraded, &mut server).await?;
-    // Print message when done
-    tracing::info!(
-        "client wrote {} bytes and received {} bytes",
-        from_client,
-        from_server
-    );
+    tracing::info!(from_client, from_server);
     Ok(())
 }

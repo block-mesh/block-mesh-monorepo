@@ -19,4 +19,4 @@ bytes = { workspace = true }
 once_cell = { workspace = true }
 futures-util = { workspace = true }
 anyhow = { workspace = true }
-block-mesh-common = { path = "../block-mesh-common" }
+block-mesh-common = { path = "../block-mesh-common", features = ["http"] }

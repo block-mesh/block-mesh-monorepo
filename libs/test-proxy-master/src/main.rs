@@ -9,7 +9,6 @@ use tokio::net::TcpListener;
 mod clients_endpoint;
 mod proxy_endpoint;
 mod proxy_pool;
-mod utils;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {

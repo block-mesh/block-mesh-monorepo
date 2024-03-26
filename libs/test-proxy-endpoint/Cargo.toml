@@ -17,4 +17,4 @@ hyper-util = { workspace = true }
 rustc-hash = { workspace = true }
 http-body-util = { workspace = true }
 bytes = { workspace = true }
-block-mesh-common = { path = "../block-mesh-common" }
+block-mesh-common = { path = "../block-mesh-common", features = ["http"] }
