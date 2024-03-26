@@ -7,3 +7,10 @@ authors.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+tracing-subscriber = { workspace = true, features = ["env-filter", "time", "json"] }
+http-body-util = { workspace = true, optional = true }
+bytes = { workspace = true, optional = true }
+hyper = { workspace = true, features = ["full"], optional = true }
+
+[features]
+http = ["dep:http-body-util", "dep:bytes", "dep:hyper"]
