@@ -1,5 +1,5 @@
 use anchor_lang::prelude::Pubkey;
-use block_mesh_solana_client::manager::SolanaManagerAuth;
+use block_mesh_solana_client::manager::FullRouteHeader;
 use rustc_hash::FxHashMap;
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
@@ -13,16 +13,16 @@ pub struct TokenDetails {
     pub bandwidth_allowance: u64,
     pub bandwidth_used: u64,
     pub nonce: String,
-    pub signed_message: String,
+    pub signature: String,
     pub pubkey: Pubkey,
     pub api_token: Pubkey,
 }
 
 impl TokenDetails {
-    pub fn is_valid(&self, solana_manager_auth: &SolanaManagerAuth) -> bool {
-        self.nonce == solana_manager_auth.nonce
-            && self.signed_message == solana_manager_auth.signed_message
-            && self.pubkey == solana_manager_auth.pubkey
+    pub fn is_valid(&self, solana_manager_auth: &FullRouteHeader) -> bool {
+        self.nonce == solana_manager_auth.client_signature.nonce
+            && self.signature == solana_manager_auth.client_signature.signature
+            && self.pubkey == solana_manager_auth.client_signature.pubkey
             && self.api_token == solana_manager_auth.api_token
     }
 }

@@ -9,6 +9,8 @@ pub struct ProviderNodeCliArgs {
     pub keypair_path: String,
     #[arg(long, default_value = BLOCK_MESH_PROGRAM_ID, value_parser = Pubkey::from_str)]
     pub program_id: Pubkey,
-    #[arg(long, default_value = "3000")]
-    pub port: u16,
+    #[arg(long, default_value = "5000")]
+    pub proxy_port: u16,
+    #[arg(long, default_value = "4000")]
+    pub client_port: u16,
 }

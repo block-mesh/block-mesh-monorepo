@@ -5,7 +5,8 @@ use anchor_lang::prelude::*;
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct UpdateProviderNodeArgs {
     pub ipv4: [u8; 4],
-    pub port: u16,
+    pub proxy_port: u16,
+    pub client_port: u16,
     pub report_bandwidth_limit: u64,
 }
 
@@ -32,7 +33,8 @@ pub fn update_provider_node(
 ) -> Result<()> {
     let provider_node = &mut ctx.accounts.provider_node;
     provider_node.ipv4 = args.ipv4;
-    provider_node.port = args.port;
+    provider_node.proxy_port = args.proxy_port;
+    provider_node.client_port = args.client_port;
     provider_node.report_bandwidth_limit = args.report_bandwidth_limit;
     provider_node.active = true;
     Ok(())

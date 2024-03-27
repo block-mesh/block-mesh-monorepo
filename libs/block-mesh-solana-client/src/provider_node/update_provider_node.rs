@@ -9,7 +9,8 @@ use solana_sdk::{system_program, sysvar};
 pub fn update_provider_node_instruction(
     program_id: Pubkey,
     ipv4: [u8; 4],
-    port: u16,
+    proxy_port: u16,
+    client_port: u16,
     report_bandwidth_limit: u64,
     signer: Pubkey,
     provider_node: Pubkey,
@@ -24,7 +25,8 @@ pub fn update_provider_node_instruction(
     let args = blockmesh_program_instruction::UpdateProviderNode {
         args: UpdateProviderNodeArgs {
             ipv4,
-            port,
+            proxy_port,
+            client_port,
             report_bandwidth_limit,
         },
     };

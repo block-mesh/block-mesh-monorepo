@@ -108,7 +108,7 @@ export class ApiToken implements ApiTokenArgs {
    */
   static gpaBuilder(
     programId: web3.PublicKey = new web3.PublicKey(
-      'GzscdwWG2FwpA6iqB6yYKEESvvw773c1iAzmJatXLcve'
+      'FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ'
     )
   ) {
     return beetSolana.GpaBuilder.fromStruct(programId, apiTokenBeet)

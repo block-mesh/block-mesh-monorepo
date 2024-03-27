@@ -8,7 +8,8 @@
 import * as beet from '@metaplex-foundation/beet'
 export type CreateProviderNodeArgs = {
   ipv4: number[] /* size: 4 */
-  port: number
+  proxyPort: number
+  clientPort: number
   reportBandwidthLimit: beet.bignum
 }
 
@@ -20,7 +21,8 @@ export const createProviderNodeArgsBeet =
   new beet.BeetArgsStruct<CreateProviderNodeArgs>(
     [
       ['ipv4', beet.uniformFixedSizeArray(beet.u8, 4)],
-      ['port', beet.u16],
+      ['proxyPort', beet.u16],
+      ['clientPort', beet.u16],
       ['reportBandwidthLimit', beet.u64],
     ],
     'CreateProviderNodeArgs'

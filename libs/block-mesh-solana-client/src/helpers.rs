@@ -31,6 +31,10 @@ pub fn get_client_address(program_id: &Pubkey, client: &Pubkey) -> (Pubkey, u8) 
     Pubkey::find_program_address(&[b"CLIENT", &client.to_bytes()], program_id)
 }
 
+pub fn get_endpoint_address(program_id: &Pubkey, client: &Pubkey) -> (Pubkey, u8) {
+    Pubkey::find_program_address(&[b"ENDPOINT", &client.to_bytes()], program_id)
+}
+
 pub const PROGRAM_ID: &str = "k8hfCF1y8dP1hRXAHwmWke3bMYS5fMQ3kU4Tm8cdbGg";
 const DEV_NET_HTTP: &str = "https://api.devnet.solana.com";
 

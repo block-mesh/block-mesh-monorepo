@@ -14,4 +14,10 @@ pub enum ErrorCode {
     ClientNotProviderNode,
     #[msg("Mismatch On Reported Usage")]
     MismatchOnReportedUsage,
+    #[msg("Signer mismatch")]
+    SignerMismatch,
+    #[msg("Invalid data")]
+    InvalidData,
+    #[msg("Address mismatch")]
+    AddressMismatch,
 }

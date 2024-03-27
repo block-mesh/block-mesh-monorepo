@@ -37,7 +37,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
         tokio::spawn(conn.with_upgrades());
 
-        // TODO: register proxy-endpoint in proxy-master
+        // TODO: register proxy-endpoint_node in proxy-master
 
         // let req = Request::builder()
         //     .method(Method::POST)

@@ -1,0 +1,32 @@
+[package]
+name = "endpoint-node"
+version = "0.1.0"
+edition = "2021"
+authors.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { workspace = true, features = ["derive"] }
+anyhow = { workspace = true }
+anchor-lang = { workspace = true }
+blockmesh-program = { path = "../../programs/blockmesh-program" }
+block-mesh-solana-client = { path = "../block-mesh-solana-client" }
+solana-client = { workspace = true }
+solana-sdk = { workspace = true }
+axum = { workspace = true }
+hyper = { workspace = true, features = ["full"] }
+tower = { workspace = true, features = ["util"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+tokio = { workspace = true, features = ["full"] }
+hyper-util = { workspace = true, features = ["full"] }
+once_cell = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+uuid = { workspace = true, features = ["v4"] }
+rustc-hash = { workspace = true }
+block-mesh-common = { path = "../block-mesh-common", features = ["http"] }
+serde_json = { workspace = true }
+http-body-util = { workspace = true }
+futures-util = { workspace = true }
+bytes = { workspace = true }
