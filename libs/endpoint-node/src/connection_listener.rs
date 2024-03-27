@@ -1,5 +1,5 @@
 use block_mesh_common::http::{empty, full, host_addr};
-use block_mesh_solana_client::manager::SolanaManagerAuth;
+use block_mesh_solana_client::manager::EndpointNodeToProviderNodeHeader;
 use bytes::Bytes;
 use http::header;
 use http_body_util::combinators::BoxBody;
@@ -13,10 +13,10 @@ use tokio::net::TcpStream;
 
 pub async fn listen_for_proxies_connecting(
     addr: SocketAddr,
-    solana_manager_header: SolanaManagerAuth,
+    auth_header: EndpointNodeToProviderNodeHeader,
 ) -> anyhow::Result<()> {
     while let Ok(stream) = TcpStream::connect(addr).await {
-        let solana_manager_header = solana_manager_header.clone();
+        let auth_header = auth_header.clone();
         tracing::info!("Connected to {}", addr);
         // Initial registration
         let (mut send_request, conn) = client::conn::http1::Builder::new()
@@ -43,10 +43,10 @@ pub async fn listen_for_proxies_connecting(
             .uri(addr.to_string())
             .header(
                 header::PROXY_AUTHORIZATION,
-                serde_json::to_string(&solana_manager_header)?,
+                serde_json::to_string(&auth_header)?,
             )
-            .header(header::UPGRADE, "foobar")
-            .header("custom-header", "I want connect xxx")
+            // .header(header::UPGRADE, "foobar")
+            // .header("custom-header", "I want connect xxx")
             .body(empty())
             .unwrap();
 

@@ -11,13 +11,14 @@ use crate::provider_node::update_provider_node::update_provider_node_instruction
 use anchor_lang::AccountDeserialize;
 use anyhow::anyhow;
 use secret::Secret;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
 use solana_client::nonblocking::rpc_client::RpcClient;
 use solana_sdk::account::Account;
 use solana_sdk::instruction::Instruction;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Keypair;
 use std::net::Ipv4Addr;
+use std::str::FromStr;
 use std::sync::Arc;
 use tokio::fs::try_exists;
 
@@ -32,22 +33,124 @@ pub struct SolanaManager {
     rpc_client: Arc<RpcClient>,
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct SolanaManagerAuth {
-    pub nonce: String,
-    pub signed_message: String,
-    pub pubkey: Pubkey,
-    pub api_token: Pubkey,
+fn serialize_pubkey_as_string<S>(pubkey: &Pubkey, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    // Convert the integer to a string and serialize it as a string
+    serializer.serialize_str(&pubkey.to_string())
 }
 
-impl SolanaManagerAuth {
-    pub fn new(nonce: String, signed_message: String, pubkey: Pubkey, api_token: Pubkey) -> Self {
-        Self {
-            nonce,
-            signed_message,
+fn deserialize_pubkey_from_string<'de, D>(deserializer: D) -> Result<Pubkey, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s: String = Deserialize::deserialize(deserializer)?;
+    Pubkey::from_str(&s).map_err(serde::de::Error::custom)
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct NodeSignature {
+    pub details: String,
+    pub nonce: String,
+    pub signature: String,
+    #[serde(
+        serialize_with = "serialize_pubkey_as_string",
+        deserialize_with = "deserialize_pubkey_from_string"
+    )]
+    pub pubkey: Pubkey,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct EndpointNodeToProviderNodeHeader {
+    pub nonce: String,
+    pub signature: String,
+    #[serde(
+        serialize_with = "serialize_pubkey_as_string",
+        deserialize_with = "deserialize_pubkey_from_string"
+    )]
+    pub pubkey: Pubkey,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub struct FullRouteHeader {
+    #[serde(
+        serialize_with = "serialize_pubkey_as_string",
+        deserialize_with = "deserialize_pubkey_from_string"
+    )]
+    pub api_token: Pubkey,
+    pub client_signature: NodeSignature,
+    pub provider_node_forward_signature: Option<NodeSignature>,
+    pub endpoint_node_signature: Option<NodeSignature>,
+    pub provider_node_return_signature: Option<NodeSignature>,
+}
+
+impl FullRouteHeader {
+    pub fn new(
+        nonce: String,
+        signed_message: String,
+        pubkey: Pubkey,
+        api_token: Pubkey,
+        details: String,
+    ) -> Self {
+        let client_signature: NodeSignature = NodeSignature {
+            details: details.clone(),
+            nonce: nonce.clone(),
+            signature: signed_message.clone(),
             pubkey,
+        };
+        Self {
+            client_signature,
             api_token,
+            provider_node_forward_signature: None,
+            endpoint_node_signature: None,
+            provider_node_return_signature: None,
         }
+    }
+
+    pub fn add_provider_node_forward_signature(
+        &mut self,
+        nonce: String,
+        signed_message: String,
+        pubkey: Pubkey,
+        details: String,
+    ) {
+        self.provider_node_forward_signature = Some(NodeSignature {
+            details,
+            nonce,
+            signature: signed_message,
+            pubkey,
+        });
+    }
+
+    pub fn add_endpoint_node_signature(
+        &mut self,
+        nonce: String,
+        signed_message: String,
+        pubkey: Pubkey,
+        details: String,
+    ) {
+        self.endpoint_node_signature = Some(NodeSignature {
+            details,
+            nonce,
+            signature: signed_message,
+            pubkey,
+        });
+    }
+
+    pub fn provider_node_return_signature(
+        &mut self,
+        nonce: String,
+        signed_message: String,
+        pubkey: Pubkey,
+        details: String,
+    ) {
+        self.provider_node_return_signature = Some(NodeSignature {
+            details,
+            nonce,
+            signature: signed_message,
+            pubkey,
+        });
     }
 }
 

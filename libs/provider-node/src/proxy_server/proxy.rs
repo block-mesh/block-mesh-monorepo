@@ -4,7 +4,7 @@ use axum::body::Body;
 use axum::extract::Request;
 use axum::http::StatusCode;
 use axum::response::{IntoResponse, Response};
-use block_mesh_solana_client::manager::SolanaManagerAuth;
+use block_mesh_solana_client::manager::FullRouteHeader;
 use std::sync::Arc;
 
 #[tracing::instrument(name = "proxy", skip(app_state), ret, err)]
@@ -14,7 +14,7 @@ pub async fn proxy(app_state: Arc<AppState>, req: Request) -> Result<Response, h
 
     let proxy_authorization = req.headers().get("Proxy-Authorization");
 
-    let solana_manager_auth: SolanaManagerAuth = match proxy_authorization {
+    let solana_manager_auth: FullRouteHeader = match proxy_authorization {
         None => {
             let msg = "proxy authorization header not found";
             tracing::error!(msg);

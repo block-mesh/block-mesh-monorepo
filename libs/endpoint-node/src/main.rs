@@ -1,9 +1,8 @@
 use block_mesh_common::tracing::setup_tracing;
 use block_mesh_solana_client::helpers::sign_message;
-use block_mesh_solana_client::manager::{SolanaManager, SolanaManagerAuth};
+use block_mesh_solana_client::manager::{EndpointNodeToProviderNodeHeader, SolanaManager};
 use clap::Parser;
 use futures_util::future::join_all;
-use solana_sdk::pubkey::Pubkey;
 use std::net::SocketAddr;
 use std::str::FromStr;
 use uuid::Uuid;
@@ -28,15 +27,13 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .unwrap();
 
     let nonce = Uuid::new_v4().to_string();
-    let signed_message = sign_message(&nonce, &solana_manager.get_keypair()).unwrap();
-    let api_token = Pubkey::from_str("Ex4XxjYzNkzXWYj2dz95WzNXpbPRyaebryYi3Aqrrv82").unwrap();
+    let signature = sign_message(&nonce, &solana_manager.get_keypair()).unwrap();
 
-    let solana_manager_header = SolanaManagerAuth::new(
+    let auth_header: EndpointNodeToProviderNodeHeader = EndpointNodeToProviderNodeHeader {
         nonce,
-        signed_message,
-        solana_manager.get_pubkey(),
-        api_token,
-    );
+        signature,
+        pubkey: solana_manager.get_pubkey(),
+    };
 
     // let provider_node_address =
     //     get_provider_node_address(&cli_args.program_id, &provider_node_owner);
@@ -48,7 +45,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
 
     let listener_task = tokio::spawn(connection_listener::listen_for_proxies_connecting(
         addr,
-        solana_manager_header,
+        auth_header,
     ));
 
     let _ = join_all(vec![listener_task]).await;

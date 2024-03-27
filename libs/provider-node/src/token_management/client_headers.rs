@@ -1,15 +1,21 @@
 use crate::app_state::AppState;
 use anyhow::anyhow;
-use block_mesh_solana_client::manager::SolanaManagerAuth;
+use block_mesh_solana_client::helpers::sign_message;
+use block_mesh_solana_client::manager::FullRouteHeader;
 use std::sync::Arc;
+use uuid::Uuid;
 
 pub async fn process_client_headers(
     app_state: Arc<AppState>,
     req: &mut axum::http::Request<hyper::body::Incoming>,
-) -> anyhow::Result<SolanaManagerAuth> {
+) -> anyhow::Result<FullRouteHeader> {
     let proxy_authorization = req.headers().get("Proxy-Authorization");
 
-    let solana_manager_auth: SolanaManagerAuth = match proxy_authorization {
+    let nonce = Uuid::new_v4().to_string();
+    let _signed_message =
+        sign_message(&nonce, &app_state.solana_manager.read().await.get_keypair()).unwrap();
+
+    let solana_manager_auth: FullRouteHeader = match proxy_authorization {
         None => {
             let msg = "proxy authorization header not found";
             tracing::error!(msg);

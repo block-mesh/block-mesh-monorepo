@@ -1,10 +1,10 @@
-use block_mesh_solana_client::manager::SolanaManagerAuth;
+use block_mesh_solana_client::manager::FullRouteHeader;
 use solana_client::client_error::reqwest;
 
 #[tracing::instrument(name = "register_token", skip(solana_manager_header))]
 pub async fn register_token(
     proxy_url: &str,
-    solana_manager_header: &SolanaManagerAuth,
+    solana_manager_header: &FullRouteHeader,
 ) -> anyhow::Result<()> {
     let response = reqwest::Client::new()
         .post(proxy_url)

@@ -4,7 +4,7 @@ mod management;
 use crate::cli_args::ClientNodeCliArgs;
 use block_mesh_common::tracing::setup_tracing;
 use block_mesh_solana_client::helpers::{get_provider_node_address, sign_message};
-use block_mesh_solana_client::manager::{SolanaManager, SolanaManagerAuth};
+use block_mesh_solana_client::manager::{FullRouteHeader, SolanaManager};
 use blockmesh_program::state::provider_node::ProviderNode;
 use clap::Parser;
 use solana_client::client_error::reqwest;
@@ -15,7 +15,7 @@ use uuid::Uuid;
 
 pub async fn get_proxy(
     proxy_url: &str,
-    solana_manager_header: &SolanaManagerAuth,
+    solana_manager_header: &FullRouteHeader,
 ) -> anyhow::Result<Proxy> {
     let proxy = Proxy::all(proxy_url)?;
     let json = serde_json::to_string(solana_manager_header)?;
@@ -68,11 +68,12 @@ async fn main() {
     let nonce = Uuid::new_v4().to_string();
     let signed_message = sign_message(&nonce, &solana_manager.get_keypair()).unwrap();
 
-    let solana_manager_header = SolanaManagerAuth::new(
+    let solana_manager_header = FullRouteHeader::new(
         nonce,
         signed_message,
         solana_manager.get_pubkey(),
         solana_manager.get_api_token(),
+        "client-node".to_string(),
     );
     // register_token(
     //     &format!("http://{}/register", proxy_url),
@@ -94,7 +95,7 @@ async fn main() {
         .await
         .unwrap();
 
-    let _content_length = response.content_length().unwrap();
+    // let _content_length = response.content_length().unwrap();
 
     match client_node_cli_args.response_type {
         cli_args::ResponseType::Json => {
