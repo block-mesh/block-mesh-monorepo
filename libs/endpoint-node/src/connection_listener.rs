@@ -1,5 +1,6 @@
+use crate::endpoint_headers::process_endpoint_headers;
 use block_mesh_common::http::{empty, full, host_addr};
-use block_mesh_solana_client::manager::EndpointNodeToProviderNodeHeader;
+use block_mesh_solana_client::manager::{EndpointNodeToProviderNodeHeader, SolanaManager};
 use bytes::Bytes;
 use http::header;
 use http_body_util::combinators::BoxBody;
@@ -9,14 +10,17 @@ use hyper::upgrade::Upgraded;
 use hyper::{client, http, Method, Request, Response};
 use hyper_util::rt::TokioIo;
 use std::net::SocketAddr;
+use std::sync::Arc;
 use tokio::net::TcpStream;
 
 pub async fn listen_for_proxies_connecting(
     addr: SocketAddr,
     auth_header: EndpointNodeToProviderNodeHeader,
+    solana_manager: Arc<SolanaManager>,
 ) -> anyhow::Result<()> {
     while let Ok(stream) = TcpStream::connect(addr).await {
         let auth_header = auth_header.clone();
+        let solana_manager = solana_manager.clone();
         tracing::info!("Connected to {}", addr);
         // Initial registration
         let (mut send_request, conn) = client::conn::http1::Builder::new()
@@ -58,7 +62,10 @@ pub async fn listen_for_proxies_connecting(
         if let Err(err) = http1::Builder::new()
             .preserve_header_case(true)
             .title_case_headers(true)
-            .serve_connection(stream, service_fn(proxy))
+            .serve_connection(
+                stream,
+                service_fn(move |req| proxy(req, solana_manager.clone())),
+            )
             .with_upgrades()
             .await
         {
@@ -68,11 +75,14 @@ pub async fn listen_for_proxies_connecting(
     Ok(())
 }
 
-#[tracing::instrument(name = "proxy", ret, err)]
+#[tracing::instrument(name = "proxy", skip(solana_manager), ret, err)]
 async fn proxy(
-    req: Request<hyper::body::Incoming>,
-) -> Result<Response<BoxBody<Bytes, hyper::Error>>, hyper::Error> {
-    tracing::info!("req: {:?}", req);
+    mut req: Request<hyper::body::Incoming>,
+    solana_manager: Arc<SolanaManager>,
+) -> anyhow::Result<Response<BoxBody<Bytes, hyper::Error>>> {
+    tracing::info!("1 req: {:?}", req);
+    process_endpoint_headers(solana_manager, &mut req).await?;
+    tracing::info!("2 req: {:?}", req);
 
     if Method::CONNECT == req.method() {
         // Received an HTTP request like:

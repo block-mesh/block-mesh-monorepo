@@ -94,9 +94,7 @@ async fn main() {
         .send()
         .await
         .unwrap();
-
-    // let _content_length = response.content_length().unwrap();
-
+    tracing::info!("RESPONSE HEADERS => {:?}", response.headers());
     match client_node_cli_args.response_type {
         cli_args::ResponseType::Json => {
             let response: serde_json::Value = response.json().await.unwrap();

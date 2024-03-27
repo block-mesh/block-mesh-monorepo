@@ -80,9 +80,8 @@ pub struct FullRouteHeader {
     )]
     pub api_token: Pubkey,
     pub client_signature: NodeSignature,
-    pub provider_node_forward_signature: Option<NodeSignature>,
+    pub provider_node_signature: Option<NodeSignature>,
     pub endpoint_node_signature: Option<NodeSignature>,
-    pub provider_node_return_signature: Option<NodeSignature>,
 }
 
 impl FullRouteHeader {
@@ -102,25 +101,26 @@ impl FullRouteHeader {
         Self {
             client_signature,
             api_token,
-            provider_node_forward_signature: None,
+            provider_node_signature: None,
             endpoint_node_signature: None,
-            provider_node_return_signature: None,
         }
     }
 
-    pub fn add_provider_node_forward_signature(
+    pub fn add_provider_node_signature(
         &mut self,
         nonce: String,
         signed_message: String,
         pubkey: Pubkey,
         details: String,
     ) {
-        self.provider_node_forward_signature = Some(NodeSignature {
-            details,
-            nonce,
-            signature: signed_message,
-            pubkey,
-        });
+        if self.provider_node_signature.is_none() {
+            self.provider_node_signature = Some(NodeSignature {
+                details,
+                nonce,
+                signature: signed_message,
+                pubkey,
+            });
+        }
     }
 
     pub fn add_endpoint_node_signature(
@@ -130,27 +130,14 @@ impl FullRouteHeader {
         pubkey: Pubkey,
         details: String,
     ) {
-        self.endpoint_node_signature = Some(NodeSignature {
-            details,
-            nonce,
-            signature: signed_message,
-            pubkey,
-        });
-    }
-
-    pub fn provider_node_return_signature(
-        &mut self,
-        nonce: String,
-        signed_message: String,
-        pubkey: Pubkey,
-        details: String,
-    ) {
-        self.provider_node_return_signature = Some(NodeSignature {
-            details,
-            nonce,
-            signature: signed_message,
-            pubkey,
-        });
+        if self.endpoint_node_signature.is_none() {
+            self.endpoint_node_signature = Some(NodeSignature {
+                details,
+                nonce,
+                signature: signed_message,
+                pubkey,
+            });
+        }
     }
 }
 

@@ -5,10 +5,12 @@ use clap::Parser;
 use futures_util::future::join_all;
 use std::net::SocketAddr;
 use std::str::FromStr;
+use std::sync::Arc;
 use uuid::Uuid;
 
 mod cli_args;
 mod connection_listener;
+mod endpoint_headers;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
@@ -26,6 +28,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         .await
         .unwrap();
 
+    let solana_manager = Arc::new(solana_manager);
     let nonce = Uuid::new_v4().to_string();
     let signature = sign_message(&nonce, &solana_manager.get_keypair()).unwrap();
 
@@ -46,6 +49,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     let listener_task = tokio::spawn(connection_listener::listen_for_proxies_connecting(
         addr,
         auth_header,
+        solana_manager,
     ));
 
     let _ = join_all(vec![listener_task]).await;
