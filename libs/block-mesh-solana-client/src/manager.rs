@@ -9,7 +9,6 @@ use crate::provider_node::create_provider_node::create_provider_node_instruction
 use crate::provider_node::update_provider_node::update_provider_node_instruction;
 use anchor_lang::AccountDeserialize;
 use anyhow::anyhow;
-use blockmesh_program::state::provider_node::ProviderNode;
 use secret::Secret;
 use serde::{Deserialize, Serialize};
 use solana_client::nonblocking::rpc_client::RpcClient;
@@ -206,7 +205,8 @@ impl SolanaManager {
     pub async fn create_or_update_provider_node_if_needed(
         &mut self,
         ip_addr: Ipv4Addr,
-        port: u16,
+        proxy_port: u16,
+        client_port: u16,
     ) -> anyhow::Result<()> {
         let provider_node_address = get_provider_node_address(&self.program_id, &self.get_pubkey());
         self.provider_node = Some(provider_node_address.0);
@@ -219,37 +219,28 @@ impl SolanaManager {
                 )
             })?;
         let instruction: Option<Instruction> = match account {
-            Some(account) => {
-                let provider_node_account: ProviderNode = SolanaManager::deserialize(account)?;
-                if provider_node_account.ipv4 == ip_addr.octets()
-                    && provider_node_account.port == port
-                {
-                    tracing::info!(
-                        "create_or_update_provider_node_if_needed::Provider node account already exists, data matches current, nothing to do: {:?}",
-                        &provider_node_address.0.to_string()
-                    );
-                    None
-                } else {
-                    tracing::info!(
-                        "create_or_update_provider_node_if_needed::Provider need to be updated: {:?}",
-                        &provider_node_address.0.to_string()
-                    );
-                    let instruction = update_provider_node_instruction(
-                        self.program_id,
-                        ip_addr.octets(),
-                        port,
-                        100,
-                        self.get_pubkey(),
-                        provider_node_address.0,
-                    );
-                    Some(instruction)
-                }
+            Some(_account) => {
+                tracing::info!(
+                    "create_or_update_provider_node_if_needed::Provider need to be updated: {:?}",
+                    &provider_node_address.0.to_string()
+                );
+                let instruction = update_provider_node_instruction(
+                    self.program_id,
+                    ip_addr.octets(),
+                    proxy_port,
+                    client_port,
+                    100,
+                    self.get_pubkey(),
+                    provider_node_address.0,
+                );
+                Some(instruction)
             }
             None => {
                 let instruction = create_provider_node_instruction(
                     self.program_id,
                     ip_addr.octets(),
-                    port,
+                    proxy_port,
+                    client_port,
                     100,
                     self.get_pubkey(),
                     provider_node_address.0,

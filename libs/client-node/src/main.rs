@@ -69,7 +69,7 @@ async fn main() {
                 provider_node_account.ipv4[1],
                 provider_node_account.ipv4[2],
                 provider_node_account.ipv4[3],
-                provider_node_account.port
+                provider_node_account.client_port
             )
         }
     };

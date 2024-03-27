@@ -51,4 +51,8 @@ pub mod blockmesh_program {
     ) -> Result<()> {
         update_provider_node::update_provider_node(ctx, args)
     }
+
+    pub fn create_endpoint_node(ctx: Context<CreateEndpointContext>) -> Result<()> {
+        create_endpoint_node::create_endpoint_node(ctx)
+    }
 }

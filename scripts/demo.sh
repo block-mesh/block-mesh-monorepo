@@ -19,8 +19,7 @@ function cleanup()
 #  "127.0.0.1:3000" \
 #  "https://example.com"
 
-cargo run -p provider-node -- \
-  --keypair-path example-keys/provider-node.json \
+cargo run -p provider-node -- --keypair-path example-keys/provider-node.json \
   &> demo_logs/provider-node.log &
 export PROVIDER_NODE_PID=$!
 

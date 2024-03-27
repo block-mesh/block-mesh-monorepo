@@ -25,6 +25,8 @@ once_cell = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 uuid = { workspace = true, features = ["v4"] }
 rustc-hash = { workspace = true }
-block-mesh-common = { path = "../block-mesh-common" }
+block-mesh-common = { path = "../block-mesh-common", features = ["http"] }
 serde_json = { workspace = true }
 http-body-util = { workspace = true }
+futures-util = { workspace = true }
+bytes = { workspace = true }
