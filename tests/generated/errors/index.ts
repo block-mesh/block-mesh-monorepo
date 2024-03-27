@@ -163,6 +163,69 @@ createErrorFromNameLookup.set(
 )
 
 /**
+ * SignerMismatch: 'Signer mismatch'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class SignerMismatchError extends Error {
+  readonly code: number = 0x1776
+  readonly name: string = 'SignerMismatch'
+  constructor() {
+    super('Signer mismatch')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, SignerMismatchError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1776, () => new SignerMismatchError())
+createErrorFromNameLookup.set('SignerMismatch', () => new SignerMismatchError())
+
+/**
+ * InvalidData: 'Invalid data'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class InvalidDataError extends Error {
+  readonly code: number = 0x1777
+  readonly name: string = 'InvalidData'
+  constructor() {
+    super('Invalid data')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, InvalidDataError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1777, () => new InvalidDataError())
+createErrorFromNameLookup.set('InvalidData', () => new InvalidDataError())
+
+/**
+ * AddressMismatch: 'Address mismatch'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class AddressMismatchError extends Error {
+  readonly code: number = 0x1778
+  readonly name: string = 'AddressMismatch'
+  constructor() {
+    super('Address mismatch')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, AddressMismatchError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1778, () => new AddressMismatchError())
+createErrorFromNameLookup.set(
+  'AddressMismatch',
+  () => new AddressMismatchError()
+)
+
+/**
  * Attempts to resolve a custom program error from the provided error code.
  * @category Errors
  * @category generated

@@ -1,5 +1,5 @@
 const PROGRAM_NAME = "blockmesh_program";
-const PROGRAM_ID = "GzscdwWG2FwpA6iqB6yYKEESvvw773c1iAzmJatXLcve";
+const PROGRAM_ID = "FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ";
 
 const path = require("path");
 const programDir = path.join(__dirname, "programs", "blockmesh-program");

@@ -9,5 +9,6 @@ source "${ROOT}/scripts/setup.sh"
 ensure anchor build
 ensure anchor deploy --provider.cluster "${RPC}"
 # doesnt use ensure since this is a one time op
-anchor idl init --provider.cluster "${RPC}" "${PROGRAM_ID}" --filepath target/idl/blockmesh_program.json
+#anchor idl init --provider.cluster "${RPC}" "${PROGRAM_ID}" --filepath target/idl/blockmesh_program.json
 ensure anchor idl upgrade --provider.cluster "${RPC}" "${PROGRAM_ID}" --filepath target/idl/blockmesh_program.json
+echo "Done"

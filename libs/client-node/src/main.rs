@@ -1,8 +1,8 @@
 mod cli_args;
-mod managment;
+mod management;
 
 use crate::cli_args::ClientNodeCliArgs;
-use crate::managment::register::register_token;
+use block_mesh_common::tracing::setup_tracing;
 use block_mesh_solana_client::helpers::{get_provider_node_address, sign_message};
 use block_mesh_solana_client::manager::{SolanaManager, SolanaManagerAuth};
 use blockmesh_program::state::provider_node::ProviderNode;
@@ -11,8 +11,6 @@ use solana_client::client_error::reqwest;
 use solana_client::client_error::reqwest::Proxy;
 use std::net::IpAddr;
 use std::str::FromStr;
-use tracing_subscriber::layer::SubscriberExt;
-use tracing_subscriber::util::SubscriberInitExt;
 use uuid::Uuid;
 
 pub async fn get_proxy(
@@ -27,14 +25,7 @@ pub async fn get_proxy(
 
 #[tokio::main]
 async fn main() {
-    tracing_subscriber::registry()
-        .with(
-            tracing_subscriber::EnvFilter::try_from_default_env()
-                .unwrap_or_else(|_| "trace".into()),
-        )
-        .with(tracing_subscriber::fmt::layer().with_ansi(false))
-        .init();
-
+    setup_tracing();
     let client_node_cli_args = ClientNodeCliArgs::parse();
     let provider_node_owner = client_node_cli_args.provider_node_owner;
     let mut solana_manager = SolanaManager::new(
@@ -83,12 +74,12 @@ async fn main() {
         solana_manager.get_pubkey(),
         solana_manager.get_api_token(),
     );
-    register_token(
-        &format!("http://{}/register", proxy_url),
-        &solana_manager_header,
-    )
-    .await
-    .unwrap();
+    // register_token(
+    //     &format!("http://{}/register", proxy_url),
+    //     &solana_manager_header,
+    // )
+    // .await
+    // .unwrap();
     let proxy = get_proxy(&proxy_url, &solana_manager_header).await.unwrap();
     let local_address = IpAddr::from_str("0.0.0.0").unwrap();
     let client = reqwest::Client::builder()

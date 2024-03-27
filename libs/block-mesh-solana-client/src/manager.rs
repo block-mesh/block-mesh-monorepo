@@ -1,9 +1,10 @@
 use crate::api_token::create_api_token_instruction::create_api_token_instruction;
 use crate::client::create_client::create_client_instruction;
 use crate::client::update_latest_client_report::update_latest_client_report_instruction;
+use crate::endpoint::create_endpoint_node::create_endpoint_node;
 use crate::helpers::{
     build_txn_and_send_and_confirm, get_account, get_api_token_address, get_client,
-    get_client_address, get_provider_node_address, CloneableKeypair,
+    get_client_address, get_endpoint_address, get_provider_node_address, CloneableKeypair,
 };
 use crate::provider_node::create_provider_node::create_provider_node_instruction;
 use crate::provider_node::update_provider_node::update_provider_node_instruction;
@@ -25,6 +26,7 @@ pub struct SolanaManager {
     keypair: Arc<Secret<CloneableKeypair>>,
     program_id: Pubkey,
     provider_node: Option<Pubkey>,
+    endpoint_node: Option<Pubkey>,
     client: Option<Pubkey>,
     api_token: Option<Pubkey>,
     rpc_client: Arc<RpcClient>,
@@ -76,6 +78,7 @@ impl SolanaManager {
             rpc_client: Arc::new(get_client()),
             client: None,
             api_token: None,
+            endpoint_node: None,
         })
     }
 
@@ -150,6 +153,45 @@ impl SolanaManager {
                 .await?;
                 tracing::info!(
                     "create_api_token_if_needed::ApiToken account created: {}",
+                    signature
+                );
+                Ok(())
+            }
+        }
+    }
+
+    #[tracing::instrument(name = "create_endpoint_account_if_needed", skip(self), ret, err)]
+    pub async fn create_endpoint_account_if_needed(&mut self) -> anyhow::Result<()> {
+        let endpoint_address = get_endpoint_address(&self.program_id, &self.get_pubkey());
+        self.endpoint_node = Some(endpoint_address.0);
+        let account = get_account(&self.rpc_client, &endpoint_address.0)
+            .await
+            .map_err(|e| {
+                anyhow!(
+                    "create_endpoint_account_if_needed::Error getting client account: {}",
+                    e.to_string()
+                )
+            })?;
+        match account {
+            Some(_) => {
+                tracing::info!(
+                    "create_endpoint_account_if_needed::EndpointNode account already exists: {:?}",
+                    &endpoint_address.0.to_string()
+                );
+                Ok(())
+            }
+            None => {
+                let instruction =
+                    create_endpoint_node(self.program_id, self.get_pubkey(), endpoint_address.0);
+                let signature = build_txn_and_send_and_confirm(
+                    &self.rpc_client,
+                    vec![instruction],
+                    &self.get_pubkey(),
+                    &self.get_keypair(),
+                )
+                .await?;
+                tracing::info!(
+                    "create_endpoint_account_if_needed::EndpointNode account created: {}",
                     signature
                 );
                 Ok(())

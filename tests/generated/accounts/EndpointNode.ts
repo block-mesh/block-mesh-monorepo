@@ -10,68 +10,47 @@ import * as beet from '@metaplex-foundation/beet'
 import * as beetSolana from '@metaplex-foundation/beet-solana'
 
 /**
- * Arguments used to create {@link ProviderNode}
+ * Arguments used to create {@link EndpointNode}
  * @category Accounts
  * @category generated
  */
-export type ProviderNodeArgs = {
+export type EndpointNodeArgs = {
   bump: number
   owner: web3.PublicKey
-  ipv4: number[] /* size: 4 */
-  proxyPort: number
-  clientPort: number
-  active: boolean
-  reportBandwidthLimit: beet.bignum
 }
 
-export const providerNodeDiscriminator = [212, 96, 225, 26, 241, 140, 245, 52]
+export const endpointNodeDiscriminator = [175, 16, 7, 236, 18, 13, 73, 31]
 /**
- * Holds the data for the {@link ProviderNode} Account and provides de/serialization
+ * Holds the data for the {@link EndpointNode} Account and provides de/serialization
  * functionality for that data
  *
  * @category Accounts
  * @category generated
  */
-export class ProviderNode implements ProviderNodeArgs {
-  private constructor(
-    readonly bump: number,
-    readonly owner: web3.PublicKey,
-    readonly ipv4: number[] /* size: 4 */,
-    readonly proxyPort: number,
-    readonly clientPort: number,
-    readonly active: boolean,
-    readonly reportBandwidthLimit: beet.bignum
-  ) {}
+export class EndpointNode implements EndpointNodeArgs {
+  private constructor(readonly bump: number, readonly owner: web3.PublicKey) {}
 
   /**
-   * Creates a {@link ProviderNode} instance from the provided args.
+   * Creates a {@link EndpointNode} instance from the provided args.
    */
-  static fromArgs(args: ProviderNodeArgs) {
-    return new ProviderNode(
-      args.bump,
-      args.owner,
-      args.ipv4,
-      args.proxyPort,
-      args.clientPort,
-      args.active,
-      args.reportBandwidthLimit
-    )
+  static fromArgs(args: EndpointNodeArgs) {
+    return new EndpointNode(args.bump, args.owner)
   }
 
   /**
-   * Deserializes the {@link ProviderNode} from the data of the provided {@link web3.AccountInfo}.
+   * Deserializes the {@link EndpointNode} from the data of the provided {@link web3.AccountInfo}.
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
   static fromAccountInfo(
     accountInfo: web3.AccountInfo<Buffer>,
     offset = 0
-  ): [ProviderNode, number] {
-    return ProviderNode.deserialize(accountInfo.data, offset)
+  ): [EndpointNode, number] {
+    return EndpointNode.deserialize(accountInfo.data, offset)
   }
 
   /**
    * Retrieves the account info from the provided address and deserializes
-   * the {@link ProviderNode} from its data.
+   * the {@link EndpointNode} from its data.
    *
    * @throws Error if no account info is found at the address or if deserialization fails
    */
@@ -79,15 +58,15 @@ export class ProviderNode implements ProviderNodeArgs {
     connection: web3.Connection,
     address: web3.PublicKey,
     commitmentOrConfig?: web3.Commitment | web3.GetAccountInfoConfig
-  ): Promise<ProviderNode> {
+  ): Promise<EndpointNode> {
     const accountInfo = await connection.getAccountInfo(
       address,
       commitmentOrConfig
     )
     if (accountInfo == null) {
-      throw new Error(`Unable to find ProviderNode account at ${address}`)
+      throw new Error(`Unable to find EndpointNode account at ${address}`)
     }
-    return ProviderNode.fromAccountInfo(accountInfo, 0)[0]
+    return EndpointNode.fromAccountInfo(accountInfo, 0)[0]
   }
 
   /**
@@ -101,39 +80,39 @@ export class ProviderNode implements ProviderNodeArgs {
       'FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ'
     )
   ) {
-    return beetSolana.GpaBuilder.fromStruct(programId, providerNodeBeet)
+    return beetSolana.GpaBuilder.fromStruct(programId, endpointNodeBeet)
   }
 
   /**
-   * Deserializes the {@link ProviderNode} from the provided data Buffer.
+   * Deserializes the {@link EndpointNode} from the provided data Buffer.
    * @returns a tuple of the account data and the offset up to which the buffer was read to obtain it.
    */
-  static deserialize(buf: Buffer, offset = 0): [ProviderNode, number] {
-    return providerNodeBeet.deserialize(buf, offset)
+  static deserialize(buf: Buffer, offset = 0): [EndpointNode, number] {
+    return endpointNodeBeet.deserialize(buf, offset)
   }
 
   /**
-   * Serializes the {@link ProviderNode} into a Buffer.
+   * Serializes the {@link EndpointNode} into a Buffer.
    * @returns a tuple of the created Buffer and the offset up to which the buffer was written to store it.
    */
   serialize(): [Buffer, number] {
-    return providerNodeBeet.serialize({
-      accountDiscriminator: providerNodeDiscriminator,
+    return endpointNodeBeet.serialize({
+      accountDiscriminator: endpointNodeDiscriminator,
       ...this,
     })
   }
 
   /**
    * Returns the byteSize of a {@link Buffer} holding the serialized data of
-   * {@link ProviderNode}
+   * {@link EndpointNode}
    */
   static get byteSize() {
-    return providerNodeBeet.byteSize
+    return endpointNodeBeet.byteSize
   }
 
   /**
    * Fetches the minimum balance needed to exempt an account holding
-   * {@link ProviderNode} data from rent
+   * {@link EndpointNode} data from rent
    *
    * @param connection used to retrieve the rent exemption information
    */
@@ -142,42 +121,27 @@ export class ProviderNode implements ProviderNodeArgs {
     commitment?: web3.Commitment
   ): Promise<number> {
     return connection.getMinimumBalanceForRentExemption(
-      ProviderNode.byteSize,
+      EndpointNode.byteSize,
       commitment
     )
   }
 
   /**
    * Determines if the provided {@link Buffer} has the correct byte size to
-   * hold {@link ProviderNode} data.
+   * hold {@link EndpointNode} data.
    */
   static hasCorrectByteSize(buf: Buffer, offset = 0) {
-    return buf.byteLength - offset === ProviderNode.byteSize
+    return buf.byteLength - offset === EndpointNode.byteSize
   }
 
   /**
-   * Returns a readable version of {@link ProviderNode} properties
+   * Returns a readable version of {@link EndpointNode} properties
    * and can be used to convert to JSON and/or logging
    */
   pretty() {
     return {
       bump: this.bump,
       owner: this.owner.toBase58(),
-      ipv4: this.ipv4,
-      proxyPort: this.proxyPort,
-      clientPort: this.clientPort,
-      active: this.active,
-      reportBandwidthLimit: (() => {
-        const x = <{ toNumber: () => number }>this.reportBandwidthLimit
-        if (typeof x.toNumber === 'function') {
-          try {
-            return x.toNumber()
-          } catch (_) {
-            return x
-          }
-        }
-        return x
-      })(),
     }
   }
 }
@@ -186,9 +150,9 @@ export class ProviderNode implements ProviderNodeArgs {
  * @category Accounts
  * @category generated
  */
-export const providerNodeBeet = new beet.BeetStruct<
-  ProviderNode,
-  ProviderNodeArgs & {
+export const endpointNodeBeet = new beet.BeetStruct<
+  EndpointNode,
+  EndpointNodeArgs & {
     accountDiscriminator: number[] /* size: 8 */
   }
 >(
@@ -196,12 +160,7 @@ export const providerNodeBeet = new beet.BeetStruct<
     ['accountDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
     ['bump', beet.u8],
     ['owner', beetSolana.publicKey],
-    ['ipv4', beet.uniformFixedSizeArray(beet.u8, 4)],
-    ['proxyPort', beet.u16],
-    ['clientPort', beet.u16],
-    ['active', beet.bool],
-    ['reportBandwidthLimit', beet.u64],
   ],
-  ProviderNode.fromArgs,
-  'ProviderNode'
+  EndpointNode.fromArgs,
+  'EndpointNode'
 )

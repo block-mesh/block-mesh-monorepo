@@ -28,22 +28,22 @@ pub async fn process_proxy_headers(
     };
 
     let token_manager = app_state.token_manager.read().await;
-    let token_details = token_manager.get(&solana_manager_auth.api_token);
-    match token_details {
-        None => {
-            let msg = "token not found";
-            tracing::warn!(msg);
-            return Err(anyhow!(msg));
-        }
-        Some(token_details) => {
-            if !token_details.is_valid(&solana_manager_auth) {
-                let msg = "token is not valid";
-                tracing::warn!(msg);
-                return Err(anyhow!(msg));
-            } else {
-                token_details.api_token
-            }
-        }
-    };
+    let _token_details = token_manager.get(&solana_manager_auth.api_token);
+    // match token_details {
+    //     None => {
+    //         let msg = "token not found";
+    //         tracing::warn!(msg);
+    //         return Err(anyhow!(msg));
+    //     }
+    //     Some(token_details) => {
+    //         if !token_details.is_valid(&solana_manager_auth) {
+    //             let msg = "token is not valid";
+    //             tracing::warn!(msg);
+    //             return Err(anyhow!(msg));
+    //         } else {
+    //             token_details.api_token
+    //         }
+    //     }
+    // };
     Ok(solana_manager_auth)
 }

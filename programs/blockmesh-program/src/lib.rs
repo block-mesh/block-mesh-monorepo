@@ -13,6 +13,12 @@ declare_id!("FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ");
 pub mod blockmesh_program {
     use super::*;
 
+    pub fn close_provider_node(
+        ctx: Context<CloseProviderNodeContext>,
+        args: CloseProviderNodeArgs,
+    ) -> Result<()> {
+        close_provider_node::close_provider_node(ctx, args)
+    }
     pub fn create_client(ctx: Context<CreateClientContext>) -> Result<()> {
         create_client::create_client(ctx)
     }
@@ -52,7 +58,7 @@ pub mod blockmesh_program {
         update_provider_node::update_provider_node(ctx, args)
     }
 
-    pub fn create_endpoint_node(ctx: Context<CreateEndpointContext>) -> Result<()> {
+    pub fn create_endpoint_node(ctx: Context<CreateEndpointNodeContext>) -> Result<()> {
         create_endpoint_node::create_endpoint_node(ctx)
     }
 }

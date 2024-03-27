@@ -1,34 +1,22 @@
 use block_mesh_common::http::{empty, full, host_addr};
-use block_mesh_common::tracing::setup_tracing;
+use block_mesh_solana_client::manager::SolanaManagerAuth;
 use bytes::Bytes;
-use clap::Parser;
 use http::header;
-use http_body_util::{combinators::BoxBody, BodyExt};
-use hyper::client::conn::http1::Builder;
+use http_body_util::combinators::BoxBody;
 use hyper::server::conn::http1;
 use hyper::service::service_fn;
 use hyper::upgrade::Upgraded;
 use hyper::{client, http, Method, Request, Response};
 use hyper_util::rt::TokioIo;
 use std::net::SocketAddr;
-use std::str::FromStr;
 use tokio::net::TcpStream;
 
-#[derive(Parser, Debug)]
-pub struct CliArgs {
-    #[arg(long, default_value = "127.0.0.1")]
-    pub ip: String,
-    #[arg(long, default_value = "5000")]
-    pub port: u16,
-}
-
-#[tokio::main]
-async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    setup_tracing();
-    let args = CliArgs::parse();
-    let addr = SocketAddr::from_str(format!("{}:{}", args.ip, args.port).as_str())
-        .expect("Failed to parse address");
+pub async fn listen_for_proxies_connecting(
+    addr: SocketAddr,
+    solana_manager_header: SolanaManagerAuth,
+) -> anyhow::Result<()> {
     while let Ok(stream) = TcpStream::connect(addr).await {
+        let solana_manager_header = solana_manager_header.clone();
         tracing::info!("Connected to {}", addr);
         // Initial registration
         let (mut send_request, conn) = client::conn::http1::Builder::new()
@@ -53,6 +41,10 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .method(Method::CONNECT)
             // whatever
             .uri(addr.to_string())
+            .header(
+                header::PROXY_AUTHORIZATION,
+                serde_json::to_string(&solana_manager_header)?,
+            )
             .header(header::UPGRADE, "foobar")
             .header("custom-header", "I want connect xxx")
             .body(empty())
@@ -117,26 +109,27 @@ async fn proxy(
             Ok(resp)
         }
     } else {
-        tracing::info!("NOT CONNECT request");
-        let host = req.uri().host().expect("uri has no host");
-        let port = req.uri().port_u16().unwrap_or(80);
+        Ok(Response::new(empty()))
+        //tracing::info!("NOT CONNECT request");
+        //let host = req.uri().host().expect("uri has no host");
+        //let port = req.uri().port_u16().unwrap_or(80);
 
-        let stream = TcpStream::connect((host, port)).await.unwrap();
-        let io = TokioIo::new(stream);
+        //let stream = TcpStream::connect((host, port)).await.unwrap();
+        //let io = TokioIo::new(stream);
 
-        let (mut sender, conn) = Builder::new()
-            .preserve_header_case(true)
-            .title_case_headers(true)
-            .handshake(io)
-            .await?;
-        tokio::task::spawn(async move {
-            if let Err(err) = conn.await {
-                tracing::info!("Connection failed: {:?}", err);
-            }
-        });
+        //let (mut sender, conn) = Builder::new()
+        //    .preserve_header_case(true)
+        //    .title_case_headers(true)
+        //    .handshake(io)
+        //    .await?;
+        //tokio::task::spawn(async move {
+        //    if let Err(err) = conn.await {
+        //        tracing::info!("Connection failed: {:?}", err);
+        //    }
+        //});
 
-        let resp = sender.send_request(req).await?;
-        Ok(resp.map(|b| b.boxed()))
+        //let resp = sender.send_request(req).await?;
+        //Ok(resp.map(|b| b.boxed()))
     }
 }
 

@@ -6,7 +6,7 @@
  */
 
 import * as beet from '@metaplex-foundation/beet'
-export type CreateProviderNodeArgs = {
+export type UpdateProviderNodeArgs = {
   ipv4: number[] /* size: 4 */
   proxyPort: number
   clientPort: number
@@ -17,13 +17,13 @@ export type CreateProviderNodeArgs = {
  * @category userTypes
  * @category generated
  */
-export const createProviderNodeArgsBeet =
-  new beet.BeetArgsStruct<CreateProviderNodeArgs>(
+export const updateProviderNodeArgsBeet =
+  new beet.BeetArgsStruct<UpdateProviderNodeArgs>(
     [
       ['ipv4', beet.uniformFixedSizeArray(beet.u8, 4)],
       ['proxyPort', beet.u16],
       ['clientPort', beet.u16],
       ['reportBandwidthLimit', beet.u64],
     ],
-    'CreateProviderNodeArgs'
+    'UpdateProviderNodeArgs'
   )

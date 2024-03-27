@@ -10,54 +10,50 @@ import * as web3 from '@solana/web3.js'
 
 /**
  * @category Instructions
- * @category SyncTokenUsage
+ * @category CreateEndpointNode
  * @category generated
  */
-export const syncTokenUsageStruct = new beet.BeetArgsStruct<{
+export const createEndpointNodeStruct = new beet.BeetArgsStruct<{
   instructionDiscriminator: number[] /* size: 8 */
 }>(
   [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
-  'SyncTokenUsageInstructionArgs'
+  'CreateEndpointNodeInstructionArgs'
 )
 /**
- * Accounts required by the _syncTokenUsage_ instruction
+ * Accounts required by the _createEndpointNode_ instruction
  *
  * @property [_writable_, **signer**] signer
- * @property [_writable_] apiToken
- * @property [] client
- * @property [] providerNode
+ * @property [_writable_] endpointNode
  * @category Instructions
- * @category SyncTokenUsage
+ * @category CreateEndpointNode
  * @category generated
  */
-export type SyncTokenUsageInstructionAccounts = {
+export type CreateEndpointNodeInstructionAccounts = {
   signer: web3.PublicKey
-  apiToken: web3.PublicKey
-  client: web3.PublicKey
-  providerNode: web3.PublicKey
+  endpointNode: web3.PublicKey
   systemProgram?: web3.PublicKey
   rent?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const syncTokenUsageInstructionDiscriminator = [
-  35, 129, 233, 205, 251, 253, 39, 227,
+export const createEndpointNodeInstructionDiscriminator = [
+  139, 201, 153, 100, 196, 112, 229, 52,
 ]
 
 /**
- * Creates a _SyncTokenUsage_ instruction.
+ * Creates a _CreateEndpointNode_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
  * @category Instructions
- * @category SyncTokenUsage
+ * @category CreateEndpointNode
  * @category generated
  */
-export function createSyncTokenUsageInstruction(
-  accounts: SyncTokenUsageInstructionAccounts,
+export function createCreateEndpointNodeInstruction(
+  accounts: CreateEndpointNodeInstructionAccounts,
   programId = new web3.PublicKey('FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ')
 ) {
-  const [data] = syncTokenUsageStruct.serialize({
-    instructionDiscriminator: syncTokenUsageInstructionDiscriminator,
+  const [data] = createEndpointNodeStruct.serialize({
+    instructionDiscriminator: createEndpointNodeInstructionDiscriminator,
   })
   const keys: web3.AccountMeta[] = [
     {
@@ -66,18 +62,8 @@ export function createSyncTokenUsageInstruction(
       isSigner: true,
     },
     {
-      pubkey: accounts.apiToken,
+      pubkey: accounts.endpointNode,
       isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.client,
-      isWritable: false,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.providerNode,
-      isWritable: false,
       isSigner: false,
     },
     {

@@ -7,57 +7,74 @@
 
 import * as beet from '@metaplex-foundation/beet'
 import * as web3 from '@solana/web3.js'
+import {
+  UpdateProviderNodeArgs,
+  updateProviderNodeArgsBeet,
+} from '../types/UpdateProviderNodeArgs'
 
 /**
  * @category Instructions
- * @category SyncTokenUsage
+ * @category UpdateProviderNode
  * @category generated
  */
-export const syncTokenUsageStruct = new beet.BeetArgsStruct<{
-  instructionDiscriminator: number[] /* size: 8 */
-}>(
-  [['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)]],
-  'SyncTokenUsageInstructionArgs'
+export type UpdateProviderNodeInstructionArgs = {
+  args: UpdateProviderNodeArgs
+}
+/**
+ * @category Instructions
+ * @category UpdateProviderNode
+ * @category generated
+ */
+export const updateProviderNodeStruct = new beet.BeetArgsStruct<
+  UpdateProviderNodeInstructionArgs & {
+    instructionDiscriminator: number[] /* size: 8 */
+  }
+>(
+  [
+    ['instructionDiscriminator', beet.uniformFixedSizeArray(beet.u8, 8)],
+    ['args', updateProviderNodeArgsBeet],
+  ],
+  'UpdateProviderNodeInstructionArgs'
 )
 /**
- * Accounts required by the _syncTokenUsage_ instruction
+ * Accounts required by the _updateProviderNode_ instruction
  *
  * @property [_writable_, **signer**] signer
- * @property [_writable_] apiToken
- * @property [] client
- * @property [] providerNode
+ * @property [_writable_] providerNode
  * @category Instructions
- * @category SyncTokenUsage
+ * @category UpdateProviderNode
  * @category generated
  */
-export type SyncTokenUsageInstructionAccounts = {
+export type UpdateProviderNodeInstructionAccounts = {
   signer: web3.PublicKey
-  apiToken: web3.PublicKey
-  client: web3.PublicKey
   providerNode: web3.PublicKey
   systemProgram?: web3.PublicKey
   rent?: web3.PublicKey
   anchorRemainingAccounts?: web3.AccountMeta[]
 }
 
-export const syncTokenUsageInstructionDiscriminator = [
-  35, 129, 233, 205, 251, 253, 39, 227,
+export const updateProviderNodeInstructionDiscriminator = [
+  81, 241, 139, 181, 215, 97, 8, 165,
 ]
 
 /**
- * Creates a _SyncTokenUsage_ instruction.
+ * Creates a _UpdateProviderNode_ instruction.
  *
  * @param accounts that will be accessed while the instruction is processed
+ * @param args to provide as instruction data to the program
+ *
  * @category Instructions
- * @category SyncTokenUsage
+ * @category UpdateProviderNode
  * @category generated
  */
-export function createSyncTokenUsageInstruction(
-  accounts: SyncTokenUsageInstructionAccounts,
+export function createUpdateProviderNodeInstruction(
+  accounts: UpdateProviderNodeInstructionAccounts,
+  args: UpdateProviderNodeInstructionArgs,
   programId = new web3.PublicKey('FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ')
 ) {
-  const [data] = syncTokenUsageStruct.serialize({
-    instructionDiscriminator: syncTokenUsageInstructionDiscriminator,
+  const [data] = updateProviderNodeStruct.serialize({
+    instructionDiscriminator: updateProviderNodeInstructionDiscriminator,
+    ...args,
   })
   const keys: web3.AccountMeta[] = [
     {
@@ -66,18 +83,8 @@ export function createSyncTokenUsageInstruction(
       isSigner: true,
     },
     {
-      pubkey: accounts.apiToken,
-      isWritable: true,
-      isSigner: false,
-    },
-    {
-      pubkey: accounts.client,
-      isWritable: false,
-      isSigner: false,
-    },
-    {
       pubkey: accounts.providerNode,
-      isWritable: false,
+      isWritable: true,
       isSigner: false,
     },
     {
