@@ -54,7 +54,7 @@ export const syncTokenUsageInstructionDiscriminator = [
  */
 export function createSyncTokenUsageInstruction(
   accounts: SyncTokenUsageInstructionAccounts,
-  programId = new web3.PublicKey('GzscdwWG2FwpA6iqB6yYKEESvvw773c1iAzmJatXLcve')
+  programId = new web3.PublicKey('FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ')
 ) {
   const [data] = syncTokenUsageStruct.serialize({
     instructionDiscriminator: syncTokenUsageInstructionDiscriminator,

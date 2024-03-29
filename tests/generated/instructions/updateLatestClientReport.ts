@@ -74,7 +74,7 @@ export const updateLatestClientReportInstructionDiscriminator = [
 export function createUpdateLatestClientReportInstruction(
   accounts: UpdateLatestClientReportInstructionAccounts,
   args: UpdateLatestClientReportInstructionArgs,
-  programId = new web3.PublicKey('GzscdwWG2FwpA6iqB6yYKEESvvw773c1iAzmJatXLcve')
+  programId = new web3.PublicKey('FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ')
 ) {
   const [data] = updateLatestClientReportStruct.serialize({
     instructionDiscriminator: updateLatestClientReportInstructionDiscriminator,

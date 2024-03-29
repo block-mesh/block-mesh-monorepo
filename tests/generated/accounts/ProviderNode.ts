@@ -18,7 +18,8 @@ export type ProviderNodeArgs = {
   bump: number
   owner: web3.PublicKey
   ipv4: number[] /* size: 4 */
-  port: number
+  proxyPort: number
+  clientPort: number
   active: boolean
   reportBandwidthLimit: beet.bignum
 }
@@ -36,7 +37,8 @@ export class ProviderNode implements ProviderNodeArgs {
     readonly bump: number,
     readonly owner: web3.PublicKey,
     readonly ipv4: number[] /* size: 4 */,
-    readonly port: number,
+    readonly proxyPort: number,
+    readonly clientPort: number,
     readonly active: boolean,
     readonly reportBandwidthLimit: beet.bignum
   ) {}
@@ -49,7 +51,8 @@ export class ProviderNode implements ProviderNodeArgs {
       args.bump,
       args.owner,
       args.ipv4,
-      args.port,
+      args.proxyPort,
+      args.clientPort,
       args.active,
       args.reportBandwidthLimit
     )
@@ -95,7 +98,7 @@ export class ProviderNode implements ProviderNodeArgs {
    */
   static gpaBuilder(
     programId: web3.PublicKey = new web3.PublicKey(
-      'GzscdwWG2FwpA6iqB6yYKEESvvw773c1iAzmJatXLcve'
+      'FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ'
     )
   ) {
     return beetSolana.GpaBuilder.fromStruct(programId, providerNodeBeet)
@@ -161,7 +164,8 @@ export class ProviderNode implements ProviderNodeArgs {
       bump: this.bump,
       owner: this.owner.toBase58(),
       ipv4: this.ipv4,
-      port: this.port,
+      proxyPort: this.proxyPort,
+      clientPort: this.clientPort,
       active: this.active,
       reportBandwidthLimit: (() => {
         const x = <{ toNumber: () => number }>this.reportBandwidthLimit
@@ -193,7 +197,8 @@ export const providerNodeBeet = new beet.BeetStruct<
     ['bump', beet.u8],
     ['owner', beetSolana.publicKey],
     ['ipv4', beet.uniformFixedSizeArray(beet.u8, 4)],
-    ['port', beet.u16],
+    ['proxyPort', beet.u16],
+    ['clientPort', beet.u16],
     ['active', beet.bool],
     ['reportBandwidthLimit', beet.u64],
   ],

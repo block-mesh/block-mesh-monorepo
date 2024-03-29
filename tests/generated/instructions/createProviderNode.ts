@@ -70,7 +70,7 @@ export const createProviderNodeInstructionDiscriminator = [
 export function createCreateProviderNodeInstruction(
   accounts: CreateProviderNodeInstructionAccounts,
   args: CreateProviderNodeInstructionArgs,
-  programId = new web3.PublicKey('GzscdwWG2FwpA6iqB6yYKEESvvw773c1iAzmJatXLcve')
+  programId = new web3.PublicKey('FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ')
 ) {
   const [data] = createProviderNodeStruct.serialize({
     instructionDiscriminator: createProviderNodeInstructionDiscriminator,

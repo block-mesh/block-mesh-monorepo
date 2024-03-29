@@ -54,7 +54,7 @@ export const createApiTokenInstructionDiscriminator = [
  */
 export function createCreateApiTokenInstruction(
   accounts: CreateApiTokenInstructionAccounts,
-  programId = new web3.PublicKey('GzscdwWG2FwpA6iqB6yYKEESvvw773c1iAzmJatXLcve')
+  programId = new web3.PublicKey('FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ')
 ) {
   const [data] = createApiTokenStruct.serialize({
     instructionDiscriminator: createApiTokenInstructionDiscriminator,
