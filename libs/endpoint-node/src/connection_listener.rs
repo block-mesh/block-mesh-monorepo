@@ -80,10 +80,8 @@ async fn proxy(
     mut req: Request<hyper::body::Incoming>,
     solana_manager: Arc<SolanaManager>,
 ) -> anyhow::Result<Response<BoxBody<Bytes, hyper::Error>>> {
-    tracing::info!("1 req: {:?}", req);
-    process_endpoint_headers(solana_manager, &mut req).await?;
-    tracing::info!("2 req: {:?}", req);
-
+    let proxy_authorization = process_endpoint_headers(solana_manager.clone(), &mut req).await?;
+    let memos = proxy_authorization.prepare_for_memo();
     if Method::CONNECT == req.method() {
         // Received an HTTP request like:
         // ```
@@ -102,8 +100,15 @@ async fn proxy(
             tokio::task::spawn(async move {
                 match hyper::upgrade::on(req).await {
                     Ok(upgraded) => {
-                        if let Err(e) = tunnel(upgraded, addr).await {
-                            tracing::error!("server io error: {}", e);
+                        match tunnel(upgraded, addr).await {
+                            Ok(_) => {
+                                // TODO : send memo here
+                                if let Err(e) = solana_manager.send_memos(memos).await {
+                                    tracing::error!("send memo error: {}", e);
+                                }
+                                tracing::info!("tunnel success");
+                            }
+                            Err(e) => tracing::error!("server io error: {}", e),
                         };
                     }
                     Err(e) => tracing::error!("upgrade error: {}", e),

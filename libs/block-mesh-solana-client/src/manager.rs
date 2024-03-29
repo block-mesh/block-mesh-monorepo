@@ -17,6 +17,7 @@ use solana_sdk::account::Account;
 use solana_sdk::instruction::Instruction;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Keypair;
+use spl_memo::build_memo;
 use std::net::Ipv4Addr;
 use std::str::FromStr;
 use std::sync::Arc;
@@ -104,6 +105,29 @@ impl FullRouteHeader {
             provider_node_signature: None,
             endpoint_node_signature: None,
         }
+    }
+
+    pub fn prepare_for_memo(&self) -> Vec<String> {
+        let mut output: Vec<String> = Vec::new();
+
+        output.push(format!("api_token: {}", self.api_token.to_string()));
+        output.push(format!(
+            "client_signature: {}",
+            serde_json::to_string(&self.client_signature).unwrap()
+        ));
+        if let Some(provider_node_signature) = &self.provider_node_signature {
+            output.push(format!(
+                "provider_node_signature: {}",
+                serde_json::to_string(provider_node_signature).unwrap()
+            ));
+        }
+        if let Some(endpoint_node_signature) = &self.endpoint_node_signature {
+            output.push(format!(
+                "endpoint_node_signature: {}",
+                serde_json::to_string(endpoint_node_signature).unwrap()
+            ));
+        }
+        output
     }
 
     pub fn add_provider_node_signature(
@@ -423,6 +447,23 @@ impl SolanaManager {
             "update_latest_client_report::Transaction sent: {}",
             signature
         );
+        Ok(())
+    }
+
+    #[tracing::instrument(name = "send_memo", skip(self), ret, err)]
+    pub async fn send_memos(&self, memos: Vec<String>) -> anyhow::Result<()> {
+        let instructions = memos
+            .iter()
+            .map(|memo| build_memo(memo.as_bytes(), &[]))
+            .collect();
+        let signature = build_txn_and_send_and_confirm(
+            &self.rpc_client,
+            instructions,
+            &self.get_pubkey(),
+            &self.get_keypair(),
+        )
+        .await?;
+        tracing::info!("send_memo::Transaction sent: {}", signature);
         Ok(())
     }
 }
