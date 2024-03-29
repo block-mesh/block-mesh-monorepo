@@ -110,7 +110,7 @@ impl FullRouteHeader {
     pub fn prepare_for_memo(&self) -> Vec<String> {
         let mut output: Vec<String> = Vec::new();
 
-        output.push(format!("api_token: {}", self.api_token.to_string()));
+        output.push(format!("api_token: {}", self.api_token));
         output.push(format!(
             "client_signature: {}",
             serde_json::to_string(&self.client_signature).unwrap()
