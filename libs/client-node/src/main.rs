@@ -95,7 +95,17 @@ async fn main() {
         .await
         .unwrap();
     tracing::info!("RESPONSE HEADERS => {:?}", response.headers());
-    match client_node_cli_args.response_type {
+    let content_type = match response.headers().get("content-type") {
+        None => client_node_cli_args.response_type,
+        Some(content_type) => {
+            if content_type.to_str().unwrap().contains("application/json") {
+                cli_args::ResponseType::Json
+            } else {
+                cli_args::ResponseType::Text
+            }
+        }
+    };
+    match content_type {
         cli_args::ResponseType::Json => {
             let response: serde_json::Value = response.json().await.unwrap();
             tracing::info!("FINAL RESPONSE => {:?}", response);
