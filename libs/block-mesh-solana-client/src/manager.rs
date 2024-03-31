@@ -1,6 +1,7 @@
 use crate::api_token::create_api_token_instruction::create_api_token_instruction;
 use crate::client::create_client::create_client_instruction;
 use crate::client::update_latest_client_report::update_latest_client_report_instruction;
+use crate::demo::ping::ping;
 use crate::endpoint::create_endpoint_node::create_endpoint_node;
 use crate::helpers::{
     build_txn_and_send_and_confirm, get_account, get_api_token_address, get_client,
@@ -452,10 +453,12 @@ impl SolanaManager {
 
     #[tracing::instrument(name = "send_memo", skip(self), ret, err)]
     pub async fn send_memos(&self, memos: Vec<String>) -> anyhow::Result<()> {
-        let instructions = memos
+        let ping_instructions: Vec<Instruction> = vec![ping(self.program_id, self.get_pubkey())];
+        let memo_instructions: Vec<Instruction> = memos
             .iter()
             .map(|memo| build_memo(memo.as_bytes(), &[]))
             .collect();
+        let instructions = [&ping_instructions[..], &memo_instructions[..]].concat();
         let signature = build_txn_and_send_and_confirm(
             &self.rpc_client,
             instructions,
