@@ -13,6 +13,10 @@ declare_id!("FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ");
 pub mod blockmesh_program {
     use super::*;
 
+    pub fn ping(ctx: Context<PingContext>) -> Result<()> {
+        ping::ping(ctx)
+    }
+
     pub fn close_provider_node(
         ctx: Context<CloseProviderNodeContext>,
         args: CloseProviderNodeArgs,
