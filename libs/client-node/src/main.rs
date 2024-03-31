@@ -109,12 +109,13 @@ async fn main() {
         cli_args::ResponseType::Json => {
             let response: serde_json::Value = response.json().await.unwrap();
             let pretty_json = serde_json::to_string_pretty(&response).unwrap();
-            // tracing::info!("FINAL RESPONSE:\n{:?}", pretty_json);
+            tracing::info!("FINAL RESPONSE: {:?}", pretty_json);
             println!("\n\n{}\n\n", pretty_json);
         }
         cli_args::ResponseType::Text => {
             let response: String = response.text().await.unwrap();
-            tracing::info!("FINAL RESPONSE:\n{:?}", response);
+            tracing::info!("FINAL RESPONSE: {:?}", response);
+            println!("\n\n{}\n\n", response);
         }
     }
 }
