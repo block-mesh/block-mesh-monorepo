@@ -26,6 +26,10 @@ Can override the `IP` or `owner` of the `proxy-master` via the `CLI` , see `--he
 
 ## Run the client and perform a request through the network
 
+This client is similar to a basic `curl` but handles the protocol details for you.
+Later we'll extend it to be a local proxy, you can point your browser or other applications to go through,
+enabling a smooth and seamless interaction with `BlockMesh`.
+
 `cargo run -p client-node -- --keypair-path example-keys/client.json`
 
 The default `--target` will just return your `IP` details, which should reflect the `proxy-endpoint` since it actually
@@ -42,3 +46,4 @@ You can change it via the `--target` option.
   The protocol isn't fully implemented
   yet, [discussion](https://github.com/block-mesh/block-mesh-monorepo/discussions/64) on details and future plan is
   tracked here.
+* Currently `BlockMesh` is deployed only to `devnet` since it's still under heavy development.
