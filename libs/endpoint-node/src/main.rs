@@ -63,15 +63,16 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         Some(proxy_override) => proxy_override,
         None => {
             format!(
-                "http://{}.{}.{}.{}:{}",
+                "{}.{}.{}.{}:{}",
                 provider_node_account.ipv4[0],
                 provider_node_account.ipv4[1],
                 provider_node_account.ipv4[2],
                 provider_node_account.ipv4[3],
-                provider_node_account.client_port
+                provider_node_account.proxy_port
             )
         }
     };
+    tracing::info!("Proxy URL: {}", proxy_url);
     let addr = SocketAddr::from_str(proxy_url.as_str()).expect("Failed to parse address");
     solana_manager
         .create_endpoint_account_if_needed()
