@@ -11,9 +11,13 @@ use crate::provider_node::create_provider_node::create_provider_node_instruction
 use crate::provider_node::update_provider_node::update_provider_node_instruction;
 use anchor_lang::AccountDeserialize;
 use anyhow::anyhow;
+use base64::{engine::general_purpose::STANDARD, Engine as _};
 use secret::Secret;
 use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use solana_account_decoder::UiAccountEncoding;
 use solana_client::nonblocking::rpc_client::RpcClient;
+use solana_client::rpc_config::{RpcAccountInfoConfig, RpcProgramAccountsConfig};
+use solana_client::rpc_filter::{Memcmp, MemcmpEncodedBytes, RpcFilterType};
 use solana_sdk::account::Account;
 use solana_sdk::instruction::Instruction;
 use solana_sdk::pubkey::Pubkey;
@@ -204,6 +208,30 @@ impl SolanaManager {
     {
         let result: T = T::try_deserialize(&mut account.data.as_slice())?;
         Ok(result)
+    }
+
+    pub async fn search_accounts(
+        &self,
+        discriminator: [u8; 8],
+        memcmp_filters: Vec<RpcFilterType>,
+    ) -> anyhow::Result<Vec<(Pubkey, Account)>> {
+        let discriminator_memcmp = RpcFilterType::Memcmp(Memcmp::new(
+            0,                                                          // offset
+            MemcmpEncodedBytes::Base64(STANDARD.encode(discriminator)), // encoded bytes
+        ));
+        let config: RpcProgramAccountsConfig = RpcProgramAccountsConfig {
+            filters: Some([vec![discriminator_memcmp], memcmp_filters].concat()),
+            account_config: RpcAccountInfoConfig {
+                encoding: Option::from(UiAccountEncoding::Base64),
+                ..RpcAccountInfoConfig::default()
+            },
+            with_context: None,
+        };
+        let accounts = self
+            .rpc_client
+            .get_program_accounts_with_config(&self.program_id, config)
+            .await?;
+        Ok(accounts)
     }
 
     #[tracing::instrument(name = "get_deserialized_account", skip(self, address), ret, err)]

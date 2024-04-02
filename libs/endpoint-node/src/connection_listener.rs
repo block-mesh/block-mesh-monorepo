@@ -9,7 +9,7 @@ use hyper::service::service_fn;
 use hyper::upgrade::Upgraded;
 use hyper::{client, http, Method, Request, Response};
 use hyper_util::rt::TokioIo;
-use std::net::SocketAddr;
+use std::net::{SocketAddr, ToSocketAddrs};
 use std::sync::Arc;
 use tokio::net::TcpStream;
 
@@ -49,8 +49,6 @@ pub async fn listen_for_proxies_connecting(
                 header::PROXY_AUTHORIZATION,
                 serde_json::to_string(&auth_header)?,
             )
-            // .header(header::UPGRADE, "foobar")
-            // .header("custom-header", "I want connect xxx")
             .body(empty())
             .unwrap();
 
@@ -152,7 +150,16 @@ async fn proxy(
 // the upgraded connection
 #[tracing::instrument(name = "tunnel", ret, err)]
 async fn tunnel(upgraded: Upgraded, addr: String) -> std::io::Result<()> {
-    let mut server = TcpStream::connect(addr.clone()).await?;
+    let addr = addr
+        .to_socket_addrs()?
+        .find(|a| a.is_ipv4())
+        .expect("No IPv4 address found");
+    let mut server = TcpStream::connect(addr).await?;
+    tracing::info!(
+        "tunnel local address: {:?} | addr: {:?}",
+        server.local_addr()?,
+        addr
+    );
     let mut upgraded = TokioIo::new(upgraded);
     let (from_client, from_server) =
         tokio::io::copy_bidirectional(&mut upgraded, &mut server).await?;
