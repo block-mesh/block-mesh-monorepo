@@ -28,7 +28,7 @@ pub struct ClientNodeCliArgs {
     #[arg(long)]
     pub keypair_path: String,
     #[arg(long)]
-    pub provider_node_owner: Pubkey,
+    pub provider_node_owner: Option<Pubkey>,
     #[arg(long, default_value = BLOCK_MESH_PROGRAM_ID, value_parser = Pubkey::from_str)]
     pub program_id: Pubkey,
     #[arg(long, default_value = "https://ifconfig.me/all.json")]

@@ -13,6 +13,7 @@ anchor-lang = { workspace = true }
 blockmesh-program = { path = "../../programs/blockmesh-program" }
 solana-client = { workspace = true }
 solana-sdk = { workspace = true }
+solana-account-decoder = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
 tokio = { workspace = true, features = ["full"] }
@@ -22,6 +23,7 @@ uuid = { workspace = true, features = ["v4"] }
 rustc-hash = { workspace = true }
 secret = { path = "../secret" }
 serde_json = { workspace = true }
+base64 = { workspace = true }
 
 [dependencies.sqlx]
 optional = true
