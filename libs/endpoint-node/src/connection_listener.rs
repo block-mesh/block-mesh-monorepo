@@ -150,6 +150,7 @@ async fn proxy(
 // the upgraded connection
 #[tracing::instrument(name = "tunnel", ret, err)]
 async fn tunnel(upgraded: Upgraded, addr: String) -> std::io::Result<()> {
+    // TODO: replace to_socket_addrs with - https://crates.io/crates/hickory-resolver
     let addr = addr
         .to_socket_addrs()?
         .find(|a| a.is_ipv4())
