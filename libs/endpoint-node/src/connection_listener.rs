@@ -49,8 +49,6 @@ pub async fn listen_for_proxies_connecting(
                 header::PROXY_AUTHORIZATION,
                 serde_json::to_string(&auth_header)?,
             )
-            // .header(header::UPGRADE, "foobar")
-            // .header("custom-header", "I want connect xxx")
             .body(empty())
             .unwrap();
 
@@ -153,6 +151,7 @@ async fn proxy(
 #[tracing::instrument(name = "tunnel", ret, err)]
 async fn tunnel(upgraded: Upgraded, addr: String) -> std::io::Result<()> {
     let mut server = TcpStream::connect(addr.clone()).await?;
+    tracing::info!("tunnel local address: {:?}", server.local_addr()?);
     let mut upgraded = TokioIo::new(upgraded);
     let (from_client, from_server) =
         tokio::io::copy_bidirectional(&mut upgraded, &mut server).await?;

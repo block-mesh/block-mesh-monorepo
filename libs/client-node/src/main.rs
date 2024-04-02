@@ -96,7 +96,7 @@ async fn main() {
         .unwrap();
     tracing::info!("RESPONSE HEADERS => {:?}", response.headers());
     let content_type = match response.headers().get("content-type") {
-        None => client_node_cli_args.response_type,
+        None => cli_args::ResponseType::Text,
         Some(content_type) => {
             if content_type.to_str().unwrap().contains("application/json") {
                 cli_args::ResponseType::Json

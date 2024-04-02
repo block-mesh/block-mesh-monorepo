@@ -31,10 +31,8 @@ pub struct ClientNodeCliArgs {
     pub provider_node_owner: Pubkey,
     #[arg(long, default_value = BLOCK_MESH_PROGRAM_ID, value_parser = Pubkey::from_str)]
     pub program_id: Pubkey,
-    #[arg(long, default_value = "https://api.ipify.org?format=json")]
+    #[arg(long, default_value = "https://ifconfig.me/all.json")]
     pub target: String,
-    #[arg(value_enum, default_value_t = ResponseType::Json)]
-    pub response_type: ResponseType,
     #[arg(long)]
     pub proxy_override: Option<String>,
 }
