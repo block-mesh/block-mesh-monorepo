@@ -17,3 +17,28 @@ Run `cargo run -p provider-node -- --help` to see the options.
 
 ## Launch the Proxy-Endpoint Node
 
+This will run the `proxy-endpoint` and try to connect to the first `proxy-master` node it finds published on-chain.
+(Obviously this is simplified for demo purposes)
+
+Can override the `IP` or `owner` of the `proxy-master` via the `CLI` , see `--help` for more info.
+
+`cargo run -p endpoint-node -- --keypair-path example-keys/client.json`
+
+## Run the client and perform a request through the network
+
+`cargo run -p client-node -- --keypair-path example-keys/client.json`
+
+The default `--target` will just return your `IP` details, which should reflect the `proxy-endpoint` since it actually
+terminates the request.
+You can change it via the `--target` option.
+
+## Caveats
+
+* The `proxy-master` `--proxy-port` and `--client-port` should be publicly available and open in your firewall, unless
+  you're running all locally.
+* All the nodes have overrides options for easier testing and demo purposes.
+* Currently, the `proxy-master` publish their `IP:PORT` on-chain and the `client-node` creates an on-chain token to
+  connect to the `proxy-master`.
+  The protocol isn't fully implemented
+  yet, [discussion](https://github.com/block-mesh/block-mesh-monorepo/discussions/64) on details and future plan is
+  tracked here.
