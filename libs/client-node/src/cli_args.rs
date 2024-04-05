@@ -23,6 +23,24 @@ impl FromStr for ResponseType {
     }
 }
 
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, ValueEnum)]
+pub enum Mode {
+    Cli,
+    Proxy,
+}
+
+impl FromStr for Mode {
+    type Err = String;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "cli" => Ok(Mode::Cli),
+            "proxy" => Ok(Mode::Proxy),
+            _ => Err(format!("{} is not a valid mode", s)),
+        }
+    }
+}
+
 #[derive(Parser, Debug)]
 pub struct ClientNodeCliArgs {
     #[arg(long)]
@@ -35,4 +53,8 @@ pub struct ClientNodeCliArgs {
     pub target: String,
     #[arg(long)]
     pub proxy_override: Option<String>,
+    #[arg(value_enum, default_value_t = Mode::Cli)]
+    pub mode: Mode,
+    #[arg(long, default_value = "8100")]
+    pub proxy_port: u16,
 }

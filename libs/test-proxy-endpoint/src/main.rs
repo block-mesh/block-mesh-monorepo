@@ -53,7 +53,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
             .method(Method::CONNECT)
             // whatever
             .uri(addr.to_string())
-            .header(header::UPGRADE, "foobar")
+            .header(header::UPGRADE, "")
             .header("custom-header", "I want connect xxx")
             .body(empty())
             .unwrap();
