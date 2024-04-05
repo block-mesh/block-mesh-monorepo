@@ -55,4 +55,6 @@ pub struct ClientNodeCliArgs {
     pub proxy_override: Option<String>,
     #[arg(value_enum, default_value_t = Mode::Cli)]
     pub mode: Mode,
+    #[arg(long, default_value = "8100")]
+    pub proxy_port: u16,
 }

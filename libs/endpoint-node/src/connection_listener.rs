@@ -13,6 +13,7 @@ use std::net::{SocketAddr, ToSocketAddrs};
 use std::sync::Arc;
 use tokio::net::TcpStream;
 
+#[tracing::instrument(name = "listen_for_proxies_connecting", skip(solana_manager), ret, err)]
 pub async fn listen_for_proxies_connecting(
     addr: SocketAddr,
     auth_header: EndpointNodeToProviderNodeHeader,
