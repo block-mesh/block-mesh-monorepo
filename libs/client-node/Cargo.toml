@@ -27,4 +27,5 @@ uuid = { workspace = true, features = ["v4"] }
 rustc-hash = { workspace = true }
 ipapi-is-rust = { path = "../ipapi-is-rust" }
 serde_json = { workspace = true }
-block-mesh-common = { path = "../block-mesh-common" }
+block-mesh-common = { path = "../block-mesh-common", features = ["http"] }
+http-body-util = { workspace = true }
