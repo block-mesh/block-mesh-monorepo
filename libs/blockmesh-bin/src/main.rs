@@ -3,7 +3,7 @@ use std::process::ExitCode;
 
 use block_mesh_common::cli::{CliArgs, Commands};
 use client_node::client_node_main;
-use provider_node::proxy_master_main;
+use proxy_master::proxy_master_main;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<ExitCode> {

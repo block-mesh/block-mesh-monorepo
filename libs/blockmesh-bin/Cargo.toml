@@ -15,5 +15,5 @@ block-mesh-common = { path = "../block-mesh-common", features = ["http", "cli"] 
 serde = { workspace = true, features = ["derive"] }
 tokio = { workspace = true, features = ["full"] }
 client-node = { path = "../client-node" }
-provider-node = { path = "../proxy-master" }
+proxy-master = { path = "../proxy-master" }
 anyhow = { workspace = true }
