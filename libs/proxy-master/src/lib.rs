@@ -1,39 +1,42 @@
+pub mod app_state;
+pub mod client_server;
+pub mod ip_getter;
+pub mod proxy_server;
+pub mod routes;
+pub mod token_management;
+
+use app_state::AppState;
+use block_mesh_common::cli::ProxyMasterNodeOptions;
 use block_mesh_common::tracing::setup_tracing;
 use block_mesh_solana_client::manager::SolanaManager;
-use clap::Parser;
+use client_server::clients_endpoint::listen_for_clients_connecting;
 use futures_util::future::join_all;
-use provider_node::app_state::AppState;
-use provider_node::cli_args::ProviderNodeCliArgs;
-use provider_node::client_server::clients_endpoint::listen_for_clients_connecting;
-use provider_node::ip_getter::get_ip;
-use provider_node::proxy_server::proxy_endpoint::listen_for_proxies_connecting;
-use provider_node::proxy_server::proxy_pool::ProxyPool;
-use provider_node::token_management::channels::{
-    update_token_manager, ChannelMessage, TokenManagerHashMap,
-};
+use ip_getter::get_ip;
+use proxy_server::proxy_endpoint::listen_for_proxies_connecting;
+use proxy_server::proxy_pool::ProxyPool;
 use rustc_hash::FxHashMap;
 use std::net::{IpAddr, SocketAddr};
-use std::process::exit;
+use std::process::{exit, ExitCode};
 use std::sync::Arc;
+use token_management::channels::{update_token_manager, ChannelMessage, TokenManagerHashMap};
 use tokio::net::TcpListener;
 use tokio::sync::broadcast;
 
-#[tokio::main]
-async fn main() {
+#[tracing::instrument(name = "proxy_master_main", ret, err)]
+pub async fn proxy_master_main(
+    proxy_master_node_options: ProxyMasterNodeOptions,
+) -> anyhow::Result<ExitCode> {
     setup_tracing();
-    let provider_node_cli_args = ProviderNodeCliArgs::parse();
-    let ip_addr = get_ip().await.unwrap();
-    tracing::info!("IP address: {}", ip_addr);
+    let ip_addr = get_ip().await?;
+    tracing::info!("Local IP address: {}", ip_addr);
     let pool = ProxyPool::default();
-    let addr_proxies = SocketAddr::from(([0, 0, 0, 0], provider_node_cli_args.proxy_port));
-    let proxy_listener = TcpListener::bind(addr_proxies)
-        .await
-        .unwrap_or_else(|_| panic!("Failed to bind to {}", addr_proxies));
+    let addr_proxies = SocketAddr::from(([0, 0, 0, 0], proxy_master_node_options.proxy_port));
+    tracing::info!("Binding to proxy_port: {}", addr_proxies);
+    let proxy_listener = TcpListener::bind(addr_proxies).await?;
     tracing::info!("Listening on for proxies on: {}", addr_proxies);
-    let addr_clients = SocketAddr::from(([0, 0, 0, 0], provider_node_cli_args.client_port));
-    let client_listener = TcpListener::bind(addr_clients)
-        .await
-        .unwrap_or_else(|_| panic!("Failed to bind to {}", addr_clients));
+    let addr_clients = SocketAddr::from(([0, 0, 0, 0], proxy_master_node_options.client_port));
+    tracing::info!("Binding to client_port: {}", addr_clients);
+    let client_listener = TcpListener::bind(addr_clients).await?;
     tracing::info!("Listening on for clients on: {}", addr_clients);
 
     let ip_addr = match ip_addr {
@@ -48,19 +51,17 @@ async fn main() {
     };
 
     let mut solana_manager = SolanaManager::new(
-        &provider_node_cli_args.keypair_path,
-        &provider_node_cli_args.program_id,
+        &proxy_master_node_options.keypair_path,
+        &proxy_master_node_options.program_id,
     )
-    .await
-    .unwrap();
+    .await?;
     solana_manager
         .create_or_update_provider_node_if_needed(
             ip_addr,
-            provider_node_cli_args.proxy_port,
-            provider_node_cli_args.client_port,
+            proxy_master_node_options.proxy_port,
+            proxy_master_node_options.client_port,
         )
-        .await
-        .unwrap();
+        .await?;
 
     let solana_manager = Arc::new(tokio::sync::RwLock::new(solana_manager));
     let token_manager: TokenManagerHashMap = FxHashMap::default();
@@ -112,7 +113,7 @@ async fn main() {
     //     tower_service.clone().call(request)
     // });
     //
-    // let addr = SocketAddr::from(([0, 0, 0, 0], provider_node_cli_args.port));
+    // let addr = SocketAddr::from(([0, 0, 0, 0], proxy_master_node_cli_args.port));
     // tracing::debug!("listening on {}", addr);
     //
     // let listener = TcpListener::bind(addr).await.unwrap();
@@ -144,4 +145,5 @@ async fn main() {
         listen_for_clients_connecting(proxy_listener_pool, client_listener, client_app_state).await;
     });
     let _ = join_all(vec![proxy_listener_task, clients_listener_task]).await;
+    Ok(ExitCode::SUCCESS)
 }

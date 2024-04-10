@@ -1,17 +1,16 @@
-use crate::app_state::AppState;
 use anyhow::anyhow;
 use block_mesh_solana_client::helpers::sign_message;
-use block_mesh_solana_client::manager::FullRouteHeader;
+use block_mesh_solana_client::manager::{FullRouteHeader, SolanaManager};
 use hyper::http::HeaderValue;
 use std::sync::Arc;
 use uuid::Uuid;
 
-pub async fn process_client_headers(
-    app_state: Arc<AppState>,
+#[tracing::instrument(name = "process_endpoint_headers", skip(solana_manager), ret, err)]
+pub async fn process_endpoint_headers(
+    solana_manager: Arc<SolanaManager>,
     req: &mut axum::http::Request<hyper::body::Incoming>,
 ) -> anyhow::Result<FullRouteHeader> {
     let proxy_authorization = req.headers().get("Proxy-Authorization");
-
     let mut solana_manager_auth: FullRouteHeader = match proxy_authorization {
         None => {
             let msg = "proxy authorization header not found";
@@ -29,39 +28,20 @@ pub async fn process_client_headers(
             }
         }
     };
-
     let nonce = Uuid::new_v4().to_string();
-    let signed_message =
-        sign_message(&nonce, &app_state.solana_manager.read().await.get_keypair()).unwrap();
-    let pubkey = app_state.solana_manager.read().await.get_pubkey();
-
-    solana_manager_auth.add_provider_node_signature(
+    let signed_message = sign_message(&nonce, &solana_manager.get_keypair()).unwrap();
+    let pubkey = solana_manager.get_pubkey();
+    solana_manager_auth.add_endpoint_node_signature(
         nonce,
         signed_message,
         pubkey,
-        "provider-node-forward".to_string(),
+        "proxy-endpoint".to_string(),
     );
     let json = serde_json::to_string(&solana_manager_auth)?;
     let proxy_authorization = HeaderValue::from_str(&json)?;
     req.headers_mut()
         .insert("Proxy-Authorization", proxy_authorization);
-    let token_manager = app_state.token_manager.read().await;
-    let _token_details = token_manager.get(&solana_manager_auth.api_token);
-    // match token_details {
-    //     None => {
-    //         let msg = "token not found";
-    //         tracing::warn!(msg);
-    //         return Err(anyhow!(msg));
-    //     }
-    //     Some(token_details) => {
-    //         if !token_details.is_valid(&solana_manager_auth) {
-    //             let msg = "token is not valid";
-    //             tracing::warn!(msg);
-    //             return Err(anyhow!(msg));
-    //         } else {
-    //             token_details.api_token
-    //         }
-    //     }
-    // };
+
+    tracing::info!("process_endpoint_headers req = {:?}", req);
     Ok(solana_manager_auth)
 }

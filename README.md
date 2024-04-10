@@ -25,7 +25,7 @@ open source and blockchain industries.
   to `solana`.
 * [libs/ipapi-is-rust](libs/ipapi-is-rust/) - A rust library for [ipapi.is](https://ipapi.is/) types.
 * [libs/cloudflare-landing-page](libs/cloudflare-landing-page) - The BlockMesh network landing site.
-* [libs/provider-node](libs/provider-node/) - The `provider-node` client,
+* [libs/proxy-master](libs/proxy-master/) - The `proxy-master` node,
   manages interactions with `solana` and incoming requests from `client-node`.
 * [libs/solana-tiny-client](libs/solana-tiny-client/) - A tiny `solana` client with minimal dependencies
   hence making it support [WASM](https://webassembly.org/).

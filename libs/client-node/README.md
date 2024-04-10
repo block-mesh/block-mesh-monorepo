@@ -9,7 +9,7 @@ cargo run -p client-node -- --help
 ```
 
 ```shell
-Usage: client-node [OPTIONS] --keypair-path <KEYPAIR_PATH> --provider-node-owner <PROVIDER_NODE_OWNER> [RESPONSE_TYPE]
+Usage: client-node [OPTIONS] --keypair-path <KEYPAIR_PATH> --proxy-master-owner <PROVIDER_NODE_OWNER> [RESPONSE_TYPE]
 
 Arguments:
   [RESPONSE_TYPE]  [default: json] [possible values: json, text]
@@ -17,7 +17,7 @@ Arguments:
 Options:
       --keypair-path <KEYPAIR_PATH>
           
-      --provider-node-owner <PROVIDER_NODE_OWNER>
+      --proxy-master-owner <PROVIDER_NODE_OWNER>
           
       --program-id <PROGRAM_ID>
           [default: FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ]
