@@ -13,6 +13,7 @@ use solana_client::client_error::reqwest::Proxy;
 use std::process::{exit, ExitCode};
 use std::sync::Arc;
 
+#[tracing::instrument(name = "get_proxy", ret, err)]
 pub async fn get_proxy(
     proxy_url: &str,
     solana_manager_header: &FullRouteHeader,
@@ -23,6 +24,7 @@ pub async fn get_proxy(
     Ok(proxy)
 }
 
+#[tracing::instrument(name = "client_node_main", ret, err)]
 pub async fn client_node_main(client_node_cli_args: ClientNodeOptions) -> anyhow::Result<ExitCode> {
     setup_tracing();
     let mut solana_manager = SolanaManager::new(

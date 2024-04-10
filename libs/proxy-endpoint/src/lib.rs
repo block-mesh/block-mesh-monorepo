@@ -14,6 +14,7 @@ use uuid::Uuid;
 mod connection_listener;
 mod endpoint_headers;
 
+#[tracing::instrument(name = "proxy_endpoint_main", ret, err)]
 pub async fn proxy_endpoint_main(cli_args: ProxyEndpointNodeOptions) -> anyhow::Result<ExitCode> {
     setup_tracing();
     let mut solana_manager =

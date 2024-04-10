@@ -22,17 +22,20 @@ use token_management::channels::{update_token_manager, ChannelMessage, TokenMana
 use tokio::net::TcpListener;
 use tokio::sync::broadcast;
 
+#[tracing::instrument(name = "proxy_master_main", ret, err)]
 pub async fn proxy_master_main(
     proxy_master_node_options: ProxyMasterNodeOptions,
 ) -> anyhow::Result<ExitCode> {
     setup_tracing();
     let ip_addr = get_ip().await?;
-    tracing::info!("IP address: {}", ip_addr);
+    tracing::info!("Local IP address: {}", ip_addr);
     let pool = ProxyPool::default();
     let addr_proxies = SocketAddr::from(([0, 0, 0, 0], proxy_master_node_options.proxy_port));
+    tracing::info!("Binding to proxy_port: {}", addr_proxies);
     let proxy_listener = TcpListener::bind(addr_proxies).await?;
     tracing::info!("Listening on for proxies on: {}", addr_proxies);
     let addr_clients = SocketAddr::from(([0, 0, 0, 0], proxy_master_node_options.client_port));
+    tracing::info!("Binding to client_port: {}", addr_clients);
     let client_listener = TcpListener::bind(addr_clients).await?;
     tracing::info!("Listening on for clients on: {}", addr_clients);
 

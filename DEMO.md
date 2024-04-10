@@ -11,9 +11,9 @@ But it's not mandatory, you see the basics working on a single host.
 ## Launch the Proxy Master node
 
 This will try to bind by default to port `0.0.0.0:5000` and `0.0.0.0:4000`.
-Run `cargo run -p provider-node -- --help` to see the options.
+Run `cargo run -p blockmesh-bin -- proxy-master --help` to see the options.
 
-`cargo run -p provider-node -- --keypair-path example-keys/provider-node.json`
+`cargo run -p blockmesh-bin -- proxy-master --keypair-path example-keys/proxy-master.json`
 
 ## Launch the Proxy-Endpoint Node
 
@@ -22,7 +22,10 @@ This will run the `proxy-endpoint` and try to connect to the first `proxy-master
 
 Can override the `IP` or `owner` of the `proxy-master` via the `CLI` , see `--help` for more info.
 
-`cargo run -p endpoint-node -- --keypair-path example-keys/client.json`
+`cargo run -p blockmesh-bin -- proxy-endpoint --keypair-path example-keys/client.json`
+
+If you want to test with a local `proxy-master` you can use the `--proxy-override` option to point to it.
+For example `--proxy-override 127.0.0.1:5000`, which points to the default `proxy-master` `proxy_port`.
 
 ## Run the client and perform a request through the network
 
@@ -30,11 +33,17 @@ This client is similar to a basic `curl` but handles the protocol details for yo
 Later we'll extend it to be a local proxy, you can point your browser or other applications to go through,
 enabling a smooth and seamless interaction with `BlockMesh`.
 
-`cargo run -p client-node -- --keypair-path example-keys/client.json`
+`cargo run -p blockmesh-bin -- client-node --keypair-path example-keys/client.json`
+
+If you want to test with a local `proxy-master` you can use the `--proxy-override` option to point to it.
+For example `--proxy-override 127.0.0.1:4000`, which points to the default `proxy-master` `client_port`.
 
 The default `--target` will just return your `IP` details, which should reflect the `proxy-endpoint` since it actually
 terminates the request.
 You can change it via the `--target` option.
+
+The `client-node` also supports `proxy` mode, which will launch it as a local `proxy` server.
+You can run `curl -x` pointing to it, or point to it in your browser settings.
 
 ## Caveats
 
