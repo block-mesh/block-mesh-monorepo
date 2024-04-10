@@ -16,4 +16,5 @@ serde = { workspace = true, features = ["derive"] }
 tokio = { workspace = true, features = ["full"] }
 client-node = { path = "../client-node" }
 proxy-master = { path = "../proxy-master" }
+proxy-endpoint = { path = "../proxy-endpoint" }
 anyhow = { workspace = true }

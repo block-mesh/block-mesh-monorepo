@@ -35,7 +35,7 @@ pub async fn process_endpoint_headers(
         nonce,
         signed_message,
         pubkey,
-        "endpoint-node".to_string(),
+        "proxy-endpoint".to_string(),
     );
     let json = serde_json::to_string(&solana_manager_auth)?;
     let proxy_authorization = HeaderValue::from_str(&json)?;
