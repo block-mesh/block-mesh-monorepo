@@ -11,10 +11,11 @@ clap = { workspace = true, features = ["derive"] }
 solana-sdk = { workspace = true }
 blockmesh-program = { path = "../../programs/blockmesh-program" }
 block-mesh-solana-client = { path = "../block-mesh-solana-client" }
-block-mesh-common = { path = "../block-mesh-common", features = ["http"] }
+block-mesh-common = { path = "../block-mesh-common", features = ["http", "cli"] }
 serde = { workspace = true, features = ["derive"] }
-
-
+tokio = { workspace = true, features = ["full"] }
+client-node = { path = "../client-node" }
+anyhow = { workspace = true }
 
 [lints]
 workspace = true

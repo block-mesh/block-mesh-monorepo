@@ -1,16 +1,14 @@
-mod cli_args;
 mod management;
 mod modes;
 
-use crate::cli_args::ClientNodeCliArgs;
 use crate::modes::cli::cli_mode;
 use crate::modes::proxy_mode::proxy_mode;
 use anchor_lang::Discriminator;
+use block_mesh_common::cli::{ClientNodeMode, ClientNodeOptions};
 use block_mesh_common::tracing::setup_tracing;
 use block_mesh_solana_client::helpers::get_provider_node_address;
 use block_mesh_solana_client::manager::{FullRouteHeader, SolanaManager};
 use blockmesh_program::state::provider_node::ProviderNode;
-use clap::Parser;
 use solana_client::client_error::reqwest::Proxy;
 use std::process::{exit, ExitCode};
 use std::sync::Arc;
@@ -25,17 +23,15 @@ pub async fn get_proxy(
     Ok(proxy)
 }
 
-#[tokio::main]
-async fn main() -> anyhow::Result<ExitCode> {
+pub async fn client_node_main(client_node_cli_args: ClientNodeOptions) -> anyhow::Result<ExitCode> {
     setup_tracing();
-    let client_node_cli_args = ClientNodeCliArgs::parse();
     let mut solana_manager = SolanaManager::new(
         &client_node_cli_args.keypair_path,
         &client_node_cli_args.program_id,
     )
     .await?;
     solana_manager.create_client_account_if_needed().await?;
-    let provider_node_account: ProviderNode = match client_node_cli_args.provider_node_owner {
+    let provider_node_account: ProviderNode = match client_node_cli_args.proxy_master_node_owner {
         Some(provider_node_owner) => {
             let provider_node_address =
                 get_provider_node_address(&client_node_cli_args.program_id, &provider_node_owner);
@@ -95,11 +91,11 @@ async fn main() -> anyhow::Result<ExitCode> {
     // ?;
 
     match &client_node_cli_args.mode {
-        cli_args::Mode::Cli => {
+        ClientNodeMode::Cli => {
             tracing::info!("Starting in CLI mode");
             cli_mode(solana_manager, &proxy_url, client_node_cli_args).await?;
         }
-        cli_args::Mode::Proxy => {
+        ClientNodeMode::Proxy => {
             tracing::info!("Starting in proxy mode");
             proxy_mode(
                 solana_manager,

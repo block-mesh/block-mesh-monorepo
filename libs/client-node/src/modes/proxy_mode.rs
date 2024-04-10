@@ -1,6 +1,6 @@
-use crate::cli_args::ClientNodeCliArgs;
 use axum::body::Bytes;
 use axum::http::{header, HeaderValue};
+use block_mesh_common::cli::ClientNodeOptions;
 use block_mesh_common::http::{empty, full, host_addr};
 use block_mesh_solana_client::helpers::sign_message;
 use block_mesh_solana_client::manager::{FullRouteHeader, SolanaManager};
@@ -21,7 +21,7 @@ use uuid::Uuid;
 pub async fn proxy_mode(
     solana_manager: Arc<SolanaManager>,
     proxy_url: Arc<String>,
-    client_node_cli_args: ClientNodeCliArgs,
+    client_node_cli_args: ClientNodeOptions,
 ) -> anyhow::Result<()> {
     let addr = SocketAddr::from(([127, 0, 0, 1], client_node_cli_args.proxy_port));
     let listener = TcpListener::bind(addr).await?;

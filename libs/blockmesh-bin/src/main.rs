@@ -1,31 +1,16 @@
-use clap::{Parser, Subcommand};
-mod cli_options;
-use crate::cli_options::client_node_options::ClientNodeOptions;
-use crate::cli_options::proxy_endpoint_node_options::ProxyEndpointNodeOptions;
-use crate::cli_options::proxy_master_node_options::ProxyMasterNodeOptions;
+use clap::Parser;
+use std::process::ExitCode;
 
-/// Main CLI arguments
-#[derive(Parser, Debug)]
-#[clap(author, version, about, long_about = None)]
-struct Args {
-    #[clap(subcommand)]
-    command: Commands,
-}
+use block_mesh_common::cli::{CliArgs, Commands};
+use client_node::client_node_main;
 
-/// Commands are mutually exclusive groups
-#[derive(Subcommand, Debug)]
-enum Commands {
-    ClientNode(ClientNodeOptions),
-    ProxyMaster(ProxyMasterNodeOptions),
-    ProxyEndpoint(ProxyEndpointNodeOptions),
-}
-
-fn main() {
-    let args = Args::parse();
+#[tokio::main]
+async fn main() -> anyhow::Result<ExitCode> {
+    let args = CliArgs::parse();
 
     match args.command {
-        Commands::ClientNode(_a) => {}
-        Commands::ProxyMaster(_b) => {}
-        Commands::ProxyEndpoint(_c) => {}
+        Commands::ClientNode(client_node_options) => client_node_main(client_node_options).await,
+        Commands::ProxyMaster(_b) => Ok(ExitCode::SUCCESS),
+        Commands::ProxyEndpoint(_c) => Ok(ExitCode::SUCCESS),
     }
 }
