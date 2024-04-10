@@ -5,11 +5,11 @@ This is the executable for `provider nodes`. They run it on their local machine.
 The `provider node` registers on `solana` and waits for incoming requests from clients.
 
 ```shell
-cargo run -p provider-node -- --help
+cargo run -p proxy-master -- --help
 ```
 
 ```shell
-Usage: provider-node [OPTIONS] --keypair-path <KEYPAIR_PATH>
+Usage: proxy-master [OPTIONS] --keypair-path <KEYPAIR_PATH>
 
 Options:
       --keypair-path <KEYPAIR_PATH>  

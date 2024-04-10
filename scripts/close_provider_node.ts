@@ -23,7 +23,7 @@ function getConnection(network: Network): Connection {
 }
 
 async function main() {
-    const providerNodeWallet = loadWalletKey("./example-keys/provider-node.json");
+    const providerNodeWallet = loadWalletKey("./example-keys/proxy-master.json");
     const connection = getConnection(Network.DEVNET);
     const [providerNode, bump] = PublicKey.findProgramAddressSync([
         Buffer.from(anchor.utils.bytes.utf8.encode("PROVIDER_NODE")),

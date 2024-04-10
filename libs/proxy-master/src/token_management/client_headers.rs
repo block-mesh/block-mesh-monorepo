@@ -39,7 +39,7 @@ pub async fn process_client_headers(
         nonce,
         signed_message,
         pubkey,
-        "provider-node-forward".to_string(),
+        "proxy-master-forward".to_string(),
     );
     let json = serde_json::to_string(&solana_manager_auth)?;
     let proxy_authorization = HeaderValue::from_str(&json)?;
