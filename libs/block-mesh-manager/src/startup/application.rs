@@ -41,8 +41,11 @@ impl Application {
         };
 
         let un_auth_router = Router::new()
-            .route("/login", get(routes::login_register::login::handler))
-            .route("/register", get(routes::login_register::register::handler))
+            .route("/login", get(routes::login::login_form::handler))
+            .route("/register", get(routes::register::register_form::handler))
+            .route("/create_task", get(routes::tasks::create_task::handler))
+            .route("/tasks_table", get(routes::tasks::tasks_table::handler))
+            .route("/dashboard", get(routes::dashboard::get::handler))
             .route("/health_check", get(routes::health_check::get::handler));
 
         let application_base_url = ApplicationBaseUrl(settings.application.base_url.clone());

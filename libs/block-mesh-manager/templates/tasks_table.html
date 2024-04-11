@@ -1,0 +1,37 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="mx-auto bg-gray-700 p-4 h-screen">
+    <h1 class="mb-6 text-center text-2xl font-semibold text-white">Tasks Overview</h1>
+    <div class="overflow-x-auto">
+        <table class="whitespace-no-wrap w-full table-auto text-left border-white border-solid border-2">
+            <thead>
+            <tr class="border-b bg-gray-800 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                <th class="px-4 py-3">URL</th>
+                <th class="px-4 py-3">Method</th>
+                <th class="px-4 py-3">Headers</th>
+                <th class="px-4 py-3">Body</th>
+                <th class="px-4 py-3">Response</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y bg-gray-500">
+            <!-- Dynamically generated task rows go here -->
+            <tr class="text-white">
+                <td class="px-4 py-3">https://example.com/api/tasks</td>
+                <td class="px-4 py-3">POST</td>
+                <td class="px-4 py-3">
+                    <pre>{"Content-Type": "application/json"}</pre>
+                </td>
+                <td class="px-4 py-3">
+                    <pre>{"name": "New Task", "priority": "High"}</pre>
+                </td>
+                <td class="px-4 py-3">
+                    <pre>{"status": "success", "id": "1"}</pre>
+                </td>
+            </tr>
+            <!-- Add more rows as needed -->
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}
