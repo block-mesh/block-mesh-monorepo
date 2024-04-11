@@ -40,8 +40,10 @@ impl Application {
             _ => CorsLayer::permissive(),
         };
 
-        let un_auth_router =
-            Router::new().route("/health_check", get(routes::health_check::get::handler));
+        let un_auth_router = Router::new()
+            .route("/login", get(routes::login_register::login::handler))
+            .route("/register", get(routes::login_register::register::handler))
+            .route("/health_check", get(routes::health_check::get::handler));
 
         let application_base_url = ApplicationBaseUrl(settings.application.base_url.clone());
         let app = Router::new()
