@@ -21,6 +21,7 @@ dotenv = { workspace = true }
 enum-iterator = { workspace = true }
 tokio = { workspace = true, features = ["full"] }
 axum-login = { workspace = true }
+tower-sessions-sqlx-store = { workspace = true, features = ["postgres"] }
 axum = { workspace = true, features = ["ws", "macros"] }
 tower = { workspace = true, features = ["util"] }
 serde_json = { workspace = true }
@@ -33,6 +34,9 @@ tracing-log = { workspace = true }
 http = { workspace = true }
 secret = { path = "../secret", features = ["sqlx"] }
 
+[dependencies.rand]
+workspace = true
+features = ["min_const_gen"]
 
 [dependencies.sqlx]
 workspace = true

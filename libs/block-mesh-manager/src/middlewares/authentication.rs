@@ -1,13 +1,16 @@
-/*
+use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
+use crate::database::user::get_user_by_email::get_user_opt_by_email;
+use crate::database::user::get_user_by_id::get_user_opt_by_id;
+use crate::errors::error::Error;
 use async_trait::async_trait;
 use axum_login::tower_sessions::cookie::time::Duration;
 use axum_login::{
     tower_sessions::{ExpiredDeletion, Expiry, SessionManagerLayer},
     AuthManagerLayer, AuthManagerLayerBuilder, AuthUser, AuthnBackend, UserId,
 };
+use secret::Secret;
 use serde::Deserialize;
 use sqlx::PgPool;
-use std::str::FromStr;
 use tower_sessions_sqlx_store::PostgresStore;
 use uuid::Uuid;
 
@@ -15,8 +18,8 @@ pub type AuthSession = axum_login::AuthSession<Backend>;
 
 #[derive(Debug, Clone, Deserialize)]
 pub struct Credentials {
-    pub wallet_address: String,
-    pub signed_message: String,
+    pub email: String,
+    pub password: Secret<String>,
     pub nonce: String,
 }
 
@@ -34,7 +37,7 @@ impl Backend {
 #[derive(Debug, Clone, Deserialize)]
 pub struct SessionUser {
     pub id: Uuid,
-    pub wallet_address: String,
+    pub email: String,
     pub nonce: String,
 }
 
@@ -49,22 +52,22 @@ impl AuthnBackend for Backend {
         creds: Self::Credentials,
     ) -> Result<Option<Self::User>, Self::Error> {
         let mut transaction = self.db.begin().await.map_err(Error::from)?;
-        let user = get_user_opt_by_wallet(&mut transaction, &creds.wallet_address)
+        let user = get_user_opt_by_email(&mut transaction, &creds.email)
             .await
-            .map_err(|e| Error::AuthError(e.to_string()))?;
+            .map_err(|e| Error::Auth(e.to_string()))?;
         match user {
             None => {
                 return Ok(None);
             }
             Some(user) => {
-                let public_key = Pubkey::from_str(&creds.wallet_address).map_err(Error::from)?;
-                validate_signature(creds.nonce.as_ref(), &creds.signed_message, &public_key)
-                    .map_err(|e| Error::AuthError(e.to_string()))?;
+                if user.password.as_ref() != creds.password.as_ref() {
+                    return Err(Error::Auth("Invalid password".to_string()));
+                }
                 transaction.commit().await.map_err(Error::from)?;
                 Ok(Option::from(SessionUser {
                     id: user.id,
-                    wallet_address: user.wallet_address,
                     nonce: creds.nonce,
+                    email: user.email,
                 }))
             }
         }
@@ -80,16 +83,16 @@ impl AuthnBackend for Backend {
                 return Ok(None);
             }
             Some(user) => {
-                let nonce = get_nonce(&mut transaction, &user.wallet_address)
-                    .await
-                    .map_err(|e| Error::AuthError(e.to_string()))?;
+                let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
+                    .await?
+                    .ok_or_else(|| Error::Auth("Nonce not found".to_string()))?;
                 transaction
                     .commit()
                     .await
-                    .map_err(|e| Error::AuthError(e.to_string()))?;
+                    .map_err(|e| Error::Auth(e.to_string()))?;
                 Ok(Option::from(SessionUser {
                     id: user.id,
-                    wallet_address: user.wallet_address,
+                    email: user.email,
                     nonce: nonce.nonce.as_ref().to_string(),
                 }))
             }
@@ -129,4 +132,3 @@ pub async fn authentication_layer(pool: &PgPool) -> AuthManagerLayer<Backend, Po
     let backend = Backend::new(pool.clone());
     AuthManagerLayerBuilder::new(backend, session_layer).build()
 }
- */
