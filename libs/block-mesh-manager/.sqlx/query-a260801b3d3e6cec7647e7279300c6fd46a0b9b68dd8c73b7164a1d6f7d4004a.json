@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO provider_nodes (id, created_at, address, status) VALUES ($1, $2, $3, $4)",
+  "query": "INSERT INTO proxy_masters (id, created_at, address, status) VALUES ($1, $2, $3, $4)",
   "describe": {
     "columns": [],
     "parameters": {
@@ -13,5 +13,5 @@
     },
     "nullable": []
   },
-  "hash": "57341271e0c0af31ea825033706b8348ad1f13e9ae6ab454cd7c50f120570a55"
+  "hash": "a260801b3d3e6cec7647e7279300c6fd46a0b9b68dd8c73b7164a1d6f7d4004a"
 }

@@ -1,1 +1,1 @@
-mod provider_node;
+mod proxy_master;
