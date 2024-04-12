@@ -60,7 +60,7 @@ impl From<Task> for TaskForTemplate {
             assigned_user_id: OptionWrapper(task.assigned_user_id.unwrap_or(Uuid::nil())),
             status: task.status,
             response_code: OptionWrapper(task.response_code.unwrap_or(0)),
-            response_raw: OptionWrapper(task.response_raw.unwrap_or(String::new())),
+            response_raw: OptionWrapper(task.response_raw.unwrap_or_default()),
             created_at: task.created_at,
         }
     }
