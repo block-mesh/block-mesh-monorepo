@@ -14,22 +14,10 @@
                 <th class="px-4 py-3">Response</th>
             </tr>
             </thead>
-            <tbody class="divide-y bg-gray-500">
-            <!-- Dynamically generated task rows go here -->
-            <tr class="text-white">
-                <td class="px-4 py-3">https://example.com/api/tasks</td>
-                <td class="px-4 py-3">POST</td>
-                <td class="px-4 py-3">
-                    <pre>{"Content-Type": "application/json"}</pre>
-                </td>
-                <td class="px-4 py-3">
-                    <pre>{"name": "New Task", "priority": "High"}</pre>
-                </td>
-                <td class="px-4 py-3">
-                    <pre>{"status": "success", "id": "1"}</pre>
-                </td>
-            </tr>
-            <!-- Add more rows as needed -->
+            <tbody class="divide-y bg-gray-500" id="tasks-content">
+            {% for task in tasks %}
+            {% include "task_row.html" %}
+            {% endfor %}
             </tbody>
         </table>
     </div>

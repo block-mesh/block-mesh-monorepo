@@ -6,7 +6,7 @@ use axum::response::Redirect;
 use axum::{Extension, Form};
 use axum_login::AuthSession;
 use serde::{Deserialize, Serialize};
-use sqlx::types::JsonValue;
+use serde_json::Value;
 use sqlx::PgPool;
 
 #[allow(dead_code)]
@@ -14,8 +14,8 @@ use sqlx::PgPool;
 pub struct CreateTaskForm {
     pub url: String,
     pub method: Method,
-    pub headers: Option<JsonValue>,
-    pub body: Option<JsonValue>,
+    pub headers: Option<Value>,
+    pub body: Option<Value>,
 }
 
 #[tracing::instrument(name = "create_task_post", skip(auth))]

@@ -7,7 +7,7 @@ authors.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-askama = { workspace = true, features = ["with-axum"] }
+askama = { workspace = true, features = ["with-axum", "serde-json"] }
 askama_axum = { workspace = true }
 tokio-stream = { workspace = true, features = ["sync"] }
 serde = { workspace = true, features = ["derive"] }

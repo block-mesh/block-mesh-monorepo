@@ -52,7 +52,7 @@ pingora-http = { version = "0.1.0" }
 pingora-load-balancing = { version = "0.1.0" }
 pingora-proxy = { version = "0.1.0" }
 pingora-limits = { version = "0.1.0" }
-askama = { version = "0.12.1", features = ["with-axum"] }
+askama = { version = "0.12.1", features = ["with-axum", "serde-json"] }
 askama_axum = { version = "0.4.0" }
 tokio-stream = { version = "0.1.14", features = ["sync"] }
 tracing-appender = { version = "0.2.0" }
