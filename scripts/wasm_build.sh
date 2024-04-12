@@ -12,6 +12,14 @@ cd "${ROOT}/libs/extension" || exit
 ## --out-name - force output file names
 ## --target - always use "web"!
 ## See https://rustwasm.github.io/wasm-pack/book/commands/build.html
+
+echo Cleaning up...
+rm -fr extension_js/js/wasm/*
+rm -f chrome.zip
+rm -f firefox.zip
+rm -fr "${ROOT}"/tmp_ext/chrome/*
+rm -fr "${ROOT}"/tmp_ext/firefox/*
+
 echo Building wasm module...
 wasm-pack build . --dev --no-typescript --out-dir "./extension_js/js/wasm" --out-name "blockmesh_ext" --target web
 
@@ -27,7 +35,7 @@ rm -f chrome.zip && \
 (cd extension_js && cp manifests/manifest_cr.json manifest.json)&& \
 (cd extension_js && zip -rq ../chrome.zip .) && \
 (cd extension_js && rm -f manifest.json) && \
-(cp chrome.zip "${ROOT}/tmp_ext/chrome/") && \
+(cp -f chrome.zip "${ROOT}/tmp_ext/chrome/") && \
 (cd "${ROOT}/tmp_ext/chrome/" && unzip chrome.zip) && \
 echo Chrome package: chrome.zip
 
@@ -36,7 +44,7 @@ rm -f firefox.zip && \
 (cd extension_js && cp manifests/manifest_ff.json manifest.json)&& \
 (cd extension_js && zip -rq ../firefox.zip .) && \
 (cd extension_js && rm -f manifest.json) && \
-(cp firefox.zip "${ROOT}/tmp_ext/firefox/") && \
+(cp -f firefox.zip "${ROOT}/tmp_ext/firefox/") && \
 (cd "${ROOT}/tmp_ext/firefox/" && unzip firefox.zip) && \
 echo Firefox package: firefox.zip
 

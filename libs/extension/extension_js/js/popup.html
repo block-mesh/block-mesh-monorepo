@@ -1,64 +1,27 @@
 <!DOCTYPE html>
-<html>
-
+<html lang="en">
 <head>
-    <style>
-        html {
-            min-height: 5em;
-            min-width: 10em;
-            background: rgb(173, 169, 218);
-        }
-
-        ul {
-            list-style: none;
-        }
-
-        li {
-            margin-bottom: 0.5em;
-            white-space: nowrap;
-        }
-
-        button {
-            text-wrap: nowrap
-        }
-
-        .log:has(> summary:empty) {
-            display: none;
-        }
-
-        .log p {
-            font-size: xx-small;
-        }
-
-        summary {
-            cursor: pointer;
-        }
-    </style>
-    <script type="module" src="popup.js">
-    </script>
+    <link rel="stylesheet" type="text/css" href="popup.css">
+    <script type="module" src="popup.js"></script>
+    <title>BlockMesh</title>
 </head>
-
 <body>
-<h3>Spotify Playlist Builder</h3>
-<p><small>Build a playlist with a random selection from your liked tracks, albums and playlists.</small></p>
-<p id="otherPage"><strong>Wrong page:</strong> open this extension again on one of your Spotify playlists you want to
-    add tracks to.</p>
-<ul>
-    <li>Tracks to add: <select id="tracks_qty">
-        <option value="500">500</option>
-        <option value="1000">1,000</option>
-        <option value="2000">2,000</option>
-        <option value="5000">5,000</option>
-        <option value="10000">10,000</option>
-    </select>
-        <button id="btn_add">Go</button>
-    </li>
-</ul>
-<p><small><a id="btn_info" href="https://github.com/rimutaka/spotify-playlist-builder/#readme">More info</a>&nbsp;&nbsp;<a
-        id="btn_contact" href="https://github.com/rimutaka/spotify-playlist-builder/issues">Bug reports</a></small></p>
-<details class="log" id="log">
-    <summary id="log-summary" title="Click to see the full log"></summary>
-</details>
+<div class="login-container">
+    <h2>Login</h2>
+    <div id="login-form">
+        <div class="form-control">
+            <label for="email">Email</label>
+            <input type="text" name="email" id="email">
+        </div>
+        <div class="form-control">
+            <label for="password">Password</label>
+            <input type="password" id="password" name="password">
+        </div>
+        <button type="submit" id="popup_login_button">Login</button>
+    </div>
+    <details class="log" id="log">
+        <summary id="log-summary" title="Click to see the full log"></summary>
+    </details>
+</div>
 </body>
-
 </html>
