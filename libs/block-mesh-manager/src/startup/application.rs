@@ -43,7 +43,11 @@ impl Application {
 
         let auth_router = Router::new()
             .route("/logout", get(routes::logout::get::handler))
-            .route("/create_task", get(routes::tasks::create_task::handler))
+            .route(
+                "/create_task",
+                get(routes::tasks::create_task::handler)
+                    .post(routes::tasks::create_task_post::handler),
+            )
             .route("/tasks_table", get(routes::tasks::tasks_table::handler))
             .route("/dashboard", get(routes::dashboard::get::handler));
 
