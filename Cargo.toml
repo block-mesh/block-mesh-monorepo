@@ -121,6 +121,7 @@ time = { version = "0.3", features = ['wasm-bindgen'] }
 ipgeolocate = { version = "0.3.5" }
 ipinfo = { version = "3.0.0" }
 cargo-husky = { version = "1.5.0", features = ["precommit-hook", "run-cargo-clippy", "run-cargo-fmt"] }
+bcrypt = { version = "0.15" }
 
 [workspace.dependencies.rand]
 version = "0.8.5"

@@ -2,7 +2,6 @@ use crate::configuration::settings::Settings;
 use crate::envars::app_env_var::AppEnvVar;
 use crate::envars::env_var;
 use crate::envars::get_env_var_or_panic::get_env_var_or_panic;
-// use crate::middlewares::authentication::{authentication_layer, Backend};
 use crate::middlewares::authentication::{authentication_layer, Backend};
 use crate::routes;
 use axum::routing::get;
@@ -43,13 +42,18 @@ impl Application {
         };
 
         let auth_router = Router::new()
+            .route("/logout", get(routes::logout::get::handler))
             .route("/create_task", get(routes::tasks::create_task::handler))
             .route("/tasks_table", get(routes::tasks::tasks_table::handler))
             .route("/dashboard", get(routes::dashboard::get::handler));
 
         let un_auth_router = Router::new()
             .route("/login", get(routes::login::login_form::handler))
-            .route("/register", get(routes::register::register_form::handler))
+            .route(
+                "/register",
+                get(routes::register::register_form::handler)
+                    .post(routes::register::register_post::handler),
+            )
             .route("/health_check", get(routes::health_check::get::handler));
 
         let application_base_url = ApplicationBaseUrl(settings.application.base_url.clone());

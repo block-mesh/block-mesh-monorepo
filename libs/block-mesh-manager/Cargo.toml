@@ -32,6 +32,7 @@ tracing-appender = { workspace = true }
 tracing-bunyan-formatter = { workspace = true }
 tracing-log = { workspace = true }
 http = { workspace = true }
+bcrypt = { workspace = true }
 secret = { path = "../secret", features = ["sqlx"] }
 
 [dependencies.rand]

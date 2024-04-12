@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use std::iter;
 use uuid::Uuid;
 
-const _CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
+const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
 pub struct Nonce {
@@ -17,9 +17,9 @@ pub struct Nonce {
 }
 
 impl Nonce {
-    pub(crate) fn _generate_nonce(len: usize) -> String {
+    pub(crate) fn generate_nonce(len: usize) -> String {
         let mut rng = rand::thread_rng();
-        let one_char = || _CHARSET[rng.gen_range(0.._CHARSET.len())] as char;
+        let one_char = || CHARSET[rng.gen_range(0..CHARSET.len())] as char;
         iter::repeat_with(one_char).take(len).collect()
     }
 }
