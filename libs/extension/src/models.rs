@@ -56,24 +56,24 @@ impl Default for VariablesAlbumOrPlaylistTracks {
     }
 }
 
-/// A serializable struct for adding variables to a spotify request
-/// ````
-///     "variables": {
-///         "uris": [
-///         "spotify:track:7lcFWApQa0PE2Dw4mT8N1I",
-///         "spotify:track:1L7mNK7YX1qI42V5lG7kDf",
-///         "spotify:track:1YbZZIJOBrfTJ56rqEBpIZ",
-///         "spotify:track:0PV4VX0Oy652WmCA3AstAH",
-///         "spotify:track:7EknPu06BycAlX2DI6tUnu",
-///         "spotify:track:3NpxaxQQdRLjYoU5g02iaw"
-///         ],
-///         "playlistUri": "spotify:playlist:70Y4rw4zDsRBvyolsQATni",
-///         "newPosition": {
-///         "moveType": "BOTTOM_OF_PLAYLIST",
-///         "fromUid": null
-///         }
-///     },
-/// ```
+// A serializable struct for adding variables to a spotify request
+// ````
+//     "variables": {
+//         "uris": [
+//         "spotify:track:7lcFWApQa0PE2Dw4mT8N1I",
+//         "spotify:track:1L7mNK7YX1qI42V5lG7kDf",
+//         "spotify:track:1YbZZIJOBrfTJ56rqEBpIZ",
+//         "spotify:track:0PV4VX0Oy652WmCA3AstAH",
+//         "spotify:track:7EknPu06BycAlX2DI6tUnu",
+//         "spotify:track:3NpxaxQQdRLjYoU5g02iaw"
+//         ],
+//         "playlistUri": "spotify:playlist:70Y4rw4zDsRBvyolsQATni",
+//         "newPosition": {
+//         "moveType": "BOTTOM_OF_PLAYLIST",
+//         "fromUid": null
+//         }
+//     },
+// ```
 
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
@@ -104,22 +104,22 @@ impl Default for VariablesAddTracksToPlaylist {
     }
 }
 
-/// The top level structure for including variables as POST payload to a spotify request.
-/// Get requests have the top level members as HTTP query params and should be serialized individually.
-/// ````
-/// {
-///     "variables": {
-///         ... <T> ...
-///     },
-///     "operationName": "addToPlaylist",
-///     "extensions": {
-///         "persistedQuery": {
-///         "version": 1,
-///         "sha256Hash": "200b7618afd05364c4aafb95e2070249ed87ee3f08fc4d2f1d5d04fdf1a516d9"
-///         }
-///     }
-/// }
-/// ```
+// The top level structure for including variables as POST payload to a spotify request.
+// Get requests have the top level members as HTTP query params and should be serialized individually.
+// ````
+// {
+//     "variables": {
+//         ... <T> ...
+//     },
+//     "operationName": "addToPlaylist",
+//     "extensions": {
+//         "persistedQuery": {
+//         "version": 1,
+//         "sha256Hash": "200b7618afd05364c4aafb95e2070249ed87ee3f08fc4d2f1d5d04fdf1a516d9"
+//         }
+//     }
+// }
+// ```
 #[derive(Debug, Serialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct Payload<T: Serialize> {

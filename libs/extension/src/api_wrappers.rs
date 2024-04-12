@@ -51,7 +51,7 @@ pub(crate) async fn fetch_album_tracks(
     .await
     {
         Ok(v) => v,
-        Err(e) if matches!(e, RetryAfter::Never) => {
+        Err(RetryAfter::Never) => {
             return Vec::new();
         }
         Err(_) => {
@@ -225,7 +225,7 @@ pub(crate) async fn fetch_playlist_tracks(
     .await
     {
         Ok(v) => v,
-        Err(e) if matches!(e, RetryAfter::Never) => {
+        Err(RetryAfter::Never) => {
             return None;
         }
         Err(_) => {
@@ -405,7 +405,7 @@ pub(crate) async fn fetch_lib_v3_items(
     .await
     {
         Ok(v) => v,
-        Err(e) if matches!(e, RetryAfter::Never) => {
+        Err(RetryAfter::Never) => {
             return Vec::new();
         }
         Err(_) => {
@@ -572,7 +572,7 @@ pub(crate) async fn add_tracks_to_playlist(
                     // clear for the next lot of tracks
                     payload.variables.uris.clear();
                 }
-                Err(e) if matches!(e, RetryAfter::Never) => {
+                Err(RetryAfter::Never) => {
                     log!("Failed to add {} tracks", idx + 1);
                     tracks_missed += payload.variables.uris.len();
                     // clear the list to make room for the next lot of tracks
