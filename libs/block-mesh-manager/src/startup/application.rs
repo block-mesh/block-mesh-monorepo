@@ -48,7 +48,10 @@ impl Application {
             .route("/dashboard", get(routes::dashboard::get::handler));
 
         let un_auth_router = Router::new()
-            .route("/login", get(routes::login::login_form::handler))
+            .route(
+                "/login",
+                get(routes::login::login_form::handler).post(routes::login::login_post::handler),
+            )
             .route(
                 "/register",
                 get(routes::register::register_form::handler)

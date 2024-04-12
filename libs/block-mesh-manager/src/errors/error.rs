@@ -20,12 +20,17 @@ pub enum Error {
     UserNotFound,
     #[error(transparent)]
     Bcrypt(#[from] bcrypt::BcryptError),
+    #[error("Nonce not found")]
+    NonceNotFound,
 }
 
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         tracing::error!("Error occurred: {}", self);
         match self {
+            Error::NonceNotFound => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+            }
             Error::Bcrypt(_) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
             }
@@ -54,6 +59,7 @@ impl From<Error> for StatusCode {
     fn from(error: Error) -> Self {
         tracing::error!("Error occurred: {}", error);
         match error {
+            Error::NonceNotFound => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Bcrypt(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::UserNotFound => StatusCode::BAD_REQUEST,
             Error::PasswordMismatch => StatusCode::BAD_REQUEST,
