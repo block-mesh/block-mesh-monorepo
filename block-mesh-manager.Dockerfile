@@ -6,11 +6,16 @@ RUN apk add tmux curl protoc musl-dev gzip git
 #  && chmod +x tailwindcss-linux-x64 \
 #  && mv tailwindcss-linux-x64 tailwindcss
 
-RUN mkdir -p configuration
-RUN cd /opt/configuration && curl -sLO https://raw.githubusercontent.com/block-mesh/block-mesh-monorepo/master/libs/block-mesh-manager/configuration/base.yaml
-RUN cd /opt/configuration && curl -sLO https://raw.githubusercontent.com/block-mesh/block-mesh-monorepo/master/libs/block-mesh-manager/configuration/local.yaml
-RUN cd /opt/configuration && curl -sLO https://raw.githubusercontent.com/block-mesh/block-mesh-monorepo/master/libs/block-mesh-manager/configuration/staging.yaml
-RUN cd /opt/configuration && curl -sLO https://raw.githubusercontent.com/block-mesh/block-mesh-monorepo/master/libs/block-mesh-manager/configuration/production.yaml
+# for configuration, migrations and templates
+RUN git clone https://github.com/block-mesh/block-mesh-monorepo.git
+RUN cp -fr libs/block-mesh-manager/* .
+
+#RUN mkdir -p configuration
+#RUN cd /opt/configuration && curl -sLO https://raw.githubusercontent.com/block-mesh/block-mesh-monorepo/master/libs/block-mesh-manager/configuration/base.yaml
+#RUN cd /opt/configuration && curl -sLO https://raw.githubusercontent.com/block-mesh/block-mesh-monorepo/master/libs/block-mesh-manager/configuration/local.yaml
+#RUN cd /opt/configuration && curl -sLO https://raw.githubusercontent.com/block-mesh/block-mesh-monorepo/master/libs/block-mesh-manager/configuration/staging.yaml
+#RUN cd /opt/configuration && curl -sLO https://raw.githubusercontent.com/block-mesh/block-mesh-monorepo/master/libs/block-mesh-manager/configuration/production.yaml
+
 RUN curl -sLO https://github.com/block-mesh/block-mesh-monorepo/releases/latest/download/block-mesh-manager-x86_64-unknown-linux-musl.tar.gz \
   && tar -xvf block-mesh-manager-x86_64-unknown-linux-musl.tar.gz \
   && chmod +x block-mesh-manager

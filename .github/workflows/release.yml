@@ -117,5 +117,15 @@ jobs:
           push: true
           tags: blockmesh/block-mesh-manager:latest,blockmesh/block-mesh-manager:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
-
+  publish-to-heroko:
+    name: "Publish to Heroku"
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: akhileshns/heroku-deploy@v3.13.15 # This is the action
+        with:
+          heroku_api_key: ${{secrets.HEROKU_API}}
+          heroku_app_name: "block-mesh-manager" #Must be unique in Heroku
+          heroku_email: ${{secrets.HEROKU_EMAIL}}
+          usedocker: true
 # https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/
