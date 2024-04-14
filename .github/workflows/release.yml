@@ -61,10 +61,6 @@ jobs:
             os: "ubuntu-latest"
           - target: "x86_64-unknown-linux-musl"
             os: "ubuntu-latest"
-          - target: "aarch64-unknown-linux-gnu"
-            os: "ubuntu-latest"
-          - target: "aarch64-unknown-linux-musl"
-            os: "ubuntu-latest"
     runs-on: ${{ matrix.os }}
     steps:
       - name: "Check out the repo"
@@ -72,7 +68,7 @@ jobs:
       - name: "Cache"
         uses: Swatinem/rust-cache@v2
         with:
-          key: release-upload
+          key: release-upload-${{ matrix.target }}
           cache-all-crates: true
       - name: "Upload Binaries"
         uses: "taiki-e/upload-rust-binary-action@v1"
@@ -111,7 +107,6 @@ jobs:
         uses: "docker/build-push-action@v5"
         with:
           context: .
-          platforms: linux/amd64,linux/arm64
           file: block-mesh-manager.Dockerfile
           push: true
           tags: blockmesh/block-mesh-manager:latest,blockmesh/block-mesh-manager:v${{ needs.get-tag.outputs.pkg-version }}
