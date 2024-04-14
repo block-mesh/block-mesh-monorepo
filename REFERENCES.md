@@ -1,5 +1,11 @@
 # REFERENCES
 
+## Extension in Rust
+
+* [Chrome extension example with Rust and WASM](https://dev.to/rimutaka/chrome-extension-with-rust-and-wasm-by-example-5cbh)
+* [tab-organizer](https://github.com/Pauan/tab-organizer)
+* [Extension-with-WASM](https://github.com/inflatablegrade/Extension-with-WASM)
+
 ## HTMX
 
 * [HTML with rust - by Shuttle](https://www.shuttle.rs/blog/2023/10/25/htmx-with-rust)

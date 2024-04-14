@@ -35,6 +35,15 @@ aes-gcm-siv = { git = "https://github.com/RustCrypto/AEADs", rev = "6105d7a5591a
 curve25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dalek", rev = "8274d5cbb6fc3f38cdc742b4798173895cd2a290" }
 
 [workspace.dependencies]
+
+wasm-bindgen = { version = "0.2" }
+js-sys = { version = "0.3" }
+wasm-bindgen-futures = { version = "0.4" }
+serde-wasm-bindgen = { version = "0.6" }
+urlencoding = { version = "2.1" }
+getrandom = { version = "0.2", features = ["js"] }
+wee_alloc = { version = "0.4.5" }
+wasm-bindgen-test = "0.3.36"
 console_error_panic_hook = { version = "0.1.7" }
 cfg-if = { version = "1.0.0" }
 clap = { version = "4.5.2", features = ["derive"] }
@@ -121,6 +130,19 @@ time = { version = "0.3", features = ['wasm-bindgen'] }
 ipgeolocate = { version = "0.3.5" }
 ipinfo = { version = "3.0.0" }
 cargo-husky = { version = "1.5.0", features = ["precommit-hook", "run-cargo-clippy", "run-cargo-fmt"] }
+
+[workspace.dependencies.web-sys]
+version = "0.3"
+features = [
+  "console",
+  "WorkerGlobalScope",
+  "Window",
+  'Headers',
+  'Request',
+  'RequestInit',
+  'RequestMode',
+  'Response',
+]
 
 [workspace.dependencies.rand]
 version = "0.8.5"

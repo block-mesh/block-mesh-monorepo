@@ -1,0 +1,40 @@
+[package]
+name = "extension"
+version = "0.1.0"
+edition = "2021"
+authors.workspace = true
+
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+wasm-bindgen = { workspace = true }
+js-sys = { workspace = true }
+wasm-bindgen-futures = { workspace = true }
+serde_json = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde-wasm-bindgen = { workspace = true }
+urlencoding = { workspace = true }
+rand = { workspace = true }
+getrandom = { workspace = true, features = ["js"] }
+console_error_panic_hook = { workspace = true }
+wee_alloc = { workspace = true }
+reqwest = { workspace = true, default-features = false, features = [
+  "json",
+] }
+
+[dependencies.web-sys]
+workspace = true
+features = [
+  "console",
+  "WorkerGlobalScope",
+  "Window",
+  'Headers',
+  'Request',
+  'RequestInit',
+  'RequestMode',
+  'Response',
+]
+
+[dev-dependencies]
+wasm-bindgen-test = { workspace = true }

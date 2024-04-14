@@ -1,0 +1,49 @@
+{
+  "manifest_version": 3,
+  "name": "BlockMesh Network",
+  "short_name": "BlockMesh",
+  "description": "BlockMesh Network allows you to generate passive income from your excessive bandwidth",
+  "version": "0.0.1",
+  "author": "ohaddahan@blockmesh.xyz",
+  "minimum_chrome_version": "110",
+  "offline_enabled": false,
+  "action": {
+    "default_title": "BlockMesh",
+    "default_icon": {
+      "16": "assets/block-mesh-logo.png",
+      "19": "assets/block-mesh-logo.png",
+      "32": "assets/block-mesh-logo.png",
+      "38": "assets/block-mesh-logo.png"
+    },
+    "default_popup": "js/popup.html",
+    "show_matches": [
+      "*://*"
+    ]
+  },
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  },
+  "background": {
+    "type": "module",
+    "service_worker": "js/background.js"
+  },
+  "permissions": [
+    "storage",
+    "background",
+    "webRequest"
+  ],
+  "host_permissions": [
+    "<all_urls>"
+  ],
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "resources": [
+        "js/wasm/blockmesh_ext.js",
+        "js/wasm/blockmesh_ext.wasm"
+      ]
+    }
+  ]
+}

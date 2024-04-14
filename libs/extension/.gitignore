@@ -1,0 +1,8 @@
+*.zip
+*/target
+**/*.rs.bk
+Cargo.lock
+bin/
+pkg/
+wasm-pack.log
+extension_js/js/wasm
