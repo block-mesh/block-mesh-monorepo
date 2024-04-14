@@ -1,0 +1,17 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE\n        tasks\n        SET\n        response_code = $1,\n        response_raw = $2,\n        status = $3\n        WHERE id = $4",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Text",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "644a7f55848403b087ec0fc48cfe6bd3d018d1454a5af38bf80808f22ae79285"
+}

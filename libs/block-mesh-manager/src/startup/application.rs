@@ -4,7 +4,7 @@ use crate::envars::env_var;
 use crate::envars::get_env_var_or_panic::get_env_var_or_panic;
 use crate::middlewares::authentication::{authentication_layer, Backend};
 use crate::routes;
-use axum::routing::get;
+use axum::routing::{get, post};
 use axum::{Extension, Router};
 use axum_login::login_required;
 use sqlx::postgres::PgPool;
@@ -51,7 +51,15 @@ impl Application {
             .route("/tasks_table", get(routes::tasks::tasks_table::handler))
             .route("/dashboard", get(routes::dashboard::get::handler));
 
+        let api_router = Router::new()
+            .route("/get_token", post(routes::api_token::get_token::handler))
+            .route("/get_task", post(routes::tasks::get_task::handler));
+
         let un_auth_router = Router::new()
+            .route(
+                "/",
+                get(routes::login::login_form::handler).post(routes::login::login_post::handler),
+            )
             .route(
                 "/login",
                 get(routes::login::login_form::handler).post(routes::login::login_post::handler),
@@ -67,6 +75,7 @@ impl Application {
         let app = Router::new()
             .nest("/", auth_router)
             .route_layer(login_required!(Backend, login_url = "/login"))
+            .nest("/api", api_router)
             .nest("/", un_auth_router)
             .layer(Extension(application_base_url))
             .layer(Extension(db_pool.clone()))

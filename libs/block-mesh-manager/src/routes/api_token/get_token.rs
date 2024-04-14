@@ -1,0 +1,60 @@
+use crate::database::api_token::get_api_token_by_user_id_and_status::get_api_token_by_usr_and_status;
+use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
+use crate::database::user::get_user_by_email::get_user_opt_by_email;
+use crate::domain::api_token::ApiTokenStatus;
+use crate::errors::error::Error;
+use crate::middlewares::authentication::{Backend, Credentials};
+use anyhow::anyhow;
+use axum::{Extension, Json};
+use axum_login::AuthSession;
+use secret::Secret;
+use serde::{Deserialize, Serialize};
+use sqlx::PgPool;
+use uuid::Uuid;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetTokenRequest {
+    email: String,
+    password: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetTokenResponse {
+    pub api_token: Uuid,
+}
+
+#[tracing::instrument(name = "get_token", skip(body, auth))]
+pub async fn handler(
+    Extension(pool): Extension<PgPool>,
+    Extension(mut auth): Extension<AuthSession<Backend>>,
+    Json(body): Json<GetTokenRequest>,
+) -> Result<Json<GetTokenResponse>, Error> {
+    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let user = get_user_opt_by_email(&mut transaction, &body.email)
+        .await?
+        .ok_or_else(|| Error::UserNotFound)?;
+    let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
+        .await?
+        .ok_or_else(|| Error::NonceNotFound)?;
+    let creds: Credentials = Credentials {
+        email: body.email,
+        password: Secret::from(body.password),
+        nonce: nonce.nonce.as_ref().to_string(),
+    };
+    let session = auth
+        .authenticate(creds)
+        .await
+        .map_err(|_| Error::Auth(anyhow!("Authentication failed").to_string()))?
+        .ok_or(Error::UserNotFound)?;
+    auth.login(&session)
+        .await
+        .map_err(|_| Error::Auth(anyhow!("Login failed").to_string()))?;
+    let api_token =
+        get_api_token_by_usr_and_status(&mut transaction, &user.id, ApiTokenStatus::Active)
+            .await?
+            .ok_or(Error::ApiTokenNotFound)?;
+    transaction.commit().await.map_err(Error::from)?;
+    Ok(Json(GetTokenResponse {
+        api_token: *api_token.token.as_ref(),
+    }))
+}
