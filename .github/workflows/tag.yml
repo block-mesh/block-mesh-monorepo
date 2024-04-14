@@ -1,0 +1,26 @@
+# https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/
+name: "Tag"
+on:
+  push:
+    branches:
+      - "master"
+jobs:
+  create-tag:
+    name: "Create tag"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Check out the repo"
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          toolchain: ${{ vars.RUSTC_VERSION }}
+      - name: "Get tag"
+        id: "get-tag"
+        shell: "bash"
+        run: |
+          echo PKG_VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g') >> $GITHUB_OUTPUT
+      - name: "Set Tag"
+        shell: "bash"
+        run: |
+          git tag v${{ steps.get-tag.outputs.PKG_VERSION }} && git push --tags
