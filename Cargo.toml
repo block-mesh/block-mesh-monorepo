@@ -12,6 +12,7 @@ codegen-units = 1
 members = ["libs/*", "programs/*"]
 exclude = ["libs/renaissance-hackathon"]
 resolver = "2"
+version = "0.0.1"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
