@@ -1,5 +1,5 @@
 use crate::database::task::create_task::create_task;
-use crate::domain::task::Method;
+use crate::domain::task::TaskMethod;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use axum::response::Redirect;
@@ -13,7 +13,7 @@ use sqlx::PgPool;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CreateTaskForm {
     pub url: String,
-    pub method: Method,
+    pub method: TaskMethod,
     pub headers: Option<Value>,
     pub body: Option<Value>,
 }

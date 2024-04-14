@@ -1,5 +1,5 @@
 use crate::database::task::get_tasks_by_user_id::get_tasks_by_user_id;
-use crate::domain::task::{Method, Status, Task};
+use crate::domain::task::{Task, TaskMethod, TaskStatus};
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use askama::Template;
@@ -38,11 +38,11 @@ struct TaskForTemplate {
     pub id: Uuid,
     pub user_id: Uuid,
     pub url: String,
-    pub method: Method,
+    pub method: TaskMethod,
     pub headers: OptionWrapper<Value>,
     pub body: OptionWrapper<Value>,
     pub assigned_user_id: OptionWrapper<Uuid>,
-    pub status: Status,
+    pub status: TaskStatus,
     pub response_code: OptionWrapper<i32>,
     pub response_raw: OptionWrapper<String>,
     pub created_at: DateTime<Utc>,

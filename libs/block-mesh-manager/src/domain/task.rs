@@ -7,37 +7,37 @@ use std::fmt::Display;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum Method {
+pub enum TaskMethod {
     GET,
     POST,
 }
 
-impl From<String> for Method {
+impl From<String> for TaskMethod {
     fn from(s: String) -> Self {
         match s.as_str() {
-            "GET" => Method::GET,
-            "POST" => Method::POST,
-            _ => Method::GET,
+            "GET" => TaskMethod::GET,
+            "POST" => TaskMethod::POST,
+            _ => TaskMethod::GET,
         }
     }
 }
 
-impl Display for Method {
+impl Display for TaskMethod {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Method::GET => write!(f, "GET"),
-            Method::POST => write!(f, "POST"),
+            TaskMethod::GET => write!(f, "GET"),
+            TaskMethod::POST => write!(f, "POST"),
         }
     }
 }
 
-impl sqlx::Type<Postgres> for Method {
+impl sqlx::Type<Postgres> for TaskMethod {
     fn type_info() -> sqlx::postgres::PgTypeInfo {
         <String as sqlx::Type<Postgres>>::type_info()
     }
 }
 
-impl sqlx::Encode<'_, Postgres> for Method {
+impl sqlx::Encode<'_, Postgres> for TaskMethod {
     fn encode_by_ref(
         &self,
         buf: &mut <Postgres as sqlx::database::HasArguments<'_>>::ArgumentBuffer,
@@ -46,7 +46,7 @@ impl sqlx::Encode<'_, Postgres> for Method {
     }
 }
 
-impl sqlx::Decode<'_, Postgres> for Method {
+impl sqlx::Decode<'_, Postgres> for TaskMethod {
     fn decode(
         value: <Postgres as sqlx::database::HasValueRef<'_>>::ValueRef,
     ) -> Result<Self, Box<dyn Error + 'static + Send + Sync>> {
@@ -57,43 +57,43 @@ impl sqlx::Decode<'_, Postgres> for Method {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
-pub enum Status {
+pub enum TaskStatus {
     Pending,
     Assigned,
     Completed,
     Failed,
 }
 
-impl Display for Status {
+impl Display for TaskStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Status::Pending => write!(f, "Pending"),
-            Status::Assigned => write!(f, "Assigned"),
-            Status::Completed => write!(f, "Completed"),
-            Status::Failed => write!(f, "Failed"),
+            TaskStatus::Pending => write!(f, "Pending"),
+            TaskStatus::Assigned => write!(f, "Assigned"),
+            TaskStatus::Completed => write!(f, "Completed"),
+            TaskStatus::Failed => write!(f, "Failed"),
         }
     }
 }
 
-impl From<String> for Status {
+impl From<String> for TaskStatus {
     fn from(s: String) -> Self {
         match s.as_str() {
-            "Pending" => Status::Pending,
-            "Assigned" => Status::Assigned,
-            "Completed" => Status::Completed,
-            "Failed" => Status::Failed,
-            _ => Status::Pending,
+            "Pending" => TaskStatus::Pending,
+            "Assigned" => TaskStatus::Assigned,
+            "Completed" => TaskStatus::Completed,
+            "Failed" => TaskStatus::Failed,
+            _ => TaskStatus::Pending,
         }
     }
 }
 
-impl sqlx::Type<Postgres> for Status {
+impl sqlx::Type<Postgres> for TaskStatus {
     fn type_info() -> sqlx::postgres::PgTypeInfo {
         <String as sqlx::Type<Postgres>>::type_info()
     }
 }
 
-impl sqlx::Encode<'_, Postgres> for Status {
+impl sqlx::Encode<'_, Postgres> for TaskStatus {
     fn encode_by_ref(
         &self,
         buf: &mut <Postgres as sqlx::database::HasArguments<'_>>::ArgumentBuffer,
@@ -102,7 +102,7 @@ impl sqlx::Encode<'_, Postgres> for Status {
     }
 }
 
-impl sqlx::Decode<'_, Postgres> for Status {
+impl sqlx::Decode<'_, Postgres> for TaskStatus {
     fn decode(
         value: <Postgres as sqlx::database::HasValueRef<'_>>::ValueRef,
     ) -> Result<Self, Box<dyn Error + 'static + Send + Sync>> {
@@ -117,11 +117,11 @@ pub struct Task {
     pub id: Uuid,
     pub user_id: Uuid,
     pub url: String,
-    pub method: Method,
+    pub method: TaskMethod,
     pub headers: Option<Value>,
     pub body: Option<Value>,
     pub assigned_user_id: Option<Uuid>,
-    pub status: Status,
+    pub status: TaskStatus,
     pub response_code: Option<i32>,
     pub response_raw: Option<String>,
     pub created_at: DateTime<Utc>,

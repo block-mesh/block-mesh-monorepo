@@ -1,5 +1,5 @@
-use crate::domain::task::Method;
-use crate::domain::task::Status;
+use crate::domain::task::TaskMethod;
+use crate::domain::task::TaskStatus;
 use chrono::Utc;
 use sqlx::types::JsonValue;
 use sqlx::{Postgres, Transaction};
@@ -10,7 +10,7 @@ pub(crate) async fn create_task(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
     url: &str,
-    method: &Method,
+    method: &TaskMethod,
     headers: Option<JsonValue>,
     body: Option<JsonValue>,
 ) -> anyhow::Result<Uuid> {
@@ -28,7 +28,7 @@ pub(crate) async fn create_task(
         method.to_string(),
         headers,
         body,
-        Status::Pending.to_string(),
+        TaskStatus::Pending.to_string(),
         user_id
     )
     .execute(&mut **transaction)

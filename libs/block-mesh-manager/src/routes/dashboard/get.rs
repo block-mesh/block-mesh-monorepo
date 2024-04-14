@@ -5,7 +5,7 @@ use axum::Extension;
 use axum_login::AuthSession;
 
 #[derive(Template)]
-#[template(path = "dashboard.html")]
+#[template(path = "dashboard/dashboard.html")]
 struct DashboardTemplate;
 
 #[tracing::instrument(name = "dashboard", skip(_auth))]
