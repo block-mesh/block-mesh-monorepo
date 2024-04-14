@@ -1,5 +1,4 @@
-# https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/
-name: "Tag"
+name: Tag
 on:
   push:
     branches:
@@ -28,3 +27,5 @@ jobs:
         shell: "bash"
         run: |
           git tag v${{ steps.get-tag.outputs.PKG_VERSION }} && git push --tags
+
+# https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/

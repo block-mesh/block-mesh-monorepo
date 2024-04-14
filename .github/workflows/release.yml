@@ -1,5 +1,4 @@
-# https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/
-name: "Release"
+name: Release
 permissions:
   contents: "write"
 on:
@@ -113,3 +112,5 @@ jobs:
           push: true
           tags: bwks/shazam:latest,bwks/shazam:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
+
+# https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/
