@@ -73,7 +73,7 @@ jobs:
       - name: "Upload Binaries"
         uses: "taiki-e/upload-rust-binary-action@v1"
         with:
-          bin: "shazam"
+          bin: "block-mesh-manager"
           target: ${{ matrix.target }}
           archive: $bin-${{ matrix.target }}
           ref: refs/tags/v${{ needs.get-tag.outputs.pkg-version }}
@@ -104,14 +104,14 @@ jobs:
         id: "meta"
         uses: "docker/metadata-action@v5"
         with:
-          images: "bwks/shazam"
+          images: "blockmesh/block-mesh-manager"
 
       - name: "Build and push Docker image"
         uses: "docker/build-push-action@v5"
         with:
           context: .
           push: true
-          tags: bwks/shazam:latest,bwks/shazam:v${{ needs.get-tag.outputs.pkg-version }}
+          tags: blockmesh/block-mesh-manager:latest,blockmesh/block-mesh-manager:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
 
 # https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/
