@@ -2,7 +2,7 @@ use crate::domain::task::Task;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "Create Tasks By User Id", skip(transaction), ret, err)]
+#[tracing::instrument(name = "Get Tasks By User Id", skip(transaction), ret, err)]
 pub(crate) async fn get_tasks_by_user_id(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,

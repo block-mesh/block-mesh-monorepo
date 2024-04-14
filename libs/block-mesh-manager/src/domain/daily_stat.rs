@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{Decode, Postgres};
 use std::error::Error;
@@ -59,7 +59,8 @@ impl sqlx::Decode<'_, Postgres> for DailyStatStatus {
 pub struct DailyStat {
     pub id: Uuid,
     pub user_id: Uuid,
-    pub tasks_count: i32,
+    pub tasks_count: i64,
     pub status: DailyStatStatus,
+    pub day: NaiveDate,
     pub created_at: DateTime<Utc>,
 }
