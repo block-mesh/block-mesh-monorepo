@@ -112,6 +112,7 @@ jobs:
         uses: "docker/build-push-action@v5"
         with:
           context: .
+          file: Dockerfile.block-mesh-manager
           push: true
           tags: blockmesh/block-mesh-manager:latest,blockmesh/block-mesh-manager:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
