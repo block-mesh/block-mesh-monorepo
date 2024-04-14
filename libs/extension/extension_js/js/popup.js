@@ -35,22 +35,7 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 // listens for msgs from WASM
 chrome.runtime.onMessage.addListener((msg, sender) => {
-        // background.js may send a status update as boolean because
-        // there is no badge change event
-        if (typeof msg === "boolean") {
-            // document.getElementById("btn_add").disabled = msg;
-            return;
-        }
-
-        // if it's not a bool, then it is a log entry as a string
-        const log = document.getElementById("log");
-        const lastMsg = document.getElementById("log-summary").innerText;
-        if (lastMsg) {
-            const p = document.createElement("p");
-            p.innerText = lastMsg;
-
-            log.insertBefore(p, log.firstChild);
-        }
-        document.getElementById("log-summary").innerText = msg;
+        console.log("Popup::onMessage", {msg, sender});
+        return true
     }
 );

@@ -19,6 +19,9 @@ rand = { workspace = true }
 getrandom = { workspace = true, features = ["js"] }
 console_error_panic_hook = { workspace = true }
 wee_alloc = { workspace = true }
+reqwest = { workspace = true, default-features = false, features = [
+  "json",
+] }
 
 [dependencies.web-sys]
 workspace = true
