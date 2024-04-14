@@ -20,5 +20,5 @@ CREATE TRIGGER trg_make_archive_of_changes_for_daily_stats
     AFTER INSERT OR DELETE OR UPDATE
     ON daily_stats
     FOR EACH ROW
-EXECUTE FUNCTION make_archive_of_changes('DailyStats');
+EXECUTE FUNCTION make_archive_of_changes('DailyStat');
 
