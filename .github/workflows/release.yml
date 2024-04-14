@@ -112,6 +112,7 @@ jobs:
         uses: "docker/build-push-action@v5"
         with:
           context: .
+          platforms: linux/amd64,linux/arm64
           file: block-mesh-manager.Dockerfile
           push: true
           tags: blockmesh/block-mesh-manager:latest,blockmesh/block-mesh-manager:v${{ needs.get-tag.outputs.pkg-version }}
