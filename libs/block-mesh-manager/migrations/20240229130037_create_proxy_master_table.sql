@@ -1,4 +1,4 @@
-CREATE TABLE provider_nodes
+CREATE TABLE proxy_masters
 (
     id         uuid PRIMARY KEY,
     sid        BIGSERIAL   NOT NULL UNIQUE,
@@ -7,13 +7,13 @@ CREATE TABLE provider_nodes
     created_at timestamptz NOT NULL
 );
 
-CREATE INDEX provider_node_created_at ON provider_nodes (created_at);
-CREATE INDEX provider_node_address ON provider_nodes (address);
-CREATE INDEX provider_node_status ON provider_nodes (status);
+CREATE INDEX provider_node_created_at ON proxy_masters (created_at);
+CREATE INDEX provider_node_address ON proxy_masters (address);
+CREATE INDEX provider_node_status ON proxy_masters (status);
 
-CREATE TRIGGER trg_make_archive_of_changes_for_provider_nodes
+CREATE TRIGGER trg_make_archive_of_changes_for_proxy_masters
     AFTER INSERT OR DELETE OR UPDATE
-    ON provider_nodes
+    ON proxy_masters
     FOR EACH ROW
 EXECUTE FUNCTION make_archive_of_changes('ProviderNode');
 

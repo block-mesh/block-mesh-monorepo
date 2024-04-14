@@ -1,12 +1,13 @@
-use crate::domain::provider_node_status::ProviderNodeStatus;
 use chrono::{DateTime, Utc};
+use secret::Secret;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
-pub struct ProviderNode {
+pub struct User {
     pub id: Uuid,
-    pub address: String,
-    pub status: ProviderNodeStatus,
+    pub email: String,
+    pub password: Secret<String>,
+    pub wallet_address: Option<String>,
     pub created_at: DateTime<Utc>,
 }

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "INSERT INTO provider_nodes (id, created_at, address, status) VALUES ($1, $2, $3, $4)",
+  "query": "INSERT INTO users (id, created_at, wallet_address, email, password) VALUES ($1, $2, $3, $4, $5)",
   "describe": {
     "columns": [],
     "parameters": {
@@ -8,10 +8,11 @@
         "Uuid",
         "Timestamptz",
         "Text",
+        "Text",
         "Text"
       ]
     },
     "nullable": []
   },
-  "hash": "57341271e0c0af31ea825033706b8348ad1f13e9ae6ab454cd7c50f120570a55"
+  "hash": "f7e4570792ccd0972723e1776e5081bcff8d0f204f859c02e31fff25ef2025ba"
 }

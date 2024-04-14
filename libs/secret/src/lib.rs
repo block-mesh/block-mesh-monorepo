@@ -1,3 +1,4 @@
+use serde::{Deserialize, Serialize};
 #[cfg(feature = "sqlx")]
 use sqlx::database::HasValueRef;
 #[cfg(feature = "sqlx")]
@@ -9,6 +10,30 @@ use std::fmt::{Debug, Display};
 pub struct Secret<T>(T)
 where
     T: Clone;
+
+impl<T> Serialize for Secret<T>
+where
+    T: Clone + Serialize,
+{
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: serde::Serializer,
+    {
+        self.0.serialize(serializer)
+    }
+}
+
+impl<'de, T> Deserialize<'de> for Secret<T>
+where
+    T: Clone + Deserialize<'de>,
+{
+    fn deserialize<D>(deserializer: D) -> Result<Secret<T>, D::Error>
+    where
+        D: serde::Deserializer<'de>,
+    {
+        Ok(Secret(T::deserialize(deserializer)?))
+    }
+}
 
 impl<T> Clone for Secret<T>
 where

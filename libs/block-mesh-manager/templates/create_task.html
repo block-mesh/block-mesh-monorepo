@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+
+{% block content %}
+<form action="/create_task" method="post">
+    <div class="mx-auto justify-center items-center bg-gray-700 p-4 h-screen">
+        <div class="mb-4 rounded px-8 pb-8 pt-6 shadow-md bg-gray-800  border-white border-solid border-2">
+            <form id="taskForm">
+                <h2 class="mb-4 text-xl text-white">Create a Task</h2>
+                <div class="mb-4">
+                    <label class="mb-2 block text-sm font-bold text-white" for="url">URL</label>
+                    <input class="w-full appearance-none rounded border px-3 py-2 text-black shadow" id="url"
+                           type="text" name="url"
+                           required
+                           placeholder="URL"/>
+                </div>
+                <div class="mb-4">
+                    <label class="mb-2 block text-sm font-bold text-white" for="method">Method</label>
+                    <select class="w-full rounded border px-3 py-2 text-gray-700 shadow" id="method" name="method">
+                        <option value="GET">GET</option>
+                        <option value="POST">POST</option>
+                        <option value="PUT">PUT</option>
+                        <option value="DELETE">DELETE</option>
+                    </select>
+                </div>
+                <div class="mb-4">
+                    <label class="mb-2 block text-sm font-bold text-white" for="headers">Optional: Headers (JSON
+                        format)</label>
+                    <textarea class="w-full appearance-none rounded border px-3 py-2 text-black shadow" id="headers"
+                              name="headers"
+                              placeholder='{"Content-Type": "application/json"}'></textarea>
+                </div>
+                <div class="mb-4">
+                    <label class="mb-2 block text-sm font-bold text-white" for="body">Optional: Body (JSON
+                        format)</label>
+                    <textarea class="w-full appearance-none rounded border px-3 py-2 text-black shadow" id="body"
+                              name="body"
+                              placeholder="{}"></textarea>
+                </div>
+                <button class="focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+                        type="submit">Create Task
+                </button>
+            </form>
+        </div>
+    </div>
+</form>
+{% endblock %}

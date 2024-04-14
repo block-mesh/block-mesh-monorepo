@@ -29,7 +29,7 @@ impl ApiToken {
         std::mem::size_of::<u8>() + /* bump */
         std::mem::size_of::<Pubkey>() + /* owner */
         std::mem::size_of::<Pubkey>() + /* client */
-        std::mem::size_of::<Pubkey>() + /* provider_node */
+        std::mem::size_of::<Pubkey>() + /* proxy_master */
         std::mem::size_of::<Pubkey>() + /* api_token */
         std::mem::size_of::<u64>() + /* bandwidth_paid */
         std::mem::size_of::<u64>() + /* bandwidth_used */

@@ -32,8 +32,8 @@ pub fn close_provider_node(
         ctx.program_id,
     );
     let data: Vec<u8> = provider_node.data.borrow().to_vec();
-    // let data= provider_node.data;
-    // let binding = provider_node.data.clone();
+    // let data= proxy_master.data;
+    // let binding = proxy_master.data.clone();
     // let data = binding.borrow();
     let offset = 8 + std::mem::size_of::<u8>();
     let owner = &data[offset..offset + std::mem::size_of::<Pubkey>()];
@@ -47,7 +47,7 @@ pub fn close_provider_node(
         ErrorCode::AddressMismatch
     );
     msg!("provider_node_address = {:?}", provider_node_address);
-    msg!("provider_node.key() = {:?}", provider_node.key());
+    msg!("proxy_master.key() = {:?}", provider_node.key());
     close_account(
         &mut provider_node.to_account_info(),
         &mut signer.to_account_info(),
