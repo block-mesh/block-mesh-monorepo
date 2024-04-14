@@ -15,6 +15,10 @@ jobs:
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
           toolchain: ${{ vars.RUSTC_VERSION }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: tag
+          cache-all-crates: true
       - name: "Get tag"
         id: "get-tag"
         shell: "bash"
