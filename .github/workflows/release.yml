@@ -15,8 +15,9 @@ jobs:
     steps:
       - name: "Check out the repo"
         uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
         with:
-          token: ${{ secrets.GITHUB_TOKEN }}
+          toolchain: ${{ vars.RUSTC_VERSION }}
       - uses: Swatinem/rust-cache@v2
         with:
           key: release-tag
