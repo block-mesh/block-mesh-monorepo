@@ -24,7 +24,7 @@ pub struct SubmitTaskResponse {
     pub status_code: u16,
 }
 
-#[tracing::instrument(name = "submit_task", skip(body))]
+#[tracing::instrument(name = "submit_task", skip(body, pool))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Json(body): Json<SubmitTaskRequest>,

@@ -2,30 +2,13 @@ use crate::database::api_token::find_token::find_token;
 use crate::database::task::find_task_by_excluded_user_id_and_status::find_task_by_excluded_user_id_and_status;
 use crate::database::task::update_task_assigned::update_task_assigned;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
-use crate::domain::task::{TaskMethod, TaskStatus};
+use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
 use axum::{Extension, Json};
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
+use block_mesh_common::interface::{GetTaskRequest, GetTaskResponse};
 use sqlx::PgPool;
-use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Debug)]
-pub struct GetTaskRequest {
-    pub email: String,
-    pub api_token: Uuid,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct GetTaskResponse {
-    pub id: Uuid,
-    pub url: String,
-    pub method: TaskMethod,
-    pub headers: Option<Value>,
-    pub body: Option<Value>,
-}
-
-#[tracing::instrument(name = "get_task", skip(body))]
+#[tracing::instrument(name = "get_task", skip(body, pool))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Json(body): Json<GetTaskRequest>,
@@ -49,7 +32,7 @@ pub async fn handler(
     Ok(Json(GetTaskResponse {
         id: task.id,
         url: task.url,
-        method: task.method,
+        method: task.method.to_string(),
         headers: task.headers,
         body: task.body,
     }))

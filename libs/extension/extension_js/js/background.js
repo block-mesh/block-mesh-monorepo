@@ -3,6 +3,7 @@
 import initWasmModule, {task_poller} from './wasm/blockmesh_ext.js';
 
 console.log("Background script started");
+
 // console.log(await chrome.permissions.getAll());
 
 // run the wasm initializer before calling wasm methods

@@ -1,5 +1,19 @@
 console.log("popup.js loaded");
 
+async function getStorageValueWithDefault(key, defaultValue) {
+    try {
+        let result = await chrome.storage.sync.get(key);
+        if (!result?.key) {
+            console.log(`Key ${key} not found, returning default value: ${defaultValue}`);
+            return defaultValue;
+        } else {
+            return result.key;
+        }
+    } catch (e) {
+        console.error(`Error getting ${key} , error : ${e}`);
+    }
+}
+
 function onSuccess(message) {
     console.log(`Send OK: ${JSON.stringify(message)}`);
 }
@@ -14,13 +28,33 @@ async function onClickLoging() {
         console.log("Starting onClickLoging");
         let email = document.getElementById("email").value;
         let password = document.getElementById("password").value;
+        let blockmesh_url = await getStorageValueWithDefault("blockmesh_url", "https://app.blockmesh.xyz");
+
         let message = {
             action: "loging",
             email,
-            password
+            password,
+            blockmesh_url
         }
-        console.log("Logging in", {message});
-        await chrome.runtime.sendMessage(message).then(onSuccess, onError);
+        let response = await fetch(blockmesh_url + "/api/get_token", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+                email,
+                password
+            })
+        })
+        let data = await response.json();
+        if (data?.api_token) {
+            await chrome.storage.sync.set({blockmesh_api_token: data.api_token});
+            await chrome.storage.sync.set({email});
+            console.log("Logging success", {message});
+            // await chrome.runtime.sendMessage(message).then(onSuccess, onError);
+        } else {
+            console.error("Login failed, missing api_token in response.", {data});
+        }
     } catch (e) {
         console.error(`Login error: ${e}`);
     }

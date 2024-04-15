@@ -53,7 +53,11 @@ impl Application {
 
         let api_router = Router::new()
             .route("/get_token", post(routes::api_token::get_token::handler))
-            .route("/get_task", post(routes::tasks::get_task::handler));
+            .route("/get_task", post(routes::tasks::get_task::handler))
+            .route(
+                "/create_task_with_token",
+                post(routes::tasks::create_task_with_token::handler),
+            );
 
         let un_auth_router = Router::new()
             .route(

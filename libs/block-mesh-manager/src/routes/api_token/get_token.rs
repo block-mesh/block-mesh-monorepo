@@ -7,21 +7,9 @@ use crate::middlewares::authentication::{Backend, Credentials};
 use anyhow::anyhow;
 use axum::{Extension, Json};
 use axum_login::AuthSession;
+use block_mesh_common::interface::{GetTokenRequest, GetTokenResponse};
 use secret::Secret;
-use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-use uuid::Uuid;
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct GetTokenRequest {
-    email: String,
-    password: String,
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct GetTokenResponse {
-    pub api_token: Uuid,
-}
 
 #[tracing::instrument(name = "get_token", skip(body, auth))]
 pub async fn handler(
