@@ -1,3 +1,4 @@
+use crate::database::api_token::create_api_token::create_api_token;
 use crate::database::nonce::create_nonce::create_nonce;
 use crate::database::user::create_user::create_user;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
@@ -42,6 +43,7 @@ pub async fn handler(
         .await
         .map_err(Error::from)?;
     create_nonce(&mut transaction, &user_id, &nonce_secret).await?;
+    create_api_token(&mut transaction, user_id).await?;
     transaction.commit().await.map_err(Error::from)?;
 
     let creds: Credentials = Credentials {

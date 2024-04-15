@@ -22,12 +22,35 @@ pub enum Error {
     Bcrypt(#[from] bcrypt::BcryptError),
     #[error("Nonce not found")]
     NonceNotFound,
+    #[error("Api token not found")]
+    ApiTokenNotFound,
+    #[error("Task not found")]
+    TaskNotFound,
+    #[error("Task Assigned to another user")]
+    TaskAssignedToAnotherUser,
+    #[error("Unauthorized")]
+    Unauthorized,
+    #[error("Failed reading body")]
+    FailedReadingBody,
 }
 
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         tracing::error!("Error occurred: {}", self);
         match self {
+            Error::TaskAssignedToAnotherUser => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+            }
+            Error::FailedReadingBody => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+            }
+            Error::Unauthorized => (StatusCode::UNAUTHORIZED, "Unauthorized.").into_response(),
+            Error::TaskNotFound => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+            }
+            Error::ApiTokenNotFound => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+            }
             Error::NonceNotFound => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
             }
@@ -59,6 +82,11 @@ impl From<Error> for StatusCode {
     fn from(error: Error) -> Self {
         tracing::error!("Error occurred: {}", error);
         match error {
+            Error::TaskAssignedToAnotherUser => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::FailedReadingBody => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::Unauthorized => StatusCode::UNAUTHORIZED,
+            Error::TaskNotFound => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::ApiTokenNotFound => StatusCode::INTERNAL_SERVER_ERROR,
             Error::NonceNotFound => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Bcrypt(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::UserNotFound => StatusCode::BAD_REQUEST,

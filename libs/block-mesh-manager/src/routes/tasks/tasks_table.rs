@@ -66,7 +66,7 @@ impl From<Task> for TaskForTemplate {
     }
 }
 
-#[tracing::instrument(name = "tasks_table", skip(auth))]
+#[tracing::instrument(name = "tasks_table", skip(auth, pool))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,

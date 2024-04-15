@@ -1,17 +1,32 @@
-mod utils;
+use crate::tasks::{get_task, run_task, submit_task};
+use crate::utils::connectors::{get_storage_value, set_panic_hook};
+use crate::utils::log::log;
+use std::fmt::Display;
+use std::str::FromStr;
 use wasm_bindgen::prelude::*;
 
-use crate::utils::get_runtime::get_runtime;
-use crate::utils::log::log;
+mod tasks;
+mod utils;
 
 #[global_allocator]
 static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
-/// Makes JS `console.log` available in Rust
-#[wasm_bindgen]
-extern "C" {
-    #[wasm_bindgen(js_namespace=console)]
-    fn log(s: &str);
+#[derive(Debug)]
+pub enum StorageValues {
+    BlockMeshUrl,
+    Email,
+    ApiToken,
+}
+
+impl Display for StorageValues {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        let str = match self {
+            StorageValues::BlockMeshUrl => "blockmesh_url".to_string(),
+            StorageValues::Email => "email".to_string(),
+            StorageValues::ApiToken => "blockmesh_api_token".to_string(),
+        };
+        write!(f, "{}", str)
+    }
 }
 
 /// The main entry point callable from `background.js`.
@@ -21,7 +36,52 @@ pub async fn task_poller() {
     // try to init the browser runtime, but there is nothing we can do if it's missing
     // if it does, there is either a bug or something changed in the browser implementation
     // The runtime is a global singleton. It can probably work with OnceCell or lazy_static!.
-    match get_runtime().await {
+    // match get_runtime().await {
+    //     Ok(v) => v,
+    //     Err(e) => {
+    //         log!("{e}");
+    //         return;
+    //     }
+    // };
+
+    let blockmesh_url = get_storage_value(StorageValues::BlockMeshUrl.to_string().as_str())
+        .await
+        .as_string()
+        .unwrap_or("https://app.blockmesh.xyz".to_string());
+
+    let email = get_storage_value(StorageValues::Email.to_string().as_str())
+        .await
+        .as_string()
+        .unwrap_or_default();
+    let api_token = get_storage_value(StorageValues::ApiToken.to_string().as_str())
+        .await
+        .as_string()
+        .unwrap_or_default();
+    if email.is_empty() {
+        log!("email is empty");
+        return;
+    }
+    if api_token.is_empty() {
+        log!("api_token is empty");
+        return;
+    }
+    let api_token = match uuid::Uuid::from_str(&api_token) {
+        Ok(v) => v,
+        Err(e) => {
+            log!("{e}");
+            return;
+        }
+    };
+    log!("blockmesh_url => {:?}", blockmesh_url);
+
+    let task = match get_task(&blockmesh_url, &email, &api_token).await {
+        Ok(v) => v,
+        Err(e) => {
+            log!("{e}");
+            return;
+        }
+    };
+    let finished_task = match run_task(&task.url, &task.method, task.headers, task.body).await {
         Ok(v) => v,
         Err(e) => {
             log!("{e}");
@@ -29,41 +89,21 @@ pub async fn task_poller() {
         }
     };
 
-    let _ = reqwest::Client::new()
-        .get("https://mocki.io/v1/17e60da5-ab9d-4501-99f2-4f12f464a6e8")
-        .send()
-        .await
-        .map(|v| log!("{:?}", v))
-        .map_err(|e| log!("{e}"));
-}
-
-/// This is a proxy for report_progress() in progress.js
-/// to send messages to other js scripts.
-#[wasm_bindgen(inline_js = r#"
-    export function report_progress(msg) {
-        function onSuccess(message) {
-            console.log(`report_progress::onSuccess: ${JSON.stringify(message)}`);
+    match submit_task(
+        &blockmesh_url,
+        &email,
+        &api_token,
+        &task.id,
+        finished_task.status,
+        finished_task.raw,
+    )
+    .await
+    {
+        Ok(_) => {
+            log!("successfully submitted task");
         }
-        function onError(error) {
-            console.log(`report_progress::onError: ${error}`);
+        Err(e) => {
+            log!("{e}");
         }
-        try {
-            chrome.runtime.sendMessage(msg).then(onSuccess, onError)
-        } catch (e) {
-            console.log('report_progress', { e })
-        }
-    }"#)]
-extern "C" {
-    pub fn report_progress(msg: &str);
-}
-
-#[allow(dead_code)]
-pub fn set_panic_hook() {
-    // When the `console_error_panic_hook` feature is enabled, we can call the
-    // `set_panic_hook` function at least once during initialization, and then
-    // we will get better error messages if our code ever panics.
-    //
-    // For more details see
-    // https://github.com/rustwasm/console_error_panic_hook#readme
-    console_error_panic_hook::set_once();
+    };
 }

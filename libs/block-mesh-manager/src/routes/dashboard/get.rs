@@ -1,4 +1,4 @@
-use crate::database::daily_stat::get_daily_stat_by_user_id::get_daily_stat_by_user_id;
+use crate::database::daily_stat::get_daily_stats_by_user_id::get_daily_stats_by_user_id;
 use crate::database::daily_stat::get_users_tank::{get_users_rank, RankedUsers};
 use crate::domain::daily_stat::DailyStat;
 use crate::errors::error::Error;
@@ -24,7 +24,7 @@ pub async fn handler(
 ) -> Result<impl IntoResponse, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let user = auth.user.ok_or(Error::UserNotFound)?;
-    let daily_stats = get_daily_stat_by_user_id(&mut transaction, &user.id)
+    let daily_stats = get_daily_stats_by_user_id(&mut transaction, &user.id)
         .await
         .map_err(Error::from)?;
     let overall_task_count = daily_stats.iter().map(|x| x.tasks_count).sum();

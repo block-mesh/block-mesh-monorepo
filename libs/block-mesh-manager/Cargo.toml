@@ -10,6 +10,7 @@ authors.workspace = true
 askama = { workspace = true, features = ["with-axum", "serde-json"] }
 askama_axum = { workspace = true }
 tokio-stream = { workspace = true, features = ["sync"] }
+http-body-util = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
@@ -19,6 +20,7 @@ serde-aux = { workspace = true }
 config = { workspace = true }
 dotenv = { workspace = true }
 enum-iterator = { workspace = true }
+block-mesh-common = { path = "../block-mesh-common" }
 tokio = { workspace = true, features = ["full"] }
 axum-login = { workspace = true }
 tower-sessions-sqlx-store = { workspace = true, features = ["postgres"] }

@@ -1,4 +1,5 @@
 use crate::domain::user::User;
+use crate::domain::user::UserRole;
 use secret::Secret;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
@@ -15,7 +16,8 @@ pub(crate) async fn get_user_opt_by_id(
         email,
         created_at,
         password as "password: Secret<String>",
-        wallet_address
+        wallet_address,
+        role as "role: UserRole"
         FROM users WHERE id = $1 LIMIT 1"#,
         id
     )

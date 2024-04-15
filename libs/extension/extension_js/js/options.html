@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="tailwindcss.js"></script>
+    <script type="module" src="options.js"></script>
+    <title>BlockMesh</title>
+</head>
+<body class="h-full">
+<div class="login-container">
+    <div class="bg-gray-700 flex justify-center items-center">
+        <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
+            <h2 class="text-white text-2xl font-semibold text-center mb-6">Options</h2>
+            <div class="mb-4">
+                <label class="block text-white text-sm font-bold mb-2" for="blockmesh_url">BlockMesh URL</label>
+                <input class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                       type="text" id="blockmesh_url" placeholder="https://app.blockmesh.xyz" name="blockmesh_url"
+                       value="https://app.blockmesh.xyz">
+            </div>
+            <div class="flex items-center justify-between">
+                <button
+                        id="options_submit_button"
+                        class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                        type="submit"
+                >
+                    Submit
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+</html>
