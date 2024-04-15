@@ -2,7 +2,7 @@ use crate::domain::task::TaskStatus;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "finish_task", skip(transaction), ret, err)]
+#[tracing::instrument(name = "finish_task", skip(transaction, response_raw), ret, err)]
 pub(crate) async fn finish_task(
     transaction: &mut Transaction<'_, Postgres>,
     task_id: Uuid,

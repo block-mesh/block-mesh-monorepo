@@ -23,7 +23,7 @@ impl Display for StorageValues {
         let str = match self {
             StorageValues::BlockMeshUrl => "blockmesh_url".to_string(),
             StorageValues::Email => "email".to_string(),
-            StorageValues::ApiToken => "api_token".to_string(),
+            StorageValues::ApiToken => "blockmesh_api_token".to_string(),
         };
         write!(f, "{}", str)
     }
@@ -94,8 +94,8 @@ pub async fn task_poller() {
         &email,
         &api_token,
         &task.id,
-        Option::from(finished_task.status),
-        Option::from(finished_task.raw),
+        finished_task.status,
+        finished_task.raw,
     )
     .await
     {

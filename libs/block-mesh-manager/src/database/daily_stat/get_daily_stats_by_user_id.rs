@@ -3,7 +3,7 @@ use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
 #[tracing::instrument(name = "Get Daily Stats By User Id", skip(transaction), ret, err)]
-pub(crate) async fn get_daily_stat_by_user_id(
+pub(crate) async fn get_daily_stats_by_user_id(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
 ) -> anyhow::Result<Vec<DailyStat>> {

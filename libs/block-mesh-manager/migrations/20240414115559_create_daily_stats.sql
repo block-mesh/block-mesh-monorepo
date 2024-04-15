@@ -11,6 +11,7 @@ CREATE TABLE daily_stats
 
 );
 
+CREATE UNIQUE INDEX daily_stats_day_user_id ON daily_stats (day, user_id);
 CREATE INDEX daily_stats_created_at ON daily_stats (created_at);
 CREATE INDEX daily_stats_status ON daily_stats (status);
 CREATE INDEX daily_stats_user_id ON daily_stats (user_id);

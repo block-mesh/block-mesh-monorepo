@@ -24,6 +24,7 @@ pub async fn get_task(
         email: email.to_string(),
         api_token: *api_token,
     };
+    log!("get_task => {:?}", body);
     let response: GetTaskResponse = reqwest::Client::new()
         .post(format!("{}/api/get_task", base_url))
         .json(&body)
@@ -63,10 +64,13 @@ pub async fn run_task(
         });
         client = client.headers(headers_map)
     }
+    log!("run_task pre-send url: {url}");
     let response = client.send().await;
+    log!("run_task post-send url: {url}");
     match response {
         Ok(v) => {
             let status = v.status().as_u16();
+            log!("run_task url: {url} status: {status}");
             let raw = v.text().await?;
             Ok(RunTaskResponse {
                 status: status.into(),
@@ -85,22 +89,24 @@ pub async fn submit_task(
     email: &str,
     api_token: &Uuid,
     task_id: &Uuid,
-    response_code: Option<i32>,
-    response_raw: Option<String>,
+    response_code: i32,
+    response_raw: String,
 ) -> anyhow::Result<SubmitTaskResponse> {
-    let body: SubmitTaskRequest = SubmitTaskRequest {
+    let query: SubmitTaskRequest = SubmitTaskRequest {
         email: email.to_string(),
         api_token: *api_token,
         task_id: *task_id,
-        response_code,
-        response_raw,
+        response_code: Some(response_code),
     };
-    let response: SubmitTaskResponse = reqwest::Client::new()
+    log!("submit_task query => {:?}", query);
+    let response = reqwest::Client::new()
         .post(format!("{}/api/submit_task", base_url))
-        .json(&body)
+        .query(&query)
+        .body(response_raw)
         .send()
-        .await?
-        .json()
         .await?;
+    log!("submit_task response => {:?}", response);
+    let response: SubmitTaskResponse = response.json().await?;
+    log!("submit_task response => {:?}", response);
     Ok(response)
 }
