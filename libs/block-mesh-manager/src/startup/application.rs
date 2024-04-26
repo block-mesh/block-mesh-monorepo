@@ -74,6 +74,10 @@ impl Application {
                 get(routes::register::register_form::handler)
                     .post(routes::register::register_post::handler),
             )
+            .route(
+                "/api/check_token",
+                post(routes::api_token::check_token::handler),
+            )
             .route("/health_check", get(routes::health_check::get::handler));
 
         let application_base_url = ApplicationBaseUrl(settings.application.base_url.clone());

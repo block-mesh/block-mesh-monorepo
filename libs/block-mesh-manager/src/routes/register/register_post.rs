@@ -10,17 +10,9 @@ use axum::response::Redirect;
 use axum::{Extension, Form};
 use axum_login::AuthSession;
 use bcrypt::{hash, DEFAULT_COST};
+use block_mesh_common::interface::RegisterForm;
 use secret::Secret;
-use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-
-#[allow(dead_code)]
-#[derive(Serialize, Deserialize, Debug)]
-pub struct RegisterForm {
-    email: String,
-    password: String,
-    password_confirm: String,
-}
 
 #[tracing::instrument(name = "register_post", skip(form, auth))]
 pub async fn handler(

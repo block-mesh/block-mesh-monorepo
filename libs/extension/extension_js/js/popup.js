@@ -1,3 +1,5 @@
+import initWasmModule, {mount_app} from './wasm/blockmesh_ext.js';
+
 console.log("popup.js loaded");
 
 let state = {
@@ -5,6 +7,7 @@ let state = {
     blockmesh_api_token: "",
     blockmesh_url: "http://localhost:8000"
 }
+
 
 async function getStorageValueWithDefault(key, defaultValue) {
     console.debug("getStorageValueWithDefault::", {key, defaultValue});
@@ -72,21 +75,10 @@ async function onClickLoging() {
 // Popups cannot have any inline scripts with our security policies.
 // Click handlers should be added when the popup is opened.
 document.addEventListener('DOMContentLoaded', async function () {
-    let email_from_storage = await getStorageValueWithDefault("email", undefined);
-    if (email_from_storage !== undefined) {
-        state.email = email_from_storage;
-    }
-    let blockmesh_api_token_from_storage = await getStorageValueWithDefault("blockmesh_api_token", undefined);
-    if (blockmesh_api_token_from_storage !== undefined) {
-        state.blockmesh_api_token = blockmesh_api_token_from_storage;
-    }
-    let blockmesh_url_from_storage = await getStorageValueWithDefault("blockmesh_url", "http://localhost:8000");
-    if (blockmesh_url_from_storage !== undefined) {
-        state.blockmesh_url = blockmesh_url_from_storage;
-    }
-    console.log("Popup::DOMContentLoaded", JSON.stringify(state, null, 2));
-    let login_button = document.getElementById("popup_login_button");
-    login_button.addEventListener("click", onClickLoging);
+    await initWasmModule();
+    console.log("pre mount");
+    mount_app();
+    console.log("post mount");
 });
 
 // listens for msgs from WASM

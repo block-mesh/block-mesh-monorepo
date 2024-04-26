@@ -24,6 +24,8 @@ pub enum Error {
     NonceNotFound,
     #[error("Api token not found")]
     ApiTokenNotFound,
+    #[error("Api token mismatch")]
+    ApiTokenMismatch,
     #[error("Task not found")]
     TaskNotFound,
     #[error("Task Assigned to another user")]
@@ -38,6 +40,9 @@ impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         tracing::error!("Error occurred: {}", self);
         match self {
+            Error::ApiTokenMismatch => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+            }
             Error::TaskAssignedToAnotherUser => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
             }
@@ -82,6 +87,7 @@ impl From<Error> for StatusCode {
     fn from(error: Error) -> Self {
         tracing::error!("Error occurred: {}", error);
         match error {
+            Error::ApiTokenMismatch => StatusCode::INTERNAL_SERVER_ERROR,
             Error::TaskAssignedToAnotherUser => StatusCode::INTERNAL_SERVER_ERROR,
             Error::FailedReadingBody => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Unauthorized => StatusCode::UNAUTHORIZED,

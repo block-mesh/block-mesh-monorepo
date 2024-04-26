@@ -37,6 +37,25 @@ pub struct GetTokenRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct CheckTokenRequest {
+    pub email: String,
+    pub api_token: Uuid,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct GetTokenResponse {
     pub api_token: Uuid,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct LoginForm {
+    pub email: String,
+    pub password: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RegisterForm {
+    pub email: String,
+    pub password: String,
+    pub password_confirm: String,
 }
