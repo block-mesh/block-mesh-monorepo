@@ -22,7 +22,7 @@ use background::*;
 use pages::*;
 
 #[component]
-pub fn App() -> impl IntoView {
+pub fn Popup() -> impl IntoView {
     provide_context(AppState::default());
     spawn_local(async move {
         let state1 = expect_context::<AppState>();
@@ -76,7 +76,16 @@ pub fn App() -> impl IntoView {
 }
 
 #[wasm_bindgen]
-pub fn mount_app() {
+pub fn mount_popup() {
     set_panic_hook();
-    mount_to_body(App);
+    mount_to_body(Popup);
+}
+
+#[component]
+pub fn Options() -> impl IntoView {}
+
+#[wasm_bindgen]
+pub fn mount_options() {
+    set_panic_hook();
+    mount_to_body(Options);
 }

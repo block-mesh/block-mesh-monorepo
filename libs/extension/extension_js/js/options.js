@@ -1,14 +1,17 @@
-async function onClickSubmit() {
-    try {
-        console.log("Starting onClickSubmit");
-        let blockmesh_url = document.getElementById("blockmesh_url").value;
-        await chrome.storage.sync.set({blockmesh_url});
-    } catch (e) {
-        console.error(`Submit error: ${e}`);
-    }
+import initWasmModule, {mount_options} from './wasm/blockmesh_ext.js';
+
+function onSuccess(message) {
+    console.log(`onSuccess: ${JSON.stringify(message)}`);
+}
+
+// A placeholder for OnError in .then
+function onError(error) {
+    console.error(`onError: ${error}`);
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
-    let login_button = document.getElementById("options_submit_button");
-    login_button.addEventListener("click", onClickSubmit);
+    await initWasmModule().then(onSuccess, onError);
+    console.log("pre mount");
+    mount_options();
+    console.log("post mount");
 });
