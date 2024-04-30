@@ -1,25 +1,27 @@
 use anyhow::anyhow;
-use serde::{Deserialize, Serialize};
 
-#[derive(Serialize, Deserialize)]
-pub struct LoginCreds {
-    pub email: String,
-    pub password: String,
-}
+use block_mesh_common::interface::{CheckTokenRequest, GetTokenResponse, LoginForm, RegisterForm};
 
-#[derive(Serialize, Deserialize)]
-pub struct RegisterCreds {
-    pub email: String,
-    pub password: String,
-    pub confirm_password: String,
-}
-
-use block_mesh_common::interface::GetTokenResponse;
-
-pub async fn _register(blockmesh_url: &str, credentials: &RegisterCreds) -> anyhow::Result<()> {
-    let url = format!("{}/register_post", blockmesh_url);
+pub async fn check_token(
+    blockmesh_url: &str,
+    credentials: &CheckTokenRequest,
+) -> anyhow::Result<GetTokenResponse> {
+    let url = format!("{}/api/check_token", blockmesh_url);
     let client = reqwest::Client::new();
-    let response = client.post(&url).json(credentials).send().await?;
+    let response = client
+        .post(&url)
+        .json(credentials)
+        .send()
+        .await?
+        .json()
+        .await?;
+    Ok(response)
+}
+
+pub async fn register(blockmesh_url: &str, credentials: &RegisterForm) -> anyhow::Result<()> {
+    let url = format!("{}/register", blockmesh_url);
+    let client = reqwest::Client::new();
+    let response = client.post(&url).form(credentials).send().await?;
     if response.status().is_success() || response.status().is_redirection() {
         Ok(())
     } else {
@@ -29,7 +31,7 @@ pub async fn _register(blockmesh_url: &str, credentials: &RegisterCreds) -> anyh
 
 pub async fn login(
     blockmesh_url: &str,
-    credentials: &LoginCreds,
+    credentials: &LoginForm,
 ) -> anyhow::Result<GetTokenResponse> {
     let url = format!("{}/api/get_token", blockmesh_url);
     let client = reqwest::Client::new();

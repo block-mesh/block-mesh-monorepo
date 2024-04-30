@@ -19,13 +19,8 @@ pub async fn task_poller() {
     //     }
     // };
 
-    let app_state = match AppState::new().await {
-        Ok(v) => v,
-        Err(e) => {
-            log!("{e}");
-            return;
-        }
-    };
+    let app_state = AppState::new().await;
+    AppState::init(app_state).await;
 
     let task = match get_task(
         &app_state.blockmesh_url.get_untracked(),

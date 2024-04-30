@@ -1,12 +1,20 @@
 import initWasmModule, {mount_popup} from './wasm/blockmesh_ext.js';
 
 function onSuccess(message) {
-    console.log(`onSuccess: ${JSON.stringify(message)}`);
+    try {
+        console.log(`onSuccess: ${JSON.stringify(message)}`);
+    } catch (e) {
+        console.error(`onSuccess error: ${e}`);
+    }
 }
 
-// A placeholder for OnError in .then
 function onError(error) {
-    console.error(`onError: ${error}`);
+    try {
+        console.error(`onError: ${JSON.stringify(error)}`);
+    } catch (e) {
+        console.error(`onError error (1): ${error}`);
+        console.error(`onError error (2): ${e}`);
+    }
 }
 
 // Popups cannot have any inline scripts with our security policies.

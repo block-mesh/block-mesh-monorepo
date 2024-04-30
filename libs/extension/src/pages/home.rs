@@ -1,24 +1,32 @@
 use crate::pages::page::Page;
-use crate::utils::state::AppState;
+use crate::utils::state::{AppState, AppStatus};
 use leptos::*;
 
 #[component]
 pub fn Home() -> impl IntoView {
     let state = use_context::<AppState>().unwrap();
-    let logged_in = Signal::derive(move || state.logged_in.get());
+    let status = Signal::derive(move || state.status.get());
     let email = Signal::derive(move || state.email.get());
 
     view! {
-        <h2>"Leptos Login example"</h2>
-        {move || match logged_in.get() {
-            true => {
+        <h2>"BlockMesh Network"</h2>
+        {move || match status.get() {
+            AppStatus::LoggedIn => {
                 view! { <p>"You are logged in with " {email} "."</p> }.into_view()
             }
-            false => {
+            AppStatus::LoggedOut => {
                 view! {
                     <p>"You are not logged in."</p>
                     <a href=Page::Login.path()>"Login now."</a>
-                }.into_view()
+                }
+                    .into_view()
+            }
+            AppStatus::WaitingEmailVerification => {
+                view! {
+                    <p>"You are logged in, but your email is not verified yet."</p>
+                    <a href=Page::Login.path()>"Login now."</a>
+                }
+                    .into_view()
             }
         }}
     }

@@ -8,6 +8,7 @@ authors.workspace = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+url = { workspace = true }
 leptos = { workspace = true, features = ["tracing", "csr"] }
 log = { workspace = true }
 leptos_router = { workspace = true, features = ["csr"] }

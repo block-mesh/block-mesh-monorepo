@@ -22,6 +22,20 @@ extern "C" {
 }
 
 #[wasm_bindgen(inline_js = r#"
+    export async function remove_storage_value(key) {
+        try {
+            await chrome.storage.sync.remove(key);
+        } catch (e) {
+            return ""
+        }
+    };
+"#)]
+extern "C" {
+    // need to rewrite with this: https://github.com/Pauan/tab-organizer/blob/rust/web-extension/src/storage.rs
+    pub async fn remove_storage_value(key: &str) -> JsValue;
+}
+
+#[wasm_bindgen(inline_js = r#"
     export async function get_storage_value(key) {
         try {
             let result = await chrome.storage.sync.get(key);
