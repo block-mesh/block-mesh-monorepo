@@ -55,6 +55,7 @@ impl Application {
             .route("/get_token", post(routes::api_token::get_token::handler))
             .route("/get_task", post(routes::tasks::get_task::handler))
             .route("/submit_task", post(routes::tasks::submit_task::handler))
+            .route("/get_stats", post(routes::api_token::get_stats::handler))
             .route(
                 "/create_task_with_token",
                 post(routes::tasks::create_task_with_token::handler),

@@ -25,6 +25,8 @@ pub fn Login(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
             set_wait_for_response.update(|w| *w = false);
             match result {
                 Ok(res) => {
+                    state.email.update(|e| *e = credentials.email.clone());
+                    AppState::store_email(credentials.email).await;
                     set_login_error.update(|e| *e = None);
                     if res.api_token != state.api_token.get_untracked() {
                         log_info!("Store new api token");

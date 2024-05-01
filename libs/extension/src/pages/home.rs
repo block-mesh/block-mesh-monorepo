@@ -8,6 +8,17 @@ pub fn Home() -> impl IntoView {
     let status = Signal::derive(move || state.status.get());
     let email = Signal::derive(move || state.email.get());
 
+    // create_effect(move |_| {
+    //     log!("new effect");
+    //     spawn_local(async move {
+    //         log!("new spawn");
+    //         while let status = state.status.get() {
+    //             log!("Spinning around {:#?}", state);
+    //             sleep(Duration::from_secs(5)).await;
+    //         }
+    //     });
+    // });
+
     view! {
         <h2>"BlockMesh Network"</h2>
         {move || match status.get() {

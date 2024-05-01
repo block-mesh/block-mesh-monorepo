@@ -1,16 +1,10 @@
 use crate::pages::page::Page;
-use crate::utils::log::log;
 use crate::utils::state::{AppState, AppStatus};
 use leptos::*;
 
 #[component]
 pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
     let state = use_context::<AppState>().unwrap();
-    let status = Signal::derive(move || state.status.get());
-    create_effect(move |_| {
-        log!("Status: {}", status.get());
-    });
-
     view! {
         <nav>
             <div class="flex items-center justify-center h-full">
@@ -25,7 +19,7 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
                     </div>
                     <div class="flex justify-center mt-4">
                         <Show
-                            when=move || status.get() == AppStatus::LoggedIn
+                            when=move || state.status.get() == AppStatus::LoggedIn
                             fallback=|| {
                                 view! {
                                     <a

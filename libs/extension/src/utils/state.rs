@@ -1,8 +1,10 @@
 use leptos::*;
+use leptos_router::use_navigate;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
 
+use crate::pages::page::Page;
 use crate::utils::auth::check_token;
 use block_mesh_common::interface::CheckTokenRequest;
 use serde::{Deserialize, Serialize};
@@ -69,7 +71,7 @@ impl AppState {
         }
     }
 
-    pub async fn init(context: AppState) {
+    pub async fn init(context: AppState) -> AppStatus {
         log!("Before state: {:#?}", context);
         let blockmesh_url = Self::get_blockmesh_url().await;
         let email = Self::get_email().await;
@@ -80,7 +82,7 @@ impl AppState {
         context.api_token.update(|v| *v = api_token);
         if email.is_empty() || api_token.is_nil() {
             log!("End state: {:#?}", context);
-            return;
+            return context.status.get_untracked();
         }
         let credentials = CheckTokenRequest { api_token, email };
         let result = check_token(&blockmesh_url, &credentials).await;
@@ -89,6 +91,7 @@ impl AppState {
             context.status.update(|v| *v = AppStatus::LoggedIn);
         };
         log!("End state: {:#?}", context);
+        context.status.get_untracked()
     }
 
     pub fn init_resource(context: AppState) -> Option<()> {
@@ -100,19 +103,24 @@ impl AppState {
                     context.api_token.get(),
                 )
             },
-            move |_| {
+            |_| async move {
                 let state = use_context::<AppState>().unwrap();
-                AppState::init(state)
+                let status = AppState::init(state).await;
+                if status == AppStatus::LoggedIn {
+                    let navigate = use_navigate();
+                    navigate(Page::Home.path(), Default::default());
+                }
             },
         );
         resource.get()
     }
 
-    pub async fn clear(&mut self) {
+    pub async fn clear(&self) {
         self.blockmesh_url
             .update(|v| *v = "https://app.blockmesh.xyz".to_string());
         self.email.update(|v| *v = "".to_string());
         self.api_token.update(|v| *v = Uuid::default());
+        self.status.update(|v| *v = AppStatus::LoggedOut);
         AppState::store_api_token(Uuid::default()).await;
         AppState::store_email("".to_string()).await;
         AppState::store_blockmesh_url("https://app.blockmesh.xyz".to_string()).await;

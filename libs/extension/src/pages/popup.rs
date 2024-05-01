@@ -14,9 +14,12 @@ pub fn Popup() -> impl IntoView {
     provide_context(AppState::default());
     let state = use_context::<AppState>().unwrap();
     let _ = AppState::init_resource(state);
+    create_effect(move |_| {
+        let navigate = use_navigate();
+        navigate(Page::Home.path(), Default::default());
+    });
 
     let logout = create_action(move |_: &()| async move {
-        let mut state = expect_context::<AppState>();
         state.clear().await;
     });
 
