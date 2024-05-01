@@ -6,4 +6,25 @@ macro_rules! log {
     }
 }
 
+macro_rules! log_info {
+    ( $( $t:tt )* ) => {
+        web_sys::console::info_1(&format!( $( $t )* ).into())
+    }
+}
+
+macro_rules! log_warn {
+    ( $( $t:tt )* ) => {
+        web_sys::console::warn_1(&format!( $( $t )* ).into())
+    }
+}
+
+macro_rules! log_error {
+    ( $( $t:tt )* ) => {
+        web_sys::console::error_1(&format!( $( $t )* ).into())
+    }
+}
+
 pub(crate) use log;
+pub(crate) use log_error;
+pub(crate) use log_info;
+pub(crate) use log_warn;

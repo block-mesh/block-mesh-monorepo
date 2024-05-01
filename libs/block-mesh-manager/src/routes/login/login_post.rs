@@ -6,16 +6,9 @@ use anyhow::anyhow;
 use axum::response::Redirect;
 use axum::{Extension, Form};
 use axum_login::AuthSession;
+use block_mesh_common::interface::LoginForm;
 use secret::Secret;
-use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-
-#[allow(dead_code)]
-#[derive(Serialize, Deserialize, Debug)]
-pub struct LoginForm {
-    email: String,
-    password: String,
-}
 
 #[tracing::instrument(name = "login_post", skip(form, auth))]
 pub async fn handler(

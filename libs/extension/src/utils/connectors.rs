@@ -22,6 +22,20 @@ extern "C" {
 }
 
 #[wasm_bindgen(inline_js = r#"
+    export async function remove_storage_value(key) {
+        try {
+            await chrome.storage.sync.remove(key);
+        } catch (e) {
+            return ""
+        }
+    };
+"#)]
+extern "C" {
+    // need to rewrite with this: https://github.com/Pauan/tab-organizer/blob/rust/web-extension/src/storage.rs
+    pub async fn remove_storage_value(key: &str) -> JsValue;
+}
+
+#[wasm_bindgen(inline_js = r#"
     export async function get_storage_value(key) {
         try {
             let result = await chrome.storage.sync.get(key);
@@ -37,6 +51,33 @@ extern "C" {
 extern "C" {
     // need to rewrite with this: https://github.com/Pauan/tab-organizer/blob/rust/web-extension/src/storage.rs
     pub async fn get_storage_value(key: &str) -> JsValue;
+}
+
+#[wasm_bindgen(inline_js = r#"
+    export async function set_storage_value(key, value) {
+        try {
+            await chrome.storage.sync.set({ [key]: value });
+        } catch (e) {
+            return ""
+        }
+    };
+"#)]
+extern "C" {
+    // need to rewrite with this: https://github.com/Pauan/tab-organizer/blob/rust/web-extension/src/storage.rs
+    pub async fn set_storage_value(key: &str, value: JsValue) -> JsValue;
+}
+
+#[wasm_bindgen(inline_js = r#"
+    export function storageOnChange(key, callback) {
+        chrome.storage.sync.onChanged.addListener((changes, namespace) => {
+            if (key in changes) {
+                callback(changes[key].newValue);
+            }
+        });
+    }
+"#)]
+extern "C" {
+    pub fn storageOnChange(key: &str, callback: &js_sys::Function);
 }
 
 /// Makes JS `console.log` available in Rust

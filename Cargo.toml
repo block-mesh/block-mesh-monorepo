@@ -36,7 +36,9 @@ aes-gcm-siv = { git = "https://github.com/RustCrypto/AEADs", rev = "6105d7a5591a
 curve25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dalek", rev = "8274d5cbb6fc3f38cdc742b4798173895cd2a290" }
 
 [workspace.dependencies]
-
+url = { version = "2.5.0" }
+leptos = { version = "0.6.11", features = ["tracing", "csr"] }
+leptos_router = { version = "0.6.11" }
 wasm-bindgen = { version = "0.2" }
 js-sys = { version = "0.3" }
 wasm-bindgen-futures = { version = "0.4" }

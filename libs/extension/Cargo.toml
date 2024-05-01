@@ -8,6 +8,10 @@ authors.workspace = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+url = { workspace = true }
+leptos = { workspace = true, features = ["tracing", "csr"] }
+log = { workspace = true }
+leptos_router = { workspace = true, features = ["csr"] }
 anyhow = { workspace = true }
 wasm-bindgen = { workspace = true }
 js-sys = { workspace = true }
@@ -24,6 +28,7 @@ reqwest = { workspace = true, default-features = false, features = [
   "json",
 ] }
 block-mesh-common = { path = "../block-mesh-common" }
+thiserror = { workspace = true }
 
 [dependencies.web-sys]
 workspace = true

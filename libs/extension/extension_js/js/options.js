@@ -1,14 +1,30 @@
-async function onClickSubmit() {
+import initWasmModule, {mount_options} from './wasm/blockmesh_ext.js';
+
+function onSuccess(message) {
     try {
-        console.log("Starting onClickSubmit");
-        let blockmesh_url = document.getElementById("blockmesh_url").value;
-        await chrome.storage.sync.set({blockmesh_url});
+        console.log(`onSuccess: ${JSON.stringify(message)}`);
     } catch (e) {
-        console.error(`Submit error: ${e}`);
+        console.error(`onSuccess error: ${e}`);
+    }
+}
+
+function onError(error) {
+    try {
+        console.error(`onError: ${JSON.stringify(error)}`);
+    } catch (e) {
+        console.error(`onError error (1): ${error}`);
+        console.error(`onError error (2): ${e}`);
     }
 }
 
 document.addEventListener('DOMContentLoaded', async function () {
-    let login_button = document.getElementById("options_submit_button");
-    login_button.addEventListener("click", onClickSubmit);
+    await initWasmModule().then(onSuccess, onError);
+    console.log("pre mount");
+    mount_options();
+    console.log("post mount");
+    let delete_form = document.getElementById("delete_form");
+    if (delete_form) {
+        console.log("removing delete_form");
+        delete_form.parentNode.removeChild(delete_form);
+    }
 });

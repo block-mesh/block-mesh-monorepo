@@ -55,6 +55,7 @@ impl Application {
             .route("/get_token", post(routes::api_token::get_token::handler))
             .route("/get_task", post(routes::tasks::get_task::handler))
             .route("/submit_task", post(routes::tasks::submit_task::handler))
+            .route("/get_stats", post(routes::api_token::get_stats::handler))
             .route(
                 "/create_task_with_token",
                 post(routes::tasks::create_task_with_token::handler),
@@ -73,6 +74,10 @@ impl Application {
                 "/register",
                 get(routes::register::register_form::handler)
                     .post(routes::register::register_post::handler),
+            )
+            .route(
+                "/api/check_token",
+                post(routes::api_token::check_token::handler),
             )
             .route("/health_check", get(routes::health_check::get::handler));
 
