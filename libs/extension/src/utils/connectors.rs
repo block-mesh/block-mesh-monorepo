@@ -67,6 +67,19 @@ extern "C" {
     pub async fn set_storage_value(key: &str, value: JsValue) -> JsValue;
 }
 
+#[wasm_bindgen(inline_js = r#"
+    export function storageOnChange(key, callback) {
+        chrome.storage.sync.onChanged.addListener((changes, namespace) => {
+            if (key in changes) {
+                callback(changes[key].newValue);
+            }
+        });
+    }
+"#)]
+extern "C" {
+    pub fn storageOnChange(key: &str, callback: &js_sys::Function);
+}
+
 /// Makes JS `console.log` available in Rust
 #[wasm_bindgen]
 extern "C" {

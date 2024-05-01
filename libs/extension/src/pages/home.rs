@@ -1,41 +1,68 @@
-use crate::pages::page::Page;
+use crate::components::table::Table;
 use crate::utils::state::{AppState, AppStatus};
+use crate::utils::stats::get_stats;
+use block_mesh_common::interface::{GetStatsRequest, Stat};
 use leptos::*;
+use std::time::Duration;
 
 #[component]
 pub fn Home() -> impl IntoView {
     let state = use_context::<AppState>().unwrap();
-    let status = Signal::derive(move || state.status.get());
     let email = Signal::derive(move || state.email.get());
+    let (stats, set_stats) = create_signal::<Vec<Stat>>(vec![]);
 
-    // create_effect(move |_| {
-    //     log!("new effect");
-    //     spawn_local(async move {
-    //         log!("new spawn");
-    //         while let status = state.status.get() {
-    //             log!("Spinning around {:#?}", state);
-    //             sleep(Duration::from_secs(5)).await;
-    //         }
-    //     });
-    // });
+    let _interval = set_interval_with_handle(
+        move || {
+            if state.status.get() == AppStatus::LoggedIn {
+                let email = state.email.get();
+                let api_token = state.api_token.get();
+                let blockmesh_url = state.blockmesh_url.get();
+                spawn_local(async move {
+                    if let Ok(result) =
+                        get_stats(&blockmesh_url, &GetStatsRequest { email, api_token }).await
+                    {
+                        set_stats.set(result.stats);
+                    }
+                });
+            }
+        },
+        Duration::from_secs(5),
+    );
 
     view! {
-        <h2>"BlockMesh Network"</h2>
-        {move || match status.get() {
+        {move || match state.status.get() {
             AppStatus::LoggedIn => {
-                view! { <p>"You are logged in with " {email} "."</p> }.into_view()
+                view! {
+                    <div class="bg-gray-700 flex justify-center items-center">
+                        <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
+                            <p class="text-white mb-2">
+                                {format!("Logged in as: {}", email.get())}
+                            </p>
+                            <Table stats=stats/>
+                        </div>
+                    </div>
+                }
+                    .into_view()
             }
             AppStatus::LoggedOut => {
                 view! {
-                    <p>"You are not logged in."</p>
-                    <a href=Page::Login.path()>"Login now."</a>
+                    <div class="bg-gray-700 flex justify-center items-center">
+                        <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
+                            <p class="text-white">You are not logged in</p>
+                        </div>
+                    </div>
                 }
                     .into_view()
             }
             AppStatus::WaitingEmailVerification => {
                 view! {
-                    <p>"You are logged in, but your email is not verified yet."</p>
-                    <a href=Page::Login.path()>"Login now."</a>
+                    <div class="bg-gray-700 flex justify-center items-center">
+                        <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
+                            <p class="text-white">
+                                You are logged in, but your email is not verified yet
+                            </p>
+                        </div>
+                    </div>
                 }
                     .into_view()
             }

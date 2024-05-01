@@ -1,6 +1,6 @@
 use block_mesh_common::interface::{GetStatsRequest, GetStatsResponse};
 
-pub async fn _get_stats(
+pub async fn get_stats(
     blockmesh_url: &str,
     credentials: &GetStatsRequest,
 ) -> anyhow::Result<GetStatsResponse> {

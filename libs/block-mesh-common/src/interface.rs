@@ -53,7 +53,7 @@ pub struct GetStatsRequest {
     pub email: String,
     pub api_token: Uuid,
 }
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Stat {
     pub day: NaiveDate,
     pub tasks_count: i64,

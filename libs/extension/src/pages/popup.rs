@@ -1,6 +1,3 @@
-use leptos::*;
-use leptos_router::{use_navigate, Route, Router, Routes};
-
 use crate::components::navbar::NavBar;
 use crate::pages::home::Home;
 use crate::pages::login::Login;
@@ -8,6 +5,8 @@ use crate::pages::page::Page;
 use crate::pages::register::Register;
 use crate::utils::log::log;
 use crate::utils::state::AppState;
+use leptos::*;
+use leptos_router::{use_navigate, Route, Router, Routes};
 
 #[component]
 pub fn Popup() -> impl IntoView {
