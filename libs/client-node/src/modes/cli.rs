@@ -29,7 +29,7 @@ impl FromStr for ResponseType {
 pub async fn cli_mode(
     solana_manager: Arc<SolanaManager>,
     proxy_url: &str,
-    client_node_cli_args: ClientNodeOptions,
+    client_node_cli_args: &ClientNodeOptions,
 ) -> anyhow::Result<()> {
     let nonce = Uuid::new_v4().to_string();
     let signed_message = sign_message(&nonce, &solana_manager.get_keypair())?;

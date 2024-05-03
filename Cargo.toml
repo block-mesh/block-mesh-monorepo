@@ -36,6 +36,8 @@ aes-gcm-siv = { git = "https://github.com/RustCrypto/AEADs", rev = "6105d7a5591a
 curve25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dalek", rev = "8274d5cbb6fc3f38cdc742b4798173895cd2a290" }
 
 [workspace.dependencies]
+egui = { version = "0.27.2" }
+eframe = { version = "0.27.2" }
 url = { version = "2.5.0" }
 leptos = { version = "0.6.11", features = ["tracing", "csr"] }
 leptos_router = { version = "0.6.11" }

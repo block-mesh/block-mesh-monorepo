@@ -21,7 +21,7 @@ use uuid::Uuid;
 pub async fn proxy_mode(
     solana_manager: Arc<SolanaManager>,
     proxy_url: Arc<String>,
-    client_node_cli_args: ClientNodeOptions,
+    client_node_cli_args: &ClientNodeOptions,
 ) -> anyhow::Result<()> {
     let addr = SocketAddr::from(([127, 0, 0, 1], client_node_cli_args.proxy_port));
     let listener = TcpListener::bind(addr).await?;
