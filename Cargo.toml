@@ -9,8 +9,8 @@ incremental = false
 codegen-units = 1
 
 [workspace]
-members = ["libs/*", "programs/*"]
-exclude = ["libs/renaissance-hackathon"]
+members = ["libs/*", "programs/*", "libs/tauri-app/src-tauri"]
+exclude = ["libs/renaissance-hackathon", "libs/installers"]
 resolver = "2"
 
 [workspace.lints.rust]
@@ -36,7 +36,9 @@ aes-gcm-siv = { git = "https://github.com/RustCrypto/AEADs", rev = "6105d7a5591a
 curve25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dalek", rev = "8274d5cbb6fc3f38cdc742b4798173895cd2a290" }
 
 [workspace.dependencies]
+tauri-build = { version = "1.5.1", features = [] }
 egui = { version = "0.27.2" }
+tauri = { version = "1.6.1", features = ["shell-open"] }
 eframe = { version = "0.27.2" }
 url = { version = "2.5.0" }
 leptos = { version = "0.6.11", features = ["tracing", "csr"] }

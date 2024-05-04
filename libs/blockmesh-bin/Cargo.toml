@@ -20,3 +20,7 @@ client-node = { path = "../client-node" }
 proxy-master = { path = "../proxy-master" }
 proxy-endpoint = { path = "../proxy-endpoint" }
 anyhow = { workspace = true }
+
+[[bin]]
+name = "blockmesh"
+path = "src/main.rs"
