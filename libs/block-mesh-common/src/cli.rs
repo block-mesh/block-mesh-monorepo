@@ -6,21 +6,19 @@ use std::fmt::Display;
 use std::str::FromStr;
 
 /// Main CLI arguments
-#[derive(Parser, Debug)]
+#[derive(Parser, Debug, Clone)]
 #[clap(author, version, about, long_about = None)]
 pub struct CliArgs {
     #[clap(subcommand)]
-    pub command: Commands,
+    pub command: Option<Commands>,
 }
 
 /// Commands are mutually exclusive groups
-#[derive(Subcommand, Debug, Clone, Default)]
+#[derive(Subcommand, Debug, Clone)]
 pub enum Commands {
     ClientNode(ClientNodeOptions),
     ProxyMaster(ProxyMasterNodeOptions),
     ProxyEndpoint(ProxyEndpointNodeOptions),
-    #[default]
-    Nothing,
 }
 
 impl Display for Commands {
@@ -29,7 +27,6 @@ impl Display for Commands {
             Commands::ClientNode(_) => write!(f, "ClientNode"),
             Commands::ProxyMaster(_) => write!(f, "ProxyMaster"),
             Commands::ProxyEndpoint(_) => write!(f, "ProxyEndpoint"),
-            Commands::Nothing => write!(f, "Nothing"),
         }
     }
 }

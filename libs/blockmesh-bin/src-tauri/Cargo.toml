@@ -1,0 +1,32 @@
+[package]
+name = "blockmesh-tauri"
+version = { workspace = true }
+description = "BlockMesh Network"
+authors.workspace = true
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[build-dependencies]
+tauri-build = { workspace = true, features = [] }
+
+[dependencies]
+tauri = { workspace = true, features = ["shell-open"] }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+auto-launch = { workspace = true }
+whoami = { workspace = true }
+clap = { workspace = true, features = ["derive"] }
+solana-sdk = { workspace = true }
+blockmesh-program = { path = "../../../programs/blockmesh-program" }
+block-mesh-solana-client = { path = "../../block-mesh-solana-client" }
+block-mesh-common = { path = "../../block-mesh-common", features = ["http", "cli"] }
+tokio = { workspace = true, features = ["full"] }
+client-node = { path = "../../client-node" }
+proxy-master = { path = "../../proxy-master" }
+proxy-endpoint = { path = "../../proxy-endpoint" }
+anyhow = { workspace = true }
+
+[features]
+# This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!
+custom-protocol = ["tauri/custom-protocol"]
