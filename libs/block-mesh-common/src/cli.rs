@@ -9,6 +9,8 @@ use std::str::FromStr;
 #[derive(Parser, Debug, Clone)]
 #[clap(author, version, about, long_about = None)]
 pub struct CliArgs {
+    #[arg(long)]
+    pub minimized: bool,
     #[clap(subcommand)]
     pub command: Option<Commands>,
 }

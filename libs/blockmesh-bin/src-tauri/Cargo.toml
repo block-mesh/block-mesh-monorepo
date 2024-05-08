@@ -11,7 +11,11 @@ edition = "2021"
 tauri-build = { workspace = true, features = [] }
 
 [dependencies]
-tauri = { workspace = true, features = ["shell-open"] }
+tauri = { workspace = true, features = ["shell-open", "system-tray"] }
+tauri-plugin-autostart = { workspace = true }
+tauri-plugin-single-instance = { workspace = true }
+cocoa = { workspace = true }
+futures-util = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 auto-launch = { workspace = true }
