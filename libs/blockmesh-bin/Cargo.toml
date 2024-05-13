@@ -1,20 +1,17 @@
 [package]
-name = "blockmesh-bin"
-version = "0.1.0"
+name = "blockmesh-leptos"
+version = "0.0.0"
 edition = "2021"
-authors.workspace = true
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
-
 [dependencies]
-clap = { workspace = true, features = ["derive"] }
-solana-sdk = { workspace = true }
-blockmesh-program = { path = "../../programs/blockmesh-program" }
-block-mesh-solana-client = { path = "../block-mesh-solana-client" }
-block-mesh-common = { path = "../block-mesh-common", features = ["http", "cli"] }
+leptos = { workspace = true, features = ["csr"] }
+leptos_router = { workspace = true, features = ["csr"] }
+wasm-bindgen = { workspace = true }
+wasm-bindgen-futures = { workspace = true }
+js-sys = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-tokio = { workspace = true, features = ["full"] }
-client-node = { path = "../client-node" }
-proxy-master = { path = "../proxy-master" }
-proxy-endpoint = { path = "../proxy-endpoint" }
-anyhow = { workspace = true }
+serde-wasm-bindgen = { workspace = true }
+console_error_panic_hook = { workspace = true }
+block-mesh-common = { path = "../block-mesh-common", features = ["http", "cli"] }
+solana-sdk = { workspace = true }

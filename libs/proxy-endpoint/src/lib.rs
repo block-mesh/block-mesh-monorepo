@@ -15,7 +15,7 @@ mod connection_listener;
 mod endpoint_headers;
 
 #[tracing::instrument(name = "proxy_endpoint_main", ret, err)]
-pub async fn proxy_endpoint_main(cli_args: ProxyEndpointNodeOptions) -> anyhow::Result<ExitCode> {
+pub async fn proxy_endpoint_main(cli_args: &ProxyEndpointNodeOptions) -> anyhow::Result<ExitCode> {
     setup_tracing();
     let mut solana_manager =
         SolanaManager::new(&cli_args.keypair_path, &cli_args.program_id).await?;
@@ -53,7 +53,7 @@ pub async fn proxy_endpoint_main(cli_args: ProxyEndpointNodeOptions) -> anyhow::
             provider_node_account
         }
     };
-    let proxy_url = match cli_args.proxy_override {
+    let proxy_url = match cli_args.proxy_override.clone() {
         Some(proxy_override) => proxy_override,
         None => {
             format!(

@@ -24,7 +24,7 @@ use tokio::sync::broadcast;
 
 #[tracing::instrument(name = "proxy_master_main", ret, err)]
 pub async fn proxy_master_main(
-    proxy_master_node_options: ProxyMasterNodeOptions,
+    proxy_master_node_options: &ProxyMasterNodeOptions,
 ) -> anyhow::Result<ExitCode> {
     setup_tracing();
     let ip_addr = get_ip().await?;
