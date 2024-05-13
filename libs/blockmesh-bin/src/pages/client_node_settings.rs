@@ -1,4 +1,3 @@
-use crate::log::log;
 use crate::state::LeptosTauriAppState;
 use block_mesh_common::cli::Commands;
 use block_mesh_common::constants::BLOCK_MESH_PROGRAM_ID;
@@ -9,8 +8,7 @@ use std::str::FromStr;
 #[component]
 pub fn ClientNodeSettingsForm() -> impl IntoView {
     let state = expect_context::<LeptosTauriAppState>();
-    let cli_args = move || state.cli_args.get();
-    let command = move || cli_args().command;
+    let command = move || state.cli_args.get_untracked().command;
     let (error, set_error) = create_signal(None::<String>);
     let (keypair_path, set_keypair_path) = create_signal(match command() {
         Some(Commands::ClientNode(options)) => options.keypair_path.to_string(),
@@ -32,7 +30,7 @@ pub fn ClientNodeSettingsForm() -> impl IntoView {
     });
     let (proxy_port, set_proxy_port) = create_signal(match command() {
         Some(Commands::ClientNode(options)) => options.proxy_port,
-        _ => 0,
+        _ => 8100,
     });
 
     let submit_action = move || {
@@ -64,7 +62,6 @@ pub fn ClientNodeSettingsForm() -> impl IntoView {
                 options.program_id = program_address.unwrap();
                 options.proxy_override = proxy_override.get();
                 options.proxy_port = proxy_port.get();
-                log!("ClientNodeOptions: {:?}", options);
                 let mut args = state.cli_args.get();
                 args.command = Some(Commands::ClientNode(options));
                 state.cli_args.set(args);

@@ -9,6 +9,7 @@ use leptos::*;
 use leptos_router::{Route, Router, Routes};
 use serde::{Deserialize, Serialize};
 // use serde_wasm_bindgen::to_value;
+use crate::log::log;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -25,32 +26,16 @@ struct GreetArgs<'a> {
 #[component]
 pub fn App() -> impl IntoView {
     provide_context(LeptosTauriAppState::default());
-    // let (name, set_name) = create_signal(String::new());
-    // let (greet_msg, set_greet_msg) = create_signal(String::new());
     let (cli_args, _set_cli_args) = create_signal(CliArgs::default());
-    let _resource = create_resource(move || cli_args.get(), |_| async move {});
-
-    // let update_name = move |ev: Event| {
-    //     let v = event_target_value(&ev);
-    //     set_name.set(v);
-    // };
-    // let greet = move |ev: SubmitEvent| {
-    //     ev.prevent_default();
-    //     spawn_local(async move {
-    //         let name = name.get_untracked();
-    //         if name.is_empty() {
-    //             return;
-    //         }
-    //
-    //         let args = to_value(&GreetArgs { name: &name }).unwrap();
-    //         Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-    // let new_msg = invoke("greet", args).await.as_string().unwrap();
-    // set_greet_msg.set(new_msg);
-    // });
-    // };
+    let _resource = create_resource(
+        move || cli_args.get(),
+        |_| async move {
+            log!("Here");
+        },
+    );
 
     view! {
-        <div class="h-full bg-gray-900">
+        <div class="h-screen bg-gray-800">
             <div class="h-full">
                 <Router>
                     <Navigation/>

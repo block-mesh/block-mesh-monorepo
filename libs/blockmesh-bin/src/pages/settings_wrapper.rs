@@ -1,5 +1,7 @@
 use crate::components::show_check_box::ShowCheckBox;
 use crate::pages::client_node_settings::ClientNodeSettingsForm;
+use crate::pages::proxy_endpoint_settings::ProxyEndpointSettingsForm;
+use crate::pages::proxy_master_settings::ProxyMasterSettingsForm;
 use crate::state::LeptosTauriAppState;
 use block_mesh_common::cli::CommandsEnum;
 use leptos::*;
@@ -30,6 +32,24 @@ pub fn SettingsWrapper() -> impl IntoView {
         >
 
             <ClientNodeSettingsForm/>
+        </Show>
+        <Show
+            when=move || command() == CommandsEnum::ProxyMaster
+            fallback=|| {
+                view! {}
+            }
+        >
+
+            <ProxyMasterSettingsForm/>
+        </Show>
+        <Show
+            when=move || command() == CommandsEnum::ProxyEndpoint
+            fallback=|| {
+                view! {}
+            }
+        >
+
+            <ProxyEndpointSettingsForm/>
         </Show>
     }
 }
