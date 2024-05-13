@@ -1,7 +1,14 @@
-use leptos::leptos_dom::ev::SubmitEvent;
+use crate::components::navigation::Navigation;
+use crate::page_routes::PageRoutes;
+use crate::pages::settings_wrapper::SettingsWrapper;
+use crate::state::LeptosTauriAppState;
+use block_mesh_common::cli::CliArgs;
+// use leptos::ev::Event;
+// use leptos::leptos_dom::ev::SubmitEvent;
 use leptos::*;
+use leptos_router::{Route, Router, Routes};
 use serde::{Deserialize, Serialize};
-use serde_wasm_bindgen::to_value;
+// use serde_wasm_bindgen::to_value;
 use wasm_bindgen::prelude::*;
 
 #[wasm_bindgen]
@@ -17,61 +24,60 @@ struct GreetArgs<'a> {
 
 #[component]
 pub fn App() -> impl IntoView {
-    let (name, set_name) = create_signal(String::new());
-    let (greet_msg, set_greet_msg) = create_signal(String::new());
+    provide_context(LeptosTauriAppState::default());
+    // let (name, set_name) = create_signal(String::new());
+    // let (greet_msg, set_greet_msg) = create_signal(String::new());
+    let (cli_args, _set_cli_args) = create_signal(CliArgs::default());
+    let _resource = create_resource(move || cli_args.get(), |_| async move {});
 
-    let update_name = move |ev| {
-        let v = event_target_value(&ev);
-        set_name.set(v);
-    };
-
-    let greet = move |ev: SubmitEvent| {
-        ev.prevent_default();
-        spawn_local(async move {
-            let name = name.get_untracked();
-            if name.is_empty() {
-                return;
-            }
-
-            let args = to_value(&GreetArgs { name: &name }).unwrap();
-            // Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
-            let new_msg = invoke("greet", args).await.as_string().unwrap();
-            set_greet_msg.set(new_msg);
-        });
-    };
+    // let update_name = move |ev: Event| {
+    //     let v = event_target_value(&ev);
+    //     set_name.set(v);
+    // };
+    // let greet = move |ev: SubmitEvent| {
+    //     ev.prevent_default();
+    //     spawn_local(async move {
+    //         let name = name.get_untracked();
+    //         if name.is_empty() {
+    //             return;
+    //         }
+    //
+    //         let args = to_value(&GreetArgs { name: &name }).unwrap();
+    //         Learn more about Tauri commands at https://tauri.app/v1/guides/features/command
+    // let new_msg = invoke("greet", args).await.as_string().unwrap();
+    // set_greet_msg.set(new_msg);
+    // });
+    // };
 
     view! {
-        <main class="container">
-            <div class="row">
-                <a href="https://tauri.app" target="_blank">
-                    <img src="public/tauri.svg" class="logo tauri" alt="Tauri logo"/>
-                </a>
-                <a href="https://docs.rs/leptos/" target="_blank">
-                    <img src="public/leptos.svg" class="logo leptos" alt="Leptos logo"/>
-                </a>
+        <div class="h-full bg-gray-900">
+            <div class="h-full">
+                <Router>
+                    <Navigation/>
+                    <div class="lg:pl-72">
+                        <main class="py-10">
+                            <div class="px-4 sm:px-6 lg:px-8">
+                                <Routes>
+                                    <Route
+                                        path=PageRoutes::Home.path()
+                                        view=move || {
+                                            view! { <div>Home</div> }
+                                        }
+                                    />
+
+                                    <Route
+                                        path=PageRoutes::Settings.path()
+                                        view=move || {
+                                            view! { <SettingsWrapper/> }
+                                        }
+                                    />
+
+                                </Routes>
+                            </div>
+                        </main>
+                    </div>
+                </Router>
             </div>
-
-            <p>"Click on the Tauri and Leptos logos to learn more."</p>
-
-            <p>
-                "Recommended IDE setup: "
-                <a href="https://code.visualstudio.com/" target="_blank">"VS Code"</a>
-                " + "
-                <a href="https://github.com/tauri-apps/tauri-vscode" target="_blank">"Tauri"</a>
-                " + "
-                <a href="https://github.com/rust-lang/rust-analyzer" target="_blank">"rust-analyzer"</a>
-            </p>
-
-            <form class="row" on:submit=greet>
-                <input
-                    id="greet-input"
-                    placeholder="Enter a name..."
-                    on:input=update_name
-                />
-                <button type="submit">"Greet"</button>
-            </form>
-
-            <p><b>{ move || greet_msg.get() }</b></p>
-        </main>
+        </div>
     }
 }

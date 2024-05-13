@@ -12,7 +12,7 @@ pub fn on_run_events(_app_handle: &AppHandle, event: RunEvent) {
         }
         RunEvent::MainEventsCleared => {}
         _ => {
-            println!("run event: {:?}", event);
+            // println!("run event: {:?}", event);
         }
     }
 }

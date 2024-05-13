@@ -1,3 +1,5 @@
 /src
 /public
 /Cargo.toml
+/.vscode
+/dist

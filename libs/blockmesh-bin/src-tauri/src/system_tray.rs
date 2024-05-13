@@ -16,6 +16,7 @@ pub fn setup_tray() -> SystemTray {
 }
 
 pub fn set_dock_visible(_visible: bool) {
+    // https://github.dev/thewh1teagle/RustDuck/tree/main/src-tauri/src
     // if cfg!(target_os = "macos") {
     //     let policy = if visible {
     //         NSApplicationActivationPolicyRegular
@@ -36,21 +37,21 @@ pub fn on_system_tray_event(app: &AppHandle, event: SystemTrayEvent) {
             size: _,
             ..
         } => {
-            println!("system tray received a left click");
+            // println!("system tray received a left click");
         }
         SystemTrayEvent::RightClick {
             position: _,
             size: _,
             ..
         } => {
-            println!("system tray received a right click");
+            // println!("system tray received a right click");
         }
         SystemTrayEvent::DoubleClick {
             position: _,
             size: _,
             ..
         } => {
-            println!("system tray received a double click");
+            // println!("system tray received a double click");
         }
         SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
             "show" => {
@@ -68,7 +69,7 @@ pub fn on_system_tray_event(app: &AppHandle, event: SystemTrayEvent) {
             _ => {}
         },
         _ => {
-            println!("system tray unknown event");
+            // println!("system tray unknown event");
         }
     }
 }

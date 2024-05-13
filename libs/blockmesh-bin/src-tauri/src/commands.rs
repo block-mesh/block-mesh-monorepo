@@ -16,13 +16,10 @@ pub async fn greet(name: &str, state: State<'_, Arc<Mutex<AppState>>>) -> Result
 #[tauri::command]
 pub fn open_main_window(app_handle: &AppHandle) -> anyhow::Result<()> {
     set_dock_visible(true);
-    println!("Opening main window");
     if let Some(window) = app_handle.get_window("main") {
-        println!("Found window");
         window.show().unwrap();
         window.set_focus().unwrap();
     } else {
-        println!("Creating window");
         let _window = tauri::WindowBuilder::new(
             app_handle,
             "main",

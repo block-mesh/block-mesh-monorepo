@@ -10,7 +10,6 @@ use tokio::sync::broadcast::Receiver;
 use tokio::sync::Mutex;
 
 pub fn start_task(app_state: Arc<Mutex<AppState>>, mut rx: Receiver<ChannelMessage>) {
-    println!("Starting task");
     let state = app_state.clone();
     let task = tauri::async_runtime::spawn(async move {
         let app_state = state.clone();
@@ -28,10 +27,7 @@ pub fn start_task(app_state: Arc<Mutex<AppState>>, mut rx: Receiver<ChannelMessa
                     proxy_endpoint_main(proxy_endpoint_node_options).await
                 }
             },
-            None => {
-                println!("No command provided");
-                Ok(ExitCode::SUCCESS)
-            }
+            None => Ok(ExitCode::SUCCESS),
         }
     });
 
@@ -39,13 +35,10 @@ pub fn start_task(app_state: Arc<Mutex<AppState>>, mut rx: Receiver<ChannelMessa
     let _: tauri::async_runtime::JoinHandle<anyhow::Result<ExitCode>> =
         tauri::async_runtime::spawn(async move {
             let app_state = app_state.clone();
-            println!("Waiting for message 2");
-            while let Ok(msg) = rx.recv().await {
-                println!("Received message 2: {:?}", msg);
+            while let Ok(_msg) = rx.recv().await {
                 task.abort();
                 start_task(app_state.clone(), rx.resubscribe());
             }
             Ok(ExitCode::SUCCESS)
         });
-    println!("Exiting method");
 }
