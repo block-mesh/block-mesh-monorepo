@@ -1,7 +1,7 @@
 use crate::background::tasks::{get_task, run_task, submit_task};
 use crate::utils::connectors::set_panic_hook;
+use crate::utils::ext_state::AppState;
 use crate::utils::log::log;
-use crate::utils::state::AppState;
 use leptos::SignalGetUntracked;
 use wasm_bindgen::prelude::wasm_bindgen;
 

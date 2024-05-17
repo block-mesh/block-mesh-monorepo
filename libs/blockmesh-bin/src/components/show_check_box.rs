@@ -1,16 +1,16 @@
-use crate::state::LeptosTauriAppState;
+use crate::leptos_state::LeptosTauriAppState;
 use block_mesh_common::cli::CommandsEnum;
 use leptos::*;
 
 #[component]
 pub fn ShowCheckBox(title: CommandsEnum) -> impl IntoView {
     let state = expect_context::<LeptosTauriAppState>();
-    let command = move || match state.cli_args.get().command {
-        Some(command) => {
-            let c: CommandsEnum = command.clone().into();
-            c
-        }
-        None => CommandsEnum::ClientNode,
+    let command = move || {
+        state
+            .app_config
+            .get()
+            .mode
+            .unwrap_or(CommandsEnum::ClientNode)
     };
     let show = move || command().to_string() == title.to_string();
     let active = move || {
@@ -25,17 +25,11 @@ pub fn ShowCheckBox(title: CommandsEnum) -> impl IntoView {
         <label
             class=active
             on:click=move |_ev| {
-                match &state.cli_args.get().command {
-                    Some(command) => {
-                        let command_result = command.convert(&title);
-                        if command_result.is_some() {
-                            let mut args = state.cli_args.get();
-                            args.command = Some(command_result.unwrap());
-                            state.cli_args.set(args);
-                        }
-                    }
-                    None => {}
-                }
+                state
+                    .app_config
+                    .update(|config| {
+                        config.mode = Some(title);
+                    });
             }
         >
 

@@ -1,8 +1,19 @@
 use crate::page_routes::PageRoutes;
 use leptos::*;
+use leptos_router::use_location;
 
 #[component]
 pub fn Sidebar() -> impl IntoView {
+    let location = use_location();
+    let current_path = Signal::derive(move || location.pathname.get());
+    let active = move |path: &str| {
+        if path == current_path.get() {
+            "bg-gray-800 text-white group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+        } else {
+            "text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+        }
+    };
+
     view! {
         <div class="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col border-r-2  border-r-white">
             <div class="flex grow flex-col gap-y-5 overflow-y-auto bg-gray-900 px-6 pb-4">
@@ -19,22 +30,26 @@ pub fn Sidebar() -> impl IntoView {
                             <ul role="list" class="-mx-2 space-y-1">
                                 <li>
                                     <a
-                                        href=PageRoutes::Dashboard.path()
-                                        class="text-gray-400 hover:text-white hover:bg-gray-800 group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                                        href=PageRoutes::Home.path()
+                                        class=move || active(PageRoutes::Home.path())
                                     >
-                                        // class="bg-gray-800 text-white group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                                        Home
+                                    </a>
+                                </li>
+                                <li>
+                                    <a
+                                        href=PageRoutes::Dashboard.path()
+                                        class=move || active(PageRoutes::Dashboard.path())
+                                    >
                                         Dashboard
                                     </a>
                                 </li>
                                 <li>
                                     <a
                                         href=PageRoutes::Settings.path()
-                                        class="bg-gray-800 text-white group flex gap-x-3 rounded-md p-2 text-sm leading-6 font-semibold"
+                                        class=move || active(PageRoutes::Settings.path())
                                     >
                                         Settings
-                                    // <div class="order-first flex-none rounded-full bg-indigo-400/10 px-2 py-1 text-xs font-medium text-indigo-400 ring-1 ring-inset ring-indigo-400/30 sm:order-none">
-                                    // coming soon
-                                    // </div>
                                     </a>
                                 </li>
                             </ul>

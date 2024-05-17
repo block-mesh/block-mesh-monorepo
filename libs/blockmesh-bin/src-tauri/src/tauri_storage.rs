@@ -1,4 +1,4 @@
-use crate::state::AppState;
+use crate::tauri_state::AppState;
 use anyhow::anyhow;
 use block_mesh_common::app_config::AppConfig;
 use block_mesh_common::constants::CONFIG_FILENAME;
