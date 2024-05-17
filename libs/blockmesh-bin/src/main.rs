@@ -1,9 +1,9 @@
 mod app;
 mod components;
+mod leptos_state;
 mod log;
 mod page_routes;
 mod pages;
-mod state;
 
 use app::*;
 use leptos::*;

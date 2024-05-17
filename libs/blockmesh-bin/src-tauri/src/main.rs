@@ -1,11 +1,14 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+#![allow(clippy::let_underscore_future)]
 use crate::background::start_task;
-use crate::commands::{greet, open_main_window};
+use crate::commands::{get_app_config, open_main_window, set_app_config};
 use crate::run_events::on_run_events;
-use crate::state::{AppState, ChannelMessage};
 use crate::system_tray::{on_system_tray_event, set_dock_visible, setup_tray};
+use crate::tauri_state::{AppState, ChannelMessage};
+use crate::tauri_storage::setup_storage;
 use crate::windows_events::on_window_event;
+use block_mesh_common::app_config::AppConfig;
 use block_mesh_common::cli::CliArgs;
 use block_mesh_common::constants::{BLOCKMESH_DISABLE_GUI_ENVAR, BLOCKMESH_HOME_DIR_ENVAR};
 use clap::Parser;
@@ -19,8 +22,9 @@ use tokio::sync::{broadcast, Mutex};
 mod background;
 mod commands;
 mod run_events;
-mod state;
 mod system_tray;
+mod tauri_state;
+mod tauri_storage;
 mod windows_events;
 
 #[tokio::main]
@@ -31,8 +35,14 @@ async fn main() -> anyhow::Result<ExitCode> {
     let _current_exe_path = current_exe().unwrap();
     let rx = incoming_tx.subscribe();
     let args = CliArgs::parse();
+    let config = if let Some(command) = args.command {
+        AppConfig::from(command)
+    } else {
+        AppConfig::default()
+    };
+
     let app_state = Arc::new(Mutex::new(AppState {
-        cli_args: args.clone(),
+        config,
         tx: incoming_tx,
         rx: incoming_rx,
     }));
@@ -52,6 +62,10 @@ async fn main() -> anyhow::Result<ExitCode> {
         .system_tray(setup_tray())
         .manage(app_state.clone())
         .setup(move |app| {
+            let app_handle = app.app_handle();
+            let _: tauri::async_runtime::JoinHandle<()> = tauri::async_runtime::spawn(async move {
+                let _ = setup_storage(app_handle).await;
+            });
             app.set_activation_policy(ActivationPolicy::Accessory);
             if args.minimized {
                 set_dock_visible(false);
@@ -62,7 +76,7 @@ async fn main() -> anyhow::Result<ExitCode> {
         })
         .on_system_tray_event(on_system_tray_event)
         .on_window_event(on_window_event)
-        .invoke_handler(tauri::generate_handler![greet])
+        .invoke_handler(tauri::generate_handler![get_app_config, set_app_config])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
         .run(on_run_events);
