@@ -13,21 +13,19 @@ pub fn start_task(app_state: Arc<Mutex<AppState>>, mut rx: Receiver<ChannelMessa
     let state = app_state.clone();
     let task = tauri::async_runtime::spawn(async move {
         let app_state = state.clone();
-        let args = app_state.lock().await.cli_args.clone();
+        let config = app_state.lock().await.config.clone();
+        let commands = Commands::from(config);
         drop(app_state);
-        match &args.command {
-            Some(commands) => match &commands {
-                Commands::ClientNode(client_node_options) => {
-                    client_node_main(client_node_options).await
-                }
-                Commands::ProxyMaster(proxy_master_node_options) => {
-                    proxy_master_main(proxy_master_node_options).await
-                }
-                Commands::ProxyEndpoint(proxy_endpoint_node_options) => {
-                    proxy_endpoint_main(proxy_endpoint_node_options).await
-                }
-            },
-            None => Ok(ExitCode::SUCCESS),
+        match &commands {
+            Commands::ClientNode(client_node_options) => {
+                client_node_main(client_node_options).await
+            }
+            Commands::ProxyMaster(proxy_master_node_options) => {
+                proxy_master_main(proxy_master_node_options).await
+            }
+            Commands::ProxyEndpoint(proxy_endpoint_node_options) => {
+                proxy_endpoint_main(proxy_endpoint_node_options).await
+            }
         }
     });
 
