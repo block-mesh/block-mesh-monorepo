@@ -1,5 +1,5 @@
 #![allow(clippy::let_underscore_future)]
-use crate::state::{AppState, ChannelMessage};
+use crate::tauri_state::{AppState, ChannelMessage};
 use block_mesh_common::cli::Commands;
 use client_node::client_node_main;
 use proxy_endpoint::proxy_endpoint_main;

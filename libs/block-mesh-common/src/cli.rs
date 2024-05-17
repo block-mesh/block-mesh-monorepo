@@ -43,7 +43,7 @@ impl From<Commands> for CommandsEnum {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Copy)]
+#[derive(Debug, Clone, PartialEq, Copy, Serialize, Deserialize)]
 pub enum CommandsEnum {
     ClientNode,
     ProxyMaster,
@@ -128,25 +128,6 @@ impl Commands {
     }
 }
 
-/// Arguments for proxy-endpoint
-#[derive(Parser, Debug, Clone, PartialEq, Default)]
-pub struct ProxyEndpointNodeOptions {
-    /// Path to the keypair
-    #[arg(long, default_value = "proxy-endpoint-keypair.json")]
-    pub keypair_path: String,
-    #[arg(long)]
-    /// Proxy-Master owner public key, by default will take first one found on-chain
-    pub proxy_master_node_owner: Option<Pubkey>,
-    /// BlockMesh Solana Program ID
-    #[arg(long, default_value = BLOCK_MESH_PROGRAM_ID, value_parser = Pubkey::from_str)]
-    pub program_id: Pubkey,
-    #[arg(long)]
-    /// Override the proxy-master URL, mostly for testing purposes
-    pub proxy_override: Option<String>,
-    #[clap(long, short)]
-    pub gui: bool,
-}
-
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, ValueEnum, PartialEq, Default)]
 pub enum ClientNodeMode {
     #[default]
@@ -164,6 +145,25 @@ impl FromStr for ClientNodeMode {
             _ => Err(format!("{} is not a valid mode", s)),
         }
     }
+}
+
+/// Arguments for proxy-endpoint
+#[derive(Parser, Debug, Clone, PartialEq, Default)]
+pub struct ProxyEndpointNodeOptions {
+    /// Path to the keypair
+    #[arg(long, default_value = "proxy-endpoint-keypair.json")]
+    pub keypair_path: String,
+    #[arg(long)]
+    /// Proxy-Master owner public key, by default will take first one found on-chain
+    pub proxy_master_node_owner: Option<Pubkey>,
+    /// BlockMesh Solana Program ID
+    #[arg(long, default_value = BLOCK_MESH_PROGRAM_ID, value_parser = Pubkey::from_str)]
+    pub program_id: Pubkey,
+    #[arg(long)]
+    /// Override the proxy-master URL, mostly for testing purposes
+    pub proxy_override: Option<String>,
+    #[clap(long, short)]
+    pub gui: bool,
 }
 
 /// Arguments for client-node
