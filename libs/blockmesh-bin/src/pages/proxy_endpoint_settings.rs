@@ -1,6 +1,5 @@
-use crate::state::LeptosTauriAppState;
-use block_mesh_common::cli::Commands;
-use block_mesh_common::constants::BLOCK_MESH_PROGRAM_ID;
+use crate::leptos_state::LeptosTauriAppState;
+use block_mesh_common::app_config::AppConfig;
 use leptos::*;
 use solana_sdk::pubkey::Pubkey;
 use std::str::FromStr;
@@ -8,44 +7,64 @@ use std::str::FromStr;
 #[component]
 pub fn ProxyEndpointSettingsForm() -> impl IntoView {
     let state = expect_context::<LeptosTauriAppState>();
-    let command = move || state.cli_args.get_untracked().command;
     let (error, set_error) = create_signal(None::<String>);
 
-    let (keypair_path, set_keypair_path) = create_signal(match command() {
-        Some(Commands::ProxyEndpoint(options)) => options.keypair_path.to_string(),
-        _ => "".to_string(),
-    });
+    let keypair_path = Signal::derive(move || state.app_config.get().keypair_path);
+    let set_keypair_path =
+        move |key: String| state.app_config.update(|c| c.keypair_path = Some(key));
 
-    let (proxy_master_address, set_proxy_master_address) = create_signal(match command() {
-        Some(Commands::ProxyEndpoint(options)) => {
-            options.proxy_master_node_owner.map(|v| v.to_string())
-        }
-        _ => None,
+    let proxy_master_address = Signal::derive(move || {
+        state
+            .app_config
+            .get()
+            .proxy_master_node_owner
+            .unwrap_or_default()
+            .to_string()
     });
-    let (program_address, set_program_address) = create_signal(match command() {
-        Some(Commands::ProxyEndpoint(options)) => options.program_id.to_string(),
-        _ => BLOCK_MESH_PROGRAM_ID.to_string(),
-    });
+    let set_proxy_master_address = move |address: String| {
+        state.app_config.update(|c| {
+            if let Ok(val) = Pubkey::from_str(&address) {
+                c.proxy_master_node_owner = Some(val);
+            }
+        });
+    };
 
-    let (proxy_override, set_proxy_override) = create_signal(match command() {
-        Some(Commands::ProxyEndpoint(options)) => options.proxy_override,
-        _ => None,
+    let program_address = Signal::derive(move || {
+        state
+            .app_config
+            .get()
+            .program_id
+            .unwrap_or_default()
+            .to_string()
     });
+    let set_program_address = move |address: String| {
+        state.app_config.update(|c| {
+            if let Ok(val) = Pubkey::from_str(&address) {
+                c.program_id = Some(val);
+            }
+        });
+    };
+    let proxy_override = Signal::derive(move || {
+        state
+            .app_config
+            .get()
+            .proxy_override
+            .unwrap_or_default()
+            .to_string()
+    });
+    let set_proxy_override = move |override_: String| {
+        state
+            .app_config
+            .update(|c| c.proxy_override = Some(override_));
+    };
 
     let submit_action = move || {
-        if let Some(cmd) = state.cli_args.get().command {
-            let proxy_master_address = match proxy_master_address.get() {
-                None => None,
-                Some(val) => {
-                    let proxy_master_address = Pubkey::from_str(&val);
-                    match proxy_master_address {
-                        Ok(val) => Some(val),
-                        Err(_) => {
-                            set_error
-                                .update(|e| *e = Some("Invalid Proxy Master Address".to_string()));
-                            return;
-                        }
-                    }
+        if state.app_config.get().mode.is_some() {
+            let proxy_master_address = match Pubkey::from_str(&proxy_master_address.get()) {
+                Ok(val) => Some(val),
+                Err(_) => {
+                    set_error.update(|e| *e = Some("Invalid Proxy Master Address".to_string()));
+                    return;
                 }
             };
 
@@ -55,15 +74,15 @@ pub fn ProxyEndpointSettingsForm() -> impl IntoView {
                 return;
             }
 
-            if let Commands::ProxyEndpoint(mut options) = cmd {
-                options.keypair_path = keypair_path.get();
-                options.proxy_master_node_owner = proxy_master_address;
-                options.program_id = program_address.unwrap();
-                options.proxy_override = proxy_override.get();
-                let mut args = state.cli_args.get();
-                args.command = Some(Commands::ProxyEndpoint(options));
-                state.cli_args.set(args);
-            }
+            let config = AppConfig {
+                keypair_path: keypair_path.get(),
+                proxy_master_node_owner: proxy_master_address,
+                program_id: Some(program_address.unwrap()),
+                proxy_override: Some(proxy_override.get()),
+                mode: state.app_config.get().mode,
+                ..AppConfig::default()
+            };
+            state.app_config.set(config);
         }
     };
 
@@ -86,15 +105,14 @@ pub fn ProxyEndpointSettingsForm() -> impl IntoView {
                             placeholder="Key Pair Path"
                             name="keypair_path"
                             value=move || keypair_path.get()
-                            prop:disabled=move || command().is_none()
                             on:keyup=move |ev: ev::KeyboardEvent| {
                                 let val = event_target_value(&ev);
-                                set_keypair_path.update(|v| *v = val);
+                                set_keypair_path(val);
                             }
 
                             on:change=move |ev| {
                                 let val = event_target_value(&ev);
-                                set_keypair_path.update(|v| *v = val);
+                                set_keypair_path(val);
                             }
                         />
 
@@ -105,16 +123,15 @@ pub fn ProxyEndpointSettingsForm() -> impl IntoView {
                             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             placeholder="Proxy Master Address"
                             name="proxy_master_address"
-                            prop:disabled=move || command().is_none()
                             value=move || proxy_master_address.get()
                             on:keyup=move |ev: ev::KeyboardEvent| {
                                 let val = event_target_value(&ev);
-                                set_proxy_master_address.update(|v| *v = Some(val));
+                                set_proxy_master_address(val);
                             }
 
                             on:change=move |ev| {
                                 let val = event_target_value(&ev);
-                                set_proxy_master_address.update(|v| *v = Some(val));
+                                set_proxy_master_address(val);
                             }
                         />
 
@@ -125,16 +142,15 @@ pub fn ProxyEndpointSettingsForm() -> impl IntoView {
                             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             placeholder="Program Address"
                             name="program_address"
-                            prop:disabled=move || command().is_none()
                             value=move || program_address.get()
                             on:keyup=move |ev: ev::KeyboardEvent| {
                                 let val = event_target_value(&ev);
-                                set_program_address.update(|v| *v = val);
+                                set_program_address(val);
                             }
 
                             on:change=move |ev| {
                                 let val = event_target_value(&ev);
-                                set_program_address.update(|v| *v = val);
+                                set_program_address(val);
                             }
                         />
 
@@ -145,23 +161,21 @@ pub fn ProxyEndpointSettingsForm() -> impl IntoView {
                             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
                             placeholder="Proxy Override"
                             name="proxy_override"
-                            prop:disabled=move || command().is_none()
                             value=move || proxy_override.get()
                             on:keyup=move |ev: ev::KeyboardEvent| {
                                 let val = event_target_value(&ev);
-                                set_proxy_override.update(|v| *v = Some(val));
+                                set_proxy_override(val);
                             }
 
                             on:change=move |ev| {
                                 let val = event_target_value(&ev);
-                                set_proxy_override.update(|v| *v = Some(val));
+                                set_proxy_override(val);
                             }
                         />
 
                     </div> <div class="flex items-center justify-between">
                         <button
                             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                            prop:disabled=move || command().is_none()
                             on:click=move |_| { submit_action() }
                         >
                             Submit
