@@ -1,5 +1,5 @@
 use crate::components::table::Table;
-use crate::utils::state::{AppState, AppStatus};
+use crate::utils::ext_state::{AppState, AppStatus};
 use crate::utils::stats::get_stats;
 use block_mesh_common::interface::{GetStatsRequest, Stat};
 use leptos::*;
