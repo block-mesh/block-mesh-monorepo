@@ -5,6 +5,7 @@ use crate::cli::{
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
 use std::env;
+use std::fmt::Display;
 
 #[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub struct AppConfig {
@@ -18,6 +19,32 @@ pub struct AppConfig {
     pub gui: Option<bool>,
     pub minimized: Option<bool>,
     pub config_path: Option<String>,
+    pub task_status: Option<TaskStatus>,
+}
+
+#[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Copy)]
+pub enum TaskStatus {
+    Running,
+    #[default]
+    Off,
+}
+
+impl Display for TaskStatus {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TaskStatus::Running => write!(f, "Running"),
+            TaskStatus::Off => write!(f, "Off"),
+        }
+    }
+}
+
+impl From<String> for TaskStatus {
+    fn from(s: String) -> Self {
+        match s.as_str() {
+            "Running" => TaskStatus::Running,
+            _ => TaskStatus::Off,
+        }
+    }
 }
 
 impl AppConfig {
@@ -101,6 +128,7 @@ impl From<Commands> for AppConfig {
                 gui: Some(options.gui),
                 minimized: None,
                 config_path: None,
+                task_status: None,
             },
             Commands::ProxyMaster(options) => AppConfig {
                 keypair_path: Some(options.keypair_path),
@@ -113,6 +141,7 @@ impl From<Commands> for AppConfig {
                 gui: Some(options.gui),
                 minimized: None,
                 config_path: None,
+                task_status: None,
             },
             Commands::ProxyEndpoint(options) => AppConfig {
                 keypair_path: Some(options.keypair_path),
@@ -125,6 +154,7 @@ impl From<Commands> for AppConfig {
                 gui: Some(options.gui),
                 minimized: None,
                 config_path: None,
+                task_status: None,
             },
         }
     }

@@ -17,6 +17,7 @@ clap = { workspace = true, features = ["derive"], optional = true }
 solana-sdk = { workspace = true, optional = true }
 chrono = { workspace = true, features = ["clock", "serde"] }
 anyhow = { workspace = true }
+once_cell = { workspace = true }
 
 [dependencies.uuid]
 workspace = true

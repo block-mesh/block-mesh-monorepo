@@ -1,7 +1,7 @@
 use crate::system_tray::set_dock_visible;
 use crate::tauri_state::{AppState, ChannelMessage};
 use crate::tauri_storage::set_config_with_path;
-use block_mesh_common::app_config::AppConfig;
+use block_mesh_common::app_config::{AppConfig, TaskStatus};
 use std::sync::Arc;
 use tauri::{AppHandle, InvokeError, Manager, State};
 use tokio::sync::Mutex;
@@ -12,6 +12,19 @@ pub async fn get_app_config(state: State<'_, Arc<Mutex<AppState>>>) -> Result<St
     let state = state.lock().await;
     let config = &state.config;
     serde_json::to_string(config).map_err(|e| InvokeError::from(e.to_string()))
+}
+
+#[tauri::command]
+#[tracing::instrument(name = "get_task_status", level = "trace", skip(state), ret)]
+pub async fn get_task_status(
+    state: State<'_, Arc<Mutex<AppState>>>,
+) -> Result<String, InvokeError> {
+    let state = state.lock().await;
+    let config = &state.config;
+    match &config.task_status {
+        None => Ok(TaskStatus::Off.to_string()),
+        Some(task_status) => Ok(task_status.to_string()),
+    }
 }
 
 #[tauri::command(rename_all = "snake_case")]

@@ -43,8 +43,9 @@ impl From<Commands> for CommandsEnum {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Copy, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Copy, Serialize, Deserialize, Default)]
 pub enum CommandsEnum {
+    #[default]
     ClientNode,
     ProxyMaster,
     ProxyEndpoint,

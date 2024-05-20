@@ -2,7 +2,7 @@
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #![allow(clippy::let_underscore_future)]
 use crate::background::start_task;
-use crate::commands::{get_app_config, open_main_window, set_app_config};
+use crate::commands::{get_app_config, get_task_status, open_main_window, set_app_config};
 use crate::run_events::on_run_events;
 use crate::system_tray::{on_system_tray_event, set_dock_visible, setup_tray};
 use crate::tauri_state::{AppState, ChannelMessage};
@@ -76,7 +76,11 @@ async fn main() -> anyhow::Result<ExitCode> {
         })
         .on_system_tray_event(on_system_tray_event)
         .on_window_event(on_window_event)
-        .invoke_handler(tauri::generate_handler![get_app_config, set_app_config])
+        .invoke_handler(tauri::generate_handler![
+            get_app_config,
+            set_app_config,
+            get_task_status
+        ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
         .run(on_run_events);

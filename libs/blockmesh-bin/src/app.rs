@@ -2,14 +2,16 @@ use crate::components::navigation::Navigation;
 use crate::leptos_state::LeptosTauriAppState;
 use crate::log::{log, log_error};
 use crate::page_routes::PageRoutes;
+use crate::pages::dashboard::Dashboard;
 use crate::pages::home::Home;
 use crate::pages::settings_wrapper::SettingsWrapper;
-use block_mesh_common::app_config::AppConfig;
+use block_mesh_common::app_config::{AppConfig, TaskStatus};
 use block_mesh_common::cli::CommandsEnum;
 use leptos::*;
 use leptos_router::{Route, Router, Routes};
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
+use std::time::Duration;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 
@@ -61,11 +63,6 @@ impl Display for MyJsError {
     }
 }
 
-#[derive(Serialize, Deserialize)]
-struct GreetArgs<'a> {
-    name: &'a str,
-}
-
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SetAppConfigArgs {
     pub config: AppConfig,
@@ -74,6 +71,17 @@ pub struct SetAppConfigArgs {
 #[component]
 pub fn App() -> impl IntoView {
     provide_context(LeptosTauriAppState::default());
+    let state = expect_context::<LeptosTauriAppState>();
+
+    let (task_status, set_task_status) = create_signal(
+        state
+            .app_config
+            .get_untracked()
+            .task_status
+            .unwrap_or_default()
+            .to_string(),
+    );
+
     let _resource = create_resource(
         move || {},
         |_| async move {
@@ -98,6 +106,23 @@ pub fn App() -> impl IntoView {
         },
     );
 
+    let _interval = set_interval_with_handle(
+        move || {
+            spawn_local(async move {
+                let result = invoke_tauri("get_task_status", JsValue::NULL).await;
+                if let Ok(result) = result {
+                    let result = result.as_string().unwrap();
+                    let task = TaskStatus::from(result);
+                    set_task_status.set(task.to_string());
+                    state.app_config.update(|config| {
+                        config.task_status = Some(task);
+                    });
+                }
+            });
+        },
+        Duration::from_secs(5),
+    );
+
     view! {
         <div class="h-screen bg-gray-800">
             <div class="h-full">
@@ -111,6 +136,13 @@ pub fn App() -> impl IntoView {
                                         path=PageRoutes::Home.path()
                                         view=move || {
                                             view! { <Home/> }
+                                        }
+                                    />
+
+                                    <Route
+                                        path=PageRoutes::Dashboard.path()
+                                        view=move || {
+                                            view! { <Dashboard task_status/> }
                                         }
                                     />
 
