@@ -1,3 +1,4 @@
+use crate::app::{invoke_tauri, SetAppConfigArgs};
 use crate::leptos_state::LeptosTauriAppState;
 use block_mesh_common::app_config::AppConfig;
 use leptos::*;
@@ -82,14 +83,29 @@ pub fn ProxyEndpointSettingsForm() -> impl IntoView {
                 mode: state.app_config.get().mode,
                 ..AppConfig::default()
             };
-            state.app_config.set(config);
+            spawn_local(async move {
+                let args: SetAppConfigArgs = SetAppConfigArgs {
+                    config: config.clone(),
+                };
+                if let Ok(js_args) = serde_wasm_bindgen::to_value(&args) {
+                    let result = invoke_tauri("set_app_config", js_args).await;
+                    match result {
+                        Ok(_) => {
+                            state.app_config.set(config.clone());
+                        }
+                        Err(error) => {
+                            set_error.update(|e| *e = Some(error.to_string()));
+                        }
+                    }
+                }
+            });
         }
     };
 
     view! {
         <form on:submit=|ev| ev.prevent_default()>
             <div class="flex justify-center items-center m-4">
-                <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
+                <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md w-full">
                     {move || {
                         error
                             .get()
@@ -98,6 +114,7 @@ pub fn ProxyEndpointSettingsForm() -> impl IntoView {
                             })
                     }}
                     <div class="mb-4">
+                        <label class="block text-white text-sm font-bold mb-2">Key Pair Path</label>
                         <input
                             type="text"
                             // required
@@ -117,6 +134,9 @@ pub fn ProxyEndpointSettingsForm() -> impl IntoView {
                         />
 
                     </div> <div class="mb-4">
+                        <label class="block text-white text-sm font-bold mb-2">
+                            Proxy Master Address
+                        </label>
                         <input
                             type="text"
                             // required
@@ -136,6 +156,9 @@ pub fn ProxyEndpointSettingsForm() -> impl IntoView {
                         />
 
                     </div> <div class="mb-4">
+                        <label class="block text-white text-sm font-bold mb-2">
+                            Program Address
+                        </label>
                         <input
                             type="text"
                             // required
@@ -155,6 +178,9 @@ pub fn ProxyEndpointSettingsForm() -> impl IntoView {
                         />
 
                     </div> <div class="mb-4">
+                        <label class="block text-white text-sm font-bold mb-2">
+                            Proxy Override
+                        </label>
                         <input
                             type="text"
                             // required

@@ -1,6 +1,5 @@
-use crate::app::{invoke, SetAppConfigArgs};
+use crate::app::{invoke_tauri, SetAppConfigArgs};
 use crate::leptos_state::LeptosTauriAppState;
-use crate::log::log;
 use block_mesh_common::app_config::AppConfig;
 use leptos::*;
 use solana_sdk::pubkey::Pubkey;
@@ -68,7 +67,6 @@ pub fn ClientNodeSettingsForm() -> impl IntoView {
                 Ok(val) => Some(val),
                 Err(_) => {
                     set_error.update(|e| *e = Some("Invalid Proxy Master Address".to_string()));
-                    log!("Invalid Proxy Master Address");
                     return;
                 }
             };
@@ -76,7 +74,6 @@ pub fn ClientNodeSettingsForm() -> impl IntoView {
             let program_address = Pubkey::from_str(&program_address.get());
             if program_address.is_err() {
                 set_error.update(|e| *e = Some("Invalid Program Address".to_string()));
-                log!("Invalid Program Address");
                 return;
             }
 
@@ -89,13 +86,21 @@ pub fn ClientNodeSettingsForm() -> impl IntoView {
                 mode: state.app_config.get().mode,
                 ..AppConfig::default()
             };
-            state.app_config.set(config.clone());
+
             spawn_local(async move {
-                let args: SetAppConfigArgs = SetAppConfigArgs { config };
+                let args: SetAppConfigArgs = SetAppConfigArgs {
+                    config: config.clone(),
+                };
                 if let Ok(js_args) = serde_wasm_bindgen::to_value(&args) {
-                    log!("invoke set_app_config");
-                    let result = invoke("set_app_config", js_args).await;
-                    log!("invoke set_app_config result: {:?}", result);
+                    let result = invoke_tauri("set_app_config", js_args).await;
+                    match result {
+                        Ok(_) => {
+                            state.app_config.set(config.clone());
+                        }
+                        Err(error) => {
+                            set_error.update(|e| *e = Some(error.to_string()));
+                        }
+                    }
                 }
             });
         }
@@ -104,7 +109,7 @@ pub fn ClientNodeSettingsForm() -> impl IntoView {
     view! {
         <form on:submit=|ev| ev.prevent_default()>
             <div class="flex justify-center items-center m-4">
-                <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
+                <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md w-full">
                     {move || {
                         error
                             .get()
@@ -113,6 +118,7 @@ pub fn ClientNodeSettingsForm() -> impl IntoView {
                             })
                     }}
                     <div class="mb-4">
+                        <label class="block text-white text-sm font-bold mb-2">Key Pair Path</label>
                         <input
                             type="text"
                             // required
@@ -132,6 +138,9 @@ pub fn ClientNodeSettingsForm() -> impl IntoView {
                         />
 
                     </div> <div class="mb-4">
+                        <label class="block text-white text-sm font-bold mb-2">
+                            Proxy Master Address
+                        </label>
                         <input
                             type="text"
                             // required
@@ -152,6 +161,9 @@ pub fn ClientNodeSettingsForm() -> impl IntoView {
                         />
 
                     </div> <div class="mb-4">
+                        <label class="block text-white text-sm font-bold mb-2">
+                            Program Address
+                        </label>
                         <input
                             type="text"
                             // required
@@ -171,6 +183,9 @@ pub fn ClientNodeSettingsForm() -> impl IntoView {
                         />
 
                     </div> <div class="mb-4">
+                        <label class="block text-white text-sm font-bold mb-2">
+                            Proxy Override
+                        </label>
                         <input
                             type="text"
                             // required
@@ -190,6 +205,7 @@ pub fn ClientNodeSettingsForm() -> impl IntoView {
                         />
 
                     </div> <div class="mb-4">
+                        <label class="block text-white text-sm font-bold mb-2">Proxy Port</label>
                         <input
                             type="number"
                             // required

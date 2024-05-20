@@ -1,6 +1,6 @@
 use crate::components::navigation::Navigation;
 use crate::leptos_state::LeptosTauriAppState;
-use crate::log::log;
+use crate::log::{log, log_error};
 use crate::page_routes::PageRoutes;
 use crate::pages::home::Home;
 use crate::pages::settings_wrapper::SettingsWrapper;
@@ -9,6 +9,7 @@ use block_mesh_common::cli::CommandsEnum;
 use leptos::*;
 use leptos_router::{Route, Router, Routes};
 use serde::{Deserialize, Serialize};
+use std::fmt::Display;
 use wasm_bindgen::prelude::*;
 use wasm_bindgen::JsValue;
 
@@ -17,13 +18,47 @@ use wasm_bindgen::JsValue;
             try {
                 return await window.__TAURI__.tauri.invoke(cmd, args);
             } catch (e) {
-                console.error(e);
-                return null;
+                console.error(`Error in invoke ${cmd} : ${e}`);
+                const t = typeof e;
+                if (t === 'string') {
+                    return { error: e };
+                } else if (t === 'object') {
+                    return { error: e?.message };
+                } else {
+                    return { error: 'Unknown error', e };
+                }
             }
         }"#)]
 extern "C" {
-    // #[wasm_bindgen(js_namespace = ["window", "__TAURI__", "tauri"])]
     pub async fn invoke(cmd: &str, args: JsValue) -> JsValue;
+}
+
+pub async fn invoke_tauri(cmd: &str, args: JsValue) -> Result<JsValue, MyJsError> {
+    let result = invoke(cmd, args).await;
+    let error_attribute = JsValue::from_str("error");
+    if let Ok(error) = js_sys::Reflect::get(&result, &error_attribute) {
+        if error.is_string() {
+            let error = error.as_string().unwrap();
+            log_error!("Command: '{}' , Failed with error: '{}'", cmd, error);
+            return Err(MyJsError {
+                message: error,
+                cmd: cmd.to_string(),
+            });
+        }
+    }
+    Ok(result)
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct MyJsError {
+    pub cmd: String,
+    pub message: String,
+}
+
+impl Display for MyJsError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Command '{}': | Error: '{}'", self.cmd, self.message)
+    }
 }
 
 #[derive(Serialize, Deserialize)]
@@ -42,10 +77,16 @@ pub fn App() -> impl IntoView {
     let _resource = create_resource(
         move || {},
         |_| async move {
-            let app_config_json: JsValue = invoke("get_app_config", JsValue::NULL).await;
-            if app_config_json.is_null() {
-                return;
-            }
+            let app_config_json = invoke_tauri("get_app_config", JsValue::NULL).await;
+            let app_config_json = match app_config_json {
+                Ok(app_config_json) => {
+                    if app_config_json.is_null() {
+                        return;
+                    }
+                    app_config_json
+                }
+                Err(_) => return,
+            };
             let app_config_json = app_config_json.as_string().unwrap();
             let mut app_config: AppConfig = serde_json::from_str(&app_config_json).unwrap();
             if app_config.mode.is_none() {

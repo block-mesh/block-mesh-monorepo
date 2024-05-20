@@ -22,10 +22,10 @@ pub async fn set_app_config(
 ) -> Result<(), InvokeError> {
     let mut state = state.lock().await;
     let path = state.config.config_path.clone();
-    // config
-    //     .validate_keypair()
-    //     .await
-    //     .map_err(|e| InvokeError::from(e.to_string()))?;
+    config
+        .validate_keypair()
+        .await
+        .map_err(|e| InvokeError::from(e.to_string()))?;
     config.config_path = path;
     state.config = config.clone();
     set_config_with_path(config)

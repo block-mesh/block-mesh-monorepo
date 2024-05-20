@@ -4,6 +4,7 @@ use crate::cli::{
 };
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
+use std::env;
 
 #[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub struct AppConfig {
@@ -34,19 +35,23 @@ impl AppConfig {
         self.config_path = self.config_path.clone().or(config.config_path);
     }
 
-    // pub async fn validate_keypair(&self) -> anyhow::Result<()> {
-    //     match &self.keypair_path {
-    //         Some(keypair_path) => {
-    //             let _ = solana_sdk::signature::read_keypair_file(&keypair_path).map_err(|e| {
-    //                 anyhow::anyhow!("Error reading keypair file: {}", e.to_string())
-    //             })?;
-    //             Ok(())
-    //         }
-    //         None => {
-    //             return Err(anyhow::anyhow!("Keypair path not set"));
-    //         }
-    //     }
-    // }
+    pub async fn validate_keypair(&self) -> anyhow::Result<()> {
+        let path = env::current_dir()?;
+        match &self.keypair_path {
+            Some(keypair_path) => {
+                let _ = solana_sdk::signature::read_keypair_file(keypair_path).map_err(|e| {
+                    anyhow::anyhow!(
+                        "Error reading keypair file, cwd: '{:?}', path: '{}' , error: {}",
+                        path,
+                        keypair_path,
+                        e.to_string()
+                    )
+                })?;
+                Ok(())
+            }
+            None => Err(anyhow::anyhow!("Keypair path not set")),
+        }
+    }
 }
 
 impl From<AppConfig> for Commands {

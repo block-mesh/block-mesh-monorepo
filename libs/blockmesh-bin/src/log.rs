@@ -6,4 +6,11 @@ macro_rules! log {
     }
 }
 
+macro_rules! log_error {
+    ( $( $t:tt )* ) => {
+        web_sys::console::error_1(&format!( $( $t )* ).into())
+    }
+}
+
 pub(crate) use log;
+pub(crate) use log_error;
