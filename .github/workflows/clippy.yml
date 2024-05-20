@@ -14,7 +14,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Install deps
-        run: sudo apt-get install libgtk-3-dev libsoup2.4-dev
+        run: |
+          #          sudo apt update
+               sudo apt install libwebkit2gtk-4.0-dev \
+               build-essential \
+               curl \
+               wget \
+               file \
+               libssl-dev \
+               libgtk-3-dev \
+               libayatana-appindicator3-dev \
+               librsvg2-dev
+      #          sudo apt-get install libgtk-3-dev libsoup2.4-dev
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
