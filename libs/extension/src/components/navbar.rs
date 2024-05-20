@@ -1,5 +1,5 @@
 use crate::pages::page::Page;
-use crate::utils::state::{AppState, AppStatus};
+use crate::utils::ext_state::{AppState, AppStatus};
 use leptos::*;
 
 #[component]

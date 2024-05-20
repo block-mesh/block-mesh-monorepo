@@ -1,8 +1,8 @@
-use block_mesh_common::cli::CliArgs;
+use block_mesh_common::app_config::AppConfig;
 use tokio::sync::broadcast::{Receiver, Sender};
 
 pub struct AppState {
-    pub cli_args: CliArgs,
+    pub config: AppConfig,
     pub tx: Sender<ChannelMessage>,
     pub rx: Receiver<ChannelMessage>,
 }

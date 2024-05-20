@@ -1,20 +1,20 @@
 use crate::components::show_check_box::ShowCheckBox;
+use crate::leptos_state::LeptosTauriAppState;
 use crate::pages::client_node_settings::ClientNodeSettingsForm;
 use crate::pages::proxy_endpoint_settings::ProxyEndpointSettingsForm;
 use crate::pages::proxy_master_settings::ProxyMasterSettingsForm;
-use crate::state::LeptosTauriAppState;
 use block_mesh_common::cli::CommandsEnum;
 use leptos::*;
 
 #[component]
 pub fn SettingsWrapper() -> impl IntoView {
     let state = expect_context::<LeptosTauriAppState>();
-    let command = move || match state.cli_args.get().command {
-        Some(command) => {
-            let c: CommandsEnum = command.clone().into();
-            c
-        }
-        None => CommandsEnum::ClientNode,
+    let command = move || {
+        state
+            .app_config
+            .get()
+            .mode
+            .unwrap_or(CommandsEnum::ClientNode)
     };
     view! {
         <fieldset>
