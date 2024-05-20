@@ -68,7 +68,8 @@ async fn main() -> anyhow::Result<ExitCode> {
             let _: tauri::async_runtime::JoinHandle<()> = tauri::async_runtime::spawn(async move {
                 let _ = setup_storage(app_handle).await;
             });
-            if cfg!(target_os = "macos") {
+            #[cfg(target_os = "macos")]
+            {
                 app.set_activation_policy(ActivationPolicy::Accessory);
             }
             if args.minimized {
