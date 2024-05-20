@@ -15,7 +15,9 @@ use clap::Parser;
 use std::process::ExitCode;
 use std::sync::Arc;
 use tauri::utils::platform::current_exe;
-use tauri::{ActivationPolicy, Manager};
+#[cfg(target_os = "macos")]
+use tauri::ActivationPolicy;
+use tauri::Manager;
 use tauri_plugin_autostart::MacosLauncher;
 use tokio::sync::{broadcast, Mutex};
 
@@ -66,7 +68,9 @@ async fn main() -> anyhow::Result<ExitCode> {
             let _: tauri::async_runtime::JoinHandle<()> = tauri::async_runtime::spawn(async move {
                 let _ = setup_storage(app_handle).await;
             });
-            app.set_activation_policy(ActivationPolicy::Accessory);
+            if cfg!(target_os = "macos") {
+                app.set_activation_policy(ActivationPolicy::Accessory);
+            }
             if args.minimized {
                 set_dock_visible(false);
             } else {
