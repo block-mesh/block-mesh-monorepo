@@ -1,7 +1,6 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #![allow(clippy::let_underscore_future)]
-use crate::background::start_task;
 use crate::commands::{get_app_config, get_task_status, open_main_window, set_app_config};
 use crate::run_events::on_run_events;
 use crate::system_tray::{on_system_tray_event, set_dock_visible, setup_tray};
@@ -35,7 +34,7 @@ async fn main() -> anyhow::Result<ExitCode> {
     let _disable_gui = std::env::var(BLOCKMESH_DISABLE_GUI_ENVAR).ok();
     let (incoming_tx, incoming_rx) = broadcast::channel::<ChannelMessage>(2);
     let _current_exe_path = current_exe().unwrap();
-    let rx = incoming_tx.subscribe();
+    // let rx = incoming_tx.subscribe();
     let args = CliArgs::parse();
     let config = if let Some(command) = args.command {
         AppConfig::from(command)
@@ -49,9 +48,6 @@ async fn main() -> anyhow::Result<ExitCode> {
         rx: incoming_rx,
     }));
     tauri::async_runtime::set(tokio::runtime::Handle::current());
-    let state = app_state.clone();
-    tauri::async_runtime::spawn(async move { start_task(state.clone(), rx) });
-
     let app_state = app_state.clone();
     tauri::Builder::default()
         .plugin(tauri_plugin_autostart::init(
