@@ -16,9 +16,9 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: "macos-latest" # for Arm based macs (M1 and above).
+          - platform: "macos-latest-arm" # for Arm based macs (M1 and above).
             args: "--target aarch64-apple-darwin"
-          - platform: "macos-latest" # for Intel based macs.
+          - platform: "macos-latest-x86" # for Intel based macs.
             args: "--target x86_64-apple-darwin"
           - platform: "ubuntu-22.04" # for Tauri v1 you could replace this with ubuntu-20.04.
             args: ""
@@ -28,6 +28,15 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
+      - name: "Cache"
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: tauri-build-${{ matrix.platform }}
+          cache-all-crates: true
+      - name: setup node
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
