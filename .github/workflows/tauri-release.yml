@@ -24,7 +24,7 @@ jobs:
             target: "x86_64-apple-darwin"
           - platform: "ubuntu-22.04" # for Tauri v1 you could replace this with ubuntu-20.04.
             args: ""
-            target: "x86_64-unknown-linux-musl"
+            target: "x86_64-unknown-linux-gnu"
           - platform: "windows-latest"
             args: ""
             target: "x86_64-pc-windows-msvc"
@@ -48,8 +48,9 @@ jobs:
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
           targets: wasm32-unknown-unknown , ${{ matrix.target }}
-      - name: Install trunk
-        run: cargo install --locked trunk
+      - uses: jetli/trunk-action@v0.5.0
+        with:
+          version: 'latest'
       - name: setup node
         uses: actions/setup-node@v4
         with:
