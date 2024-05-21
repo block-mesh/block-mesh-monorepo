@@ -16,14 +16,18 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - platform: "macos-latest-arm" # for Arm based macs (M1 and above).
+          - platform: "macos-latest" # for Arm based macs (M1 and above).
             args: "--target aarch64-apple-darwin"
-          - platform: "macos-latest-x86" # for Intel based macs.
+            target: "aarch64-apple-darwin"
+          - platform: "macos-latest" # for Intel based macs.
             args: "--target x86_64-apple-darwin"
+            target: "x86_64-apple-darwin"
           - platform: "ubuntu-22.04" # for Tauri v1 you could replace this with ubuntu-20.04.
             args: ""
+            target: "x86_64-unknown-linux-musl"
           - platform: "windows-latest"
             args: ""
+            target: "x86_64-pc-windows-msvc"
 
     runs-on: ${{ matrix.platform }}
     steps:
@@ -31,7 +35,7 @@ jobs:
       - name: "Cache"
         uses: Swatinem/rust-cache@v2
         with:
-          key: tauri-build-${{ matrix.platform }}
+          key: tauri-build-${{ matrix.target }}
           cache-all-crates: true
       - name: Install sqlx-cli
         run: cargo install sqlx-cli
@@ -39,16 +43,17 @@ jobs:
           --features ${{ vars.SQLX_FEATURES }}
           --no-default-features
           --locked
+      - name: install Rust stable
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          targets: wasm32-unknown-unknown , ${{ matrix.target }}
       - name: Install trunk
         run: cargo install --locked trunk
       - name: setup node
         uses: actions/setup-node@v4
         with:
           node-version: lts/*
-      - name: install Rust stable
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: ${{ vars.RUSTC_VERSION }}
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
         run: |
