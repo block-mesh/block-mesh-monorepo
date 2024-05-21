@@ -4,6 +4,9 @@ on:
     types: [opened]
   pull_request:
     types: [opened]
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   run:
     runs-on: ubuntu-latest
