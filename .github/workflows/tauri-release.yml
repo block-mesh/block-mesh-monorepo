@@ -33,6 +33,14 @@ jobs:
         with:
           key: tauri-build-${{ matrix.platform }}
           cache-all-crates: true
+      - name: Install sqlx-cli
+        run: cargo install sqlx-cli
+          --version=${{ vars.SQLX_VERSION }}
+          --features ${{ vars.SQLX_FEATURES }}
+          --no-default-features
+          --locked
+      - name: Install trunk
+        run: cargo install --locked trunk
       - name: setup node
         uses: actions/setup-node@v4
         with:
