@@ -7,8 +7,7 @@
     "withGlobalTauri": true
   },
   "package": {
-    "productName": "blockmesh",
-    "version": "0.0.0"
+    "productName": "blockmesh"
   },
   "tauri": {
     "updater": {

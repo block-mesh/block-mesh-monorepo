@@ -1253,7 +1253,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-tauri"
-version = "0.0.8"
+version = "0.0.9"
 dependencies = [
  "anyhow",
  "auto-launch",
@@ -1882,6 +1882,8 @@ dependencies = [
 name = "cloudflare-worker-tauri-releases"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "reqwest",
  "rustc-hash",
  "serde",
  "serde_json",
