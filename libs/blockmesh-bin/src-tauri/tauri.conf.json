@@ -7,10 +7,20 @@
     "withGlobalTauri": true
   },
   "package": {
-    "productName": "blockmesh",
-    "version": "0.0.0"
+    "productName": "blockmesh"
   },
   "tauri": {
+    "updater": {
+      "active": true,
+      "endpoints": [
+        "https://cloudflare-worker-ip-data.blockmesh.workers.dev/{{target}}/{{arch}}/{{current_version}}"
+      ],
+      "dialog": false,
+      "pubkey": "dW50cnVzdGVkIGNvbW1lbnQ6IG1pbmlzaWduIHB1YmxpYyBrZXk6IDgwNzZDOUI3ODlDNDE5NTAKUldSUUdjU0p0OGwyZ0oyS3B1YmJyeCtXb0ZOVktlU2RFdnpGc0V6VUdDcVFvQWN3cmNGditZQ20K",
+      "windows": {
+        "installMode": "passive"
+      }
+    },
     "systemTray": {
       "iconPath": "icons/icon.png",
       "iconAsTemplate": true

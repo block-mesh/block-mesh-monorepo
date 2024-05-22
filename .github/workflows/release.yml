@@ -6,6 +6,9 @@ on:
     workflows: ["Tag"]
     types:
       - "completed"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 jobs:
   get-tag:
     name: "Get Tag From Package Version"
