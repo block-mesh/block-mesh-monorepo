@@ -1,19 +1,39 @@
-name: "Build and publish Tauri"
-
+name: Build and publish Tauri
+permissions:
+  contents: "write"
 on:
-  push:
-    branches:
-      - release
-      - 107-tauri-auto-update
-
+  workflow_run:
+    workflows: ["Tag"]
+    types:
+      - "completed"
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-
-# This workflow will trigger on each push to the `release` branch to create or update a GitHub release, build your app, and upload the artifacts to the release.
-
 jobs:
+  get-tag:
+    name: "Get Tag From Package Version"
+    runs-on: "ubuntu-latest"
+    outputs:
+      pkg-version: ${{ steps.pkg-version.outputs.PKG_VERSION }}
+    steps:
+      - name: "Check out the repo"
+        uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release-tag
+          cache-all-crates: true
+      - name: "Get tag"
+        id: "pkg-version"
+        shell: "bash"
+        run: |
+          echo PKG_VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g') >> $GITHUB_OUTPUT
   publish-tauri:
+    name: "Publish Tauri"
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs: "get-tag"
     permissions:
       contents: write
     strategy:
@@ -32,7 +52,6 @@ jobs:
           - platform: "windows-latest"
             args: ""
             target: "x86_64-pc-windows-msvc"
-
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
@@ -72,6 +91,7 @@ jobs:
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
         with:
+          ref: refs/tags/v${{ needs.get-tag.outputs.pkg-version }}
           tagName: v__VERSION__ # the action automatically replaces \_\_VERSION\_\_ with the app version.
           releaseName: "v__VERSION__"
           releaseBody: "See the assets to download this version and install."
