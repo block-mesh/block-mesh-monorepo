@@ -10,6 +10,7 @@ use crate::windows_events::on_window_event;
 use block_mesh_common::app_config::AppConfig;
 use block_mesh_common::cli::CliArgs;
 use block_mesh_common::constants::{BLOCKMESH_DISABLE_GUI_ENVAR, BLOCKMESH_HOME_DIR_ENVAR};
+use block_mesh_common::tracing::setup_tracing;
 use clap::Parser;
 use std::process::ExitCode;
 use std::sync::Arc;
@@ -30,6 +31,7 @@ mod windows_events;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<ExitCode> {
+    setup_tracing();
     let _override_home_dir = std::env::var(BLOCKMESH_HOME_DIR_ENVAR).ok();
     let _disable_gui = std::env::var(BLOCKMESH_DISABLE_GUI_ENVAR).ok();
     let (incoming_tx, incoming_rx) = broadcast::channel::<ChannelMessage>(2);
