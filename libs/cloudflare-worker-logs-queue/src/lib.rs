@@ -1,4 +1,5 @@
-use serde_json::Value;
+use serde::{Deserialize, Serialize};
+use serde_json::{Map, Value};
 use tracing_subscriber::fmt::format::Pretty;
 use tracing_subscriber::fmt::time::UtcTime;
 use tracing_subscriber::prelude::*;
@@ -8,6 +9,11 @@ use worker::*;
 
 const PRODUCER: &str = "rawlog";
 const CONSUMER: &str = "rawlog";
+
+const STREAM: &str = "logs";
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct Wrapper(Map<String, Value>);
 
 #[event(start)]
 fn start() {
@@ -44,12 +50,12 @@ async fn main(mut req: Request, env: Env, _: worker::Context) -> Result<Response
 
     let timestamp = chrono::offset::Utc::now().timestamp();
     obj.insert("cloudflare-timestamp".to_string(), Value::from(timestamp));
-    // Send a message with using a serializable struct
-    let string = serde_json::to_string(obj).unwrap();
+    let string = serde_json::to_string(&obj).unwrap();
+    let js_string = JsValue::from_str(&string);
     raw_messages_queue
         .send_raw(
             // RawMessageBuilder has to be used as we should set content type of these raw messages
-            RawMessageBuilder::new(JsValue::from_str(&string))
+            RawMessageBuilder::new(js_string)
                 .delay_seconds(1)
                 .build_with_content_type(QueueContentType::Json),
         )
@@ -60,25 +66,37 @@ async fn main(mut req: Request, env: Env, _: worker::Context) -> Result<Response
 
 // Consumes messages from queue
 #[event(queue)]
-pub async fn main(message_batch: MessageBatch<Value>, _: Env, _: Context) -> Result<()> {
+pub async fn main(message_batch: MessageBatch<Value>, env: Env, _: Context) -> Result<()> {
+    let log_url = env.secret("log_url").unwrap().to_string();
+    let basic_auth = env.secret("basic_auth").unwrap().to_string();
+    let url = format!("{}/api/v1/ingest", log_url);
+    let auth = format!(" Basic {}", basic_auth);
     match message_batch.queue().as_str() {
         CONSUMER => {
-            for message in message_batch.raw_iter() {
-                let value: Value = serde_wasm_bindgen::from_value(message.body()).unwrap();
-                console_log!(
-                    "Got raw message {:?}, with id {} and timestamp: {} - {:#?}",
-                    message.body(),
-                    message.id(),
-                    message.timestamp().to_string(),
-                    value
-                );
+            let messages: Vec<Wrapper> = message_batch
+                .iter()
+                .map(|message| {
+                    let raw_str = message.unwrap().raw_body().as_string().unwrap();
+                    let wrapper: Wrapper = serde_json::from_str(&raw_str).unwrap();
+                    wrapper
+                })
+                .collect();
+            match reqwest::Client::new()
+                .post(&url)
+                .header("X-P-Stream", STREAM)
+                .header("Authorization", &auth)
+                .header("Content-Type", "application/json")
+                .json(&messages)
+                .send()
+                .await
+            {
+                Ok(_) => message_batch.ack_all(),
+                Err(e) => console_error!("Error {}", e),
             }
-            message_batch.ack_all();
         }
         _ => {
             console_error!("Unknown queue: {}", message_batch.queue());
         }
     }
-
     Ok(())
 }
