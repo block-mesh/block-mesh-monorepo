@@ -1,0 +1,32 @@
+[package]
+name = "cloudflare-worker-logs-queue"
+version = "0.1.0"
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[package.metadata.release]
+release = false
+
+# https://github.com/rustwasm/wasm-pack/issues/1247
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
+
+[dependencies]
+chrono = { workspace = true, features = ["clock", "serde"] }
+worker = { workspace = true, features = ["queue"] }
+tracing = { workspace = true }
+tracing-web = { workspace = true }
+tracing-subscriber = { workspace = true, features = ['time', 'json'] }
+time = { workspace = true, features = ['wasm-bindgen'] }
+serde = { workspace = true, features = ['derive'] }
+wasm-bindgen = { workspace = true }
+js-sys = { workspace = true }
+serde_json = { workspace = true }
+serde-wasm-bindgen = { workspace = true }
+rustc-hash = { workspace = true }
+reqwest = { workspace = true, features = [
+  "json",
+] }
+anyhow = { workspace = true }
