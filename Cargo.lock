@@ -1658,28 +1658,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "chrono-tz"
-version = "0.8.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d59ae0466b83e838b81a54256c39d5d7c20b9d7daa10510a242d9b75abd5936e"
-dependencies = [
- "chrono",
- "chrono-tz-build",
- "phf 0.11.2",
-]
-
-[[package]]
-name = "chrono-tz-build"
-version = "0.2.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "433e39f13c9a060046954e0592a8d0a4bcb1040125cbf91cb8ee58964cfb350f"
-dependencies = [
- "parse-zoneinfo",
- "phf 0.11.2",
- "phf_codegen 0.11.2",
-]
-
-[[package]]
 name = "ciborium"
 version = "0.2.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1859,6 +1837,26 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "tracing-web",
+ "worker",
+]
+
+[[package]]
+name = "cloudflare-worker-logs-queue"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "chrono",
+ "js-sys",
+ "reqwest",
+ "rustc-hash",
+ "serde",
+ "serde-wasm-bindgen 0.6.5",
+ "serde_json",
+ "time",
+ "tracing",
+ "tracing-subscriber",
+ "tracing-web",
+ "wasm-bindgen",
  "worker",
 ]
 
@@ -5444,15 +5442,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "parse-zoneinfo"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1f2a05b18d44e2957b88f96ba460715e295bc1d7510468a2f3d3b44535d26c24"
-dependencies = [
- "regex",
-]
-
-[[package]]
 name = "paste"
 version = "1.0.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5608,16 +5597,6 @@ checksum = "4fb1c3a8bc4dd4e5cfce29b44ffc14bedd2ee294559a294e2a4d4c9e9a6a13cd"
 dependencies = [
  "phf_generator 0.10.0",
  "phf_shared 0.10.0",
-]
-
-[[package]]
-name = "phf_codegen"
-version = "0.11.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e8d39688d359e6b34654d328e262234662d16cc0f60ec8dcbe5e718709342a5a"
-dependencies = [
- "phf_generator 0.11.2",
- "phf_shared 0.11.2",
 ]
 
 [[package]]
@@ -10682,16 +10661,17 @@ dependencies = [
 
 [[package]]
 name = "worker"
-version = "0.0.19"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f3c4603afa2af7cdab02c982ecf31b06d03da641de448189bb2203a75c994bff"
+checksum = "d58b567e8b518469c73c8d7e4798d5abcd7db76a1b33121fffd36ac6fa62da05"
 dependencies = [
  "async-trait",
+ "bytes",
  "chrono",
- "chrono-tz",
  "futures-channel",
  "futures-util",
  "http 1.1.0",
+ "http-body 1.0.0",
  "js-sys",
  "matchit",
  "pin-project",
@@ -10712,9 +10692,9 @@ dependencies = [
 
 [[package]]
 name = "worker-kv"
-version = "0.6.0"
+version = "0.7.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3d4b9fe1a87b7aef252fceb4f30bf6303036a5de329c81ccad9be9c35d1fdbc7"
+checksum = "7f06d4d1416a9f8346ee9123b0d9a11b3cfa38e6cfb5a139698017d1597c4d41"
 dependencies = [
  "js-sys",
  "serde",
@@ -10727,9 +10707,9 @@ dependencies = [
 
 [[package]]
 name = "worker-macros"
-version = "0.0.11"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "561167c26ca0a0540021cb3f268305cc447c1cdf5b3cc39427270e9656c0a35e"
+checksum = "15db63b1b56564beca160a5265169730a109fc85c21e858f184bb9e39afbfe44"
 dependencies = [
  "async-trait",
  "proc-macro2",
@@ -10743,9 +10723,9 @@ dependencies = [
 
 [[package]]
 name = "worker-sys"
-version = "0.0.11"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2c3feab530cf367256a4dc3bbd8b9f52c50a944aacab826dcb3c6d7f64271abc"
+checksum = "5c1082d3b324dd37fe9b25b1aa61a938e343d035650708986bf9d0aa9a020c84"
 dependencies = [
  "cfg-if 1.0.0",
  "js-sys",
