@@ -7,7 +7,9 @@ authors.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter", "time", "json"] }
+tracing-serde = { workspace = true }
 http-body-util = { workspace = true, optional = true }
 bytes = { workspace = true, optional = true }
 hyper = { workspace = true, features = ["full"], optional = true }
@@ -18,6 +20,11 @@ solana-sdk = { workspace = true, optional = true }
 chrono = { workspace = true, features = ["clock", "serde"] }
 anyhow = { workspace = true }
 once_cell = { workspace = true }
+tokio = { workspace = true, optional = true }
+reqwest = { workspace = true, optional = true, features = [
+  "json",
+  "hickory-dns"
+] }
 
 [dependencies.uuid]
 workspace = true
@@ -32,3 +39,4 @@ features = [
 http = ["dep:http-body-util", "dep:bytes", "dep:hyper"]
 cli = ["dep:clap", "dep:solana-sdk"]
 app-config = ["dep:clap", "dep:solana-sdk"]
+async-tracer = ["dep:tokio", "dep:reqwest"]
