@@ -5,6 +5,7 @@ use futures_util::future::join_all;
 use proxy_pool::ProxyPool;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;
+use uuid::Uuid;
 
 mod clients_endpoint;
 mod proxy_endpoint;
@@ -12,7 +13,7 @@ mod proxy_pool;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    setup_tracing();
+    setup_tracing(Uuid::new_v4());
     let pool = ProxyPool::default();
     let addr_proxies = SocketAddr::from(([127, 0, 0, 1], 5000));
     let proxy_listener = TcpListener::bind(addr_proxies).await?;

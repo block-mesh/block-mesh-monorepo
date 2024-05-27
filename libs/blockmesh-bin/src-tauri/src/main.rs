@@ -9,17 +9,16 @@ use crate::tauri_storage::setup_storage;
 use crate::windows_events::on_window_event;
 use block_mesh_common::app_config::AppConfig;
 use block_mesh_common::cli::CliArgs;
-use block_mesh_common::constants::{BLOCKMESH_DISABLE_GUI_ENVAR, BLOCKMESH_HOME_DIR_ENVAR};
 use block_mesh_common::tracing::setup_tracing;
 use clap::Parser;
 use std::process::ExitCode;
 use std::sync::Arc;
-use tauri::utils::platform::current_exe;
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
 use tauri::Manager;
 use tauri_plugin_autostart::MacosLauncher;
 use tokio::sync::{broadcast, Mutex};
+use uuid::Uuid;
 
 mod background;
 mod commands;
@@ -31,18 +30,15 @@ mod windows_events;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<ExitCode> {
-    setup_tracing();
-    let _override_home_dir = std::env::var(BLOCKMESH_HOME_DIR_ENVAR).ok();
-    let _disable_gui = std::env::var(BLOCKMESH_DISABLE_GUI_ENVAR).ok();
     let (incoming_tx, incoming_rx) = broadcast::channel::<ChannelMessage>(2);
-    let _current_exe_path = current_exe().unwrap();
-    // let rx = incoming_tx.subscribe();
     let args = CliArgs::parse();
-    let config = if let Some(command) = args.command {
+    let mut config = if let Some(command) = args.command {
         AppConfig::from(command)
     } else {
         AppConfig::default()
     };
+    config.user_id = config.user_id.or(Some(Uuid::new_v4()));
+    setup_tracing(config.user_id.unwrap());
 
     let app_state = Arc::new(Mutex::new(AppState {
         config,
@@ -56,9 +52,11 @@ async fn main() -> anyhow::Result<ExitCode> {
             MacosLauncher::LaunchAgent,
             Some(vec!["--minimized"]),
         ))
-        .plugin(tauri_plugin_single_instance::init(|app, _argv, _cwd| {
-            open_main_window(app).unwrap();
-        }))
+        .plugin(tauri_plugin_single_instance::init(
+            move |app, _argv, _cwd| {
+                open_main_window(app).unwrap();
+            },
+        ))
         .system_tray(setup_tray())
         .manage(app_state.clone())
         .setup(move |app| {
@@ -70,7 +68,10 @@ async fn main() -> anyhow::Result<ExitCode> {
             {
                 app.set_activation_policy(ActivationPolicy::Accessory);
             }
+            let app_handle = app.app_handle();
             if args.minimized {
+                let window = app_handle.get_window("main").unwrap();
+                window.hide().unwrap();
                 set_dock_visible(false);
             } else {
                 open_main_window(&app.app_handle()).unwrap();

@@ -5,7 +5,6 @@ use crate::modes::cli::cli_mode;
 use crate::modes::proxy_mode::proxy_mode;
 use anchor_lang::Discriminator;
 use block_mesh_common::cli::{ClientNodeMode, ClientNodeOptions};
-use block_mesh_common::tracing::setup_tracing;
 use block_mesh_solana_client::helpers::get_provider_node_address;
 use block_mesh_solana_client::manager::{FullRouteHeader, SolanaManager};
 use blockmesh_program::state::provider_node::ProviderNode;
@@ -28,7 +27,6 @@ pub async fn get_proxy(
 pub async fn client_node_main(
     client_node_cli_args: &ClientNodeOptions,
 ) -> anyhow::Result<ExitCode> {
-    setup_tracing();
     let mut solana_manager = SolanaManager::new(
         &client_node_cli_args.keypair_path,
         &client_node_cli_args.program_id,

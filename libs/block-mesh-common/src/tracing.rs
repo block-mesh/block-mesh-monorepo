@@ -10,15 +10,16 @@ use tracing_subscriber::layer::Context;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Layer;
+use uuid::Uuid;
 
 static INSTANCE: OnceCell<bool> = OnceCell::new();
 
-pub fn setup_tracing() {
+pub fn setup_tracing(user_id: Uuid) {
     if INSTANCE.get().is_some() {
         return;
     }
     let log_env = std::env::var(BLOCK_MESH_LOG_ENV).unwrap_or_else(|_| "prod".to_string());
-    let log_layer = HttpLogLayer::new(BLOCK_MESH_LOGGER.to_string(), log_env);
+    let log_layer = HttpLogLayer::new(BLOCK_MESH_LOGGER.to_string(), log_env, user_id);
     tracing_subscriber::registry()
         .with(
             tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
@@ -34,12 +35,14 @@ struct HttpLogLayer {
     pub buffer: Arc<Mutex<Vec<Value>>>,
     pub url: Arc<String>,
     pub env: String,
+    pub user_id: Arc<Uuid>,
 }
 
 impl HttpLogLayer {
-    fn new(url: String, env: String) -> Self {
+    fn new(url: String, env: String, user_id: Uuid) -> Self {
         let init_buffer: Arc<Mutex<Vec<Value>>> = Arc::new(Mutex::new(Vec::new()));
         let init_client: Arc<Mutex<Client>> = Arc::new(Mutex::new(Client::new()));
+        let user_id = Arc::new(user_id);
         let init_url = Arc::new(url);
         let x_url = init_url.clone();
         let x_buffer = init_buffer.clone();
@@ -66,6 +69,7 @@ impl HttpLogLayer {
             buffer: x_buffer.clone(),
             url: x_url.clone(),
             env,
+            user_id,
         }
     }
 
@@ -90,6 +94,7 @@ where
             "level": event.metadata().level().to_string(),
             "event": event.as_serde(),
             "env": self.env.clone(),
+            "user_id": self.user_id,
         });
 
         let buffer = self.buffer.clone();
