@@ -31,6 +31,7 @@ proxy-master = { path = "../../proxy-master" }
 proxy-endpoint = { path = "../../proxy-endpoint" }
 anyhow = { workspace = true }
 log = { workspace = true }
+uuid = { workspace = true, features = ["v4", "fast-rng", "macro-diagnostics", "serde"] }
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

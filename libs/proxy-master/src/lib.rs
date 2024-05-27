@@ -7,7 +7,6 @@ pub mod token_management;
 
 use app_state::AppState;
 use block_mesh_common::cli::ProxyMasterNodeOptions;
-use block_mesh_common::tracing::setup_tracing;
 use block_mesh_solana_client::manager::SolanaManager;
 use client_server::clients_endpoint::listen_for_clients_connecting;
 use futures_util::future::join_all;
@@ -26,7 +25,6 @@ use tokio::sync::broadcast;
 pub async fn proxy_master_main(
     proxy_master_node_options: &ProxyMasterNodeOptions,
 ) -> anyhow::Result<ExitCode> {
-    setup_tracing();
     let ip_addr = get_ip().await?;
     tracing::info!("Local IP address: {}", ip_addr);
     let pool = ProxyPool::default();

@@ -1,6 +1,5 @@
 use anchor_lang::Discriminator;
 use block_mesh_common::cli::ProxyEndpointNodeOptions;
-use block_mesh_common::tracing::setup_tracing;
 use block_mesh_solana_client::helpers::{get_provider_node_address, sign_message};
 use block_mesh_solana_client::manager::{EndpointNodeToProviderNodeHeader, SolanaManager};
 use blockmesh_program::state::provider_node::ProviderNode;
@@ -16,7 +15,6 @@ mod endpoint_headers;
 
 #[tracing::instrument(name = "proxy_endpoint_main", ret, err)]
 pub async fn proxy_endpoint_main(cli_args: &ProxyEndpointNodeOptions) -> anyhow::Result<ExitCode> {
-    setup_tracing();
     let mut solana_manager =
         SolanaManager::new(&cli_args.keypair_path, &cli_args.program_id).await?;
     let provider_node_account: ProviderNode = match cli_args.proxy_master_node_owner {

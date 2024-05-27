@@ -13,6 +13,7 @@ use hyper_util::rt::TokioIo;
 use std::net::SocketAddr;
 use std::str::FromStr;
 use tokio::net::TcpStream;
+use uuid::Uuid;
 
 #[derive(Parser, Debug)]
 pub struct CliArgs {
@@ -24,7 +25,7 @@ pub struct CliArgs {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    setup_tracing();
+    setup_tracing(Uuid::new_v4());
     let args = CliArgs::parse();
     let addr = SocketAddr::from_str(format!("{}:{}", args.ip, args.port).as_str())
         .expect("Failed to parse address");

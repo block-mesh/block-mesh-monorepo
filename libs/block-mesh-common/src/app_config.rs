@@ -6,6 +6,7 @@ use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
 use std::env;
 use std::fmt::Display;
+use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub struct AppConfig {
@@ -20,6 +21,7 @@ pub struct AppConfig {
     pub minimized: Option<bool>,
     pub config_path: Option<String>,
     pub task_status: Option<TaskStatus>,
+    pub user_id: Option<Uuid>,
 }
 
 #[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Copy)]
@@ -60,6 +62,7 @@ impl AppConfig {
         self.mode = self.mode.or(config.mode);
         self.gui = self.gui.or(config.gui);
         self.config_path = self.config_path.clone().or(config.config_path);
+        self.user_id = self.user_id.or(config.user_id);
     }
 
     pub async fn validate_keypair(&self) -> anyhow::Result<()> {
@@ -129,6 +132,7 @@ impl From<Commands> for AppConfig {
                 minimized: None,
                 config_path: None,
                 task_status: None,
+                user_id: None,
             },
             Commands::ProxyMaster(options) => AppConfig {
                 keypair_path: Some(options.keypair_path),
@@ -142,6 +146,7 @@ impl From<Commands> for AppConfig {
                 minimized: None,
                 config_path: None,
                 task_status: None,
+                user_id: None,
             },
             Commands::ProxyEndpoint(options) => AppConfig {
                 keypair_path: Some(options.keypair_path),
@@ -155,6 +160,7 @@ impl From<Commands> for AppConfig {
                 minimized: None,
                 config_path: None,
                 task_status: None,
+                user_id: None,
             },
         }
     }
