@@ -31,13 +31,8 @@ impl sqlx::Decode<'_, Postgres> for OptionUuid {
     fn decode(
         value: <Postgres as sqlx::database::HasValueRef<'_>>::ValueRef,
     ) -> Result<Self, Box<dyn Error + 'static + Send + Sync>> {
-        let value = <&str as Decode<Postgres>>::decode(value)?;
-        if value.is_empty() {
-            Ok(Self(None))
-        } else {
-            let value = Uuid::from_str(value)?;
-            Ok(Self(Some(value)))
-        }
+        let value = <Uuid as Decode<Postgres>>::decode(value)?;
+        Ok(Self(Some(value)))
     }
 }
 
