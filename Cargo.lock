@@ -1830,7 +1830,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "cloudflare-privac-page"
+name = "cloudflare-privacy-page"
 version = "0.1.0"
 dependencies = [
  "serde",
