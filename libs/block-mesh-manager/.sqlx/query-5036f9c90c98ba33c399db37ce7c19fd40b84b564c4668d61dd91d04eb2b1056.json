@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n        id,\n        email,\n        created_at,\n        password as \"password: Secret<String>\",\n        wallet_address,\n        role as \"role: UserRole\",\n        invited_by as \"invited_by: OptionUuid\",\n        invite_code\n        FROM users WHERE invite_code = $1 LIMIT 1",
+  "query": "SELECT\n        id,\n        email,\n        created_at,\n        password as \"password: Secret<String>\",\n        wallet_address,\n        role as \"role: UserRole\",\n        invited_by as \"invited_by: OptionUuid\"\n        FROM users WHERE id = $1 LIMIT 1",
   "describe": {
     "columns": [
       {
@@ -37,16 +37,11 @@
         "ordinal": 6,
         "name": "invited_by: OptionUuid",
         "type_info": "Uuid"
-      },
-      {
-        "ordinal": 7,
-        "name": "invite_code",
-        "type_info": "Text"
       }
     ],
     "parameters": {
       "Left": [
-        "Text"
+        "Uuid"
       ]
     },
     "nullable": [
@@ -56,9 +51,8 @@
       false,
       true,
       false,
-      true,
-      false
+      true
     ]
   },
-  "hash": "f6a61d2ce9b7606a4cd6c7a5e955ff039e1df7257b6ab60338a71006d6880ae8"
+  "hash": "5036f9c90c98ba33c399db37ce7c19fd40b84b564c4668d61dd91d04eb2b1056"
 }

@@ -18,8 +18,7 @@ pub(crate) async fn get_user_opt_by_email(
         email,
         wallet_address,
         role as "role: UserRole",
-        invited_by as "invited_by: OptionUuid",
-        invite_code
+        invited_by as "invited_by: OptionUuid"
         FROM users WHERE email = $1 LIMIT 1"#,
         email
     )

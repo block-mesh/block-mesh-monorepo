@@ -2,7 +2,6 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::ops::Deref;
-use std::str::FromStr;
 use uuid::Uuid;
 // https://stackoverflow.com/questions/75242725/rust-sqlx-try-from-optionuuid
 #[derive(Debug, Serialize, Deserialize, Clone)]
