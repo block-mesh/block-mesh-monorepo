@@ -1830,6 +1830,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "cloudflare-privacy-page"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "time",
+ "tracing",
+ "tracing-subscriber",
+ "tracing-web",
+ "worker",
+]
+
+[[package]]
 name = "cloudflare-worker-ip-data"
 version = "0.1.0"
 dependencies = [
