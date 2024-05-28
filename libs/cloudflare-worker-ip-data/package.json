@@ -7,7 +7,7 @@
     "dev": "wrangler dev --local"
   },
   "devDependencies": {
-    "wrangler": "3.19.0",
+    "wrangler": "3.55.0",
     "undici": "5.28.4"
   }
 }
