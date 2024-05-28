@@ -75,4 +75,5 @@ pub struct RegisterForm {
     pub email: String,
     pub password: String,
     pub password_confirm: String,
+    pub invite_code: Option<String>,
 }

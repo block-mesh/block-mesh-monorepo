@@ -1,6 +1,7 @@
 pub mod api_token;
 pub mod daily_stat;
 pub mod nonce;
+pub mod option_uuid;
 pub mod provider_master_status;
 pub mod proxy_master;
 pub mod task;

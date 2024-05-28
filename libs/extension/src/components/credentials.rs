@@ -12,9 +12,16 @@ pub fn CredentialsForm(
     let (password, set_password) = create_signal(String::new());
     let (password_confirm, set_password_confirm) = create_signal(String::new());
     let (email, set_email) = create_signal(String::new());
+    let (invite_code, set_invite_code) = create_signal(String::new());
 
-    let dispatch_action =
-        move || action.dispatch(vec![email.get(), password.get(), password_confirm.get()]);
+    let dispatch_action = move || {
+        action.dispatch(vec![
+            email.get(),
+            password.get(),
+            password_confirm.get(),
+            invite_code.get(),
+        ])
+    };
 
     let button_is_disabled = Signal::derive(move || {
         disabled.get()
@@ -106,6 +113,32 @@ pub fn CredentialsForm(
                                         _ => {
                                             let val = event_target_value(&ev);
                                             set_password_confirm.update(|p| *p = val);
+                                        }
+                                    }
+                                }
+
+                                on:change=move |ev| {
+                                    let val = event_target_value(&ev);
+                                    set_password_confirm.update(|p| *p = val);
+                                }
+                            />
+
+                        </div>
+              <div class="mb-4">
+                            <input
+                                type="text"
+                                placeholder="Invite Code"
+                                prop:disabled=move || disabled.get()
+                                class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
+                                name="invite_code"
+                                on:keyup=move |ev: ev::KeyboardEvent| {
+                                    match &*ev.key() {
+                                        "Enter" => {
+                                            dispatch_action();
+                                        }
+                                        _ => {
+                                            let val = event_target_value(&ev);
+                                            set_invite_code.update(|p| *p = val);
                                         }
                                     }
                                 }

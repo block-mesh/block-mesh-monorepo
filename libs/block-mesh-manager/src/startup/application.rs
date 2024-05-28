@@ -66,6 +66,7 @@ impl Application {
                 "/",
                 get(routes::login::login_form::handler).post(routes::login::login_post::handler),
             )
+            .route("/error", get(routes::error::error_page::handler))
             .route(
                 "/login",
                 get(routes::login::login_form::handler).post(routes::login::login_post::handler),

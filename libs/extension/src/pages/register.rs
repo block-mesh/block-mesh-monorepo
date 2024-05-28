@@ -15,10 +15,16 @@ pub fn Register(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
         let email = params[0].to_string();
         let password = params[1].to_string();
         let password_confirm = params[2].to_string();
+        let invite_code = params[3].to_string();
         let credentials = RegisterForm {
             email,
             password,
             password_confirm,
+            invite_code: if invite_code.is_empty() {
+                None
+            } else {
+                Some(invite_code)
+            },
         };
         log!("Try to register new account for {}", credentials.email);
         async move {

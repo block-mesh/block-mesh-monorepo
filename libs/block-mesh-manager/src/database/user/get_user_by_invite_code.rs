@@ -4,24 +4,24 @@ use crate::domain::user::UserRole;
 use secret::Secret;
 use sqlx::{Postgres, Transaction};
 
-#[tracing::instrument(name = "Get User opt by email", skip(transaction), ret, err)]
-pub(crate) async fn get_user_opt_by_email(
+#[tracing::instrument(name = "get_user_opt_by_invited_code", skip(transaction), ret, err)]
+pub(crate) async fn get_user_opt_by_invited_code(
     transaction: &mut Transaction<'_, Postgres>,
-    email: &str,
+    invite_code: String,
 ) -> anyhow::Result<Option<User>> {
     Ok(sqlx::query_as!(
         User,
         r#"SELECT
         id,
+        email,
         created_at,
         password as "password: Secret<String>",
-        email,
         wallet_address,
         role as "role: UserRole",
         invited_by as "invited_by: OptionUuid",
         invite_code
-        FROM users WHERE email = $1 LIMIT 1"#,
-        email
+        FROM users WHERE invite_code = $1 LIMIT 1"#,
+        invite_code
     )
     .fetch_optional(&mut **transaction)
     .await?)

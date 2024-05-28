@@ -1162,6 +1162,7 @@ dependencies = [
  "config",
  "dotenv",
  "enum-iterator 2.1.0",
+ "form_urlencoded",
  "http 1.1.0",
  "http-body-util",
  "rand 0.8.5",
@@ -1181,6 +1182,7 @@ dependencies = [
  "tracing-bunyan-formatter",
  "tracing-log 0.2.0",
  "tracing-subscriber",
+ "url",
  "uuid",
 ]
 
