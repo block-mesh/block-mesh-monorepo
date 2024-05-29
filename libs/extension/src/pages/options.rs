@@ -1,5 +1,4 @@
 use crate::utils::ext_state::AppState;
-use crate::utils::log::log;
 use leptos::*;
 use std::time::Duration;
 use url::Url;
@@ -21,7 +20,7 @@ pub fn Options() -> impl IntoView {
         }
         let raw_url = url.get_untracked();
         let url = Url::parse(&url.get_untracked());
-        let url = match url {
+        match url {
             Err(error) => {
                 set_error.update(|e| *e = Some(format!("Invalid URL: {}", error)));
                 set_timeout(
@@ -34,7 +33,6 @@ pub fn Options() -> impl IntoView {
             }
             Ok(url) => url,
         };
-        log!("Save URL: {:?}", url);
         state.blockmesh_url.update(|v| *v = raw_url.clone());
         set_url.update(|v| *v = raw_url.clone());
         AppState::store_blockmesh_url(raw_url).await;

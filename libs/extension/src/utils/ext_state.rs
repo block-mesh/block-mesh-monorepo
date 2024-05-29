@@ -12,7 +12,6 @@ use uuid::Uuid;
 use wasm_bindgen::JsValue;
 
 use crate::utils::connectors::{get_storage_value, set_storage_value};
-use crate::utils::log::log;
 use crate::utils::storage::StorageValues;
 
 #[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
@@ -42,16 +41,20 @@ impl Default for AppStatus {
 pub struct AppState {
     pub email: RwSignal<String>,
     pub api_token: RwSignal<Uuid>,
+    pub device_id: RwSignal<Uuid>,
     pub blockmesh_url: RwSignal<String>,
     pub status: RwSignal<AppStatus>,
+    pub uptime: RwSignal<f64>,
 }
 
 impl Debug for AppState {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.debug_struct("AppState")
             .field("email", &self.email.get_untracked())
+            .field("user_id", &self.device_id.get_untracked())
             .field("api_token", &self.api_token.get_untracked())
             .field("blockmesh_url", &self.blockmesh_url.get_untracked())
+            .field("uptime", &self.uptime.get_untracked())
             .field("status", &self.status.get_untracked())
             .finish()
     }
@@ -64,11 +67,16 @@ impl AppState {
         let email = Self::get_email().await;
         let api_token = Self::get_api_token().await;
         let api_token = uuid::Uuid::from_str(&api_token).unwrap_or_else(|_| Uuid::default());
+        let device_id = Self::get_device_id().await;
+        let device_id = uuid::Uuid::from_str(&device_id).unwrap_or_else(|_| Uuid::new_v4());
+        let uptime = Self::get_uptime().await;
         Self {
             email: create_rw_signal(email),
             api_token: create_rw_signal(api_token),
             blockmesh_url: create_rw_signal(blockmesh_url),
             status: create_rw_signal(AppStatus::LoggedOut),
+            device_id: create_rw_signal(device_id),
+            uptime: create_rw_signal(uptime),
         }
     }
 
@@ -86,16 +94,12 @@ impl AppState {
         context.blockmesh_url.update(|v| *v = blockmesh_url.clone());
         context.email.update(|v| *v = email.clone());
         context.api_token.update(|v| *v = api_token);
-        log!("init state = {:#?}", context);
         if email.is_empty() || api_token.is_nil() || api_token == Uuid::default() {
-            log!("init: email or api_token is empty");
             return context.status.get_untracked();
         }
         let credentials = CheckTokenRequest { api_token, email };
         let result = check_token(&blockmesh_url, &credentials).await;
-        log!("init: check_token result = {:#?}", result);
         if result.is_ok() {
-            log!("init: check_token is ok");
             context.status.update(|v| *v = AppStatus::LoggedIn);
         };
         context.status.get_untracked()
@@ -172,6 +176,20 @@ impl AppState {
         get_storage_value(StorageValues::ApiToken.to_string().as_str())
             .await
             .as_string()
+            .unwrap_or_default()
+    }
+
+    pub async fn get_device_id() -> String {
+        get_storage_value(StorageValues::DeviceId.to_string().as_str())
+            .await
+            .as_string()
+            .unwrap_or_default()
+    }
+
+    pub async fn get_uptime() -> f64 {
+        get_storage_value(StorageValues::Uptime.to_string().as_str())
+            .await
+            .as_f64()
             .unwrap_or_default()
     }
 }

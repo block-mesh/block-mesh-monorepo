@@ -12,6 +12,7 @@ url = { workspace = true }
 leptos = { workspace = true, features = ["tracing", "csr"] }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
 log = { workspace = true }
+tracing-wasm = { workspace = true }
 leptos_router = { workspace = true, features = ["csr"] }
 anyhow = { workspace = true }
 wasm-bindgen = { workspace = true }
@@ -28,7 +29,7 @@ wee_alloc = { workspace = true }
 reqwest = { workspace = true, default-features = false, features = [
   "json",
 ] }
-block-mesh-common = { path = "../block-mesh-common" }
+block-mesh-common = { path = "../block-mesh-common", features = ["leptos-tracer"] }
 thiserror = { workspace = true }
 
 [dependencies.web-sys]

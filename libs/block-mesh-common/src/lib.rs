@@ -6,5 +6,7 @@ pub mod constants;
 #[cfg(feature = "http")]
 pub mod http;
 pub mod interface;
+#[cfg(feature = "leptos-tracer")]
+pub mod leptos_tracing;
 #[cfg(feature = "async-tracer")]
 pub mod tracing;

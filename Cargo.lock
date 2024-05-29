@@ -1143,6 +1143,7 @@ dependencies = [
  "tracing",
  "tracing-serde",
  "tracing-subscriber",
+ "tracing-wasm",
  "uuid",
 ]
 
@@ -1246,6 +1247,7 @@ dependencies = [
  "serde-wasm-bindgen 0.6.5",
  "serde_json",
  "solana-sdk",
+ "tracing-wasm",
  "wasm-bindgen",
  "wasm-bindgen-futures",
 ]
@@ -2955,6 +2957,7 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tracing-subscriber",
+ "tracing-wasm",
  "url",
  "urlencoding",
  "uuid",
@@ -9786,6 +9789,17 @@ dependencies = [
  "tracing-core",
  "tracing-log 0.2.0",
  "tracing-serde",
+]
+
+[[package]]
+name = "tracing-wasm"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4575c663a174420fa2d78f4108ff68f65bf2fbb7dd89f33749b6e826b3626e07"
+dependencies = [
+ "tracing",
+ "tracing-subscriber",
+ "wasm-bindgen",
 ]
 
 [[package]]

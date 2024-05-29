@@ -1,7 +1,6 @@
 use crate::components::credentials::CredentialsForm;
 use crate::utils::auth::login;
 use crate::utils::ext_state::{AppState, AppStatus};
-use crate::utils::log::{log_error, log_info};
 use block_mesh_common::interface::LoginForm;
 use leptos::*;
 use uuid::Uuid;
@@ -14,7 +13,7 @@ pub fn Login(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
     let url = Signal::derive(move || state.blockmesh_url.get());
     let login_action = create_action(move |params: &Vec<String>| {
         let email = params[0].to_string();
-        log_info!(
+        tracing::info!(
             "Try to login with {} - {}",
             email,
             state.blockmesh_url.get_untracked()
@@ -33,16 +32,16 @@ pub fn Login(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
                     if res.api_token != state.api_token.get_untracked()
                         || state.api_token.get_untracked() == Uuid::default()
                     {
-                        log_info!("Store new api token");
+                        tracing::info!("Store new api token");
                         AppState::store_api_token(res.api_token).await;
                     } else {
-                        log_info!("Logged in");
+                        tracing::info!("Logged in");
                     }
                     state.status.update(|v| *v = AppStatus::LoggedIn);
                     on_success.call(());
                 }
                 Err(err) => {
-                    log_error!("Unable to login with {}: {err}", credentials.email);
+                    tracing::error!("Unable to login with {}: {err}", credentials.email);
                     set_login_error.update(|e| *e = Some(err.to_string()));
                 }
             }
