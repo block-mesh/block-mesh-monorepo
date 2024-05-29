@@ -2,6 +2,7 @@ use leptos::*;
 
 #[component]
 pub fn CredentialsForm(
+    url: Signal<String>,
     title: &'static str,
     action_label: &'static str,
     action: Action<Vec<String>, ()>,
@@ -43,6 +44,16 @@ pub fn CredentialsForm(
                             })
                     }}
 
+                    <div class="mb-4">
+                        <input
+                            type="url"
+                            class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                            placeholder="URL"
+                            name="url"
+                            prop:disabled=true
+                            prop:value=url
+                        />
+                    </div>
                     <div class="mb-4">
                         <input
                             type="email"
@@ -124,7 +135,7 @@ pub fn CredentialsForm(
                             />
 
                         </div>
-              <div class="mb-4">
+                        <div class="mb-4">
                             <input
                                 type="text"
                                 placeholder="Invite Code"

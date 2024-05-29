@@ -27,6 +27,17 @@ pub struct SubmitTaskRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct ReportUptimeRequest {
+    pub email: String,
+    pub api_token: Uuid,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ReportUptimeResponse {
+    pub status_code: u16,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct SubmitTaskResponse {
     pub status_code: u16,
 }

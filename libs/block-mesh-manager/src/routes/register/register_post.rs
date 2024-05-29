@@ -2,6 +2,7 @@ use crate::database::api_token::create_api_token::create_api_token;
 use crate::database::invite_code::create_invite_code::create_invite_code;
 use crate::database::invite_code::get_user_opt_by_invited_code::get_user_opt_by_invited_code;
 use crate::database::nonce::create_nonce::create_nonce;
+use crate::database::uptime_report::create_uptime_report::create_uptime_report;
 use crate::database::user::create_user::create_user;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::database::user::update_user_invited_by::update_user_invited_by;
@@ -17,6 +18,7 @@ use block_mesh_common::interface::RegisterForm;
 use secret::Secret;
 use sqlx::PgPool;
 use uuid::Uuid;
+use validator::validate_email;
 
 #[tracing::instrument(name = "register_post", skip(form, auth))]
 pub async fn handler(
@@ -25,6 +27,14 @@ pub async fn handler(
     Form(form): Form<RegisterForm>,
 ) -> Result<Redirect, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let email = form.email.clone();
+    if !validate_email(email) {
+        return Ok(Error::redirect(
+            400,
+            "Invalid email".to_string(),
+            "Please check if email you inserted is correct".to_string(),
+        ));
+    }
     if form.password_confirm != form.password {
         return Err(Error::PasswordMismatch);
     }
@@ -41,6 +51,7 @@ pub async fn handler(
     create_nonce(&mut transaction, &user_id, &nonce_secret).await?;
     create_api_token(&mut transaction, user_id).await?;
     create_invite_code(&mut transaction, user_id, Uuid::new_v4().to_string()).await?;
+    create_uptime_report(&mut transaction, user_id).await?;
     if let Some(invite_code) = form.invite_code {
         if !invite_code.is_empty() {
             match get_user_opt_by_invited_code(&mut transaction, invite_code).await? {

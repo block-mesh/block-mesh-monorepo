@@ -58,6 +58,7 @@ impl Debug for AppState {
 }
 
 impl AppState {
+    #[tracing::instrument(name = "AppState::new")]
     pub async fn new() -> Self {
         let blockmesh_url = Self::get_blockmesh_url().await;
         let email = Self::get_email().await;
@@ -71,8 +72,13 @@ impl AppState {
         }
     }
 
+    pub fn has_api_token(&self) -> bool {
+        let api_token = self.api_token.get_untracked();
+        !(api_token.is_nil() || api_token == Uuid::default())
+    }
+
+    #[tracing::instrument(name = "AppState::init")]
     pub async fn init(context: AppState) -> AppStatus {
-        log!("Before state: {:#?}", context);
         let blockmesh_url = Self::get_blockmesh_url().await;
         let email = Self::get_email().await;
         let api_token = Self::get_api_token().await;
@@ -80,20 +86,21 @@ impl AppState {
         context.blockmesh_url.update(|v| *v = blockmesh_url.clone());
         context.email.update(|v| *v = email.clone());
         context.api_token.update(|v| *v = api_token);
-        if email.is_empty() || api_token.is_nil() {
-            log!("End state: {:#?}", context);
+        log!("init state = {:#?}", context);
+        if email.is_empty() || api_token.is_nil() || api_token == Uuid::default() {
+            log!("init: email or api_token is empty");
             return context.status.get_untracked();
         }
         let credentials = CheckTokenRequest { api_token, email };
         let result = check_token(&blockmesh_url, &credentials).await;
+        log!("init: check_token result = {:#?}", result);
         if result.is_ok() {
-            log!("Logged from cache");
+            log!("init: check_token is ok");
             context.status.update(|v| *v = AppStatus::LoggedIn);
         };
-        log!("End state: {:#?}", context);
         context.status.get_untracked()
     }
-
+    #[tracing::instrument(name = "init_resource")]
     pub fn init_resource(context: AppState) -> Option<()> {
         let resource = create_resource(
             move || {
@@ -115,6 +122,7 @@ impl AppState {
         resource.get()
     }
 
+    #[tracing::instrument(name = "clear")]
     pub async fn clear(&self) {
         self.blockmesh_url
             .update(|v| *v = "https://app.blockmesh.xyz".to_string());

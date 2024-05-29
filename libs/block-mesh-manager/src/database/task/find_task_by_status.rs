@@ -1,12 +1,10 @@
 use crate::domain::task::Task;
 use crate::domain::task::TaskStatus;
 use sqlx::{Postgres, Transaction};
-use uuid::Uuid;
 
-#[tracing::instrument(name = "Find task task id and status", skip(transaction), ret, err)]
-pub(crate) async fn find_task_by_task_id_and_status(
+#[tracing::instrument(name = "Find task status", skip(transaction), ret, err)]
+pub(crate) async fn find_task_by_status(
     transaction: &mut Transaction<'_, Postgres>,
-    task_id: &Uuid,
     status: TaskStatus,
 ) -> anyhow::Result<Option<Task>> {
     let task = sqlx::query_as!(
@@ -25,10 +23,9 @@ pub(crate) async fn find_task_by_task_id_and_status(
         response_raw,
         created_at
         FROM tasks
-        WHERE id = $1 and status = $2
+        WHERE status = $1
         LIMIT 1
         "#,
-        task_id,
         status.to_string()
     )
     .fetch_optional(&mut **transaction)

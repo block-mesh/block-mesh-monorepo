@@ -1,0 +1,82 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n        id,\n        user_id,\n        url,\n        method,\n        headers,\n        body,\n        assigned_user_id,\n        status,\n        response_code,\n        response_raw,\n        created_at\n        FROM tasks\n        WHERE status = $1\n        LIMIT 1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "method",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "headers",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 5,
+        "name": "body",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 6,
+        "name": "assigned_user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 7,
+        "name": "status",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "response_code",
+        "type_info": "Int4"
+      },
+      {
+        "ordinal": 9,
+        "name": "response_raw",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 10,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      false,
+      true,
+      true,
+      false
+    ]
+  },
+  "hash": "36872c21efd9593489e7b2c95c405f82716bb2c98a563fa8561ca7e711681643"
+}

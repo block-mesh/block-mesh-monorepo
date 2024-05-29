@@ -1,6 +1,7 @@
 use crate::utils::ext_state::AppState;
 use crate::utils::log::log;
 use leptos::*;
+use std::time::Duration;
 use url::Url;
 
 #[component]
@@ -10,6 +11,7 @@ pub fn Options() -> impl IntoView {
     let _ = AppState::init_resource(state);
 
     let (error, set_error) = create_signal(None::<String>);
+    let (success, set_success) = create_signal(None::<String>);
     let (url, set_url) = create_signal(state.blockmesh_url.get_untracked());
 
     let save_action = create_action(move |_| async move {
@@ -22,6 +24,12 @@ pub fn Options() -> impl IntoView {
         let url = match url {
             Err(error) => {
                 set_error.update(|e| *e = Some(format!("Invalid URL: {}", error)));
+                set_timeout(
+                    move || {
+                        set_error.update(|e| *e = None);
+                    },
+                    Duration::from_millis(1500),
+                );
                 return;
             }
             Ok(url) => url,
@@ -30,7 +38,14 @@ pub fn Options() -> impl IntoView {
         state.blockmesh_url.update(|v| *v = raw_url.clone());
         set_url.update(|v| *v = raw_url.clone());
         AppState::store_blockmesh_url(raw_url).await;
+        set_success.update(|s| *s = Some("URL saved".to_string()));
         set_error.update(|e| *e = None);
+        set_timeout(
+            move || {
+                set_success.update(|s| *s = None);
+            },
+            Duration::from_millis(1500),
+        );
     });
 
     view! {
@@ -43,6 +58,14 @@ pub fn Options() -> impl IntoView {
                             .get()
                             .map(|err| {
                                 view! { <p style="color:red;">{err}</p> }
+                            })
+                    }}
+
+                    {move || {
+                        success
+                            .get()
+                            .map(|success| {
+                                view! { <p style="color:green;">{success}</p> }
                             })
                     }}
 

@@ -24,9 +24,7 @@ pub fn Dashboard(task_status: ReadSignal<String>) -> impl IntoView {
                     <dl>
                         <div class="bg-gray-700 px-4 py-5 sm:grid sm:grid-cols-3 sm:gap-4 sm:px-6">
                             <dt class="text-sm font-medium text-gray-500">{move || mode.get()}</dt>
-                            <dd class=status_color>
-                                {move || task_status.get()}
-                            </dd>
+                            <dd class=status_color>{move || task_status.get()}</dd>
                         </div>
                     </dl>
                 </div>

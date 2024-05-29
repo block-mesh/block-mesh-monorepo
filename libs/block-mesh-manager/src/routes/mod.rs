@@ -7,3 +7,4 @@ pub mod login;
 pub mod logout;
 pub mod register;
 pub mod tasks;
+pub mod uptime_report;

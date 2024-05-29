@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT\n        id,\n        user_id,\n        url,\n        method,\n        headers,\n        body,\n        assigned_user_id,\n        status,\n        response_code,\n        response_raw,\n        created_at\n        FROM tasks\n        WHERE user_id != $1 and status = $2\n        ",
+  "query": "\n        SELECT\n        id,\n        user_id,\n        url,\n        method,\n        headers,\n        body,\n        assigned_user_id,\n        status,\n        response_code,\n        response_raw,\n        created_at\n        FROM tasks\n        WHERE user_id != $1 and status = $2\n        LIMIT 1\n        ",
   "describe": {
     "columns": [
       {
@@ -79,5 +79,5 @@
       false
     ]
   },
-  "hash": "66164c483699a23ff7375003de7d84f276fb04220c1d93fb1abe134b0da43f9c"
+  "hash": "023f9e08970845bc77582e8ced3bd8bdae918da7dcec38c733832e1b7b905a0f"
 }

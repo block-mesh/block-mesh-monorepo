@@ -31,6 +31,7 @@ pub(crate) async fn find_task_by_excluded_user_id_and_status(
         created_at
         FROM tasks
         WHERE user_id != $1 and status = $2
+        LIMIT 1
         "#,
         user_id,
         status.to_string()

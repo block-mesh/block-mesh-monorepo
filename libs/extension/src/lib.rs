@@ -11,6 +11,7 @@ use crate::pages::options::Options;
 use crate::pages::popup::Popup;
 
 use crate::utils::connectors::set_panic_hook;
+use crate::utils::log::setup_leptos_tracing;
 
 mod background;
 mod components;
@@ -23,11 +24,13 @@ static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 #[wasm_bindgen]
 pub fn mount_popup() {
     set_panic_hook();
+    setup_leptos_tracing();
     mount_to_body(Popup);
 }
 
 #[wasm_bindgen]
 pub fn mount_options() {
     set_panic_hook();
+    setup_leptos_tracing();
     mount_to_body(Options);
 }

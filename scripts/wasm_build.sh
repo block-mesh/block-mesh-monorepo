@@ -21,7 +21,7 @@ rm -fr "${ROOT}"/tmp_ext/chrome/*
 rm -fr "${ROOT}"/tmp_ext/firefox/*
 
 echo Building wasm module...
-wasm-pack build . --dev --no-typescript --out-dir "./extension_js/js/wasm" --out-name "blockmesh_ext" --target web
+wasm-pack build . --dev --no-typescript --out-dir "./extension_js/js/wasm" --out-name "blockmesh_ext" --target web || exit
 
 ## wasm-pack creates bunch of useless files:
 echo Removing trash files...
