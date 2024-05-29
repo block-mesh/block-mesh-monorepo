@@ -21,6 +21,12 @@ pub async fn handler(
     let user = get_user_opt_by_email(&mut transaction, &body.email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
+    if !user.verified_email {
+        return Ok(Json(GetTokenResponse {
+            api_token: None,
+            message: Some("Email not verified yet".to_string()),
+        }));
+    }
     let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
         .await?
         .ok_or_else(|| Error::NonceNotFound)?;
@@ -43,6 +49,7 @@ pub async fn handler(
             .ok_or(Error::ApiTokenNotFound)?;
     transaction.commit().await.map_err(Error::from)?;
     Ok(Json(GetTokenResponse {
-        api_token: *api_token.token.as_ref(),
+        api_token: Some(*api_token.token.as_ref()),
+        message: None,
     }))
 }

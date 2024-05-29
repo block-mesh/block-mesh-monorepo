@@ -1,54 +1,44 @@
-use reqwest::Client;
-use serde::{Deserialize, Serialize};
+use reqwest::{multipart, Client};
+use secret::Secret;
+use serde_json::json;
 
-#[allow(dead_code)]
-const BASE_URL: &str = "https://api.mailjet.com/v3.1/send";
+const BASE_URL: &str = "https://api.mailgun.net/v3/blockmesh.xyz/messages";
+const CONFIRM_TEMPLATE_ID: &str = "confirmation email";
+const EMAIL: &str = "no-reply@blockmesh.xyz";
+const SUBJECT: &str = "BlockMesh Network";
+
 pub struct EmailClient {
     pub client: Client,
-    pub mj_apikey_public: String,
-    pub mj_apikey_private: String,
-}
-
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all(serialize = "PascalCase"))]
-struct EmailAddress {
-    email: String,
-    name: String,
-}
-
-#[derive(Serialize, Deserialize)]
-#[serde(rename_all(serialize = "PascalCase"))]
-struct EmailMessage {
-    from: EmailAddress,
-    to: Vec<EmailAddress>,
-    subject: String,
-    text_part: String,
-    #[serde(rename = "HTMLPart")]
-    html_part: String,
+    pub token: Secret<String>,
+    pub base_url: String,
 }
 
 impl EmailClient {
-    #[allow(dead_code)]
-    pub async fn send_email(&self, to: String, subject: String, text: String, html: String) {
-        let messages: Vec<EmailMessage> = vec![EmailMessage {
-            subject,
-            from: EmailAddress {
-                email: "no-reply@blockmesh.xyz".to_string(),
-                name: "BlockMesh Network".to_string(),
-            },
-            to: vec![EmailAddress {
-                email: to,
-                name: "".to_string(),
-            }],
-            text_part: text,
-            html_part: html,
-        }];
-
+    pub fn new(token: Secret<String>, base_url: String) -> Self {
+        Self {
+            base_url,
+            client: Client::new(),
+            token,
+        }
+    }
+    #[tracing::instrument(name = "send_confirmation_email", skip(self, token))]
+    pub async fn send_confirmation_email(&self, to: &str, token: &str) {
+        let form = multipart::Form::new()
+            .text("from", format!("BlockMesh Network<{}", EMAIL))
+            .text("to", format!("<{}>", to))
+            .text("subject", SUBJECT)
+            .text("template", CONFIRM_TEMPLATE_ID)
+            .text(
+                "h:X-Mailgun-Variables",
+                json!({"action_url": format!("{}/email_confirm?token={}", self.base_url, token)})
+                    .to_string(),
+            );
         let result = self
             .client
             .post(BASE_URL)
-            .basic_auth(&self.mj_apikey_public, Some(&self.mj_apikey_private))
-            .json(&messages)
+            .basic_auth("api", Some(self.token.expose_secret()))
+            .header("Authorization", format!("Bearer {}", self.token))
+            .multipart(form)
             .send()
             .await;
         tracing::info!("Email sent: {:?}", result);

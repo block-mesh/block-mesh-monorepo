@@ -5,6 +5,7 @@
 use block_mesh_common::tracing::setup_tracing;
 use block_mesh_manager::configuration::get_configuration::get_configuration;
 use block_mesh_manager::database::migrate::migrate;
+use block_mesh_manager::emails::email_client::EmailClient;
 use block_mesh_manager::envars::app_env_var::AppEnvVar;
 use block_mesh_manager::envars::env_var::EnvVar;
 use block_mesh_manager::envars::get_env_var_or_panic::get_env_var_or_panic;
@@ -31,9 +32,16 @@ async fn main() -> anyhow::Result<()> {
     tracing::info!("Starting with configuration {:#?}", configuration);
     let database_url = get_env_var_or_panic(AppEnvVar::DatabaseUrl);
     let database_url = <EnvVar as AsRef<Secret<String>>>::as_ref(&database_url);
+    let mailgun_token = get_env_var_or_panic(AppEnvVar::MailgunSendKey);
+    let mailgun_token = <EnvVar as AsRef<Secret<String>>>::as_ref(&mailgun_token);
     let db_pool = get_connection_pool(&configuration.database, Option::from(database_url)).await?;
     migrate(&db_pool).await.expect("Failed to migrate database");
+    let email_client = Arc::new(EmailClient::new(
+        mailgun_token.clone(),
+        configuration.application.base_url.clone(),
+    ));
     let app_state = Arc::new(AppState {
+        email_client,
         pool: db_pool.clone(),
     });
     let application = Application::build(configuration, app_state, db_pool).await;

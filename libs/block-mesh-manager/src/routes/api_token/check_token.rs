@@ -26,6 +26,7 @@ pub async fn handler(
     }
     transaction.commit().await.map_err(Error::from)?;
     Ok(Json(GetTokenResponse {
-        api_token: *api_token.token.as_ref(),
+        api_token: Some(*api_token.token.as_ref()),
+        message: None,
     }))
 }

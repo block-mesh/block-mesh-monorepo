@@ -29,16 +29,22 @@ pub fn Login(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
                     state.email.update(|e| *e = credentials.email.clone());
                     AppState::store_email(credentials.email).await;
                     set_login_error.update(|e| *e = None);
-                    if res.api_token != state.api_token.get_untracked()
-                        || state.api_token.get_untracked() == Uuid::default()
-                    {
-                        tracing::info!("Store new api token");
-                        AppState::store_api_token(res.api_token).await;
-                    } else {
-                        tracing::info!("Logged in");
+                    if res.message.is_some() {
+                        set_login_error.update(|e| *e = res.message.clone());
+                        return;
                     }
-                    state.status.update(|v| *v = AppStatus::LoggedIn);
-                    on_success.call(());
+                    if let Some(api_token) = res.api_token {
+                        if api_token != state.api_token.get_untracked()
+                            || state.api_token.get_untracked() == Uuid::default()
+                        {
+                            tracing::info!("Store new api token");
+                            AppState::store_api_token(api_token).await;
+                        } else {
+                            tracing::info!("Logged in");
+                        }
+                        state.status.update(|v| *v = AppStatus::LoggedIn);
+                        on_success.call(());
+                    }
                 }
                 Err(err) => {
                     tracing::error!("Unable to login with {}: {err}", credentials.email);

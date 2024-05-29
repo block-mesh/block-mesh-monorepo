@@ -158,6 +158,14 @@ impl AppState {
         .await;
     }
 
+    pub async fn store_uptime(uptime: f64) {
+        set_storage_value(
+            &StorageValues::Uptime.to_string(),
+            JsValue::from_f64(uptime),
+        )
+        .await;
+    }
+
     pub async fn get_blockmesh_url() -> String {
         get_storage_value(StorageValues::BlockMeshUrl.to_string().as_str())
             .await

@@ -8,6 +8,7 @@ authors.workspace = true
 
 [dependencies]
 reqwest = { workspace = true, default-features = false, features = [
+  "multipart",
   "json",
 ] }
 validator = { workspace = true }
@@ -58,7 +59,8 @@ features = [
   "uuid",
   "chrono",
   "migrate",
-  "json"
+  "json",
+  "bigdecimal"
 ]
 
 [dependencies.uuid]

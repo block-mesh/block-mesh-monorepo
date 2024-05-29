@@ -1,1 +1,2 @@
-pub(crate) mod report_uptime;
+pub mod get_user_uptime;
+pub mod report_uptime;

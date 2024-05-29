@@ -9,7 +9,9 @@ use crate::database::user::update_user_invited_by::update_user_invited_by;
 use crate::domain::nonce::Nonce;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
+use crate::startup::application::AppState;
 use anyhow::anyhow;
+use axum::extract::State;
 use axum::response::Redirect;
 use axum::{Extension, Form};
 use axum_login::AuthSession;
@@ -17,13 +19,15 @@ use bcrypt::{hash, DEFAULT_COST};
 use block_mesh_common::interface::RegisterForm;
 use secret::Secret;
 use sqlx::PgPool;
+use std::sync::Arc;
 use uuid::Uuid;
 use validator::validate_email;
 
-#[tracing::instrument(name = "register_post", skip(form, auth))]
+#[tracing::instrument(name = "register_post", skip(form, auth, state))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(mut auth): Extension<AuthSession<Backend>>,
+    State(state): State<Arc<AppState>>,
     Form(form): Form<RegisterForm>,
 ) -> Result<Redirect, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
@@ -72,7 +76,7 @@ pub async fn handler(
     transaction.commit().await.map_err(Error::from)?;
 
     let creds: Credentials = Credentials {
-        email: form.email,
+        email: form.email.clone(),
         password: Secret::from(form.password),
         nonce,
     };
@@ -84,5 +88,9 @@ pub async fn handler(
     auth.login(&session)
         .await
         .map_err(|_| Error::Auth(anyhow!("Login failed").to_string()))?;
+    state
+        .email_client
+        .send_confirmation_email(&form.email, nonce_secret.expose_secret())
+        .await;
     Ok(Redirect::to("/dashboard"))
 }

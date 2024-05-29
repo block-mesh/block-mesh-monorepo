@@ -13,6 +13,18 @@ pub fn Options() -> impl IntoView {
     let (success, set_success) = create_signal(None::<String>);
     let (url, set_url) = create_signal(state.blockmesh_url.get_untracked());
 
+    let clear_action = create_action(move |_| async move {
+        state.clear().await;
+        set_success.update(|s| *s = Some("Cache cleared".to_string()));
+        set_error.update(|e| *e = None);
+        set_timeout(
+            move || {
+                set_success.update(|s| *s = None);
+            },
+            Duration::from_millis(1500),
+        );
+    });
+
     let save_action = create_action(move |_| async move {
         if url.get_untracked().is_empty() {
             set_error.update(|e| *e = Some("URL is empty".to_string()));
@@ -93,10 +105,24 @@ pub fn Options() -> impl IntoView {
                     <div class="flex items-center justify-between">
                         <button
                             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
-                            // prop:disabled=move || button_is_disabled.get()
                             on:click=move |_| save_action.dispatch(())
                         >
                             Submit
+                        </button>
+                    </div>
+
+                </div>
+            </div>
+        </form>
+        <form on:submit=|ev| ev.prevent_default()>
+            <div class="bg-gray-700 flex justify-center items-center">
+                <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
+                    <div class="flex items-center justify-between">
+                        <button
+                            class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                            on:click=move |_| clear_action.dispatch(())
+                        >
+                            Reset Cache
                         </button>
                     </div>
                 </div>
