@@ -52,6 +52,10 @@ impl Application {
             .route("/dashboard", get(routes::dashboard::get::handler));
 
         let api_router = Router::new()
+            .route(
+                "/report_uptime",
+                post(routes::uptime_report::report_uptime::handler),
+            )
             .route("/get_token", post(routes::api_token::get_token::handler))
             .route("/get_task", post(routes::tasks::get_task::handler))
             .route("/submit_task", post(routes::tasks::submit_task::handler))
@@ -66,6 +70,7 @@ impl Application {
                 "/",
                 get(routes::login::login_form::handler).post(routes::login::login_post::handler),
             )
+            .route("/error", get(routes::error::error_page::handler))
             .route(
                 "/login",
                 get(routes::login::login_form::handler).post(routes::login::login_post::handler),

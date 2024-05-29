@@ -1,6 +1,7 @@
 use anyhow::Error as AnyhowError;
 use axum::http::StatusCode;
-use axum::response::IntoResponse;
+use axum::response::{IntoResponse, Redirect};
+use url::Url;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
@@ -34,12 +35,30 @@ pub enum Error {
     Unauthorized,
     #[error("Failed reading body")]
     FailedReadingBody,
+    #[error("Invite Code Not Found")]
+    InviteCodeNotFound,
+}
+
+impl Error {
+    pub fn redirect(code: u64, summary: String, detailed: String) -> Redirect {
+        let mut url = Url::parse("tmp://error").unwrap();
+        url.query_pairs_mut()
+            .append_pair("code", &format!("{}", code))
+            .append_pair("summary", summary.as_str())
+            .append_pair("detailed", detailed.as_str());
+        let url = url.to_string();
+        let url = url.split("tmp:/").last().unwrap();
+        Redirect::to(url)
+    }
 }
 
 impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         tracing::error!("Error occurred: {}", self);
         match self {
+            Error::InviteCodeNotFound => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "Invite Code Not Found").into_response()
+            }
             Error::ApiTokenMismatch => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
             }
@@ -87,6 +106,7 @@ impl From<Error> for StatusCode {
     fn from(error: Error) -> Self {
         tracing::error!("Error occurred: {}", error);
         match error {
+            Error::InviteCodeNotFound => StatusCode::BAD_REQUEST,
             Error::ApiTokenMismatch => StatusCode::INTERNAL_SERVER_ERROR,
             Error::TaskAssignedToAnotherUser => StatusCode::INTERNAL_SERVER_ERROR,
             Error::FailedReadingBody => StatusCode::INTERNAL_SERVER_ERROR,

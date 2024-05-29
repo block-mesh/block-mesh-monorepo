@@ -1162,9 +1162,11 @@ dependencies = [
  "config",
  "dotenv",
  "enum-iterator 2.1.0",
+ "form_urlencoded",
  "http 1.1.0",
  "http-body-util",
  "rand 0.8.5",
+ "reqwest",
  "secret",
  "serde",
  "serde-aux",
@@ -1181,7 +1183,9 @@ dependencies = [
  "tracing-bunyan-formatter",
  "tracing-log 0.2.0",
  "tracing-subscriber",
+ "url",
  "uuid",
+ "validator",
 ]
 
 [[package]]
@@ -2950,6 +2954,7 @@ dependencies = [
  "serde-wasm-bindgen 0.6.5",
  "serde_json",
  "thiserror",
+ "tracing-subscriber",
  "url",
  "urlencoding",
  "uuid",
@@ -10037,6 +10042,21 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.65",
+]
+
+[[package]]
+name = "validator"
+version = "0.16.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b92f40481c04ff1f4f61f304d61793c7b56ff76ac1469f1beb199b1445b253bd"
+dependencies = [
+ "idna 0.4.0",
+ "lazy_static",
+ "regex",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "url",
 ]
 
 [[package]]

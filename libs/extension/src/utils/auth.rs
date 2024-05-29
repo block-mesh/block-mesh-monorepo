@@ -1,7 +1,9 @@
 use anyhow::anyhow;
+use leptos::*;
 
 use block_mesh_common::interface::{CheckTokenRequest, GetTokenResponse, LoginForm, RegisterForm};
 
+#[tracing::instrument(name = "check_token", skip(credentials), err)]
 pub async fn check_token(
     blockmesh_url: &str,
     credentials: &CheckTokenRequest,
@@ -18,6 +20,7 @@ pub async fn check_token(
     Ok(response)
 }
 
+#[tracing::instrument(name = "register", skip(credentials), err)]
 pub async fn register(blockmesh_url: &str, credentials: &RegisterForm) -> anyhow::Result<()> {
     let url = format!("{}/register", blockmesh_url);
     let client = reqwest::Client::new();
@@ -29,6 +32,7 @@ pub async fn register(blockmesh_url: &str, credentials: &RegisterForm) -> anyhow
     }
 }
 
+#[tracing::instrument(name = "login", skip(credentials), err)]
 pub async fn login(
     blockmesh_url: &str,
     credentials: &LoginForm,

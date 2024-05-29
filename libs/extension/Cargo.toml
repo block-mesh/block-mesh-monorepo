@@ -10,6 +10,7 @@ crate-type = ["cdylib", "rlib"]
 [dependencies]
 url = { workspace = true }
 leptos = { workspace = true, features = ["tracing", "csr"] }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
 log = { workspace = true }
 leptos_router = { workspace = true, features = ["csr"] }
 anyhow = { workspace = true }

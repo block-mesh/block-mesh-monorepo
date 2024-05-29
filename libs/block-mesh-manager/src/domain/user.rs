@@ -1,3 +1,4 @@
+use crate::domain::option_uuid::OptionUuid;
 use chrono::{DateTime, Utc};
 use secret::Secret;
 use serde::{Deserialize, Serialize};
@@ -64,4 +65,5 @@ pub struct User {
     pub password: Secret<String>,
     pub wallet_address: Option<String>,
     pub created_at: DateTime<Utc>,
+    pub invited_by: OptionUuid,
 }

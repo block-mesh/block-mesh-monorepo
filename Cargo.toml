@@ -36,11 +36,13 @@ aes-gcm-siv = { git = "https://github.com/RustCrypto/AEADs", rev = "6105d7a5591a
 curve25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dalek", rev = "8274d5cbb6fc3f38cdc742b4798173895cd2a290" }
 
 [workspace.dependencies]
+sendgrid = { version = "0.21.0" }
 tauri = { version = "1.6.1", features = ["shell-open", "system-tray", "updater"] }
 tauri-build = { version = "1.5.1", features = [] }
 tauri-plugin-autostart = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
-
+url-builder = { version = "0.1.1" }
+form_urlencoded = { version = "1.2.1" }
 auto-launch = { version = "0.5.0" }
 whoami = { version = "1.5.1" }
 url = { version = "2.5.0" }

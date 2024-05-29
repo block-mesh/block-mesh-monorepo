@@ -26,6 +26,7 @@ pub(crate) async fn find_task_by_task_id_and_status(
         created_at
         FROM tasks
         WHERE id = $1 and status = $2
+        LIMIT 1
         "#,
         task_id,
         status.to_string()

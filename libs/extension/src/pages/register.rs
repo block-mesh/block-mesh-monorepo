@@ -10,15 +10,22 @@ pub fn Register(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
     let (register_error, set_register_error) = create_signal(None::<String>);
     let (wait_for_response, set_wait_for_response) = create_signal(false);
     let state = use_context::<AppState>().unwrap();
+    let url = Signal::derive(move || state.blockmesh_url.get());
 
     let register_action = create_action(move |params: &Vec<String>| {
         let email = params[0].to_string();
         let password = params[1].to_string();
         let password_confirm = params[2].to_string();
+        let invite_code = params[3].to_string();
         let credentials = RegisterForm {
             email,
             password,
             password_confirm,
+            invite_code: if invite_code.is_empty() {
+                None
+            } else {
+                Some(invite_code)
+            },
         };
         log!("Try to register new account for {}", credentials.email);
         async move {
@@ -33,6 +40,8 @@ pub fn Register(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
             match result {
                 Ok(_) => {
                     set_register_error.update(|e| *e = None);
+                    state.api_token.update(|t| *t = uuid::Uuid::default());
+                    AppState::store_api_token(uuid::Uuid::default()).await;
                     state
                         .status
                         .update(|v| *v = AppStatus::WaitingEmailVerification);
@@ -53,6 +62,7 @@ pub fn Register(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
 
     view! {
         <CredentialsForm
+            url=url
             title="Register"
             action_label="Register"
             action=register_action

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n        id,\n        email,\n        created_at,\n        password as \"password: Secret<String>\",\n        wallet_address,\n        role as \"role: UserRole\"\n        FROM users WHERE id = $1 LIMIT 1",
+  "query": "SELECT\n        id,\n        email,\n        created_at,\n        password as \"password: Secret<String>\",\n        wallet_address,\n        role as \"role: UserRole\",\n        invited_by as \"invited_by: OptionUuid\"\n        FROM users WHERE id = $1 LIMIT 1",
   "describe": {
     "columns": [
       {
@@ -32,6 +32,11 @@
         "ordinal": 5,
         "name": "role: UserRole",
         "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "invited_by: OptionUuid",
+        "type_info": "Uuid"
       }
     ],
     "parameters": {
@@ -45,8 +50,9 @@
       false,
       false,
       true,
-      false
+      false,
+      true
     ]
   },
-  "hash": "63a20958fc987f07802e588bcae69f0c4041e1e880de808936f56e5e6a94ff42"
+  "hash": "5036f9c90c98ba33c399db37ce7c19fd40b84b564c4668d61dd91d04eb2b1056"
 }
