@@ -76,14 +76,14 @@ jobs:
         with:
           key: release-upload-${{ matrix.target }}
           cache-all-crates: true
-#      - name: "Upload Binaries"
-#        uses: "taiki-e/upload-rust-binary-action@v1"
-#        with:
-#          bin: "block-mesh-manager"
-#          target: ${{ matrix.target }}
-#          archive: $bin-${{ matrix.target }}
-#          ref: refs/tags/v${{ needs.get-tag.outputs.pkg-version }}
-#          token: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Upload Binaries"
+        uses: "taiki-e/upload-rust-binary-action@v1"
+        with:
+          bin: "block-mesh-manager"
+          target: ${{ matrix.target }}
+          archive: $bin-${{ matrix.target }}
+          ref: refs/tags/v${{ needs.get-tag.outputs.pkg-version }}
+          token: ${{ secrets.GITHUB_TOKEN }}
 #  push-to-registry:
 #    name: "Push Docker image to Docker Hub"
 #    if: ${{ github.event.workflow_run.conclusion == 'success' }}
