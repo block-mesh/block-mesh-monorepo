@@ -23,7 +23,7 @@ tokio = { workspace = true, features = ["full"] }
 hyper-util = { workspace = true, features = ["full"] }
 once_cell = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-uuid = { workspace = true, features = ["v4"] }
+uuid = { workspace = true, features = ["v4", "js"] }
 rustc-hash = { workspace = true }
 block-mesh-common = { path = "../block-mesh-common", features = ["http"] }
 serde_json = { workspace = true }

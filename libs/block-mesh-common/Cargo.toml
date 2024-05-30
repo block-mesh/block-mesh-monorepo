@@ -37,6 +37,7 @@ features = [
   "fast-rng", # Use a faster (but still sufficiently random) RNG
   "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
   "serde", # Enable serialization/deserialization of UUIDs
+  "js"
 ]
 
 [features]
@@ -45,4 +46,4 @@ cli = ["dep:clap", "dep:solana-sdk"]
 app-config = ["dep:clap", "dep:solana-sdk"]
 async-tracer = ["dep:tokio", "dep:reqwest"]
 leptos-tracer = ["dep:tracing-wasm"]
-ip-data = ["dep:ipgeolocate"]
+ip-data = ["dep:ipgeolocate", "dep:reqwest"]
