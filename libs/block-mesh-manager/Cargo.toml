@@ -8,6 +8,7 @@ authors.workspace = true
 
 [dependencies]
 reqwest = { workspace = true, default-features = false, features = [
+  "multipart",
   "json",
 ] }
 validator = { workspace = true }
@@ -26,7 +27,7 @@ serde-aux = { workspace = true }
 config = { workspace = true }
 dotenv = { workspace = true }
 enum-iterator = { workspace = true }
-block-mesh-common = { path = "../block-mesh-common", features = ["async-tracer"] }
+block-mesh-common = { path = "../block-mesh-common", features = ["async-tracer", "ip-data"] }
 tokio = { workspace = true, features = ["full"] }
 axum-login = { workspace = true }
 tower-sessions-sqlx-store = { workspace = true, features = ["postgres"] }
@@ -58,7 +59,8 @@ features = [
   "uuid",
   "chrono",
   "migrate",
-  "json"
+  "json",
+  "bigdecimal"
 ]
 
 [dependencies.uuid]

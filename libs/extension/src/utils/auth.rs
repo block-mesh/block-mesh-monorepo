@@ -1,7 +1,8 @@
 use anyhow::anyhow;
+use block_mesh_common::interfaces::server_api::{
+    CheckTokenRequest, GetTokenResponse, LoginForm, RegisterForm,
+};
 use leptos::*;
-
-use block_mesh_common::interface::{CheckTokenRequest, GetTokenResponse, LoginForm, RegisterForm};
 
 #[tracing::instrument(name = "check_token", skip(credentials), err)]
 pub async fn check_token(

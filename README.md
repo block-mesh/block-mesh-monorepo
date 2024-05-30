@@ -23,7 +23,6 @@ open source and blockchain industries.
   and responds with the data back to the caller - `curl https://cloudflare-worker-ip-data.blockmesh.xyz/`.
 * [lib/cloudflare-worker-solana-relay](libs/cloudflare-worker-solana-relay/) - A cloudflare worker that relays requests
   to `solana`.
-* [libs/ipapi-is-rust](libs/ipapi-is-rust/) - A rust library for [ipapi.is](https://ipapi.is/) types.
 * [libs/cloudflare-landing-page](libs/cloudflare-landing-page) - The BlockMesh network landing site.
 * [libs/proxy-master](libs/proxy-master/) - The `proxy-master` node,
   manages interactions with `solana` and incoming requests from `client-node`.

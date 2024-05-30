@@ -1,6 +1,5 @@
-use crate::utils::log::log;
 use anyhow::anyhow;
-use block_mesh_common::interface::{
+use block_mesh_common::interfaces::server_api::{
     GetTaskRequest, GetTaskResponse, SubmitTaskRequest, SubmitTaskResponse,
 };
 use leptos::*;
@@ -16,7 +15,7 @@ pub struct RunTaskResponse {
     pub raw: String,
 }
 
-#[tracing::instrument(name = "get_task", skip(api_token), ret, err)]
+#[tracing::instrument(name = "get_task", level = "trace", skip(api_token), err)]
 pub async fn get_task(
     base_url: &str,
     email: &str,
@@ -36,7 +35,7 @@ pub async fn get_task(
     Ok(response)
 }
 
-#[tracing::instrument(name = "run_task", ret, err)]
+#[tracing::instrument(name = "run_task", err)]
 pub async fn run_task(
     url: &str,
     method: &str,
@@ -50,9 +49,9 @@ pub async fn run_task(
             Some(v) => client.post(url).json(&v),
             None => client.post(url),
         },
-        _ => {
-            log!("Unsupported method");
-            return Err(anyhow!("Unsupported method"));
+        method => {
+            tracing::error!("Unsupported method: {}", method);
+            return Err(anyhow!("Unsupported method: {}", method));
         }
     };
 
@@ -79,8 +78,8 @@ pub async fn run_task(
             })
         }
         Err(e) => {
-            log!("{e}");
-            Err(anyhow!("{e}"))
+            tracing::error!("run_task error: {e}");
+            Err(anyhow!("run_task error: {e}"))
         }
     }
 }

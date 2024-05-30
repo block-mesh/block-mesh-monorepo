@@ -7,7 +7,7 @@ use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
 use axum::{Extension, Json};
-use block_mesh_common::interface::{GetTaskRequest, GetTaskResponse};
+use block_mesh_common::interfaces::server_api::{GetTaskRequest, GetTaskResponse};
 use chrono::Utc;
 use sqlx::PgPool;
 

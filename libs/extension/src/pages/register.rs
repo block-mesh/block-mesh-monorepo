@@ -1,8 +1,7 @@
 use crate::components::credentials::CredentialsForm;
 use crate::utils::auth::register;
 use crate::utils::ext_state::{AppState, AppStatus};
-use crate::utils::log::{log_error, log_warn};
-use block_mesh_common::interface::RegisterForm;
+use block_mesh_common::interfaces::server_api::RegisterForm;
 use leptos::{logging::log, *};
 
 #[component]
@@ -30,7 +29,7 @@ pub fn Register(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
         log!("Try to register new account for {}", credentials.email);
         async move {
             if credentials.password != credentials.password_confirm {
-                log_warn!("Passwords do not match");
+                tracing::warn!("Passwords do not match");
                 set_register_error.update(|e| *e = Some("Passwords do not match".to_string()));
                 return;
             }
@@ -48,7 +47,7 @@ pub fn Register(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
                     on_success.call(());
                 }
                 Err(err) => {
-                    log_error!(
+                    tracing::error!(
                         "Unable to register new account for {}: {err}",
                         credentials.email
                     );

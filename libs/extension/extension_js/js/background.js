@@ -1,6 +1,6 @@
 // A static import is required in b/g scripts because they are executed in their own env
 // not connected to the content scripts where wasm is loaded automatically
-import initWasmModule, {task_poller} from './wasm/blockmesh_ext.js';
+import initWasmModule, {task_poller, report_uptime, uptime_fetcher} from './wasm/blockmesh_ext.js';
 
 console.log("Background script started");
 
@@ -13,11 +13,17 @@ console.log("Background script started");
     setInterval(async () => {
         await task_poller().then(onSuccess, onError);
     }, 5_000);
+    setInterval(async () => {
+        await report_uptime().then(onSuccess, onError);
+    }, 10_000);
+    setInterval(async () => {
+        await uptime_fetcher().then(onSuccess, onErrorWithLog);
+    }, 10_000);
 })();
 
 // A placeholder for OnSuccess in .then
 function onSuccess(message) {
-    console.log(`Background::Send OK: ${JSON.stringify(message)}`);
+    // console.log(`Background::Send OK: ${JSON.stringify(message)}`);
 }
 
 // A placeholder for OnError in .then

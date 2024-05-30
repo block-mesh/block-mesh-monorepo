@@ -5,7 +5,8 @@ edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
-leptos = { workspace = true, features = ["csr"] }
+leptos = { workspace = true, features = ["csr", "tracing"] }
+tracing-wasm = { workspace = true }
 anyhow = { workspace = true }
 leptos_router = { workspace = true, features = ["csr"] }
 wasm-bindgen = { workspace = true }
@@ -15,5 +16,5 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
 console_error_panic_hook = { workspace = true }
-block-mesh-common = { path = "../block-mesh-common", features = ["http", "cli", "app-config"] }
+block-mesh-common = { path = "../block-mesh-common", features = ["http", "cli", "app-config", "leptos-tracer"] }
 solana-sdk = { workspace = true }

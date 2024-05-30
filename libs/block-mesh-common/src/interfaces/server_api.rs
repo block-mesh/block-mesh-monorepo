@@ -1,4 +1,4 @@
-use chrono::NaiveDate;
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use uuid::Uuid;
@@ -24,6 +24,11 @@ pub struct SubmitTaskRequest {
     pub api_token: Uuid,
     pub task_id: Uuid,
     pub response_code: Option<i32>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ConfirmEmailRequest {
+    pub token: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -56,7 +61,8 @@ pub struct CheckTokenRequest {
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetTokenResponse {
-    pub api_token: Uuid,
+    pub api_token: Option<Uuid>,
+    pub message: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -87,4 +93,19 @@ pub struct RegisterForm {
     pub password: String,
     pub password_confirm: String,
     pub invite_code: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetUserUptimeRequest {
+    pub email: String,
+    pub api_token: Uuid,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetUserUptimeResponse {
+    pub user_id: Uuid,
+    pub start_time: Option<DateTime<Utc>>,
+    pub end_time: Option<DateTime<Utc>>,
+    pub duration_seconds: Option<f64>,
+    pub status_code: u16,
 }

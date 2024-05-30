@@ -66,4 +66,5 @@ pub struct User {
     pub wallet_address: Option<String>,
     pub created_at: DateTime<Utc>,
     pub invited_by: OptionUuid,
+    pub verified_email: bool,
 }

@@ -1,8 +1,7 @@
 use crate::constants::{BLOCK_MESH_LOGGER, BLOCK_MESH_LOG_ENV};
-use once_cell::sync::OnceCell;
 use reqwest::Client;
 use serde_json::{json, Value};
-use std::sync::Arc;
+use std::sync::{Arc, Once};
 use tokio::sync::Mutex;
 use tracing::{Event, Subscriber};
 use tracing_serde::AsSerde;
@@ -12,22 +11,20 @@ use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Layer;
 use uuid::Uuid;
 
-static INSTANCE: OnceCell<bool> = OnceCell::new();
-
 pub fn setup_tracing(user_id: Uuid) {
-    if INSTANCE.get().is_some() {
-        return;
-    }
-    let log_env = std::env::var(BLOCK_MESH_LOG_ENV).unwrap_or_else(|_| "prod".to_string());
-    let log_layer = HttpLogLayer::new(BLOCK_MESH_LOGGER.to_string(), log_env, user_id);
-    tracing_subscriber::registry()
-        .with(
-            tracing_subscriber::EnvFilter::try_from_default_env().unwrap_or_else(|_| "info".into()),
-        )
-        .with(tracing_subscriber::fmt::layer().with_ansi(false))
-        .with(log_layer)
-        .init();
-    INSTANCE.set(true).unwrap()
+    static SET_HOOK: Once = Once::new();
+    SET_HOOK.call_once(|| {
+        let log_env = std::env::var(BLOCK_MESH_LOG_ENV).unwrap_or_else(|_| "prod".to_string());
+        let log_layer = HttpLogLayer::new(BLOCK_MESH_LOGGER.to_string(), log_env, user_id);
+        tracing_subscriber::registry()
+            .with(
+                tracing_subscriber::EnvFilter::try_from_default_env()
+                    .unwrap_or_else(|_| "info".into()),
+            )
+            .with(tracing_subscriber::fmt::layer().with_ansi(false))
+            .with(log_layer)
+            .init();
+    });
 }
 
 struct HttpLogLayer {
