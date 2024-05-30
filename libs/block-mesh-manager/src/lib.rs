@@ -4,6 +4,7 @@ pub mod domain;
 pub mod envars;
 pub mod errors;
 
+pub mod emails;
 pub mod middlewares;
 pub mod routes;
 pub mod startup;

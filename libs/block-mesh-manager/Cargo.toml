@@ -7,7 +7,14 @@ authors.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+reqwest = { workspace = true, default-features = false, features = [
+  "multipart",
+  "json",
+] }
+validator = { workspace = true }
+url = { workspace = true }
 askama = { workspace = true, features = ["with-axum", "serde-json"] }
+form_urlencoded = { workspace = true }
 askama_axum = { workspace = true }
 tokio-stream = { workspace = true, features = ["sync"] }
 http-body-util = { workspace = true }
@@ -20,7 +27,7 @@ serde-aux = { workspace = true }
 config = { workspace = true }
 dotenv = { workspace = true }
 enum-iterator = { workspace = true }
-block-mesh-common = { path = "../block-mesh-common" }
+block-mesh-common = { path = "../block-mesh-common", features = ["async-tracer", "ip-data"] }
 tokio = { workspace = true, features = ["full"] }
 axum-login = { workspace = true }
 tower-sessions-sqlx-store = { workspace = true, features = ["postgres"] }
@@ -52,7 +59,8 @@ features = [
   "uuid",
   "chrono",
   "migrate",
-  "json"
+  "json",
+  "bigdecimal"
 ]
 
 [dependencies.uuid]

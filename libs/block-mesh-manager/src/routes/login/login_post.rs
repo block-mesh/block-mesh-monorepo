@@ -6,7 +6,7 @@ use anyhow::anyhow;
 use axum::response::Redirect;
 use axum::{Extension, Form};
 use axum_login::AuthSession;
-use block_mesh_common::interface::LoginForm;
+use block_mesh_common::interfaces::server_api::LoginForm;
 use secret::Secret;
 use sqlx::PgPool;
 

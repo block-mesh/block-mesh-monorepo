@@ -1,8 +1,8 @@
-use crate::utils::log::log;
 use anyhow::anyhow;
-use block_mesh_common::interface::{
+use block_mesh_common::interfaces::server_api::{
     GetTaskRequest, GetTaskResponse, SubmitTaskRequest, SubmitTaskResponse,
 };
+use leptos::*;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -15,17 +15,17 @@ pub struct RunTaskResponse {
     pub raw: String,
 }
 
+#[tracing::instrument(name = "get_task", level = "trace", skip(api_token), err)]
 pub async fn get_task(
     base_url: &str,
     email: &str,
     api_token: &Uuid,
-) -> anyhow::Result<GetTaskResponse> {
+) -> anyhow::Result<Option<GetTaskResponse>> {
     let body: GetTaskRequest = GetTaskRequest {
         email: email.to_string(),
         api_token: *api_token,
     };
-    log!("get_task => {:?}", body);
-    let response: GetTaskResponse = reqwest::Client::new()
+    let response: Option<GetTaskResponse> = reqwest::Client::new()
         .post(format!("{}/api/get_task", base_url))
         .json(&body)
         .send()
@@ -35,6 +35,7 @@ pub async fn get_task(
     Ok(response)
 }
 
+#[tracing::instrument(name = "run_task", err)]
 pub async fn run_task(
     url: &str,
     method: &str,
@@ -48,29 +49,28 @@ pub async fn run_task(
             Some(v) => client.post(url).json(&v),
             None => client.post(url),
         },
-        _ => {
-            log!("Unsupported method");
-            return Err(anyhow!("Unsupported method"));
+        method => {
+            tracing::error!("Unsupported method: {}", method);
+            return Err(anyhow!("Unsupported method: {}", method));
         }
     };
 
     if headers.is_some() {
         let mut headers_map = HeaderMap::new();
-        let headers = headers.clone().unwrap();
-        headers.as_object().unwrap().into_iter().for_each(|(k, v)| {
-            let header_name = HeaderName::from_str(k).unwrap();
-            let header_value = HeaderValue::from_str(v.as_str().unwrap()).unwrap();
-            headers_map.insert(header_name, header_value);
-        });
-        client = client.headers(headers_map)
+        let headers = headers.unwrap();
+        if headers.is_object() {
+            headers.as_object().unwrap().into_iter().for_each(|(k, v)| {
+                let header_name = HeaderName::from_str(k).unwrap();
+                let header_value = HeaderValue::from_str(v.as_str().unwrap()).unwrap();
+                headers_map.insert(header_name, header_value);
+            });
+            client = client.headers(headers_map)
+        }
     }
-    log!("run_task pre-send url: {url}");
     let response = client.send().await;
-    log!("run_task post-send url: {url}");
     match response {
         Ok(v) => {
             let status = v.status().as_u16();
-            log!("run_task url: {url} status: {status}");
             let raw = v.text().await?;
             Ok(RunTaskResponse {
                 status: status.into(),
@@ -78,12 +78,13 @@ pub async fn run_task(
             })
         }
         Err(e) => {
-            log!("{e}");
-            Err(anyhow!("{e}"))
+            tracing::error!("run_task error: {e}");
+            Err(anyhow!("run_task error: {e}"))
         }
     }
 }
 
+#[tracing::instrument(name = "submit_task", ret, err)]
 pub async fn submit_task(
     base_url: &str,
     email: &str,
@@ -98,15 +99,12 @@ pub async fn submit_task(
         task_id: *task_id,
         response_code: Some(response_code),
     };
-    log!("submit_task query => {:?}", query);
     let response = reqwest::Client::new()
         .post(format!("{}/api/submit_task", base_url))
         .query(&query)
         .body(response_raw)
         .send()
         .await?;
-    log!("submit_task response => {:?}", response);
     let response: SubmitTaskResponse = response.json().await?;
-    log!("submit_task response => {:?}", response);
     Ok(response)
 }

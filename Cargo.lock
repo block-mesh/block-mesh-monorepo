@@ -1053,6 +1053,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "bigdecimal"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a6773ddc0eafc0e509fb60e48dff7f450f8e674a0686ae8605e8d9901bd5eefa"
+dependencies = [
+ "num-bigint 0.4.5",
+ "num-integer",
+ "num-traits",
+]
+
+[[package]]
 name = "bincode"
 version = "1.3.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1134,6 +1145,7 @@ dependencies = [
  "clap 4.5.4",
  "http-body-util",
  "hyper 1.3.1",
+ "ipgeolocate",
  "once_cell",
  "reqwest",
  "serde",
@@ -1143,6 +1155,7 @@ dependencies = [
  "tracing",
  "tracing-serde",
  "tracing-subscriber",
+ "tracing-wasm",
  "uuid",
 ]
 
@@ -1162,9 +1175,11 @@ dependencies = [
  "config",
  "dotenv",
  "enum-iterator 2.1.0",
+ "form_urlencoded",
  "http 1.1.0",
  "http-body-util",
  "rand 0.8.5",
+ "reqwest",
  "secret",
  "serde",
  "serde-aux",
@@ -1181,7 +1196,9 @@ dependencies = [
  "tracing-bunyan-formatter",
  "tracing-log 0.2.0",
  "tracing-subscriber",
+ "url",
  "uuid",
+ "validator",
 ]
 
 [[package]]
@@ -1242,6 +1259,7 @@ dependencies = [
  "serde-wasm-bindgen 0.6.5",
  "serde_json",
  "solana-sdk",
+ "tracing-wasm",
  "wasm-bindgen",
  "wasm-bindgen-futures",
 ]
@@ -1257,7 +1275,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-tauri"
-version = "0.0.9"
+version = "0.0.10"
 dependencies = [
  "anyhow",
  "auto-launch",
@@ -1567,12 +1585,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "cargo-husky"
-version = "1.5.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7b02b629252fe8ef6460461409564e2c21d0c8e77e0944f3d189ff06c4e932ad"
-
-[[package]]
 name = "cargo_toml"
 version = "0.15.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1802,7 +1814,6 @@ dependencies = [
  "http-body-util",
  "hyper 1.3.1",
  "hyper-util",
- "ipapi-is-rust",
  "once_cell",
  "rustc-hash",
  "serde",
@@ -1830,11 +1841,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "cloudflare-privacy-page"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "time",
+ "tracing",
+ "tracing-subscriber",
+ "tracing-web",
+ "worker",
+]
+
+[[package]]
 name = "cloudflare-worker-ip-data"
 version = "0.1.0"
 dependencies = [
- "ipapi-is-rust",
- "ipgeolocate",
+ "block-mesh-common",
  "rustc-hash",
  "serde",
  "serde_json",
@@ -2937,6 +2960,8 @@ dependencies = [
  "serde-wasm-bindgen 0.6.5",
  "serde_json",
  "thiserror",
+ "tracing-subscriber",
+ "tracing-wasm",
  "url",
  "urlencoding",
  "uuid",
@@ -4248,18 +4273,6 @@ dependencies = [
  "hermit-abi 0.3.9",
  "libc",
  "windows-sys 0.48.0",
-]
-
-[[package]]
-name = "ipapi-is-rust"
-version = "0.1.0"
-dependencies = [
- "cargo-husky",
- "reqwest",
- "serde",
- "serde_json",
- "tokio",
- "tracing",
 ]
 
 [[package]]
@@ -6490,6 +6503,7 @@ dependencies = [
  "js-sys",
  "log",
  "mime",
+ "mime_guess",
  "native-tls",
  "once_cell",
  "percent-encoding",
@@ -8464,6 +8478,7 @@ checksum = "24ba59a9342a3d9bab6c56c118be528b27c9b60e490080e9711a04dccac83ef6"
 dependencies = [
  "ahash 0.8.11",
  "atoi",
+ "bigdecimal",
  "byteorder",
  "bytes",
  "chrono",
@@ -8548,6 +8563,7 @@ checksum = "1ed31390216d20e538e447a7a9b959e06ed9fc51c37b514b46eb758016ecd418"
 dependencies = [
  "atoi",
  "base64 0.21.7",
+ "bigdecimal",
  "bitflags 2.5.0",
  "byteorder",
  "bytes",
@@ -8593,6 +8609,7 @@ checksum = "7c824eb80b894f926f89a0b9da0c7f435d27cdd35b8c655b114e58223918577e"
 dependencies = [
  "atoi",
  "base64 0.21.7",
+ "bigdecimal",
  "bitflags 2.5.0",
  "byteorder",
  "chrono",
@@ -8611,6 +8628,7 @@ dependencies = [
  "log",
  "md-5",
  "memchr",
+ "num-bigint 0.4.5",
  "once_cell",
  "rand 0.8.5",
  "serde",
@@ -9771,6 +9789,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "tracing-wasm"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4575c663a174420fa2d78f4108ff68f65bf2fbb7dd89f33749b6e826b3626e07"
+dependencies = [
+ "tracing",
+ "tracing-subscriber",
+ "wasm-bindgen",
+]
+
+[[package]]
 name = "tracing-web"
 version = "0.1.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10024,6 +10053,21 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.65",
+]
+
+[[package]]
+name = "validator"
+version = "0.16.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b92f40481c04ff1f4f61f304d61793c7b56ff76ac1469f1beb199b1445b253bd"
+dependencies = [
+ "idna 0.4.0",
+ "lazy_static",
+ "regex",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "url",
 ]
 
 [[package]]

@@ -1,3 +1,4 @@
+use crate::domain::option_uuid::OptionUuid;
 use crate::domain::user::User;
 use crate::domain::user::UserRole;
 use secret::Secret;
@@ -16,7 +17,9 @@ pub(crate) async fn get_user_opt_by_email(
         password as "password: Secret<String>",
         email,
         wallet_address,
-        role as "role: UserRole"
+        role as "role: UserRole",
+        invited_by as "invited_by: OptionUuid",
+        verified_email
         FROM users WHERE email = $1 LIMIT 1"#,
         email
     )

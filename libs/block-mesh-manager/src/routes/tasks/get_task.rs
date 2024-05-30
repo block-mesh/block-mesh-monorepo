@@ -1,13 +1,13 @@
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
-use crate::database::task::find_task_by_excluded_user_id_and_status::find_task_by_excluded_user_id_and_status;
+use crate::database::task::find_task_by_status::find_task_by_status;
 use crate::database::task::update_task_assigned::update_task_assigned;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
 use axum::{Extension, Json};
-use block_mesh_common::interface::{GetTaskRequest, GetTaskResponse};
+use block_mesh_common::interfaces::server_api::{GetTaskRequest, GetTaskResponse};
 use chrono::Utc;
 use sqlx::PgPool;
 
@@ -15,7 +15,7 @@ use sqlx::PgPool;
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Json(body): Json<GetTaskRequest>,
-) -> Result<Json<GetTaskResponse>, Error> {
+) -> Result<Json<Option<GetTaskResponse>>, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let api_token = find_token(&mut transaction, &body.api_token)
         .await?
@@ -26,10 +26,11 @@ pub async fn handler(
     if user.email != body.email {
         return Err(Error::UserNotFound);
     }
-    let task =
-        find_task_by_excluded_user_id_and_status(&mut transaction, &user.id, TaskStatus::Pending)
-            .await?
-            .ok_or(Error::TaskNotFound)?;
+    let task = find_task_by_status(&mut transaction, TaskStatus::Pending).await?;
+    let task = match task {
+        Some(v) => v,
+        None => return Ok(Json(None)),
+    };
     let daily_stat_opt =
         get_daily_stat_by_user_id_and_day(&mut transaction, user.id, Utc::now().date_naive())
             .await?;
@@ -38,11 +39,11 @@ pub async fn handler(
     }
     update_task_assigned(&mut transaction, task.id, user.id, TaskStatus::Assigned).await?;
     transaction.commit().await.map_err(Error::from)?;
-    Ok(Json(GetTaskResponse {
+    Ok(Json(Some(GetTaskResponse {
         id: task.id,
         url: task.url,
         method: task.method.to_string(),
         headers: task.headers,
         body: task.body,
-    }))
+    })))
 }

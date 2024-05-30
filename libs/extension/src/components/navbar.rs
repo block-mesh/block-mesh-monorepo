@@ -5,6 +5,10 @@ use leptos::*;
 #[component]
 pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
     let state = use_context::<AppState>().unwrap();
+    let url = move || state.blockmesh_url.get();
+    let email = Signal::derive(move || state.email.get());
+    let status = Signal::derive(move || state.status.get());
+
     view! {
         <nav>
             <div class="flex items-center justify-center h-full">
@@ -17,9 +21,15 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
                             />
                         </a>
                     </div>
+                    <div class="flex justify-center mt-4 text-white">
+                        <div class="mr-2 text-bold">URL:</div>
+                        <a href=url target="_blank" class="text-blue-500 hover:text-blue-800">
+                            {url}
+                        </a>
+                    </div>
                     <div class="flex justify-center mt-4">
                         <Show
-                            when=move || state.status.get() == AppStatus::LoggedIn
+                            when=move || status.get() == AppStatus::LoggedIn
                             fallback=|| {
                                 view! {
                                     <a
@@ -38,14 +48,20 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
                             }
                         >
 
-                            <a
-                                href="#"
-                                class="px-4 py-2 rounded font-bold text-sm text-blue-500 hover:text-blue-800"
-                                on:click=move |_| on_logout.call(())
-                            >
-                                "Logout"
-                            </a>
+                            <div class="flex justify-center mt-4 text-white flex-col">
+                                <div class="mb-2">{email.get().to_string()}</div>
+                                <div class="mb-2">
+                                    <a
+                                        href="#"
+                                        class="px-4 py-2 rounded font-bold text-sm text-blue-500 hover:text-blue-800"
+                                        on:click=move |_| on_logout.call(())
+                                    >
+                                        "Logout"
+                                    </a>
+                                </div>
+                            </div>
                         </Show>
+
                     </div>
                 </div>
             </div>

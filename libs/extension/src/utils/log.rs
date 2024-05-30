@@ -1,3 +1,5 @@
+#![allow(unused_macros, unused_imports)]
+
 /// Logs output into browser console. It is not the same console as for the web page because the extension runs separately.
 /// Look for the service worker console.
 macro_rules! log {
