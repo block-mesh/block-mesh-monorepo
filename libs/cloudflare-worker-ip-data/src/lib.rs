@@ -130,14 +130,26 @@ fn start() {
         .init();
 }
 
+#[derive(Debug, Serialize, Deserialize)]
+struct PostRequest {
+    ip: String,
+}
+
 #[event(fetch)]
-async fn main(req: Request, _env: Env, _ctx: Context) -> Result<Response> {
+async fn main(mut req: Request, _env: Env, _ctx: Context) -> Result<Response> {
     let mut headers: FxHashMap<String, String> = FxHashMap::default();
-    req.headers().entries().for_each(|(k, v)| {
-        if IP_HEADERS.contains(&k.as_str()) {
-            headers.insert(k.clone(), v.clone());
-        }
-    });
+    if req.method() == Method::Get {
+        req.headers().entries().for_each(|(k, v)| {
+            if IP_HEADERS.contains(&k.as_str()) {
+                headers.insert(k.clone(), v.clone());
+            }
+        });
+    } else if req.method() == Method::Post {
+        let body = req.json::<PostRequest>().await?;
+        headers.insert(IP_HEADERS[0].to_string(), body.ip);
+    } else {
+        return Response::error("Method not allowed", 405);
+    }
     let mut ip_data = IPData::new(headers);
     ip_data.get_ip_api_is_response().await;
     tracing::info!("IP Data: {:?}", ip_data);
