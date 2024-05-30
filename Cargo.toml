@@ -19,7 +19,7 @@ panic = "forbid"
 
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.10"
+version = "0.0.11"
 
 [patch.crates-io]
 ## aes-gcm-siv 0.10.3 and curve25519-dalek 3.x pin zeroize to <1.4
