@@ -1,6 +1,7 @@
-use block_mesh_common::interfaces::ip_data::{get_ip_info, IPData, Locator, LocatorDe, Service};
+use block_mesh_common::interfaces::ip_data::{
+    get_ip_info, IPData, IpDataPostRequest, Locator, LocatorDe, Service,
+};
 use rustc_hash::FxHashMap;
-use serde::{Deserialize, Serialize};
 use tracing_subscriber::fmt::format::Pretty;
 use tracing_subscriber::fmt::time::UtcTime;
 use tracing_subscriber::prelude::*;
@@ -81,11 +82,6 @@ fn start() {
         .init();
 }
 
-#[derive(Debug, Serialize, Deserialize)]
-struct PostRequest {
-    ip: String,
-}
-
 #[event(fetch)]
 async fn main(mut req: Request, _env: Env, _ctx: Context) -> Result<Response> {
     let mut headers: FxHashMap<String, String> = FxHashMap::default();
@@ -96,7 +92,7 @@ async fn main(mut req: Request, _env: Env, _ctx: Context) -> Result<Response> {
             }
         });
     } else if req.method() == Method::Post {
-        let body = req.json::<PostRequest>().await?;
+        let body = req.json::<IpDataPostRequest>().await?;
         headers.insert(IP_HEADERS[0].to_string(), body.ip);
     } else {
         return Response::error("Method not allowed", 405);

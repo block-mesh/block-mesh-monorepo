@@ -73,7 +73,7 @@ pub struct IpApiIsResponse {
     pub elapsed_ms: f64,
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct LocatorDe {
     /// Returns the IP address.
     pub ip: String,
@@ -118,6 +118,18 @@ pub struct IPData {
     pub ip_geolocate_response: Option<LocatorDe>,
 }
 
+impl IPData {
+    pub fn ip(&self) -> Option<String> {
+        if let Some(i) = self.cf_connecting_ip.clone() {
+            Some(i)
+        } else if let Some(i) = self.ip_geolocate_response.clone() {
+            Some(i.ip)
+        } else {
+            None
+        }
+    }
+}
+
 #[tracing::instrument(name = "get_ip_info", ret, err)]
 pub async fn get_ip_info(ip: &str) -> Result<IpApiIsResponse, reqwest::Error> {
     let url = format!("https://api.ipapi.is?q={}", ip);
@@ -132,4 +144,9 @@ pub async fn get_ip_info(ip: &str) -> Result<IpApiIsResponse, reqwest::Error> {
     })?;
     tracing::info!("IP info: {:?}", response);
     Ok(response)
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct IpDataPostRequest {
+    pub ip: String,
 }

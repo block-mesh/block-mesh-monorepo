@@ -14,7 +14,6 @@ pub struct UptimeReport {
     pub city: Option<String>,
     pub region: Option<String>,
     pub country: Option<String>,
-    pub country_code: Option<String>,
     pub timezone: Option<String>,
     pub isp: Option<String>,
 }
