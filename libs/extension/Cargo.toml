@@ -52,6 +52,7 @@ features = [
   "fast-rng", # Use a faster (but still sufficiently random) RNG
   "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
   "serde", # Enable serialization/deserialization of UUIDs
+	"js"
 ]
 
 [dev-dependencies]
