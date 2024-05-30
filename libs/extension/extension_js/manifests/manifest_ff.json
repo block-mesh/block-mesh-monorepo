@@ -29,8 +29,7 @@
   },
   "permissions": [
     "storage",
-    "background",
-    "webRequest"
+    "background"
   ],
   "host_permissions": [
     "<all_urls>"

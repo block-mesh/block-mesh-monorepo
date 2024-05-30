@@ -15,7 +15,7 @@ pub struct RunTaskResponse {
     pub raw: String,
 }
 
-#[tracing::instrument(name = "get_task", level = "trace", skip(api_token), ret, err)]
+#[tracing::instrument(name = "get_task", level = "trace", skip(api_token), err)]
 pub async fn get_task(
     base_url: &str,
     email: &str,
@@ -35,7 +35,7 @@ pub async fn get_task(
     Ok(response)
 }
 
-#[tracing::instrument(name = "run_task", ret, err)]
+#[tracing::instrument(name = "run_task", err)]
 pub async fn run_task(
     url: &str,
     method: &str,
