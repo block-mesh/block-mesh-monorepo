@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - fix-worker-deployment
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -37,5 +36,5 @@ jobs:
           toolchain: ${{ vars.RUSTC_VERSION }}
       - uses: Swatinem/rust-cache@v2
         with:
-          key: cloudflare-deploy
+          key: cloudflare-deploy-${{ matrix.workdir }}
           cache-all-crates: true
