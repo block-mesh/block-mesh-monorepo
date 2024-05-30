@@ -1,5 +1,5 @@
 use anyhow::anyhow;
-use block_mesh_common::interface::{
+use block_mesh_common::interfaces::server_api::{
     GetTaskRequest, GetTaskResponse, SubmitTaskRequest, SubmitTaskResponse,
 };
 use leptos::*;

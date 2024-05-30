@@ -4,7 +4,7 @@ use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::domain::api_token::ApiTokenStatus;
 use crate::errors::error::Error;
 use axum::{Extension, Json};
-use block_mesh_common::interface::{GetStatsRequest, GetStatsResponse, Stat};
+use block_mesh_common::interfaces::server_api::{GetStatsRequest, GetStatsResponse, Stat};
 use sqlx::PgPool;
 
 #[tracing::instrument(name = "get_stats", skip(body))]

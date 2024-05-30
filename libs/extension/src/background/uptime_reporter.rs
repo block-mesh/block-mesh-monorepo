@@ -1,7 +1,7 @@
+use block_mesh_common::interfaces::server_api::{ReportUptimeRequest, ReportUptimeResponse};
 use leptos::*;
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use block_mesh_common::interface::{ReportUptimeRequest, ReportUptimeResponse};
 use block_mesh_common::leptos_tracing::setup_leptos_tracing;
 
 use crate::utils::connectors::set_panic_hook;

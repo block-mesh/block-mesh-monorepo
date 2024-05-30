@@ -1,7 +1,7 @@
 use crate::components::credentials::CredentialsForm;
 use crate::utils::auth::register;
 use crate::utils::ext_state::{AppState, AppStatus};
-use block_mesh_common::interface::RegisterForm;
+use block_mesh_common::interfaces::server_api::RegisterForm;
 use leptos::{logging::log, *};
 
 #[component]

@@ -1,12 +1,3 @@
-use axum::extract::{Query, Request};
-use axum::{Extension, Json};
-use chrono::Utc;
-use http::StatusCode;
-use http_body_util::BodyExt;
-use sqlx::PgPool;
-
-use block_mesh_common::interface::{SubmitTaskRequest, SubmitTaskResponse};
-
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
@@ -16,6 +7,13 @@ use crate::database::task::finish_task::finish_task;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
+use axum::extract::{Query, Request};
+use axum::{Extension, Json};
+use block_mesh_common::interfaces::server_api::{SubmitTaskRequest, SubmitTaskResponse};
+use chrono::Utc;
+use http::StatusCode;
+use http_body_util::BodyExt;
+use sqlx::PgPool;
 
 #[tracing::instrument(name = "submit_task", skip(pool, request, query), err, ret)]
 pub async fn handler(

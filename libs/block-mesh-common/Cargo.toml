@@ -26,6 +26,8 @@ reqwest = { workspace = true, optional = true, features = [
   "hickory-dns"
 ] }
 tracing-wasm = { workspace = true, optional = true }
+ipgeolocate = { workspace = true, optional = true }
+
 
 
 [dependencies.uuid]
@@ -43,3 +45,4 @@ cli = ["dep:clap", "dep:solana-sdk"]
 app-config = ["dep:clap", "dep:solana-sdk"]
 async-tracer = ["dep:tokio", "dep:reqwest"]
 leptos-tracer = ["dep:tracing-wasm"]
+ip-data = ["dep:ipgeolocate"]

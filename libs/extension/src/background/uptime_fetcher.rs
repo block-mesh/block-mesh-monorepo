@@ -1,4 +1,4 @@
-use block_mesh_common::interface::{GetUserUptimeRequest, GetUserUptimeResponse};
+use block_mesh_common::interfaces::server_api::{GetUserUptimeRequest, GetUserUptimeResponse};
 use block_mesh_common::leptos_tracing::setup_leptos_tracing;
 use leptos::*;
 use wasm_bindgen::prelude::wasm_bindgen;

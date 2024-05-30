@@ -6,7 +6,7 @@ use axum::extract::Query;
 use axum::response::Redirect;
 use axum::Extension;
 use axum_login::AuthSession;
-use block_mesh_common::interface::ConfirmEmailRequest;
+use block_mesh_common::interfaces::server_api::ConfirmEmailRequest;
 use sqlx::PgPool;
 
 #[tracing::instrument(name = "email_confirm", skip(auth, pool, query))]

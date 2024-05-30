@@ -7,7 +7,7 @@ use crate::middlewares::authentication::{Backend, Credentials};
 use anyhow::anyhow;
 use axum::{Extension, Json};
 use axum_login::AuthSession;
-use block_mesh_common::interface::{GetTokenRequest, GetTokenResponse};
+use block_mesh_common::interfaces::server_api::{GetTokenRequest, GetTokenResponse};
 use secret::Secret;
 use sqlx::PgPool;
 

@@ -8,4 +8,13 @@ pub struct UptimeReport {
     pub nonce: Uuid,
     pub user_id: Uuid,
     pub created_at: DateTime<Utc>,
+    pub ip: Option<String>,
+    pub latitude: Option<f64>,
+    pub longitude: Option<f64>,
+    pub city: Option<String>,
+    pub region: Option<String>,
+    pub country: Option<String>,
+    pub country_code: Option<String>,
+    pub timezone: Option<String>,
+    pub isp: Option<String>,
 }

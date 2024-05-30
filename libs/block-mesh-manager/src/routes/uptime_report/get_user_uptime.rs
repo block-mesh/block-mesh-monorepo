@@ -4,7 +4,7 @@ use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::errors::error::Error;
 use axum::extract::Query;
 use axum::{Extension, Json};
-use block_mesh_common::interface::{GetUserUptimeRequest, GetUserUptimeResponse};
+use block_mesh_common::interfaces::server_api::{GetUserUptimeRequest, GetUserUptimeResponse};
 use http::StatusCode;
 use sqlx::PgPool;
 

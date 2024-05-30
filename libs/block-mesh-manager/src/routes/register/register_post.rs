@@ -16,7 +16,7 @@ use axum::response::Redirect;
 use axum::{Extension, Form};
 use axum_login::AuthSession;
 use bcrypt::{hash, DEFAULT_COST};
-use block_mesh_common::interface::RegisterForm;
+use block_mesh_common::interfaces::server_api::RegisterForm;
 use secret::Secret;
 use sqlx::PgPool;
 use std::sync::Arc;

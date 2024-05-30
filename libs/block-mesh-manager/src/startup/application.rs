@@ -9,6 +9,7 @@ use axum::routing::{get, post};
 use axum::{Extension, Router};
 use axum_login::login_required;
 use sqlx::postgres::PgPool;
+use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
@@ -116,7 +117,11 @@ impl Application {
     }
 
     pub async fn run(self) -> std::io::Result<()> {
-        axum::serve(self.listener, self.app).await
+        axum::serve(
+            self.listener,
+            self.app.into_make_service_with_connect_info::<SocketAddr>(),
+        )
+        .await
     }
 
     pub fn address(&self) -> String {

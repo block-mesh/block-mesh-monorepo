@@ -1,4 +1,4 @@
-use block_mesh_common::interface::{GetStatsRequest, GetStatsResponse};
+use block_mesh_common::interfaces::server_api::{GetStatsRequest, GetStatsResponse};
 
 pub async fn get_stats(
     blockmesh_url: &str,

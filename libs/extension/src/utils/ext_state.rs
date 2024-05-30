@@ -6,7 +6,7 @@ use std::str::FromStr;
 
 use crate::pages::page::Page;
 use crate::utils::auth::check_token;
-use block_mesh_common::interface::CheckTokenRequest;
+use block_mesh_common::interfaces::server_api::CheckTokenRequest;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use wasm_bindgen::JsValue;
