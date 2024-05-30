@@ -14,7 +14,7 @@ use std::fmt::Display;
 use uuid::Uuid;
 
 #[derive(Template)]
-#[template(path = "tasks_table.html")]
+#[template(path = "tasks/tasks_table.html")]
 struct TasksTableTemplate {
     tasks: Vec<TaskForTemplate>,
 }
