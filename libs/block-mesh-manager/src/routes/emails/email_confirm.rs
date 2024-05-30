@@ -21,15 +21,17 @@ pub async fn handler(
     return match nonce {
         None => Ok(Error::redirect(
             500,
-            "Didn't find token".to_string(),
-            "Please contact our support".to_string(),
+            "Didn't find token",
+            "Please contact our support",
+            "/",
         )),
         Some(nonce) => {
             if *nonce.nonce.expose_secret() != query.token {
                 Ok(Error::redirect(
                     500,
-                    "Token mismatch".to_string(),
-                    "Please contact our support".to_string(),
+                    "Token mismatch",
+                    "Please contact our support",
+                    "/",
                 ))
             } else {
                 update_verified_email(&mut transaction, user.id, true)
