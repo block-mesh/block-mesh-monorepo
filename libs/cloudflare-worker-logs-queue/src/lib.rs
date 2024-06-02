@@ -29,7 +29,7 @@ fn start() {
 
 // Produce messages to queue
 #[event(fetch)]
-async fn main(mut req: Request, env: Env, _: worker::Context) -> Result<Response> {
+async fn main(mut req: Request, env: Env, _: Context) -> Result<Response> {
     if req.method() != Method::Post {
         return Response::error("Only accept POST requests", 400);
     }
@@ -62,12 +62,13 @@ async fn main(mut req: Request, env: Env, _: worker::Context) -> Result<Response
         .map(|i| {
             let string = serde_json::to_string(&i).unwrap();
             let js_string = JsValue::from_str(&string);
+            console_log!("Message: {:#?}", js_string);
             RawMessageBuilder::new(js_string).build_with_content_type(QueueContentType::Json)
         })
         .collect();
     let msg_builder = BatchMessageBuilder::new()
         .messages(messages)
-        .delay_seconds(1)
+        .delay_seconds(10)
         .build();
     raw_messages_queue.send_raw_batch(msg_builder).await?;
     Response::empty()
@@ -77,21 +78,24 @@ async fn main(mut req: Request, env: Env, _: worker::Context) -> Result<Response
 #[event(queue)]
 pub async fn main(message_batch: MessageBatch<Value>, env: Env, _: Context) -> Result<()> {
     let url = env.secret("log_url").unwrap().to_string();
+    console_log!("URL: {}", url);
     match message_batch.queue().as_str() {
         CONSUMER => {
-            let messages: Vec<Wrapper> = message_batch
+            let messages: Vec<String> = message_batch
                 .iter()
                 .map(|message| {
                     let raw_str = message.unwrap().raw_body().as_string().unwrap();
-                    let wrapper: Wrapper = serde_json::from_str(&raw_str).unwrap();
-                    wrapper
+                    console_log!("Log Message Send: {:#?}", raw_str);
+                    // let wrapper: Wrapper = serde_json::from_str(&raw_str).unwrap();
+                    // wrapper
+                    raw_str
                 })
                 .collect();
             for message in messages {
                 match reqwest::Client::new()
                     .post(&url)
                     .header("Content-Type", "application/json")
-                    .json(&message)
+                    .body(message)
                     .send()
                     .await
                 {

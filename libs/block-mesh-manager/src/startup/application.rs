@@ -56,10 +56,6 @@ impl Application {
                 get(routes::invite_codes::edit_invite_code::handler)
                     .post(routes::invite_codes::edit_invite_code_post::handler),
             )
-            .route(
-                "/email_confirm",
-                get(routes::emails::email_confirm::handler),
-            )
             .route("/tasks_table", get(routes::tasks::tasks_table::handler))
             .route("/dashboard", get(routes::dashboard::get::handler));
 
@@ -82,6 +78,10 @@ impl Application {
             );
 
         let un_auth_router = Router::new()
+            .route(
+                "/email_confirm",
+                get(routes::emails::email_confirm::handler),
+            )
             .route(
                 "/",
                 get(routes::login::login_form::handler).post(routes::login::login_post::handler),

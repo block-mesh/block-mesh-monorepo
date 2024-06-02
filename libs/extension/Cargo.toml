@@ -25,7 +25,6 @@ urlencoding = { workspace = true }
 rand = { workspace = true }
 getrandom = { workspace = true, features = ["js"] }
 console_error_panic_hook = { workspace = true }
-wee_alloc = { workspace = true }
 reqwest = { workspace = true, default-features = false, features = [
   "json",
 ] }
@@ -52,7 +51,7 @@ features = [
   "fast-rng", # Use a faster (but still sufficiently random) RNG
   "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
   "serde", # Enable serialization/deserialization of UUIDs
-	"js"
+  "js"
 ]
 
 [dev-dependencies]

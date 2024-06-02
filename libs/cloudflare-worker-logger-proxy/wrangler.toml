@@ -1,0 +1,6 @@
+name = "cloudflare-worker-logger-proxy"
+main = "build/worker/shim.mjs"
+compatibility_date = "2023-12-01"
+
+[build]
+command = "cargo install -q worker-build && worker-build --release"

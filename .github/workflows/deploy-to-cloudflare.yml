@@ -19,7 +19,8 @@ jobs:
           "cloudflare-worker-ip-data",
           "cloudflare-worker-logs-queue",
           "cloudflare-worker-solana-relay",
-          "cloudflare-worker-tauri-releases"
+          "cloudflare-worker-tauri-releases",
+          "cloudflare-worker-logger-proxy"
         ]
     steps:
       - uses: actions/checkout@v4
