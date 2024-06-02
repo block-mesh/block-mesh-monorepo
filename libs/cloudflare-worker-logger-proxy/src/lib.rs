@@ -19,21 +19,13 @@ fn start() {
         .init();
 }
 
-#[tracing::instrument(name = "send_log", ret, err)]
+#[tracing::instrument(name = "tracing::send_log", ret, err)]
 async fn send_log(url: &str, log: Value) -> anyhow::Result<()> {
-    let json = serde_json::to_string(&log).map_err(|e| {
-        console_error!("Error failed to serialize log: {}", e);
-        e
-    })?;
-    console_log!("JSON: {:?}", json);
-    match reqwest::Client::new()
-        .post(url)
-        .header("Content-Type", "application/json")
-        .body(json)
-        .send()
-        .await
-    {
-        Ok(_) => Ok(console_log!("Successfully sent log to: {}", url)),
+    match reqwest::Client::new().post(url).json(&log).send().await {
+        Ok(r) => {
+            console_log!("Successfully sent log to: {} {}", url, r.status());
+            Ok(())
+        }
         Err(e) => {
             console_error!("Error failed to send log: {}", e);
             return Err(e.into());
@@ -47,7 +39,6 @@ async fn main(mut req: Request, env: Env, _ctx: Context) -> Result<Response> {
         return Response::error("Only accept POST requests", 400);
     }
     let url = env.secret("log_url").unwrap().to_string();
-    console_log!("URL: {}", url);
     let body: Value = match req.json().await {
         Ok(json) => json,
         Err(e) => {
@@ -55,7 +46,6 @@ async fn main(mut req: Request, env: Env, _ctx: Context) -> Result<Response> {
             return Response::error(e.to_string(), 400);
         }
     };
-    console_log!("Body: {:?}", body);
 
     if body.is_object() {
         let _ = send_log(&url, body).await;

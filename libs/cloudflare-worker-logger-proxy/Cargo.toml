@@ -17,6 +17,6 @@ serde_json = { workspace = true }
 block-mesh-common = { path = "../block-mesh-common" }
 reqwest = { workspace = true, features = [
   "json",
-  "serde_json"
+  "hickory-dns"
 ] }
 anyhow = { workspace = true }
