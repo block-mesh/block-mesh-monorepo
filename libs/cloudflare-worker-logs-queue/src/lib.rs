@@ -87,21 +87,19 @@ pub async fn main(message_batch: MessageBatch<Value>, env: Env, _: Context) -> R
                     wrapper
                 })
                 .collect();
-            match reqwest::Client::new()
-                .post(&url)
-                .header("Content-Type", "application/json")
-                .json(&messages)
-                .send()
-                .await
-            {
-                Ok(_) => {
-                    console_log!("Successfully sent messages {} to {}", messages.len(), url);
-                    let j = serde_json::to_string(&messages).unwrap();
-                    console_log!("Messages => {:#?}", j);
-                    message_batch.ack_all()
+            for message in messages {
+                match reqwest::Client::new()
+                    .post(&url)
+                    .header("Content-Type", "application/json")
+                    .json(&message)
+                    .send()
+                    .await
+                {
+                    Ok(_) => {}
+                    Err(e) => console_error!("Error {}", e),
                 }
-                Err(e) => console_error!("Error {}", e),
             }
+            message_batch.ack_all()
         }
         _ => {
             console_error!("Unknown queue: {}", message_batch.queue());

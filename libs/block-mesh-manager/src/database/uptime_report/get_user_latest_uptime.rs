@@ -69,6 +69,8 @@ pub async fn get_user_latest_uptime(
         latest_group lg
     ON
         gt.group_id = lg.latest_group_id
+    WHERE
+        gt.user_id = $1
     GROUP BY
         gt.user_id, gt.group_id
     ORDER BY

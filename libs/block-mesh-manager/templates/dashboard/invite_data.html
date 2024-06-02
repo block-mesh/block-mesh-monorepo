@@ -1,0 +1,31 @@
+<div class="xl:pl-72 m-2">
+    <script>
+        function copy_invite_code_to_clipboard() {
+            let copyText = document.getElementById("copy_invite_code");
+            navigator.clipboard.writeText(copyText.innerText);
+        }
+    </script>
+    <div class="grid grid-cols-1 bg-gray-700/10 sm:grid-cols-3 lg:grid-cols-3 border rounded">
+        <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8">
+            <p class="text-sm font-medium leading-6 text-gray-400">Invite Code</p>
+            <p class="mt-2 flex items-baseline gap-x-2">
+                <span class="text-4xl font-semibold tracking-tight text-white"
+                      id="copy_invite_code">{{ invite_code }}</span>
+                <span class="text-white cursor-pointer" onclick="copy_invite_code_to_clipboard()">{% include "icons/clipboard_icon.html" %}</span>
+            </p>
+        </div>
+        <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
+            <p class="text-sm font-medium leading-6 text-gray-400">Users Invited</p>
+            <p class="mt-2 flex items-baseline gap-x-2">
+                <span class="text-4xl font-semibold tracking-tight text-white">{{ number_of_users_invited }}</span>
+            </p>
+        </div>
+        <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
+            <p class="text-sm font-medium leading-6 text-gray-400">Edit Invite Code</p>
+            <p class="mt-2 flex items-baseline gap-x-2">
+                <a href="/edit_invite_code" class="text-4xl font-semibold tracking-tight text-white">
+                    {% include "icons/link_icon.html" %}</a>
+            </p>
+        </div>
+    </div>
+</div>
