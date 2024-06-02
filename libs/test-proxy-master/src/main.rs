@@ -1,5 +1,6 @@
 use crate::clients_endpoint::listen_for_clients_connecting;
 use crate::proxy_endpoint::listen_for_proxies_connecting;
+use block_mesh_common::constants::DeviceType;
 use block_mesh_common::tracing::setup_tracing;
 use futures_util::future::join_all;
 use proxy_pool::ProxyPool;
@@ -13,7 +14,7 @@ mod proxy_pool;
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    setup_tracing(Uuid::new_v4());
+    setup_tracing(Uuid::new_v4(), DeviceType::TestProxyMaster);
     let pool = ProxyPool::default();
     let addr_proxies = SocketAddr::from(([127, 0, 0, 1], 5000));
     let proxy_listener = TcpListener::bind(addr_proxies).await?;

@@ -1,4 +1,4 @@
-use crate::constants::{BLOCK_MESH_LOGGER, BLOCK_MESH_LOG_ENV};
+use crate::constants::{DeviceType, BLOCK_MESH_LOGGER, BLOCK_MESH_LOG_ENV};
 use reqwest::Client;
 use serde_json::{json, Value};
 use std::sync::{Arc, Once};
@@ -11,11 +11,12 @@ use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Layer;
 use uuid::Uuid;
 
-pub fn setup_tracing(user_id: Uuid) {
+pub fn setup_tracing(user_id: Uuid, device_type: DeviceType) {
     static SET_HOOK: Once = Once::new();
     SET_HOOK.call_once(|| {
         let log_env = std::env::var(BLOCK_MESH_LOG_ENV).unwrap_or_else(|_| "prod".to_string());
-        let log_layer = HttpLogLayer::new(BLOCK_MESH_LOGGER.to_string(), log_env, user_id);
+        let log_layer =
+            HttpLogLayer::new(BLOCK_MESH_LOGGER.to_string(), log_env, user_id, device_type);
         tracing_subscriber::registry()
             .with(
                 tracing_subscriber::EnvFilter::try_from_default_env()
@@ -33,10 +34,11 @@ struct HttpLogLayer {
     pub url: Arc<String>,
     pub env: String,
     pub user_id: Arc<Uuid>,
+    pub device_type: DeviceType,
 }
 
 impl HttpLogLayer {
-    fn new(url: String, env: String, user_id: Uuid) -> Self {
+    fn new(url: String, env: String, user_id: Uuid, device_type: DeviceType) -> Self {
         let init_buffer: Arc<Mutex<Vec<Value>>> = Arc::new(Mutex::new(Vec::new()));
         let init_client: Arc<Mutex<Client>> = Arc::new(Mutex::new(Client::new()));
         let user_id = Arc::new(user_id);
@@ -67,6 +69,7 @@ impl HttpLogLayer {
             url: x_url.clone(),
             env,
             user_id,
+            device_type,
         }
     }
 
@@ -92,6 +95,7 @@ where
             "event": event.as_serde(),
             "env": self.env.clone(),
             "user_id": self.user_id,
+            "device_type": self.device_type.clone()
         });
 
         let buffer = self.buffer.clone();
