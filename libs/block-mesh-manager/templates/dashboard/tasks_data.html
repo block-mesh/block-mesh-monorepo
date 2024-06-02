@@ -1,0 +1,22 @@
+<div class="xl:pl-72 m-2">
+    <div class="grid grid-cols-1 bg-gray-700/10 sm:grid-cols-3 lg:grid-cols-3 border rounded">
+        <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8">
+            <p class="text-sm font-medium leading-6 text-gray-400">Uptime Ranking</p>
+            <p class="mt-2 flex items-baseline gap-x-2 text-white">
+                {{ rank }}
+            </p>
+        </div>
+        <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
+            <p class="text-sm font-medium leading-6 text-gray-400">Overall Tasks</p>
+            <p class="mt-2 flex items-baseline gap-x-2 text-white">
+                {{ overall_task_count }}
+            </p>
+        </div>
+        <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
+            <p class="text-sm font-medium leading-6 text-gray-400">24 hour tasks</p>
+            <p class="mt-2 flex items-baseline gap-x-2 text-white">
+                {{ last_24_hours_tasks }}
+            </p>
+        </div>
+    </div>
+</div>

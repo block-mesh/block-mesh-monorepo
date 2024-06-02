@@ -1,3 +1,4 @@
+use block_mesh_common::constants::DeviceType;
 use block_mesh_common::http::{empty, full, host_addr};
 use block_mesh_common::tracing::setup_tracing;
 use bytes::Bytes;
@@ -25,7 +26,7 @@ pub struct CliArgs {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    setup_tracing(Uuid::new_v4());
+    setup_tracing(Uuid::new_v4(), DeviceType::TestProxyEndpoint);
     let args = CliArgs::parse();
     let addr = SocketAddr::from_str(format!("{}:{}", args.ip, args.port).as_str())
         .expect("Failed to parse address");

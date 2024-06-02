@@ -7,6 +7,7 @@ authors.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+num-traits = { workspace = true }
 reqwest = { workspace = true, default-features = false, features = [
   "multipart",
   "json",
@@ -70,5 +71,6 @@ features = [
   "fast-rng", # Use a faster (but still sufficiently random) RNG
   "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
   "serde", # Enable serialization/deserialization of UUIDs
+  "js"
 ]
 

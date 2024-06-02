@@ -1178,6 +1178,7 @@ dependencies = [
  "form_urlencoded",
  "http 1.1.0",
  "http-body-util",
+ "num-traits",
  "rand 0.8.5",
  "reqwest",
  "secret",
@@ -1275,7 +1276,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-tauri"
-version = "0.0.10"
+version = "0.0.13"
 dependencies = [
  "anyhow",
  "auto-launch",
@@ -10042,6 +10043,7 @@ dependencies = [
  "rand 0.8.5",
  "serde",
  "uuid-macro-internal",
+ "wasm-bindgen",
 ]
 
 [[package]]

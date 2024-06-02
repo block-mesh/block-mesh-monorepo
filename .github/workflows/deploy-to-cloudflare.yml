@@ -23,6 +23,11 @@ jobs:
         ]
     steps:
       - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          targets: wasm32-unknown-unknown
+          components: cargo , clippy , rust-docs , rust-std , rustc , rustfmt
       - name: Build & Deploy Worker
         uses: cloudflare/wrangler-action@v3
         with:
@@ -31,9 +36,7 @@ jobs:
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: libs/${{ matrix.workdir }}
           command: deploy
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: ${{ vars.RUSTC_VERSION }}
+
       - uses: Swatinem/rust-cache@v2
         with:
           key: cloudflare-deploy-${{ matrix.workdir }}

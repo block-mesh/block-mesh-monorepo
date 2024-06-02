@@ -5,7 +5,7 @@ use axum::Extension;
 use axum_login::AuthSession;
 
 #[derive(Template)]
-#[template(path = "create_task.html")]
+#[template(path = "tasks/create_task.html")]
 struct CreateTaskTemplate;
 
 #[tracing::instrument(name = "create_task", skip(_auth))]

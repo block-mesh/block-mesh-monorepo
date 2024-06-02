@@ -35,8 +35,9 @@ pub async fn handler(
     if !validate_email(email) {
         return Ok(Error::redirect(
             400,
-            "Invalid email".to_string(),
-            "Please check if email you inserted is correct".to_string(),
+            "Invalid email",
+            "Please check if email you inserted is correct",
+            "/register",
         ));
     }
     if form.password_confirm != form.password {
@@ -66,8 +67,9 @@ pub async fn handler(
                 None => {
                     return Ok(Error::redirect(
                         400,
-                        "Invite Code Not Found".to_string(),
-                        "Please check if the invite you insert is correct".to_string(),
+                        "Invite Code Not Found",
+                        "Please check if the invite you insert is correct",
+                        "/register",
                     ))
                 }
             }

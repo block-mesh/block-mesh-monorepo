@@ -1,0 +1,23 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            RANK() OVER (ORDER BY COALESCE(COUNT(t.id), 0) DESC) AS user_rank\n            FROM\n                users u\n            LEFT JOIN\n                tasks t ON u.id = t.assigned_user_id\n            AND t.status = $1\n            WHERE u.id = $2\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_rank",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "63e3940493aa263a1062313c30e75cf640755ddc31e5f215cc8a51999b6333e4"
+}

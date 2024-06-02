@@ -1,3 +1,4 @@
+use crate::database::task::count_user_tasks_in_period::count_user_tasks_in_period;
 use crate::database::task::create_task::create_task;
 use crate::domain::task::TaskMethod;
 use crate::errors::error::Error;
@@ -26,6 +27,16 @@ pub async fn handler(
 ) -> Result<Redirect, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let user = auth.user.ok_or(Error::UserNotFound)?;
+    let users_tasks_count =
+        count_user_tasks_in_period(&mut transaction, &user.id, 60 * 60 * 24).await?;
+    if users_tasks_count > 50 {
+        return Ok(Error::redirect(
+            429,
+            "Daily Task Limit Reached",
+            "You have reached the daily task limit of 50 tasks",
+            "/tasks_table",
+        ));
+    }
     create_task(
         &mut transaction,
         &user.id,
@@ -37,5 +48,5 @@ pub async fn handler(
     .await
     .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;
-    Ok(Redirect::to("/dashboard"))
+    Ok(Redirect::to("/tasks_table"))
 }

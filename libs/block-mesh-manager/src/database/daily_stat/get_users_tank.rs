@@ -1,38 +1,28 @@
-use serde::{Deserialize, Serialize};
+use crate::domain::task::TaskStatus;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[derive(Debug, Serialize, Deserialize)]
-pub struct RankedUsers {
-    pub user_id: Uuid,
-    pub total_tasks_count: Option<i64>,
-    pub rank: Option<i64>,
-}
-
-#[tracing::instrument(name = "Get Users Rank", skip(transaction), ret, err)]
-pub(crate) async fn get_users_rank(
+#[tracing::instrument(name = "Get User Rank by Task Statsu", skip(transaction), ret, err)]
+pub(crate) async fn get_user_rank_by_task_status(
     transaction: &mut Transaction<'_, Postgres>,
-) -> anyhow::Result<Vec<RankedUsers>> {
-    let ranks = sqlx::query_as!(
-        RankedUsers,
+    user_id: Uuid,
+    status: TaskStatus,
+) -> anyhow::Result<i64> {
+    let rank: Option<i64> = sqlx::query_scalar!(
         r#"
-        WITH RankedUsers AS (
-            SELECT
-            user_id,
-            SUM(tasks_count) as total_tasks_count,
-            RANK() OVER (ORDER BY SUM(tasks_count) DESC) as rank
-        FROM daily_stats
-        GROUP BY user_id
-        )
         SELECT
-            user_id,
-            total_tasks_count,
-            rank
-        FROM RankedUsers
-        ORDER BY rank;
+            RANK() OVER (ORDER BY COALESCE(COUNT(t.id), 0) DESC) AS user_rank
+            FROM
+                users u
+            LEFT JOIN
+                tasks t ON u.id = t.assigned_user_id
+            AND t.status = $1
+            WHERE u.id = $2
         "#,
+        status.to_string(),
+        user_id
     )
-    .fetch_all(&mut **transaction)
+    .fetch_one(&mut **transaction)
     .await?;
-    Ok(ranks)
+    Ok(rank.unwrap_or_default())
 }
