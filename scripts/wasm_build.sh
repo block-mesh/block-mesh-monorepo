@@ -25,10 +25,6 @@ VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -
 sed -i -e "s/\"version\":.*/\"version\": \"${VERSION}\",/" extension_js/manifests/manifest_cr.json || exit
 sed -i -e "s/\"version\":.*/\"version\": \"${VERSION}\",/" extension_js/manifests/manifest_ff.json || exit
 
-
-sed -i -e "s/\"version\":.*/\"version\": \"${VERSION}\",/" extension_js/manifests/manifest_cr.json || exit
-sed -i -e "s/\"version\":.*/\"version\": \"${VERSION}\",/" extension_js/manifests/manifest_ff.json || exit
-
 echo Building wasm module...
 wasm-pack build . --dev --no-typescript --out-dir "./extension_js/js/wasm" --out-name "blockmesh_ext" --target web || exit
 
