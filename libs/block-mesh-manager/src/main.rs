@@ -2,7 +2,7 @@
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unreachable_pub)]
 
-use block_mesh_common::constants::DeviceType;
+use block_mesh_common::constants::{DeviceType, BLOCKMESH_SERVER_UUID_ENVAR};
 use block_mesh_common::tracing::setup_tracing;
 use block_mesh_manager::configuration::get_configuration::get_configuration;
 use block_mesh_manager::database::migrate::migrate;
@@ -22,12 +22,7 @@ use uuid::Uuid;
 async fn main() -> anyhow::Result<()> {
     load_dotenv();
     setup_tracing(
-        Uuid::parse_str(
-            std::env::var("BLOCKMESH_SERVER_UUID_ENVAR")
-                .unwrap()
-                .as_str(),
-        )
-        .unwrap(),
+        Uuid::parse_str(std::env::var(BLOCKMESH_SERVER_UUID_ENVAR).unwrap().as_str()).unwrap(),
         DeviceType::AppServer,
     );
     let configuration = get_configuration().expect("Failed to read configuration");
