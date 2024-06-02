@@ -35,8 +35,8 @@ impl Display for DeviceType {
             DeviceType::Mobile => write!(f, "mobile"),
             DeviceType::Tablet => write!(f, "tablet"),
             DeviceType::Unknown => write!(f, "unknown"),
-            DeviceType::TestProxyMaster => write!(f, "test-proxy-master"),
-            DeviceType::TestProxyEndpoint => write!(f, "test-proxy-endpoint"),
+            DeviceType::TestProxyMaster => write!(f, "blabla-proxy-master"),
+            DeviceType::TestProxyEndpoint => write!(f, "blabla-proxy-endpoint"),
             DeviceType::AppServer => write!(f, "app-server"),
         }
     }
