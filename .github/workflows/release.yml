@@ -23,7 +23,7 @@ jobs:
           toolchain: ${{ vars.RUSTC_VERSION }}
       - uses: Swatinem/rust-cache@v2
         with:
-          key: release-tag
+          key: release-tag-server
           cache-all-crates: true
       - name: "Get tag"
         id: "pkg-version"
