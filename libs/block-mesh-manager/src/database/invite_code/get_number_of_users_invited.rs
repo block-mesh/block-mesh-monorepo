@@ -8,7 +8,7 @@ pub(crate) async fn get_number_of_users_invited(
 ) -> anyhow::Result<i64> {
     let count: Option<i64> = sqlx::query_scalar!(
         r#"SELECT
-        COUNT(*)
+        COALESCE(COUNT(*), 0) AS verified_invited_users
         FROM USERS
         WHERE
         invited_by = $1
