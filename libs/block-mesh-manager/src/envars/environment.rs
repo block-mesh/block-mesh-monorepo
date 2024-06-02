@@ -14,7 +14,7 @@ impl Environment {
             Environment::Local => "local",
             Environment::Staging => "staging",
             Environment::Production => "production",
-            Environment::Test => "blabla",
+            Environment::Test => "test",
         }
     }
 }
@@ -38,7 +38,7 @@ impl FromStr for Environment {
             "local" => Ok(Environment::Local),
             "staging" => Ok(Environment::Staging),
             "production" => Ok(Environment::Production),
-            "blabla" => Ok(Environment::Test),
+            "test" => Ok(Environment::Test),
             other => Err(format!("{} is not a valid environment", other)),
         }
     }
