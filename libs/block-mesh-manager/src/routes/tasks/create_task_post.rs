@@ -29,7 +29,6 @@ pub async fn handler(
     let user = auth.user.ok_or(Error::UserNotFound)?;
     let users_tasks_count =
         count_user_tasks_in_period(&mut transaction, &user.id, 60 * 60 * 24).await?;
-    tracing::info!("users_tasks_count = {}", users_tasks_count);
     if users_tasks_count > 50 {
         return Ok(Error::redirect(
             429,

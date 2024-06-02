@@ -52,6 +52,11 @@ impl Application {
                     .post(routes::tasks::create_task_post::handler),
             )
             .route(
+                "/edit_invite_code",
+                get(routes::invite_codes::edit_invite_code::handler)
+                    .post(routes::invite_codes::edit_invite_code_post::handler),
+            )
+            .route(
                 "/email_confirm",
                 get(routes::emails::email_confirm::handler),
             )

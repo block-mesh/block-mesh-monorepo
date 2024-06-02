@@ -4,6 +4,7 @@ pub mod dashboard;
 pub mod emails;
 pub mod error;
 pub mod health_check;
+pub mod invite_codes;
 pub mod login;
 pub mod logout;
 pub mod register;
