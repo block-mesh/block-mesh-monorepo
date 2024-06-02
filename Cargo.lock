@@ -1178,6 +1178,7 @@ dependencies = [
  "form_urlencoded",
  "http 1.1.0",
  "http-body-util",
+ "num-traits",
  "rand 0.8.5",
  "reqwest",
  "secret",
