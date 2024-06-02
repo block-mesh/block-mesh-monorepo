@@ -28,5 +28,6 @@ serde-wasm-bindgen = { workspace = true }
 rustc-hash = { workspace = true }
 reqwest = { workspace = true, features = [
   "json",
+  "serde_json"
 ] }
 anyhow = { workspace = true }

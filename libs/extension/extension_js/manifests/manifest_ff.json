@@ -3,7 +3,7 @@
   "name": "BlockMesh Network",
   "short_name": "BlockMesh",
   "description": "BlockMesh Network allows you to generate passive income from your excessive bandwidth",
-  "version": "0.0.15",
+  "version": "0.0.16",
   "author": "ohaddahan@blockmesh.xyz",
   "action": {
     "default_title": "BlockMesh",

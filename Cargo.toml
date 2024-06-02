@@ -19,7 +19,7 @@ panic = "forbid"
 
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.15"
+version = "0.0.16"
 
 [patch.crates-io]
 ## aes-gcm-siv 0.10.3 and curve25519-dalek 3.x pin zeroize to <1.4
@@ -56,7 +56,6 @@ wasm-bindgen-futures = { version = "0.4" }
 serde-wasm-bindgen = { version = "0.6" }
 urlencoding = { version = "2.1" }
 getrandom = { version = "0.2", features = ["js"] }
-wee_alloc = { version = "0.4.5" }
 wasm-bindgen-test = "0.3.36"
 console_error_panic_hook = { version = "0.1.7" }
 cfg-if = { version = "1.0.0" }
