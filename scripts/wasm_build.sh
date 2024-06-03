@@ -25,6 +25,7 @@ sed -i -e "s/\"version\":.*/\"version\": \"${VERSION}\",/" extension_js/manifest
 sed -i -e "s/\"version\":.*/\"version\": \"${VERSION}\",/" extension_js/manifests/manifest_ff.json || exit
 
 echo Building wasm module...
+export RUSTFLAGS=--cfg=web_sys_unstable_apis
 wasm-pack build . --dev --no-typescript --out-dir "./extension_js/js/wasm" --out-name "blockmesh_ext" --target web || exit
 
 ## wasm-pack creates bunch of useless files:

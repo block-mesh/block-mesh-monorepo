@@ -1,3 +1,4 @@
+#![allow(unused_variables, unused_imports)]
 use crate::utils::ext_state::{AppState, AppStatus};
 use leptos::*;
 use std::time::Duration;
@@ -18,36 +19,41 @@ pub fn Home() -> impl IntoView {
     });
 
     let copy_to_clipboard = move |_| {
-        if let Some(clipboard) = web_sys::window().unwrap().navigator().clipboard() {
-            let invite_url_string = invite_url.get();
-            tracing::info!("invite_url_string = {}", invite_code.get());
-            if invite_code.get().is_empty() {
-                set_error.update(|s| *s = Some("Missing invite code".to_string()));
+        #[cfg(web_sys_unstable_apis)]
+        {
+            if let Some(clipboard) = web_sys::window().unwrap().navigator().clipboard() {
+                let invite_url_string = invite_url.get();
+                tracing::info!("invite_url_string = {}", invite_code.get());
+                if invite_code.get().is_empty() {
+                    set_error.update(|s| *s = Some("Missing invite code".to_string()));
+                    set_timeout(
+                        move || {
+                            set_error.update(|s| *s = None);
+                        },
+                        Duration::from_millis(1500),
+                    );
+                    return;
+                }
+                let _ = clipboard.write_text(&invite_url_string);
+                set_success.update(|s| *s = Some("Copied to clipboard".to_string()));
+                set_timeout(
+                    move || {
+                        set_success.update(|s| *s = None);
+                    },
+                    Duration::from_millis(1500),
+                );
+            } else {
+                set_error.update(|s| *s = Some("Failed to copy".to_string()));
                 set_timeout(
                     move || {
                         set_error.update(|s| *s = None);
                     },
                     Duration::from_millis(1500),
                 );
-                return;
             }
-            let _ = clipboard.write_text(&invite_url_string);
-            set_success.update(|s| *s = Some("Copied to clipboard".to_string()));
-            set_timeout(
-                move || {
-                    set_success.update(|s| *s = None);
-                },
-                Duration::from_millis(1500),
-            );
-        } else {
-            set_error.update(|s| *s = Some("Failed to copy".to_string()));
-            set_timeout(
-                move || {
-                    set_error.update(|s| *s = None);
-                },
-                Duration::from_millis(1500),
-            );
         }
+        #[cfg(not(web_sys_unstable_apis))]
+        {}
     };
 
     view! {

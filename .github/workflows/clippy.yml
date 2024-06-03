@@ -38,6 +38,4 @@ jobs:
           --no-default-features
           --locked
       - name: Linting
-        env:
-          RUSTFLAGS: "--cfg=web_sys_unstable_apis"
         run: cargo clippy --all -- -D warnings
