@@ -105,25 +105,14 @@ impl AppState {
         context.status.get_untracked()
     }
     #[tracing::instrument(name = "init_resource")]
-    pub fn init_resource(context: AppState) -> Option<()> {
-        let resource = create_resource(
-            move || {
-                (
-                    context.blockmesh_url.get(),
-                    context.email.get(),
-                    context.api_token.get(),
-                )
-            },
-            |_| async move {
-                let state = use_context::<AppState>().unwrap();
-                let status = AppState::init(state).await;
-                if status == AppStatus::LoggedIn {
-                    let navigate = use_navigate();
-                    navigate(Page::Home.path(), Default::default());
-                }
-            },
-        );
-        resource.get()
+    pub fn init_resource(context: AppState) {
+        spawn_local(async move {
+            let status = AppState::init(context).await;
+            if status == AppStatus::LoggedIn {
+                let navigate = use_navigate();
+                navigate(Page::Home.path(), Default::default());
+            }
+        });
     }
 
     #[tracing::instrument(name = "clear")]

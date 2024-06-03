@@ -102,10 +102,21 @@ pub struct GetUserUptimeRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct GetLatestInviteCodeRequest {
+    pub email: String,
+    pub api_token: Uuid,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct GetUserUptimeResponse {
     pub user_id: Uuid,
     pub start_time: Option<DateTime<Utc>>,
     pub end_time: Option<DateTime<Utc>>,
     pub duration_seconds: Option<f64>,
     pub status_code: u16,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetLatestInviteCodeResponse {
+    pub invite_code: String,
 }
