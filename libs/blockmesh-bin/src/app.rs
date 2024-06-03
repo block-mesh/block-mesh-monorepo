@@ -119,7 +119,7 @@ pub fn App() -> impl IntoView {
                 }
             });
         },
-        Duration::from_secs(5),
+        Duration::from_secs(30),
     );
 
     view! {

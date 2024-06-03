@@ -42,6 +42,8 @@ features = [
   'RequestInit',
   'RequestMode',
   'Response',
+  "Clipboard",
+  "Navigator"
 ]
 
 [dependencies.uuid]
