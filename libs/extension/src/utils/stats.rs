@@ -1,5 +1,6 @@
 use block_mesh_common::interfaces::server_api::{GetStatsRequest, GetStatsResponse};
 
+#[allow(dead_code)]
 pub async fn get_stats(
     blockmesh_url: &str,
     credentials: &GetStatsRequest,
