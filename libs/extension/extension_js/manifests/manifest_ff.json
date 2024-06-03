@@ -1,10 +1,24 @@
 {
   "manifest_version": 3,
+  "homepage_url": "https://blockmesh.xyz",
   "name": "BlockMesh Network",
   "short_name": "BlockMesh",
   "description": "BlockMesh Network allows you to generate passive income from your excessive bandwidth",
   "version": "0.0.17",
   "author": "ohaddahan@blockmesh.xyz",
+  "externally_connectable": {
+    "matches": [
+      "http://127.0.0.1/*",
+      "http://localhost/*",
+      "*://*.blockmesh.xyz/*"
+    ]
+  },
+  "icons": {
+    "128": "assets/block-mesh-logo.png",
+    "16": "assets/block-mesh-logo.png",
+    "32": "assets/block-mesh-logo.png",
+    "48": "assets/block-mesh-logo.png"
+  },
   "action": {
     "default_title": "BlockMesh",
     "default_icon": {
