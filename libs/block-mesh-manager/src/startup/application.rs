@@ -73,6 +73,10 @@ impl Application {
             .route("/submit_task", post(routes::tasks::submit_task::handler))
             .route("/get_stats", post(routes::api_token::get_stats::handler))
             .route(
+                "/get_latest_invite_code",
+                post(routes::invite_codes::get_latest_invite_code::handler),
+            )
+            .route(
                 "/create_task_with_token",
                 post(routes::tasks::create_task_with_token::handler),
             );

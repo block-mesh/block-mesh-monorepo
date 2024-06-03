@@ -28,3 +28,11 @@ document.addEventListener('DOMContentLoaded', async function () {
         delete_form.parentNode.removeChild(delete_form);
     }
 });
+
+chrome.runtime.onMessage.addListener((msg, sender) => {
+        if (msg !== "ping") {
+            console.log("Options::onMessage", {msg, sender});
+        }
+        return true
+    }
+);

@@ -7,6 +7,7 @@ pub enum StorageValues {
     ApiToken,
     DeviceId,
     Uptime,
+    InviteCode,
 }
 
 impl Display for StorageValues {
@@ -17,6 +18,7 @@ impl Display for StorageValues {
             StorageValues::ApiToken => "blockmesh_api_token".to_string(),
             StorageValues::DeviceId => "device_id".to_string(),
             StorageValues::Uptime => "uptime".to_string(),
+            StorageValues::InviteCode => "invite_code".to_string(),
         };
         write!(f, "{}", str)
     }

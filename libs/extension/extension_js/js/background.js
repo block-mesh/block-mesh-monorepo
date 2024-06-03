@@ -2,6 +2,18 @@
 // not connected to the content scripts where wasm is loaded automatically
 import initWasmModule, {task_poller, report_uptime, uptime_fetcher} from './wasm/blockmesh_ext.js';
 
+const PING_INTERVAL = 3 * 1000;
+
+// This keeps the service worker alive
+function stayAlive() {
+    chrome.runtime.sendMessage("ping");
+}
+
+setInterval(() => {
+    stayAlive();
+}, PING_INTERVAL);
+
+
 console.log("Background script started");
 
 // console.log(await chrome.permissions.getAll());
@@ -12,13 +24,13 @@ console.log("Background script started");
     await initWasmModule();
     setInterval(async () => {
         await task_poller().then(onSuccess, onError);
-    }, 5_000);
+    }, 30_000 + Math.random());
     setInterval(async () => {
         await report_uptime().then(onSuccess, onError);
-    }, 10_000);
+    }, 30_000 + Math.random());
     setInterval(async () => {
         await uptime_fetcher().then(onSuccess, onErrorWithLog);
-    }, 10_000);
+    }, 30_000 + Math.random());
 })();
 
 // A placeholder for OnSuccess in .then

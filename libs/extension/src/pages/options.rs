@@ -7,7 +7,7 @@ use url::Url;
 pub fn Options() -> impl IntoView {
     provide_context(AppState::default());
     let state = use_context::<AppState>().unwrap();
-    let _ = AppState::init_resource(state);
+    AppState::init_resource(state);
 
     let (error, set_error) = create_signal(None::<String>);
     let (success, set_success) = create_signal(None::<String>);

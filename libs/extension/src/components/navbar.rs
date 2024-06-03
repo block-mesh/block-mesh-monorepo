@@ -5,7 +5,6 @@ use leptos::*;
 #[component]
 pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
     let state = use_context::<AppState>().unwrap();
-    let url = move || state.blockmesh_url.get();
     let email = Signal::derive(move || state.email.get());
     let status = Signal::derive(move || state.status.get());
 
@@ -19,12 +18,6 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
                                 class="w-24 h-24"
                                 src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"
                             />
-                        </a>
-                    </div>
-                    <div class="flex justify-center mt-4 text-white">
-                        <div class="mr-2 text-bold">URL:</div>
-                        <a href=url target="_blank" class="text-blue-500 hover:text-blue-800">
-                            {url}
                         </a>
                     </div>
                     <div class="flex justify-center mt-4">
@@ -48,8 +41,8 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
                             }
                         >
 
-                            <div class="flex justify-center mt-4 text-white flex-col">
-                                <div class="mb-2">{email.get().to_string()}</div>
+                            <div class="flex justify-center text-center mt-4 text-white flex-col">
+                                <div class="mb-2">{move || email.get().to_string()}</div>
                                 <div class="mb-2">
                                     <a
                                         href="#"
