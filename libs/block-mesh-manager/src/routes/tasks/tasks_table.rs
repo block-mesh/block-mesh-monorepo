@@ -85,18 +85,17 @@ impl From<Task> for TaskForTemplate {
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,
-) -> impl IntoResponse {
-    let mut transaction = pool.begin().await.map_err(Error::from).unwrap();
-    let user = auth.user.ok_or(Error::UserNotFound).unwrap();
+) -> Result<impl IntoResponse, Error> {
+    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let user = auth.user.ok_or(Error::UserNotFound)?;
     let tasks = get_tasks_by_user_id(&mut transaction, &user.id)
         .await
-        .map_err(Error::from)
-        .unwrap();
+        .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from).unwrap();
 
     let tasks: Vec<TaskForTemplate> = tasks.into_iter().map(TaskForTemplate::from).collect();
 
-    TasksTableTemplate {
+    Ok(TasksTableTemplate {
         tasks,
         chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
         app_server: BLOCK_MESH_APP_SERVER.to_string(),
@@ -107,5 +106,5 @@ pub async fn handler(
         image: BLOCK_MESH_LANDING_PAGE_IMAGE.to_string(),
         support: BLOCK_MESH_SUPPORT_EMAIL.to_string(),
         chat: BLOCK_MESH_SUPPORT_CHAT.to_string(),
-    }
+    })
 }

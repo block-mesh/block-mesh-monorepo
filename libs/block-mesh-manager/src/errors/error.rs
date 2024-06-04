@@ -39,6 +39,10 @@ pub enum Error {
     InviteCodeNotFound,
     #[error("Too many tasks")]
     TooManyTasks,
+    #[error("Task response not found")]
+    TaskResponseNotFound,
+    #[error("Not your task")]
+    NotYourTask,
 }
 
 impl Error {
@@ -59,6 +63,12 @@ impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         tracing::error!("Error occurred: {}", self);
         match self {
+            Error::NotYourTask => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+            }
+            Error::TaskResponseNotFound => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+            }
             Error::TooManyTasks => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
             }
@@ -112,6 +122,8 @@ impl From<Error> for StatusCode {
     fn from(error: Error) -> Self {
         tracing::error!("Error occurred: {}", error);
         match error {
+            Error::NotYourTask => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::TaskResponseNotFound => StatusCode::INTERNAL_SERVER_ERROR,
             Error::TooManyTasks => StatusCode::INTERNAL_SERVER_ERROR,
             Error::InviteCodeNotFound => StatusCode::BAD_REQUEST,
             Error::ApiTokenMismatch => StatusCode::INTERNAL_SERVER_ERROR,
