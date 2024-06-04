@@ -1826,6 +1826,9 @@ dependencies = [
 name = "cloudflare-landing-page"
 version = "0.1.0"
 dependencies = [
+ "askama",
+ "askama_axum",
+ "block-mesh-common",
  "serde",
  "serde_json",
  "time",
