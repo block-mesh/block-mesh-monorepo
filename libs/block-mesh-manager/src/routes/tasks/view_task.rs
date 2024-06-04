@@ -43,21 +43,21 @@ pub async fn handler(
     Query(query): Query<ViewTaskParams>,
 ) -> Result<impl IntoResponse, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
-    let _ = auth.user.ok_or(Error::UserNotFound).unwrap();
+    let user = auth.user.ok_or(Error::UserNotFound).unwrap();
     let task = get_task_by_user_id(&mut transaction, &query.id)
         .await
         .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;
-
     if task.is_none() {
         return Err(Error::TaskNotFound);
     }
     let task = task.unwrap();
-
+    if task.user_id != user.id {
+        return Err(Error::NotYourTask);
+    }
     if task.response_raw.is_none() {
         return Err(Error::TaskResponseNotFound);
     }
-
     Ok(ViewTaskTemplate {
         raw_html: task.response_raw.unwrap(),
         chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),

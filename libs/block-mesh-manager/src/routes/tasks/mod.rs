@@ -4,4 +4,4 @@ pub mod create_task_with_token;
 pub mod get_task;
 pub mod submit_task;
 pub mod tasks_table;
-pub(crate) mod view_task;
+pub mod view_task;
