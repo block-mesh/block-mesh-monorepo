@@ -10,7 +10,28 @@
         From: "opacity-100"
         To: "opacity-0"
     -->
-    <div class="fixed inset-0 bg-gray-900/80"></div>
+    <div class="fixed inset-0 bg-gray-900/80">
+        <div class="bg-gray-700 flex justify-center items-center h-screen">
+            <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md m-2">
+                <div class="text-center">
+                    <p class="font-semibold text-red-600 text-2xl">Sorry</p>
+                    <h1 class="mt-4 text-3xl font-bold tracking-tight text-white sm:text-5xl">Come back from
+                        your
+                        desktop</h1>
+                    <p class="mt-6 text-base leading-7 text-white">
+                        The mobile friendly version isn't ready yet, please use a desktop.
+                        Sorry for the inconvenience.
+                    </p>
+                    <div class="mt-10 flex items-center justify-center gap-x-6">
+                        <a href="/"
+                           class="rounded-md bg-indigo-600 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-500 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                            Go Back
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 
     <div class="fixed inset-0 flex">
         <!--
@@ -34,16 +55,6 @@
                 From: "opacity-100"
                 To: "opacity-0"
             -->
-            <div class="absolute left-full top-0 flex w-16 justify-center pt-5">
-                <button type="button" class="-m-2.5 p-2.5">
-                    <span class="sr-only">Close sidebar</span>
-                    <svg class="h-6 w-6 text-white" fill="none" viewBox="0 0 24 24" stroke-width="1.5"
-                         stroke="currentColor" aria-hidden="true">
-                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
-                    </svg>
-                </button>
-            </div>
-
             {% include "sidebar/mobile_sidebar.html" %}
         </div>
     </div>

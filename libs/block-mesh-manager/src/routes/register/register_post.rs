@@ -41,11 +41,21 @@ pub async fn handler(
         ));
     }
     if form.password_confirm != form.password {
-        return Err(Error::PasswordMismatch);
+        return Ok(Error::redirect(
+            400,
+            "Password Mismatch",
+            "Please check if your password and password confirm are the same",
+            "/register",
+        ));
     }
     let user = get_user_opt_by_email(&mut transaction, &form.email).await?;
     if user.is_some() {
-        return Err(Error::UserAlreadyExists);
+        return Ok(Error::redirect(
+            400,
+            "User Already Exists",
+            "User with this email already exists",
+            "/register",
+        ));
     }
     let nonce = Nonce::generate_nonce(16);
     let nonce_secret = Secret::from(nonce.clone());
