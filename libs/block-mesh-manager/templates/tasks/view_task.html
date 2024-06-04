@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% include "sidebar/sidebar_wrapper.html" %}
+<template class="invisible" id="iframe_content">
+    {{ raw_html|safe }}
+</template>
+
+<div>
+    <div class="xl:pl-72 m-2">
+        <iframe id="iframe_display" class="w-full h-screen"></iframe>
+    </div>
+</div>
+
+
+<script>
+    let iframe_content = document.getElementById('iframe_content');
+    let iframe_display = document.getElementById('iframe_display');
+    if (iframe_content && iframe_display) {
+        iframe_display.contentWindow.document.write(iframe_content.innerHTML)
+    }
+</script>
+{% endblock %}

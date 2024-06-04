@@ -9,6 +9,8 @@
         <pre>{{ task.body }}</pre>
     </td>
     <td class="px-4 py-3">
-        <pre>{{ task.response_raw }}</pre>
+        {% if task.response_raw.0.len() > 0 %}
+        <a href="/view_task?id={{ task.id }}">View Task</a>
+        {% endif %}
     </td>
 </tr>
