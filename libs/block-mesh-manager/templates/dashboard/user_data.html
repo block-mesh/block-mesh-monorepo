@@ -1,6 +1,18 @@
 <div class="xl:pl-72 m-2">
-    <div class="grid grid-cols-1 bg-gray-700/10 sm:grid-cols-3 lg:grid-cols-3 border rounded">
+    <div class="grid grid-cols-1 bg-gray-700/10 sm:grid-cols-4 lg:grid-cols-4 border rounded">
         <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8">
+            <p class="text-sm font-medium leading-6 text-gray-400">Chrome Extension</p>
+            <p class="mt-2 flex items-baseline gap-x-2 text-white">
+                <a
+                        href={{ chrome_extension_link }}
+                        target="_blank"
+                        class="inline-flex items-center gap-x-1.5 rounded-md border px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+                    Download
+                    {% include "icons/chrome_icon.html" %}
+                </a>
+            </p>
+        </div>
+        <div class="border-t border-white/5 py-6 px-4 sm:px-6 lg:px-8 sm:border-l">
             <p class="text-sm font-medium leading-6 text-gray-400">Logged In As</p>
             <p class="mt-2 flex items-baseline gap-x-2 text-white">
                 {{ email }}

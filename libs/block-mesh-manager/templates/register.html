@@ -43,4 +43,14 @@
         </div>
     </div>
 </form>
+
+<script>
+    let current_url = new URL(window.location.href);
+    let invite_code = current_url.searchParams.get("invite_code")
+    let invite_code_input = document.getElementById('invite_code');
+    if (invite_code && invite_code_input) {
+        invite_code_input.value = invite_code;
+        invite_code_input.readOnly = true;
+    }
+</script>
 {% endblock %}

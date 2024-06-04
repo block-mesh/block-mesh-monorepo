@@ -25,8 +25,15 @@ pub async fn handler(
     if form.new_invite_code.contains(' ') {
         return Ok(Error::redirect(
             400,
+            "Invalid Invite",
             "Invite code cannot contain spaces",
-            "Invite code cannot contain spaces",
+            "/edit_invite_code",
+        ));
+    } else if !form.new_invite_code.chars().all(char::is_alphanumeric) {
+        return Ok(Error::redirect(
+            400,
+            "Invalid Invite",
+            "Invite code cannot contain special characters",
             "/edit_invite_code",
         ));
     }
