@@ -9,6 +9,14 @@ use block_mesh_common::constants::{
 };
 use serde::{Deserialize, Serialize};
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct ErrorQueryParams {
+    pub code: u64,
+    pub summary: String,
+    pub detailed: String,
+    pub go_to: String,
+}
+
 #[derive(Template, Debug, Serialize, Deserialize)]
 #[template(path = "error.html")]
 pub struct ErrorTemplate {
@@ -28,7 +36,7 @@ pub struct ErrorTemplate {
 }
 
 #[tracing::instrument(name = "error_page")]
-pub async fn handler(error: Query<ErrorTemplate>) -> Result<impl IntoResponse, Error> {
+pub async fn handler(error: Query<ErrorQueryParams>) -> Result<impl IntoResponse, Error> {
     let error_template = ErrorTemplate {
         code: error.code,
         summary: error.summary.clone(),
