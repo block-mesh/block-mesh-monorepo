@@ -1,5 +1,6 @@
 #![allow(dead_code)]
 use leptos::*;
+use leptos_dom::tracing;
 use wasm_bindgen::JsCast;
 use web_sys::{Window, WorkerGlobalScope};
 
