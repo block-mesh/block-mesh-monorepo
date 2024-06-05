@@ -1,23 +1,20 @@
-use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
+use crate::database::nonce::get_nonce_by_nonce::get_nonce_by_nonce;
+use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::database::user::update_verified_email::update_verified_email;
 use crate::errors::error::Error;
-use crate::middlewares::authentication::Backend;
 use axum::extract::Query;
 use axum::response::Redirect;
 use axum::Extension;
-use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::ConfirmEmailRequest;
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "email_confirm", skip(auth, pool, query))]
+#[tracing::instrument(name = "email_confirm", skip(pool, query))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
-    Extension(auth): Extension<AuthSession<Backend>>,
     Query(query): Query<ConfirmEmailRequest>,
 ) -> Result<Redirect, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
-    let user = auth.user.ok_or(Error::UserNotFound)?;
-    let nonce = get_nonce_by_user_id(&mut transaction, &user.id).await?;
+    let nonce = get_nonce_by_nonce(&mut transaction, &query.token).await?;
     return match nonce {
         None => Ok(Error::redirect(
             500,
@@ -34,7 +31,18 @@ pub async fn handler(
                     "/",
                 ))
             } else {
-                update_verified_email(&mut transaction, user.id, true)
+                let user = get_user_opt_by_id(&mut transaction, &nonce.user_id)
+                    .await
+                    .map_err(Error::from)?;
+                if user.is_none() {
+                    return Ok(Error::redirect(
+                        500,
+                        "User not found",
+                        "Please contact our support",
+                        "/",
+                    ));
+                }
+                update_verified_email(&mut transaction, user.unwrap().id, true)
                     .await
                     .map_err(Error::from)?;
                 transaction.commit().await.map_err(Error::from)?;
