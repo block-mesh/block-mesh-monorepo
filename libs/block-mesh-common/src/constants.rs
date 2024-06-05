@@ -33,6 +33,8 @@ pub static CONFIG_FILENAME: &str = "blockmesh.json";
 
 pub static BLOCKMESH_SERVER_UUID_ENVAR: &str = "BLOCKMESH_SERVER_UUID";
 
+pub static BLOCKMESH_VERSION: &str = env!("CARGO_PKG_VERSION");
+
 #[derive(Debug, Clone, Copy, Deserialize, Serialize)]
 pub enum DeviceType {
     Extension,

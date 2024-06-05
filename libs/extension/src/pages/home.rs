@@ -61,7 +61,7 @@ pub fn Home() -> impl IntoView {
             AppStatus::LoggedIn => {
                 view! {
                     <div class="bg-gray-700 flex justify-center items-center">
-                        <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
+                        <div class="bg-gray-800 p-8 shadow-md w-80">
                             {move || {
                                 error
                                     .get()
@@ -95,7 +95,7 @@ pub fn Home() -> impl IntoView {
             AppStatus::LoggedOut => {
                 view! {
                     <div class="bg-gray-700 flex justify-center items-center">
-                        <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
+                        <div class="bg-gray-800 p-8 shadow-md w-80">
                             <p class="text-white">You are not logged in</p>
                         </div>
                     </div>
@@ -105,7 +105,7 @@ pub fn Home() -> impl IntoView {
             AppStatus::WaitingEmailVerification => {
                 view! {
                     <div class="bg-gray-700 flex justify-center items-center">
-                        <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
+                        <div class="bg-gray-800 p-8 shadow-md w-80">
                             <p class="text-white">Please verify your email address and login</p>
                         </div>
                     </div>

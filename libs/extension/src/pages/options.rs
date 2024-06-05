@@ -61,7 +61,7 @@ pub fn Options() -> impl IntoView {
     view! {
         <form on:submit=|ev| ev.prevent_default()>
             <div class="bg-gray-700 flex justify-center items-center">
-                <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
+                <div class="bg-gray-800 p-8 shadow-md w-full">
                     <p class="text-white">Options</p>
                     {move || {
                         error
@@ -116,7 +116,7 @@ pub fn Options() -> impl IntoView {
         </form>
         <form on:submit=|ev| ev.prevent_default()>
             <div class="bg-gray-700 flex justify-center items-center">
-                <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
+                <div class="bg-gray-800 border-white p-8 shadow-md w-full">
                     <div class="flex items-center justify-between">
                         <button
                             class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
