@@ -3,7 +3,8 @@ use block_mesh_common::interfaces::server_api::{
     CheckTokenRequest, GetLatestInviteCodeRequest, GetLatestInviteCodeResponse, GetTokenResponse,
     LoginForm, RegisterForm,
 };
-use leptos::*;
+use leptos::leptos_dom;
+use leptos_dom::tracing;
 
 #[tracing::instrument(name = "check_token", skip(credentials), err)]
 pub async fn check_token(

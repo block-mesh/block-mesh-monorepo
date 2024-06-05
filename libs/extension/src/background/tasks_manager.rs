@@ -4,6 +4,7 @@ use crate::utils::ext_state::{AppState, AppStatus};
 use block_mesh_common::leptos_tracing::setup_leptos_tracing;
 use leptos::SignalGetUntracked;
 use leptos::*;
+use leptos_dom::tracing;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen]

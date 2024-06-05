@@ -3,6 +3,7 @@ use crate::utils::auth::login;
 use crate::utils::ext_state::{AppState, AppStatus};
 use block_mesh_common::interfaces::server_api::LoginForm;
 use leptos::*;
+use leptos_dom::tracing;
 use uuid::Uuid;
 
 #[component]
