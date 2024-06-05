@@ -1,4 +1,4 @@
-use crate::constants::{DeviceType, BLOCK_MESH_LOGGER, BLOCK_MESH_LOG_ENV};
+use crate::constants::{DeviceType, BLOCKMESH_VERSION, BLOCK_MESH_LOGGER, BLOCK_MESH_LOG_ENV};
 use reqwest::Client;
 use serde_json::{json, Value};
 use std::sync::{Arc, Once};
@@ -95,7 +95,8 @@ where
             "event": event.as_serde(),
             "env": self.env.clone(),
             "user_id": self.user_id,
-            "device_type": self.device_type.clone()
+            "device_type": self.device_type.clone(),
+            "version": BLOCKMESH_VERSION,
         });
 
         let buffer = self.buffer.clone();
