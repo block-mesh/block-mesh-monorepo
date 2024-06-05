@@ -13,7 +13,7 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
     view! {
         <nav>
             <div class="flex items-center justify-center h-full">
-                <div class="w-80 rounded-lg border-2 border-white bg-gray-800 p-8 shadow-md">
+                <div class="w-80 bg-gray-800 p-8 shadow-md">
                     <div class="flex justify-center">
                         <div class="mt-4 flex flex-col justify-center text-center text-white">
                             <div class="mb-2">
