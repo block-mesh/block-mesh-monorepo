@@ -49,11 +49,44 @@ jobs:
           key: build-extension
           cache-all-crates: true
       - name: Install wasm-pack
-        run: cargo install wasm-pack --locked
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y curl jq zip
+          cargo install wasm-pack --locked
       - name: Build
-        run: |-
+        run: |
           ./scripts/wasm_build.sh --release
           cp tmp_ext/chrome/chrome.zip chrome-extension-${{ github.event.pull_request.head.sha }}.zip
+      - name: Check Chrome Store
+        run: |
+          PKG_VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g')
+
+          mkdir -p ext-temp
+          curl -L  -o ext-temp/tmp.zip "https://clients2.google.com/service/update2/crx?response=redirect&prodversion=${{ vars.CHROME_PRODVERSION }}&acceptformat=crx2,crx3&x=id%3D${{ vars.EXTENSION_ID }}%26uc"
+          cd ext-temp && unzip tmp.zip
+          STORE_VERSION=$(cat manifest.json| jq '.version')
+          
+          RESPONSE=$(curl -X POST https://www.googleapis.com/oauth2/v4/token \
+          -d client_id=${{ secrets.CI_GOOGLE_CLIENT_ID }} \
+          -d client_secret=${{ secrets.CI_GOOGLE_CLIENT_SECRET }} \
+          -d refresh_token=${{ secrets.CI_GOOGLE_REFRESH_TOKEN }} \
+          -d grant_type=refresh_token)
+          
+          ACCESS_TOKEN=$(echo $RESPONSE | jq -r '.access_token')
+
+          RESPONSE_2=$(curl -X GET \
+          -H 'x-goog-api-version: 2' \
+          -H "Authorization: Bearer $ACCESS_TOKEN" \
+          "https://www.googleapis.com/chromewebstore/v1.1/items/${{ vars.EXTENSION_ID }}?projection=DRAFT")
+          
+          PENDING_VERSION=$(echo -E $RESPONSE_2 | jq '.crxVersion')
+          LATEST=$(printf "${PKG_VERSION}\n${STORE_VERSION}5\n${PENDING_VERSION}\n' | sort -V | head -n 1)
+
+      #          if [ "${STORE_VERSION}" != "${LATEST}" ]; then
+      #            echo "Version mismatch: ${STORE_VERSION} != ${LATEST}"
+      #            exit 1
+      #          fi
+
       - name: Archive chrome-extension artifact
         uses: actions/upload-artifact@v3
         with:
