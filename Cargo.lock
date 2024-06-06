@@ -2977,6 +2977,7 @@ dependencies = [
  "console_error_panic_hook",
  "getrandom 0.2.15",
  "js-sys",
+ "lazy_static",
  "leptos",
  "leptos-use",
  "leptos_router",
