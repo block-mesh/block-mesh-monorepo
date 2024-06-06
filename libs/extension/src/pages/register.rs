@@ -7,7 +7,6 @@ use leptos_dom::tracing;
 
 #[component]
 pub fn Register(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
-    let (register_error, set_register_error) = create_signal(None::<String>);
     let (wait_for_response, set_wait_for_response) = create_signal(false);
     let state = use_context::<AppState>().unwrap();
     let url = Signal::derive(move || state.blockmesh_url.get());
@@ -31,7 +30,7 @@ pub fn Register(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
         async move {
             if credentials.password != credentials.password_confirm {
                 tracing::warn!("Passwords do not match");
-                set_register_error.update(|e| *e = Some("Passwords do not match".to_string()));
+                AppState::set_error("Passwords do not match".to_string(), state.error);
                 return;
             }
             set_wait_for_response.update(|w| *w = true);
@@ -39,7 +38,6 @@ pub fn Register(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
             set_wait_for_response.update(|w| *w = false);
             match result {
                 Ok(_) => {
-                    set_register_error.update(|e| *e = None);
                     state.api_token.update(|t| *t = uuid::Uuid::default());
                     AppState::store_api_token(uuid::Uuid::default()).await;
                     state
@@ -52,7 +50,7 @@ pub fn Register(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
                         "Unable to register new account for {}: {err}",
                         credentials.email
                     );
-                    set_register_error.update(|e| *e = Some(err.to_string()));
+                    AppState::set_error(err.to_string(), state.error);
                 }
             }
         }
@@ -63,10 +61,8 @@ pub fn Register(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
     view! {
         <CredentialsForm
             url=url
-            title="Register"
             action_label="Register"
             action=register_action
-            error=register_error.into()
             disabled=disabled
             register=true
         />

@@ -26,9 +26,9 @@ reqwest = { workspace = true, optional = true, features = [
   "hickory-dns"
 ] }
 tracing-wasm = { workspace = true, optional = true }
+tracing-subscriber-wasm = { workspace = true, optional = true }
 ipgeolocate = { workspace = true, optional = true }
-
-
+wasm-bindgen-futures = { workspace = true, optional = true }
 
 [dependencies.uuid]
 workspace = true
@@ -40,10 +40,26 @@ features = [
   "js"
 ]
 
+[dependencies.web-sys]
+workspace = true
+features = [
+  "console",
+  "WorkerGlobalScope",
+  "Window",
+  'Headers',
+  'Request',
+  'RequestInit',
+  'RequestMode',
+  'Response',
+  "Clipboard",
+  "Navigator"
+]
+optional = true
+
 [features]
 http = ["dep:http-body-util", "dep:bytes", "dep:hyper"]
 cli = ["dep:clap", "dep:solana-sdk"]
 app-config = ["dep:clap", "dep:solana-sdk"]
 async-tracer = ["dep:tokio", "dep:reqwest"]
-leptos-tracer = ["dep:tracing-wasm"]
+leptos-tracer = ["dep:tracing-wasm", "dep:tracing-subscriber-wasm", "dep:web-sys", "dep:reqwest", "dep:wasm-bindgen-futures"]
 ip-data = ["dep:ipgeolocate", "dep:reqwest"]

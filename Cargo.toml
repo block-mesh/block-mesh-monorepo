@@ -36,6 +36,7 @@ aes-gcm-siv = { git = "https://github.com/RustCrypto/AEADs", rev = "6105d7a5591a
 curve25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dalek", rev = "8274d5cbb6fc3f38cdc742b4798173895cd2a290" }
 
 [workspace.dependencies]
+tracing-subscriber-wasm = { version = "0.1.0" }
 num-traits = { version = "0.2.19" }
 sendgrid = { version = "0.21.0" }
 tracing-wasm = { version = "0.2.1" }

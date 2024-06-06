@@ -7,6 +7,7 @@ pub mod health_check;
 pub mod invite_codes;
 pub mod login;
 pub mod logout;
+pub mod notification;
 pub mod register;
 pub mod tasks;
 pub mod uptime_report;

@@ -84,6 +84,10 @@ impl Application {
 
         let un_auth_router = Router::new()
             .route(
+                "/notification",
+                get(routes::notification::notification_page::handler),
+            )
+            .route(
                 "/email_confirm",
                 get(routes::emails::email_confirm::handler),
             )

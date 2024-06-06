@@ -4,10 +4,13 @@ use leptos_router::use_navigate;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
 use std::str::FromStr;
+use std::time::Duration;
 
 use crate::pages::page::Page;
 use crate::utils::auth::{check_token, get_latest_invite_code};
+use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
+use block_mesh_common::leptos_tracing::setup_leptos_tracing;
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 use wasm_bindgen::JsValue;
@@ -47,6 +50,8 @@ pub struct AppState {
     pub status: RwSignal<AppStatus>,
     pub uptime: RwSignal<f64>,
     pub invite_code: RwSignal<String>,
+    pub success: RwSignal<Option<String>>,
+    pub error: RwSignal<Option<String>>,
 }
 
 impl Debug for AppState {
@@ -59,6 +64,8 @@ impl Debug for AppState {
             .field("uptime", &self.uptime.get_untracked())
             .field("status", &self.status.get_untracked())
             .field("invite_code", &self.invite_code.get_untracked())
+            .field("success", &self.success.get_untracked())
+            .field("error", &self.error.get_untracked())
             .finish()
     }
 }
@@ -80,19 +87,22 @@ impl AppState {
             Self::store_device_id(device_id.clone()).await;
         }
         let device_id = uuid::Uuid::from_str(&device_id).unwrap_or_else(|_| Uuid::new_v4());
+        setup_leptos_tracing(Option::from(device_id), DeviceType::Extension);
         let uptime = Self::get_uptime().await;
         let mut invite_code = Self::get_invite_code().await;
-        if let Ok(result) = get_latest_invite_code(
-            &blockmesh_url,
-            &GetLatestInviteCodeRequest {
-                email: email.clone(),
-                api_token,
-            },
-        )
-        .await
-        {
-            invite_code = result.invite_code;
-            Self::store_invite_code(invite_code.clone()).await;
+        if !api_token.is_nil() && api_token != Uuid::default() {
+            if let Ok(result) = get_latest_invite_code(
+                &blockmesh_url,
+                &GetLatestInviteCodeRequest {
+                    email: email.clone(),
+                    api_token,
+                },
+            )
+            .await
+            {
+                invite_code = result.invite_code;
+                Self::store_invite_code(invite_code.clone()).await;
+            }
         }
 
         Self {
@@ -103,7 +113,39 @@ impl AppState {
             status: create_rw_signal(AppStatus::LoggedOut),
             device_id: create_rw_signal(device_id),
             uptime: create_rw_signal(uptime),
+            success: create_rw_signal(None),
+            error: create_rw_signal(None),
         }
+    }
+
+    #[tracing::instrument(name = "AppState::set_success")]
+    pub fn set_success<T>(success: T, signal: RwSignal<Option<String>>)
+    where
+        T: Display + Clone + Into<String> + Debug,
+    {
+        let success = Option::from(success.clone().to_string());
+        signal.update(|v| *v = success);
+        set_timeout(
+            move || {
+                signal.update(|v| *v = None);
+            },
+            Duration::from_millis(3500),
+        );
+    }
+
+    #[tracing::instrument(name = "AppState::set_error")]
+    pub fn set_error<T>(error: T, signal: RwSignal<Option<String>>)
+    where
+        T: Display + Clone + Into<String> + Debug,
+    {
+        let error = Option::from(error.clone().to_string());
+        signal.update(|v| *v = error);
+        set_timeout(
+            move || {
+                signal.update(|v| *v = None);
+            },
+            Duration::from_millis(3500),
+        );
     }
 
     pub fn has_api_token(&self) -> bool {
@@ -124,24 +166,25 @@ impl AppState {
             Self::store_device_id(device_id.clone()).await;
         }
         let device_id = uuid::Uuid::from_str(&device_id).unwrap_or_else(|_| Uuid::new_v4());
+        setup_leptos_tracing(Option::from(device_id), DeviceType::Extension);
         let email = Self::get_email().await;
         let api_token = Self::get_api_token().await;
         let api_token = uuid::Uuid::from_str(&api_token).unwrap_or_else(|_| Uuid::default());
-
         let mut invite_code = Self::get_invite_code().await;
-        if let Ok(result) = get_latest_invite_code(
-            &blockmesh_url,
-            &GetLatestInviteCodeRequest {
-                email: email.clone(),
-                api_token,
-            },
-        )
-        .await
-        {
-            invite_code = result.invite_code;
-            Self::store_invite_code(invite_code.clone()).await;
+        if context.status.get_untracked() != AppStatus::LoggedOut && context.has_api_token() {
+            if let Ok(result) = get_latest_invite_code(
+                &blockmesh_url,
+                &GetLatestInviteCodeRequest {
+                    email: email.clone(),
+                    api_token,
+                },
+            )
+            .await
+            {
+                invite_code = result.invite_code;
+                Self::store_invite_code(invite_code.clone()).await;
+            }
         }
-
         context.invite_code.update(|v| *v = invite_code.clone());
         context.blockmesh_url.update(|v| *v = blockmesh_url.clone());
         context.email.update(|v| *v = email.clone());
