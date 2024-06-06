@@ -8,6 +8,8 @@ authors.workspace = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+lazy_static = { workspace = true }
+leptos-use = { workspace = true }
 url = { workspace = true }
 leptos = { workspace = true, features = ["tracing", "csr"] }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
@@ -43,7 +45,14 @@ features = [
   'RequestMode',
   'Response',
   "Clipboard",
-  "Navigator"
+  "Navigator",
+  "WebSocket",
+  "BinaryType",
+  "Blob",
+  "ErrorEvent",
+  "FileReader",
+  "MessageEvent",
+  "ProgressEvent",
 ]
 
 [dependencies.uuid]
