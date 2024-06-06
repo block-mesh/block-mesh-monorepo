@@ -26,7 +26,14 @@ macro_rules! log_error {
     }
 }
 
+macro_rules! log_debug {
+    ( $( $t:tt )* ) => {
+        web_sys::console::debug_1(&format!( $( $t )* ).into())
+    }
+}
+
 pub(crate) use log;
+pub(crate) use log_debug;
 pub(crate) use log_error;
 pub(crate) use log_info;
 pub(crate) use log_warn;

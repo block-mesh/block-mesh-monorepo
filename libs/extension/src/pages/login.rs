@@ -8,7 +8,6 @@ use uuid::Uuid;
 
 #[component]
 pub fn Login(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
-    let (login_error, set_login_error) = create_signal(None::<String>);
     let (wait_for_response, set_wait_for_response) = create_signal(false);
     let state = use_context::<AppState>().unwrap();
     let url = Signal::derive(move || state.blockmesh_url.get());
@@ -29,9 +28,8 @@ pub fn Login(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
                 Ok(res) => {
                     state.email.update(|e| *e = credentials.email.clone());
                     AppState::store_email(credentials.email).await;
-                    set_login_error.update(|e| *e = None);
                     if res.message.is_some() {
-                        set_login_error.update(|e| *e = res.message.clone());
+                        AppState::set_error(res.message.unwrap(), state.error);
                         return;
                     }
                     if let Some(api_token) = res.api_token {
@@ -49,7 +47,10 @@ pub fn Login(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
                 }
                 Err(err) => {
                     tracing::error!("Unable to login with {}: {err}", credentials.email);
-                    set_login_error.update(|e| *e = Some(err.to_string()));
+                    AppState::set_error(
+                        "Failed to login, please check your credentials again",
+                        state.error,
+                    );
                 }
             }
         }
@@ -60,10 +61,8 @@ pub fn Login(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
     view! {
         <CredentialsForm
             url=url
-            title="Login"
             action_label="Login"
             action=login_action
-            error=login_error.into()
             disabled=disabled
             register=false
         />

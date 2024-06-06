@@ -1,6 +1,7 @@
 use crate::background::tasks::{get_task, run_task, submit_task};
 use crate::utils::connectors::set_panic_hook;
 use crate::utils::ext_state::{AppState, AppStatus};
+use block_mesh_common::constants::DeviceType;
 use block_mesh_common::leptos_tracing::setup_leptos_tracing;
 use leptos::SignalGetUntracked;
 use leptos::*;
@@ -10,7 +11,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 #[wasm_bindgen]
 pub async fn task_poller() {
     set_panic_hook();
-    setup_leptos_tracing();
+    setup_leptos_tracing(None, DeviceType::Extension);
 
     let app_state = AppState::new().await;
     AppState::init(app_state).await;
@@ -44,7 +45,24 @@ pub async fn task_poller() {
     let finished_task = match run_task(&task.url, &task.method, task.headers, task.body).await {
         Ok(v) => v,
         Err(e) => {
-            tracing::error!("finished_task: {e}");
+            tracing::error!("finished_task: error: {e}");
+            match submit_task(
+                &app_state.blockmesh_url.get_untracked(),
+                &app_state.email.get_untracked(),
+                &app_state.api_token.get_untracked(),
+                &task.id,
+                520,
+                "".to_string(),
+            )
+            .await
+            {
+                Ok(_) => {
+                    tracing::info!("successfully submitted failed task");
+                }
+                Err(e) => {
+                    tracing::error!("submit_task: error: {e}");
+                }
+            }
             return;
         }
     };
@@ -63,7 +81,7 @@ pub async fn task_poller() {
             tracing::info!("successfully submitted task");
         }
         Err(e) => {
-            tracing::error!("submit_task: {e}");
+            tracing::error!("submit_task: error: {e}");
         }
     };
 }

@@ -21,7 +21,8 @@ pub(crate) async fn get_tasks_by_user_id(
         status,
         response_code,
         response_raw,
-        created_at
+        created_at,
+        retries_count
         FROM tasks
         WHERE user_id = $1
         "#,

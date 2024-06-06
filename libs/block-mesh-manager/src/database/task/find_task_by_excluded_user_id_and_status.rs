@@ -28,7 +28,8 @@ pub(crate) async fn find_task_by_excluded_user_id_and_status(
         status,
         response_code,
         response_raw,
-        created_at
+        created_at,
+        retries_count
         FROM tasks
         WHERE user_id != $1 and status = $2
         LIMIT 1

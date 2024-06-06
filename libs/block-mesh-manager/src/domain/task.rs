@@ -125,4 +125,5 @@ pub struct Task {
     pub response_code: Option<i32>,
     pub response_raw: Option<String>,
     pub created_at: DateTime<Utc>,
+    pub retries_count: i32,
 }

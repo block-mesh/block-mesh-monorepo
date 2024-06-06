@@ -3,10 +3,8 @@ use leptos::*;
 #[component]
 pub fn CredentialsForm(
     url: Signal<String>,
-    title: &'static str,
     action_label: &'static str,
     action: Action<Vec<String>, ()>,
-    error: Signal<Option<String>>,
     disabled: Signal<bool>,
     register: bool,
 ) -> impl IntoView {
@@ -35,15 +33,6 @@ pub fn CredentialsForm(
         <form on:submit=|ev| ev.prevent_default()>
             <div class="bg-gray-700 flex justify-center items-center">
                 <div class="bg-gray-800 p-8 shadow-md w-80">
-                    <p class="text-white">{title}</p>
-                    {move || {
-                        error
-                            .get()
-                            .map(|err| {
-                                view! { <p style="color:red;">{err}</p> }
-                            })
-                    }}
-
                     <div class="mb-4">
                         <input
                             type="url"

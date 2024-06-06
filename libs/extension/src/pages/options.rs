@@ -1,6 +1,6 @@
+use crate::components::notifications::Notifications;
 use crate::utils::ext_state::AppState;
 use leptos::*;
-use std::time::Duration;
 use url::Url;
 
 #[component]
@@ -9,38 +9,23 @@ pub fn Options() -> impl IntoView {
     let state = use_context::<AppState>().unwrap();
     AppState::init_resource(state);
 
-    let (error, set_error) = create_signal(None::<String>);
-    let (success, set_success) = create_signal(None::<String>);
     let (url, set_url) = create_signal(state.blockmesh_url.get_untracked());
 
     let clear_action = create_action(move |_| async move {
         state.clear().await;
-        set_success.update(|s| *s = Some("Cache cleared".to_string()));
-        set_error.update(|e| *e = None);
-        set_timeout(
-            move || {
-                set_success.update(|s| *s = None);
-            },
-            Duration::from_millis(1500),
-        );
+        AppState::set_success("Cache cleared".to_string(), state.success);
     });
 
     let save_action = create_action(move |_| async move {
         if url.get_untracked().is_empty() {
-            set_error.update(|e| *e = Some("URL is empty".to_string()));
+            AppState::set_error("URL is empty".to_string(), state.error);
             return;
         }
         let raw_url = url.get_untracked();
         let url = Url::parse(&url.get_untracked());
         match url {
             Err(error) => {
-                set_error.update(|e| *e = Some(format!("Invalid URL: {}", error)));
-                set_timeout(
-                    move || {
-                        set_error.update(|e| *e = None);
-                    },
-                    Duration::from_millis(1500),
-                );
+                AppState::set_error(format!("Invalid URL: {}", error), state.error);
                 return;
             }
             Ok(url) => url,
@@ -48,37 +33,15 @@ pub fn Options() -> impl IntoView {
         state.blockmesh_url.update(|v| *v = raw_url.clone());
         set_url.update(|v| *v = raw_url.clone());
         AppState::store_blockmesh_url(raw_url).await;
-        set_success.update(|s| *s = Some("URL saved".to_string()));
-        set_error.update(|e| *e = None);
-        set_timeout(
-            move || {
-                set_success.update(|s| *s = None);
-            },
-            Duration::from_millis(1500),
-        );
+        AppState::set_success("URL saved".to_string(), state.success);
     });
 
     view! {
+        <Notifications/>
         <form on:submit=|ev| ev.prevent_default()>
             <div class="bg-gray-700 flex justify-center items-center">
                 <div class="bg-gray-800 p-8 shadow-md w-full">
                     <p class="text-white">Options</p>
-                    {move || {
-                        error
-                            .get()
-                            .map(|err| {
-                                view! { <p style="color:red;">{err}</p> }
-                            })
-                    }}
-
-                    {move || {
-                        success
-                            .get()
-                            .map(|success| {
-                                view! { <p style="color:green;">{success}</p> }
-                            })
-                    }}
-
                     <div class="mb-4">
                         <label class="block text-white text-sm font-bold mb-2" for="url">
                             BlockMesh URL

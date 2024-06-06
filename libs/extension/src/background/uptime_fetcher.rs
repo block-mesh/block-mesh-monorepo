@@ -1,3 +1,4 @@
+use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{GetUserUptimeRequest, GetUserUptimeResponse};
 use block_mesh_common::leptos_tracing::setup_leptos_tracing;
 use leptos::*;
@@ -9,7 +10,7 @@ use crate::utils::ext_state::AppState;
 #[wasm_bindgen]
 pub async fn uptime_fetcher() {
     set_panic_hook();
-    setup_leptos_tracing();
+    setup_leptos_tracing(None, DeviceType::Extension);
     let app_state = AppState::new().await;
     AppState::init(app_state).await;
 

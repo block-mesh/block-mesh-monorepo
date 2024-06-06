@@ -1,4 +1,5 @@
 use crate::components::navbar::NavBar;
+use crate::components::notifications::Notifications;
 use crate::pages::home::Home;
 use crate::pages::login::Login;
 use crate::pages::page::Page;
@@ -28,8 +29,10 @@ pub fn Popup() -> impl IntoView {
     };
 
     view! {
+        <Notifications/>
         <Router>
             <NavBar on_logout/>
+
             <main>
                 <Routes>
                     <Route

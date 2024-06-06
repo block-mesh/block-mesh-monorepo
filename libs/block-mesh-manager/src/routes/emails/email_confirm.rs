@@ -2,6 +2,7 @@ use crate::database::nonce::get_nonce_by_nonce::get_nonce_by_nonce;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::database::user::update_verified_email::update_verified_email;
 use crate::errors::error::Error;
+use crate::notification::notification_redirect::NotificationRedirect;
 use axum::extract::Query;
 use axum::response::Redirect;
 use axum::Extension;
@@ -46,7 +47,11 @@ pub async fn handler(
                     .await
                     .map_err(Error::from)?;
                 transaction.commit().await.map_err(Error::from)?;
-                Ok(Redirect::to("/dashboard"))
+                Ok(NotificationRedirect::redirect(
+                    "Please Login",
+                    "You email confirmed, please login into your account",
+                    "/login",
+                ))
             }
         }
     };
