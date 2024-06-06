@@ -23,14 +23,13 @@ pub fn setup_leptos_tracing(user_id: Option<Uuid>, device_type: DeviceType) {
     SET_HOOK.call_once(|| {
         let buffer: Arc<Mutex<Vec<Value>>> = Arc::new(Mutex::new(Vec::new()));
         let client: Arc<Mutex<Client>> = Arc::new(Mutex::new(Client::new()));
-        let init_url = Arc::new(BLOCK_MESH_LOGGER.to_string());
-        let x_url = init_url.clone();
+        let url = Arc::new(BLOCK_MESH_LOGGER.to_string());
         let env = std::env::var(BLOCK_MESH_LOG_ENV).unwrap_or_else(|_| "prod".to_string());
 
         let writer = HttpMakeConsoleWriter {
             client,
             buffer,
-            url: x_url.clone(),
+            url,
             env,
             device_type,
             mapped_levels: MappedLevels::default(),

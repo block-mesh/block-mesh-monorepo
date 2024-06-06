@@ -33,6 +33,7 @@ macro_rules! log_debug {
 }
 
 pub(crate) use log;
+pub(crate) use log_debug;
 pub(crate) use log_error;
 pub(crate) use log_info;
 pub(crate) use log_warn;

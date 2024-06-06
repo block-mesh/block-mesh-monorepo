@@ -2,6 +2,8 @@
 // not connected to the content scripts where wasm is loaded automatically
 import initWasmModule, {task_poller, report_uptime, uptime_fetcher} from './wasm/blockmesh_ext.js';
 
+console.log("Background script started");
+
 const PING_INTERVAL = 3 * 1000;
 
 // This keeps the service worker alive
@@ -16,7 +18,7 @@ function stayAlive() {
 setInterval(() => {
     stayAlive();
 }, PING_INTERVAL);
-console.log("1 Background script started");
+
 
 chrome.runtime.onConnect.addListener(async function () {
     console.log("onConnect");
