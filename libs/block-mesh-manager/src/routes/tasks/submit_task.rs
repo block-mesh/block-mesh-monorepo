@@ -52,7 +52,10 @@ pub async fn handler(
         query.task_id,
         query.response_code,
         Option::from(response_raw),
-        TaskStatus::Completed,
+        match query.response_code.unwrap_or(520) {
+            520 => TaskStatus::Failed,
+            _ => TaskStatus::Completed,
+        },
     )
     .await?;
     let daily_stat_opt =

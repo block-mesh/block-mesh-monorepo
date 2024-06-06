@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT\n        id,\n        user_id,\n        url,\n        method,\n        headers,\n        body,\n        assigned_user_id,\n        status,\n        response_code,\n        response_raw,\n        created_at\n        FROM tasks\n        WHERE id = $1\n        ",
+  "query": "\n        SELECT\n        id,\n        user_id,\n        url,\n        method,\n        headers,\n        body,\n        assigned_user_id,\n        status,\n        response_code,\n        response_raw,\n        created_at,\n        retries_count\n        FROM tasks\n        WHERE status = $1\n        LIMIT 1\n        ",
   "describe": {
     "columns": [
       {
@@ -57,11 +57,16 @@
         "ordinal": 10,
         "name": "created_at",
         "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 11,
+        "name": "retries_count",
+        "type_info": "Int4"
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid"
+        "Text"
       ]
     },
     "nullable": [
@@ -75,8 +80,9 @@
       false,
       true,
       true,
+      false,
       false
     ]
   },
-  "hash": "533532f9b0fe549f35fbb0fbc57b7b2020e25e425c52ef6f1293f6ff35342fe4"
+  "hash": "c5ea6fc5440644044e8027b8de39df18f075548c80d7efa950c3d1f797a8ed3f"
 }
