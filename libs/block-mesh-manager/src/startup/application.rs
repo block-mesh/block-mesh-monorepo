@@ -65,10 +65,6 @@ impl Application {
                 "/report_uptime",
                 post(routes::uptime_report::report_uptime::handler),
             )
-            .route(
-                "/get_user_uptime",
-                post(routes::uptime_report::get_user_uptime::handler),
-            )
             .route("/get_token", post(routes::api_token::get_token::handler))
             .route("/get_task", post(routes::tasks::get_task::handler))
             .route("/submit_task", post(routes::tasks::submit_task::handler))
