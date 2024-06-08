@@ -25,7 +25,7 @@ pub async fn handler(
         .ok_or_else(|| Error::NonceNotFound)?;
     state
         .email_client
-        .send_reset_password_email(&form.email, nonce.nonce.expose_secret())
+        .send_reset_password_email(&user.email, nonce.nonce.expose_secret())
         .await;
     transaction.commit().await.map_err(Error::from)?;
     Ok(NotificationRedirect::redirect(
