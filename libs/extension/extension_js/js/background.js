@@ -40,9 +40,6 @@ async function init_background() {
     setInterval(async () => {
         await report_uptime().then(onSuccess, onError);
     }, 30_000 + Math.random());
-    setInterval(async () => {
-        await uptime_fetcher().then(onSuccess, onErrorWithLog);
-    }, 30_000 + Math.random());
 }
 
 init_background().then(onSuccess, onError);

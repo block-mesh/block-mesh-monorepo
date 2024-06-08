@@ -24,6 +24,8 @@ pub async fn get_user_uptime_in_duration(
             AND
                 e1.user_id = $1
             AND
+                e2.user_id = $1
+            AND
                 e1.created_at >= $2
         "#,
         user_id,
