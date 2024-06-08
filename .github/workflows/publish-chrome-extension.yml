@@ -80,7 +80,7 @@ jobs:
           LATEST=$(printf "${PKG_VERSION}\n${STORE_VERSION}5\n${PENDING_VERSION}\n' | sort -V | head -n 1)
 
           if [ "${PENDING_VERSION}" == "${LATEST}" ]; then
-            echo "Version mismatch: ${STORE_VERSION} != ${LATEST}"
+            echo "No need to publish: ${PENDING_VERSION} == ${LATEST}"
             exit 1
           fi
 
