@@ -1,12 +1,15 @@
 [package]
 name = "cloudflare-landing-page"
-version = "0.1.0"
+version = { workspace = true }
 edition = "2021"
 
 [lib]
 crate-type = ["cdylib"]
 
 [dependencies]
+block-mesh-common = { path = "../block-mesh-common" }
+askama = { workspace = true, features = ["with-axum", "serde-json"] }
+askama_axum = { workspace = true }
 worker = { workspace = true }
 tracing = { workspace = true }
 tracing-web = { workspace = true }

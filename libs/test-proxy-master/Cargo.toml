@@ -1,6 +1,6 @@
 [package]
 name = "test-proxy-master"
-version = "0.1.0"
+version = { workspace = true }
 edition = "2021"
 authors.workspace = true
 
@@ -20,4 +20,4 @@ once_cell = { workspace = true }
 futures-util = { workspace = true }
 anyhow = { workspace = true }
 block-mesh-common = { path = "../block-mesh-common", features = ["http"] }
-uuid = { workspace = true, features = ["v4", "fast-rng", "macro-diagnostics", "serde"] }
+uuid = { workspace = true, features = ["v4", "fast-rng", "macro-diagnostics", "serde", "js"] }

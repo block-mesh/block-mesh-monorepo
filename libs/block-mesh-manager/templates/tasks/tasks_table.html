@@ -1,0 +1,35 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+    {% include "sidebar/sidebar_wrapper.html" %}
+    <div class="xl:pl-72 m-2">
+        <div class="flex justify-center m-2">
+            <button onclick='window.location.href = "/create_task"' type="button"
+                    class="focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none">
+                Create New Task
+            </button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="whitespace-no-wrap w-full table-auto text-left border-white border-solid border-2">
+                <thead>
+                <tr class="border-b bg-gray-800 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    <th class="px-4 py-3">Status</th>
+                    <th class="px-4 py-3">Status Code</th>
+                    <th class="px-4 py-3">URL</th>
+                    <th class="px-4 py-3">Method</th>
+                    <th class="px-4 py-3">Headers</th>
+                    <th class="px-4 py-3">Body</th>
+                    <th class="px-4 py-3">Response</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y bg-gray-500" id="tasks-content">
+                {% for task in tasks %}
+                {% include "task_row.html" %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

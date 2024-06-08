@@ -11,17 +11,33 @@ jobs:
   deploy:
     runs-on: ubuntu-latest
     timeout-minutes: 60
+    strategy:
+      matrix:
+        workdir: [
+          "cloudflare-landing-page",
+          "cloudflare-privacy-page",
+          "cloudflare-worker-ip-data",
+          "cloudflare-worker-logs-queue",
+          "cloudflare-worker-solana-relay",
+          "cloudflare-worker-tauri-releases",
+          "cloudflare-worker-logger-proxy"
+        ]
     steps:
       - uses: actions/checkout@v4
-      - name: Build & Deploy Worker
-        uses: cloudflare/wrangler-action@v3
-        with:
-          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
+          targets: wasm32-unknown-unknown
+          components: cargo , clippy , rust-docs , rust-std , rustc , rustfmt
       - uses: Swatinem/rust-cache@v2
         with:
-          key: cloudflare-deploy
+          key: cloudflare-deploy-${{ matrix.workdir }}
           cache-all-crates: true
+      - name: Build & Deploy Worker
+        uses: cloudflare/wrangler-action@v3
+        with:
+          wranglerVersion: "3.55.0"
+          apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          workingDirectory: libs/${{ matrix.workdir }}
+          command: deploy

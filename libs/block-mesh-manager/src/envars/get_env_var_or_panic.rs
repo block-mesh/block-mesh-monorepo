@@ -5,7 +5,7 @@ use secret::Secret;
 pub fn get_env_var_or_panic(key: AppEnvVar) -> EnvVar {
     match std::env::var(key.to_string()) {
         Ok(val) => {
-            let value = if key == AppEnvVar::WalletMnemonic || key == AppEnvVar::DatabaseUrl {
+            let value = if key == AppEnvVar::MailgunSendKey || key == AppEnvVar::DatabaseUrl {
                 EnvVar::Secret(Secret::from(val))
             } else {
                 EnvVar::Public(val)

@@ -1,4 +1,4 @@
-use block_mesh_common::interface::Stat;
+use block_mesh_common::interfaces::server_api::Stat;
 use leptos::*;
 
 #[component]

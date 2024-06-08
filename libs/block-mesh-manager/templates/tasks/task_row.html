@@ -1,0 +1,20 @@
+<tr class="text-white" id="task-{{ task.id }}">
+    <td class="px-4 py-3">{{ task.status }}</td>
+    <td class="px-4 py-3">{{ task.response_code }}</td>
+    <td class="px-4 py-3">{{ task.url }}</td>
+    <td class="px-4 py-3">{{ task.method }}</td>
+    <td class="px-4 py-3">
+        <pre>{{ task.headers }}</pre>
+    </td>
+    <td class="px-4 py-3">
+        <pre>{{ task.body }}</pre>
+    </td>
+    <td class="px-4 py-3">
+        {% if task.response_raw.0.len() > 0 %}
+        <button
+                class="inline-flex items-center gap-x-1.5 rounded-md border px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600">
+            <a href="/view_task?id={{ task.id }}">View Task</a>
+        </button>
+        {% endif %}
+    </td>
+</tr>

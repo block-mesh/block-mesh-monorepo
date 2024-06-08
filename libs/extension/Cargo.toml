@@ -1,6 +1,6 @@
 [package]
 name = "extension"
-version = "0.1.0"
+version = { workspace = true }
 edition = "2021"
 authors.workspace = true
 
@@ -8,8 +8,10 @@ authors.workspace = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+tracing-subscriber-wasm = { workspace = true }
 url = { workspace = true }
 leptos = { workspace = true, features = ["tracing", "csr"] }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
 log = { workspace = true }
 leptos_router = { workspace = true, features = ["csr"] }
 anyhow = { workspace = true }
@@ -23,11 +25,10 @@ urlencoding = { workspace = true }
 rand = { workspace = true }
 getrandom = { workspace = true, features = ["js"] }
 console_error_panic_hook = { workspace = true }
-wee_alloc = { workspace = true }
 reqwest = { workspace = true, default-features = false, features = [
   "json",
 ] }
-block-mesh-common = { path = "../block-mesh-common" }
+block-mesh-common = { path = "../block-mesh-common", features = ["leptos-tracer"] }
 thiserror = { workspace = true }
 
 [dependencies.web-sys]
@@ -41,6 +42,8 @@ features = [
   'RequestInit',
   'RequestMode',
   'Response',
+  "Clipboard",
+  "Navigator"
 ]
 
 [dependencies.uuid]
@@ -50,6 +53,7 @@ features = [
   "fast-rng", # Use a faster (but still sufficiently random) RNG
   "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
   "serde", # Enable serialization/deserialization of UUIDs
+  "js"
 ]
 
 [dev-dependencies]

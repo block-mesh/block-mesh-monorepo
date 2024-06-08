@@ -9,9 +9,13 @@
     <title>BlockMesh</title>
     {% block head %}{% endblock %}
 </head>
-<body class="h-full">
-<div id="content" >
-    {% block content %}<p>Placeholder content</p>{% endblock %}
+<body class="flex flex-col min-h-screen">
+<div id="content" class="h-screen" >
+    {% block content %}
+        <p>Placeholder content</p>
+    {% endblock %}
 </div>
+{% include "notification.html" %}
 </body>
+{% include "footer.html" %}
 </html>

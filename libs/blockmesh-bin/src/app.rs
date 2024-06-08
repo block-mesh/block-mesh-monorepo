@@ -1,6 +1,5 @@
 use crate::components::navigation::Navigation;
 use crate::leptos_state::LeptosTauriAppState;
-use crate::log::{log, log_error};
 use crate::page_routes::PageRoutes;
 use crate::pages::dashboard::Dashboard;
 use crate::pages::home::Home;
@@ -41,7 +40,7 @@ pub async fn invoke_tauri(cmd: &str, args: JsValue) -> Result<JsValue, MyJsError
     if let Ok(error) = js_sys::Reflect::get(&result, &error_attribute) {
         if error.is_string() {
             let error = error.as_string().unwrap();
-            log_error!("Command: '{}' , Failed with error: '{}'", cmd, error);
+            tracing::error!("Command: '{}' , Failed with error: '{}'", cmd, error);
             return Err(MyJsError {
                 message: error,
                 cmd: cmd.to_string(),
@@ -100,7 +99,7 @@ pub fn App() -> impl IntoView {
             if app_config.mode.is_none() {
                 app_config.mode = Some(CommandsEnum::ClientNode);
             }
-            log!("Loaded app_config: {:?}", app_config);
+            tracing::info!("Loaded app_config: {:?}", app_config);
             let state = expect_context::<LeptosTauriAppState>();
             state.app_config.set(app_config);
         },
@@ -120,7 +119,7 @@ pub fn App() -> impl IntoView {
                 }
             });
         },
-        Duration::from_secs(5),
+        Duration::from_secs(30),
     );
 
     view! {

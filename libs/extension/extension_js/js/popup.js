@@ -28,7 +28,9 @@ document.addEventListener('DOMContentLoaded', async function () {
 
 // listens for msgs from WASM
 chrome.runtime.onMessage.addListener((msg, sender) => {
-        console.log("Popup::onMessage", {msg, sender});
+        if (msg !== "ping") {
+            console.log("Popup::onMessage", {msg, sender});
+        }
         return true
     }
 );

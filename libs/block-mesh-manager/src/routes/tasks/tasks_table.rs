@@ -6,6 +6,11 @@ use askama::Template;
 use askama_axum::IntoResponse;
 use axum::Extension;
 use axum_login::AuthSession;
+use block_mesh_common::constants::{
+    BLOCK_MESH_APP_SERVER, BLOCK_MESH_CHROME_EXTENSION_LINK, BLOCK_MESH_GITBOOK, BLOCK_MESH_GITHUB,
+    BLOCK_MESH_LANDING_PAGE_IMAGE, BLOCK_MESH_LOGO, BLOCK_MESH_SUPPORT_CHAT,
+    BLOCK_MESH_SUPPORT_EMAIL, BLOCK_MESH_TWITTER,
+};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -13,10 +18,20 @@ use sqlx::PgPool;
 use std::fmt::Display;
 use uuid::Uuid;
 
+#[allow(dead_code)]
 #[derive(Template)]
-#[template(path = "tasks_table.html")]
+#[template(path = "tasks/tasks_table.html")]
 struct TasksTableTemplate {
     tasks: Vec<TaskForTemplate>,
+    pub chrome_extension_link: String,
+    pub app_server: String,
+    pub github: String,
+    pub twitter: String,
+    pub gitbook: String,
+    pub logo: String,
+    pub image: String,
+    pub support: String,
+    pub chat: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -70,16 +85,26 @@ impl From<Task> for TaskForTemplate {
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,
-) -> impl IntoResponse {
-    let mut transaction = pool.begin().await.map_err(Error::from).unwrap();
-    let user = auth.user.ok_or(Error::UserNotFound).unwrap();
+) -> Result<impl IntoResponse, Error> {
+    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let user = auth.user.ok_or(Error::UserNotFound)?;
     let tasks = get_tasks_by_user_id(&mut transaction, &user.id)
         .await
-        .map_err(Error::from)
-        .unwrap();
+        .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from).unwrap();
 
     let tasks: Vec<TaskForTemplate> = tasks.into_iter().map(TaskForTemplate::from).collect();
 
-    TasksTableTemplate { tasks }
+    Ok(TasksTableTemplate {
+        tasks,
+        chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
+        app_server: BLOCK_MESH_APP_SERVER.to_string(),
+        github: BLOCK_MESH_GITHUB.to_string(),
+        twitter: BLOCK_MESH_TWITTER.to_string(),
+        gitbook: BLOCK_MESH_GITBOOK.to_string(),
+        logo: BLOCK_MESH_LOGO.to_string(),
+        image: BLOCK_MESH_LANDING_PAGE_IMAGE.to_string(),
+        support: BLOCK_MESH_SUPPORT_EMAIL.to_string(),
+        chat: BLOCK_MESH_SUPPORT_CHAT.to_string(),
+    })
 }

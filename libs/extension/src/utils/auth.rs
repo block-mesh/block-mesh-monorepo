@@ -1,7 +1,12 @@
 use anyhow::anyhow;
+use block_mesh_common::interfaces::server_api::{
+    CheckTokenRequest, GetLatestInviteCodeRequest, GetLatestInviteCodeResponse, GetTokenResponse,
+    LoginForm, RegisterForm,
+};
+use leptos::leptos_dom;
+use leptos_dom::tracing;
 
-use block_mesh_common::interface::{CheckTokenRequest, GetTokenResponse, LoginForm, RegisterForm};
-
+#[tracing::instrument(name = "check_token", skip(credentials), err)]
 pub async fn check_token(
     blockmesh_url: &str,
     credentials: &CheckTokenRequest,
@@ -18,6 +23,7 @@ pub async fn check_token(
     Ok(response)
 }
 
+#[tracing::instrument(name = "register", skip(credentials), err)]
 pub async fn register(blockmesh_url: &str, credentials: &RegisterForm) -> anyhow::Result<()> {
     let url = format!("{}/register", blockmesh_url);
     let client = reqwest::Client::new();
@@ -29,11 +35,30 @@ pub async fn register(blockmesh_url: &str, credentials: &RegisterForm) -> anyhow
     }
 }
 
+#[tracing::instrument(name = "login", skip(credentials), err)]
 pub async fn login(
     blockmesh_url: &str,
     credentials: &LoginForm,
 ) -> anyhow::Result<GetTokenResponse> {
     let url = format!("{}/api/get_token", blockmesh_url);
+    let client = reqwest::Client::new();
+    let response = client
+        .post(&url)
+        .header("Content-Type", "application/json")
+        .json(&credentials)
+        .send()
+        .await?
+        .json()
+        .await?;
+    Ok(response)
+}
+
+#[tracing::instrument(name = "get_latest_invite_code", skip(credentials), err)]
+pub async fn get_latest_invite_code(
+    blockmesh_url: &str,
+    credentials: &GetLatestInviteCodeRequest,
+) -> anyhow::Result<GetLatestInviteCodeResponse> {
+    let url = format!("{}/api/get_latest_invite_code", blockmesh_url);
     let client = reqwest::Client::new();
     let response = client
         .post(&url)

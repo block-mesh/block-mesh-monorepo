@@ -1,6 +1,6 @@
 [package]
 name = "block-mesh-solana-client"
-version = "0.1.0"
+version = { workspace = true }
 edition = "2021"
 authors.workspace = true
 
@@ -19,7 +19,7 @@ tracing-subscriber = { workspace = true, features = ["env-filter"] }
 tokio = { workspace = true, features = ["full"] }
 hyper-util = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-uuid = { workspace = true, features = ["v4"] }
+uuid = { workspace = true, features = ["v4", "js"] }
 rustc-hash = { workspace = true }
 secret = { path = "../secret" }
 serde_json = { workspace = true }

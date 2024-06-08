@@ -1,4 +1,4 @@
-#[allow(unused_macros, unused_imports)]
+#![allow(unused_macros, unused_imports)]
 
 macro_rules! log {
     ( $( $t:tt )* ) => {

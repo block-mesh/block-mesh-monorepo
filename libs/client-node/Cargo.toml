@@ -1,6 +1,6 @@
 [package]
 name = "client-node"
-version = "0.1.0"
+version = { workspace = true }
 edition = "2021"
 authors.workspace = true
 
@@ -23,9 +23,8 @@ tokio = { workspace = true, features = ["full"] }
 hyper-util = { workspace = true }
 once_cell = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-uuid = { workspace = true, features = ["v4"] }
+uuid = { workspace = true, features = ["v4", "js"] }
 rustc-hash = { workspace = true }
-ipapi-is-rust = { path = "../ipapi-is-rust" }
 serde_json = { workspace = true }
-block-mesh-common = { path = "../block-mesh-common", features = ["http"] }
+block-mesh-common = { path = "../block-mesh-common", features = ["http", "ip-data"] }
 http-body-util = { workspace = true }

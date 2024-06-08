@@ -1,6 +1,6 @@
 [package]
 name = "test-proxy-endpoint"
-version = "0.1.0"
+version = { workspace = true }
 edition = "2021"
 authors.workspace = true
 
@@ -18,4 +18,4 @@ rustc-hash = { workspace = true }
 http-body-util = { workspace = true }
 bytes = { workspace = true }
 block-mesh-common = { path = "../block-mesh-common", features = ["http"] }
-uuid = { workspace = true, features = ["v4", "fast-rng", "macro-diagnostics", "serde"] }
+uuid = { workspace = true, features = ["v4", "fast-rng", "macro-diagnostics", "serde", "js"] }

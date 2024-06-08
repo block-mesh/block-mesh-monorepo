@@ -1,8 +1,8 @@
 use crate::database::api_token::find_token::find_token;
+use crate::database::task::count_user_tasks_in_period::count_user_tasks_in_period;
 use crate::database::task::create_task::create_task;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::task::TaskMethod;
-use crate::domain::user::UserRole;
 use crate::errors::error::Error;
 use axum::{Extension, Json};
 use serde::{Deserialize, Serialize};
@@ -40,8 +40,10 @@ pub async fn handler(
     if user.email != body.email {
         return Err(Error::UserNotFound);
     }
-    if user.role != UserRole::Admin {
-        return Err(Error::Unauthorized);
+
+    let users_tasks_count = count_user_tasks_in_period(&mut transaction, &user.id, 60).await?;
+    if users_tasks_count > 50 {
+        return Err(Error::TooManyTasks);
     }
 
     let task_id = create_task(

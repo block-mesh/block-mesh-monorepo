@@ -9,6 +9,7 @@ use crate::tauri_storage::setup_storage;
 use crate::windows_events::on_window_event;
 use block_mesh_common::app_config::AppConfig;
 use block_mesh_common::cli::CliArgs;
+use block_mesh_common::constants::DeviceType;
 use block_mesh_common::tracing::setup_tracing;
 use clap::Parser;
 use std::process::ExitCode;
@@ -37,8 +38,8 @@ async fn main() -> anyhow::Result<ExitCode> {
     } else {
         AppConfig::default()
     };
-    config.user_id = config.user_id.or(Some(Uuid::new_v4()));
-    setup_tracing(config.user_id.unwrap());
+    config.device_id = config.device_id.or(Some(Uuid::new_v4()));
+    setup_tracing(config.device_id.unwrap(), DeviceType::Desktop);
 
     let app_state = Arc::new(Mutex::new(AppState {
         config,

@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            SELECT\n                SUM(EXTRACT(EPOCH FROM (e2.created_at - e1.created_at))) AS total_seconds\n            FROM\n                uptime_reports e1\n            JOIN\n                uptime_reports e2 ON e1.created_at < e2.created_at\n            AND\n                ABS(EXTRACT(EPOCH FROM (e1.created_at - e2.created_at))) <= 60\n            AND\n                e1.user_id = $1\n            AND\n                e2.user_id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "total_seconds",
+        "type_info": "Numeric"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "989a2485a3519e5d08fbba14bad25a9d3ca761579dea0004200239c03b08763a"
+}

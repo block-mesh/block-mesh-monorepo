@@ -3,6 +3,8 @@ use wasm_bindgen::prelude::wasm_bindgen;
 
 #[allow(unused_imports)]
 use background::*;
+use block_mesh_common::constants::DeviceType;
+use block_mesh_common::leptos_tracing::setup_leptos_tracing;
 
 #[allow(unused_imports)]
 use pages::*;
@@ -17,17 +19,19 @@ mod components;
 mod pages;
 mod utils;
 
-#[global_allocator]
-static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
+// #[global_allocator]
+// static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
 #[wasm_bindgen]
 pub fn mount_popup() {
     set_panic_hook();
+    setup_leptos_tracing(None, DeviceType::Extension);
     mount_to_body(Popup);
 }
 
 #[wasm_bindgen]
 pub fn mount_options() {
     set_panic_hook();
+    setup_leptos_tracing(None, DeviceType::Extension);
     mount_to_body(Options);
 }
