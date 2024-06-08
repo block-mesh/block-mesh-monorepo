@@ -85,7 +85,7 @@ pub async fn run_task(
     }
 }
 
-#[tracing::instrument(name = "submit_task", ret, err)]
+#[tracing::instrument(name = "submit_task", err)]
 pub async fn submit_task(
     base_url: &str,
     email: &str,
