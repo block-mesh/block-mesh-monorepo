@@ -55,16 +55,16 @@ jobs:
     runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v4
-      - name: "Cache"
-        uses: Swatinem/rust-cache@v2
-        with:
-          key: tauri-build-${{ matrix.target }}
-          cache-all-crates: true
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
           targets: wasm32-unknown-unknown , ${{ matrix.target }}
+      - name: "Cache"
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: tauri-build-${{ matrix.target }}
+          cache-all-crates: true
       - name: Install sqlx-cli
         run: cargo install sqlx-cli
           --version=${{ vars.SQLX_VERSION }}
