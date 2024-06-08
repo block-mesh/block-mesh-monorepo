@@ -92,6 +92,21 @@ impl Application {
                 get(routes::emails::email_confirm::handler),
             )
             .route(
+                "/reset_password",
+                get(routes::password::reset_password_form::handler)
+                    .post(routes::password::reset_password_post::handler),
+            )
+            .route(
+                "/resend_confirmation_email",
+                get(routes::emails::resend_confirm_email_form::handler)
+                    .post(routes::emails::resend_confirm_email_post::handler),
+            )
+            .route(
+                "/new_password",
+                get(routes::password::new_password_form::handler)
+                    .post(routes::password::new_password_post::handler),
+            )
+            .route(
                 "/",
                 get(routes::login::login_form::handler).post(routes::login::login_post::handler),
             )

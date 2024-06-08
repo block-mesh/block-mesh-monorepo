@@ -43,6 +43,8 @@ pub enum Error {
     TaskResponseNotFound,
     #[error("Not your task")]
     NotYourTask,
+    #[error("Token Mismatch")]
+    TokenMismatch,
 }
 
 impl Error {
@@ -63,6 +65,9 @@ impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         tracing::error!("Error occurred: {}", self);
         match self {
+            Error::TokenMismatch => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+            }
             Error::NotYourTask => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
             }
@@ -122,6 +127,7 @@ impl From<Error> for StatusCode {
     fn from(error: Error) -> Self {
         tracing::error!("Error occurred: {}", error);
         match error {
+            Error::TokenMismatch => StatusCode::INTERNAL_SERVER_ERROR,
             Error::NotYourTask => StatusCode::INTERNAL_SERVER_ERROR,
             Error::TaskResponseNotFound => StatusCode::INTERNAL_SERVER_ERROR,
             Error::TooManyTasks => StatusCode::INTERNAL_SERVER_ERROR,

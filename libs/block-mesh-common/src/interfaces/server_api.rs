@@ -88,6 +88,29 @@ pub struct LoginForm {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct ResetPasswordForm {
+    pub email: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ResendConfirmEmailForm {
+    pub email: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct NewPasswordQuery {
+    pub token: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct NewPasswordForm {
+    pub email: String,
+    pub token: String,
+    pub password: String,
+    pub password_confirm: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct RegisterForm {
     pub email: String,
     pub password: String,
