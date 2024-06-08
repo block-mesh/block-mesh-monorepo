@@ -77,13 +77,12 @@ jobs:
           "https://www.googleapis.com/chromewebstore/v1.1/items/${{ vars.EXTENSION_ID }}?projection=DRAFT")
           
           PENDING_VERSION=$(echo -E $RESPONSE_2 | jq '.crxVersion')
-          LATEST=$(printf "${PKG_VERSION}\n${PENDING_VERSION}\n' | sort -V -r | head -n 1)
+          LATEST=$(printf "${PKG_VERSION}\n${PENDING_VERSION}\n" | sort -V -r | head -n 1)
 
           if [ "${PENDING_VERSION}" == "${LATEST}" ]; then
             echo "No need to publish: ${PENDING_VERSION} == ${LATEST}"
             exit 1
           fi
-
       - name: Archive chrome-extension artifact
         uses: actions/upload-artifact@v3
         with:
