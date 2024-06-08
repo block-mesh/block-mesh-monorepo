@@ -2,13 +2,10 @@ name: Update Chrome Extension
 permissions:
   contents: "write"
 on:
-  push:
-    branches:
-      - fix-version
-  #workflow_run:
-  #  workflows: ["Tag"]
-  #  types:
-  #    - "completed"
+  workflow_run:
+    workflows: ["Tag"]
+    types:
+      - "completed"
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -61,10 +58,10 @@ jobs:
         run: |
           PKG_VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g')
 
-          mkdir -p ext-temp
-          curl -L  -o ext-temp/tmp.zip "https://clients2.google.com/service/update2/crx?response=redirect&prodversion=${{ vars.CHROME_PRODVERSION }}&acceptformat=crx2,crx3&x=id%3D${{ vars.EXTENSION_ID }}%26uc"
-          cd ext-temp && unzip tmp.zip
-          STORE_VERSION=$(cat manifest.json| jq '.version')
+          # mkdir -p ext-temp
+          # curl -L  -o ext-temp/tmp.zip "https://clients2.google.com/service/update2/crx?response=redirect&prodversion=${{ vars.CHROME_PRODVERSION }}&acceptformat=crx2,crx3&x=id%3D${{ vars.EXTENSION_ID }}%26uc"
+          # cd ext-temp && unzip tmp.zip
+          # STORE_VERSION=$(cat manifest.json| jq '.version')
           
           RESPONSE=$(curl -X POST https://www.googleapis.com/oauth2/v4/token \
           -d client_id=${{ secrets.CI_GOOGLE_CLIENT_ID }} \
@@ -80,12 +77,12 @@ jobs:
           "https://www.googleapis.com/chromewebstore/v1.1/items/${{ vars.EXTENSION_ID }}?projection=DRAFT")
           
           PENDING_VERSION=$(echo -E $RESPONSE_2 | jq '.crxVersion')
-          LATEST=$(printf "${PKG_VERSION}\n${STORE_VERSION}5\n${PENDING_VERSION}\n' | sort -V | head -n 1)
+          LATEST=$(printf "${PKG_VERSION}\n${PENDING_VERSION}\n' | sort -V -r | head -n 1)
 
-      #          if [ "${STORE_VERSION}" != "${LATEST}" ]; then
-      #            echo "Version mismatch: ${STORE_VERSION} != ${LATEST}"
-      #            exit 1
-      #          fi
+          if [ "${PENDING_VERSION}" == "${LATEST}" ]; then
+            echo "No need to publish: ${PENDING_VERSION} == ${LATEST}"
+            exit 1
+          fi
 
       - name: Archive chrome-extension artifact
         uses: actions/upload-artifact@v3
@@ -115,12 +112,13 @@ jobs:
       - name: Install webstore cli
         run: |-
           npm install -g chrome-webstore-upload-cli
-      # - name: Upload step
-      #   run: |-
-      #     chrome-webstore-upload upload \\
-      #       --source chrome-extension-${{ github.event.pull_request.head.sha }}.zip \\
-      #       --extension-id ${{ env.EXTENSION_ID }} \\
-      #       --client-id ${{ secrets.CI_GOOGLE_CLIENT_ID }} \\
-      #       --client-secret ${{ secrets.CI_GOOGLE_CLIENT_SECRET }} \\
-      #       --refresh-token ${{ secrets.CI_GOOGLE_REFRESH_TOKEN }}
+      - name: Upload step
+        run: |-
+          chrome-webstore-upload upload \\
+            --auto-publish \\
+            --source chrome-extension-${{ github.event.pull_request.head.sha }}.zip \\
+            --extension-id ${{ env.EXTENSION_ID }} \\
+            --client-id ${{ secrets.CI_GOOGLE_CLIENT_ID }} \\
+            --client-secret ${{ secrets.CI_GOOGLE_CLIENT_SECRET }} \\
+            --refresh-token ${{ secrets.CI_GOOGLE_REFRESH_TOKEN }}
 # https://jam.dev/blog/automating-chrome-extension-publishing/
