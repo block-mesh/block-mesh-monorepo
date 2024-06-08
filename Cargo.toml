@@ -40,7 +40,7 @@ tracing-subscriber-wasm = { version = "0.1.0" }
 num-traits = { version = "0.2.19" }
 sendgrid = { version = "0.21.0" }
 tracing-wasm = { version = "0.2.1" }
-tauri = { version = "1.6.1", features = ["shell-open", "system-tray", "updater", "native-tls-vendored", "reqwest-native-tls-vendored"] }
+tauri = { version = "1.6.1", features = ["shell-open", "system-tray", "updater", "native-tls-vendored", "reqwest-native-tls-vendored", "macos-private-api"] }
 tauri-build = { version = "1.5.1", features = [] }
 tauri-plugin-autostart = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
 tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }

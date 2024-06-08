@@ -11,7 +11,7 @@ edition = "2021"
 tauri-build = { workspace = true, features = [] }
 
 [dependencies]
-tauri = { workspace = true, features = ["shell-open", "system-tray"] }
+tauri = { workspace = true, features = ["shell-open", "system-tray", "macos-private-api"] }
 tauri-plugin-autostart = { workspace = true }
 tauri-plugin-single-instance = { workspace = true }
 futures-util = { workspace = true }
