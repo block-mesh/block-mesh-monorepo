@@ -17,12 +17,16 @@ pub async fn handler(
     Form(form): Form<ResetPasswordForm>,
 ) -> Result<Redirect, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
-    let user = get_user_opt_by_email(&mut transaction, &form.email)
+    let email = form.email.clone().to_ascii_lowercase();
+    let user = get_user_opt_by_email(&mut transaction, &email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
         .await?
         .ok_or_else(|| Error::NonceNotFound)?;
+    if email != user.email {
+        return Err(Error::UserNotFound);
+    }
     state
         .email_client
         .send_reset_password_email(&user.email, nonce.nonce.expose_secret())

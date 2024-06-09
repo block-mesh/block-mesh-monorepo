@@ -15,6 +15,7 @@ pub async fn handler(
     Form(form): Form<NewPasswordForm>,
 ) -> Result<Redirect, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let email = form.email.clone().to_ascii_lowercase();
     if form.password_confirm != form.password {
         return Ok(Error::redirect(
             400,
@@ -23,7 +24,7 @@ pub async fn handler(
             "/register",
         ));
     }
-    let user = get_user_opt_by_email(&mut transaction, &form.email)
+    let user = get_user_opt_by_email(&mut transaction, &email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
@@ -31,6 +32,9 @@ pub async fn handler(
         .ok_or_else(|| Error::NonceNotFound)?;
     if *nonce.nonce.expose_secret() != form.token {
         return Err(Error::TokenMismatch);
+    }
+    if email != user.email {
+        return Err(Error::UserNotFound);
     }
     let hashed_password = hash(form.password.clone(), DEFAULT_COST)?;
     update_user_password(&mut transaction, user.id, hashed_password).await?;
