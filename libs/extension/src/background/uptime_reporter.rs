@@ -6,7 +6,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use block_mesh_common::leptos_tracing::setup_leptos_tracing;
 
 use crate::utils::connectors::set_panic_hook;
-use crate::utils::ext_state::AppState;
+use crate::utils::ext_state::{AppState, AppStatus};
 
 #[wasm_bindgen]
 pub async fn report_uptime() {
@@ -16,6 +16,9 @@ pub async fn report_uptime() {
     AppState::init(app_state).await;
 
     if !app_state.has_api_token() {
+        return;
+    }
+    if app_state.status.get_untracked() == AppStatus::LoggedOut {
         return;
     }
 
