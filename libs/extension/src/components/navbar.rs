@@ -12,10 +12,10 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
     let support_href = format!("mailto: {}", BLOCK_MESH_SUPPORT_EMAIL);
     let (download_speed, set_download_speed) = create_signal(state.download_speed.get());
     let (upload_speed, set_upload_speed) = create_signal(state.upload_speed.get());
-    let display_bandwidth = Signal::derive(move || {
+    let _display_bandwidth = Signal::derive(move || {
         let d = download_speed.get();
         let u = upload_speed.get();
-        d > 0f64 && u > 0f64
+        d > 0f64 && u > 0f64 && status.get() == AppStatus::LoggedIn
     });
     set_timeout(
         move || {
@@ -92,22 +92,22 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
                                 </a>
                             </div>
                             <Show
-                                when=move || display_bandwidth.get()
+                                when=move || false
                                 fallback=|| {
                                     view! {}
                                 }
                             >
 
                                 <div class="mb-2">
-                                    <span class="mr-1 align-middle text-left">Up M/s:</span>
+                                    <span class="mr-1 align-middle text-left">Upload:</span>
                                     <span class="align-middle text-right">
-                                        {{ format!("{:.2}", upload_speed.get()) }}
+                                        {{ format!("{:.2} [mbit/s]", upload_speed.get()) }}
                                     </span>
                                 </div>
                                 <div class="mb-2">
-                                    <span class="mr-1 align-middle text-left">Down M/s:</span>
+                                    <span class="mr-1 align-middle text-left">Download:</span>
                                     <span class="align-middle text-right">
-                                        {{ format!("{:.2}", download_speed.get()) }}
+                                        {{ format!("{:.2} [mbit/s]", download_speed.get()) }}
                                     </span>
                                 </div>
                             </Show>
