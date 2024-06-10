@@ -22,6 +22,7 @@ CREATE INDEX bandwidth_reports_country ON bandwidth_reports (country);
 CREATE INDEX bandwidth_reports_ip ON bandwidth_reports (ip);
 CREATE INDEX bandwidth_reports_asn ON bandwidth_reports (asn);
 CREATE INDEX bandwidth_reports_colo ON bandwidth_reports (colo);
+CREATE INDEX bandwidth_reports_user_id ON bandwidth_reports (user_id);
 
 CREATE TRIGGER trg_make_archive_of_changes_for_bandwidth_reports
     AFTER INSERT OR DELETE OR UPDATE
