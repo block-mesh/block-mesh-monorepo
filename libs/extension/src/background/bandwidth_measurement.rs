@@ -29,8 +29,8 @@ pub async fn measure_bandwidth() {
         return;
     }
     let url = &app_state.blockmesh_url.get_untracked();
-    let download_speed = test_download(1_000_000).await.unwrap_or_default();
-    let upload_speed = test_upload(1_000_000).await.unwrap_or_default();
+    let download_speed = test_download(100_000).await.unwrap_or_default();
+    let upload_speed = test_upload(100_000).await.unwrap_or_default();
     let latency = test_latency().await.unwrap_or_default();
     let metadata = fetch_metadata().await.unwrap_or_default();
     log!(

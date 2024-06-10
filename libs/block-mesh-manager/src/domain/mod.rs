@@ -1,5 +1,5 @@
 pub mod api_token;
-mod bandwith_report;
+pub mod bandwidth_report;
 pub mod daily_stat;
 pub mod invite_code;
 pub mod nonce;
