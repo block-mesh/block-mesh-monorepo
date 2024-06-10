@@ -44,6 +44,7 @@ struct DashboardTemplate {
     pub image: String,
     pub support: String,
     pub chat: String,
+    pub points: f64,
 }
 
 #[tracing::instrument(name = "dashboard", skip(auth))]
@@ -83,11 +84,14 @@ pub async fn handler(
         .map_err(Error::from)?;
     let user_since = (Utc::now() - db_user.created_at).num_days();
     transaction.commit().await.map_err(Error::from)?;
+
+    let points =
+        (overall_uptime / (24 * 60 * 60) as f64) * 100.0 + (overall_task_count as f64 * 10.0);
+
     let template = DashboardTemplate {
-        // uptime_rank,
+        points,
         overall_uptime,
         overall_task_count,
-        // rank,
         invite_code: user_invite_code.invite_code,
         number_of_users_invited,
         last_24_hours_tasks,
