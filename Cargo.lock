@@ -8351,6 +8351,7 @@ name = "speed-test"
 version = "0.0.27"
 dependencies = [
  "anyhow",
+ "chrono",
  "regex",
  "reqwest",
  "tokio",

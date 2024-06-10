@@ -143,3 +143,22 @@ pub struct GetUserUptimeResponse {
 pub struct GetLatestInviteCodeResponse {
     pub invite_code: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ReportBandwidthRequest {
+    pub email: String,
+    pub api_token: Uuid,
+    pub download_speed: f64,
+    pub upload_speed: f64,
+    pub latency: f64,
+    pub city: String,
+    pub country: String,
+    pub ip: String,
+    pub asn: String,
+    pub colo: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ReportBandwidthResponse {
+    pub status_code: u16,
+}

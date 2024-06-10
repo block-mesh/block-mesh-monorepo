@@ -1,17 +1,18 @@
 use crate::{BASE_URL, DOWNLOAD_URL};
+use chrono::Utc;
 use regex::Regex;
 use reqwest::Client;
-use std::time::Instant;
+use std::cmp;
 
 pub async fn test_latency() -> anyhow::Result<f64> {
     let client = Client::new();
     let url = &format!("{}/{}{}", BASE_URL, DOWNLOAD_URL, 0);
     let req_builder = client.get(url);
-
-    let start = Instant::now();
+    let start = Utc::now();
     let response = req_builder.send().await.expect("failed to get response");
     let _status_code = response.status();
-    let duration = start.elapsed().as_secs_f64() * 1_000.0;
+    let end = Utc::now();
+    let duration = cmp::max((end - start).num_milliseconds(), 1) as f64;
 
     let re = Regex::new(r"cfRequestDuration;dur=([\d.]+)").unwrap();
     let cf_req_duration: f64 = re
