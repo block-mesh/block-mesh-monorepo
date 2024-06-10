@@ -78,9 +78,6 @@ pub async fn handler(
     let overall_uptime = get_user_overall_uptime(&mut transaction, user.id)
         .await
         .map_err(Error::from)?;
-    // let uptime_rank = get_user_uptime_rank(&mut transaction, user.id)
-    //     .await
-    //     .map_err(Error::from)?;
     let last_24_hours_uptime = get_user_uptime_in_duration(&mut transaction, user.id, 24 * 60 * 60)
         .await
         .map_err(Error::from)?;

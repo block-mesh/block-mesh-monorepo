@@ -14,7 +14,7 @@ pub async fn get_user_uptime_in_duration(
     let count: Option<BigDecimal> = sqlx::query_scalar!(
         r#"
             SELECT
-                SUM(EXTRACT(EPOCH FROM (e2.created_at - e1.created_at))) AS total_seconds
+                SUM(EXTRACT(EPOCH FROM (e2.created_at - e1.created_at))) AS total_seconds_get_user_uptime_in_duration
             FROM
                 uptime_reports e1
             JOIN
@@ -27,6 +27,8 @@ pub async fn get_user_uptime_in_duration(
                 e2.user_id = $1
             AND
                 e1.created_at >= $2
+            AND
+                e2.created_at >= $2
         "#,
         user_id,
         since
