@@ -25,8 +25,8 @@ pub async fn measure_bandwidth() {
         return;
     }
 
-    let download_speed = test_download(100_000).await;
-    let upload_speed = test_upload(100_000).await;
-    let latency_speed = test_latency().await;
-    let metadata = fetch_metadata().await;
+    let _download_speed = test_download(100_000).await;
+    let _upload_speed = test_upload(100_000).await;
+    let _latency_speed = test_latency().await;
+    let _metadata = fetch_metadata().await;
 }
