@@ -8,6 +8,8 @@ pub enum StorageValues {
     DeviceId,
     Uptime,
     InviteCode,
+    DownloadSpeed,
+    UploadSpeed,
 }
 
 impl Display for StorageValues {
@@ -19,6 +21,8 @@ impl Display for StorageValues {
             StorageValues::DeviceId => "device_id".to_string(),
             StorageValues::Uptime => "uptime".to_string(),
             StorageValues::InviteCode => "invite_code".to_string(),
+            StorageValues::DownloadSpeed => "download_speed".to_string(),
+            StorageValues::UploadSpeed => "upload_speed".to_string(),
         };
         write!(f, "{}", str)
     }

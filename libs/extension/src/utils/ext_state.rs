@@ -52,6 +52,8 @@ pub struct AppState {
     pub invite_code: RwSignal<String>,
     pub success: RwSignal<Option<String>>,
     pub error: RwSignal<Option<String>>,
+    pub download_speed: RwSignal<f64>,
+    pub upload_speed: RwSignal<f64>,
 }
 
 impl Debug for AppState {
@@ -66,6 +68,8 @@ impl Debug for AppState {
             .field("invite_code", &self.invite_code.get_untracked())
             .field("success", &self.success.get_untracked())
             .field("error", &self.error.get_untracked())
+            .field("download_speed", &self.download_speed.get_untracked())
+            .field("upload_speed", &self.upload_speed.get_untracked())
             .finish()
     }
 }
@@ -104,6 +108,8 @@ impl AppState {
                 Self::store_invite_code(invite_code.clone()).await;
             }
         }
+        let download_speed = Self::get_download_speed().await;
+        let upload_speed = Self::get_upload_speed().await;
 
         Self {
             invite_code: create_rw_signal(invite_code),
@@ -115,6 +121,8 @@ impl AppState {
             uptime: create_rw_signal(uptime),
             success: create_rw_signal(None),
             error: create_rw_signal(None),
+            download_speed: create_rw_signal(download_speed),
+            upload_speed: create_rw_signal(upload_speed),
         }
     }
 
@@ -185,6 +193,11 @@ impl AppState {
                 Self::store_invite_code(invite_code.clone()).await;
             }
         }
+        let download_speed = Self::get_download_speed().await;
+        let upload_speed = Self::get_upload_speed().await;
+
+        context.upload_speed.update(|v| *v = upload_speed);
+        context.download_speed.update(|v| *v = download_speed);
         context.invite_code.update(|v| *v = invite_code.clone());
         context.blockmesh_url.update(|v| *v = blockmesh_url.clone());
         context.email.update(|v| *v = email.clone());
@@ -267,6 +280,22 @@ impl AppState {
         .await;
     }
 
+    pub async fn store_download_speed(uptime: f64) {
+        set_storage_value(
+            &StorageValues::DownloadSpeed.to_string(),
+            JsValue::from_f64(uptime),
+        )
+        .await;
+    }
+
+    pub async fn store_upload_speed(uptime: f64) {
+        set_storage_value(
+            &StorageValues::UploadSpeed.to_string(),
+            JsValue::from_f64(uptime),
+        )
+        .await;
+    }
+
     pub async fn get_blockmesh_url() -> String {
         get_storage_value(StorageValues::BlockMeshUrl.to_string().as_str())
             .await
@@ -303,9 +332,20 @@ impl AppState {
     }
 
     pub async fn get_uptime() -> f64 {
-        get_storage_value(StorageValues::Uptime.to_string().as_str())
-            .await
-            .as_f64()
-            .unwrap_or_default()
+        let value = get_storage_value(StorageValues::Uptime.to_string().as_str()).await;
+        let str = value.as_string().unwrap_or_default();
+        f64::from_str(&str).unwrap_or_default()
+    }
+
+    pub async fn get_download_speed() -> f64 {
+        let value = get_storage_value(StorageValues::DownloadSpeed.to_string().as_str()).await;
+        let str = value.as_string().unwrap_or_default();
+        f64::from_str(&str).unwrap_or_default()
+    }
+
+    pub async fn get_upload_speed() -> f64 {
+        let value = get_storage_value(StorageValues::UploadSpeed.to_string().as_str()).await;
+        let str = value.as_string().unwrap_or_default();
+        f64::from_str(&str).unwrap_or_default()
     }
 }

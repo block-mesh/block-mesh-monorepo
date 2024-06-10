@@ -2,6 +2,7 @@ use crate::pages::page::Page;
 use crate::utils::ext_state::{AppState, AppStatus};
 use block_mesh_common::constants::{BLOCKMESH_VERSION, BLOCK_MESH_SUPPORT_EMAIL};
 use leptos::*;
+use std::time::Duration;
 
 #[component]
 pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
@@ -9,6 +10,35 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
     let email = Signal::derive(move || state.email.get());
     let status = Signal::derive(move || state.status.get());
     let support_href = format!("mailto: {}", BLOCK_MESH_SUPPORT_EMAIL);
+    let (download_speed, set_download_speed) = create_signal(state.download_speed.get());
+    let (upload_speed, set_upload_speed) = create_signal(state.upload_speed.get());
+    let display_bandwidth = Signal::derive(move || {
+        let d = download_speed.get();
+        let u = upload_speed.get();
+        d > 0f64 && u > 0f64
+    });
+    set_timeout(
+        move || {
+            spawn_local(async move {
+                let d = AppState::get_download_speed().await;
+                let u = AppState::get_upload_speed().await;
+                set_download_speed.set(d);
+                set_upload_speed.set(u);
+            })
+        },
+        Duration::from_millis(1000),
+    );
+    set_interval(
+        move || {
+            spawn_local(async move {
+                let d = AppState::get_download_speed().await;
+                let u = AppState::get_upload_speed().await;
+                set_download_speed.set(d);
+                set_upload_speed.set(u);
+            })
+        },
+        Duration::from_millis(60000),
+    );
 
     view! {
         <nav>
@@ -24,6 +54,23 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
                                     />
                                 </a>
                             </div>
+                            <Show
+                                when=move || status.get() == AppStatus::LoggedIn
+                                fallback=|| {
+                                    view! {}
+                                }
+                            >
+
+                                <div class="mb-2">
+                                    <video
+                                        autoplay=true
+                                        loop=true
+                                        class="w-24 h-24"
+                                        src="/assets/wifi-animation.webm"
+                                    ></video>
+                                </div>
+                            </Show>
+
                             <div class="mb-2">
                                 <span class="mr-1 align-middle">Version:</span>
                                 <span class="align-middle">{{ BLOCKMESH_VERSION }}</span>
@@ -44,6 +91,26 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
                                     </svg>
                                 </a>
                             </div>
+                            <Show
+                                when=move || display_bandwidth.get()
+                                fallback=|| {
+                                    view! {}
+                                }
+                            >
+
+                                <div class="mb-2">
+                                    <span class="mr-1 align-middle text-left">Up M/s:</span>
+                                    <span class="align-middle text-right">
+                                        {{ format!("{:.2}", upload_speed.get()) }}
+                                    </span>
+                                </div>
+                                <div class="mb-2">
+                                    <span class="mr-1 align-middle text-left">Down M/s:</span>
+                                    <span class="align-middle text-right">
+                                        {{ format!("{:.2}", download_speed.get()) }}
+                                    </span>
+                                </div>
+                            </Show>
 
                         </div>
                     </div>

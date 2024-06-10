@@ -1,3 +1,4 @@
+pub mod bandwidth_measurement;
 pub mod tasks;
 pub mod tasks_manager;
 mod uptime_fetcher;
