@@ -11,7 +11,7 @@ use block_mesh_common::interfaces::server_api::{GetTokenRequest, GetTokenRespons
 use secret::Secret;
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "get_token", skip(body, auth))]
+#[tracing::instrument(name = "get_token", skip(body, auth), fields(email = body.email))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(mut auth): Extension<AuthSession<Backend>>,

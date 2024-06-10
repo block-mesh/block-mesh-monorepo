@@ -59,7 +59,7 @@ impl Debug for AppState {
         f.debug_struct("AppState")
             .field("email", &self.email.get_untracked())
             .field("user_id", &self.device_id.get_untracked())
-            .field("api_token", &self.api_token.get_untracked())
+            .field("api_token", &"********")
             .field("blockmesh_url", &self.blockmesh_url.get_untracked())
             .field("uptime", &self.uptime.get_untracked())
             .field("status", &self.status.get_untracked())
