@@ -1,7 +1,11 @@
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
+use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::api_token::find_token::find_token;
 use crate::database::uptime_report::create_uptime_report::create_uptime_report;
 use crate::database::uptime_report::enrich_uptime_report::enrich_uptime_report;
+use crate::database::uptime_report::get_user_uptimes::get_user_uptimes;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
+use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use axum::extract::{ConnectInfo, Query};
 use axum::{Extension, Json};
@@ -30,6 +34,28 @@ pub async fn handler(
         return Err(Error::UserNotFound);
     }
     let uptime_id = create_uptime_report(&mut transaction, user.id).await?;
+
+    let uptimes = get_user_uptimes(&mut transaction, user.id, 2).await?;
+    if uptimes.len() == 2 {
+        let diff = uptimes[0].created_at - uptimes[1].created_at;
+        if diff.num_seconds() < 60 {
+            let aggregate = get_or_create_aggregate_by_user_and_name(
+                &mut transaction,
+                AggregateName::Uptime,
+                user.id,
+            )
+            .await
+            .map_err(Error::from)?;
+            let sum = aggregate.value.as_f64().unwrap_or_default() + diff.num_seconds() as f64;
+            update_aggregate(
+                &mut transaction,
+                aggregate.id,
+                &serde_json::Value::from(sum),
+            )
+            .await
+            .map_err(Error::from)?;
+        }
+    }
     transaction.commit().await.map_err(Error::from)?;
 
     tokio::spawn(async move {

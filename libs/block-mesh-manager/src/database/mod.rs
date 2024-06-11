@@ -1,3 +1,4 @@
+pub mod aggregate;
 pub mod api_token;
 pub mod bandwidth;
 pub mod daily_stat;
