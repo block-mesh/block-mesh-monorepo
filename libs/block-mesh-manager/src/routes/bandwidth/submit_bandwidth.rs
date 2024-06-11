@@ -1,13 +1,11 @@
-use axum::{Extension, Json};
-use http::StatusCode;
-use sqlx::PgPool;
-
-use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
-
 use crate::database::api_token::find_token::find_token;
 use crate::database::bandwidth::create_bandwidth_report::create_bandwidth_report;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::errors::error::Error;
+use axum::{Extension, Json};
+use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
+use http::StatusCode;
+use sqlx::PgPool;
 
 #[tracing::instrument(name = "submit_bandwidth", skip(pool, body), fields(email = body.email), err, ret)]
 pub async fn handler(
