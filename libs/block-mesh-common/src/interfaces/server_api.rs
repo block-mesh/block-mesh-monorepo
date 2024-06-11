@@ -24,6 +24,11 @@ pub struct SubmitTaskRequest {
     pub api_token: Uuid,
     pub task_id: Uuid,
     pub response_code: Option<i32>,
+    pub country: Option<String>,
+    pub ip: Option<String>,
+    pub asn: Option<String>,
+    pub colo: Option<String>,
+    pub response_time: Option<f64>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

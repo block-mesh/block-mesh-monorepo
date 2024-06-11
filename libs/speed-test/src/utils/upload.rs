@@ -1,4 +1,5 @@
 use crate::{BASE_URL, UPLOAD_URL};
+use anyhow::anyhow;
 use chrono::Utc;
 use reqwest::Client;
 use std::cmp;
@@ -10,7 +11,10 @@ pub async fn test_upload(payload_size_bytes: usize) -> anyhow::Result<f64> {
     let req_builder = client.post(url).body(payload);
     let (_status_code, mbits, _duration) = {
         let start = Utc::now();
-        let response = req_builder.send().await.expect("failed to get response");
+        let response = req_builder
+            .send()
+            .await
+            .map_err(|e| anyhow!("failed to get response - {}", e))?;
         let status_code = response.status();
         let end = Utc::now();
         let duration = cmp::max((end - start).num_milliseconds(), 1) as f64;

@@ -56,6 +56,11 @@ pub async fn handler(
             520 => TaskStatus::Failed,
             _ => TaskStatus::Completed,
         },
+        &query.country.unwrap_or_default(),
+        &query.ip.unwrap_or_default(),
+        &query.asn.unwrap_or_default(),
+        &query.colo.unwrap_or_default(),
+        query.response_time.unwrap_or_default(),
     )
     .await?;
     let daily_stat_opt =

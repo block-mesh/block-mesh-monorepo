@@ -2,6 +2,7 @@ use crate::domain::task::TaskStatus;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
+#[allow(clippy::too_many_arguments)]
 #[tracing::instrument(name = "finish_task", skip(transaction, response_raw), ret, err)]
 pub(crate) async fn finish_task(
     transaction: &mut Transaction<'_, Postgres>,
@@ -9,6 +10,11 @@ pub(crate) async fn finish_task(
     response_code: Option<i32>,
     response_raw: Option<String>,
     status: TaskStatus,
+    country: &str,
+    ip: &str,
+    asn: &str,
+    colo: &str,
+    response_time: f64,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         r#"
@@ -17,11 +23,21 @@ pub(crate) async fn finish_task(
         SET
         response_code = $1,
         response_raw = $2,
-        status = $3
-        WHERE id = $4"#,
+        status = $3,
+        country = $4,
+        ip = $5,
+        asn = $6,
+        colo = $7,
+        response_time = $8
+        WHERE id = $9"#,
         response_code,
         response_raw,
         status.to_string(),
+        country,
+        ip,
+        asn,
+        colo,
+        response_time,
         task_id
     )
     .execute(&mut **transaction)

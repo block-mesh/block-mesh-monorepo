@@ -22,7 +22,12 @@ pub(crate) async fn find_task_by_status(
         response_code,
         response_raw,
         created_at,
-        retries_count
+        retries_count,
+        country,
+        ip,
+        asn,
+        colo,
+        response_time
         FROM tasks
         WHERE status = $1
         LIMIT 1

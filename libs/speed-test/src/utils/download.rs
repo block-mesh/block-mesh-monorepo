@@ -1,4 +1,5 @@
 use crate::{BASE_URL, DOWNLOAD_URL};
+use anyhow::anyhow;
 use chrono::Utc;
 use reqwest::Client;
 use std::cmp;
@@ -7,7 +8,10 @@ pub async fn test_download(payload_size_bytes: usize) -> anyhow::Result<f64> {
     let client = Client::new();
     let url = &format!("{BASE_URL}/{DOWNLOAD_URL}{payload_size_bytes}");
     let req_builder = client.get(url);
-    let response = req_builder.send().await.expect("failed to get response");
+    let response = req_builder
+        .send()
+        .await
+        .map_err(|e| anyhow!("failed to get response - {}", e))?;
     let start = Utc::now();
     let _res_bytes = response.bytes().await;
     let end = Utc::now();

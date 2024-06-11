@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT\n        id,\n        user_id,\n        url,\n        method,\n        headers,\n        body,\n        assigned_user_id,\n        status,\n        response_code,\n        response_raw,\n        created_at,\n        retries_count\n        FROM tasks\n        WHERE id = $1\n        ",
+  "query": "\n        SELECT\n        id,\n        user_id,\n        url,\n        method,\n        headers,\n        body,\n        assigned_user_id,\n        status,\n        response_code,\n        response_raw,\n        created_at,\n        retries_count,\n        country,\n        ip,\n        asn,\n        colo,\n        response_time\n        FROM tasks\n        WHERE id = $1\n        ",
   "describe": {
     "columns": [
       {
@@ -62,6 +62,31 @@
         "ordinal": 11,
         "name": "retries_count",
         "type_info": "Int4"
+      },
+      {
+        "ordinal": 12,
+        "name": "country",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 13,
+        "name": "ip",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 14,
+        "name": "asn",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 15,
+        "name": "colo",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 16,
+        "name": "response_time",
+        "type_info": "Float8"
       }
     ],
     "parameters": {
@@ -81,8 +106,13 @@
       true,
       true,
       false,
+      false,
+      false,
+      false,
+      false,
+      false,
       false
     ]
   },
-  "hash": "16627f225c27ccc9e2f1a9ad7ef2a5b64102f43847be09aad9b9d33657745926"
+  "hash": "457399c91e6e6f3a117fea2e8696fec37a57abb4f0b5874a03f8e7c10a990e8b"
 }

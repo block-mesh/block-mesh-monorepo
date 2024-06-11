@@ -29,7 +29,12 @@ pub(crate) async fn find_task_by_excluded_user_id_and_status(
         response_code,
         response_raw,
         created_at,
-        retries_count
+        retries_count,
+        country,
+        ip,
+        asn,
+        colo,
+        response_time
         FROM tasks
         WHERE user_id != $1 and status = $2
         LIMIT 1

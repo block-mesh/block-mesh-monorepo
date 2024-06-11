@@ -40,6 +40,7 @@ pub async fn handler(
             "/register",
         ));
     }
+
     if form.password_confirm != form.password {
         return Ok(Error::redirect(
             400,

@@ -7,6 +7,7 @@ use leptos_dom::tracing;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use speed_test::Metadata;
 use std::str::FromStr;
 use uuid::Uuid;
 
@@ -26,6 +27,7 @@ pub async fn get_task(
         email: email.to_string(),
         api_token: *api_token,
     };
+
     let response: Option<GetTaskResponse> = reqwest::Client::new()
         .post(format!("{}/api/get_task", base_url))
         .json(&body)
@@ -68,11 +70,13 @@ pub async fn run_task(
             client = client.headers(headers_map)
         }
     }
+
     let response = client.send().await;
     match response {
         Ok(v) => {
             let status = v.status().as_u16();
             let raw = v.text().await?;
+
             Ok(RunTaskResponse {
                 status: status.into(),
                 raw,
@@ -85,6 +89,7 @@ pub async fn run_task(
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 #[tracing::instrument(name = "submit_task", skip(api_token, response_raw), err)]
 pub async fn submit_task(
     base_url: &str,
@@ -93,12 +98,19 @@ pub async fn submit_task(
     task_id: &Uuid,
     response_code: i32,
     response_raw: String,
+    metadata: &Metadata,
+    response_time: f64,
 ) -> anyhow::Result<SubmitTaskResponse> {
     let query: SubmitTaskRequest = SubmitTaskRequest {
         email: email.to_string(),
         api_token: *api_token,
         task_id: *task_id,
         response_code: Some(response_code),
+        country: Option::from(metadata.country.clone()),
+        ip: Option::from(metadata.ip.clone()),
+        asn: Option::from(metadata.asn.clone()),
+        colo: Option::from(metadata.colo.clone()),
+        response_time: Option::from(response_time),
     };
     let response = reqwest::Client::new()
         .post(format!("{}/api/submit_task", base_url))
