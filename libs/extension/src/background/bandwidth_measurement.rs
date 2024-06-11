@@ -4,6 +4,7 @@ use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
 use block_mesh_common::leptos_tracing::setup_leptos_tracing;
 use leptos::*;
+use leptos_dom::tracing;
 use speed_test::download::test_download;
 use speed_test::latency::test_latency;
 use speed_test::types::metadata::Metadata;
