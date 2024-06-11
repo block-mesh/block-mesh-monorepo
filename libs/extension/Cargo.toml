@@ -27,6 +27,7 @@ getrandom = { workspace = true, features = ["js"] }
 console_error_panic_hook = { workspace = true }
 reqwest = { workspace = true, default-features = false, features = [
   "json",
+  "cookies"
 ] }
 block-mesh-common = { path = "../block-mesh-common", features = ["leptos-tracer"] }
 speed-test = { path = "../speed-test" }

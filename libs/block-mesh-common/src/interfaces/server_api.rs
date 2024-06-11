@@ -93,6 +93,12 @@ pub struct LoginForm {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct LoginResponse {
+    pub status_code: u16,
+    pub error: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ResetPasswordForm {
     pub email: String,
 }
@@ -121,6 +127,12 @@ pub struct RegisterForm {
     pub password: String,
     pub password_confirm: String,
     pub invite_code: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RegisterResponse {
+    pub status_code: u16,
+    pub error: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

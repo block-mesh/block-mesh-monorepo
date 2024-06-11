@@ -116,6 +116,10 @@ impl Application {
                 get(routes::login::login_form::handler).post(routes::login::login_post::handler),
             )
             .route(
+                "/register_api",
+                post(routes::register::register_api::handler),
+            )
+            .route(
                 "/register",
                 get(routes::register::register_form::handler)
                     .post(routes::register::register_post::handler),

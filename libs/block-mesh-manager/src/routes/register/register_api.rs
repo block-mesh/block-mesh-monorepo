@@ -1,18 +1,3 @@
-use std::sync::Arc;
-
-use anyhow::anyhow;
-use axum::extract::State;
-use axum::response::Redirect;
-use axum::{Extension, Form};
-use axum_login::AuthSession;
-use bcrypt::{hash, DEFAULT_COST};
-use sqlx::PgPool;
-use uuid::Uuid;
-use validator::validate_email;
-
-use block_mesh_common::interfaces::server_api::RegisterForm;
-use secret::Secret;
-
 use crate::database::api_token::create_api_token::create_api_token;
 use crate::database::invite_code::create_invite_code::create_invite_code;
 use crate::database::invite_code::get_user_opt_by_invited_code::get_user_opt_by_invited_code;
@@ -25,6 +10,17 @@ use crate::domain::nonce::Nonce;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
 use crate::startup::application::AppState;
+use anyhow::anyhow;
+use axum::extract::State;
+use axum::{Extension, Form, Json};
+use axum_login::AuthSession;
+use bcrypt::{hash, DEFAULT_COST};
+use block_mesh_common::interfaces::server_api::{RegisterForm, RegisterResponse};
+use secret::Secret;
+use sqlx::PgPool;
+use std::sync::Arc;
+use uuid::Uuid;
+use validator::validate_email;
 
 #[tracing::instrument(name = "register_api", skip(form, auth, state))]
 pub async fn handler(
@@ -32,57 +28,47 @@ pub async fn handler(
     Extension(mut auth): Extension<AuthSession<Backend>>,
     State(state): State<Arc<AppState>>,
     Form(form): Form<RegisterForm>,
-) -> Result<Redirect, Error> {
+) -> Result<Json<RegisterResponse>, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let email = form.email.clone();
     if !validate_email(email) {
-        return Ok(Error::redirect(
-            400,
-            "Invalid email",
-            "Please check if email you inserted is correct",
-            "/register",
-        ));
+        return Ok(Json(RegisterResponse {
+            status_code: 400,
+            error: Some("Please check if email you inserted is correct".to_string()),
+        }));
     }
 
     if form.password.contains(' ') {
-        return Ok(Error::redirect(
-            400,
-            "Invalid Password",
-            "Password cannot contain spaces",
-            "/register",
-        ));
+        return Ok(Json(RegisterResponse {
+            status_code: 400,
+            error: Some("Password cannot contain spaces".to_string()),
+        }));
     } else if form.password.chars().all(char::is_alphanumeric) {
-        return Ok(Error::redirect(
-            400,
-            "Invalid Password",
-            "Password must contain a special characters",
-            "/register",
-        ));
+        return Ok(Json(RegisterResponse {
+            status_code: 400,
+            error: Some("Password must contain a special characters".to_string()),
+        }));
     } else if form.password.len() < 8 {
-        return Ok(Error::redirect(
-            400,
-            "Invalid Password",
-            "Password must be at least 8 characters long",
-            "/register",
-        ));
+        return Ok(Json(RegisterResponse {
+            status_code: 400,
+            error: Some("Password must be at least 8 characters long".to_string()),
+        }));
     }
 
     if form.password_confirm != form.password {
-        return Ok(Error::redirect(
-            400,
-            "Password Mismatch",
-            "Please check if your password and password confirm are the same",
-            "/register",
-        ));
+        return Ok(Json(RegisterResponse {
+            status_code: 400,
+            error: Some(
+                "Please check if your password and password confirm are the same".to_string(),
+            ),
+        }));
     }
     let user = get_user_opt_by_email(&mut transaction, &form.email).await?;
     if user.is_some() {
-        return Ok(Error::redirect(
-            400,
-            "User Already Exists",
-            "User with this email already exists",
-            "/register",
-        ));
+        return Ok(Json(RegisterResponse {
+            status_code: 400,
+            error: Some("User with this email already exists".to_string()),
+        }));
     }
     let nonce = Nonce::generate_nonce(16);
     let nonce_secret = Secret::from(nonce.clone());
@@ -102,12 +88,10 @@ pub async fn handler(
                     update_user_invited_by(&mut transaction, user_id, invited_by_user_id).await?;
                 }
                 None => {
-                    return Ok(Error::redirect(
-                        400,
-                        "Invite Code Not Found",
-                        "Please check if the invite you insert is correct",
-                        "/register",
-                    ))
+                    return Ok(Json(RegisterResponse {
+                        status_code: 400,
+                        error: Some("Please check if the invite you insert is correct".to_string()),
+                    }))
                 }
             }
         }
@@ -131,5 +115,8 @@ pub async fn handler(
         .email_client
         .send_confirmation_email(&form.email, nonce_secret.expose_secret())
         .await;
-    Ok(Redirect::to("/dashboard"))
+    Ok(Json(RegisterResponse {
+        status_code: 200,
+        error: None,
+    }))
 }
