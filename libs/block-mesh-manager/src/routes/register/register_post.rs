@@ -26,7 +26,7 @@ use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
 use crate::startup::application::AppState;
 
-#[tracing::instrument(name = "register_api", skip(form, auth, state))]
+#[tracing::instrument(name = "register_post", skip(form, auth, state))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(mut auth): Extension<AuthSession<Backend>>,
