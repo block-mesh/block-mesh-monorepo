@@ -30,8 +30,8 @@ pub async fn handler(
     Form(form): Form<RegisterForm>,
 ) -> Result<Json<RegisterResponse>, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
-    let email = form.email.clone();
-    if !validate_email(email) {
+    let email = form.email.clone().to_ascii_lowercase();
+    if !validate_email(email.clone()) {
         return Ok(Json(RegisterResponse {
             status_code: 400,
             error: Some("Please check if email you inserted is correct".to_string()),
@@ -63,7 +63,7 @@ pub async fn handler(
             ),
         }));
     }
-    let user = get_user_opt_by_email(&mut transaction, &form.email).await?;
+    let user = get_user_opt_by_email(&mut transaction, &email).await?;
     if user.is_some() {
         return Ok(Json(RegisterResponse {
             status_code: 400,
@@ -73,7 +73,7 @@ pub async fn handler(
     let nonce = Nonce::generate_nonce(16);
     let nonce_secret = Secret::from(nonce.clone());
     let hashed_password = hash(form.password.clone(), DEFAULT_COST)?;
-    let user_id = create_user(&mut transaction, None, &form.email, &hashed_password)
+    let user_id = create_user(&mut transaction, None, &email, &hashed_password)
         .await
         .map_err(Error::from)?;
     create_nonce(&mut transaction, &user_id, &nonce_secret).await?;
@@ -99,7 +99,7 @@ pub async fn handler(
     transaction.commit().await.map_err(Error::from)?;
 
     let creds: Credentials = Credentials {
-        email: form.email.clone(),
+        email: email.clone(),
         password: Secret::from(form.password),
         nonce,
     };
@@ -113,7 +113,7 @@ pub async fn handler(
         .map_err(|_| Error::Auth(anyhow!("Login failed").to_string()))?;
     state
         .email_client
-        .send_confirmation_email(&form.email, nonce_secret.expose_secret())
+        .send_confirmation_email(&email, nonce_secret.expose_secret())
         .await;
     Ok(Json(RegisterResponse {
         status_code: 200,

@@ -18,7 +18,8 @@ pub async fn handler(
     Json(body): Json<GetTokenRequest>,
 ) -> Result<Json<GetTokenResponse>, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
-    let user = get_user_opt_by_email(&mut transaction, &body.email)
+    let email = body.email.clone().to_ascii_lowercase();
+    let user = get_user_opt_by_email(&mut transaction, &email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     if !user.verified_email {
@@ -31,7 +32,7 @@ pub async fn handler(
         .await?
         .ok_or_else(|| Error::NonceNotFound)?;
     let creds: Credentials = Credentials {
-        email: body.email,
+        email,
         password: Secret::from(body.password),
         nonce: nonce.nonce.as_ref().to_string(),
     };
