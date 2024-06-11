@@ -41,6 +41,29 @@ pub async fn handler(
         ));
     }
 
+    if form.password.contains(' ') {
+        return Ok(Error::redirect(
+            400,
+            "Invalid Password",
+            "Password cannot contain spaces",
+            "/register",
+        ));
+    } else if form.password.chars().all(char::is_alphanumeric) {
+        return Ok(Error::redirect(
+            400,
+            "Invalid Password",
+            "Password must contain a special characters",
+            "/register",
+        ));
+    } else if form.password.len() < 8 {
+        return Ok(Error::redirect(
+            400,
+            "Invalid Password",
+            "Password must be at least 8 characters long",
+            "/register",
+        ));
+    }
+
     if form.password_confirm != form.password {
         return Ok(Error::redirect(
             400,
