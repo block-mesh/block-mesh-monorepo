@@ -13,7 +13,8 @@ pub async fn handler(
     Json(body): Json<GetStatsRequest>,
 ) -> Result<Json<GetStatsResponse>, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
-    let user = get_user_opt_by_email(&mut transaction, &body.email)
+    let email = body.email.clone().to_ascii_lowercase();
+    let user = get_user_opt_by_email(&mut transaction, &email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     let api_token =

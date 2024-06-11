@@ -126,4 +126,9 @@ pub struct Task {
     pub response_raw: Option<String>,
     pub created_at: DateTime<Utc>,
     pub retries_count: i32,
+    pub country: String,
+    pub ip: String,
+    pub asn: String,
+    pub colo: String,
+    pub response_time: f64,
 }

@@ -3,9 +3,12 @@ use crate::utils::connectors::set_panic_hook;
 use crate::utils::ext_state::{AppState, AppStatus};
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::leptos_tracing::setup_leptos_tracing;
+use chrono::Utc;
 use leptos::SignalGetUntracked;
 use leptos::*;
 use leptos_dom::tracing;
+use speed_test::metadata::fetch_metadata;
+use std::cmp;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen]
@@ -36,16 +39,21 @@ pub async fn task_poller() {
             return;
         }
     };
+    let metadata = fetch_metadata().await.unwrap_or_default();
     let task = match task {
         Some(v) => v,
         None => {
             return;
         }
     };
+    let start = Utc::now();
+
     let finished_task = match run_task(&task.url, &task.method, task.headers, task.body).await {
         Ok(v) => v,
         Err(e) => {
             tracing::error!("finished_task: error: {e}");
+            let end = Utc::now();
+            let response_time = cmp::max((end - start).num_milliseconds(), 1) as f64;
             match submit_task(
                 &app_state.blockmesh_url.get_untracked(),
                 &app_state.email.get_untracked(),
@@ -53,6 +61,8 @@ pub async fn task_poller() {
                 &task.id,
                 520,
                 "".to_string(),
+                &metadata,
+                response_time,
             )
             .await
             {
@@ -66,6 +76,8 @@ pub async fn task_poller() {
             return;
         }
     };
+    let end = Utc::now();
+    let response_time = cmp::max((end - start).num_milliseconds(), 1) as f64;
 
     match submit_task(
         &app_state.blockmesh_url.get_untracked(),
@@ -74,6 +86,8 @@ pub async fn task_poller() {
         &task.id,
         finished_task.status,
         finished_task.raw,
+        &metadata,
+        response_time,
     )
     .await
     {

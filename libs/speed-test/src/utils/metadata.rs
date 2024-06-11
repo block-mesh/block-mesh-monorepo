@@ -1,5 +1,6 @@
 use crate::types::metadata::Metadata;
 use crate::{BASE_URL, DOWNLOAD_URL};
+use anyhow::anyhow;
 use reqwest::{header::HeaderValue, Client};
 
 fn extract_header_value(
@@ -22,7 +23,7 @@ pub async fn fetch_metadata() -> anyhow::Result<Metadata> {
         .get(url)
         .send()
         .await
-        .expect("failed to get response")
+        .map_err(|e| anyhow!("failed to get response - {}", e))?
         .headers()
         .to_owned();
     Ok(Metadata {

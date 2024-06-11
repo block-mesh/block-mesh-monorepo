@@ -22,7 +22,12 @@ pub(crate) async fn get_task_by_user_id(
         response_code,
         response_raw,
         created_at,
-        retries_count
+        retries_count,
+        country,
+        ip,
+        asn,
+        colo,
+        response_time
         FROM tasks
         WHERE id = $1
         "#,

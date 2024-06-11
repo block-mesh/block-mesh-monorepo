@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT\n        id,\n        user_id,\n        url,\n        method,\n        headers,\n        body,\n        assigned_user_id,\n        status,\n        response_code,\n        response_raw,\n        created_at,\n        retries_count\n        FROM tasks\n        WHERE id = $1 and status = $2\n        LIMIT 1\n        ",
+  "query": "\n        SELECT\n        id,\n        user_id,\n        url,\n        method,\n        headers,\n        body,\n        assigned_user_id,\n        status,\n        response_code,\n        response_raw,\n        created_at,\n        retries_count,\n        country,\n        ip,\n        asn,\n        colo,\n        response_time\n        FROM tasks\n        WHERE user_id = $1\n        ",
   "describe": {
     "columns": [
       {
@@ -62,12 +62,36 @@
         "ordinal": 11,
         "name": "retries_count",
         "type_info": "Int4"
+      },
+      {
+        "ordinal": 12,
+        "name": "country",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 13,
+        "name": "ip",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 14,
+        "name": "asn",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 15,
+        "name": "colo",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 16,
+        "name": "response_time",
+        "type_info": "Float8"
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid",
-        "Text"
+        "Uuid"
       ]
     },
     "nullable": [
@@ -82,8 +106,13 @@
       true,
       true,
       false,
+      false,
+      false,
+      false,
+      false,
+      false,
       false
     ]
   },
-  "hash": "e99f4c7d5b0a32e030adbfa43f1b75b8e4fe1c22c7e4b81dab11b15a47bcbf09"
+  "hash": "e6bfd595538318c16abfd39e4387030bfcdf9bdf060b79282ee7294a7658b59c"
 }

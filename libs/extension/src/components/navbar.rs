@@ -28,17 +28,17 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
         },
         Duration::from_millis(1000),
     );
-    set_interval(
-        move || {
-            spawn_local(async move {
-                let d = AppState::get_download_speed().await;
-                let u = AppState::get_upload_speed().await;
-                set_download_speed.set(d);
-                set_upload_speed.set(u);
-            })
-        },
-        Duration::from_millis(60000),
-    );
+    // set_interval(
+    //     move || {
+    //         spawn_local(async move {
+    //             let d = AppState::get_download_speed().await;
+    //             let u = AppState::get_upload_speed().await;
+    //             set_download_speed.set(d);
+    //             set_upload_speed.set(u);
+    //         })
+    //     },
+    //     Duration::from_millis(60000),
+    // );
 
     view! {
         <nav>

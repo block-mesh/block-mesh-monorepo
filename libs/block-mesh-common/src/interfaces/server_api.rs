@@ -24,6 +24,11 @@ pub struct SubmitTaskRequest {
     pub api_token: Uuid,
     pub task_id: Uuid,
     pub response_code: Option<i32>,
+    pub country: Option<String>,
+    pub ip: Option<String>,
+    pub asn: Option<String>,
+    pub colo: Option<String>,
+    pub response_time: Option<f64>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -116,6 +121,12 @@ pub struct RegisterForm {
     pub password: String,
     pub password_confirm: String,
     pub invite_code: Option<String>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RegisterResponse {
+    pub status_code: u16,
+    pub error: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
