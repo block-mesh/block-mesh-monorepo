@@ -1,18 +1,33 @@
 <!DOCTYPE html>
 <html lang="en" class="h-full bg-gray-900">
+<head>
     <script src="https://unpkg.com/htmx.org@1.9.6"
             integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni"
             crossorigin="anonymous"></script>
     <link rel="stylesheet" href="/styles.css"/>
-    <link rel="icon" type="image/x-icon" href="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"/>
+    <link rel="icon" type="image/x-icon"
+          href="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"/>
     <script src="https://cdn.tailwindcss.com"></script>
     <title>BlockMesh</title>
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RYHLW3MDK2"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+
+        function gtag() {
+            dataLayer.push(arguments);
+        }
+
+        gtag('js', new Date());
+
+        gtag('config', 'G-RYHLW3MDK2');
+    </script>
     {% block head %}{% endblock %}
 </head>
 <body class="flex flex-col min-h-screen">
-<div id="content" class="h-screen" >
+<div id="content" class="h-screen">
     {% block content %}
-        <p>Placeholder content</p>
+    <p>Placeholder content</p>
     {% endblock %}
 </div>
 {% include "notification.html" %}
