@@ -1,3 +1,4 @@
+use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 
@@ -68,16 +69,26 @@ extern "C" {
 }
 
 #[wasm_bindgen(inline_js = r#"
-    export function storageOnChange(key, callback) {
+    export function storageOnChange(callback) {
         chrome.storage.sync.onChanged.addListener((changes, namespace) => {
-            if (key in changes) {
-                callback(changes[key].newValue);
-            }
+            Object.keys(changes).forEach((key) => {
+                callback( { [key]: changes[key].newValue } );
+            });
         });
     }
 "#)]
 extern "C" {
-    pub fn storageOnChange(key: &str, callback: &js_sys::Function);
+    // pub fn storageOnChange(callback: &js_sys::Function);
+    pub fn storageOnChange(callback: &Closure<dyn Fn(JsValue)>);
+}
+
+#[wasm_bindgen(inline_js = r#"
+    export function get_chrome() {
+        return chrome;
+    }
+"#)]
+extern "C" {
+    pub fn get_chrome() -> JsValue;
 }
 
 /// Makes JS `console.log` available in Rust

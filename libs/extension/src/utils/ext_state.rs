@@ -1,8 +1,11 @@
+use gloo_utils::format::JsValueSerdeExt;
 use leptos::*;
 use leptos_dom::tracing;
 use leptos_router::use_navigate;
+use std::cell::RefCell;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
+use std::rc::Rc;
 use std::str::FromStr;
 use std::time::Duration;
 
@@ -12,10 +15,13 @@ use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
 use block_mesh_common::leptos_tracing::setup_leptos_tracing;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use uuid::Uuid;
+use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
-use crate::utils::connectors::{get_storage_value, set_storage_value};
+use crate::utils::connectors::{get_storage_value, set_storage_value, storageOnChange};
+use crate::utils::log::log;
 use crate::utils::storage::StorageValues;
 
 #[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
@@ -111,7 +117,7 @@ impl AppState {
         let download_speed = Self::get_download_speed().await;
         let upload_speed = Self::get_upload_speed().await;
 
-        Self {
+        let out = Self {
             invite_code: create_rw_signal(invite_code),
             email: create_rw_signal(email),
             api_token: create_rw_signal(api_token),
@@ -123,7 +129,30 @@ impl AppState {
             error: create_rw_signal(None),
             download_speed: create_rw_signal(download_speed),
             upload_speed: create_rw_signal(upload_speed),
-        }
+        };
+
+        let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
+            if let Ok(data) = event.into_serde::<Value>() {
+                log!("data = {:#?}", data);
+                let key = data["key"].as_str().unwrap_or_default();
+                if let Ok(storage_value) = StorageValues::try_from(key) {
+                    match storage_value {
+                        // TODO finish
+                        StorageValues::BlockMeshUrl => {}
+                        StorageValues::ApiToken => {}
+                        _ => {}
+                    }
+                    let _value = data["value"].clone();
+                }
+            }
+        });
+
+        let closure_ref = Rc::new(RefCell::new(Some(callback)));
+        let closure_clone = closure_ref.clone();
+        storageOnChange(closure_clone.borrow().as_ref().unwrap());
+        closure_ref.borrow_mut().take().unwrap().forget();
+
+        out
     }
 
     #[tracing::instrument(name = "AppState::set_success")]

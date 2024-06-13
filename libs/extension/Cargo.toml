@@ -33,6 +33,7 @@ block-mesh-common = { path = "../block-mesh-common", features = ["leptos-tracer"
 speed-test = { path = "../speed-test" }
 thiserror = { workspace = true }
 chrono = { workspace = true, features = ["wasmbind"] }
+gloo-utils = { workspace = true }
 
 [dependencies.web-sys]
 workspace = true
@@ -46,7 +47,8 @@ features = [
   'RequestMode',
   'Response',
   "Clipboard",
-  "Navigator"
+  "Navigator",
+  "MessageEvent"
 ]
 
 [dependencies.uuid]

@@ -27,3 +27,21 @@ impl Display for StorageValues {
         write!(f, "{}", str)
     }
 }
+
+impl TryFrom<&str> for StorageValues {
+    type Error = &'static str;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        match value {
+            "blockmesh_url" => Ok(StorageValues::BlockMeshUrl),
+            "email" => Ok(StorageValues::Email),
+            "blockmesh_api_token" => Ok(StorageValues::ApiToken),
+            "device_id" => Ok(StorageValues::DeviceId),
+            "uptime" => Ok(StorageValues::Uptime),
+            "invite_code" => Ok(StorageValues::InviteCode),
+            "download_speed" => Ok(StorageValues::DownloadSpeed),
+            "upload_speed" => Ok(StorageValues::UploadSpeed),
+            _ => Err("Invalid storage value"),
+        }
+    }
+}
