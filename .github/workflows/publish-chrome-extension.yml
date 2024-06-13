@@ -113,11 +113,11 @@ jobs:
           npm install -g chrome-webstore-upload-cli
       - name: Upload step
         run: |-
-          chrome-webstore-upload upload \\
-            --auto-publish \\
-            --source chrome-extension-${{ github.event.pull_request.head.sha }}.zip \\
-            --extension-id ${{ env.EXTENSION_ID }} \\
-            --client-id ${{ secrets.CI_GOOGLE_CLIENT_ID }} \\
-            --client-secret ${{ secrets.CI_GOOGLE_CLIENT_SECRET }} \\
-            --refresh-token ${{ secrets.CI_GOOGLE_REFRESH_TOKEN }}
+          # chrome-webstore-upload upload \\
+          #   --auto-publish \\
+          #   --source chrome-extension-${{ github.event.pull_request.head.sha }}.zip \\
+          #   --extension-id ${{ env.EXTENSION_ID }} \\
+          #   --client-id ${{ secrets.CI_GOOGLE_CLIENT_ID }} \\
+          #   --client-secret ${{ secrets.CI_GOOGLE_CLIENT_SECRET }} \\
+          #   --refresh-token ${{ secrets.CI_GOOGLE_REFRESH_TOKEN }}
 # https://jam.dev/blog/automating-chrome-extension-publishing/
