@@ -45,3 +45,11 @@ impl TryFrom<&str> for StorageValues {
         }
     }
 }
+
+impl TryFrom<&String> for StorageValues {
+    type Error = &'static str;
+
+    fn try_from(value: &String) -> Result<Self, Self::Error> {
+        StorageValues::try_from(value.as_str())
+    }
+}

@@ -21,7 +21,6 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
 use crate::utils::connectors::{get_storage_value, set_storage_value, storageOnChange};
-use crate::utils::log::log;
 use crate::utils::storage::StorageValues;
 
 #[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
@@ -117,32 +116,65 @@ impl AppState {
         let download_speed = Self::get_download_speed().await;
         let upload_speed = Self::get_upload_speed().await;
 
-        let out = Self {
-            invite_code: create_rw_signal(invite_code),
-            email: create_rw_signal(email),
-            api_token: create_rw_signal(api_token),
-            blockmesh_url: create_rw_signal(blockmesh_url),
-            status: create_rw_signal(AppStatus::LoggedOut),
-            device_id: create_rw_signal(device_id),
-            uptime: create_rw_signal(uptime),
-            success: create_rw_signal(None),
-            error: create_rw_signal(None),
-            download_speed: create_rw_signal(download_speed),
-            upload_speed: create_rw_signal(upload_speed),
-        };
+        // Signals:
+        let invite_code = create_rw_signal(invite_code);
+        let email = create_rw_signal(email);
+        let api_token = create_rw_signal(api_token);
+        let blockmesh_url = create_rw_signal(blockmesh_url);
+        let status = create_rw_signal(AppStatus::LoggedOut);
+        let device_id = create_rw_signal(device_id);
+        let uptime = create_rw_signal(uptime);
+        let success = create_rw_signal(None);
+        let error = create_rw_signal(None);
+        let download_speed = create_rw_signal(download_speed);
+        let upload_speed = create_rw_signal(upload_speed);
 
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
             if let Ok(data) = event.into_serde::<Value>() {
-                log!("data = {:#?}", data);
-                let key = data["key"].as_str().unwrap_or_default();
-                if let Ok(storage_value) = StorageValues::try_from(key) {
-                    match storage_value {
-                        // TODO finish
-                        StorageValues::BlockMeshUrl => {}
-                        StorageValues::ApiToken => {}
-                        _ => {}
+                if let Some(obj) = data.as_object() {
+                    for key in obj.keys() {
+                        if let Ok(storage_value) = StorageValues::try_from(key) {
+                            if let Some(value) = obj.get(key) {
+                                let value = value.as_str().unwrap_or_default().to_string();
+                                match storage_value {
+                                    StorageValues::BlockMeshUrl => {
+                                        blockmesh_url.update(|v| *v = value);
+                                    }
+                                    StorageValues::ApiToken => {
+                                        api_token.update(|v| {
+                                            *v = Uuid::from_str(&value).unwrap_or_default()
+                                        });
+                                    }
+                                    StorageValues::Email => {
+                                        email.update(|v| *v = value);
+                                    }
+                                    StorageValues::DeviceId => {
+                                        device_id.update(|v| {
+                                            *v = Uuid::from_str(&value).unwrap_or_default()
+                                        });
+                                    }
+                                    StorageValues::Uptime => {
+                                        uptime.update(|v| {
+                                            *v = f64::from_str(&value).unwrap_or_default()
+                                        });
+                                    }
+                                    StorageValues::InviteCode => {
+                                        invite_code.update(|v| *v = value);
+                                    }
+                                    StorageValues::DownloadSpeed => {
+                                        download_speed.update(|v| {
+                                            *v = f64::from_str(&value).unwrap_or_default()
+                                        });
+                                    }
+                                    StorageValues::UploadSpeed => {
+                                        upload_speed.update(|v| {
+                                            *v = f64::from_str(&value).unwrap_or_default()
+                                        });
+                                    }
+                                }
+                            }
+                        }
                     }
-                    let _value = data["value"].clone();
                 }
             }
         });
@@ -152,7 +184,19 @@ impl AppState {
         storageOnChange(closure_clone.borrow().as_ref().unwrap());
         closure_ref.borrow_mut().take().unwrap().forget();
 
-        out
+        Self {
+            invite_code,
+            email,
+            api_token,
+            blockmesh_url,
+            status,
+            device_id,
+            uptime,
+            success,
+            error,
+            download_speed,
+            upload_speed,
+        }
     }
 
     #[tracing::instrument(name = "AppState::set_success")]
