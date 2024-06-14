@@ -78,17 +78,7 @@ extern "C" {
     }
 "#)]
 extern "C" {
-    // pub fn storageOnChange(callback: &js_sys::Function);
     pub fn storageOnChange(callback: &Closure<dyn Fn(JsValue)>);
-}
-
-#[wasm_bindgen(inline_js = r#"
-    export function get_chrome() {
-        return chrome;
-    }
-"#)]
-extern "C" {
-    pub fn get_chrome() -> JsValue;
 }
 
 /// Makes JS `console.log` available in Rust
