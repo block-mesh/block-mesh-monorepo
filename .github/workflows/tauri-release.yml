@@ -9,6 +9,8 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+env:
+  BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
 jobs:
   get-tag:
     name: "Get Tag From Package Version"
@@ -87,7 +89,6 @@ jobs:
         # You can remove the one that doesn't apply to your app to speed up the workflow a bit.
       - uses: tauri-apps/tauri-action@v0
         env:
-          BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           TAURI_PRIVATE_KEY: ${{ secrets.TAURI_PRIVATE_KEY }}
           TAURI_KEY_PASSWORD: ${{ secrets.TAURI_KEY_PASSWORD }}
