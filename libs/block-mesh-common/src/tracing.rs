@@ -1,4 +1,4 @@
-use crate::constants::{DeviceType, BLOCKMESH_VERSION, BLOCK_MESH_LOGGER, BLOCK_MESH_LOG_ENV};
+use crate::constants::{DeviceType, BLOCKMESH_LOG_ENV, BLOCKMESH_VERSION, BLOCK_MESH_LOGGER};
 use reqwest::Client;
 use serde_json::{json, Value};
 use std::sync::{Arc, Once};
@@ -14,7 +14,7 @@ use uuid::Uuid;
 pub fn setup_tracing(user_id: Uuid, device_type: DeviceType) {
     static SET_HOOK: Once = Once::new();
     SET_HOOK.call_once(|| {
-        let log_env = std::env::var(BLOCK_MESH_LOG_ENV).unwrap_or_else(|_| "prod".to_string());
+        let log_env = std::env::var(BLOCKMESH_LOG_ENV).unwrap_or_else(|_| "prod".to_string());
         let log_layer =
             HttpLogLayer::new(BLOCK_MESH_LOGGER.to_string(), log_env, user_id, device_type);
         tracing_subscriber::registry()
