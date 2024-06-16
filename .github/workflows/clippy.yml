@@ -38,4 +38,6 @@ jobs:
           --no-default-features
           --locked
       - name: Linting
+        env:
+          BLOCK_MESH_LOG_ENV: ${{ vars.BLOCK_MESH_LOG_ENV }}
         run: cargo clippy --all -- -D warnings
