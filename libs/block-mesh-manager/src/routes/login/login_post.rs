@@ -2,7 +2,6 @@ use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
-use anyhow::anyhow;
 use axum::response::Redirect;
 use axum::{Extension, Form};
 use axum_login::AuthSession;
@@ -28,14 +27,29 @@ pub async fn handler(
         password: Secret::from(form.password),
         nonce: nonce.nonce.as_ref().to_string(),
     };
-    let session = auth
-        .authenticate(creds)
-        .await
-        .map_err(|_| Error::Auth(anyhow!("Authentication failed").to_string()))?
-        .ok_or(Error::UserNotFound)?;
-    auth.login(&session)
-        .await
-        .map_err(|_| Error::Auth(anyhow!("Login failed").to_string()))?;
+    let session = match auth.authenticate(creds).await {
+        Ok(Some(user)) => user,
+        _ => {
+            return Ok(Error::redirect(
+                400,
+                "Authentication failed",
+                "Authentication failed. Please try again.",
+                "/login",
+            ));
+        }
+    };
+    match auth.login(&session).await {
+        Ok(_) => {}
+        Err(e) => {
+            tracing::error!("Login failed: {:?} for user {}", e, user.id);
+            return Ok(Error::redirect(
+                400,
+                "Login Failed",
+                "Login failed. Please try again.",
+                "/login",
+            ));
+        }
+    }
     transaction.commit().await.map_err(Error::from)?;
     Ok(Redirect::to("/dashboard"))
 }
