@@ -88,8 +88,6 @@ jobs:
         env:
           BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
         with:
-          env:
-            BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
           bin: "block-mesh-manager"
           target: ${{ matrix.target }}
           archive: $bin-${{ matrix.target }}
