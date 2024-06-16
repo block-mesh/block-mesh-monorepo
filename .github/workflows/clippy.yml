@@ -14,7 +14,7 @@ concurrency:
 jobs:
   clippy:
     name: Clippy
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     steps:
       - name: Install deps
         run: |
@@ -27,7 +27,7 @@ jobs:
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
           components: clippy
-      - uses: Swatinem/rust-cache@v2
+      - uses: useblacksmith/rust-cache@v3
         with:
           key: clippy-sqlx-${{ vars.SQLX_VERSION }}
           cache-all-crates: true
