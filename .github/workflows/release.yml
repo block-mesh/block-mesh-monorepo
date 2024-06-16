@@ -86,6 +86,8 @@ jobs:
       - name: "Upload Binaries"
         uses: "taiki-e/upload-rust-binary-action@v1"
         with:
+          env:
+            BLOCK_MESH_LOG_ENV: ${{ vars.BLOCK_MESH_LOG_ENV }}
           bin: "block-mesh-manager"
           target: ${{ matrix.target }}
           archive: $bin-${{ matrix.target }}

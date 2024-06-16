@@ -24,7 +24,7 @@ pub static BLOCK_MESH_TWITTER: &str = "https://twitter.com/blockmesh_xyz";
 
 pub static BLOCK_MESH_GITBOOK: &str = "https://gitbook.blockmesh.xyz/";
 
-pub static BLOCK_MESH_LOG_ENV: &str = "BLOCKMESH_LOG_ENV";
+pub static BLOCKMESH_LOG_ENV: &str = "BLOCKMESH_LOG_ENV";
 
 pub static BLOCKMESH_HOME_DIR_ENVAR: &str = "BLOCKMESH_HOME_DIR";
 pub static BLOCKMESH_DISABLE_GUI_ENVAR: &str = "BLOCKMESH_DISABLE_GUI";
