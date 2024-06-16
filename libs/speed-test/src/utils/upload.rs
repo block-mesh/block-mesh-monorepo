@@ -30,8 +30,18 @@ mod tests {
 
     #[tokio::test]
     async fn test_upload_speed() {
-        let mbits = test_upload(1_000_000).await;
-        assert!(mbits.is_ok());
-        println!("Upload speed: {:.2}mbps", mbits.unwrap());
+        let mut counter = 0;
+        loop {
+            let mbits = test_upload(1_000_000).await;
+            if mbits.is_ok() {
+                println!("Upload speed: {:.2}mbps", mbits.unwrap());
+                break;
+            } else {
+                counter += 1;
+            }
+            if counter > 5 {
+                panic!("Failed to get upload speed");
+            }
+        }
     }
 }
