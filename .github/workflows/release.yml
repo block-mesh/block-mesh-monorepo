@@ -9,6 +9,8 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+env:
+  BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
 jobs:
   get-tag:
     name: "Get Tag From Package Version"
@@ -85,8 +87,6 @@ jobs:
           cache-all-crates: true
       - name: "Upload Binaries"
         uses: "taiki-e/upload-rust-binary-action@v1"
-        env:
-          BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
         with:
           bin: "block-mesh-manager"
           target: ${{ matrix.target }}

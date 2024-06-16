@@ -11,6 +11,8 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+env:
+  BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
 jobs:
   clippy:
     name: Clippy
@@ -38,6 +40,4 @@ jobs:
           --no-default-features
           --locked
       - name: Linting
-        env:
-          BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
         run: cargo clippy --all -- -D warnings
