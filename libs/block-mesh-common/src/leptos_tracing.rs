@@ -24,7 +24,10 @@ pub fn setup_leptos_tracing(user_id: Option<Uuid>, device_type: DeviceType) {
         let buffer: Arc<Mutex<Vec<Value>>> = Arc::new(Mutex::new(Vec::new()));
         let client: Arc<Mutex<Client>> = Arc::new(Mutex::new(Client::new()));
         let url = Arc::new(BLOCK_MESH_LOGGER.to_string());
-        let env = env!("BLOCKMESH_LOG_ENV").to_string();
+        let env = option_env!("BLOCKMESH_LOG_ENV")
+            .or(Some("dev"))
+            .unwrap()
+            .to_string();
 
         let writer = HttpMakeConsoleWriter {
             client,
