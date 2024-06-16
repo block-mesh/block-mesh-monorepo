@@ -1,4 +1,4 @@
-use crate::constants::{DeviceType, BLOCKMESH_VERSION, BLOCK_MESH_LOGGER, BLOCK_MESH_LOG_ENV};
+use crate::constants::{DeviceType, BLOCKMESH_VERSION, BLOCK_MESH_LOGGER};
 use reqwest::Client;
 use serde_json::{json, Value};
 use std::io::{self, Write};
@@ -24,7 +24,7 @@ pub fn setup_leptos_tracing(user_id: Option<Uuid>, device_type: DeviceType) {
         let buffer: Arc<Mutex<Vec<Value>>> = Arc::new(Mutex::new(Vec::new()));
         let client: Arc<Mutex<Client>> = Arc::new(Mutex::new(Client::new()));
         let url = Arc::new(BLOCK_MESH_LOGGER.to_string());
-        let env = std::env::var(BLOCK_MESH_LOG_ENV).unwrap_or_else(|_| "prod".to_string());
+        let env = env!("BLOCK_MESH_LOG_ENV").to_string();
 
         let writer = HttpMakeConsoleWriter {
             client,

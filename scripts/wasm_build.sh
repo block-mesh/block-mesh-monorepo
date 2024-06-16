@@ -1,9 +1,12 @@
 #!/usr/bin/env bash
 # https://github.com/rimutaka/spotify-playlist-builder/blob/master/build.sh
 set -x
-BUILD_TYPE=$1
+export BUILD_TYPE=$1
 if [ -z "${BUILD_TYPE}" ] ; then
-  BUILD_TYPE="--dev"
+  export BUILD_TYPE="--dev"
+  export BLOCKMESH_LOG_ENV="dev"
+elif [ "${BUILD_TYPE}" == "--release" ]; then
+  export BLOCKMESH_LOG_ENV="prod"
 elif [ "${BUILD_TYPE}" != "--release" ]; then
   echo "Invalid argument: ${BUILD_TYPE}"
   exit 1

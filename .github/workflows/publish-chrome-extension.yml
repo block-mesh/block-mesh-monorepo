@@ -78,7 +78,10 @@ jobs:
           
           PENDING_VERSION=$(echo -E $RESPONSE_2 | jq '.crxVersion')
           LATEST=$(printf "${PKG_VERSION}\n${PENDING_VERSION}\n" | sort -V -r | head -n 1)
-
+          echo "PKG_VERSION: ${PKG_VERSION}"
+          echo "PENDING_VERSION: ${PENDING_VERSION}"
+          echo "LATEST: ${LATEST}"
+          
           if [ "${PENDING_VERSION}" == "${LATEST}" ]; then
             echo "No need to publish: ${PENDING_VERSION} == ${LATEST}"
             exit 1
