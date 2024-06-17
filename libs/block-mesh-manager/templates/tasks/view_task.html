@@ -1,13 +1,14 @@
 {% extends "base.html" %}
 
 {% block content %}
-{% include "sidebar/sidebar_wrapper.html" %}
+{% include "sidebar/top_navbar.html" %}
+
 <template class="invisible" id="iframe_content">
     {{ raw_html|safe }}
 </template>
 
 <div>
-    <div class="xl:pl-72 m-2">
+    <div class="m-2">
         <iframe id="iframe_display" class="w-full h-screen"></iframe>
     </div>
 </div>
