@@ -30,5 +30,4 @@ jobs:
           workingDirectory: ./
           preCommands: |
             npx tailwindcss -i ./input.css -o ./tailwind.css
-            gzip tailwind.css
-          command: r2 object put assets/tailwind.css.gz --file tailwind.css.gz
+          command: r2 object put assets/tailwind.css --file tailwind.css
