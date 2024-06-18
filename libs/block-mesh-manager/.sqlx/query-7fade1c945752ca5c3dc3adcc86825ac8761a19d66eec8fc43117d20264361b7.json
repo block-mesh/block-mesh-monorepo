@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT\n        \tregexp_replace(url, '\\?.*$', '') as url,\n        \tcountry,\n        \tresponse_code,\n        \tAVG(response_time) as latency,\n        \tCOALESCE(COUNT(*), 0) as count\n        FROM tasks\n        WHERE\n            created_at != $1\n        AND\n        \tstatus = ANY($2::text[])\n        GROUP BY url, country, response_code\n        ",
+  "query": "\n        SELECT\n        \tregexp_replace(url, '\\?.*$', '') as url,\n        \tcountry,\n        \tresponse_code,\n        \tAVG(response_time) as latency,\n        \tCOALESCE(COUNT(*), 0) as count\n        FROM tasks\n        WHERE\n            created_at > $1\n        AND\n        \tstatus = ANY($2::text[])\n        GROUP BY url, country, response_code\n        ",
   "describe": {
     "columns": [
       {
@@ -43,5 +43,5 @@
       null
     ]
   },
-  "hash": "2b000135984cc9d04725144ece0ec9b370ae58a9a9469f7d3ef0e9102570d359"
+  "hash": "7fade1c945752ca5c3dc3adcc86825ac8761a19d66eec8fc43117d20264361b7"
 }

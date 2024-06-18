@@ -47,7 +47,7 @@ pub async fn get_tasks_rpc_results(
         	COALESCE(COUNT(*), 0) as count
         FROM tasks
         WHERE
-            created_at != $1
+            created_at > $1
         AND
         	status = ANY($2::text[])
         GROUP BY url, country, response_code
