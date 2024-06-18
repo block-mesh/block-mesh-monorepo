@@ -1852,6 +1852,9 @@ dependencies = [
 name = "cloudflare-privacy-page"
 version = "0.0.41"
 dependencies = [
+ "askama",
+ "askama_axum",
+ "block-mesh-common",
  "serde",
  "serde_json",
  "time",
