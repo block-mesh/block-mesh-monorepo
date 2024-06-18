@@ -26,7 +26,7 @@ impl RpcName {
     pub fn from_url(url: &str) -> Self {
         if url.starts_with("https://mainnet.helius-rpc.com") {
             RpcName::Helius
-        } else if url.contains("quicknode.pro") {
+        } else if url.contains("quiknode.pro") {
             RpcName::QuickNode
         } else if url.starts_with("https://global.rpc.hellomoon.io") {
             RpcName::HelloMoonGlobal
