@@ -16,6 +16,10 @@ pub enum RpcName {
     HelloMoonGlobal,
     #[default]
     SolanaLabs,
+    Shyft,
+    Alchemy,
+    Syndica,
+    Chainstack,
 }
 
 impl RpcName {
@@ -28,8 +32,16 @@ impl RpcName {
             RpcName::HelloMoonGlobal
         } else if url.starts_with("https://rpc.hellomoon.io") {
             RpcName::HelloMoon
-        // } else if url.starts_with("https://api.mainnet-beta.solana.com") {
-        //     RpcName::SolanaLabs
+            // } else if url.starts_with("https://api.mainnet-beta.solana.com") {
+            //     RpcName::SolanaLabs
+        } else if url.starts_with("https://rpc.shyft.to") {
+            RpcName::Shyft
+        } else if url.starts_with("https://solana-mainnet.g.alchemy.com") {
+            RpcName::Alchemy
+        } else if url.starts_with("https://solana-mainnet.api.syndica.io") {
+            RpcName::Syndica
+        } else if url.starts_with("https://solana-mainnet.core.chainstack.com") {
+            RpcName::Chainstack
         } else {
             RpcName::SolanaLabs
         }
@@ -44,6 +56,10 @@ impl Display for RpcName {
             RpcName::HelloMoon => write!(f, "HelloMoon"),
             RpcName::HelloMoonGlobal => write!(f, "HelloMoonGlobal"),
             RpcName::SolanaLabs => write!(f, "SolanaLabs"),
+            RpcName::Shyft => write!(f, "Shyft"),
+            RpcName::Alchemy => write!(f, "Alchemy"),
+            RpcName::Syndica => write!(f, "Syndica"),
+            RpcName::Chainstack => write!(f, "Chainstack"),
         }
     }
 }
@@ -56,6 +72,10 @@ impl From<String> for RpcName {
             "HelloMoon" => RpcName::HelloMoon,
             "HelloMoonGlobal" => RpcName::HelloMoonGlobal,
             "SolanaLabs" => RpcName::SolanaLabs,
+            "Shyft" => RpcName::Shyft,
+            "Alchemy" => RpcName::Alchemy,
+            "Syndica" => RpcName::Syndica,
+            "Chainstack" => RpcName::Chainstack,
             _ => RpcName::SolanaLabs,
         }
     }
@@ -104,6 +124,9 @@ impl Rpc {
         let url = match &self.name {
             RpcName::Helius => {
                 format!("{}?api-key={}", self.host, self.token)
+            }
+            RpcName::Shyft => {
+                format!("{}?api_key={}", self.host, self.token)
             }
             RpcName::SolanaLabs => self.host.to_string(),
             _ => {

@@ -32,6 +32,6 @@ pub async fn rpc_worker_loop(pool: PgPool) -> Result<(), anyhow::Error> {
                 tracing::error!("worker_loop: create_rpc_tasks: error: {}", e);
             }
         }
-        tokio::time::sleep(Duration::from_millis(60_000)).await;
+        tokio::time::sleep(Duration::from_millis(10_000)).await;
     }
 }
