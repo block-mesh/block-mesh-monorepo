@@ -11,5 +11,6 @@ pub mod logout;
 pub mod notification;
 pub mod password;
 pub mod register;
+pub mod rpc;
 pub mod tasks;
 pub mod uptime_report;
