@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - master
-      - tailwind-setup
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
