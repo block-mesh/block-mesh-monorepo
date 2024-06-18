@@ -14,6 +14,7 @@ use block_mesh_manager::envars::load_dotenv::load_dotenv;
 use block_mesh_manager::startup::application::{AppState, Application};
 use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
 use block_mesh_manager::startup::report_exit::report_exit;
+use block_mesh_manager::worker::rpc_cron::rpc_worker_loop;
 use secret::Secret;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -41,11 +42,13 @@ async fn main() -> anyhow::Result<()> {
         email_client,
         pool: db_pool.clone(),
     });
-    let application = Application::build(configuration, app_state, db_pool).await;
+    let application = Application::build(configuration, app_state, db_pool.clone()).await;
+    let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
     let application_task = tokio::spawn(application.run());
+
     tokio::select! {
         o = application_task => report_exit("API", o),
-        // o = worker_task =>  report_exit("Background worker", o),
+        o = rpc_worker_task =>  report_exit("RPC Background worker failed", o),
     };
     Ok(())
 }

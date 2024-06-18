@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div>
+    <div class="m-2">
+        <div class="flex justify-center m-2">
+            <button onclick="window.location.href = window.origin"
+                    class="focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none">
+                BlockMesh Network - Solana RPC Dashboard
+            </button>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="whitespace-no-wrap w-full table-auto text-left border-white border-solid border-2">
+                <thead>
+                <tr class="border-b bg-gray-800 text-xs font-semibold uppercase tracking-wide text-gray-500">
+                    <th class="px-4 py-3">Location</th>
+                    <th class="px-4 py-3">Provider</th>
+                    <th class="px-4 py-3">Response Code</th>
+                    <th class="px-4 py-3">Latency (ms)</th>
+                    <th class="px-4 py-3">Samples</th>
+                </tr>
+                </thead>
+                <tbody class="divide-y bg-gray-500" id="tasks-content">
+                {% for result in results %}
+                {% include "rpc_row.html" %}
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

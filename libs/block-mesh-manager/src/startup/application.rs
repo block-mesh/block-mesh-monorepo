@@ -83,6 +83,7 @@ impl Application {
             );
 
         let un_auth_router = Router::new()
+            .route("/rpc_dashboard", get(routes::rpc::rpc_dashboard::handler))
             .route(
                 "/notification",
                 get(routes::notification::notification_page::handler),

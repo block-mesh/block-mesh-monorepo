@@ -8,4 +8,5 @@ pub mod find_task_by_task_id_and_status;
 pub mod finish_task;
 pub mod get_task_by_id;
 pub mod get_tasks_by_user_id;
+pub mod get_tasks_rpc_results;
 pub mod update_task_assigned;
