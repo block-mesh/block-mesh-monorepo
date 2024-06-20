@@ -14,12 +14,13 @@ pub enum RpcName {
     QuickNode,
     HelloMoon,
     HelloMoonGlobal,
-    #[default]
     SolanaLabs,
     Shyft,
     Alchemy,
     Syndica,
     Chainstack,
+    #[default]
+    Invalid,
 }
 
 impl RpcName {
@@ -42,8 +43,10 @@ impl RpcName {
             RpcName::Syndica
         } else if url.starts_with("https://solana-mainnet.core.chainstack.com") {
             RpcName::Chainstack
-        } else {
+        } else if url.starts_with("https://api.mainnet-beta.solana.com") {
             RpcName::SolanaLabs
+        } else {
+            RpcName::Invalid
         }
     }
 }
@@ -60,6 +63,7 @@ impl Display for RpcName {
             RpcName::Alchemy => write!(f, "Alchemy"),
             RpcName::Syndica => write!(f, "Syndica"),
             RpcName::Chainstack => write!(f, "Chainstack"),
+            RpcName::Invalid => write!(f, "Invalid"),
         }
     }
 }
@@ -76,7 +80,7 @@ impl From<String> for RpcName {
             "Alchemy" => RpcName::Alchemy,
             "Syndica" => RpcName::Syndica,
             "Chainstack" => RpcName::Chainstack,
-            _ => RpcName::SolanaLabs,
+            _ => RpcName::Invalid,
         }
     }
 }

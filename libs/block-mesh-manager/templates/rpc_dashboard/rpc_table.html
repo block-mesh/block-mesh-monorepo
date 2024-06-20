@@ -1,8 +1,12 @@
 {% extends "base.html" %}
 
 {% block content %}
+<script src="https://code.jquery.com/jquery-3.7.1.js" integrity="sha256-eKhayi8LEQwp4NKxN+CfCh+3qOVUtJn3QNZ0TciWLP4="
+        crossorigin="anonymous"></script>
+<link rel="stylesheet" href="https://cdn.datatables.net/2.0.8/css/dataTables.dataTables.min.css"/>
+<script src="http://cdn.datatables.net/2.0.8/js/dataTables.min.js"></script>
 <div>
-    <div class="m-2">
+    <div class="m-2 text-white">
         <div class="flex justify-center m-2">
             <button onclick="window.location.href = window.origin"
                     class="focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none">
@@ -10,7 +14,8 @@
             </button>
         </div>
         <div class="overflow-x-auto">
-            <table class="whitespace-no-wrap w-full table-auto text-left border-white border-solid border-2">
+            <table id="rpc_table"
+                   class="cell-border stripe whitespace-no-wrap w-full table-auto text-left border-white border-solid border-2">
                 <thead>
                 <tr class="border-b bg-gray-800 text-xs font-semibold uppercase tracking-wide text-gray-500">
                     <th class="px-4 py-3">Location</th>
@@ -29,4 +34,7 @@
         </div>
     </div>
 </div>
+<script>
+    let table = new DataTable('#rpc_table');
+</script>
 {% endblock %}
