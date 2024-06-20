@@ -1,3 +1,15 @@
+use std::net::SocketAddr;
+
+use axum::extract::{ConnectInfo, Query};
+use axum::{Extension, Json};
+use http::StatusCode;
+use reqwest::Client;
+use sqlx::PgPool;
+
+use block_mesh_common::constants::BLOCK_MESH_IP_WORKER;
+use block_mesh_common::interfaces::ip_data::{IPData, IpDataPostRequest};
+use block_mesh_common::interfaces::server_api::{ReportUptimeRequest, ReportUptimeResponse};
+
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::api_token::find_token::find_token;
@@ -7,15 +19,6 @@ use crate::database::uptime_report::get_user_uptimes::get_user_uptimes;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
-use axum::extract::{ConnectInfo, Query};
-use axum::{Extension, Json};
-use block_mesh_common::constants::BLOCK_MESH_IP_WORKER;
-use block_mesh_common::interfaces::ip_data::{IPData, IpDataPostRequest};
-use block_mesh_common::interfaces::server_api::{ReportUptimeRequest, ReportUptimeResponse};
-use http::StatusCode;
-use reqwest::Client;
-use sqlx::PgPool;
-use std::net::SocketAddr;
 
 #[tracing::instrument(name = "report_uptime", skip(pool, query), err, ret)]
 pub async fn handler(
@@ -64,7 +67,10 @@ pub async fn handler(
         let ip_data = Client::new()
             .post(BLOCK_MESH_IP_WORKER)
             .json(&IpDataPostRequest {
-                ip: addr.ip().to_string(),
+                ip: match query.ip {
+                    None => addr.ip().to_string(),
+                    Some(ip) => ip,
+                },
             })
             .send()
             .await

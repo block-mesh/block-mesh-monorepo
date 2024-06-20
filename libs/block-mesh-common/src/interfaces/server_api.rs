@@ -40,6 +40,7 @@ pub struct ConfirmEmailRequest {
 pub struct ReportUptimeRequest {
     pub email: String,
     pub api_token: Uuid,
+    pub ip: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
