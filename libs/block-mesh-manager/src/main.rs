@@ -2,23 +2,27 @@
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unreachable_pub)]
 
-use block_mesh_common::constants::{DeviceType, BLOCKMESH_SERVER_UUID_ENVAR};
-use block_mesh_common::tracing::setup_tracing;
-use block_mesh_manager::configuration::get_configuration::get_configuration;
-use block_mesh_manager::database::migrate::migrate;
-use block_mesh_manager::emails::email_client::EmailClient;
-use block_mesh_manager::envars::app_env_var::AppEnvVar;
-use block_mesh_manager::envars::env_var::EnvVar;
-use block_mesh_manager::envars::get_env_var_or_panic::get_env_var_or_panic;
-use block_mesh_manager::envars::load_dotenv::load_dotenv;
-use block_mesh_manager::startup::application::{AppState, Application};
-use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
-use block_mesh_manager::startup::report_exit::report_exit;
-use block_mesh_manager::worker::rpc_cron::rpc_worker_loop;
-use secret::Secret;
-use std::sync::Arc;
-use uuid::Uuid;
+use cfg_if::cfg_if;
+cfg_if! { if #[cfg(feature = "ssr")] {
+    use block_mesh_common::constants::{DeviceType, BLOCKMESH_SERVER_UUID_ENVAR};
+    use block_mesh_common::tracing::setup_tracing;
+    use block_mesh_manager::configuration::get_configuration::get_configuration;
+    use block_mesh_manager::database::migrate::migrate;
+    use block_mesh_manager::emails::email_client::EmailClient;
+    use block_mesh_manager::envars::app_env_var::AppEnvVar;
+    use block_mesh_manager::envars::env_var::EnvVar;
+    use block_mesh_manager::envars::get_env_var_or_panic::get_env_var_or_panic;
+    use block_mesh_manager::envars::load_dotenv::load_dotenv;
+    use block_mesh_manager::startup::application::{AppState, Application};
+    use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
+    use block_mesh_manager::startup::report_exit::report_exit;
+    use block_mesh_manager::worker::rpc_cron::rpc_worker_loop;
+    use secret::Secret;
+    use std::sync::Arc;
+    use uuid::Uuid;
+}}
 
+#[cfg(feature = "ssr")]
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     load_dotenv();
@@ -51,4 +55,11 @@ async fn main() -> anyhow::Result<()> {
         o = rpc_worker_task =>  report_exit("RPC Background worker failed", o),
     };
     Ok(())
+}
+
+#[cfg(not(feature = "ssr"))]
+pub fn main() {
+    // no client-side main function
+    // unless we want this to work with e.g., Trunk for a purely client-side app
+    // see lib.rs for hydration function instead
 }

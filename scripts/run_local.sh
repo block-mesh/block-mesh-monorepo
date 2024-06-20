@@ -10,7 +10,11 @@ source "${ROOT}/scripts/setup.sh"
 export DATABASE_URL="postgres://postgres:password@localhost:5555/block-mesh"
 ensure "${ROOT}/scripts/init_db.sh"
 ensure "${ROOT}/scripts/build.sh"
-"${ROOT}/target/debug/block-mesh-manager" &
+if [ -f .env ] ; then
+  source .env
+fi
+#"${ROOT}/target/debug/block-mesh-manager" &
+cargo leptos watch --project block-mesh-manager | bunyan &
 export backend=$!
 function cleanup()
 {

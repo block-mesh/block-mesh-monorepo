@@ -10,7 +10,10 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
         .try_into()
         .unwrap_or_else(|_| panic!("Failed to parse {}", AppEnvVar::AppEnvironment));
     let cwd = env::current_dir().expect("Failed to determine current directory");
-    let configuration_directory = cwd.join("configuration");
+    let configuration_directory = cwd
+        .join("libs")
+        .join("block-mesh-manager")
+        .join("configuration");
     let configuration_file_path = configuration_directory.join("base.yaml");
 
     match Path::new(configuration_file_path.to_str().unwrap_or_default()).is_file() {

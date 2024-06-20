@@ -36,6 +36,8 @@ aes-gcm-siv = { git = "https://github.com/RustCrypto/AEADs", rev = "6105d7a5591a
 curve25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dalek", rev = "8274d5cbb6fc3f38cdc742b4798173895cd2a290" }
 
 [workspace.dependencies]
+leptos_axum = { version = "0.6.12" }
+leptos_meta = { version = "0.6.12" }
 gloo-utils = { version = "0.2.0" }
 tracing-subscriber-wasm = { version = "0.1.0" }
 num-traits = { version = "0.2.19" }
@@ -50,17 +52,18 @@ form_urlencoded = { version = "1.2.1" }
 auto-launch = { version = "0.5.0" }
 whoami = { version = "1.5.1" }
 url = { version = "2.5.0" }
-leptos = { version = "0.6.11", features = ["tracing", "csr"] }
-leptos_router = { version = "0.6.11", features = ["csr"] }
-wasm-bindgen = { version = "0.2" }
+leptos = { version = "0.6.11", features = ["tracing"] }
+leptos_router = { version = "0.6.11" }
+wasm-bindgen = { version = "=0.2.92" }
 js-sys = { version = "0.3" }
-wasm-bindgen-futures = { version = "0.4" }
+wasm-bindgen-futures = { version = "=0.4.42" }
 serde-wasm-bindgen = { version = "0.6" }
 urlencoding = { version = "2.1" }
 getrandom = { version = "0.2", features = ["js"] }
-wasm-bindgen-test = "0.3.36"
+wasm-bindgen-test = { version = "0.3.36" }
 console_error_panic_hook = { version = "0.1.7" }
 cfg-if = { version = "1.0.0" }
+console_log = { version = "1.0.0" }
 clap = { version = "4.5.2", features = ["derive"] }
 bs58 = { version = "0.5.0" }
 base64 = { version = "0.22.0" }
