@@ -53,7 +53,7 @@ jobs:
       - name: Build
         run: |
           ./scripts/wasm_build.sh --release
-          cp tmp_ext/chrome/chrome.zip chrome-extension-${{ github.event.pull_request.head.sha }}.zip
+          cp tmp_ext/chrome/chrome.zip chrome-extension-${{ github.sha }}.zip
       - name: Check Chrome Store
         run: |
           PKG_VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g')
@@ -90,7 +90,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: chrome-extension-${{ github.sha }}
-          path: chrome-extension-${{ github.event.pull_request.head.sha }}.zip
+          path: chrome-extension-${{ github.sha }}.zip
   # api usage reference:
   # * <https://developer.chrome.com/docs/webstore/using_webstore_api/>
   # * <https://github.com/fregante/chrome-webstore-upload/blob/main/How%20to%20generate%20Google%20API%20keys.md>
@@ -117,10 +117,10 @@ jobs:
       - name: Upload step
         run: |-
           chrome-webstore-upload upload \\
-            --source chrome-extension-${{ github.event.pull_request.head.sha }}.zip \\
-            --extension-id ${{ env.EXTENSION_ID }} \\
-            --client-id ${{ secrets.CI_GOOGLE_CLIENT_ID }} \\
-            --client-secret ${{ secrets.CI_GOOGLE_CLIENT_SECRET }} \\
-            --refresh-token ${{ secrets.CI_GOOGLE_REFRESH_TOKEN }}
-#            --auto-publish \\
+            --source "chrome-extension-${{ github.sha }}.zip" \\
+            --extension-id "${{ env.EXTENSION_ID }}" \\
+            --client-id "${{ secrets.CI_GOOGLE_CLIENT_ID }}" \\
+            --client-secret "${{ secrets.CI_GOOGLE_CLIENT_SECRET }}" \\
+            --refresh-token "${{ secrets.CI_GOOGLE_REFRESH_TOKEN }}" \\
+            --auto-publish
 # https://jam.dev/blog/automating-chrome-extension-publishing/
