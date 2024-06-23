@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        WITH\n            extant AS (\n                SELECT id, user_id, name, value, created_at FROM aggregates WHERE (user_id, name) = ($3, $4)\n            ),\n            inserted AS (\n                INSERT INTO aggregates (id , created_at, user_id, name, value)\n                SELECT $1, $2, $3, $4,  CAST( $5 as JSONB )\n                WHERE NOT EXISTS (SELECT FROM extant)\n                RETURNING id, user_id, name, value, created_at\n            )\n        SELECT id, user_id, name, value, created_at FROM inserted\n        UNION ALL\n        SELECT id, user_id, name, value, created_at FROM extant\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Uuid",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "bd95610fea81ff71a21e608233387c6742f95604a98ec745cb80cf34cca27dc7"
+}

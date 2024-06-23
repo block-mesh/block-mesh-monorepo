@@ -1,43 +1,59 @@
+use crate::domain::option_uuid::OptionUuid;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
-use uuid::Uuid;
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
 pub struct Aggregate {
-    pub id: Uuid,
-    pub user_id: Uuid,
+    pub id: OptionUuid,
+    pub user_id: OptionUuid,
     pub name: AggregateName,
     pub value: serde_json::Value,
-    pub created_at: DateTime<Utc>,
+    pub created_at: Option<DateTime<Utc>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum AggregateName {
     Uptime,
-    Bandwidth,
+    Download,
+    Upload,
+    Latency,
     Tasks,
+    Invalid,
 }
 
 impl Display for AggregateName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             AggregateName::Uptime => write!(f, "Uptime"),
-            AggregateName::Bandwidth => write!(f, "Bandwidth"),
+            AggregateName::Download => write!(f, "Download"),
+            AggregateName::Upload => write!(f, "Upload"),
+            AggregateName::Latency => write!(f, "Latency"),
             AggregateName::Tasks => write!(f, "Tasks"),
+            AggregateName::Invalid => write!(f, "Invalid"),
         }
     }
 }
 
+impl From<Option<String>> for AggregateName {
+    fn from(s: Option<String>) -> Self {
+        match s {
+            Some(s) => Self::from(s),
+            None => AggregateName::Invalid,
+        }
+    }
+}
 impl From<String> for AggregateName {
     fn from(s: String) -> Self {
         match s.as_str() {
             "Uptime" => AggregateName::Uptime,
-            "Bandwidth" => AggregateName::Bandwidth,
+            "Download" => AggregateName::Download,
+            "Upload" => AggregateName::Upload,
+            "Latency" => AggregateName::Latency,
             "Tasks" => AggregateName::Tasks,
-            _ => AggregateName::Uptime,
+            _ => AggregateName::Invalid,
         }
     }
 }

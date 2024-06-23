@@ -30,7 +30,7 @@ pub async fn get_tasks_rpc_results(
     duration: u64,
 ) -> anyhow::Result<Vec<RpcResults>> {
     let now = Utc::now();
-    let duration = now - Duration::from_millis(duration);
+    let duration = now - Duration::from_secs(duration);
     let status = [TaskStatus::Failed, TaskStatus::Completed]
         .iter()
         .map(|s| s.to_string())
@@ -57,16 +57,22 @@ pub async fn get_tasks_rpc_results(
     )
     .fetch_all(&mut **transaction)
     .await?;
-    tracing::error!("rpc_results: {:?}", rpc_results);
     Ok(rpc_results
         .into_iter()
-        .map(|i| RpcResults {
-            url: i.url.clone().unwrap_or_default(),
-            country: i.country,
-            response_code: i.response_code.unwrap_or_default(),
-            latency: i.latency.unwrap_or_default(),
-            count: i.count.unwrap_or_default(),
-            provider: RpcName::from_url(&i.url.clone().unwrap_or_default()).to_string(),
+        .filter_map(|i| {
+            let rpc_results = RpcResults {
+                url: i.url.clone().unwrap_or_default(),
+                country: i.country,
+                response_code: i.response_code.unwrap_or_default(),
+                latency: i.latency.unwrap_or_default(),
+                count: i.count.unwrap_or_default(),
+                provider: RpcName::from_url(&i.url.clone().unwrap_or_default()).to_string(),
+            };
+            if rpc_results.provider == RpcName::Invalid.to_string() {
+                None
+            } else {
+                Some(rpc_results)
+            }
         })
         .collect())
 }

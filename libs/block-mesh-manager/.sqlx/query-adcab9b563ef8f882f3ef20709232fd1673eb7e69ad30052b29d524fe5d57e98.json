@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        DELETE\n            FROM uptime_reports\n        WHERE\n            created_at < $1\n        AND\n            user_id = $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Timestamptz",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "adcab9b563ef8f882f3ef20709232fd1673eb7e69ad30052b29d524fe5d57e98"
+}

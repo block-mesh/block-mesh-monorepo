@@ -6,7 +6,7 @@ use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetTokenResponse};
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "check_token", skip(body), fields(email=body.email))]
+#[tracing::instrument(name = "check_token", skip(body), level = "trace", fields(email=body.email))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Json(body): Json<CheckTokenRequest>,

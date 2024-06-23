@@ -1,21 +1,25 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
+use std::net::SocketAddr;
+
+use axum::extract::{ConnectInfo, Query};
+use axum::{Extension, Json};
+use http::StatusCode;
+use reqwest::Client;
+use sqlx::PgPool;
+
+use block_mesh_common::constants::BLOCK_MESH_IP_WORKER;
+use block_mesh_common::interfaces::ip_data::{IPData, IpDataPostRequest};
+use block_mesh_common::interfaces::server_api::{ReportUptimeRequest, ReportUptimeResponse};
+
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
 use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::api_token::find_token::find_token;
 use crate::database::uptime_report::create_uptime_report::create_uptime_report;
+use crate::database::uptime_report::delete_uptime_report_by_time::delete_uptime_report_by_time;
 use crate::database::uptime_report::enrich_uptime_report::enrich_uptime_report;
 use crate::database::uptime_report::get_user_uptimes::get_user_uptimes;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
-use axum::extract::{ConnectInfo, Query};
-use axum::{Extension, Json};
-use block_mesh_common::constants::BLOCK_MESH_IP_WORKER;
-use block_mesh_common::interfaces::ip_data::{IPData, IpDataPostRequest};
-use block_mesh_common::interfaces::server_api::{ReportUptimeRequest, ReportUptimeResponse};
-use http::StatusCode;
-use reqwest::Client;
-use sqlx::PgPool;
-use std::net::SocketAddr;
 
 #[tracing::instrument(name = "report_uptime", skip(pool, query), err, ret)]
 pub async fn handler(
@@ -39,8 +43,8 @@ pub async fn handler(
     if uptimes.len() == 2 {
         let diff = uptimes[0].created_at - uptimes[1].created_at;
         if diff.num_seconds() < 60 {
-            let aggregate = get_or_create_aggregate_by_user_and_name(
-                &mut transaction,
+            let aggregate = get_or_create_aggregate_by_user_and_name_no_transaction(
+                &pool,
                 AggregateName::Uptime,
                 user.id,
             )
@@ -49,13 +53,16 @@ pub async fn handler(
             let sum = aggregate.value.as_f64().unwrap_or_default() + diff.num_seconds() as f64;
             update_aggregate(
                 &mut transaction,
-                aggregate.id,
+                aggregate.id.0.unwrap_or_default(),
                 &serde_json::Value::from(sum),
             )
             .await
             .map_err(Error::from)?;
         }
     }
+    delete_uptime_report_by_time(&mut transaction, user.id, 60 * 60)
+        .await
+        .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;
 
     tokio::spawn(async move {
@@ -64,7 +71,10 @@ pub async fn handler(
         let ip_data = Client::new()
             .post(BLOCK_MESH_IP_WORKER)
             .json(&IpDataPostRequest {
-                ip: addr.ip().to_string(),
+                ip: match query.ip {
+                    None => addr.ip().to_string(),
+                    Some(ip) => ip,
+                },
             })
             .send()
             .await
