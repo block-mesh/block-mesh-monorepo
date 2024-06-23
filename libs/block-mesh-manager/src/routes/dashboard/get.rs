@@ -1,4 +1,17 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
+use askama::Template;
+use askama_axum::IntoResponse;
+use axum::Extension;
+use axum_login::AuthSession;
+use chrono::Utc;
+use sqlx::PgPool;
+
+use block_mesh_common::constants::{
+    BLOCK_MESH_APP_SERVER, BLOCK_MESH_CHROME_EXTENSION_LINK, BLOCK_MESH_GITBOOK, BLOCK_MESH_GITHUB,
+    BLOCK_MESH_LANDING_PAGE_IMAGE, BLOCK_MESH_LOGO, BLOCK_MESH_SUPPORT_CHAT,
+    BLOCK_MESH_SUPPORT_EMAIL, BLOCK_MESH_TWITTER,
+};
+
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
 use crate::database::invite_code::get_number_of_users_invited::get_number_of_users_invited;
 use crate::database::invite_code::get_user_latest_invite_code::get_user_latest_invite_code;
 use crate::database::task::count_user_tasks_by_status::count_user_tasks_by_status;
@@ -7,17 +20,6 @@ use crate::domain::aggregate::AggregateName;
 use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
-use askama::Template;
-use askama_axum::IntoResponse;
-use axum::Extension;
-use axum_login::AuthSession;
-use block_mesh_common::constants::{
-    BLOCK_MESH_APP_SERVER, BLOCK_MESH_CHROME_EXTENSION_LINK, BLOCK_MESH_GITBOOK, BLOCK_MESH_GITHUB,
-    BLOCK_MESH_LANDING_PAGE_IMAGE, BLOCK_MESH_LOGO, BLOCK_MESH_SUPPORT_CHAT,
-    BLOCK_MESH_SUPPORT_EMAIL, BLOCK_MESH_TWITTER,
-};
-use chrono::Utc;
-use sqlx::PgPool;
 
 #[allow(dead_code)]
 #[derive(Template)]
@@ -63,10 +65,13 @@ pub async fn handler(
     let number_of_users_invited = get_number_of_users_invited(&mut transaction, user.id)
         .await
         .map_err(Error::from)?;
-    let uptime_aggregate =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, user.id)
-            .await
-            .map_err(Error::from)?;
+    let uptime_aggregate = get_or_create_aggregate_by_user_and_name_no_transaction(
+        &pool,
+        AggregateName::Uptime,
+        user.id,
+    )
+    .await
+    .map_err(Error::from)?;
     let overall_uptime = uptime_aggregate.value.as_f64().unwrap_or_default();
     let user_since = (Utc::now() - db_user.created_at).num_days();
     transaction.commit().await.map_err(Error::from)?;

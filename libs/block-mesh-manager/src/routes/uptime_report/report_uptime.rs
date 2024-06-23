@@ -10,7 +10,7 @@ use block_mesh_common::constants::BLOCK_MESH_IP_WORKER;
 use block_mesh_common::interfaces::ip_data::{IPData, IpDataPostRequest};
 use block_mesh_common::interfaces::server_api::{ReportUptimeRequest, ReportUptimeResponse};
 
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
 use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::api_token::find_token::find_token;
 use crate::database::uptime_report::create_uptime_report::create_uptime_report;
@@ -42,8 +42,8 @@ pub async fn handler(
     if uptimes.len() == 2 {
         let diff = uptimes[0].created_at - uptimes[1].created_at;
         if diff.num_seconds() < 60 {
-            let aggregate = get_or_create_aggregate_by_user_and_name(
-                &mut transaction,
+            let aggregate = get_or_create_aggregate_by_user_and_name_no_transaction(
+                &pool,
                 AggregateName::Uptime,
                 user.id,
             )
