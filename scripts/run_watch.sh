@@ -8,6 +8,9 @@ cd "${ROOT}/libs/block-mesh-manager" || exit 1
 set +x
 source "${ROOT}/scripts/setup.sh"
 export DATABASE_URL="postgres://postgres:password@localhost:5555/block-mesh"
+if [ -f "${ROOT}/.env" ] ; then
+  source "${ROOT}/.env"
+fi
 ensure "${ROOT}/scripts/init_db.sh"
 ensure "${ROOT}/scripts/build.sh"
 cargo watch -x run -w templates -w src

@@ -49,6 +49,12 @@ impl TryFrom<String> for OptionUuid {
     }
 }
 
+impl From<Option<Uuid>> for OptionUuid {
+    fn from(option: Option<Uuid>) -> Self {
+        Self(option)
+    }
+}
+
 impl Deref for OptionUuid {
     type Target = Option<Uuid>;
 

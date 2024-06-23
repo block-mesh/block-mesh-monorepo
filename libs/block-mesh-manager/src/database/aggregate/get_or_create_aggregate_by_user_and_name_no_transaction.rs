@@ -21,12 +21,19 @@ pub(crate) async fn get_or_create_aggregate_by_user_and_name_no_transaction(
     let aggregate = sqlx::query_as!(
         Aggregate,
         r#"
-        INSERT INTO aggregates
-        (id, created_at, user_id, name, value)
-        VALUES ($1, $2, $3, $4, $5)
-        ON CONFLICT (user_id, name)
-        DO UPDATE set user_id = $3
-        RETURNING id, created_at, user_id, name, value
+        WITH
+            extant AS (
+                SELECT id, user_id, name, value, created_at FROM aggregates WHERE (user_id, name) = ($3, $4)
+            ),
+            inserted AS (
+                INSERT INTO aggregates (id , created_at, user_id, name, value)
+                SELECT $1, $2, $3, $4,  CAST( $5 as JSONB )
+                WHERE NOT EXISTS (SELECT FROM extant)
+                RETURNING id, user_id, name, value, created_at
+            )
+        SELECT id, user_id, name, value, created_at FROM inserted
+        UNION ALL
+        SELECT id, user_id, name, value, created_at FROM extant
         "#,
         id,
         now,
