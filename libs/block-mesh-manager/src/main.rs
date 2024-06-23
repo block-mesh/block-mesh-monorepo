@@ -4,8 +4,8 @@
 
 use cfg_if::cfg_if;
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use logger_general::tracing::setup_tracing;
     use block_mesh_common::constants::{DeviceType, BLOCKMESH_SERVER_UUID_ENVAR};
-    use block_mesh_common::tracing::setup_tracing;
     use block_mesh_manager::configuration::get_configuration::get_configuration;
     use block_mesh_manager::database::migrate::migrate;
     use block_mesh_manager::emails::email_client::EmailClient;

@@ -1,4 +1,4 @@
-use crate::constants::{DeviceType, BLOCKMESH_VERSION, BLOCK_MESH_LOGGER};
+use block_mesh_common::constants::{DeviceType, BLOCKMESH_VERSION, BLOCK_MESH_LOGGER};
 use reqwest::Client;
 use serde_json::{json, Value};
 use std::io::{self, Write};

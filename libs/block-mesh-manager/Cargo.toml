@@ -7,12 +7,14 @@ authors.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+logger-leptos = { path = "../logger-leptos", optional = true }
+logger-general = { path = "../logger-general", optional = true }
 tracing-subscriber-wasm = { workspace = true }
 num-traits = { workspace = true }
 reqwest = { workspace = true, default-features = false, features = [
   "multipart",
   "json",
-], optional = true }
+] }
 validator = { workspace = true }
 url = { workspace = true }
 askama = { workspace = true, features = ["with-axum", "serde-json"] }
@@ -29,7 +31,7 @@ serde-aux = { workspace = true }
 config = { workspace = true }
 dotenv = { workspace = true }
 enum-iterator = { workspace = true }
-block-mesh-common = { path = "../block-mesh-common", features = ["async-tracer", "ip-data"], optional = true }
+block-mesh-common = { path = "../block-mesh-common", features = ["ip-data"] }
 tokio = { workspace = true, features = ["full"], optional = true }
 axum-login = { workspace = true, optional = true }
 tower-sessions-sqlx-store = { workspace = true, features = ["postgres"], optional = true }
@@ -93,6 +95,7 @@ hydrate = [
   "leptos/hydrate",
   "leptos_meta/hydrate",
   "leptos_router/hydrate",
+  "dep:logger-leptos"
 ]
 ssr = [
   "dep:tokio-stream",
@@ -109,9 +112,8 @@ ssr = [
   "dep:tracing",
   "dep:tower-sessions-sqlx-store",
   "dep:axum-login",
-  "dep:reqwest",
-  "dep:block-mesh-common",
-  "dep:secret"
+  "dep:secret",
+  "dep:logger-general"
 ]
 
 [package.metadata.leptos]

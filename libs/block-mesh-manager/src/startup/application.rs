@@ -13,9 +13,11 @@ use leptos::leptos_config::get_config_from_env;
 use leptos_axum::{generate_route_list, LeptosRoutes};
 use sqlx::postgres::PgPool;
 use std::net::SocketAddr;
+use std::path::Path;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
+use tower_http::services::ServeDir;
 
 pub struct Application {
     app: Router,
@@ -132,10 +134,22 @@ impl Application {
                 "/api/check_token",
                 post(routes::api_token::check_token::handler),
             )
+            .route(
+                "/api/get_email_via_token",
+                post(routes::api_token::get_email_via_token::handler),
+            )
             .route("/health_check", get(routes::health_check::get::handler));
         let leptos_config = get_config_from_env().unwrap();
         let leptos_options = leptos_config.leptos_options;
         let routes = generate_route_list(App);
+
+        let path = Path::new("")
+            .join(leptos_options.site_root.clone())
+            .join(leptos_options.site_pkg_dir.clone());
+        // let leptos_pkg = Router::new().nest_service(
+        //     &format!("/{}", leptos_options.site_pkg_dir),
+        //     ServeDir::new(path),
+        // );
 
         let leptos_router: Router<()> = Router::new()
             .route("/api/*fn_name", post(leptos_axum::handle_server_fns))
@@ -154,9 +168,8 @@ impl Application {
             .layer(auth_layer)
             .with_state(app_state.clone());
 
-        let app = Router::new()
-            .nest("/leptos", leptos_router)
-            .nest("/", backend);
+        let app = Router::new().nest("/ui", leptos_router).nest("/", backend);
+        // .nest("/", leptos_pkg);
 
         let listener = TcpListener::bind(settings.application.address())
             .await

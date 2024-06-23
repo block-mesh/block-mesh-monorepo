@@ -1,5 +1,5 @@
 [package]
-name = "block-mesh-common"
+name = "logger-general"
 version = { workspace = true }
 edition = "2021"
 authors.workspace = true
@@ -7,24 +7,20 @@ authors.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+block-mesh-common = { path = "../block-mesh-common" }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter", "time", "json"] }
 tracing-serde = { workspace = true }
-http-body-util = { workspace = true, optional = true }
-bytes = { workspace = true, optional = true }
-hyper = { workspace = true, features = ["full"], optional = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
-clap = { workspace = true, features = ["derive"], optional = true }
-solana-sdk = { workspace = true, optional = true }
 chrono = { workspace = true, features = ["clock", "serde"] }
 anyhow = { workspace = true }
 once_cell = { workspace = true }
-reqwest = { workspace = true, optional = true, features = [
+tokio = { workspace = true }
+reqwest = { workspace = true, features = [
   "json",
   "hickory-dns"
 ] }
-ipgeolocate = { workspace = true, optional = true }
 
 [dependencies.uuid]
 workspace = true
@@ -35,9 +31,3 @@ features = [
   "serde", # Enable serialization/deserialization of UUIDs
   "js"
 ]
-
-[features]
-http = ["dep:http-body-util", "dep:bytes", "dep:hyper"]
-cli = ["dep:clap", "dep:solana-sdk"]
-app-config = ["dep:clap", "dep:solana-sdk"]
-ip-data = ["dep:ipgeolocate", "dep:reqwest"]

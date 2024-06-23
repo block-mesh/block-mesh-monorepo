@@ -60,6 +60,16 @@ pub struct GetTokenRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct GetEmailViaTokenRequest {
+    pub token: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetEmailViaTokenResponse {
+    pub email: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct CheckTokenRequest {
     pub email: String,
     pub api_token: Uuid,

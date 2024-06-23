@@ -7,8 +7,8 @@ mod pages;
 
 use app::*;
 use block_mesh_common::constants::DeviceType;
-use block_mesh_common::leptos_tracing::setup_leptos_tracing;
 use leptos::*;
+use logger_leptos::leptos_tracing::setup_leptos_tracing;
 
 fn main() {
     console_error_panic_hook::set_once();

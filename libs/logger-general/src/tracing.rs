@@ -1,4 +1,6 @@
-use crate::constants::{DeviceType, BLOCKMESH_LOG_ENV, BLOCKMESH_VERSION, BLOCK_MESH_LOGGER};
+use block_mesh_common::constants::{
+    DeviceType, BLOCKMESH_LOG_ENV, BLOCKMESH_VERSION, BLOCK_MESH_LOGGER,
+};
 use reqwest::Client;
 use serde_json::{json, Value};
 use std::sync::{Arc, Once};
@@ -89,12 +91,13 @@ where
     Self: 'static,
 {
     fn on_event(&self, event: &Event, _ctx: Context<S>) {
+        let user_id = self.user_id.clone();
         let log = json!({
             "timestamp": chrono::Utc::now().to_rfc3339(),
             "level": event.metadata().level().to_string(),
             "event": event.as_serde(),
             "env": self.env.clone(),
-            "user_id": self.user_id,
+            "user_id": *user_id,
             "device_type": self.device_type.clone(),
             "version": BLOCKMESH_VERSION,
         });

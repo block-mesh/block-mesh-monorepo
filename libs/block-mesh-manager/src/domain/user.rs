@@ -32,6 +32,15 @@ impl From<String> for UserRole {
     }
 }
 
+impl From<Option<String>> for UserRole {
+    fn from(s: Option<String>) -> Self {
+        match s {
+            Some(s) => UserRole::from(s),
+            None => UserRole::User,
+        }
+    }
+}
+
 impl sqlx::Type<Postgres> for UserRole {
     fn type_info() -> sqlx::postgres::PgTypeInfo {
         <String as sqlx::Type<Postgres>>::type_info()

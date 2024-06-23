@@ -1158,15 +1158,10 @@ dependencies = [
  "serde",
  "serde_json",
  "solana-sdk",
- "tokio",
  "tracing",
  "tracing-serde",
  "tracing-subscriber",
- "tracing-subscriber-wasm",
- "tracing-wasm",
  "uuid",
- "wasm-bindgen-futures",
- "web-sys",
 ]
 
 [[package]]
@@ -1196,6 +1191,8 @@ dependencies = [
  "leptos_meta",
  "leptos_router",
  "log",
+ "logger-general",
+ "logger-leptos",
  "num-traits",
  "rand 0.8.5",
  "reqwest",
@@ -1275,6 +1272,7 @@ dependencies = [
  "js-sys",
  "leptos",
  "leptos_router",
+ "logger-leptos",
  "serde",
  "serde-wasm-bindgen 0.6.5",
  "serde_json",
@@ -1307,6 +1305,7 @@ dependencies = [
  "cocoa 0.25.0",
  "futures-util",
  "log",
+ "logger-general",
  "proxy-endpoint",
  "proxy-master",
  "serde",
@@ -3048,6 +3047,7 @@ dependencies = [
  "leptos",
  "leptos_router",
  "log",
+ "logger-leptos",
  "rand 0.8.5",
  "reqwest",
  "serde",
@@ -5140,6 +5140,45 @@ name = "log"
 version = "0.4.21"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "90ed8c1e510134f979dbc4f070f87d4313098b704861a105fe34231c70a3901c"
+
+[[package]]
+name = "logger-general"
+version = "0.0.51"
+dependencies = [
+ "anyhow",
+ "block-mesh-common",
+ "chrono",
+ "once_cell",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "tracing-serde",
+ "tracing-subscriber",
+ "uuid",
+]
+
+[[package]]
+name = "logger-leptos"
+version = "0.0.51"
+dependencies = [
+ "anyhow",
+ "block-mesh-common",
+ "chrono",
+ "once_cell",
+ "reqwest",
+ "serde",
+ "serde_json",
+ "tracing",
+ "tracing-serde",
+ "tracing-subscriber",
+ "tracing-subscriber-wasm",
+ "tracing-wasm",
+ "uuid",
+ "wasm-bindgen-futures",
+ "web-sys",
+]
 
 [[package]]
 name = "loom"
@@ -9580,6 +9619,7 @@ dependencies = [
  "http-body-util",
  "hyper 1.3.1",
  "hyper-util",
+ "logger-general",
  "rustc-hash",
  "tokio",
  "tower",
@@ -9600,6 +9640,7 @@ dependencies = [
  "http-body-util",
  "hyper 1.3.1",
  "hyper-util",
+ "logger-general",
  "once_cell",
  "tokio",
  "tower",

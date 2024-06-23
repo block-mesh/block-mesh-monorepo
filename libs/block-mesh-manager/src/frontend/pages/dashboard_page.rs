@@ -5,11 +5,7 @@ use leptos::*;
 pub fn DashboardPage() -> impl IntoView {
     view! {
         <Suspense fallback=|| {
-            view! {
-                <div class="lds-roller"/>
-            }
-        }>
-        Dashboard Page
-        </Suspense>
+            view! { <div class="lds-roller"></div> }
+        }>Dashboard Page</Suspense>
     }
 }

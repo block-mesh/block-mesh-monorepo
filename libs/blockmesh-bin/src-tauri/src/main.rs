@@ -10,8 +10,8 @@ use crate::windows_events::on_window_event;
 use block_mesh_common::app_config::AppConfig;
 use block_mesh_common::cli::CliArgs;
 use block_mesh_common::constants::DeviceType;
-use block_mesh_common::tracing::setup_tracing;
 use clap::Parser;
+use logger_general::tracing::setup_tracing;
 use std::process::ExitCode;
 use std::sync::Arc;
 #[cfg(target_os = "macos")]

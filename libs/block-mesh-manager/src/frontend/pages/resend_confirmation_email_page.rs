@@ -1,26 +1,24 @@
-use leptos::Suspense;
 use leptos::*;
+use leptos_router::A;
 
 #[component]
-pub fn ResetPasswordPage() -> impl IntoView {
+pub fn ResendConfirmationEmailPage() -> impl IntoView {
     view! {
-        <Suspense fallback=|| {
-            view! { <div class="lds-roller"></div> }
-        }>
-            <form action="/reset_password" method="post">
-                <div class="bg-gray-700 flex justify-center items-center h-screen">
-                    <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
-                        <h2 class="text-white text-2xl font-semibold text-center mb-6">
-                            Reset Password
-                        </h2>
-                        <div class="flex justify-around mb-4">
-                            <a
-                                class="px-4 py-2 rounded font-bold text-sm text-blue-500 hover:text-blue-800"
-                                href="/ui/login"
-                            >
-                                Login
-                            </a>
-                        </div>
+        <form action="/resend_confirmation_email" method="post">
+            <div class="bg-gray-700 flex justify-center items-center h-screen">
+                <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
+                    <h2 class="text-white text-2xl font-semibold text-center mb-6">
+                        Resend Confirmation Email
+                    </h2>
+                    <div class="flex justify-around mb-4">
+                        <A
+                            class="px-4 py-2 rounded font-bold text-sm text-blue-500 hover:text-blue-800"
+                            href="/ui/login"
+                        >
+                            Login
+                        </A>
+                    </div>
+                    <form>
                         <div class="mb-4">
                             <label class="block text-white text-sm font-bold mb-2" for="email">
                                 Email
@@ -41,10 +39,9 @@ pub fn ResetPasswordPage() -> impl IntoView {
                                 Submit
                             </button>
                         </div>
-                    </div>
+                    </form>
                 </div>
-            </form>
-
-        </Suspense>
+            </div>
+        </form>
     }
 }

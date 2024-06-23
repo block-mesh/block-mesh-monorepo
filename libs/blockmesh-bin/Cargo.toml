@@ -5,6 +5,7 @@ version = { workspace = true }
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
+logger-leptos = { path = "../logger-leptos" }
 leptos = { workspace = true, features = ["csr", "tracing"] }
 tracing-wasm = { workspace = true }
 anyhow = { workspace = true }
@@ -16,5 +17,5 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
 console_error_panic_hook = { workspace = true }
-block-mesh-common = { path = "../block-mesh-common", features = ["http", "cli", "app-config", "leptos-tracer"] }
+block-mesh-common = { path = "../block-mesh-common", features = ["http", "cli", "app-config"] }
 solana-sdk = { workspace = true }

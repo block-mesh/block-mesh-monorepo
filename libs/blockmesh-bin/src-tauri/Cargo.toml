@@ -11,6 +11,7 @@ edition = "2021"
 tauri-build = { workspace = true, features = [] }
 
 [dependencies]
+logger-general = { path = "../../logger-general" }
 tauri = { workspace = true, features = ["shell-open", "system-tray"] }
 tauri-plugin-autostart = { workspace = true }
 tauri-plugin-single-instance = { workspace = true }
@@ -24,7 +25,7 @@ clap = { workspace = true, features = ["derive"] }
 solana-sdk = { workspace = true }
 blockmesh-program = { path = "../../../programs/blockmesh-program" }
 block-mesh-solana-client = { path = "../../block-mesh-solana-client" }
-block-mesh-common = { path = "../../block-mesh-common", features = ["http", "cli", "app-config", "async-tracer"] }
+block-mesh-common = { path = "../../block-mesh-common", features = ["http", "cli", "app-config"] }
 tokio = { workspace = true, features = ["full"] }
 client-node = { path = "../../client-node" }
 proxy-master = { path = "../../proxy-master" }

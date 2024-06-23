@@ -1,7 +1,7 @@
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{GetUserUptimeRequest, GetUserUptimeResponse};
-use block_mesh_common::leptos_tracing::setup_leptos_tracing;
 use leptos::*;
+use logger_leptos::leptos_tracing::setup_leptos_tracing;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::utils::connectors::set_panic_hook;
