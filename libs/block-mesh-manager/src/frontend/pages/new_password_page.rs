@@ -15,14 +15,26 @@ pub fn NewPasswordPage() -> impl IntoView {
         .unwrap_or(&"".to_string())
         .to_string();
     let (token, _) = create_signal(token);
+    let (origin, set_origin) = create_signal(None::<String>);
+
+    create_effect(move |_| {
+        set_origin.set(Some(window().origin()));
+        logging::log!("\n\norigin = {:?}\n\n", window().origin());
+    });
+
     logging::log!("x token = {}", token.get());
 
     let async_data = create_resource(
-        || (),
+        move || origin.get(),
         move |_| async move {
+            origin.get()?;
             let client = reqwest::Client::new();
+            logging::log!("\n\norigin = {:?}\n\n", window().origin());
             let response = client
-                .post("http://localhost:8000/api/get_email_via_token")
+                .post(&format!(
+                    "{}/api/get_email_via_token",
+                    origin.get().unwrap_or_default()
+                ))
                 .json(&GetEmailViaTokenRequest { token: token.get() })
                 .send()
                 .await;

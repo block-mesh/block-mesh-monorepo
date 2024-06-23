@@ -146,10 +146,10 @@ impl Application {
         let path = Path::new("")
             .join(leptos_options.site_root.clone())
             .join(leptos_options.site_pkg_dir.clone());
-        // let leptos_pkg = Router::new().nest_service(
-        //     &format!("/{}", leptos_options.site_pkg_dir),
-        //     ServeDir::new(path),
-        // );
+        let leptos_pkg: Router<()> = Router::new().nest_service(
+            &format!("/{}", leptos_options.site_pkg_dir),
+            ServeDir::new(path),
+        );
 
         let leptos_router: Router<()> = Router::new()
             .route("/api/*fn_name", post(leptos_axum::handle_server_fns))
@@ -168,8 +168,10 @@ impl Application {
             .layer(auth_layer)
             .with_state(app_state.clone());
 
-        let app = Router::new().nest("/ui", leptos_router).nest("/", backend);
-        // .nest("/", leptos_pkg);
+        let app = Router::new()
+            .nest("/ui", leptos_router)
+            .nest("/", backend)
+            .nest("/", leptos_pkg);
 
         let listener = TcpListener::bind(settings.application.address())
             .await
