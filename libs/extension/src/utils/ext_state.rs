@@ -1,8 +1,3 @@
-use chrono::Utc;
-use gloo_utils::format::JsValueSerdeExt;
-use leptos::*;
-use leptos_dom::tracing;
-use leptos_router::use_navigate;
 use std::cell::RefCell;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
@@ -10,19 +5,24 @@ use std::rc::Rc;
 use std::str::FromStr;
 use std::time::Duration;
 
-use crate::pages::page::Page;
-use crate::utils::auth::{check_token, get_latest_invite_code};
-use block_mesh_common::constants::DeviceType;
-use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
-use block_mesh_common::leptos_tracing::setup_leptos_tracing;
+use chrono::Utc;
+use gloo_utils::format::JsValueSerdeExt;
+use leptos::*;
+use leptos_dom::tracing;
+use leptos_router::use_navigate;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
+use block_mesh_common::constants::DeviceType;
+use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
+use block_mesh_common::leptos_tracing::setup_leptos_tracing;
+
+use crate::pages::page::Page;
+use crate::utils::auth::{check_token, get_latest_invite_code};
 use crate::utils::connectors::{get_storage_value, set_storage_value, storageOnChange};
-use crate::utils::log::log_info;
 use crate::utils::storage::StorageValues;
 
 #[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
@@ -205,7 +205,6 @@ impl AppState {
     ) -> String {
         let mut invite_code = Self::get_invite_code().await;
         if !invite_code.is_empty() && time_diff < 600 {
-            log_info!("Invite code is still valid: {}", invite_code);
             return invite_code;
         }
         if !api_token.is_nil() && *api_token != Uuid::default() {
