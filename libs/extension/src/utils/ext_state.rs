@@ -1,7 +1,3 @@
-use gloo_utils::format::JsValueSerdeExt;
-use leptos::*;
-use leptos_dom::tracing;
-use leptos_router::use_navigate;
 use std::cell::RefCell;
 use std::fmt;
 use std::fmt::{Debug, Display, Formatter};
@@ -9,17 +5,23 @@ use std::rc::Rc;
 use std::str::FromStr;
 use std::time::Duration;
 
-use crate::pages::page::Page;
-use crate::utils::auth::{check_token, get_latest_invite_code};
-use block_mesh_common::constants::DeviceType;
-use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
-use block_mesh_common::leptos_tracing::setup_leptos_tracing;
+use chrono::Utc;
+use gloo_utils::format::JsValueSerdeExt;
+use leptos::*;
+use leptos_dom::tracing;
+use leptos_router::use_navigate;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
+use block_mesh_common::constants::DeviceType;
+use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
+use block_mesh_common::leptos_tracing::setup_leptos_tracing;
+
+use crate::pages::page::Page;
+use crate::utils::auth::{check_token, get_latest_invite_code};
 use crate::utils::connectors::{get_storage_value, set_storage_value, storageOnChange};
 use crate::utils::storage::StorageValues;
 
@@ -59,6 +61,7 @@ pub struct AppState {
     pub error: RwSignal<Option<String>>,
     pub download_speed: RwSignal<f64>,
     pub upload_speed: RwSignal<f64>,
+    pub last_update: RwSignal<i64>,
 }
 
 impl Debug for AppState {
@@ -75,6 +78,7 @@ impl Debug for AppState {
             .field("error", &self.error.get_untracked())
             .field("download_speed", &self.download_speed.get_untracked())
             .field("upload_speed", &self.upload_speed.get_untracked())
+            .field("last_update", &self.last_update.get_untracked())
             .finish()
     }
 }
@@ -82,6 +86,8 @@ impl Debug for AppState {
 impl AppState {
     #[tracing::instrument(name = "AppState::new")]
     pub async fn new() -> Self {
+        let now = Utc::now().timestamp();
+        let last_update = Self::get_last_update().await;
         let mut blockmesh_url = Self::get_blockmesh_url().await;
         if blockmesh_url.is_empty() {
             blockmesh_url = "https://app.blockmesh.xyz".to_string();
@@ -98,23 +104,11 @@ impl AppState {
         let device_id = uuid::Uuid::from_str(&device_id).unwrap_or_else(|_| Uuid::new_v4());
         setup_leptos_tracing(Option::from(device_id), DeviceType::Extension);
         let uptime = Self::get_uptime().await;
-        let mut invite_code = Self::get_invite_code().await;
-        if !api_token.is_nil() && api_token != Uuid::default() {
-            if let Ok(result) = get_latest_invite_code(
-                &blockmesh_url,
-                &GetLatestInviteCodeRequest {
-                    email: email.clone(),
-                    api_token,
-                },
-            )
-            .await
-            {
-                invite_code = result.invite_code;
-                Self::store_invite_code(invite_code.clone()).await;
-            }
-        }
+        let invite_code =
+            Self::update_invite_code(&api_token, now - last_update, &blockmesh_url, &email).await;
         let download_speed = Self::get_download_speed().await;
         let upload_speed = Self::get_upload_speed().await;
+        Self::store_last_update(now).await;
 
         // Signals:
         let invite_code = create_rw_signal(invite_code);
@@ -128,6 +122,7 @@ impl AppState {
         let error = create_rw_signal(None);
         let download_speed = create_rw_signal(download_speed);
         let upload_speed = create_rw_signal(upload_speed);
+        let last_update = create_rw_signal(now);
 
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
             if let Ok(data) = event.into_serde::<Value>() {
@@ -171,6 +166,8 @@ impl AppState {
                                             *v = f64::from_str(&value).unwrap_or_default()
                                         });
                                     }
+                                    StorageValues::LastUpdate => last_update
+                                        .update(|v| *v = i64::from_str(&value).unwrap_or_default()),
                                 }
                             }
                         }
@@ -196,7 +193,35 @@ impl AppState {
             error,
             download_speed,
             upload_speed,
+            last_update,
         }
+    }
+
+    pub async fn update_invite_code(
+        api_token: &Uuid,
+        time_diff: i64,
+        blockmesh_url: &str,
+        email: &str,
+    ) -> String {
+        let mut invite_code = Self::get_invite_code().await;
+        if !invite_code.is_empty() && time_diff < 600 {
+            return invite_code;
+        }
+        if !api_token.is_nil() && *api_token != Uuid::default() {
+            if let Ok(result) = get_latest_invite_code(
+                blockmesh_url,
+                &GetLatestInviteCodeRequest {
+                    email: email.to_string(),
+                    api_token: *api_token,
+                },
+            )
+            .await
+            {
+                invite_code = result.invite_code;
+                Self::store_invite_code(invite_code.clone()).await;
+            }
+        }
+        invite_code
     }
 
     #[tracing::instrument(name = "AppState::set_success")]
@@ -236,6 +261,8 @@ impl AppState {
 
     #[tracing::instrument(name = "AppState::init")]
     pub async fn init(context: AppState) -> AppStatus {
+        let now = Utc::now().timestamp();
+        let last_update = Self::get_last_update().await;
         let mut blockmesh_url = Self::get_blockmesh_url().await;
         if blockmesh_url.is_empty() {
             blockmesh_url = "https://app.blockmesh.xyz".to_string();
@@ -251,21 +278,8 @@ impl AppState {
         let email = Self::get_email().await;
         let api_token = Self::get_api_token().await;
         let api_token = uuid::Uuid::from_str(&api_token).unwrap_or_else(|_| Uuid::default());
-        let mut invite_code = Self::get_invite_code().await;
-        if context.status.get_untracked() != AppStatus::LoggedOut && context.has_api_token() {
-            if let Ok(result) = get_latest_invite_code(
-                &blockmesh_url,
-                &GetLatestInviteCodeRequest {
-                    email: email.clone(),
-                    api_token,
-                },
-            )
-            .await
-            {
-                invite_code = result.invite_code;
-                Self::store_invite_code(invite_code.clone()).await;
-            }
-        }
+        let invite_code =
+            Self::update_invite_code(&api_token, now - last_update, &blockmesh_url, &email).await;
         let download_speed = Self::get_download_speed().await;
         let upload_speed = Self::get_upload_speed().await;
 
@@ -276,6 +290,8 @@ impl AppState {
         context.email.update(|v| *v = email.clone());
         context.api_token.update(|v| *v = api_token);
         context.device_id.update(|v| *v = device_id);
+        context.last_update.update(|v| *v = now);
+        Self::store_last_update(now).await;
         if email.is_empty() || api_token.is_nil() || api_token == Uuid::default() {
             return context.status.get_untracked();
         }
@@ -353,6 +369,14 @@ impl AppState {
         .await;
     }
 
+    pub async fn store_last_update(last_update: i64) {
+        set_storage_value(
+            &StorageValues::LastUpdate.to_string(),
+            JsValue::from_f64(last_update as f64),
+        )
+        .await;
+    }
+
     pub async fn store_download_speed(uptime: f64) {
         set_storage_value(
             &StorageValues::DownloadSpeed.to_string(),
@@ -381,6 +405,12 @@ impl AppState {
             .await
             .as_string()
             .unwrap_or_default()
+    }
+
+    pub async fn get_last_update() -> i64 {
+        let value = get_storage_value(StorageValues::LastUpdate.to_string().as_str()).await;
+        let str = value.as_string().unwrap_or_default();
+        i64::from_str(&str).unwrap_or_default()
     }
 
     pub async fn get_api_token() -> String {

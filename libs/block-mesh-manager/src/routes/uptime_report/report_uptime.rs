@@ -14,6 +14,7 @@ use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_tran
 use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::api_token::find_token::find_token;
 use crate::database::uptime_report::create_uptime_report::create_uptime_report;
+use crate::database::uptime_report::delete_uptime_report_by_time::delete_uptime_report_by_time;
 use crate::database::uptime_report::enrich_uptime_report::enrich_uptime_report;
 use crate::database::uptime_report::get_user_uptimes::get_user_uptimes;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
@@ -59,6 +60,9 @@ pub async fn handler(
             .map_err(Error::from)?;
         }
     }
+    delete_uptime_report_by_time(&mut transaction, user.id, 60 * 60)
+        .await
+        .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;
 
     tokio::spawn(async move {

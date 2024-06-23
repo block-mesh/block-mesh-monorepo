@@ -10,13 +10,13 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
     let email = Signal::derive(move || state.email.get());
     let status = Signal::derive(move || state.status.get());
     let support_href = format!("mailto: {}", BLOCK_MESH_SUPPORT_EMAIL);
-    let (download_speed, set_download_speed) = create_signal(state.download_speed.get());
-    let (upload_speed, set_upload_speed) = create_signal(state.upload_speed.get());
-    let _display_bandwidth = Signal::derive(move || {
-        let d = download_speed.get();
-        let u = upload_speed.get();
-        d > 0f64 && u > 0f64 && status.get() == AppStatus::LoggedIn
-    });
+    let (download_speed, set_download_speed) = create_signal(state.download_speed.get_untracked());
+    let (upload_speed, set_upload_speed) = create_signal(state.upload_speed.get_untracked());
+    // let _display_bandwidth = Signal::derive(move || {
+    //     let d = download_speed.get();
+    //     let u = upload_speed.get();
+    //     d > 0f64 && u > 0f64 && status.get() == AppStatus::LoggedIn
+    // });
     set_timeout(
         move || {
             spawn_local(async move {
