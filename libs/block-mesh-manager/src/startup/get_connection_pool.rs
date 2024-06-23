@@ -31,7 +31,10 @@ pub async fn get_connection_pool(
         }
         let pool_connection = PgPoolOptions::new()
             .acquire_timeout(Duration::from_secs(5))
+            .min_connections(3)
             .max_connections(100)
+            .idle_timeout(Duration::from_secs(1))
+            .test_before_acquire(true)
             .connect_with(settings.clone())
             .await;
         match pool_connection {
