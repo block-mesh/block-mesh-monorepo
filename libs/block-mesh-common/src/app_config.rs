@@ -10,6 +10,7 @@ use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub struct AppConfig {
+    pub enable_node: Option<bool>,
     pub keypair_path: Option<String>,
     pub proxy_master_node_owner: Option<Pubkey>,
     pub program_id: Option<Pubkey>,
@@ -121,6 +122,7 @@ impl From<Commands> for AppConfig {
     fn from(commands: Commands) -> Self {
         match commands {
             Commands::ClientNode(options) => AppConfig {
+                enable_node: None,
                 keypair_path: Some(options.keypair_path),
                 proxy_master_node_owner: options.proxy_master_node_owner,
                 program_id: Some(options.program_id),
@@ -135,6 +137,7 @@ impl From<Commands> for AppConfig {
                 device_id: None,
             },
             Commands::ProxyMaster(options) => AppConfig {
+                enable_node: None,
                 keypair_path: Some(options.keypair_path),
                 proxy_master_node_owner: None,
                 program_id: Some(options.program_id),
@@ -149,6 +152,7 @@ impl From<Commands> for AppConfig {
                 device_id: None,
             },
             Commands::ProxyEndpoint(options) => AppConfig {
+                enable_node: None,
                 keypair_path: Some(options.keypair_path),
                 proxy_master_node_owner: options.proxy_master_node_owner,
                 program_id: Some(options.program_id),

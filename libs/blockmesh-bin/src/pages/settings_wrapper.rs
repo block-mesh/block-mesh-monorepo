@@ -1,4 +1,5 @@
 use crate::components::show_check_box::ShowCheckBox;
+use crate::components::toggle_button::ToggleButton;
 use crate::leptos_state::LeptosTauriAppState;
 use crate::pages::client_node_settings::ClientNodeSettingsForm;
 use crate::pages::proxy_endpoint_settings::ProxyEndpointSettingsForm;
@@ -9,6 +10,7 @@ use leptos::*;
 #[component]
 pub fn SettingsWrapper() -> impl IntoView {
     let state = expect_context::<LeptosTauriAppState>();
+    let enabled = Signal::derive(move || state.app_config.get().enable_node.unwrap_or(false));
     let command = move || {
         state
             .app_config
@@ -16,40 +18,51 @@ pub fn SettingsWrapper() -> impl IntoView {
             .mode
             .unwrap_or(CommandsEnum::ClientNode)
     };
+
     view! {
-        <fieldset>
-            <div class="mt-4 mb-4 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4">
-                <ShowCheckBox title=CommandsEnum::ClientNode/>
-                <ShowCheckBox title=CommandsEnum::ProxyMaster/>
-                <ShowCheckBox title=CommandsEnum::ProxyEndpoint/>
-            </div>
-        </fieldset>
+        <div class="mt-1 mb-1 p-1">
+            <ToggleButton/>
+        </div>
         <Show
-            when=move || command() == CommandsEnum::ClientNode
+            when=move || enabled.get()
             fallback=|| {
                 view! {}
             }
         >
+            <fieldset>
+                <div class="mt-4 mb-4 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4">
+                    <ShowCheckBox title=CommandsEnum::ClientNode/>
+                    <ShowCheckBox title=CommandsEnum::ProxyMaster/>
+                    <ShowCheckBox title=CommandsEnum::ProxyEndpoint/>
+                </div>
+            </fieldset>
+            <Show
+                when=move || command() == CommandsEnum::ClientNode
+                fallback=|| {
+                    view! {}
+                }
+            >
 
-            <ClientNodeSettingsForm/>
-        </Show>
-        <Show
-            when=move || command() == CommandsEnum::ProxyMaster
-            fallback=|| {
-                view! {}
-            }
-        >
+                <ClientNodeSettingsForm/>
+            </Show>
+            <Show
+                when=move || command() == CommandsEnum::ProxyMaster
+                fallback=|| {
+                    view! {}
+                }
+            >
 
-            <ProxyMasterSettingsForm/>
-        </Show>
-        <Show
-            when=move || command() == CommandsEnum::ProxyEndpoint
-            fallback=|| {
-                view! {}
-            }
-        >
+                <ProxyMasterSettingsForm/>
+            </Show>
+            <Show
+                when=move || command() == CommandsEnum::ProxyEndpoint
+                fallback=|| {
+                    view! {}
+                }
+            >
 
-            <ProxyEndpointSettingsForm/>
+                <ProxyEndpointSettingsForm/>
+            </Show>
         </Show>
     }
 }
