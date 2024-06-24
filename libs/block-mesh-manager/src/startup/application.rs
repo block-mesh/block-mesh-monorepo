@@ -91,6 +91,10 @@ impl Application {
             );
 
         let un_auth_router = Router::new()
+            .route(
+                "/auth_status",
+                get(routes::health_check::auth_status::handler),
+            )
             .route("/rpc_dashboard", get(routes::rpc::rpc_dashboard::handler))
             .route(
                 "/notification",

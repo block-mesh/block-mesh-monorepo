@@ -191,3 +191,10 @@ pub struct DashboardResponse {
     pub number_of_users_invited: i64,
     pub invite_code: String,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct AuthStatusResponse {
+    pub status_code: u16,
+    pub logged_in: bool,
+    pub email: Option<String>,
+}

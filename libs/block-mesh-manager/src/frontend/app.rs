@@ -1,3 +1,7 @@
+use leptos::*;
+use leptos_meta::*;
+use leptos_router::*;
+
 use crate::frontend::pages::dashboard_page::DashboardPage;
 use crate::frontend::pages::edit_invite_code_page::EditInvitePage;
 use crate::frontend::pages::login_page::LoginPage;
@@ -5,13 +9,9 @@ use crate::frontend::pages::new_password_page::NewPasswordPage;
 use crate::frontend::pages::register_page::RegisterPage;
 use crate::frontend::pages::resend_confirmation_email_page::ResendConfirmationEmailPage;
 use crate::frontend::pages::reset_password_page::ResetPasswordPage;
-use leptos::*;
-use leptos_meta::*;
-use leptos_router::*;
 
 #[component]
 pub fn App() -> impl IntoView {
-    // Provides context that manages stylesheets, titles, meta tags, etc.
     provide_meta_context();
 
     view! {
@@ -27,6 +27,34 @@ pub fn App() -> impl IntoView {
             rel="stylesheet"
         />
         <Title text="BlockMesh Network"/>
+        <Script
+            src="https://unpkg.com/htmx.org@1.9.6"
+            integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni"
+            crossorigin="anonymous"
+        />
+        <Link rel="stylesheet" href="/styles.css"/>
+        <Link
+            rel="icon"
+            // type_=Some(i)
+            href="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"
+        />
+        <Link
+            rel="stylesheet"
+            // type_=Some(c)
+            href="https://r2-assets.blockmesh.xyz/tailwind.css"
+        />
+        // async_=Some(t)
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-RYHLW3MDK2"/>
+        <Script>
+            r#"
+            window.dataLayer = window.dataLayer || [];
+            function gtag() {
+                dataLayer.push(arguments);
+            }
+            gtag('js', new Date());
+            gtag('config', 'G-RYHLW3MDK2');
+            "#
+        </Script>
 
         <Router fallback=|| {
             view! {

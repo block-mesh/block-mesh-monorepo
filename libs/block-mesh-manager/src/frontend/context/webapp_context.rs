@@ -1,4 +1,4 @@
-use block_mesh_common::interfaces::server_api::DashboardResponse;
+use block_mesh_common::interfaces::server_api::{AuthStatusResponse, DashboardResponse};
 use leptos::*;
 
 pub struct WebAppContext {
@@ -16,24 +16,56 @@ impl WebAppContext {
         create_resource(
             move || origin.get(),
             move |_| async move {
-                origin.get()?;
-                let client = reqwest::Client::new();
-                let response = client
-                    .post(&format!("{}/dashboard", origin.get().unwrap_or_default()))
-                    .send()
-                    .await;
-                match response {
-                    Ok(response) => match response.json::<DashboardResponse>().await {
-                        Ok(json) => Some(json),
+                if let Some(origin) = origin.get_untracked() {
+                    let client = reqwest::Client::new();
+                    let response = client.post(&format!("{}/dashboard", origin)).send().await;
+                    match response {
+                        Ok(response) => match response.json::<DashboardResponse>().await {
+                            Ok(json) => Some(json),
+                            Err(e) => {
+                                logging::log!("error: {}", e);
+                                None
+                            }
+                        },
                         Err(e) => {
                             logging::log!("error: {}", e);
                             None
                         }
-                    },
-                    Err(e) => {
-                        logging::log!("error: {}", e);
-                        None
                     }
+                } else {
+                    None
+                }
+            },
+        )
+    }
+
+    pub fn is_logged_in() -> Resource<Option<String>, Option<AuthStatusResponse>> {
+        let (origin, set_origin) = create_signal(None::<String>);
+        create_effect(move |_| {
+            set_origin.set(Some(window().origin()));
+        });
+
+        create_resource(
+            move || origin.get(),
+            move |_| async move {
+                if let Some(origin) = origin.get_untracked() {
+                    let client = reqwest::Client::new();
+                    let response = client.get(&format!("{}/auth_status", origin)).send().await;
+                    match response {
+                        Ok(response) => match response.json::<AuthStatusResponse>().await {
+                            Ok(json) => Some(json),
+                            Err(e) => {
+                                logging::log!("error: {}", e);
+                                None
+                            }
+                        },
+                        Err(e) => {
+                            logging::log!("error: {}", e);
+                            None
+                        }
+                    }
+                } else {
+                    None
                 }
             },
         )

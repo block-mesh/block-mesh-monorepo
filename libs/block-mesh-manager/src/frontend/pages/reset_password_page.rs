@@ -1,5 +1,6 @@
 use leptos::Suspense;
 use leptos::*;
+use leptos_router::A;
 
 #[component]
 pub fn ResetPasswordPage() -> impl IntoView {
@@ -14,12 +15,12 @@ pub fn ResetPasswordPage() -> impl IntoView {
                             Reset Password
                         </h2>
                         <div class="flex justify-around mb-4">
-                            <a
+                            <A
                                 class="px-4 py-2 rounded font-bold text-sm text-blue-500 hover:text-blue-800"
                                 href="/ui/login"
                             >
                                 Login
-                            </a>
+                            </A>
                         </div>
                         <div class="mb-4">
                             <label class="block text-white text-sm font-bold mb-2" for="email">

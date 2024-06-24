@@ -11,5 +11,5 @@ pub async fn handler(
     auth.logout()
         .await
         .map_err(|e| Error::Auth(e.to_string()))?;
-    Ok(Redirect::to("/login"))
+    Ok(Redirect::to("/ui/login"))
 }
