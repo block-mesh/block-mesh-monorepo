@@ -1,9 +1,9 @@
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{ReportUptimeRequest, ReportUptimeResponse};
 use leptos::*;
+use logger_leptos::leptos_tracing::setup_leptos_tracing;
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use block_mesh_common::leptos_tracing::setup_leptos_tracing;
 use speed_test::metadata::fetch_metadata;
 
 use crate::utils::connectors::set_panic_hook;

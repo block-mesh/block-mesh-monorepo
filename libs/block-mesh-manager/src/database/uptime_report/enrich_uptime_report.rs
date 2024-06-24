@@ -2,7 +2,13 @@ use block_mesh_common::interfaces::ip_data::IPData;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "enrich_uptime_report", skip(transaction), ret, err)]
+#[tracing::instrument(
+    name = "enrich_uptime_report",
+    skip(transaction),
+    level = "trace",
+    ret,
+    err
+)]
 pub(crate) async fn enrich_uptime_report(
     transaction: &mut Transaction<'_, Postgres>,
     uptime_id: Uuid,

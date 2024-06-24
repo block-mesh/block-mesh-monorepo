@@ -131,5 +131,5 @@ pub async fn handler(
         .email_client
         .send_confirmation_email(&email, nonce_secret.expose_secret())
         .await;
-    Ok(Redirect::to("/dashboard"))
+    Ok(Redirect::to("/ui/dashboard"))
 }

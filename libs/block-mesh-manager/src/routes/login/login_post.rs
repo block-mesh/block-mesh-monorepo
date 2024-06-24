@@ -51,5 +51,5 @@ pub async fn handler(
         }
     }
     transaction.commit().await.map_err(Error::from)?;
-    Ok(Redirect::to("/dashboard"))
+    Ok(Redirect::to("/ui/dashboard"))
 }

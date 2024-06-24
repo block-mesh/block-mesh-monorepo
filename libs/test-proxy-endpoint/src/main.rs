@@ -1,6 +1,5 @@
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::http::{empty, full, host_addr};
-use block_mesh_common::tracing::setup_tracing;
 use bytes::Bytes;
 use clap::Parser;
 use http::header;
@@ -11,6 +10,7 @@ use hyper::service::service_fn;
 use hyper::upgrade::Upgraded;
 use hyper::{client, http, Method, Request, Response};
 use hyper_util::rt::TokioIo;
+use logger_general::tracing::setup_tracing;
 use std::net::SocketAddr;
 use std::str::FromStr;
 use tokio::net::TcpStream;

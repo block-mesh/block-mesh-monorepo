@@ -18,7 +18,7 @@ use wasm_bindgen::JsValue;
 
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
-use block_mesh_common::leptos_tracing::setup_leptos_tracing;
+use logger_leptos::leptos_tracing::setup_leptos_tracing;
 
 use crate::pages::page::Page;
 use crate::utils::auth::{check_token, get_latest_invite_code};

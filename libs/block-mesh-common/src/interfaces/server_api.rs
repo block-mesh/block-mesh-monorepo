@@ -60,6 +60,16 @@ pub struct GetTokenRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct GetEmailViaTokenRequest {
+    pub token: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetEmailViaTokenResponse {
+    pub email: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct CheckTokenRequest {
     pub email: String,
     pub api_token: Uuid,
@@ -173,4 +183,18 @@ pub struct ReportBandwidthRequest {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ReportBandwidthResponse {
     pub status_code: u16,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct DashboardResponse {
+    pub points: f64,
+    pub number_of_users_invited: i64,
+    pub invite_code: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct AuthStatusResponse {
+    pub status_code: u16,
+    pub logged_in: bool,
+    pub email: Option<String>,
 }

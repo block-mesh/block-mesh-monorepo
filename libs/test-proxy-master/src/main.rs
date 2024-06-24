@@ -1,8 +1,8 @@
 use crate::clients_endpoint::listen_for_clients_connecting;
 use crate::proxy_endpoint::listen_for_proxies_connecting;
 use block_mesh_common::constants::DeviceType;
-use block_mesh_common::tracing::setup_tracing;
 use futures_util::future::join_all;
+use logger_general::tracing::setup_tracing;
 use proxy_pool::ProxyPool;
 use std::net::SocketAddr;
 use tokio::net::TcpListener;

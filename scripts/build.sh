@@ -12,5 +12,6 @@ if [ -f "${ROOT}/.env" ] ; then
   source "${ROOT}/.env"
 fi
 ensure "${ROOT}/scripts/init_db.sh"
-ensure cargo build
+#ensure cargo build
+ensure cargo leptos build --project block-mesh-manager
 # ensure typeshare . --lang=typescript --output-file="${ROOT}/client/brain-war-client/src/helpers/apiTypes.ts"

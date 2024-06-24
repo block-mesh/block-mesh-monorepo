@@ -6,29 +6,27 @@
 <form action="/edit_invite_code" method="post">
     <div class="m-2">
         <div class="mb-4 rounded px-8 pb-8 pt-6 shadow-md bg-gray-800  border-white border-solid border-2">
-            <form id="taskForm">
-                <div class="mb-4">
-                    <label class="mb-2 block text-sm font-bold text-white" for="current_invite_code">Current Invite
-                        Code</label>
-                    <input class="w-full appearance-none rounded border px-3 py-2 text-black shadow"
-                           id="current_invite_code"
-                           type="text" name="current_invite_code"
-                           disabled
-                           value="{{ current_invite_code }}"
-                           placeholder="Current Invite Code"/>
-                </div>
-                <div class="mb-4">
-                    <label class="mb-2 block text-sm font-bold text-white" for="new_invite_code">New Invite Code</label>
-                    <input class="w-full appearance-none rounded border px-3 py-2 text-black shadow"
-                           id="new_invite_code"
-                           type="text" name="new_invite_code"
-                           required
-                           placeholder="New Invite Code"/>
-                </div>
-                <button class="focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
-                        type="submit">Create New Invite Code
-                </button>
-            </form>
+            <div class="mb-4">
+                <label class="mb-2 block text-sm font-bold text-white" for="current_invite_code">Current Invite
+                    Code</label>
+                <input class="w-full appearance-none rounded border px-3 py-2 text-black shadow"
+                       id="current_invite_code"
+                       type="text" name="current_invite_code"
+                       disabled
+                       value="{{ current_invite_code }}"
+                       placeholder="Current Invite Code"/>
+            </div>
+            <div class="mb-4">
+                <label class="mb-2 block text-sm font-bold text-white" for="new_invite_code">New Invite Code</label>
+                <input class="w-full appearance-none rounded border px-3 py-2 text-black shadow"
+                       id="new_invite_code"
+                       type="text" name="new_invite_code"
+                       required
+                       placeholder="New Invite Code"/>
+            </div>
+            <button class="focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+                    type="submit">Create New Invite Code
+            </button>
         </div>
     </div>
 </form>

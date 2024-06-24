@@ -20,15 +20,11 @@ solana-sdk = { workspace = true, optional = true }
 chrono = { workspace = true, features = ["clock", "serde"] }
 anyhow = { workspace = true }
 once_cell = { workspace = true }
-tokio = { workspace = true, optional = true }
 reqwest = { workspace = true, optional = true, features = [
   "json",
   "hickory-dns"
 ] }
-tracing-wasm = { workspace = true, optional = true }
-tracing-subscriber-wasm = { workspace = true, optional = true }
 ipgeolocate = { workspace = true, optional = true }
-wasm-bindgen-futures = { workspace = true, optional = true }
 
 [dependencies.uuid]
 workspace = true
@@ -40,27 +36,8 @@ features = [
   "js"
 ]
 
-[dependencies.web-sys]
-workspace = true
-features = [
-  "console",
-  "WorkerGlobalScope",
-  "Window",
-  'Headers',
-  'Request',
-  'RequestInit',
-  'RequestMode',
-  'Response',
-  "Clipboard",
-  "Navigator",
-  "MessageEvent"
-]
-optional = true
-
 [features]
 http = ["dep:http-body-util", "dep:bytes", "dep:hyper"]
 cli = ["dep:clap", "dep:solana-sdk"]
 app-config = ["dep:clap", "dep:solana-sdk"]
-async-tracer = ["dep:tokio", "dep:reqwest"]
-leptos-tracer = ["dep:tracing-wasm", "dep:tracing-subscriber-wasm", "dep:web-sys", "dep:reqwest", "dep:wasm-bindgen-futures"]
 ip-data = ["dep:ipgeolocate", "dep:reqwest"]

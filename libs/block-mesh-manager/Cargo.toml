@@ -7,6 +7,8 @@ authors.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+logger-leptos = { path = "../logger-leptos", optional = true }
+logger-general = { path = "../logger-general", optional = true }
 tracing-subscriber-wasm = { workspace = true }
 num-traits = { workspace = true }
 reqwest = { workspace = true, default-features = false, features = [
@@ -18,33 +20,42 @@ url = { workspace = true }
 askama = { workspace = true, features = ["with-axum", "serde-json"] }
 form_urlencoded = { workspace = true }
 askama_axum = { workspace = true }
-tokio-stream = { workspace = true, features = ["sync"] }
+tokio-stream = { workspace = true, features = ["sync"], optional = true }
 http-body-util = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
-chrono = { workspace = true, features = ["clock", "serde"] }
-tracing = { workspace = true }
+chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }
+tracing = { workspace = true, optional = true }
 serde-aux = { workspace = true }
 config = { workspace = true }
 dotenv = { workspace = true }
 enum-iterator = { workspace = true }
-block-mesh-common = { path = "../block-mesh-common", features = ["async-tracer", "ip-data"] }
-tokio = { workspace = true, features = ["full"] }
-axum-login = { workspace = true }
-tower-sessions-sqlx-store = { workspace = true, features = ["postgres"] }
-axum = { workspace = true, features = ["ws", "macros"] }
-tower = { workspace = true, features = ["util"] }
+block-mesh-common = { path = "../block-mesh-common", features = ["ip-data"] }
+tokio = { workspace = true, features = ["full"], optional = true }
+axum-login = { workspace = true, optional = true }
+tower-sessions-sqlx-store = { workspace = true, features = ["postgres"], optional = true }
+axum = { workspace = true, features = ["ws", "macros"], optional = true }
+tower = { workspace = true, features = ["util"], optional = true }
 serde_json = { workspace = true, features = ["raw_value"] }
-tower-http = { workspace = true, features = ["fs", "trace", "request-id", "util", "cors", "add-extension"] }
+tower-http = { workspace = true, features = ["fs", "trace", "request-id", "util", "cors", "add-extension"], optional = true }
 async-trait = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
 tracing-appender = { workspace = true }
-tracing-bunyan-formatter = { workspace = true }
+tracing-bunyan-formatter = { workspace = true, optional = true }
 tracing-log = { workspace = true }
 http = { workspace = true }
 bcrypt = { workspace = true }
-secret = { path = "../secret", features = ["sqlx"] }
+secret = { path = "../secret", features = ["sqlx"], optional = true }
+leptos_axum = { workspace = true, optional = true }
+leptos = { workspace = true }
+leptos_meta = { workspace = true }
+leptos_router = { workspace = true }
+cfg-if = { workspace = true }
+wasm-bindgen = { workspace = true }
+console_error_panic_hook = { workspace = true }
+console_log = { workspace = true }
+log = { workspace = true }
 
 [dependencies.rand]
 workspace = true
@@ -53,6 +64,7 @@ features = ["min_const_gen"]
 [dependencies.sqlx]
 workspace = true
 default-features = false
+optional = true
 features = [
   "any",
   "runtime-tokio-rustls",
@@ -62,7 +74,7 @@ features = [
   "chrono",
   "migrate",
   "json",
-  "bigdecimal"
+  "bigdecimal",
 ]
 
 [dependencies.uuid]
@@ -75,3 +87,96 @@ features = [
   "js"
 ]
 
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[features]
+hydrate = [
+  "leptos/hydrate",
+  "leptos_meta/hydrate",
+  "leptos_router/hydrate",
+  "dep:logger-leptos"
+]
+ssr = [
+  "dep:tokio-stream",
+  "dep:axum",
+  "dep:tokio",
+  "dep:tower",
+  "dep:tower-http",
+  "dep:tracing-bunyan-formatter",
+  "dep:leptos_axum",
+  "leptos/ssr",
+  "leptos_meta/ssr",
+  "leptos_router/ssr",
+  "dep:sqlx",
+  "dep:tracing",
+  "dep:tower-sessions-sqlx-store",
+  "dep:axum-login",
+  "dep:secret",
+  "dep:logger-general"
+]
+
+[package.metadata.leptos]
+# The name used by wasm-bindgen/cargo-leptos for the JS/WASM bundle. Defaults to the crate name
+output-name = "block-mesh-manager"
+
+# The site root folder is where cargo-leptos generate all output. WARNING: all content of this folder will be erased on a rebuild. Use it in your server setup.
+site-root = "target/site"
+
+# The site-root relative folder where all compiled output (JS, WASM and CSS) is written
+# Defaults to pkg
+site-pkg-dir = "pkg"
+
+# [Optional] The source CSS file. If it ends with .sass or .scss then it will be compiled by dart-sass into CSS. The CSS is optimized by Lightning CSS before being written to <site-root>/<site-pkg>/app.css
+style-file = "style/main.scss"
+# Assets source dir. All files found here will be copied and synchronized to site-root.
+# The assets-dir cannot have a sub directory with the same name/path as site-pkg-dir.
+#
+# Optional. Env: LEPTOS_ASSETS_DIR.
+assets-dir = "public"
+
+# The IP and port (ex: 127.0.0.1:3000) where the server serves the content. Use it in your server setup.
+site-addr = "127.0.0.1:8000"
+
+# The port to use for automatic reload monitoring
+reload-port = 3001
+
+# [Optional] Command to use when running end2end tests. It will run in the end2end dir.
+#   [Windows] for non-WSL use "npx.cmd playwright test"
+#   This binary name can be checked in Powershell with Get-Command npx
+end2end-cmd = "npx playwright test"
+end2end-dir = "end2end"
+
+#  The browserlist query used for optimizing the CSS.
+browserquery = "defaults"
+
+# Set by cargo-leptos watch when building with that tool. Controls whether autoreload JS will be included in the head
+watch = false
+
+# The environment Leptos will run in, usually either "DEV" or "PROD"
+env = "DEV"
+
+# The features to use when compiling the bin target
+#
+# Optional. Can be over-ridden with the command line parameter --bin-features
+bin-features = ["ssr"]
+
+# If the --no-default-features flag should be used when compiling the bin target
+#
+# Optional. Defaults to false.
+bin-default-features = false
+
+# The features to use when compiling the lib target
+#
+# Optional. Can be over-ridden with the command line parameter --lib-features
+lib-features = ["hydrate"]
+
+# If the --no-default-features flag should be used when compiling the lib target
+#
+# Optional. Defaults to false.
+lib-default-features = false
+
+# The profile to use for the lib target when compiling for release
+#
+# Optional. Defaults to "release".
+lib-profile-release = "release"

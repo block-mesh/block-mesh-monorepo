@@ -4,7 +4,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 #[allow(unused_imports)]
 use background::*;
 use block_mesh_common::constants::DeviceType;
-use block_mesh_common::leptos_tracing::setup_leptos_tracing;
+use logger_leptos::leptos_tracing::setup_leptos_tracing;
 
 #[allow(unused_imports)]
 use pages::*;

@@ -3,16 +3,21 @@ use crate::emails::email_client::EmailClient;
 use crate::envars::app_env_var::AppEnvVar;
 use crate::envars::env_var;
 use crate::envars::get_env_var_or_panic::get_env_var_or_panic;
+use crate::frontend::app::App;
 use crate::middlewares::authentication::{authentication_layer, Backend};
 use crate::routes;
 use axum::routing::{get, post};
 use axum::{Extension, Router};
 use axum_login::login_required;
+use leptos::leptos_config::get_config_from_env;
+use leptos_axum::{generate_route_list, LeptosRoutes};
 use sqlx::postgres::PgPool;
 use std::net::SocketAddr;
+use std::path::Path;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
+use tower_http::services::ServeDir;
 
 pub struct Application {
     app: Router,
@@ -58,7 +63,10 @@ impl Application {
                     .post(routes::invite_codes::edit_invite_code_post::handler),
             )
             .route("/tasks_table", get(routes::tasks::tasks_table::handler))
-            .route("/dashboard", get(routes::dashboard::get::handler));
+            .route(
+                "/dashboard",
+                get(routes::dashboard::get::handler).post(routes::dashboard::post::handler),
+            );
 
         let api_router = Router::new()
             .route(
@@ -83,6 +91,10 @@ impl Application {
             );
 
         let un_auth_router = Router::new()
+            .route(
+                "/auth_status",
+                get(routes::health_check::auth_status::handler),
+            )
             .route("/rpc_dashboard", get(routes::rpc::rpc_dashboard::handler))
             .route(
                 "/notification",
@@ -129,10 +141,30 @@ impl Application {
                 "/api/check_token",
                 post(routes::api_token::check_token::handler),
             )
+            .route(
+                "/api/get_email_via_token",
+                post(routes::api_token::get_email_via_token::handler),
+            )
             .route("/health_check", get(routes::health_check::get::handler));
+        let leptos_config = get_config_from_env().unwrap();
+        let leptos_options = leptos_config.leptos_options;
+        let routes = generate_route_list(App);
+
+        let path = Path::new("")
+            .join(leptos_options.site_root.clone())
+            .join(leptos_options.site_pkg_dir.clone());
+        let leptos_pkg: Router<()> = Router::new().nest_service(
+            &format!("/{}", leptos_options.site_pkg_dir),
+            ServeDir::new(path),
+        );
+
+        let leptos_router: Router<()> = Router::new()
+            .route("/api/*fn_name", post(leptos_axum::handle_server_fns))
+            .leptos_routes(&leptos_options, routes, App)
+            .with_state(leptos_options);
 
         let application_base_url = ApplicationBaseUrl(settings.application.base_url.clone());
-        let app = Router::new()
+        let backend = Router::new()
             .nest("/", auth_router)
             .route_layer(login_required!(Backend, login_url = "/login"))
             .nest("/api", api_router)
@@ -142,6 +174,11 @@ impl Application {
             .layer(cors)
             .layer(auth_layer)
             .with_state(app_state.clone());
+
+        let app = Router::new()
+            .nest("/", leptos_router)
+            .nest("/", backend)
+            .nest("/", leptos_pkg);
 
         let listener = TcpListener::bind(settings.application.address())
             .await
