@@ -7,7 +7,6 @@ use leptos_router::{use_query_map, A};
 
 #[component]
 pub fn NewPasswordPage() -> impl IntoView {
-    logging::log!("Starting");
     let params = use_query_map();
     let token = params
         .get()
@@ -19,17 +18,13 @@ pub fn NewPasswordPage() -> impl IntoView {
 
     create_effect(move |_| {
         set_origin.set(Some(window().origin()));
-        logging::log!("\n\norigin = {:?}\n\n", window().origin());
     });
-
-    logging::log!("x token = {}", token.get());
 
     let async_data = create_resource(
         move || origin.get(),
         move |_| async move {
             origin.get()?;
             let client = reqwest::Client::new();
-            logging::log!("\n\norigin = {:?}\n\n", window().origin());
             let response = client
                 .post(&format!(
                     "{}/api/get_email_via_token",
@@ -86,8 +81,11 @@ pub fn NewPasswordPage() -> impl IntoView {
                                 name="email"
                                 required
                                 readonly
-                                value=move || async_data.get().map(|email| email.unwrap_or_default())
+                                value=move || {
+                                    async_data.get().map(|email| email.unwrap_or_default())
+                                }
                             />
+
                         </div>
                         <div class="mb-4">
                             <label class="block text-white text-sm font-bold mb-2" for="password">

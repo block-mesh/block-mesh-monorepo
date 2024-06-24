@@ -1,3 +1,4 @@
 pub mod app;
-mod components;
+pub mod components;
+pub mod context;
 pub mod pages;

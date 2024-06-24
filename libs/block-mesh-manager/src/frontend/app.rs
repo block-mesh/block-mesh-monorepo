@@ -1,4 +1,5 @@
 use crate::frontend::pages::dashboard_page::DashboardPage;
+use crate::frontend::pages::edit_invite_code_page::EditInvitePage;
 use crate::frontend::pages::login_page::LoginPage;
 use crate::frontend::pages::new_password_page::NewPasswordPage;
 use crate::frontend::pages::register_page::RegisterPage;
@@ -26,23 +27,37 @@ pub fn App() -> impl IntoView {
             rel="stylesheet"
         />
         <Title text="BlockMesh Network"/>
+
         <Router fallback=|| {
             view! {
                 // let mut outside_errors = Errors::default();
                 // outside_errors.insert_with_default_key(AppError::NotFound);
-                Error
+                <p>Error</p>
             }
                 .into_view()
         }>
-            <main>
+            <main class="h-screen bg-gray-900">
+
                 <Routes>
-                    <Route path="/login" view=LoginPage/>
-                    <Route path="/reset_password" view=ResetPasswordPage/>
-                    <Route path="/register" view=RegisterPage/>
-                    <Route path="/dashboard" view=DashboardPage/>
-                    <Route path="/resend_confirmation_email" view=ResendConfirmationEmailPage/>
-                    <Route path="/new_password" view=NewPasswordPage/>
-                // <ProtectedRoute path="profile" view=HomePage/>
+                    <Route
+                        path="/ui"
+                        view=move || {
+                            view! {
+                                // only show the outlet if data have loaded
+                                // <Show when=|| is_loaded() fallback=|| view! { <p>"Loading"</p> }>
+                                <Outlet/>
+                            }
+                        }
+                    >
+
+                        <Route path="/login" view=LoginPage/>
+                        <Route path="/reset_password" view=ResetPasswordPage/>
+                        <Route path="/register" view=RegisterPage/>
+                        <Route path="/dashboard" view=DashboardPage/>
+                        <Route path="/resend_confirmation_email" view=ResendConfirmationEmailPage/>
+                        <Route path="/new_password" view=NewPasswordPage/>
+                        <Route path="/edit_invite_code" view=EditInvitePage/>
+                    </Route>
                 </Routes>
             </main>
         </Router>

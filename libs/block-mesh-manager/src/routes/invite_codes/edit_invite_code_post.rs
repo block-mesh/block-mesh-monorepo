@@ -27,14 +27,14 @@ pub async fn handler(
             400,
             "Invalid Invite",
             "Invite code cannot contain spaces",
-            "/edit_invite_code",
+            "/ui/edit_invite_code",
         ));
     } else if !form.new_invite_code.chars().all(char::is_alphanumeric) {
         return Ok(Error::redirect(
             400,
             "Invalid Invite",
             "Invite code cannot contain special characters",
-            "/edit_invite_code",
+            "/ui/edit_invite_code",
         ));
     }
     if create_invite_code(&mut transaction, user.id, form.new_invite_code)
@@ -45,9 +45,9 @@ pub async fn handler(
             500,
             "Failed to create invite code",
             "Failed to create invite code, please try a different invite code",
-            "/edit_invite_code",
+            "/ui/edit_invite_code",
         ));
     };
     transaction.commit().await.map_err(Error::from)?;
-    Ok(Redirect::to("/dashboard"))
+    Ok(Redirect::to("/ui/dashboard"))
 }

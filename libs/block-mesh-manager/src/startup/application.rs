@@ -63,7 +63,10 @@ impl Application {
                     .post(routes::invite_codes::edit_invite_code_post::handler),
             )
             .route("/tasks_table", get(routes::tasks::tasks_table::handler))
-            .route("/dashboard", get(routes::dashboard::get::handler));
+            .route(
+                "/dashboard",
+                get(routes::dashboard::get::handler).post(routes::dashboard::post::handler),
+            );
 
         let api_router = Router::new()
             .route(
@@ -169,7 +172,7 @@ impl Application {
             .with_state(app_state.clone());
 
         let app = Router::new()
-            .nest("/ui", leptos_router)
+            .nest("/", leptos_router)
             .nest("/", backend)
             .nest("/", leptos_pkg);
 

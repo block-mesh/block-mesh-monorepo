@@ -184,3 +184,10 @@ pub struct ReportBandwidthRequest {
 pub struct ReportBandwidthResponse {
     pub status_code: u16,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct DashboardResponse {
+    pub points: f64,
+    pub number_of_users_invited: i64,
+    pub invite_code: String,
+}
