@@ -1,17 +1,11 @@
-use std::sync::Arc;
-
-use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 
-#[tracing::instrument(name = "joiner", skip(join_handles))]
+#[tracing::instrument(name = "joiner", skip(rx))]
 pub async fn joiner_loop(
-    join_handles: Arc<Mutex<Vec<JoinHandle<()>>>>,
-    mut rx: tokio::sync::mpsc::Receiver<()>,
+    mut rx: tokio::sync::mpsc::Receiver<JoinHandle<()>>,
 ) -> Result<(), anyhow::Error> {
-    while let Some(_) = rx.recv().await {
-        while let Some(handle) = join_handles.lock().await.pop() {
-            let _ = handle.await;
-        }
+    while let Some(handle) = rx.recv().await {
+        let _ = handle.await;
     }
     Ok(())
 }

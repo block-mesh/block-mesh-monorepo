@@ -3,9 +3,10 @@
 #![deny(unreachable_pub)]
 
 use cfg_if::cfg_if;
+
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use tokio::task::JoinHandle;
     use block_mesh_manager::worker::joiner::joiner_loop;
-    use tokio::sync::Mutex;
     #[cfg(not(target_env = "msvc"))]
     use tikv_jemallocator::Jemalloc;
     #[cfg(not(target_env = "msvc"))]
@@ -27,6 +28,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use secret::Secret;
     use std::sync::Arc;
     use uuid::Uuid;
+    use reqwest::Client;
 }}
 
 #[cfg(feature = "ssr")]
@@ -49,20 +51,18 @@ async fn main() -> anyhow::Result<()> {
         mailgun_token.clone(),
         configuration.application.base_url.clone(),
     ));
-    let join_handles = Arc::new(Mutex::new(Vec::new()));
-    let (tx, rx) = tokio::sync::mpsc::channel::<()>(10);
+    let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(10);
 
     let app_state = Arc::new(AppState {
         email_client,
         pool: db_pool.clone(),
         client: Client::new(),
-        join_handles: join_handles.clone(),
         tx,
     });
     let application = Application::build(configuration, app_state, db_pool.clone()).await;
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
     let application_task = tokio::spawn(application.run());
-    let joiner_task = tokio::spawn(joiner_loop(join_handles.clone(), rx));
+    let joiner_task = tokio::spawn(joiner_loop(rx));
 
     tokio::select! {
         o = application_task => report_exit("API", o),

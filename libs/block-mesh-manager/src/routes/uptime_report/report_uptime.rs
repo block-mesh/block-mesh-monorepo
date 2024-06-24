@@ -91,9 +91,7 @@ pub async fn handler(
             .unwrap();
         transaction.commit().await.unwrap();
     });
-
-    state.join_handles.lock().await.push(handle);
-    let _ = state.tx.send(()).await;
+    let _ = state.tx.send(handle).await;
 
     Ok(Json(ReportUptimeResponse {
         status_code: u16::from(StatusCode::OK),

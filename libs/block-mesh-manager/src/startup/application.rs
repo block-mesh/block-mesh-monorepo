@@ -17,7 +17,6 @@ use std::net::SocketAddr;
 use std::path::Path;
 use std::sync::Arc;
 use tokio::net::TcpListener;
-use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
@@ -31,8 +30,7 @@ pub struct AppState {
     pub pool: PgPool,
     pub email_client: Arc<EmailClient>,
     pub client: Client,
-    pub join_handles: Arc<Mutex<Vec<JoinHandle<()>>>>,
-    pub tx: tokio::sync::mpsc::Sender<()>,
+    pub tx: tokio::sync::mpsc::Sender<JoinHandle<()>>,
 }
 
 #[derive(Clone)]
