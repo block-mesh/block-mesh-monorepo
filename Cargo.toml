@@ -36,6 +36,7 @@ aes-gcm-siv = { git = "https://github.com/RustCrypto/AEADs", rev = "6105d7a5591a
 curve25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dalek", rev = "8274d5cbb6fc3f38cdc742b4798173895cd2a290" }
 
 [workspace.dependencies]
+tikv-jemallocator = { version = "0.5" }
 leptos_axum = { version = "0.6.12" }
 leptos_meta = { version = "0.6.12" }
 gloo-utils = { version = "0.2.0" }
