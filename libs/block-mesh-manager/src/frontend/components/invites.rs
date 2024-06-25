@@ -1,29 +1,55 @@
 use crate::frontend::components::icons::clipboard_icon::ClipboardIcon;
 use crate::frontend::components::icons::edit_icon::EditIcon;
 use crate::frontend::context::webapp_context::WebAppContext;
+use leptos::logging::log;
 use leptos::*;
-use leptos_meta::Script;
 use leptos_router::A;
 
 #[component]
 pub fn InvitesComponent() -> impl IntoView {
     let async_data = WebAppContext::get_dashboard_data();
+
+    fn get_invite_code() -> Option<String> {
+        let doc = document();
+        let el = match doc.get_element_by_id("copy_invite_code") {
+            None => return None,
+            Some(el) => el,
+        };
+        el.get_attribute("invite_code")
+    }
+
+    let copy_to_clipboard = move |_| {
+        log!("1 copy_to_clipboard");
+        #[cfg(web_sys_unstable_apis)]
+        {
+            log!("2 copy_to_clipboard");
+            if let Some(clipboard) = web_sys::window().unwrap().navigator().clipboard() {
+                if let Some(invite_url_string) = get_invite_code() {
+                    let _ = clipboard.write_text(&invite_url_string);
+                }
+            } else {
+            }
+        }
+        #[cfg(not(web_sys_unstable_apis))]
+        {}
+    };
+
     view! {
         <div class="m-2">
-            <Script>
-                r#"
-                function copy_invite_code_to_clipboard() {
-                let button = document.getElementById("copy_invite_code");
-                if (button) {
-                    let copyText = button.getAttribute("invite_code")
-                    let server = window.location.origin;
-                    navigator.clipboard.writeText(`${server}/register?invite_code=${copyText}`);
-                    // open_notification("Successfully Copied", "We have copied the invite link to your clipboard. Share it with your friends!");
-                }
-                
-                }
-                "#
-            </Script>
+            // <Script>
+            // r#"
+            // function copy_invite_code_to_clipboard() {
+            // let button = document.getElementById("copy_invite_code");
+            // if (button) {
+            // let copyText = button.getAttribute("invite_code")
+            // let server = window.location.origin;
+            // navigator.clipboard.writeText(`${server}/register?invite_code=${copyText}`);
+            // // open_notification("Successfully Copied", "We have copied the invite link to your clipboard. Share it with your friends!");
+            // }
+            //
+            // }
+            // "#
+            // </Script>
 
             <div class="border-white border m-2 relative overflow-hidden rounded-[30px] pt-6 md:pt-[33px] pb-7 md:pb-[39px] pl-[11px] md:pl-[44px]">
                 <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 rounded">
@@ -40,7 +66,8 @@ pub fn InvitesComponent() -> impl IntoView {
                                     }
                                 }
 
-                                onclick="copy_invite_code_to_clipboard()"
+                                on:click=copy_to_clipboard
+                                // onclick="copy_invite_code_to_clipboard()"
                                 class="border border-white inline-flex items-center gap-x-1.5 rounded-md px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
                             >
                                 Copy Invite Link
