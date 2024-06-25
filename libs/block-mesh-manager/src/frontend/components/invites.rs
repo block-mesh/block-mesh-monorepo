@@ -1,7 +1,6 @@
 use crate::frontend::components::icons::clipboard_icon::ClipboardIcon;
 use crate::frontend::components::icons::edit_icon::EditIcon;
 use crate::frontend::context::webapp_context::WebAppContext;
-use leptos::logging::log;
 use leptos::*;
 use leptos_router::A;
 
@@ -19,15 +18,15 @@ pub fn InvitesComponent() -> impl IntoView {
     }
 
     let copy_to_clipboard = move |_| {
-        log!("1 copy_to_clipboard");
         #[cfg(web_sys_unstable_apis)]
         {
-            log!("2 copy_to_clipboard");
             if let Some(clipboard) = web_sys::window().unwrap().navigator().clipboard() {
                 if let Some(invite_url_string) = get_invite_code() {
-                    let _ = clipboard.write_text(&invite_url_string);
+                    let _ = clipboard.write_text(&format!(
+                        "https://app.blockmesh.xyz/register?invite_code={}",
+                        invite_url_string
+                    ));
                 }
-            } else {
             }
         }
         #[cfg(not(web_sys_unstable_apis))]
