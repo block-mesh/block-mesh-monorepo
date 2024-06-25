@@ -16,7 +16,8 @@ pub async fn task_poller() {
     set_panic_hook();
     setup_leptos_tracing(None, DeviceType::Extension);
 
-    let app_state = AppState::new().await;
+    let app_state = AppState::default();
+    app_state.init_with_storage().await;
     AppState::init(app_state).await;
 
     if !app_state.has_api_token() {
@@ -31,7 +32,7 @@ pub async fn task_poller() {
         &app_state.email.get_untracked(),
         &app_state.api_token.get_untracked(),
     )
-    .await
+        .await
     {
         Ok(v) => v,
         Err(e) => {
@@ -64,7 +65,7 @@ pub async fn task_poller() {
                 &metadata,
                 response_time,
             )
-            .await
+                .await
             {
                 Ok(_) => {
                     tracing::info!("successfully submitted failed task");
@@ -89,7 +90,7 @@ pub async fn task_poller() {
         &metadata,
         response_time,
     )
-    .await
+        .await
     {
         Ok(_) => {
             tracing::info!("successfully submitted task");

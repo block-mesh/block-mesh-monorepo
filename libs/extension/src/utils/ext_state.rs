@@ -84,8 +84,8 @@ impl Debug for AppState {
 }
 
 impl AppState {
-    #[tracing::instrument(name = "AppState::new")]
-    pub async fn new() -> Self {
+    #[tracing::instrument(name = "AppState::init_with_storage")]
+    pub async fn init_with_storage(self) {
         let now = Utc::now().timestamp();
         let last_update = Self::get_last_update().await;
         let mut blockmesh_url = Self::get_blockmesh_url().await;
@@ -111,18 +111,18 @@ impl AppState {
         Self::store_last_update(now).await;
 
         // Signals:
-        let invite_code = create_rw_signal(invite_code);
-        let email = create_rw_signal(email);
-        let api_token = create_rw_signal(api_token);
-        let blockmesh_url = create_rw_signal(blockmesh_url);
-        let status = create_rw_signal(AppStatus::LoggedOut);
-        let device_id = create_rw_signal(device_id);
-        let uptime = create_rw_signal(uptime);
-        let success = create_rw_signal(None);
-        let error = create_rw_signal(None);
-        let download_speed = create_rw_signal(download_speed);
-        let upload_speed = create_rw_signal(upload_speed);
-        let last_update = create_rw_signal(now);
+        self.invite_code.update(|v| *v = invite_code);
+        self.email.update(|v| *v = email);
+        self.api_token.update(|v| *v = api_token);
+        self.blockmesh_url.update(|v| *v = blockmesh_url);
+        self.status.update(|v| *v = AppStatus::LoggedOut);
+        self.device_id.update(|v| *v = device_id);
+        self.uptime.update(|v| *v = uptime);
+        self.success.update(|v| *v = None);
+        self.error.update(|v| *v = None);
+        self.download_speed.update(|v| *v = download_speed);
+        self.upload_speed.update(|v| *v = upload_speed);
+        self.last_update.update(|v| *v = now);
 
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
             if let Ok(data) = event.into_serde::<Value>() {
@@ -133,40 +133,40 @@ impl AppState {
                                 let value = value.as_str().unwrap_or_default().to_string();
                                 match storage_value {
                                     StorageValues::BlockMeshUrl => {
-                                        blockmesh_url.update(|v| *v = value);
+                                        self.blockmesh_url.update(|v| *v = value);
                                     }
                                     StorageValues::ApiToken => {
-                                        api_token.update(|v| {
+                                        self.api_token.update(|v| {
                                             *v = Uuid::from_str(&value).unwrap_or_default()
                                         });
                                     }
                                     StorageValues::Email => {
-                                        email.update(|v| *v = value);
+                                        self.email.update(|v| *v = value);
                                     }
                                     StorageValues::DeviceId => {
-                                        device_id.update(|v| {
+                                        self.device_id.update(|v| {
                                             *v = Uuid::from_str(&value).unwrap_or_default()
                                         });
                                     }
                                     StorageValues::Uptime => {
-                                        uptime.update(|v| {
+                                        self.uptime.update(|v| {
                                             *v = f64::from_str(&value).unwrap_or_default()
                                         });
                                     }
                                     StorageValues::InviteCode => {
-                                        invite_code.update(|v| *v = value);
+                                        self.invite_code.update(|v| *v = value);
                                     }
                                     StorageValues::DownloadSpeed => {
-                                        download_speed.update(|v| {
+                                        self.download_speed.update(|v| {
                                             *v = f64::from_str(&value).unwrap_or_default()
                                         });
                                     }
                                     StorageValues::UploadSpeed => {
-                                        upload_speed.update(|v| {
+                                        self.upload_speed.update(|v| {
                                             *v = f64::from_str(&value).unwrap_or_default()
                                         });
                                     }
-                                    StorageValues::LastUpdate => last_update
+                                    StorageValues::LastUpdate => self.last_update
                                         .update(|v| *v = i64::from_str(&value).unwrap_or_default()),
                                 }
                             }
@@ -180,21 +180,6 @@ impl AppState {
         let closure_clone = closure_ref.clone();
         storageOnChange(closure_clone.borrow().as_ref().unwrap());
         closure_ref.borrow_mut().take().unwrap().forget();
-
-        Self {
-            invite_code,
-            email,
-            api_token,
-            blockmesh_url,
-            status,
-            device_id,
-            uptime,
-            success,
-            error,
-            download_speed,
-            upload_speed,
-            last_update,
-        }
     }
 
     pub async fn update_invite_code(
@@ -215,7 +200,7 @@ impl AppState {
                     api_token: *api_token,
                 },
             )
-            .await
+                .await
             {
                 invite_code = result.invite_code;
                 Self::store_invite_code(invite_code.clone()).await;
@@ -259,6 +244,7 @@ impl AppState {
         !(api_token.is_nil() || api_token == Uuid::default())
     }
 
+    // TODO : do we need this?
     #[tracing::instrument(name = "AppState::init")]
     pub async fn init(context: AppState) -> AppStatus {
         let now = Utc::now().timestamp();
@@ -305,6 +291,7 @@ impl AppState {
     #[tracing::instrument(name = "init_resource")]
     pub fn init_resource(context: AppState) {
         spawn_local(async move {
+            context.init_with_storage().await;
             let status = AppState::init(context).await;
             if status == AppStatus::LoggedIn {
                 let navigate = use_navigate();
@@ -330,7 +317,7 @@ impl AppState {
             &StorageValues::BlockMeshUrl.to_string(),
             JsValue::from_str(&blockmesh_url),
         )
-        .await;
+            .await;
     }
 
     pub async fn store_device_id(device_id: String) {
@@ -338,7 +325,7 @@ impl AppState {
             &StorageValues::DeviceId.to_string(),
             JsValue::from_str(&device_id),
         )
-        .await;
+            .await;
     }
 
     pub async fn store_email(email: String) {
@@ -350,7 +337,7 @@ impl AppState {
             &StorageValues::ApiToken.to_string(),
             JsValue::from_str(&api_token.to_string()),
         )
-        .await;
+            .await;
     }
 
     pub async fn store_invite_code(invite_code: String) {
@@ -358,7 +345,7 @@ impl AppState {
             &StorageValues::InviteCode.to_string(),
             JsValue::from_str(&invite_code),
         )
-        .await;
+            .await;
     }
 
     pub async fn store_uptime(uptime: f64) {
@@ -366,7 +353,7 @@ impl AppState {
             &StorageValues::Uptime.to_string(),
             JsValue::from_f64(uptime),
         )
-        .await;
+            .await;
     }
 
     pub async fn store_last_update(last_update: i64) {
@@ -374,7 +361,7 @@ impl AppState {
             &StorageValues::LastUpdate.to_string(),
             JsValue::from_f64(last_update as f64),
         )
-        .await;
+            .await;
     }
 
     pub async fn store_download_speed(uptime: f64) {
@@ -382,7 +369,7 @@ impl AppState {
             &StorageValues::DownloadSpeed.to_string(),
             JsValue::from_f64(uptime),
         )
-        .await;
+            .await;
     }
 
     pub async fn store_upload_speed(uptime: f64) {
@@ -390,7 +377,7 @@ impl AppState {
             &StorageValues::UploadSpeed.to_string(),
             JsValue::from_f64(uptime),
         )
-        .await;
+            .await;
     }
 
     pub async fn get_blockmesh_url() -> String {

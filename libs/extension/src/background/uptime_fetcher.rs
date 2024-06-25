@@ -11,7 +11,8 @@ use crate::utils::ext_state::AppState;
 pub async fn uptime_fetcher() {
     set_panic_hook();
     setup_leptos_tracing(None, DeviceType::Extension);
-    let app_state = AppState::new().await;
+    let app_state = AppState::default();
+    app_state.init_with_storage().await;
     AppState::init(app_state).await;
 
     if !app_state.has_api_token() {
