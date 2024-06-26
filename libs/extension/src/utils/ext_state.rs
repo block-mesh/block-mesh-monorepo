@@ -9,21 +9,18 @@ use chrono::Utc;
 use gloo_utils::format::JsValueSerdeExt;
 use leptos::*;
 use leptos_dom::tracing;
-use leptos_router::use_navigate;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
-use crate::pages::page::Page;
 use block_mesh_common::constants::DeviceType;
-use block_mesh_common::interfaces::server_api::GetLatestInviteCodeRequest;
+use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
 use logger_leptos::leptos_tracing::setup_leptos_tracing;
 
-use crate::utils::auth::get_latest_invite_code;
+use crate::utils::auth::{check_token, get_latest_invite_code};
 use crate::utils::connectors::{get_storage_value, set_storage_value, storageOnChange};
-use crate::utils::log::log_info;
 use crate::utils::storage::StorageValues;
 
 #[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
@@ -109,13 +106,14 @@ impl AppState {
             Self::update_invite_code(&api_token, now - last_update, &blockmesh_url, &email).await;
         let download_speed = Self::get_download_speed().await;
         let upload_speed = Self::get_upload_speed().await;
+
         Self::store_last_update(now).await;
 
         // Signals:
         self.invite_code.update(|v| *v = invite_code);
-        self.email.update(|v| *v = email);
+        self.email.update(|v| *v = email.clone());
         self.api_token.update(|v| *v = api_token);
-        self.blockmesh_url.update(|v| *v = blockmesh_url);
+        self.blockmesh_url.update(|v| *v = blockmesh_url.clone());
         self.status.update(|v| *v = AppStatus::LoggedOut);
         self.device_id.update(|v| *v = device_id);
         self.uptime.update(|v| *v = uptime);
@@ -124,6 +122,14 @@ impl AppState {
         self.download_speed.update(|v| *v = download_speed);
         self.upload_speed.update(|v| *v = upload_speed);
         self.last_update.update(|v| *v = now);
+
+        if !email.is_empty() && !api_token.is_nil() && api_token != Uuid::default() {
+            let credentials = CheckTokenRequest { api_token, email };
+            let result = check_token(&blockmesh_url, &credentials).await;
+            if result.is_ok() {
+                self.status.update(|v| *v = AppStatus::LoggedIn);
+            };
+        }
 
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
             if let Ok(data) = event.into_serde::<Value>() {
@@ -246,31 +252,12 @@ impl AppState {
         !(api_token.is_nil() || api_token == Uuid::default())
     }
 
-    // #[tracing::instrument(name = "init_resource")]
-    // pub fn init_resource(context: AppState) {
-    //     spawn_local(async move {
-    //         context.init_with_storage().await;
-    //         let status = AppState::init(context).await;
-    //         if status == AppStatus::LoggedIn {
-    //             let navigate = use_navigate();
-    //             navigate(Page::Home.path(), Default::default());
-    //         }
-    //     });
-    // }
-
     #[tracing::instrument(name = "init_resource")]
     pub fn init_resource(state: AppState) -> Resource<(), AppState> {
         create_resource(
             || (),
             move |_| async move {
-                log_info!("Initializing AppState");
-                log_info!("1 status = {}", state.status.get_untracked());
                 state.init_with_storage().await;
-                log_info!("2 status = {}", state.status.get_untracked());
-                if state.status.get_untracked() == AppStatus::LoggedIn {
-                    let navigate = use_navigate();
-                    navigate(Page::Home.path(), Default::default());
-                }
                 state
             },
         )

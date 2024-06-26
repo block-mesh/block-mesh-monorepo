@@ -136,7 +136,11 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
                         >
 
                             <div class="flex justify-center text-center mt-4 text-white flex-col">
-                                <div class="mb-2">{move ||{ logging::log!("hier"); email.get().to_string()}}</div>
+                                <div class="mb-2">
+                                    {move || {
+                                        email.get().to_string()
+                                    }}
+                                </div>
                                 <div class="mb-2">
                                     <a
                                         href="#"
