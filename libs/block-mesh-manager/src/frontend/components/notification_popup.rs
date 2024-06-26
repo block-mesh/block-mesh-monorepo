@@ -21,12 +21,12 @@ pub fn NotificationPopupComponent() -> impl IntoView {
             <div class="flex w-full flex-col items-center space-y-4 sm:items-end">
                 <div class=move || {
                     format!(
-                        "pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-gray-700 border-white border shadow-lg ring-1 ring-black ring-opacity-5 {}",
+                        "pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-gray-100 border-white border shadow-lg ring-1 ring-black ring-opacity-5 {}",
                         opacity.get(),
                     )
                 }>
 
-                    <div class="p-4">
+                    <div class="p-2">
                         <div class="flex items-start">
                             <div class="flex-shrink-0">
                                 <svg

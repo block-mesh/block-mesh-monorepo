@@ -7,9 +7,7 @@ use leptos_router::A;
 #[component]
 pub fn InvitesComponent() -> impl IntoView {
     let _state = expect_context::<WebAppContext>();
-
     let async_data = WebAppContext::get_dashboard_data();
-
     fn get_invite_code() -> Option<String> {
         let doc = document();
         let el = match doc.get_element_by_id("copy_invite_code") {
@@ -28,6 +26,9 @@ pub fn InvitesComponent() -> impl IntoView {
                         "https://app.blockmesh.xyz/register?invite_code={}",
                         invite_url_string
                     ));
+                    WebAppContext::set_success("Successfully Copied", state.success.clone());
+                } else {
+                    WebAppContext::set_error("Failed to copy invite code", state.error.clone());
                 }
             }
         }
