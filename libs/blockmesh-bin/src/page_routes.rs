@@ -4,6 +4,7 @@ pub enum PageRoutes {
     Home,
     Settings,
     Dashboard,
+    OreMiner,
 }
 
 impl PageRoutes {
@@ -12,6 +13,7 @@ impl PageRoutes {
             Self::Home => "/",
             Self::Settings => "/settings",
             Self::Dashboard => "/dashboard",
+            Self::OreMiner => "/ore_miner",
         }
     }
 }
