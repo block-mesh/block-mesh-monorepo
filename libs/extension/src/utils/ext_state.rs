@@ -9,7 +9,6 @@ use chrono::Utc;
 use gloo_utils::format::JsValueSerdeExt;
 use leptos::*;
 use leptos_dom::tracing;
-use leptos_router::use_navigate;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use uuid::Uuid;
@@ -20,7 +19,6 @@ use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
 use logger_leptos::leptos_tracing::setup_leptos_tracing;
 
-use crate::pages::page::Page;
 use crate::utils::auth::{check_token, get_latest_invite_code};
 use crate::utils::connectors::{get_storage_value, set_storage_value, storageOnChange};
 use crate::utils::storage::StorageValues;
@@ -84,8 +82,8 @@ impl Debug for AppState {
 }
 
 impl AppState {
-    #[tracing::instrument(name = "AppState::new")]
-    pub async fn new() -> Self {
+    #[tracing::instrument(name = "AppState::init_with_storage")]
+    pub async fn init_with_storage(self) {
         let now = Utc::now().timestamp();
         let last_update = Self::get_last_update().await;
         let mut blockmesh_url = Self::get_blockmesh_url().await;
@@ -108,21 +106,30 @@ impl AppState {
             Self::update_invite_code(&api_token, now - last_update, &blockmesh_url, &email).await;
         let download_speed = Self::get_download_speed().await;
         let upload_speed = Self::get_upload_speed().await;
+
         Self::store_last_update(now).await;
 
         // Signals:
-        let invite_code = create_rw_signal(invite_code);
-        let email = create_rw_signal(email);
-        let api_token = create_rw_signal(api_token);
-        let blockmesh_url = create_rw_signal(blockmesh_url);
-        let status = create_rw_signal(AppStatus::LoggedOut);
-        let device_id = create_rw_signal(device_id);
-        let uptime = create_rw_signal(uptime);
-        let success = create_rw_signal(None);
-        let error = create_rw_signal(None);
-        let download_speed = create_rw_signal(download_speed);
-        let upload_speed = create_rw_signal(upload_speed);
-        let last_update = create_rw_signal(now);
+        self.invite_code.update(|v| *v = invite_code);
+        self.email.update(|v| *v = email.clone());
+        self.api_token.update(|v| *v = api_token);
+        self.blockmesh_url.update(|v| *v = blockmesh_url.clone());
+        self.status.update(|v| *v = AppStatus::LoggedOut);
+        self.device_id.update(|v| *v = device_id);
+        self.uptime.update(|v| *v = uptime);
+        self.success.update(|v| *v = None);
+        self.error.update(|v| *v = None);
+        self.download_speed.update(|v| *v = download_speed);
+        self.upload_speed.update(|v| *v = upload_speed);
+        self.last_update.update(|v| *v = now);
+
+        if !email.is_empty() && !api_token.is_nil() && api_token != Uuid::default() {
+            let credentials = CheckTokenRequest { api_token, email };
+            let result = check_token(&blockmesh_url, &credentials).await;
+            if result.is_ok() {
+                self.status.update(|v| *v = AppStatus::LoggedIn);
+            };
+        }
 
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
             if let Ok(data) = event.into_serde::<Value>() {
@@ -133,40 +140,41 @@ impl AppState {
                                 let value = value.as_str().unwrap_or_default().to_string();
                                 match storage_value {
                                     StorageValues::BlockMeshUrl => {
-                                        blockmesh_url.update(|v| *v = value);
+                                        self.blockmesh_url.update(|v| *v = value);
                                     }
                                     StorageValues::ApiToken => {
-                                        api_token.update(|v| {
+                                        self.api_token.update(|v| {
                                             *v = Uuid::from_str(&value).unwrap_or_default()
                                         });
                                     }
                                     StorageValues::Email => {
-                                        email.update(|v| *v = value);
+                                        self.email.update(|v| *v = value);
                                     }
                                     StorageValues::DeviceId => {
-                                        device_id.update(|v| {
+                                        self.device_id.update(|v| {
                                             *v = Uuid::from_str(&value).unwrap_or_default()
                                         });
                                     }
                                     StorageValues::Uptime => {
-                                        uptime.update(|v| {
+                                        self.uptime.update(|v| {
                                             *v = f64::from_str(&value).unwrap_or_default()
                                         });
                                     }
                                     StorageValues::InviteCode => {
-                                        invite_code.update(|v| *v = value);
+                                        self.invite_code.update(|v| *v = value);
                                     }
                                     StorageValues::DownloadSpeed => {
-                                        download_speed.update(|v| {
+                                        self.download_speed.update(|v| {
                                             *v = f64::from_str(&value).unwrap_or_default()
                                         });
                                     }
                                     StorageValues::UploadSpeed => {
-                                        upload_speed.update(|v| {
+                                        self.upload_speed.update(|v| {
                                             *v = f64::from_str(&value).unwrap_or_default()
                                         });
                                     }
-                                    StorageValues::LastUpdate => last_update
+                                    StorageValues::LastUpdate => self
+                                        .last_update
                                         .update(|v| *v = i64::from_str(&value).unwrap_or_default()),
                                 }
                             }
@@ -180,21 +188,6 @@ impl AppState {
         let closure_clone = closure_ref.clone();
         storageOnChange(closure_clone.borrow().as_ref().unwrap());
         closure_ref.borrow_mut().take().unwrap().forget();
-
-        Self {
-            invite_code,
-            email,
-            api_token,
-            blockmesh_url,
-            status,
-            device_id,
-            uptime,
-            success,
-            error,
-            download_speed,
-            upload_speed,
-            last_update,
-        }
     }
 
     pub async fn update_invite_code(
@@ -259,58 +252,15 @@ impl AppState {
         !(api_token.is_nil() || api_token == Uuid::default())
     }
 
-    #[tracing::instrument(name = "AppState::init")]
-    pub async fn init(context: AppState) -> AppStatus {
-        let now = Utc::now().timestamp();
-        let last_update = Self::get_last_update().await;
-        let mut blockmesh_url = Self::get_blockmesh_url().await;
-        if blockmesh_url.is_empty() {
-            blockmesh_url = "https://app.blockmesh.xyz".to_string();
-            Self::store_blockmesh_url(blockmesh_url.clone()).await;
-        }
-        let mut device_id = Self::get_device_id().await;
-        if device_id.is_empty() {
-            device_id = Uuid::new_v4().to_string();
-            Self::store_device_id(device_id.clone()).await;
-        }
-        let device_id = uuid::Uuid::from_str(&device_id).unwrap_or_else(|_| Uuid::new_v4());
-        setup_leptos_tracing(Option::from(device_id), DeviceType::Extension);
-        let email = Self::get_email().await;
-        let api_token = Self::get_api_token().await;
-        let api_token = uuid::Uuid::from_str(&api_token).unwrap_or_else(|_| Uuid::default());
-        let invite_code =
-            Self::update_invite_code(&api_token, now - last_update, &blockmesh_url, &email).await;
-        let download_speed = Self::get_download_speed().await;
-        let upload_speed = Self::get_upload_speed().await;
-
-        context.upload_speed.update(|v| *v = upload_speed);
-        context.download_speed.update(|v| *v = download_speed);
-        context.invite_code.update(|v| *v = invite_code.clone());
-        context.blockmesh_url.update(|v| *v = blockmesh_url.clone());
-        context.email.update(|v| *v = email.clone());
-        context.api_token.update(|v| *v = api_token);
-        context.device_id.update(|v| *v = device_id);
-        context.last_update.update(|v| *v = now);
-        Self::store_last_update(now).await;
-        if email.is_empty() || api_token.is_nil() || api_token == Uuid::default() {
-            return context.status.get_untracked();
-        }
-        let credentials = CheckTokenRequest { api_token, email };
-        let result = check_token(&blockmesh_url, &credentials).await;
-        if result.is_ok() {
-            context.status.update(|v| *v = AppStatus::LoggedIn);
-        };
-        context.status.get_untracked()
-    }
     #[tracing::instrument(name = "init_resource")]
-    pub fn init_resource(context: AppState) {
-        spawn_local(async move {
-            let status = AppState::init(context).await;
-            if status == AppStatus::LoggedIn {
-                let navigate = use_navigate();
-                navigate(Page::Home.path(), Default::default());
-            }
-        });
+    pub fn init_resource(state: AppState) -> Resource<(), AppState> {
+        create_resource(
+            || (),
+            move |_| async move {
+                state.init_with_storage().await;
+                state
+            },
+        )
     }
 
     #[tracing::instrument(name = "clear")]

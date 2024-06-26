@@ -17,8 +17,8 @@ use wasm_bindgen::prelude::*;
 pub async fn measure_bandwidth() {
     set_panic_hook();
     setup_leptos_tracing(None, DeviceType::Extension);
-    let app_state = AppState::new().await;
-    AppState::init(app_state).await;
+    let app_state = AppState::default();
+    app_state.init_with_storage().await;
 
     if !app_state.has_api_token() {
         return;

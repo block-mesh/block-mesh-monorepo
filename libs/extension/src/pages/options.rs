@@ -7,33 +7,47 @@ use url::Url;
 pub fn Options() -> impl IntoView {
     provide_context(AppState::default());
     let state = use_context::<AppState>().unwrap();
-    AppState::init_resource(state);
+    let state = AppState::init_resource(state);
 
-    let (url, set_url) = create_signal(state.blockmesh_url.get_untracked());
+    let (url, set_url) = create_signal(
+        state
+            .get()
+            .map(|s| s.blockmesh_url.get_untracked())
+            .unwrap_or_default(),
+    );
 
     let clear_action = create_action(move |_| async move {
-        state.clear().await;
-        AppState::set_success("Cache cleared".to_string(), state.success);
+        match state.get() {
+            None => (),
+            Some(s) => {
+                s.clear().await;
+                AppState::set_success("Cache cleared".to_string(), s.success);
+            }
+        }
     });
 
     let save_action = create_action(move |_| async move {
+        let s = match state.get() {
+            None => return,
+            Some(s) => s,
+        };
         if url.get_untracked().is_empty() {
-            AppState::set_error("URL is empty".to_string(), state.error);
+            AppState::set_error("URL is empty".to_string(), s.error);
             return;
         }
         let raw_url = url.get_untracked();
         let url = Url::parse(&url.get_untracked());
         match url {
             Err(error) => {
-                AppState::set_error(format!("Invalid URL: {}", error), state.error);
+                AppState::set_error(format!("Invalid URL: {}", error), s.error);
                 return;
             }
             Ok(url) => url,
         };
-        state.blockmesh_url.update(|v| *v = raw_url.clone());
+        s.blockmesh_url.update(|v| *v = raw_url.clone());
         set_url.update(|v| *v = raw_url.clone());
         AppState::store_blockmesh_url(raw_url).await;
-        AppState::set_success("URL saved".to_string(), state.success);
+        AppState::set_success("URL saved".to_string(), s.success);
     });
 
     view! {
@@ -50,7 +64,7 @@ pub fn Options() -> impl IntoView {
                             type="url"
                             required
                             class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                            placeholder=move || state.blockmesh_url.get()
+                            placeholder=move || state.get().map(|s| s.blockmesh_url.get())
                             name="url"
                             // prop:disabled=move || disabled.get()
                             on:keyup=move |ev: ev::KeyboardEvent| {
