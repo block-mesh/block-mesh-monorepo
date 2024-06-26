@@ -1,10 +1,11 @@
 use std::net::SocketAddr;
+use std::sync::Arc;
 
-use axum::extract::{ConnectInfo, Query};
+use axum::extract::{ConnectInfo, Query, State};
 use axum::{Extension, Json};
 use http::StatusCode;
-use reqwest::Client;
 use sqlx::PgPool;
+use tokio::task::JoinHandle;
 
 use block_mesh_common::constants::BLOCK_MESH_IP_WORKER;
 use block_mesh_common::interfaces::ip_data::{IPData, IpDataPostRequest};
@@ -20,10 +21,12 @@ use crate::database::uptime_report::get_user_uptimes::get_user_uptimes;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
+use crate::startup::application::AppState;
 
-#[tracing::instrument(name = "report_uptime", skip(pool, query), err, ret)]
+#[tracing::instrument(name = "report_uptime", skip(pool, query, state), err, ret)]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
+    State(state): State<Arc<AppState>>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     Query(query): Query<ReportUptimeRequest>,
 ) -> Result<Json<ReportUptimeResponse>, Error> {
@@ -64,11 +67,12 @@ pub async fn handler(
         .await
         .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;
+    let client = state.client.clone();
 
-    tokio::spawn(async move {
+    let handle: JoinHandle<()> = tokio::spawn(async move {
         let pool = pool.clone();
         let mut transaction = pool.begin().await.map_err(Error::from).unwrap();
-        let ip_data = Client::new()
+        let ip_data = client
             .post(BLOCK_MESH_IP_WORKER)
             .json(&IpDataPostRequest {
                 ip: match query.ip {
@@ -87,6 +91,7 @@ pub async fn handler(
             .unwrap();
         transaction.commit().await.unwrap();
     });
+    let _ = state.tx.send(handle).await;
 
     Ok(Json(ReportUptimeResponse {
         status_code: u16::from(StatusCode::OK),

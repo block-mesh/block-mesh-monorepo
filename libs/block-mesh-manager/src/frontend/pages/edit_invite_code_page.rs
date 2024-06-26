@@ -1,4 +1,6 @@
+use crate::frontend::components::error::ErrorComponent;
 use crate::frontend::components::navbar::NavbarComponent;
+use crate::frontend::components::notification::NotificationComponent;
 use crate::frontend::context::webapp_context::WebAppContext;
 use leptos::Suspense;
 use leptos::*;
@@ -7,10 +9,15 @@ use leptos::*;
 pub fn EditInvitePage() -> impl IntoView {
     let async_data = WebAppContext::get_dashboard_data();
     let logged_in = WebAppContext::is_logged_in();
-
     view! {
-        <Suspense fallback=|| {
-            view! { <p class="text-white">Loading...</p> }
+        <Suspense fallback=move || {
+            view! {
+                <NotificationComponent
+                    summary="Loading...".to_string()
+                    detailed="Please wait while we load the dashboard".to_string()
+                    go_to="/ui/login".to_string()
+                />
+            }
         }>
             <Show
                 when=move || {
@@ -21,7 +28,14 @@ pub fn EditInvitePage() -> impl IntoView {
                 }
 
                 fallback=|| {
-                    view! { <p class="text-white">Not logged in</p> }
+                    view! {
+                        <ErrorComponent
+                            code=401
+                            summary="Not Logged In".to_string()
+                            detailed="You must be logged in to view this page".to_string()
+                            go_to="/ui/login".to_string()
+                        />
+                    }
                 }
             >
 

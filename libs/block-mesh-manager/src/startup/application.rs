@@ -11,11 +11,13 @@ use axum::{Extension, Router};
 use axum_login::login_required;
 use leptos::leptos_config::get_config_from_env;
 use leptos_axum::{generate_route_list, LeptosRoutes};
+use reqwest::Client;
 use sqlx::postgres::PgPool;
 use std::net::SocketAddr;
 use std::path::Path;
 use std::sync::Arc;
 use tokio::net::TcpListener;
+use tokio::task::JoinHandle;
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
 
@@ -27,6 +29,8 @@ pub struct Application {
 pub struct AppState {
     pub pool: PgPool,
     pub email_client: Arc<EmailClient>,
+    pub client: Client,
+    pub tx: tokio::sync::mpsc::Sender<JoinHandle<()>>,
 }
 
 #[derive(Clone)]

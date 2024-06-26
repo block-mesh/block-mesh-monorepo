@@ -3,8 +3,10 @@ use block_mesh_common::constants::{
 };
 use reqwest::Client;
 use serde_json::{json, Value};
-use std::sync::{Arc, Once};
+use std::sync::mpsc::{Receiver, Sender};
+use std::sync::{mpsc, Arc, Once};
 use tokio::sync::Mutex;
+use tokio::task::JoinHandle;
 use tracing::{Event, Subscriber};
 use tracing_serde::AsSerde;
 use tracing_subscriber::layer::Context;
@@ -37,6 +39,7 @@ struct HttpLogLayer {
     pub env: String,
     pub user_id: Arc<Uuid>,
     pub device_type: DeviceType,
+    pub tx: Sender<JoinHandle<()>>,
 }
 
 impl HttpLogLayer {
@@ -48,6 +51,13 @@ impl HttpLogLayer {
         let x_url = init_url.clone();
         let x_buffer = init_buffer.clone();
         let x_client = init_client.clone();
+        let (tx, rx): (Sender<JoinHandle<()>>, Receiver<JoinHandle<()>>) = mpsc::channel();
+
+        tokio::spawn(async move {
+            while let Ok(handle) = rx.recv() {
+                let _ = handle.await;
+            }
+        });
 
         tokio::spawn(async move {
             let client = init_client.clone();
@@ -66,6 +76,7 @@ impl HttpLogLayer {
         });
 
         Self {
+            tx,
             client: x_client.clone(),
             buffer: x_buffer.clone(),
             url: x_url.clone(),
@@ -105,7 +116,7 @@ where
         let buffer = self.buffer.clone();
         let url = self.url.clone();
         let client = self.client.clone();
-        tokio::spawn(async move {
+        let handle = tokio::spawn(async move {
             let mut buffer = buffer.lock().await;
             buffer.push(log);
             if buffer.len() >= 10 {
@@ -114,5 +125,6 @@ where
                 HttpLogLayer::send_logs(client, url, logs).await;
             }
         });
+        let _ = self.tx.send(handle);
     }
 }

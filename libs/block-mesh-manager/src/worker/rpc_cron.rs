@@ -21,7 +21,6 @@ pub async fn create_rpc_tasks(pool: PgPool) -> anyhow::Result<()> {
 #[tracing::instrument(name = "rpc_worker_loop", skip(pool))]
 pub async fn rpc_worker_loop(pool: PgPool) -> Result<(), anyhow::Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
-
     create_server_user(&mut transaction).await?;
     transaction.commit().await.map_err(Error::from)?;
 
