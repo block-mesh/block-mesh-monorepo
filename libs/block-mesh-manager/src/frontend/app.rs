@@ -1,3 +1,5 @@
+use crate::frontend::components::notification_popup::NotificationPopupComponent;
+use crate::frontend::context::webapp_context::WebAppContext;
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
@@ -13,6 +15,7 @@ use crate::frontend::pages::reset_password_page::ResetPasswordPage;
 #[component]
 pub fn App() -> impl IntoView {
     provide_meta_context();
+    provide_context(WebAppContext::default());
 
     view! {
         <Stylesheet href="https://r2-assets.blockmesh.xyz/tailwind.css"/>
@@ -55,7 +58,7 @@ pub fn App() -> impl IntoView {
             gtag('config', 'G-RYHLW3MDK2');
             "#
         </Script>
-
+        <NotificationPopupComponent/>
         <Router fallback=|| {
             view! {
                 // let mut outside_errors = Errors::default();
