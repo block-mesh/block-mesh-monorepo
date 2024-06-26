@@ -24,13 +24,13 @@ pub fn Home() -> impl IntoView {
                 let invite_url_string = invite_url.get();
                 tracing::info!("invite_url_string = {}", invite_code.get());
                 if invite_code.get().is_empty() {
-                    AppState::set_error("Missing invite code".to_string(), state.error.clone());
+                    AppState::set_error("Missing invite code".to_string(), state.error);
                     return;
                 }
                 let _ = clipboard.write_text(&invite_url_string);
-                AppState::set_success("Copied to clipboard".to_string(), state.success.clone());
+                AppState::set_success("Copied to clipboard".to_string(), state.success);
             } else {
-                AppState::set_error("Failed to copy".to_string(), state.error.clone());
+                AppState::set_error("Failed to copy".to_string(), state.error);
             }
         }
         #[cfg(not(web_sys_unstable_apis))]
