@@ -51,7 +51,7 @@ async fn main() -> anyhow::Result<()> {
         mailgun_token.clone(),
         configuration.application.base_url.clone(),
     ));
-    let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(10);
+    let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(100);
 
     let app_state = Arc::new(AppState {
         email_client,
