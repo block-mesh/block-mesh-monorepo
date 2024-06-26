@@ -1,9 +1,23 @@
 use block_mesh_common::interfaces::server_api::{AuthStatusResponse, DashboardResponse};
 use leptos::*;
 
+#[derive(Debug, Clone)]
 pub struct WebAppContext {
     pub points: RwSignal<f64>,
     pub number_of_users_invited: RwSignal<i64>,
+    pub error: RwSignal<Option<String>>,
+    pub success: RwSignal<Option<String>>,
+}
+
+impl Default for WebAppContext {
+    fn default() -> Self {
+        Self {
+            points: create_rw_signal(0.0),
+            number_of_users_invited: create_rw_signal(0),
+            error: create_rw_signal(None),
+            success: create_rw_signal(None),
+        }
+    }
 }
 
 impl WebAppContext {

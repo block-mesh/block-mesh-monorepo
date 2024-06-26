@@ -6,6 +6,8 @@ use leptos_router::A;
 
 #[component]
 pub fn InvitesComponent() -> impl IntoView {
+    let _state = expect_context::<WebAppContext>();
+
     let async_data = WebAppContext::get_dashboard_data();
 
     fn get_invite_code() -> Option<String> {
