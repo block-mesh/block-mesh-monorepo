@@ -13,14 +13,17 @@ use leptos_router::{use_navigate, Route, Router, Routes};
 pub fn Popup() -> impl IntoView {
     provide_context(AppState::default());
     let state = use_context::<AppState>().unwrap();
-    AppState::init_resource(state);
+    let state = AppState::init_resource(state);
     create_effect(move |_| {
         let navigate = use_navigate();
         navigate(Page::Home.path(), Default::default());
     });
 
     let logout = create_action(move |_: &()| async move {
-        state.clear().await;
+        match state.get() {
+            None => (),
+            Some(s) => s.clear().await,
+        };
     });
 
     let on_logout = move |_| {

@@ -27,4 +27,3 @@ node_modules
 test-ledger
 .yarn
 demo_logs/*.log
-.sqlx
