@@ -45,6 +45,9 @@
       "csp": null
     },
     "bundle": {
+      "resources": [
+        "resources/ore"
+      ],
       "active": true,
       "targets": "all",
       "identifier": "xyz.blockmesh",

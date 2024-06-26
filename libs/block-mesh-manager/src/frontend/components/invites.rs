@@ -38,21 +38,6 @@ pub fn InvitesComponent() -> impl IntoView {
 
     view! {
         <div class="m-2">
-            // <Script>
-            // r#"
-            // function copy_invite_code_to_clipboard() {
-            // let button = document.getElementById("copy_invite_code");
-            // if (button) {
-            // let copyText = button.getAttribute("invite_code")
-            // let server = window.location.origin;
-            // navigator.clipboard.writeText(`${server}/register?invite_code=${copyText}`);
-            // // open_notification("Successfully Copied", "We have copied the invite link to your clipboard. Share it with your friends!");
-            // }
-            //
-            // }
-            // "#
-            // </Script>
-
             <div class="border-white border m-2 relative overflow-hidden rounded-[30px] pt-6 md:pt-[33px] pb-7 md:pb-[39px] pl-[11px] md:pl-[44px]">
                 <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 rounded">
                     <div class="py-6">
