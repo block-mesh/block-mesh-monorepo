@@ -1,6 +1,8 @@
 use crate::components::navigation::Navigation;
 use crate::leptos_state::LeptosTauriAppState;
 use crate::page_routes::PageRoutes;
+use crate::pages::apps::ore_wrapper::OreWrapper;
+use crate::pages::apps::select_app::SelectApps;
 use crate::pages::dashboard::Dashboard;
 use crate::pages::home::Home;
 use crate::pages::settings_wrapper::SettingsWrapper;
@@ -67,6 +69,12 @@ pub struct SetAppConfigArgs {
     pub config: AppConfig,
 }
 
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
+pub struct ToggleMinerArgs {
+    pub task_status: TaskStatus,
+}
+
 #[component]
 pub fn App() -> impl IntoView {
     provide_context(LeptosTauriAppState::default());
@@ -81,7 +89,7 @@ pub fn App() -> impl IntoView {
             .to_string(),
     );
 
-    let _resource = create_resource(
+    let resource = create_resource(
         move || {},
         |_| async move {
             let app_config_json = invoke_tauri("get_app_config", JsValue::NULL).await;
@@ -117,6 +125,15 @@ pub fn App() -> impl IntoView {
                         config.task_status = Some(task);
                     });
                 }
+
+                let result = invoke_tauri("get_ore_status", JsValue::NULL).await;
+                if let Ok(result) = result {
+                    let result = result.as_string().unwrap();
+                    let ore_status = TaskStatus::from(result);
+                    state.app_config.update(|config| {
+                        config.ore_status = Some(ore_status);
+                    });
+                }
             });
         },
         Duration::from_secs(30),
@@ -124,55 +141,74 @@ pub fn App() -> impl IntoView {
 
     view! {
         <div class="h-screen bg-gray-800">
-            <div class="h-full">
-                <Router>
-                    <Navigation/>
-                    <div class="lg:pl-72">
-                        <main>
-                            <div class="px-4 sm:px-6 lg:px-8">
-                                <Routes>
-                                    <Route
-                                        path=PageRoutes::Home.path()
-                                        view=move || {
-                                            view! { <Home/> }
-                                        }
-                                    />
+            <Suspense fallback=move || view! { <p>Loading</p> }>
+                <div class="hidden">{resource.get()}</div>
+                <div class="h-full">
+                    <Router>
+                        <Navigation/>
+                        <div class="lg:pl-72">
+                            <main>
+                                <div class="px-4 sm:px-6 lg:px-8">
+                                    <Routes>
+                                        <Route
+                                            path=PageRoutes::Home.path()
+                                            view=move || {
+                                                view! { <Home/> }
+                                            }
+                                        />
 
-                                    <Route
-                                        path=PageRoutes::Dashboard.path()
-                                        view=move || {
-                                            view! { <Dashboard task_status/> }
-                                        }
-                                    />
+                                        <Route
+                                            path=PageRoutes::Dashboard.path()
+                                            view=move || {
+                                                view! { <Dashboard task_status/> }
+                                            }
+                                        />
 
-                                    <Route
-                                        path=PageRoutes::Settings.path()
-                                        view=move || {
-                                            view! { <SettingsWrapper/> }
-                                        }
-                                    />
+                                        <Route
+                                            path=PageRoutes::Settings.path()
+                                            view=move || {
+                                                view! { <SettingsWrapper/> }
+                                            }
+                                        />
 
-                                </Routes>
-                            </div>
-                        </main>
-                    </div>
-                </Router>
-                <footer class="bg-gray-800 text-white py-6 border-t-2 border-white">
-                    <div class="w-full flex flex-col items-center md:flex-row md:justify-between px-4">
-                        <div class="text-center md:text-left"></div>
-                        <div class="mt-4 md:mt-0">
-                            <h5 class="text-gray-400 hover:text-white mx-2">BlockMesh Network</h5>
-                            <a
-                                href="https://x.com/blockmesh_xyz"
-                                target="_blank"
-                                class="text-gray-400 hover:text-white mx-2"
-                            >
-                                Contact Us
-                            </a>
+                                        <Route
+                                            path=PageRoutes::OreMiner.path()
+                                            view=move || {
+                                                view! { <OreWrapper/> }
+                                            }
+                                        />
+
+                                        <Route
+                                            path=PageRoutes::Apps.path()
+                                            view=move || {
+                                                view! { <SelectApps/> }
+                                            }
+                                        />
+
+                                    </Routes>
+                                </div>
+                            </main>
                         </div>
-                    </div>
-                </footer>
-            </div>
+                    </Router>
+                    <footer class="bg-gray-800 text-white py-6 border-t-2 border-white">
+                        <div class="w-full flex flex-col items-center md:flex-row md:justify-between px-4">
+                            <div class="text-center md:text-left"></div>
+                            <div class="mt-4 md:mt-0">
+                                <h5 class="text-gray-400 hover:text-white mx-2">
+                                    BlockMesh Network
+                                </h5>
+                                <a
+                                    href="https://x.com/blockmesh_xyz"
+                                    target="_blank"
+                                    class="text-gray-400 hover:text-white mx-2"
+                                >
+                                    Contact Us
+                                </a>
+                            </div>
+                        </div>
+                    </footer>
+                </div>
+            </Suspense>
         </div>
     }
 }

@@ -54,10 +54,10 @@ pub fn Sidebar() -> impl IntoView {
                                 </li>
                                 <li>
                                     <a
-                                        href=PageRoutes::OreMiner.path()
-                                        class=move || active(PageRoutes::OreMiner.path())
+                                        href=PageRoutes::Apps.path()
+                                        class=move || active(PageRoutes::Apps.path())
                                     >
-                                        Ore Miner
+                                        Apps
                                     </a>
                                 </li>
                             </ul>

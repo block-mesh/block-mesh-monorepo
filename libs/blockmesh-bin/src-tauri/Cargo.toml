@@ -11,8 +11,11 @@ edition = "2021"
 tauri-build = { workspace = true, features = [] }
 
 [dependencies]
+tempfile = { workspace = true }
+sysinfo = { workspace = true }
+lazy_static = { workspace = true }
 logger-general = { path = "../../logger-general" }
-tauri = { workspace = true, features = ["shell-open", "system-tray"] }
+tauri = { workspace = true, features = ["shell-open", "system-tray", "http-all"] }
 tauri-plugin-autostart = { workspace = true }
 tauri-plugin-single-instance = { workspace = true }
 futures-util = { workspace = true }

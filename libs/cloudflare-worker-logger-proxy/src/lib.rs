@@ -55,5 +55,14 @@ async fn main(mut req: Request, env: Env, _ctx: Context) -> Result<Response> {
             let _ = send_log(&url, item.to_owned()).await;
         }
     }
-    Response::ok("OK")
+
+    let mut headers = Headers::new();
+    headers.append("Access-Control-Allow-Origin", "*")?;
+    headers.append("Access-Control-Allow-Methods", "*")?;
+    headers.append("Access-Control-Allow-Headers", "*")?;
+
+    Ok(Response::builder()
+        .with_headers(headers)
+        .with_status(200)
+        .empty())
 }

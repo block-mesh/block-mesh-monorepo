@@ -1,19 +1,12 @@
 // Prevents additional console window on Windows in release, DO NOT REMOVE!!
 #![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
 #![allow(clippy::let_underscore_future)]
-use crate::commands::{get_app_config, get_task_status, open_main_window, set_app_config};
-use crate::run_events::on_run_events;
-use crate::system_tray::{on_system_tray_event, set_dock_visible, setup_tray};
-use crate::tauri_state::{AppState, ChannelMessage};
-use crate::tauri_storage::setup_storage;
-use crate::windows_events::on_window_event;
-use block_mesh_common::app_config::AppConfig;
-use block_mesh_common::cli::CliArgs;
-use block_mesh_common::constants::DeviceType;
-use clap::Parser;
-use logger_general::tracing::setup_tracing;
+
 use std::process::ExitCode;
-use std::sync::Arc;
+use std::sync::mpsc::Sender;
+use std::sync::{mpsc, Arc, OnceLock};
+
+use clap::Parser;
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
 use tauri::Manager;
@@ -21,13 +14,34 @@ use tauri_plugin_autostart::MacosLauncher;
 use tokio::sync::{broadcast, Mutex};
 use uuid::Uuid;
 
+use block_mesh_common::app_config::{AppConfig, TaskStatus};
+use block_mesh_common::cli::CliArgs;
+use block_mesh_common::constants::DeviceType;
+use logger_general::tracing::setup_tracing;
+
+use crate::commands::{
+    get_app_config, get_ore_status, get_task_status, open_main_window, set_app_config, toggle_miner,
+};
+use crate::handle_collectors::tokio_joiner_loop;
+use crate::ore::ore_process_monitor::ore_process_monitor;
+use crate::run_events::on_run_events;
+use crate::system_tray::{on_system_tray_event, set_dock_visible, setup_tray};
+use crate::tauri_state::{AppState, ChannelMessage};
+use crate::tauri_storage::setup_storage;
+use crate::windows_events::on_window_event;
+
 mod background;
 mod commands;
+mod handle_collectors;
+mod ore;
 mod run_events;
 mod system_tray;
 mod tauri_state;
 mod tauri_storage;
 mod windows_events;
+
+pub static TOKIO_JOINER_TX: OnceLock<Sender<tokio::task::JoinHandle<()>>> = OnceLock::new();
+pub static SYSTEM: OnceLock<Mutex<sysinfo::System>> = OnceLock::new();
 
 #[tokio::main]
 async fn main() -> anyhow::Result<ExitCode> {
@@ -40,13 +54,22 @@ async fn main() -> anyhow::Result<ExitCode> {
     };
     config.device_id = config.device_id.or(Some(Uuid::new_v4()));
     setup_tracing(config.device_id.unwrap(), DeviceType::Desktop);
+    let (ore_tx, ore_rx) = tokio::sync::mpsc::channel::<TaskStatus>(100);
+
+    let (tokio_joiner_tx, tokio_joiner_rx) = mpsc::channel::<tokio::task::JoinHandle<()>>();
+    let _ = TOKIO_JOINER_TX.set(tokio_joiner_tx);
 
     let app_state = Arc::new(Mutex::new(AppState {
         config,
         tx: incoming_tx,
         rx: incoming_rx,
+        ore_pid: None,
+        ore_tx,
     }));
+
     tauri::async_runtime::set(tokio::runtime::Handle::current());
+    tokio::spawn(tokio_joiner_loop(tokio_joiner_rx));
+    tokio::spawn(ore_process_monitor(ore_rx, app_state.clone()));
     let app_state = app_state.clone();
     tauri::Builder::default()
         .plugin(tauri_plugin_autostart::init(
@@ -84,7 +107,9 @@ async fn main() -> anyhow::Result<ExitCode> {
         .invoke_handler(tauri::generate_handler![
             get_app_config,
             set_app_config,
-            get_task_status
+            get_task_status,
+            toggle_miner,
+            get_ore_status
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

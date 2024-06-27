@@ -30,6 +30,10 @@
       "shell": {
         "all": false,
         "open": true
+      },
+      "http": {
+        "all": true,
+        "request": true
       }
     },
     "windows": [
