@@ -1,3 +1,4 @@
+pub mod apps;
 pub mod client_node_settings;
 pub mod dashboard;
 pub mod home;

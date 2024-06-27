@@ -1,4 +1,5 @@
 #![allow(clippy::let_underscore_future)]
+
 use crate::tauri_state::{AppState, ChannelMessage};
 use block_mesh_common::app_config::TaskStatus;
 use block_mesh_common::cli::Commands;

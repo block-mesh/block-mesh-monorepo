@@ -52,6 +52,14 @@ pub fn Sidebar() -> impl IntoView {
                                         Settings
                                     </a>
                                 </li>
+                                <li>
+                                    <a
+                                        href=PageRoutes::Apps.path()
+                                        class=move || active(PageRoutes::Apps.path())
+                                    >
+                                        Apps
+                                    </a>
+                                </li>
                             </ul>
                         </li>
                     </ul>

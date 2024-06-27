@@ -22,6 +22,11 @@ pub struct AppConfig {
     pub config_path: Option<String>,
     pub task_status: Option<TaskStatus>,
     pub device_id: Option<Uuid>,
+    pub ore_status: Option<TaskStatus>,
+    pub ore_rpc: Option<String>,
+    pub ore_threads: Option<u16>,
+    pub ore_keypair: Option<String>,
+    pub ore_priority_fee: Option<u64>,
 }
 
 #[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Copy)]
@@ -63,6 +68,11 @@ impl AppConfig {
         self.gui = self.gui.or(config.gui);
         self.config_path = self.config_path.clone().or(config.config_path);
         self.device_id = self.device_id.or(config.device_id);
+        self.ore_status = self.ore_status.or(config.ore_status);
+        self.ore_rpc = self.ore_rpc.clone().or(config.ore_rpc);
+        self.ore_threads = self.ore_threads.or(config.ore_threads);
+        self.ore_keypair = self.ore_keypair.clone().or(config.ore_keypair);
+        self.ore_priority_fee = self.ore_priority_fee.or(config.ore_priority_fee);
     }
 
     pub async fn validate_keypair(&self) -> anyhow::Result<()> {
@@ -133,6 +143,11 @@ impl From<Commands> for AppConfig {
                 config_path: None,
                 task_status: None,
                 device_id: None,
+                ore_status: None,
+                ore_rpc: None,
+                ore_threads: None,
+                ore_keypair: None,
+                ore_priority_fee: None,
             },
             Commands::ProxyMaster(options) => AppConfig {
                 keypair_path: Some(options.keypair_path),
@@ -147,6 +162,11 @@ impl From<Commands> for AppConfig {
                 config_path: None,
                 task_status: None,
                 device_id: None,
+                ore_status: None,
+                ore_rpc: None,
+                ore_threads: None,
+                ore_keypair: None,
+                ore_priority_fee: None,
             },
             Commands::ProxyEndpoint(options) => AppConfig {
                 keypair_path: Some(options.keypair_path),
@@ -161,6 +181,11 @@ impl From<Commands> for AppConfig {
                 config_path: None,
                 task_status: None,
                 device_id: None,
+                ore_status: None,
+                ore_rpc: None,
+                ore_threads: None,
+                ore_keypair: None,
+                ore_priority_fee: None,
             },
         }
     }

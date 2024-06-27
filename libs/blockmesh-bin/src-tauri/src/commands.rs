@@ -69,3 +69,25 @@ pub fn open_main_window(app_handle: &AppHandle) -> anyhow::Result<()> {
     }
     Ok(())
 }
+
+#[tauri::command]
+#[tracing::instrument(name = "toggle_miner", skip(state), ret)]
+pub async fn toggle_miner(
+    state: State<'_, Arc<Mutex<AppState>>>,
+    task_status: TaskStatus,
+) -> Result<(), InvokeError> {
+    let state = state.lock().await;
+    let _ = state.ore_tx.send(task_status).await;
+    Ok(())
+}
+
+#[tauri::command]
+#[tracing::instrument(name = "get_ore_status", level = "trace", skip(state), ret)]
+pub async fn get_ore_status(state: State<'_, Arc<Mutex<AppState>>>) -> Result<String, InvokeError> {
+    let state = state.lock().await;
+    let config = &state.config;
+    match &config.ore_status {
+        None => Ok(TaskStatus::Off.to_string()),
+        Some(task_status) => Ok(task_status.to_string()),
+    }
+}
