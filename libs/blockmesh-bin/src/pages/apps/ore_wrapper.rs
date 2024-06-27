@@ -51,12 +51,11 @@ pub fn OreWrapper() -> impl IntoView {
     let toggle_action = move || {
         spawn_local(async move {
             let args = ToggleMinerArgs {
-                // task_status: match state.app_config.get().ore_status {
-                //     Some(TaskStatus::Running) => TaskStatus::Off,
-                //     Some(TaskStatus::Off) => TaskStatus::Running,
-                //     None => TaskStatus::Off,
-                // },
-                task_status: TaskStatus::Running,
+                task_status: match state.app_config.get().ore_status {
+                    Some(TaskStatus::Running) => TaskStatus::Off,
+                    Some(TaskStatus::Off) => TaskStatus::Running,
+                    None => TaskStatus::Off,
+                },
             };
             if let Ok(js_args) = serde_wasm_bindgen::to_value(&args) {
                 tracing::info!("js_args = {:?}", js_args);
@@ -232,7 +231,6 @@ pub fn OreWrapper() -> impl IntoView {
                             {move || {
                                 status.get().map(|status| status.to_string()).unwrap_or_default()
                             }}
-
                         </button>
                     </div>
                 </div>

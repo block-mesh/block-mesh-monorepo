@@ -6,7 +6,6 @@ use leptos_router::A;
 
 #[component]
 pub fn InvitesComponent() -> impl IntoView {
-    let _state = expect_context::<WebAppContext>();
     let async_data = WebAppContext::get_dashboard_data();
     fn get_invite_code() -> Option<String> {
         let doc = document();
@@ -20,6 +19,7 @@ pub fn InvitesComponent() -> impl IntoView {
     let copy_to_clipboard = move |_| {
         #[cfg(web_sys_unstable_apis)]
         {
+            let state = expect_context::<WebAppContext>();
             if let Some(clipboard) = web_sys::window().unwrap().navigator().clipboard() {
                 if let Some(invite_url_string) = get_invite_code() {
                     let _ = clipboard.write_text(&format!(
