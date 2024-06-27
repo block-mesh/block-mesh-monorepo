@@ -26,9 +26,9 @@ pub fn InvitesComponent() -> impl IntoView {
                         "https://app.blockmesh.xyz/register?invite_code={}",
                         invite_url_string
                     ));
-                    WebAppContext::set_success("Successfully Copied", state.success.clone());
+                    WebAppContext::set_success("Successfully Copied", state.success);
                 } else {
-                    WebAppContext::set_error("Failed to copy invite code", state.error.clone());
+                    WebAppContext::set_error("Failed to copy invite code", state.error);
                 }
             }
         }
