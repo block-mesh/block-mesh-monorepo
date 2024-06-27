@@ -9,7 +9,7 @@
 <body>
 <div class="bg-gray-900">
     <main>
-        <!-- Hero section -->
+        {% include "navbar.html" %}
         <div class="relative isolate overflow-hidden">
             <svg class="absolute inset-0 -z-10 h-full w-full stroke-white/10 [mask-image:radial-gradient(100%_100%_at_top_right,white,transparent)]" aria-hidden="true">
                 <defs>
@@ -27,7 +27,6 @@
             </div>
             <div class="mx-auto max-w-7xl px-6 pb-24 pt-10 sm:pb-40 lg:flex lg:px-8 lg:pt-40">
                 <div class="mx-auto max-w-2xl flex-shrink-0 lg:mx-0 lg:max-w-xl lg:pt-8">
-                    <img class="h-11" src={{ logo }} alt="BlockMesh">
                     <div class="mt-24 sm:mt-32 lg:mt-16">
                         <a href={{ github }}  target="_blank" class="inline-flex space-x-6">
                             <span class="rounded-full bg-indigo-500/10 px-3 py-1 text-sm font-semibold leading-6 text-indigo-400 ring-1 ring-inset ring-indigo-500/20">Open Source</span>
@@ -38,9 +37,11 @@
                             <span class="inline-flex items-center space-x-2 text-sm font-medium leading-6 text-gray-300"></span>
                         </a>
                     </div>
-                    <h1 class="mt-10 text-4xl font-bold tracking-tight text-white sm:text-6xl">BlockMesh Network</h1>
+                    <h1 class="mt-10 text-4xl font-bold tracking-tight text-white sm:text-6xl">
+                        Own a Piece of the AI Movement.
+                    </h1>
                     <p class="mt-6 text-lg leading-8 text-gray-300">
-                        Welcome to BlockMesh, an innovative, open and secure network that allows you to easily monetize your excess bandwidth. Giving you a great opportunity to passively profit and participate in the frontline of AI data layer, online privacy, open source and blockchain industries.
+                        Profit from your idle internet
                     </p>
                     <div class="mt-10 flex items-center gap-x-6">
                         <a href={{ app_server }} target="_blank"
@@ -48,7 +49,10 @@
                             Application
                         </a>
                         <a href={{ chrome_extension_link }} target="_blank"
-                           class="rounded-md bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400">
+                           class="flex items-center space-x-2 rounded-md bg-indigo-500 px-3.5 py-2.5 text-sm font-semibold text-white shadow-sm hover:bg-indigo-400 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-400">
+                            <div class="pr-2">
+                                {% include "chrome_icon.html" %}
+                            </div>
                             Chrome Extension
                         </a>
                     </div>
