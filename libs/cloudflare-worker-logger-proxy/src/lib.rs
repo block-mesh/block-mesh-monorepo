@@ -33,10 +33,24 @@ async fn send_log(url: &str, log: Value) -> anyhow::Result<()> {
     }
 }
 
+pub fn respond_good() -> Result<Response> {
+    let mut headers = Headers::new();
+    headers.append("Access-Control-Allow-Origin", "*")?;
+    headers.append("Access-Control-Allow-Methods", "*")?;
+    headers.append("Access-Control-Allow-Headers", "*")?;
+
+    Ok(Response::builder()
+        .with_headers(headers)
+        .with_status(200)
+        .empty())
+}
+
 #[event(fetch)]
 async fn main(mut req: Request, env: Env, _ctx: Context) -> Result<Response> {
-    if req.method() != Method::Post {
-        return Response::error("Only accept POST requests", 400);
+    match req.method() {
+        Method::Options => return respond_good(),
+        Method::Post => {}
+        _ => return Response::error("Only accept POST/OPTIONS requests", 400),
     }
     let url = env.secret("log_url").unwrap().to_string();
     let body: Value = match req.json().await {
