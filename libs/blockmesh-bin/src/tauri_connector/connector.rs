@@ -27,9 +27,7 @@ extern "C" {
 }
 
 pub async fn invoke_tauri(cmd: &str, args: JsValue) -> Result<JsValue, MyJsError> {
-    tracing::info!("here 1");
     let result = invoke(cmd, args).await;
-    tracing::info!("here 2");
     let error_attribute = JsValue::from_str("error");
     if let Ok(error) = js_sys::Reflect::get(&result, &error_attribute) {
         if error.is_string() {

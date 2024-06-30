@@ -5,6 +5,7 @@ use std::path::PathBuf;
 use std::process::Stdio;
 use std::sync::Arc;
 use sysinfo::{Pid, System};
+// use tokio::io::{AsyncBufReadExt, BufReader};
 use tokio::process::Command;
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
@@ -32,12 +33,10 @@ pub struct OreProcessOutput {
 }
 
 #[tracing::instrument(name = "ore_process_wrapper", skip(app_state), ret, err)]
-pub async fn start_ore_process(
-    app_state: Arc<Mutex<AppState>>,
-) -> anyhow::Result<OreProcessOutput> {
+pub async fn start_ore_process(app_state: Arc<Mutex<AppState>>) -> anyhow::Result<()> {
     let mut state = app_state.lock().await;
 
-    let exec = std::env::current_exe().unwrap_or_default();
+    let exec = env::current_exe().unwrap_or_default();
     let ore = exec.parent().unwrap().join("resources").join("ore");
     if tokio::fs::metadata(&ore).await.is_err() {
         log::error!("ORE binary not found at {:?}", ore);
@@ -59,8 +58,8 @@ pub async fn start_ore_process(
     if tokio::fs::metadata(&stderr_log_file).await.is_err() {
         tokio::fs::write(&stderr_log_file, "").await?;
     }
-    let stdout_log = stdout_log_file.to_str().unwrap().to_string();
-    let stderr_log = stderr_log_file.to_str().unwrap().to_string();
+    let _stdout_log = stdout_log_file.to_str().unwrap().to_string();
+    let _stderr_log = stderr_log_file.to_str().unwrap().to_string();
     let stdout_log_file = File::open(&stdout_log_file)?;
     let stderr_log_file = File::open(&stderr_log_file)?;
     let mut child = Command::new(&ore_exec)
@@ -73,28 +72,36 @@ pub async fn start_ore_process(
         .arg(ore_keypair)
         .arg("--priority-fee")
         .arg(ore_priority_fee.to_string())
+        // .stdout(Stdio::piped())
         .stdout(Stdio::from(stdout_log_file))
         .stderr(Stdio::from(stderr_log_file))
         .spawn()?;
 
+    // let stdout = child
+    //     .stdout
+    //     .take()
+    //     .expect("child did not have a handle to stdout");
+    // let mut reader = BufReader::new(stdout).lines();
+    // Ensure the child process is spawned in the runtime so it can
+    // make progress on its own while we await for any output.
+    // tokio::spawn(async move {
+    //     while let Some(line) = reader.next_line().await.unwrap_or_default() {
+    //         tracing::info!("ORE Line: {}", line);
+    //     }
+    // });
+
     let pid = child.id().ok_or(anyhow::anyhow!("Failed to get PID"))?;
-    let handle: JoinHandle<()> = tokio::spawn(async move {
+    let _: JoinHandle<()> = tokio::spawn(async move {
         let _ = child.wait().await;
     });
-
-    Ok(OreProcessOutput {
-        pid,
-        handle,
-        stdout_log,
-        stderr_log,
-    })
+    state.config.ore_status = Option::from(TaskStatus::Running);
+    state.ore_pid = Some(pid);
+    Ok(())
 }
 
 #[tracing::instrument(name = "kill_ore_process", skip(app_state), ret, err)]
 pub async fn kill_ore_process(app_state: Arc<Mutex<AppState>>) -> anyhow::Result<()> {
-    tracing::info!("here 95");
     let mut state = app_state.lock().await;
-    tracing::info!("here 97");
     if let Some(pid) = state.ore_pid {
         let system = SYSTEM.get_or_init(|| Mutex::new(System::new_all()));
         let mut system = system.lock().await;

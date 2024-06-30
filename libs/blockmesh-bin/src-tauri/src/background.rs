@@ -11,6 +11,7 @@ use tokio::time::sleep;
 
 pub async fn channel_receiver(mut rx: Receiver<ChannelMessage>, app_state: Arc<Mutex<AppState>>) {
     while let Ok(msg) = rx.recv().await {
+        tracing::info!("channel_receiver starting to process msg => {}", msg);
         match msg {
             ChannelMessage::StartOre => {
                 let _ = kill_ore_process(app_state.clone()).await;
@@ -77,5 +78,6 @@ pub async fn channel_receiver(mut rx: Receiver<ChannelMessage>, app_state: Arc<M
             }
             ChannelMessage::RestartTask => {}
         }
+        tracing::info!("channel_receiver finished to process msg => {}", msg);
     }
 }

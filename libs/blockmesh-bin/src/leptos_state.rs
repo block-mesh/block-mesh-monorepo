@@ -1,7 +1,9 @@
-use leptos::*;
-
-use block_mesh_common::app_config::AppConfig;
+use crate::tauri_connector::connector::invoke_tauri;
+use block_mesh_common::app_config::{AppConfig, TaskStatus};
 use block_mesh_common::cli::CommandsEnum;
+use block_mesh_common::interfaces::server_api::GetTokenResponse;
+use leptos::*;
+use wasm_bindgen::JsValue;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LeptosTauriAppState {
@@ -18,5 +20,79 @@ impl Default for LeptosTauriAppState {
             app_config,
             logged_in,
         }
+    }
+}
+
+impl LeptosTauriAppState {
+    #[tracing::instrument(name = "init_app_config", skip(state))]
+    pub async fn init_app_config(state: &LeptosTauriAppState) {
+        let app_config_json = invoke_tauri("get_app_config", JsValue::NULL).await;
+        let app_config_json = match app_config_json {
+            Ok(app_config_json) => {
+                if app_config_json.is_null() {
+                    return;
+                }
+                app_config_json
+            }
+            Err(e) => {
+                tracing::error!("error: {}", e);
+                return;
+            }
+        };
+        let app_config_json = app_config_json.as_string().unwrap();
+        let mut app_config: AppConfig = serde_json::from_str(&app_config_json).unwrap();
+        if app_config.mode.is_none() {
+            app_config.mode = Some(CommandsEnum::ClientNode);
+        }
+        tracing::info!("Loaded app_config: {:?}", app_config);
+        state.app_config.set(app_config);
+    }
+
+    #[tracing::instrument(name = "check_token", skip(state))]
+    pub async fn check_token(state: &LeptosTauriAppState) {
+        if state.app_config.get_untracked().email.is_some()
+            && state.app_config.get_untracked().api_token.is_some()
+        {
+            if let Ok(result) = invoke_tauri("check_token", JsValue::NULL).await {
+                if serde_wasm_bindgen::from_value::<GetTokenResponse>(result).is_ok() {
+                    state.logged_in.update(|v| *v = true);
+                }
+            }
+        }
+        tracing::info!("Login status {}", state.logged_in.get_untracked());
+    }
+
+    #[tracing::instrument(name = "get_task_status", skip(state))]
+    pub async fn get_task_status(state: &LeptosTauriAppState) {
+        let result = invoke_tauri("get_task_status", JsValue::NULL).await;
+        if let Ok(result) = result {
+            let result = result.as_string().unwrap();
+            let task = TaskStatus::from(result);
+            // set_task_status.set(task.to_string());
+            state.app_config.update(|config| {
+                config.task_status = Some(task);
+            });
+        }
+        tracing::info!(
+            "Task status {:?}",
+            state.app_config.get_untracked().task_status
+        );
+    }
+
+    #[tracing::instrument(name = "get_ore_status", skip(state))]
+    pub async fn get_ore_status(state: &LeptosTauriAppState) {
+        let result = invoke_tauri("get_ore_status", JsValue::NULL).await;
+        tracing::info!("get_or_status result {:?}", result);
+        if let Ok(result) = result {
+            let result = result.as_string().unwrap();
+            let ore_status = TaskStatus::from(result);
+            state.app_config.update(|config| {
+                config.ore_status = Some(ore_status);
+            });
+        }
+        tracing::info!(
+            "Ore status {:?}",
+            state.app_config.get_untracked().ore_status
+        );
     }
 }
