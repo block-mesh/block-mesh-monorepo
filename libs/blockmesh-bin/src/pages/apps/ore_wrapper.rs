@@ -230,6 +230,7 @@ pub fn OreWrapper() -> impl IntoView {
                             {move || {
                                 status.get().map(|status| status.to_string()).unwrap_or_default()
                             }}
+
                         </button>
                     </div>
                 </div>

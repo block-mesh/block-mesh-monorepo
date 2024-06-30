@@ -1,16 +1,24 @@
 use crate::leptos_state::LeptosTauriAppState;
 use crate::pages::login::Login;
+use crate::tauri_connector::connector::invoke_tauri;
 use block_mesh_common::constants::{BLOCKMESH_VERSION, BLOCK_MESH_SUPPORT_EMAIL};
 use leptos::*;
-use leptos_router::{use_navigate, A};
+use leptos_router::A;
+use wasm_bindgen::JsValue;
 
 #[component]
 pub fn Home() -> impl IntoView {
     let state = expect_context::<LeptosTauriAppState>();
-    let _navigate = use_navigate();
     let email = Signal::derive(move || state.app_config.get().email);
     let support_href = move || format!("mailto: {}", BLOCK_MESH_SUPPORT_EMAIL);
-    let on_logout = move || {};
+    let logout = move || {
+        spawn_local(async move {
+            let state = expect_context::<LeptosTauriAppState>();
+            if invoke_tauri("logout", JsValue::NULL).await.is_ok() {
+                LeptosTauriAppState::check_token(&state).await;
+            }
+        });
+    };
     view! {
         <div>
             <Show
@@ -71,13 +79,18 @@ pub fn Home() -> impl IntoView {
                                     </A>
                                 </div>
                                 <div class="flex justify-center text-center mt-4 text-white flex-col">
-                                    <div class="mb-2">{move || { email.get().unwrap_or_default() }}</div>
+                                    <div class="mb-2">
+                                        {move || { email.get().unwrap_or_default() }}
+                                    </div>
                                     <div class="mb-2">
                                         <a
                                             href="#"
                                             class="px-4 py-2 rounded font-bold text-sm text-blue-500 hover:text-blue-800"
-                                            on:click=move |_| on_logout()
+                                            on:click=move |_| {
+                                                logout();
+                                            }
                                         >
+
                                             "Logout"
                                         </a>
                                     </div>

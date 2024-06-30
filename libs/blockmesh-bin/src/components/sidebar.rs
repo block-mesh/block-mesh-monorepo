@@ -35,7 +35,7 @@ pub fn Sidebar() -> impl IntoView {
                                         href=PageRoutes::Home.path()
                                         class=move || active(PageRoutes::Home.path())
                                     >
-                                        Home
+                                        BlockMesh
                                     </a>
                                 </li>
                                 // <li>

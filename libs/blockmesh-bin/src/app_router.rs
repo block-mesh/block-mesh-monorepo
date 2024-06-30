@@ -1,4 +1,8 @@
+use leptos::*;
+use leptos_router::{Route, Router, Routes};
+
 use crate::components::navigation::Navigation;
+use crate::components::notification::Notifications;
 use crate::page_routes::PageRoutes;
 use crate::pages::apps::ore_wrapper::OreWrapper;
 use crate::pages::apps::select_app::SelectApps;
@@ -7,13 +11,12 @@ use crate::pages::home::Home;
 use crate::pages::login::Login;
 use crate::pages::register::Register;
 use crate::pages::settings_wrapper::SettingsWrapper;
-use leptos::*;
-use leptos_router::{Route, Router, Routes};
 
 #[component]
 pub fn AppRouter() -> impl IntoView {
     view! {
         <Router>
+            <Notifications/>
             <Navigation/>
             <div class="lg:pl-72">
                 <main>

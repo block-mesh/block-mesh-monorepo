@@ -108,7 +108,20 @@ pub async fn get_ore_status(state: State<'_, Arc<Mutex<AppState>>>) -> Result<St
 }
 
 #[tauri::command]
-#[tracing::instrument(name = "login", level = "trace", skip(state, login_form), ret)]
+#[tracing::instrument(name = "logout", skip(state), ret)]
+pub async fn logout(state: State<'_, Arc<Mutex<AppState>>>) -> Result<(), InvokeError> {
+    let mut state = state.lock().await;
+    state.config.email = None;
+    state.config.api_token = None;
+    let config = state.config.clone();
+    set_config_with_path(config)
+        .await
+        .ok_or(InvokeError::from("Error setting config"))?;
+    Ok(())
+}
+
+#[tauri::command]
+#[tracing::instrument(name = "login", skip(state, login_form), ret)]
 pub async fn login(
     state: State<'_, Arc<Mutex<AppState>>>,
     login_form: LoginForm,
@@ -184,13 +197,14 @@ pub async fn check_token(
 }
 
 #[tauri::command]
-#[tracing::instrument(name = "register", level = "trace", skip(state, register_form), ret)]
+#[tracing::instrument(name = "register", skip(state, register_form), ret)]
 pub async fn register(
     state: State<'_, Arc<Mutex<AppState>>>,
     register_form: RegisterForm,
 ) -> Result<(), InvokeError> {
-    let url = format!("{}/api/get_token", BLOCK_MESH_APP_SERVER);
+    let url = format!("{}/register_api", BLOCK_MESH_APP_SERVER);
     let client = reqwest::Client::new();
+    tracing::info!("register_form = {:?}", register_form);
     let response = client
         .post(&url)
         .form(&register_form)

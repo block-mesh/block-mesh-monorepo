@@ -3,11 +3,15 @@ use block_mesh_common::app_config::{AppConfig, TaskStatus};
 use block_mesh_common::cli::CommandsEnum;
 use block_mesh_common::interfaces::server_api::GetTokenResponse;
 use leptos::*;
+use std::fmt::{Debug, Display};
+use std::time::Duration;
 use wasm_bindgen::JsValue;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LeptosTauriAppState {
     pub app_config: RwSignal<AppConfig>,
+    pub success: RwSignal<Option<String>>,
+    pub error: RwSignal<Option<String>>,
     pub logged_in: RwSignal<bool>,
 }
 
@@ -16,9 +20,13 @@ impl Default for LeptosTauriAppState {
         let app_config = create_rw_signal(AppConfig::default());
         app_config.update(|c| c.mode = Some(CommandsEnum::ClientNode));
         let logged_in = create_rw_signal(false);
+        let success = create_rw_signal(None);
+        let error = create_rw_signal(None);
         Self {
             app_config,
             logged_in,
+            success,
+            error,
         }
     }
 }
@@ -50,13 +58,15 @@ impl LeptosTauriAppState {
 
     #[tracing::instrument(name = "check_token", skip(state))]
     pub async fn check_token(state: &LeptosTauriAppState) {
-        if state.app_config.get_untracked().email.is_some()
-            && state.app_config.get_untracked().api_token.is_some()
-        {
-            if let Ok(result) = invoke_tauri("check_token", JsValue::NULL).await {
+        match invoke_tauri("check_token", JsValue::NULL).await {
+            Ok(result) => {
                 if serde_wasm_bindgen::from_value::<GetTokenResponse>(result).is_ok() {
                     state.logged_in.update(|v| *v = true);
                 }
+            }
+            Err(e) => {
+                tracing::error!("check_token error {}", e);
+                state.logged_in.update(|v| *v = false);
             }
         }
         tracing::info!("Login status {}", state.logged_in.get_untracked());
@@ -82,7 +92,6 @@ impl LeptosTauriAppState {
     #[tracing::instrument(name = "get_ore_status", skip(state))]
     pub async fn get_ore_status(state: &LeptosTauriAppState) {
         let result = invoke_tauri("get_ore_status", JsValue::NULL).await;
-        tracing::info!("get_or_status result {:?}", result);
         if let Ok(result) = result {
             let result = result.as_string().unwrap();
             let ore_status = TaskStatus::from(result);
@@ -93,6 +102,36 @@ impl LeptosTauriAppState {
         tracing::info!(
             "Ore status {:?}",
             state.app_config.get_untracked().ore_status
+        );
+    }
+
+    #[tracing::instrument(name = "AppState::set_success")]
+    pub fn set_success<T>(success: T, signal: RwSignal<Option<String>>)
+    where
+        T: Display + Clone + Into<String> + Debug,
+    {
+        let success = Option::from(success.clone().to_string());
+        signal.update(|v| *v = success);
+        set_timeout(
+            move || {
+                signal.update(|v| *v = None);
+            },
+            Duration::from_millis(3500),
+        );
+    }
+
+    #[tracing::instrument(name = "AppState::set_error")]
+    pub fn set_error<T>(error: T, signal: RwSignal<Option<String>>)
+    where
+        T: Display + Clone + Into<String> + Debug,
+    {
+        let error = Option::from(error.clone().to_string());
+        signal.update(|v| *v = error);
+        set_timeout(
+            move || {
+                signal.update(|v| *v = None);
+            },
+            Duration::from_millis(3500),
         );
     }
 }

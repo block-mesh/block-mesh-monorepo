@@ -20,7 +20,7 @@ use logger_general::tracing::setup_tracing;
 
 use crate::background::channel_receiver;
 use crate::commands::{
-    check_token, get_app_config, get_ore_status, get_task_status, login, open_main_window,
+    check_token, get_app_config, get_ore_status, get_task_status, login, logout, open_main_window,
     register, set_app_config, toggle_miner,
 };
 use crate::run_events::on_run_events;
@@ -110,7 +110,8 @@ async fn main() -> anyhow::Result<ExitCode> {
             get_ore_status,
             login,
             register,
-            check_token
+            check_token,
+            logout
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")
