@@ -198,3 +198,9 @@ pub struct AuthStatusResponse {
     pub logged_in: bool,
     pub email: Option<String>,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RunTaskResponse {
+    pub status: i32,
+    pub raw: String,
+}

@@ -1,5 +1,5 @@
-use crate::app::{invoke_tauri, SetAppConfigArgs};
 use crate::leptos_state::LeptosTauriAppState;
+use crate::tauri_connector::connector::{invoke_tauri, SetAppConfigArgs};
 use block_mesh_common::app_config::AppConfig;
 use leptos::*;
 use solana_sdk::pubkey::Pubkey;

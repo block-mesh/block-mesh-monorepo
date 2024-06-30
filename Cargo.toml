@@ -39,6 +39,7 @@ curve25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dal
 sysinfo = { version = "0.30.12" }
 tikv-jemallocator = { version = "0.5" }
 leptos_axum = { version = "0.6.12" }
+leptos-use = { version = "0.10.10" }
 leptos_meta = { version = "0.6.12" }
 gloo-utils = { version = "0.2.0" }
 tracing-subscriber-wasm = { version = "0.1.0" }

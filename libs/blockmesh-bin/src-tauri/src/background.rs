@@ -1,53 +1,83 @@
 #![allow(clippy::let_underscore_future)]
 
+use crate::blockmesh::blockmesh_task_monitor::{report_uptime, task_poller};
+use crate::ore::ore_process_wrapper::{kill_ore_process, start_ore_process};
 use crate::tauri_state::{AppState, ChannelMessage};
-use block_mesh_common::app_config::TaskStatus;
-use block_mesh_common::cli::Commands;
-use client_node::client_node_main;
-use proxy_endpoint::proxy_endpoint_main;
-use proxy_master::proxy_master_main;
-use std::process::ExitCode;
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::sync::broadcast::Receiver;
 use tokio::sync::Mutex;
+use tokio::time::sleep;
 
-pub fn start_task(app_state: Arc<Mutex<AppState>>, mut rx: Receiver<ChannelMessage>) {
-    let state = app_state.clone();
-    let task = tauri::async_runtime::spawn(async move {
-        let app_state = state.clone();
-        let mut state = app_state.lock().await;
-        state.config.task_status = Option::from(TaskStatus::Running);
-        let config = state.config.clone();
-        let commands = Commands::from(config);
-        drop(state);
-        let future = match &commands {
-            Commands::ClientNode(client_node_options) => {
-                client_node_main(client_node_options).await
+pub async fn channel_receiver(mut rx: Receiver<ChannelMessage>, app_state: Arc<Mutex<AppState>>) {
+    while let Ok(msg) = rx.recv().await {
+        tracing::info!("channel_receiver starting to process msg => {}", msg);
+        match msg {
+            ChannelMessage::StartOre => {
+                let _ = kill_ore_process(app_state.clone()).await;
+                let _ = start_ore_process(app_state.clone()).await;
             }
-            Commands::ProxyMaster(proxy_master_node_options) => {
-                proxy_master_main(proxy_master_node_options).await
+            ChannelMessage::ShutdownOre => {
+                let _ = kill_ore_process(app_state.clone()).await;
             }
-            Commands::ProxyEndpoint(proxy_endpoint_node_options) => {
-                proxy_endpoint_main(proxy_endpoint_node_options).await
+            ChannelMessage::StartUptime => {
+                let state = app_state.clone();
+                let handle = tauri::async_runtime::spawn(async move {
+                    let mut s = state.lock().await;
+                    if let Some(h) = &s.uptime_handle {
+                        h.abort();
+                        s.uptime_handle = None;
+                    }
+                    let email = Arc::new(s.config.email.clone().unwrap_or_default());
+                    let api_token = Arc::new(s.config.api_token.clone().unwrap_or_default());
+                    drop(s);
+                    loop {
+                        let _ = report_uptime(email.to_string(), api_token.to_string()).await;
+                        sleep(Duration::from_secs(30)).await;
+                    }
+                });
+                let mut s = app_state.lock().await;
+                s.uptime_handle = Some(handle);
             }
-        };
-        log::info!("Task finished with status: {:?}", future);
-        let mut state = app_state.lock().await;
-        state.config.task_status = Option::from(TaskStatus::Off);
-        future
-    });
-
-    let app_state = app_state.clone();
-    let _: tauri::async_runtime::JoinHandle<anyhow::Result<ExitCode>> =
-        tauri::async_runtime::spawn(async move {
-            let app_state = app_state.clone();
-            while let Ok(_msg) = rx.recv().await {
-                let mut state = app_state.lock().await;
-                state.config.task_status = Option::from(TaskStatus::Off);
-                task.abort();
-                start_task(app_state.clone(), rx.resubscribe());
-                log::warn!("Task aborted");
+            ChannelMessage::ShutdownUptime => {
+                let state = app_state.clone();
+                let mut s = state.lock().await;
+                if let Some(h) = &s.uptime_handle {
+                    h.abort();
+                    s.uptime_handle = None;
+                }
             }
-            Ok(ExitCode::SUCCESS)
-        });
+            ChannelMessage::StartNode => {}
+            ChannelMessage::ShutdownNode => {}
+            ChannelMessage::StartTaskPull => {
+                let state = app_state.clone();
+                let handle = tauri::async_runtime::spawn(async move {
+                    let mut s = state.lock().await;
+                    if let Some(h) = &s.uptime_handle {
+                        h.abort();
+                        s.task_puller = None;
+                    }
+                    let email = Arc::new(s.config.email.clone().unwrap_or_default());
+                    let api_token = Arc::new(s.config.api_token.clone().unwrap_or_default());
+                    drop(s);
+                    loop {
+                        let _ = task_poller(email.to_string(), api_token.to_string()).await;
+                        sleep(Duration::from_secs(30)).await;
+                    }
+                });
+                let mut s = app_state.lock().await;
+                s.task_puller = Some(handle);
+            }
+            ChannelMessage::ShutdownTaskPull => {
+                let state = app_state.clone();
+                let mut s = state.lock().await;
+                if let Some(h) = &s.uptime_handle {
+                    h.abort();
+                    s.task_puller = None;
+                }
+            }
+            ChannelMessage::RestartTask => {}
+        }
+        tracing::info!("channel_receiver finished to process msg => {}", msg);
+    }
 }

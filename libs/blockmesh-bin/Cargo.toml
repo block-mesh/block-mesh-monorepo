@@ -6,6 +6,7 @@ version = { workspace = true }
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 [dependencies]
 logger-leptos = { path = "../logger-leptos" }
+leptos-use = { workspace = true }
 leptos = { workspace = true, features = ["csr", "tracing"] }
 tracing-wasm = { workspace = true }
 anyhow = { workspace = true }

@@ -1,10 +1,10 @@
-use crate::app::{invoke_tauri, SetAppConfigArgs, ToggleMinerArgs};
 use crate::components::ore_icon::OreIcon;
 use block_mesh_common::app_config::TaskStatus;
 use leptos::*;
 use std::str::FromStr;
 
 use crate::leptos_state::LeptosTauriAppState;
+use crate::tauri_connector::connector::{invoke_tauri, SetAppConfigArgs, ToggleMinerArgs};
 
 #[component]
 pub fn OreWrapper() -> impl IntoView {
@@ -50,6 +50,7 @@ pub fn OreWrapper() -> impl IntoView {
 
     let toggle_action = move || {
         spawn_local(async move {
+            let state = expect_context::<LeptosTauriAppState>();
             let args = ToggleMinerArgs {
                 task_status: match state.app_config.get().ore_status {
                     Some(TaskStatus::Running) => TaskStatus::Off,
@@ -58,9 +59,8 @@ pub fn OreWrapper() -> impl IntoView {
                 },
             };
             if let Ok(js_args) = serde_wasm_bindgen::to_value(&args) {
-                tracing::info!("js_args = {:?}", js_args);
-                let result = invoke_tauri("toggle_miner", js_args).await;
-                tracing::info!("toggle_miner result: {:?}", result);
+                let _ = invoke_tauri("toggle_miner", js_args).await;
+                LeptosTauriAppState::get_ore_status(&state).await;
             }
         });
     };
@@ -227,10 +227,10 @@ pub fn OreWrapper() -> impl IntoView {
                             class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
                             on:click=move |_| { toggle_action() }
                         >
-                            ORE
                             {move || {
                                 status.get().map(|status| status.to_string()).unwrap_or_default()
                             }}
+
                         </button>
                     </div>
                 </div>

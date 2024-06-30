@@ -1,14 +1,43 @@
 use anyhow::anyhow;
+use block_mesh_common::constants::BLOCK_MESH_APP_SERVER;
 use block_mesh_common::interfaces::server_api::{
-    GetTaskRequest, GetTaskResponse, RunTaskResponse, SubmitTaskRequest, SubmitTaskResponse,
+    GetTaskRequest, GetTaskResponse, ReportUptimeRequest, ReportUptimeResponse, RunTaskResponse,
+    SubmitTaskRequest, SubmitTaskResponse,
 };
-use leptos::*;
-use leptos_dom::tracing;
+use chrono::Utc;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use serde_json::Value;
+use speed_test::metadata::fetch_metadata;
 use speed_test::Metadata;
+use std::cmp;
 use std::str::FromStr;
 use uuid::Uuid;
+
+#[tracing::instrument(name = "report_uptime", skip(api_token), err)]
+pub async fn report_uptime(email: String, api_token: String) -> anyhow::Result<()> {
+    let api_token = Uuid::from_str(&api_token).map_err(|_| anyhow!("Invalid UUID"))?;
+    let metadata = fetch_metadata().await.unwrap_or_default();
+
+    let query = ReportUptimeRequest {
+        email,
+        api_token,
+        ip: if metadata.ip.is_empty() {
+            None
+        } else {
+            Some(metadata.ip)
+        },
+    };
+
+    if let Ok(response) = reqwest::Client::new()
+        .post(format!("{}/api/report_uptime", BLOCK_MESH_APP_SERVER))
+        .query(&query)
+        .send()
+        .await
+    {
+        let _ = response.json::<ReportUptimeResponse>().await;
+    }
+    Ok(())
+}
 
 #[tracing::instrument(name = "get_task", level = "trace", skip(api_token), err)]
 pub async fn get_task(
@@ -113,4 +142,75 @@ pub async fn submit_task(
         .await?;
     let response: SubmitTaskResponse = response.json().await?;
     Ok(response)
+}
+
+pub async fn task_poller(email: String, api_token: String) -> anyhow::Result<()> {
+    let api_token = Uuid::from_str(&api_token).map_err(|_| anyhow!("Invalid UUID"))?;
+    let task = match get_task(BLOCK_MESH_APP_SERVER, &email, &api_token).await {
+        Ok(v) => v,
+        Err(e) => {
+            tracing::error!("get_task error: {e}");
+            return Err(e);
+        }
+    };
+    let metadata = fetch_metadata().await.unwrap_or_default();
+    let task = match task {
+        Some(v) => v,
+        None => {
+            return Err(anyhow!("Task not found"));
+        }
+    };
+    let start = Utc::now();
+
+    let finished_task = match run_task(&task.url, &task.method, task.headers, task.body).await {
+        Ok(v) => v,
+        Err(e) => {
+            tracing::error!("finished_task: error: {e}");
+            let end = Utc::now();
+            let response_time = cmp::max((end - start).num_milliseconds(), 1) as f64;
+            match submit_task(
+                BLOCK_MESH_APP_SERVER,
+                &email,
+                &api_token,
+                &task.id,
+                520,
+                "".to_string(),
+                &metadata,
+                response_time,
+            )
+            .await
+            {
+                Ok(_) => {
+                    tracing::info!("successfully submitted failed task");
+                }
+                Err(e) => {
+                    tracing::error!("submit_task: error: {e}");
+                }
+            }
+            return Err(anyhow!("submit_task errored"));
+        }
+    };
+    let end = Utc::now();
+    let response_time = cmp::max((end - start).num_milliseconds(), 1) as f64;
+
+    match submit_task(
+        BLOCK_MESH_APP_SERVER,
+        &email,
+        &api_token,
+        &task.id,
+        finished_task.status,
+        finished_task.raw,
+        &metadata,
+        response_time,
+    )
+    .await
+    {
+        Ok(_) => {
+            tracing::info!("successfully submitted task");
+        }
+        Err(e) => {
+            tracing::error!("submit_task: error: {e}");
+        }
+    };
+    Ok(())
 }

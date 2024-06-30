@@ -1,9 +1,11 @@
+use crate::leptos_state::LeptosTauriAppState;
 use crate::page_routes::PageRoutes;
 use leptos::*;
 use leptos_router::use_location;
 
 #[component]
 pub fn Sidebar() -> impl IntoView {
+    let state = expect_context::<LeptosTauriAppState>();
     let location = use_location();
     let current_path = Signal::derive(move || location.pathname.get());
     let active = move |path: &str| {
@@ -33,33 +35,49 @@ pub fn Sidebar() -> impl IntoView {
                                         href=PageRoutes::Home.path()
                                         class=move || active(PageRoutes::Home.path())
                                     >
-                                        Home
+                                        BlockMesh
                                     </a>
                                 </li>
-                                <li>
-                                    <a
-                                        href=PageRoutes::Dashboard.path()
-                                        class=move || active(PageRoutes::Dashboard.path())
-                                    >
-                                        Dashboard
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href=PageRoutes::Settings.path()
-                                        class=move || active(PageRoutes::Settings.path())
-                                    >
-                                        Settings
-                                    </a>
-                                </li>
-                                <li>
-                                    <a
-                                        href=PageRoutes::Apps.path()
-                                        class=move || active(PageRoutes::Apps.path())
-                                    >
-                                        Apps
-                                    </a>
-                                </li>
+                                // <li>
+                                // <a
+                                // href=PageRoutes::Dashboard.path()
+                                // class=move || active(PageRoutes::Dashboard.path())
+                                // >
+                                // Dashboard
+                                // </a>
+                                // </li>
+                                // <li>
+                                // <a
+                                // href=PageRoutes::Settings.path()
+                                // class=move || active(PageRoutes::Settings.path())
+                                // >
+                                // Settings
+                                // </a>
+                                // </li>
+                                <Show
+                                    when=move || { state.logged_in.get() }
+                                    fallback=move || {
+                                        view! {}
+                                    }
+                                >
+
+                                    <li>
+                                        <a
+                                            href=PageRoutes::Apps.path()
+                                            class=move || active(PageRoutes::Apps.path())
+                                        >
+                                            Apps
+                                        </a>
+                                    </li>
+                                </Show>
+                            // <li>
+                            // <a
+                            // href=PageRoutes::ConfigViewer.path()
+                            // class=move || active(PageRoutes::ConfigViewer.path())
+                            // >
+                            // Config
+                            // </a>
+                            // </li>
                             </ul>
                         </li>
                     </ul>
