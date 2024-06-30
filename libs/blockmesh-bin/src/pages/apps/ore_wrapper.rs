@@ -1,10 +1,10 @@
-use crate::app::{invoke_tauri, SetAppConfigArgs, ToggleMinerArgs};
 use crate::components::ore_icon::OreIcon;
 use block_mesh_common::app_config::TaskStatus;
 use leptos::*;
 use std::str::FromStr;
 
 use crate::leptos_state::LeptosTauriAppState;
+use crate::tauri_connector::connector::{invoke_tauri, SetAppConfigArgs, ToggleMinerArgs};
 
 #[component]
 pub fn OreWrapper() -> impl IntoView {
@@ -231,6 +231,7 @@ pub fn OreWrapper() -> impl IntoView {
                             {move || {
                                 status.get().map(|status| status.to_string()).unwrap_or_default()
                             }}
+
                         </button>
                     </div>
                 </div>

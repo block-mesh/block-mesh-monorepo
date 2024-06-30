@@ -10,6 +10,9 @@ use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub struct AppConfig {
+    pub auto_start_blockmesh: Option<TaskStatus>,
+    pub email: Option<String>,
+    pub api_token: Option<String>,
     pub keypair_path: Option<String>,
     pub proxy_master_node_owner: Option<Pubkey>,
     pub program_id: Option<Pubkey>,
@@ -56,6 +59,9 @@ impl From<String> for TaskStatus {
 
 impl AppConfig {
     pub fn merge(&mut self, config: Self) {
+        self.email = self.email.clone().or(config.email);
+        self.api_token = self.api_token.clone().or(config.api_token);
+        self.auto_start_blockmesh = self.auto_start_blockmesh.or(config.auto_start_blockmesh);
         self.keypair_path = self.keypair_path.clone().or(config.keypair_path);
         self.proxy_master_node_owner = self
             .proxy_master_node_owner
@@ -131,6 +137,9 @@ impl From<Commands> for AppConfig {
     fn from(commands: Commands) -> Self {
         match commands {
             Commands::ClientNode(options) => AppConfig {
+                email: None,
+                api_token: None,
+                auto_start_blockmesh: None,
                 keypair_path: Some(options.keypair_path),
                 proxy_master_node_owner: options.proxy_master_node_owner,
                 program_id: Some(options.program_id),
@@ -150,6 +159,9 @@ impl From<Commands> for AppConfig {
                 ore_priority_fee: None,
             },
             Commands::ProxyMaster(options) => AppConfig {
+                email: None,
+                api_token: None,
+                auto_start_blockmesh: None,
                 keypair_path: Some(options.keypair_path),
                 proxy_master_node_owner: None,
                 program_id: Some(options.program_id),
@@ -169,6 +181,9 @@ impl From<Commands> for AppConfig {
                 ore_priority_fee: None,
             },
             Commands::ProxyEndpoint(options) => AppConfig {
+                email: None,
+                api_token: None,
+                auto_start_blockmesh: None,
                 keypair_path: Some(options.keypair_path),
                 proxy_master_node_owner: options.proxy_master_node_owner,
                 program_id: Some(options.program_id),

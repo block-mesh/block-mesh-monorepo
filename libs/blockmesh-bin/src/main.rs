@@ -1,9 +1,11 @@
 mod app;
+mod app_router;
 mod components;
 mod leptos_state;
 mod log;
 mod page_routes;
 mod pages;
+mod tauri_connector;
 
 use app::*;
 use block_mesh_common::constants::DeviceType;

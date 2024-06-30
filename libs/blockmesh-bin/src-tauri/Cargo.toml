@@ -36,6 +36,9 @@ proxy-endpoint = { path = "../../proxy-endpoint" }
 anyhow = { workspace = true }
 log = { workspace = true }
 uuid = { workspace = true, features = ["v4", "fast-rng", "macro-diagnostics", "serde", "js"] }
+reqwest = { workspace = true, features = ["json", "serde_json"] }
+speed-test = { path = "../../speed-test" }
+chrono = { workspace = true }
 
 [features]
 # This feature is used for production builds or when a dev server is not specified, DO NOT REMOVE!!

@@ -1,4 +1,3 @@
-use crate::background::start_task;
 use crate::tauri_state::AppState;
 use anyhow::anyhow;
 use block_mesh_common::app_config::AppConfig;
@@ -63,8 +62,8 @@ pub async fn setup_storage(app_handle: AppHandle) -> anyhow::Result<()> {
     let state = app_handle.state::<Arc<Mutex<AppState>>>();
     let mut app_state = state.lock().await;
     app_state.config.merge(storage_config);
-    let rx = app_state.rx.resubscribe();
-    let state: Arc<Mutex<AppState>> = state.inner().clone();
-    tauri::async_runtime::spawn(async move { start_task(state.clone(), rx) });
+    let _rx = app_state.rx.resubscribe();
+    let _state: Arc<Mutex<AppState>> = state.inner().clone();
+    // tauri::async_runtime::spawn(async move { start_task(state.clone(), rx) });
     Ok(())
 }

@@ -3,9 +3,13 @@ pub enum PageRoutes {
     #[default]
     Home,
     Settings,
+    #[allow(dead_code)]
     Dashboard,
     Apps,
     OreMiner,
+    ConfigViewer,
+    Register,
+    Login,
 }
 
 impl PageRoutes {
@@ -16,6 +20,9 @@ impl PageRoutes {
             Self::Dashboard => "/dashboard",
             Self::Apps => "/apps",
             Self::OreMiner => "/ore_miner",
+            Self::ConfigViewer => "/config_viewer",
+            Self::Register => "/register",
+            Self::Login => "/login",
         }
     }
 }
