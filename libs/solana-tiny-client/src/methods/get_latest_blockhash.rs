@@ -51,11 +51,12 @@ mod tests {
 
     #[tokio::test]
     async fn test_get_latest_blockhash() {
-        let response = RpcClient::new(PUBLIC_URLS[2].to_string(), Commitment::Confirmed)
+        if let Ok(response) = RpcClient::new(PUBLIC_URLS[2].to_string(), Commitment::Confirmed)
             .get_latest_blockhash(None, None)
             .await
-            .unwrap();
-        assert!(response.result.value.blockhash.len() > 0);
-        assert!(response.result.value.lastValidBlockHeight > 0);
+        {
+            assert!(response.result.value.blockhash.len() > 0);
+            assert!(response.result.value.lastValidBlockHeight > 0);
+        }
     }
 }

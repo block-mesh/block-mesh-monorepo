@@ -1,17 +1,17 @@
-use crate::components::credentials::CredentialsForm;
 use crate::utils::auth::register;
 use crate::utils::ext_state::{AppState, AppStatus};
 use block_mesh_common::interfaces::server_api::RegisterForm;
 use leptos::{logging::log, *};
 use leptos_dom::tracing;
+use leptos_router::A;
 
 #[component]
 pub fn Register(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
     let (wait_for_response, set_wait_for_response) = create_signal(false);
     let state = use_context::<AppState>().unwrap();
-    let url = Signal::derive(move || state.blockmesh_url.get());
+    let _url = Signal::derive(move || state.blockmesh_url.get());
 
-    let register_action = create_action(move |params: &Vec<String>| {
+    let _register_action = create_action(move |params: &Vec<String>| {
         let email = params[0].to_string();
         let password = params[1].to_string();
         let password_confirm = params[2].to_string();
@@ -56,15 +56,39 @@ pub fn Register(#[prop(into)] on_success: Callback<()>) -> impl IntoView {
         }
     });
 
-    let disabled = Signal::derive(move || wait_for_response.get());
+    let _disabled = Signal::derive(move || wait_for_response.get());
 
     view! {
-        <CredentialsForm
-            url=url
-            action_label="Register"
-            action=register_action
-            disabled=disabled
-            register=true
-        />
+        <div class="auth-card">
+            <img class="background-image" src="/assets/background.png" alt="background"/>
+            <div class="auth-card-frame"></div>
+            <div class="auth-card-top"></div>
+            <div class="auth-card-body">
+                <img class="logo" src="/assets/block-mesh-logo.png" alt="logo"/>
+                <h1>BlockMesh</h1>
+                <form>
+                    <div class="auth-card-input-container">
+                        <input type="text" required=""/>
+                        <label>Email</label>
+                    </div>
+                    <div class="auth-card-input-container">
+                        <input type="password" required=""/>
+                        <label>Password</label>
+                    </div>
+                    <div class="auth-card-input-container">
+                        <input type="text" required=""/>
+                        <label>Refer Code</label>
+                    </div>
+                    <button class="auth-card-button">Register</button>
+                </form>
+            </div>
+            <div class="auth-card-bottom">
+                <small class="auth-card-sub-text">You already have an account?</small>
+                <br/>
+                <small class="auth-card-link register-link">
+                    <A href="/login">Login now</A>
+                </small>
+            </div>
+        </div>
     }
 }

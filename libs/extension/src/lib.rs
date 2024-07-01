@@ -16,9 +16,9 @@ use crate::utils::connectors::set_panic_hook;
 
 mod background;
 mod components;
+mod ext_router;
 mod pages;
 mod utils;
-
 // #[global_allocator]
 // static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 
