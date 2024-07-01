@@ -1,0 +1,312 @@
+:root {
+  --blue: #25e4d3;
+  --darkBlue: #2f8985;
+  --orange: #fab457;
+  --darkOrange: #f97432;
+}
+
+* {
+  /* font-family: "Nunito", sans-serif; */
+  font-family: "JetBrains Mono",monospace;
+  font-optical-sizing: auto;
+  font-style: normal;
+  cursor: default;
+}
+
+input {
+  cursor: text;
+}
+
+.auth-card {
+  background-color: #202525;
+  height: 400px;
+  width: 300px;
+  border-radius: inherit;
+  display: flex;
+  justify-content: space-between;
+  flex-direction: column;
+  position: relative;
+}
+
+.auth-card-frame {
+  position: absolute;
+  margin: 10px;
+  height: calc(100% - 28px);
+  width: calc(100% - 28px);
+  border: 4px solid #76abaebb;
+  z-index: 0;
+}
+
+.auth-card-top {
+  /* background-color: #4a706f88; */
+  /* background-color: #76abae; */
+  text-align: left;
+  padding: 3%;
+  margin-top: 3%;
+  margin-left: 3%;
+}
+
+.auth-card-logout svg {
+  cursor: pointer;
+  transform: rotate(180deg);
+}
+
+.background-image {
+  position: absolute;
+  width: 100%;
+  height: auto;
+  right: 0;
+  top: 0;
+  opacity: 0.3;
+}
+
+h1 {
+  color: var(--darkOrange);
+  font-weight: bold;
+  margin-bottom: 5%;
+}
+
+.auth-card-body {
+  text-align: center;
+  z-index: 1;
+  position: relative;
+  margin-bottom: 10%;
+  /* max-height: fit-content; */
+}
+
+::-webkit-input-placeholder { /* WebKit, Blink, Edge */
+  color:    #fffa;
+}
+:-moz-placeholder { /* Mozilla Firefox 4 to 18 */
+  color:    #fffa;
+  opacity:  1;
+}
+::-moz-placeholder { /* Mozilla Firefox 19+ */
+  color:    #fffa;
+  opacity:  1;
+}
+:-ms-input-placeholder { /* Internet Explorer 10-11 */
+  color:    #fffa;
+}
+::-ms-input-placeholder { /* Microsoft Edge */
+   color:    #fffa;
+}
+
+::placeholder { /* Most modern browsers support this now. */
+  color:    #fffa;
+}
+
+.auth-card-input-container{
+	position:relative;
+	margin-bottom:25px;
+  width: 50%;
+  margin: 10px auto;
+}
+.auth-card-input-container label{
+	position:absolute;
+	top: 10px;
+	left:0px;
+	font-size:16px;
+	color:#fffc;	
+  pointer-events: none;
+	transition: all 0.5s ease-in-out;
+}
+
+.auth-card-input-container input:focus ~ label,
+.auth-card-input-container input:valid ~ label{
+	top:0px;
+	font-size:8px;
+	
+}
+
+.auth-card-input-container input{ 
+  border:0;
+  border-bottom:1px solid #555;  
+  background:transparent;
+  width:100%;
+  padding:8px 0 5px 0;
+  font-size:16px;
+  color:#fff;
+}
+.auth-card-input-container input:focus{ 
+ border:none;	
+ outline:none;
+ border-bottom:1px solid var(--blue);	
+}
+
+/* Temp 2 */
+.auth-card-button {
+  align-items: center;
+  appearance: none;
+  border: 2px solid var(--darkBlue);
+  background-color: transparent;
+  border-radius: 6px;
+  box-shadow: 0 2px 5px #2f898588 ,rgba(30, 45, 44, .5) 0 -3px 0 inset;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  line-height: 1;
+  list-style: none;
+  overflow: hidden;
+  width: 50%;
+  padding: 10px 0;
+  position: relative;
+  text-align: left;
+  text-decoration: none;
+  transition: box-shadow .15s,transform .15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+  will-change: box-shadow,transform;
+  font-size: 18px;
+}
+
+/* Temp 3 */
+/* .auth-card-button {
+  align-items: center;
+  appearance: none;
+  background-image: radial-gradient(100% 100% at 100% 0, var(--darkBlue) 0, var(--darkBlue) 100%);
+  border: 0;
+  border-radius: 6px;
+  box-shadow: rgba(45, 35, 66, .4) 0 2px 4px,rgba(45, 35, 66, .3) 0 7px 13px -3px,rgba(30, 45, 44, .5) 0 -3px 0 inset;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  line-height: 1;
+  list-style: none;
+  overflow: hidden;
+  width: 50%;
+  padding: 10px 0;
+  position: relative;
+  text-align: left;
+  text-decoration: none;
+  transition: box-shadow .15s,transform .15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+  will-change: box-shadow,transform;
+  font-size: 18px;
+} */
+
+/* Temp 1 */
+/* .auth-card-button {
+  align-items: center;
+  appearance: none;
+  background-image: radial-gradient(100% 100% at 100% 0, var(--blue) 0, var(--darkBlue) 100%);
+  border: 0;
+  border-radius: 6px;
+  box-shadow: rgba(45, 35, 66, .4) 0 2px 4px,rgba(45, 35, 66, .3) 0 7px 13px -3px,rgba(30, 45, 44, .5) 0 -3px 0 inset;
+  box-sizing: border-box;
+  color: #fff;
+  cursor: pointer;
+  display: inline-flex;
+  justify-content: center;
+  line-height: 1;
+  list-style: none;
+  overflow: hidden;
+  width: 50%;
+  padding: 10px 0;
+  position: relative;
+  text-align: left;
+  text-decoration: none;
+  transition: box-shadow .15s,transform .15s;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: manipulation;
+  white-space: nowrap;
+  will-change: box-shadow,transform;
+  font-size: 18px;
+} */
+
+.logged-bottom .auth-card-button {
+  width: fit-content;
+  padding: 10px 10px;
+  margin: 0 5px;
+}
+
+.auth-card-button:focus {
+  box-shadow: var(--darkBlue) 0 0 0 1.5px inset, rgba(45, 35, 66, .4) 0 2px 4px, rgba(45, 35, 66, .3) 0 7px 13px -3px, var(--darkBlue) 0 -3px 0 inset;
+}
+
+.auth-card-button:hover {
+  box-shadow: rgba(45, 35, 66, .4) 0 4px 8px, rgba(45, 35, 66, .3) 0 7px 13px -3px, var(--darkBlue) 0 -3px 0 inset;
+  transform: translateY(-2px);
+}
+
+.auth-card-button:active {
+  box-shadow: var(--darkBlue) 0 3px 7px inset;
+  transform: translateY(2px);
+  outline: none;
+}
+
+.auth-card-button:focus {
+  outline: none;
+  box-shadow: 0 0 5px #fff8;
+}
+
+.auth-card-bottom {
+  text-align: center;
+  bottom: 7%;
+  position: relative;
+}
+
+.logged-bottom {
+  display: flex;
+  justify-content: center;
+  bottom: 10%;
+}
+
+.auth-card-link {
+    cursor: pointer;
+    color: var(--orange);
+}
+
+.register-link {
+    text-decoration: underline;
+}
+
+.auth-card-sub-text {
+    color: var(--orange);
+    opacity: 0.8;
+}
+
+.logo {
+  height: 60px;
+  width: 60px;
+}
+
+.auth-card-content {
+  position: relative;
+  top: -10%;
+}
+
+.auth-card-content .pulse {
+  position: relative;
+}
+
+.auth-card-version {
+  color: #fff8;
+  position: relative;
+  top: -30px;
+}
+
+.auth-card-user {
+  margin: auto;
+  color: #222;
+  font-weight: 800;
+  position: relative;
+  top: -20px;
+}
+
+.auth-card-chip {
+  padding: 4px 8px;
+  background-color: #fff8;
+  border-radius: 12px;
+  width: fit-content;
+}

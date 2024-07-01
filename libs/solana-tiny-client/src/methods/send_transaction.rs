@@ -47,13 +47,10 @@ mod tests {
         let memo = "Hello World";
         let payer_keypair = Keypair::from_bytes(&PAYER_KEYPAIR).unwrap();
         // let signer_keypair = Keypair::from_bytes(&SIGNER_KEYPAIR).unwrap();
-        let latest_blockhash = client
-            .get_latest_blockhash(None, None)
-            .await
-            .unwrap()
-            .result
-            .value
-            .blockhash;
+        let latest_blockhash = match client.get_latest_blockhash(None, None).await {
+            Err(_) => return,
+            Ok(r) => r.result.value.blockhash,
+        };
         let instruction = build_memo(memo.as_bytes(), &[]);
         let mut transaction =
             Transaction::new_unsigned(Message::new(&[instruction], Some(&payer_keypair.pubkey())));

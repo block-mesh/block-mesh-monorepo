@@ -17,7 +17,7 @@ pub fn Home() -> impl IntoView {
         )
     });
 
-    let copy_to_clipboard = move |_| {
+    let copy_to_clipboard = move |_: ()| {
         #[cfg(web_sys_unstable_apis)]
         {
             if let Some(clipboard) = web_sys::window().unwrap().navigator().clipboard() {
@@ -38,47 +38,38 @@ pub fn Home() -> impl IntoView {
     };
 
     view! {
-        {move || match state.status.get() {
-            AppStatus::LoggedIn => {
-                view! {
-                    <div class="bg-gray-700 flex justify-center items-center">
-                        <div class="bg-gray-800 p-8 shadow-md w-80">
-                            <button class="w-3/8 m-2 focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none">
-                                <a href=url.get() target="_blank">
-                                    Open Dashboard
-                                </a>
-                            </button>
-                            <button
-                                class="w-3/8 m-2 focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
-                                on:click=copy_to_clipboard
-                            >
-                                Refer
-                            </button>
-                        </div>
+        <div class="auth-card">
+            <img class="background-image" src="/assets/background.png" alt="background"/>
+            <div class="auth-card-frame"></div>
+            <div class="auth-card-top">
+                <div class="auth-card-logout">
+                    <svg
+                        title="logout"
+                        xmlns="http://www.w3.org/2000/svg"
+                        height="24px"
+                        viewBox="0 -960 960 960"
+                        width="24px"
+                        fill="#fab457cc"
+                    >
+                        <path d="M200-120q-33 0-56.5-23.5T120-200v-560q0-33 23.5-56.5T200-840h280v80H200v560h280v80H200Zm440-160-55-58 102-102H360v-80h327L585-622l55-58 200 200-200 200Z"></path>
+                    </svg>
+                </div>
+            </div>
+            <div class="auth-card-body">
+                <img class="logo" src="/assets/block-mesh-logo.png" alt="logo"/>
+                <h1>BlockMesh</h1>
+                <div class="auth-card-content">
+                    <div class="pulse"></div>
+                    <small class="auth-card-version">version: 0.0.27</small>
+                    <div class="auth-card-chip auth-card-user">
+                        <strong>ohaddahan@gmail.com</strong>
                     </div>
-                }
-                    .into_view()
-            }
-            AppStatus::LoggedOut => {
-                view! {
-                    <div class="bg-gray-700 flex justify-center items-center text-center">
-                        <div class="bg-gray-800 p-8 shadow-md w-80">
-                            <p class="text-white">You are not logged in</p>
-                        </div>
-                    </div>
-                }
-                    .into_view()
-            }
-            AppStatus::WaitingEmailVerification => {
-                view! {
-                    <div class="bg-gray-700 flex justify-center items-center text-center">
-                        <div class="bg-gray-800 p-8 shadow-md w-80">
-                            <p class="text-white">Please verify your email address and login</p>
-                        </div>
-                    </div>
-                }
-                    .into_view()
-            }
-        }}
+                </div>
+            </div>
+            <div class="auth-card-bottom logged-bottom">
+                <button class="auth-card-button">Open Dashboard</button>
+                <button class="auth-card-button">Refer</button>
+            </div>
+        </div>
     }
 }
