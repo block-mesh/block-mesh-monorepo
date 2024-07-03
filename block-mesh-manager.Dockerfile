@@ -1,4 +1,4 @@
-FROM alpine:3.19.1 as builder
+FROM alpine:3.19.1 AS builder
 WORKDIR /opt/
 RUN apk add tmux curl protoc musl-dev gzip git
 # tailwind
