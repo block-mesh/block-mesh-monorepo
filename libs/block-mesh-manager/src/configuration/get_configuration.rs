@@ -10,7 +10,7 @@ pub fn get_configuration() -> Result<Settings, config::ConfigError> {
         .try_into()
         .unwrap_or_else(|_| panic!("Failed to parse {}", AppEnvVar::AppEnvironment));
     let cwd = env::current_dir().expect("Failed to determine current directory");
-    let configuration_directory = if cwd.ends_with("block-mesh-manager") {
+    let configuration_directory = if cwd.ends_with("block-mesh-manager") || cwd.ends_with("opt") {
         cwd.join("configuration")
     } else {
         cwd.join("libs")
