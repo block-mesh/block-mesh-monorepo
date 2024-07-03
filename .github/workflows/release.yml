@@ -102,6 +102,7 @@ jobs:
           archive: $bin-${{ matrix.target }}
           ref: refs/tags/v${{ needs.get-tag.outputs.pkg-version }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          features: ssr
           include: target/site/pkg/block-mesh-manager.wasm,target/site/pkg/block-mesh-manager.js,target/site/pkg/block-mesh-manager.css
         env:
           LEPTOS_OUTPUT_NAME: block-mesh-manager
