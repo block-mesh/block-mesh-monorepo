@@ -62,6 +62,6 @@ set -x
 export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}"
 ensure sqlx database create
 ensure sqlx migrate run --source migrations
-ensure cargo sqlx prepare
+ensure cargo sqlx prepare -- --features ssr
 >&2 echo "Postgres has been migrated, ready to go!"
 cd "${_PWD}"
