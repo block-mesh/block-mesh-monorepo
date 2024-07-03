@@ -63,6 +63,23 @@ log = { workspace = true }
 workspace = true
 features = ["min_const_gen"]
 
+[dependencies.web-sys]
+optional = true
+workspace = true
+features = [
+  "console",
+  "WorkerGlobalScope",
+  "Window",
+  'Headers',
+  'Request',
+  'RequestInit',
+  'RequestMode',
+  'Response',
+  "Clipboard",
+  "Navigator",
+  "MessageEvent"
+]
+
 [dependencies.sqlx]
 workspace = true
 default-features = false
@@ -97,7 +114,8 @@ hydrate = [
   "leptos/hydrate",
   "leptos_meta/hydrate",
   "leptos_router/hydrate",
-  "dep:logger-leptos"
+  "dep:logger-leptos",
+  "dep:web-sys"
 ]
 ssr = [
   "dep:tikv-jemallocator",
