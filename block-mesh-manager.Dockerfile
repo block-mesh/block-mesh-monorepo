@@ -12,6 +12,10 @@ RUN cp -fr block-mesh-monorepo/libs/block-mesh-manager/* .
 
 RUN curl -sLO https://github.com/block-mesh/block-mesh-monorepo/releases/latest/download/block-mesh-manager-x86_64-unknown-linux-musl.tar.gz \
   && tar -xvf block-mesh-manager-x86_64-unknown-linux-musl.tar.gz \
+  && mkdir -p site/pkg \
+  && mv ./block-mesh-manager.wasm site/pkg/ \
+  && mv ./block-mesh-manager.js site/pkg \
+  && mv ./block-mesh-manager.css site/pkg \
   && chmod +x block-mesh-manager
 
 CMD ["/opt/block-mesh-manager"]
