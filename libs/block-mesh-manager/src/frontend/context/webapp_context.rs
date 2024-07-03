@@ -1,5 +1,6 @@
 use block_mesh_common::interfaces::server_api::{AuthStatusResponse, DashboardResponse};
 use leptos::*;
+use leptos_dom::tracing;
 use std::fmt::{Debug, Display};
 use std::time::Duration;
 

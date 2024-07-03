@@ -5,6 +5,7 @@ use reqwest::Client;
 use serde_json::{json, Value};
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{mpsc, Arc, Once};
+use std::thread;
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 use tracing::{Event, Subscriber};
@@ -33,7 +34,7 @@ pub fn setup_tracing(user_id: Uuid, device_type: DeviceType) {
 }
 
 struct HttpLogLayer {
-    pub client: Arc<Mutex<Client>>,
+    pub client: Client,
     pub buffer: Arc<Mutex<Vec<Value>>>,
     pub url: Arc<String>,
     pub env: String,
@@ -45,7 +46,7 @@ struct HttpLogLayer {
 impl HttpLogLayer {
     fn new(url: String, env: String, user_id: Uuid, device_type: DeviceType) -> Self {
         let init_buffer: Arc<Mutex<Vec<Value>>> = Arc::new(Mutex::new(Vec::new()));
-        let init_client: Arc<Mutex<Client>> = Arc::new(Mutex::new(Client::new()));
+        let init_client = Client::new();
         let user_id = Arc::new(user_id);
         let init_url = Arc::new(url);
         let x_url = init_url.clone();
@@ -53,7 +54,7 @@ impl HttpLogLayer {
         let x_client = init_client.clone();
         let (tx, rx): (Sender<JoinHandle<()>>, Receiver<JoinHandle<()>>) = mpsc::channel();
 
-        tokio::spawn(async move {
+        thread::spawn(move || async move {
             while let Ok(handle) = rx.recv() {
                 let _ = handle.await;
             }
@@ -86,8 +87,7 @@ impl HttpLogLayer {
         }
     }
 
-    async fn send_logs(client: Arc<Mutex<Client>>, url: Arc<String>, logs: Vec<Value>) {
-        let client = client.lock().await;
+    async fn send_logs(client: Client, url: Arc<String>, logs: Vec<Value>) {
         let r = client.post(&*url).json(&logs).send().await;
         match r {
             Ok(_) => {}
