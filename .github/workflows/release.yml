@@ -85,6 +85,12 @@ jobs:
         with:
           key: release-upload-${{ matrix.target }}
           cache-all-crates: true
+      - name: "Install Cargo Leptos"
+        run: |
+          cargo install cargo-leptos
+      - name: "Run Cargo Leptos"
+        run: |
+          cargo leptos build --project block-mesh-manager --release
       - name: "Upload Binaries"
         uses: "taiki-e/upload-rust-binary-action@v1"
         with:
@@ -93,7 +99,16 @@ jobs:
           archive: $bin-${{ matrix.target }}
           ref: refs/tags/v${{ needs.get-tag.outputs.pkg-version }}
           token: ${{ secrets.GITHUB_TOKEN }}
+          include: target/site/pkg/block-mesh-manager.wasm,target/site/pkg/block-mesh-manager.js,target/site/pkg/block-mesh-manager.css
         env:
+          LEPTOS_OUTPUT_NAME: block-mesh-manager
+          LEPTOS_SITE_ROOT: target/site
+          LEPTOS_SITE_PKG_DIR: pkg
+          LEPTOS_SITE_ADDR: 127.0.0.1:8000
+          LEPTOS_RELOAD_PORT: 3001
+          LEPTOS_LIB_DIR: libs/block-mesh-manager
+          LEPTOS_BIN_DIR: libs/block-mesh-manager
+          LEPTOS_HASH_FILES: false
           BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
   push-to-registry:
     name: "Push Docker image to Docker Hub"
