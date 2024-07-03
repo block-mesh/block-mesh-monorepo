@@ -17,7 +17,7 @@ pub fn InvitesComponent() -> impl IntoView {
     }
 
     let copy_to_clipboard = move |_| {
-        #[cfg(web_sys_unstable_apis)]
+        #[cfg(all(web_sys_unstable_apis, feature = "hydrate"))]
         {
             let state = expect_context::<WebAppContext>();
             if let Some(clipboard) = web_sys::window().unwrap().navigator().clipboard() {
