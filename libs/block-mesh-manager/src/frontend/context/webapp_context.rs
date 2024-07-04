@@ -1,8 +1,10 @@
-use block_mesh_common::interfaces::server_api::{AuthStatusResponse, DashboardResponse};
-use leptos::*;
-use leptos_dom::tracing;
 use std::fmt::{Debug, Display};
 use std::time::Duration;
+
+use leptos::*;
+use leptos_dom::tracing;
+
+use block_mesh_common::interfaces::server_api::{AuthStatusResponse, DashboardResponse};
 
 #[derive(Debug, Clone)]
 pub struct WebAppContext {
@@ -60,7 +62,7 @@ impl WebAppContext {
             set_origin.set(Some(window().origin()));
         });
 
-        create_resource(
+        create_local_resource(
             move || origin.get(),
             move |_| async move {
                 if let Some(origin) = origin.get_untracked() {
@@ -92,7 +94,7 @@ impl WebAppContext {
             set_origin.set(Some(window().origin()));
         });
 
-        create_resource(
+        create_local_resource(
             move || origin.get(),
             move |_| async move {
                 if let Some(origin) = origin.get_untracked() {
