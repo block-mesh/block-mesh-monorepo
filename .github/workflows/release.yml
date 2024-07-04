@@ -11,6 +11,14 @@ concurrency:
   cancel-in-progress: true
 env:
   BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
+  LEPTOS_OUTPUT_NAME: block-mesh-manager
+  LEPTOS_SITE_ROOT: target/site
+  LEPTOS_SITE_PKG_DIR: pkg
+  LEPTOS_SITE_ADDR: 127.0.0.1:8000
+  LEPTOS_RELOAD_PORT: 3001
+  LEPTOS_LIB_DIR: libs/block-mesh-manager
+  LEPTOS_BIN_DIR: libs/block-mesh-manager
+  LEPTOS_HASH_FILES: false
 jobs:
   get-tag:
     name: "Get Tag From Package Version"
@@ -104,16 +112,16 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           features: ssr
           include: target/site/pkg/block-mesh-manager.wasm,target/site/pkg/block-mesh-manager.js,target/site/pkg/block-mesh-manager.css
-        env:
-          LEPTOS_OUTPUT_NAME: block-mesh-manager
-          LEPTOS_SITE_ROOT: target/site
-          LEPTOS_SITE_PKG_DIR: pkg
-          LEPTOS_SITE_ADDR: 127.0.0.1:8000
-          LEPTOS_RELOAD_PORT: 3001
-          LEPTOS_LIB_DIR: libs/block-mesh-manager
-          LEPTOS_BIN_DIR: libs/block-mesh-manager
-          LEPTOS_HASH_FILES: false
-          BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
+  #        env:
+  #          LEPTOS_OUTPUT_NAME: block-mesh-manager
+  #          LEPTOS_SITE_ROOT: target/site
+  #          LEPTOS_SITE_PKG_DIR: pkg
+  #          LEPTOS_SITE_ADDR: 127.0.0.1:8000
+  #          LEPTOS_RELOAD_PORT: 3001
+  #          LEPTOS_LIB_DIR: libs/block-mesh-manager
+  #          LEPTOS_BIN_DIR: libs/block-mesh-manager
+  #          LEPTOS_HASH_FILES: false
+  #          BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
   push-to-registry:
     name: "Push Docker image to Docker Hub"
     if: ${{ github.event.workflow_run.conclusion == 'success' }}

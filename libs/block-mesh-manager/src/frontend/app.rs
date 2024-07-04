@@ -30,11 +30,6 @@ pub fn App() -> impl IntoView {
             rel="stylesheet"
         />
         <Title text="BlockMesh Network"/>
-        <Script
-            src="https://unpkg.com/htmx.org@1.9.6"
-            integrity="sha384-FhXw7b6AlE/jyjlZH5iHa/tTe9EpJ1Y55RjcgPbjeWMskSxZt1v9qkxLJWNJaGni"
-            crossorigin="anonymous"
-        />
         <Link rel="stylesheet" href="/styles.css"/>
         <Link
             rel="icon"
