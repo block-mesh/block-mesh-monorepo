@@ -46,10 +46,11 @@ tracing-subscriber-wasm = { version = "0.1.0" }
 num-traits = { version = "0.2.19" }
 sendgrid = { version = "0.21.0" }
 tracing-wasm = { version = "0.2.1" }
-tauri = { version = "1.6.1", features = ["shell-open", "system-tray", "updater", "native-tls-vendored", "reqwest-native-tls-vendored"] }
-tauri-build = { version = "1.5.1", features = [] }
-tauri-plugin-autostart = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
-tauri-plugin-single-instance = { git = "https://github.com/tauri-apps/plugins-workspace", branch = "v1" }
+tauri = { version = "2.0.0-beta", features = ["native-tls-vendored"] }
+tauri-build = { version = "2.0.0-beta", features = [] }
+tauri-plugin-autostart = "2.0.0-beta"
+tauri-plugin-single-instance = "2.0.0-beta"
+tauri-plugin-updater = "2.0.0-beta"
 url-builder = { version = "0.1.1" }
 form_urlencoded = { version = "1.2.1" }
 auto-launch = { version = "0.5.0" }
@@ -94,7 +95,7 @@ h2 = { version = "0.4.2" }
 http = { version = "1.0.0" }
 solana-client = { version = "=1.18.2" }
 solana-program-test = { version = "=1.18.2" }
-solana-zk-token-sdk = { version = "=1.18.2" }
+#solana-zk-token-sdk = { version = "1.18.2" }
 solana-account-decoder = { version = "=1.18.2" }
 solana-program = { version = "=1.18.2" }
 solana-sdk = { version = "=1.18.2" }

@@ -24,7 +24,7 @@ use crate::commands::{
     register, set_app_config, toggle_miner,
 };
 use crate::run_events::on_run_events;
-use crate::system_tray::{on_system_tray_event, set_dock_visible, setup_tray};
+use crate::system_tray::{set_dock_visible, setup_tray};
 use crate::tauri_state::{AppState, ChannelMessage};
 use crate::tauri_storage::setup_storage;
 use crate::windows_events::on_window_event;
@@ -79,28 +79,30 @@ async fn main() -> anyhow::Result<ExitCode> {
                 open_main_window(app).unwrap();
             },
         ))
-        .system_tray(setup_tray())
         .manage(app_state.clone())
         .setup(move |app| {
-            let app_handle = app.app_handle();
-            let _: tauri::async_runtime::JoinHandle<()> = tauri::async_runtime::spawn(async move {
-                let _ = setup_storage(app_handle).await;
-            });
+            setup_tray(app);
+            #[cfg(desktop)]
+            {
+                app.handle()
+                    .plugin(tauri_plugin_updater::Builder::new().build())?;
+            }
             #[cfg(target_os = "macos")]
             {
                 app.set_activation_policy(ActivationPolicy::Accessory);
             }
             let app_handle = app.app_handle();
+            let _ = tauri::async_runtime::spawn(setup_storage(app_handle.clone()));
+            let app_handle = app.app_handle();
             if args.minimized {
-                let window = app_handle.get_window("main").unwrap();
+                let window = app_handle.get_webview_window("main").unwrap();
                 window.hide().unwrap();
                 set_dock_visible(false);
             } else {
-                open_main_window(&app.app_handle()).unwrap();
+                open_main_window(app.app_handle()).unwrap();
             }
             Ok(())
         })
-        .on_system_tray_event(on_system_tray_event)
         .on_window_event(on_window_event)
         .invoke_handler(tauri::generate_handler![
             get_app_config,

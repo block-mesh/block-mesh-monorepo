@@ -1,9 +1,9 @@
-use tauri::GlobalWindowEvent;
+use tauri::{Window, WindowEvent};
 
-pub fn on_window_event(event: GlobalWindowEvent) {
-    match event.event() {
-        tauri::WindowEvent::CloseRequested { api, .. } => {
-            event.window().hide().unwrap();
+pub fn on_window_event(window: &Window, event: &WindowEvent) {
+    match event {
+        WindowEvent::CloseRequested { api, .. } => {
+            window.hide().unwrap();
             // event.window().minimize().unwrap();
             api.prevent_close();
         }
