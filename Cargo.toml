@@ -89,6 +89,8 @@ tokio-stream = { version = "0.1.14", features = ["sync"] }
 tracing-appender = { version = "0.2.0" }
 arrayref = { version = "0.3.7" }
 axum-extra = { version = "0.9.2", features = ["typed-header"] }
+sentry = { version = "0.34.0" }
+sentry-tracing = { version = "0.34.0" }
 h2 = { version = "0.4.2" }
 http = { version = "1.0.0" }
 solana-client = { version = "=1.18.2" }

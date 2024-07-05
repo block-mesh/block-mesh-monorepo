@@ -32,8 +32,24 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 }}
 
 #[cfg(feature = "ssr")]
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
+fn main() {
+    let _guard = sentry::init((
+        env!("SENTRY"),
+        sentry::ClientOptions {
+            traces_sample_rate: 0.1,
+            release: sentry::release_name!(),
+            ..Default::default()
+        },
+    ));
+    let _ = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .unwrap()
+        .block_on(async { run().await });
+}
+
+#[cfg(feature = "ssr")]
+async fn run() -> anyhow::Result<()> {
     load_dotenv();
     setup_tracing(
         Uuid::parse_str(std::env::var(BLOCKMESH_SERVER_UUID_ENVAR).unwrap().as_str()).unwrap(),
