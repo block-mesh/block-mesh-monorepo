@@ -36,7 +36,7 @@ fn main() {
     let _guard = sentry::init((
         env!("SENTRY"),
         sentry::ClientOptions {
-            traces_sample_rate: 1.0,
+            traces_sample_rate: 0.1,
             release: sentry::release_name!(),
             ..Default::default()
         },
