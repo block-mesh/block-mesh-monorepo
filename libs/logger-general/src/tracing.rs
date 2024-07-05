@@ -2,6 +2,8 @@ use block_mesh_common::constants::{
     DeviceType, BLOCKMESH_LOG_ENV, BLOCKMESH_VERSION, BLOCK_MESH_LOGGER,
 };
 use reqwest::Client;
+#[cfg(feature = "sentry")]
+use sentry_tracing;
 use serde_json::{json, Value};
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{mpsc, Arc, Once};
@@ -22,14 +24,22 @@ pub fn setup_tracing(user_id: Uuid, device_type: DeviceType) {
         let log_env = std::env::var(BLOCKMESH_LOG_ENV).unwrap_or_else(|_| "prod".to_string());
         let log_layer =
             HttpLogLayer::new(BLOCK_MESH_LOGGER.to_string(), log_env, user_id, device_type);
-        tracing_subscriber::registry()
+        let sub = tracing_subscriber::registry()
             .with(
                 tracing_subscriber::EnvFilter::try_from_default_env()
                     .unwrap_or_else(|_| "info".into()),
             )
             .with(tracing_subscriber::fmt::layer().with_ansi(false))
-            .with(log_layer)
-            .init();
+            .with(log_layer);
+
+        #[cfg(feature = "sentry")]
+        {
+            sub.with(sentry_tracing::layer()).init();
+        }
+        #[cfg(not(feature = "sentry"))]
+        {
+            sub.init();
+        }
     });
 }
 
