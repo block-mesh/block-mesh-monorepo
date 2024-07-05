@@ -11,8 +11,9 @@ use tokio::sync::Mutex;
 #[tracing::instrument(name = "storage_path", skip(app_handle), ret)]
 pub fn storage_path(app_handle: &AppHandle) -> Option<PathBuf> {
     let path = app_handle
-        .path_resolver()
-        .app_config_dir()?
+        .path()
+        .app_config_dir()
+        .ok()?
         .join(CONFIG_FILENAME);
     Some(path)
 }

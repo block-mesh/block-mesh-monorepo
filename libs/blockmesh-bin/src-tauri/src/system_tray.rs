@@ -1,18 +1,88 @@
-use tauri::{
-    AppHandle, CustomMenuItem, Manager, SystemTray, SystemTrayEvent, SystemTrayMenu,
-    SystemTrayMenuItem,
-};
+use std::fmt::{Display, Formatter};
+use tauri::menu::{MenuBuilder, MenuItemBuilder};
+use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent};
+use tauri::{App, Manager};
 
-pub fn setup_tray() -> SystemTray {
-    let quit = CustomMenuItem::new("quit".to_string(), "Quit");
-    let hide = CustomMenuItem::new("hide".to_string(), "Hide");
-    let show = CustomMenuItem::new("show".to_string(), "Show");
-    let tray_menu = SystemTrayMenu::new()
-        .add_item(show)
-        .add_item(hide)
-        .add_native_item(SystemTrayMenuItem::Separator)
-        .add_item(quit);
-    SystemTray::new().with_menu(tray_menu)
+pub enum MenuItems {
+    Quit,
+    Hide,
+    Show,
+    Invalid,
+}
+
+impl Display for MenuItems {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            MenuItems::Hide => f.write_str("Hide"),
+            MenuItems::Quit => f.write_str("Quit"),
+            MenuItems::Show => f.write_str("Show"),
+            MenuItems::Invalid => f.write_str("Invalid"),
+        }
+    }
+}
+
+impl From<String> for MenuItems {
+    fn from(value: String) -> Self {
+        match value.as_ref() {
+            "Hide" => MenuItems::Hide,
+            "Quit" => MenuItems::Quit,
+            "Show" => MenuItems::Show,
+            _ => MenuItems::Invalid,
+        }
+    }
+}
+
+pub fn setup_tray(app: &App) {
+    let quit = MenuItemBuilder::new(MenuItems::Quit.to_string())
+        .id(MenuItems::Quit)
+        .build(app)
+        .unwrap();
+    let hide = MenuItemBuilder::new(MenuItems::Hide.to_string())
+        .id(MenuItems::Hide)
+        .build(app)
+        .unwrap();
+    let show = MenuItemBuilder::new(MenuItems::Show.to_string())
+        .id(MenuItems::Show)
+        .build(app)
+        .unwrap();
+
+    let menu = MenuBuilder::new(app)
+        .items(&[&quit, &hide, &show])
+        .build()
+        .unwrap();
+
+    let _ = TrayIconBuilder::new()
+        .icon(app.default_window_icon().unwrap().clone())
+        .menu(&menu)
+        .on_menu_event(|app, event| {
+            let e = MenuItems::from(event.id().0.clone());
+            match e {
+                MenuItems::Quit => app.exit(0),
+                MenuItems::Hide => {
+                    let window = app.get_webview_window("main").unwrap();
+                    window.hide().unwrap();
+                }
+                MenuItems::Show => {
+                    let window = app.get_webview_window("main").unwrap();
+                    window.show().unwrap();
+                    window.set_focus().unwrap();
+                }
+                _ => {}
+            }
+        })
+        .on_tray_icon_event(|tray_icon, event| match event {
+            TrayIconEvent::Click { button, .. } => match button {
+                MouseButton::Left => {
+                    let window = tray_icon.app_handle().get_webview_window("main").unwrap();
+                    let _ = window.show().unwrap();
+                    let _ = window.set_focus().unwrap();
+                }
+                _ => {}
+            },
+            _ => {}
+        })
+        .build(app)
+        .unwrap();
 }
 
 pub fn set_dock_visible(_visible: bool) {
@@ -28,48 +98,4 @@ pub fn set_dock_visible(_visible: bool) {
     //         app.setActivationPolicy_(policy);
     //     }
     // }
-}
-
-pub fn on_system_tray_event(app: &AppHandle, event: SystemTrayEvent) {
-    match event {
-        SystemTrayEvent::LeftClick {
-            position: _,
-            size: _,
-            ..
-        } => {
-            // println!("system tray received a left click");
-        }
-        SystemTrayEvent::RightClick {
-            position: _,
-            size: _,
-            ..
-        } => {
-            // println!("system tray received a right click");
-        }
-        SystemTrayEvent::DoubleClick {
-            position: _,
-            size: _,
-            ..
-        } => {
-            // println!("system tray received a double click");
-        }
-        SystemTrayEvent::MenuItemClick { id, .. } => match id.as_str() {
-            "show" => {
-                let window = app.get_window("main").unwrap();
-                window.show().unwrap();
-                window.set_focus().unwrap();
-            }
-            "quit" => {
-                std::process::exit(0);
-            }
-            "hide" => {
-                let window = app.get_window("main").unwrap();
-                window.hide().unwrap();
-            }
-            _ => {}
-        },
-        _ => {
-            // println!("system tray unknown event");
-        }
-    }
 }
