@@ -14,14 +14,14 @@ concurrency:
 jobs:
   fmt:
     name: Rustfmt
-    runs-on: blacksmith-4vcpu-ubuntu-2204
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
           components: rustfmt
-      - uses: useblacksmith/rust-cache@v3
+      - uses: Swatinem/rust-cache@v2
         with:
           key: rustfmt-sqlx-${{ vars.SQLX_VERSION }}
           cache-all-crates: true
