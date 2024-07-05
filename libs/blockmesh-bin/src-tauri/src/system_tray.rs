@@ -70,16 +70,14 @@ pub fn setup_tray(app: &App) {
                 _ => {}
             }
         })
-        .on_tray_icon_event(|tray_icon, event| match event {
-            TrayIconEvent::Click { button, .. } => match button {
-                MouseButton::Left => {
+        .on_tray_icon_event(|tray_icon, event| {
+            if let TrayIconEvent::Click { button, .. } = event {
+                if button == MouseButton::Left {
                     let window = tray_icon.app_handle().get_webview_window("main").unwrap();
-                    let _ = window.show().unwrap();
-                    let _ = window.set_focus().unwrap();
+                    window.show().unwrap();
+                    window.set_focus().unwrap();
                 }
-                _ => {}
-            },
-            _ => {}
+            }
         })
         .build(app)
         .unwrap();
