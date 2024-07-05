@@ -9,7 +9,8 @@ use block_mesh_common::interfaces::server_api::{
 };
 use std::str::FromStr;
 use std::sync::Arc;
-use tauri::{AppHandle, InvokeError, Manager, State};
+use tauri::ipc::InvokeError;
+use tauri::{AppHandle, Manager, State};
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
@@ -62,14 +63,14 @@ pub async fn set_app_config(
 #[tracing::instrument(name = "open_main_window", skip(app_handle), ret, err)]
 pub fn open_main_window(app_handle: &AppHandle) -> anyhow::Result<()> {
     set_dock_visible(true);
-    if let Some(window) = app_handle.get_window("main") {
+    if let Some(window) = app_handle.get_webview_window("main") {
         window.show().unwrap();
         window.set_focus().unwrap();
     } else {
-        let _window = tauri::WindowBuilder::new(
+        let _window = tauri::WebviewWindowBuilder::new(
             app_handle,
             "main",
-            tauri::WindowUrl::App("index.html".into()),
+            tauri::WebviewUrl::App("index.html".into()),
         )
         .visible(false)
         .build()?;
