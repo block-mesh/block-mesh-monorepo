@@ -30,6 +30,12 @@
         'type': 'FeatureCollection',
         'features': features
     }
+    let max = 0;
+    for (const marker of geojson.features) {
+        if ( marker.properties.count > max) {
+            max =  marker.properties.count;
+        }
+    }
 
     const map = new mapboxgl.Map({
         container: 'map',
@@ -107,7 +113,7 @@
         // Create a DOM element for each marker.
         const el = document.createElement('div');
         el.className = 'marker';
-        const size = 10 * marker.properties.count;
+        const size = 10 * marker.properties.count / max;
         el.style.width = `${size}px`;
         el.style.height = `${size}px`;
 
