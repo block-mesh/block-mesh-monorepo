@@ -15,9 +15,9 @@ resolver = "2"
 
 [workspace.lints.rust]
 panic = "forbid"
-unsafe_code = { level = "forbid", priority = 5 }
-unused = { level = "allow", priority = 5 }
-dead_code = { level = "allow", priority = 5 }
+unsafe_code = "forbid"
+unused = "forbid"
+dead_code = "forbid"
 
 [workspace.lints.clippy]
 #all = { level = "deny", priority = 5 }
@@ -39,7 +39,7 @@ dead_code = { level = "allow", priority = 5 }
 
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.67"
+version = "0.0.68"
 
 [patch.crates-io]
 ## aes-gcm-siv 0.10.3 and curve25519-dalek 3.x pin zeroize to <1.4
