@@ -99,4 +99,3 @@ jobs:
           releaseDraft: true
           prerelease: false
           args: ${{ matrix.args }}
-          projectPath: ./libs/blockmesh-bin/
