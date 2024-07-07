@@ -9,7 +9,7 @@ concurrency:
   cancel-in-progress: true
 jobs:
   deploy:
-    runs-on: ubuntu-latest
+    runs-on: blacksmith-4vcpu-ubuntu-2204
     timeout-minutes: 60
     strategy:
       matrix:
@@ -29,7 +29,7 @@ jobs:
           toolchain: ${{ vars.RUSTC_VERSION }}
           targets: wasm32-unknown-unknown
           components: cargo , clippy , rust-docs , rust-std , rustc , rustfmt
-      - uses: Swatinem/rust-cache@v2
+      - uses: useblacksmith/rust-cache@v3
         with:
           key: cloudflare-deploy-${{ matrix.workdir }}
           cache-all-crates: true

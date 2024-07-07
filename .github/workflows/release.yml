@@ -25,7 +25,7 @@ env:
 jobs:
   get-tag:
     name: "Get Tag From Package Version"
-    runs-on: "ubuntu-latest"
+    runs-on: "blacksmith-4vcpu-ubuntu-2204"
     outputs:
       pkg-version: ${{ steps.pkg-version.outputs.PKG_VERSION }}
     steps:
@@ -35,7 +35,7 @@ jobs:
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
           targets: wasm32-unknown-unknown
-      - uses: Swatinem/rust-cache@v2
+      - uses: useblacksmith/rust-cache@v3
         with:
           key: release-tag-server
           cache-all-crates: true
@@ -48,7 +48,7 @@ jobs:
     name: "Create release"
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs: "get-tag"
-    runs-on: "ubuntu-latest"
+    runs-on: "blacksmith-4vcpu-ubuntu-2204"
     steps:
       - name: "Check out the repo"
         uses: actions/checkout@v4
@@ -57,7 +57,7 @@ jobs:
           toolchain: ${{ vars.RUSTC_VERSION }}
           targets: wasm32-unknown-unknown
       - name: "Cache"
-        uses: Swatinem/rust-cache@v2
+        uses: useblacksmith/rust-cache@v3
         with:
           key: release-build
           cache-all-crates: true
@@ -79,9 +79,9 @@ jobs:
       matrix:
         include:
           - target: "x86_64-unknown-linux-gnu"
-            os: "ubuntu-latest"
+            os: "blacksmith-4vcpu-ubuntu-2204"
           - target: "x86_64-unknown-linux-musl"
-            os: "ubuntu-latest"
+            os: "blacksmith-4vcpu-ubuntu-2204"
     runs-on: ${{ matrix.os }}
     steps:
       - name: "Check out the repo"
@@ -95,7 +95,7 @@ jobs:
           toolchain: ${{ vars.RUSTC_VERSION }}
           targets: wasm32-unknown-unknown
       - name: "Cache"
-        uses: Swatinem/rust-cache@v2
+        uses: useblacksmith/rust-cache@v3
         with:
           key: release-upload-${{ matrix.target }}
           cache-all-crates: true
@@ -121,7 +121,7 @@ jobs:
     needs:
       - "get-tag"
       - "upload-assets"
-    runs-on: "ubuntu-latest"
+    runs-on: "blacksmith-4vcpu-ubuntu-2204"
     steps:
       - name: "Check out the repo"
         uses: actions/checkout@v4
@@ -130,7 +130,7 @@ jobs:
           toolchain: ${{ vars.RUSTC_VERSION }}
           targets: wasm32-unknown-unknown
       - name: "Cache"
-        uses: Swatinem/rust-cache@v2
+        uses: useblacksmith/rust-cache@v3
         with:
           key: release-push
           cache-all-crates: true
