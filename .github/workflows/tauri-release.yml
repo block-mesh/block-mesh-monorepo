@@ -80,6 +80,9 @@ jobs:
         uses: useblacksmith/setup-node@v5
         with:
           node-version: lts/*
+      - name: install tauri cli
+        run: |
+          npm install -g @tauri-apps/cli@next
       - name: install dependencies (ubuntu only)
         if: matrix.platform == 'blacksmith-4vcpu-ubuntu-2204' # This must match the platform value defined above.
         run: |
