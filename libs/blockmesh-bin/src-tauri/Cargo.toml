@@ -1,9 +1,13 @@
 [package]
-name = "blockmesh-tauri"
+name = "blockmesh_tauri"
 version = { workspace = true }
 description = "BlockMesh Network"
 authors.workspace = true
 edition = "2021"
+
+[lib]
+name = "blockmesh_tauri_lib"
+crate-type = ["staticlib", "cdylib", "rlib"]
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
