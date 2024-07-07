@@ -21,6 +21,7 @@ env:
   LEPTOS_HASH_FILES: false
   APP_ENVIRONMENT: production
   SENTRY: ${{ secrets.SENTRY }}
+  MAPBOX: ${{ secrets.MAPBOX }}
 jobs:
   get-tag:
     name: "Get Tag From Package Version"
