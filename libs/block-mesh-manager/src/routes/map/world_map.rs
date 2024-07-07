@@ -74,7 +74,7 @@ pub async fn handler(Extension(pool): Extension<PgPool>) -> Result<impl IntoResp
     transaction.commit().await.map_err(Error::from)?;
 
     Ok(MapTemplate {
-        mapbox_api: std::env::var("MAPBOX").parse().unwrap(),
+        mapbox_api: std::env::var("MAPBOX").unwrap_or_default(),
         chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
         app_server: BLOCK_MESH_APP_SERVER.to_string(),
         github: BLOCK_MESH_GITHUB.to_string(),
