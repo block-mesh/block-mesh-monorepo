@@ -30,7 +30,6 @@ pub fn App() -> impl IntoView {
             rel="stylesheet"
         />
         <Title text="BlockMesh Network"/>
-        <Link rel="stylesheet" href="/styles.css"/>
         <Link
             rel="icon"
             // type_=Some(i)
