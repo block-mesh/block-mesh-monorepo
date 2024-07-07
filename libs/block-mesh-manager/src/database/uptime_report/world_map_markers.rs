@@ -18,9 +18,9 @@ pub(crate) async fn world_map_markers(
         Marker,
         r#"
             SELECT
-	            city,
-            	country,
-            	MIN(latitude) AS latitude,
+                city,
+                country,
+                MIN(latitude) AS latitude,
                 MIN(longitude) AS longitude,
                 count(*) AS count
             FROM
