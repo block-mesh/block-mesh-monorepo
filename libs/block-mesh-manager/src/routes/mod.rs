@@ -8,6 +8,7 @@ pub mod health_check;
 pub mod invite_codes;
 pub mod login;
 pub mod logout;
+pub mod map;
 pub mod notification;
 pub mod password;
 pub mod register;

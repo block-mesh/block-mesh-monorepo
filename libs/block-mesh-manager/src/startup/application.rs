@@ -95,6 +95,7 @@ impl Application {
             );
 
         let un_auth_router = Router::new()
+            .route("/map", get(routes::map::world_map::handler))
             .route(
                 "/auth_status",
                 get(routes::health_check::auth_status::handler),
