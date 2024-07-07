@@ -11,6 +11,7 @@ use crate::frontend::pages::new_password_page::NewPasswordPage;
 use crate::frontend::pages::register_page::RegisterPage;
 use crate::frontend::pages::resend_confirmation_email_page::ResendConfirmationEmailPage;
 use crate::frontend::pages::reset_password_page::ResetPasswordPage;
+use crate::frontend::webserver_extension::pages::home::WebServerExtensionHomePage;
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -40,6 +41,14 @@ pub fn App() -> impl IntoView {
             // type_=Some(c)
             href="https://r2-assets.blockmesh.xyz/tailwind.css"
         />
+        <Style>
+            r#"
+                #content{
+                  Position:static;
+                  z-index: 1000000;
+                }
+            "#
+        </Style>
         // async_=Some(t)
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-RYHLW3MDK2"/>
         <Script>
@@ -52,6 +61,21 @@ pub fn App() -> impl IntoView {
             gtag('config', 'G-RYHLW3MDK2');
             "#
         </Script>
+        <Script>
+            r#"
+            let port = null;
+            function onPortMessge(e) {
+                console.log("onPortMessage", e);
+            }
+            function onMessage(e) {
+                if (!e.ports.length) return;
+                e.ports[0].postMessage("Init message received");
+                e.ports[0].onmessage = onPortMessge;
+                port = e.ports[0];
+            }
+            window.addEventListener("message", onMessage);
+            "#
+        </Script>
         <NotificationPopupComponent/>
         <Router fallback=|| {
             view! {
@@ -61,9 +85,18 @@ pub fn App() -> impl IntoView {
             }
                 .into_view()
         }>
-            <main class="h-screen bg-gray-900">
+            <main id="content" class="h-screen bg-gray-900">
 
                 <Routes>
+                    <Route
+                        path="/extension"
+                        view=move || {
+                            view! { <Outlet/> }
+                        }
+                    >
+
+                        <Route path="/" view=WebServerExtensionHomePage/>
+                    </Route>
                     <Route
                         path="/ui"
                         view=move || {
