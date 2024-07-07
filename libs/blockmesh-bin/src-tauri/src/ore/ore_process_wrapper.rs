@@ -91,7 +91,7 @@ pub async fn start_ore_process(app_state: Arc<Mutex<AppState>>) -> anyhow::Resul
     // });
 
     let pid = child.id().ok_or(anyhow::anyhow!("Failed to get PID"))?;
-    let _: JoinHandle<()> = tokio::spawn(async move {
+    tokio::spawn(async move {
         let _ = child.wait().await;
     });
     state.config.ore_status = Option::from(TaskStatus::Running);
