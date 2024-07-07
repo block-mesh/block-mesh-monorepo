@@ -34,7 +34,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 #[cfg(feature = "ssr")]
 fn main() {
     let _guard = sentry::init((
-        env!("SENTRY"),
+        std::env::var("SENTRY").unwrap_or_default(),
         sentry::ClientOptions {
             traces_sample_rate: 0.1,
             release: sentry::release_name!(),
