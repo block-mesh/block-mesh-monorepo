@@ -8,7 +8,7 @@ use block_mesh_common::interfaces::server_api::{GetUserUptimeRequest, GetUserUpt
 use http::StatusCode;
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "get_user_uptime", skip(pool, query), err, ret)]
+#[tracing::instrument(name = "get_user_uptime", skip(pool, query), level = "trace", ret)]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Query(query): Query<GetUserUptimeRequest>,
