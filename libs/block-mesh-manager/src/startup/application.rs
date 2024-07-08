@@ -101,6 +101,7 @@ impl Application {
                 get(routes::health_check::auth_status::handler),
             )
             .route("/rpc_dashboard", get(routes::rpc::rpc_dashboard::handler))
+            .route("/rpc_api", get(routes::rpc::rpc_api::handler))
             .route(
                 "/notification",
                 get(routes::notification::notification_page::handler),
