@@ -12,7 +12,7 @@ use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBa
 use http::StatusCode;
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "submit_bandwidth", skip(pool, body), level = "trace", fields(email = body.email), err, ret)]
+#[tracing::instrument(name = "submit_bandwidth", skip(pool, body), level = "trace", fields(email = body.email), ret)]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Json(body): Json<ReportBandwidthRequest>,

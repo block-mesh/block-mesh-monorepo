@@ -3,13 +3,14 @@ use std::sync::Arc;
 
 use axum::extract::{ConnectInfo, Query, State};
 use axum::{Extension, Json};
-use http::StatusCode;
-use sqlx::PgPool;
-use tokio::task::JoinHandle;
-
 use block_mesh_common::constants::BLOCK_MESH_IP_WORKER;
 use block_mesh_common::interfaces::ip_data::{IPData, IpDataPostRequest};
 use block_mesh_common::interfaces::server_api::{ReportUptimeRequest, ReportUptimeResponse};
+use http::StatusCode;
+use reqwest::Client;
+use sqlx::PgPool;
+use tokio::task::JoinHandle;
+use uuid::Uuid;
 
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
 use crate::database::aggregate::update_aggregate::update_aggregate;
@@ -23,7 +24,7 @@ use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 
-#[tracing::instrument(name = "report_uptime", skip(pool, query, state), err, ret)]
+#[tracing::instrument(name = "report_uptime", level = "trace", skip(pool, query, state), ret)]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,
@@ -67,33 +68,38 @@ pub async fn handler(
         .await
         .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;
-    let client = state.client.clone();
 
     let handle: JoinHandle<()> = tokio::spawn(async move {
-        let pool = pool.clone();
-        let mut transaction = pool.begin().await.map_err(Error::from).unwrap();
-        let ip_data = client
-            .post(BLOCK_MESH_IP_WORKER)
-            .json(&IpDataPostRequest {
-                ip: match query.ip {
-                    None => addr.ip().to_string(),
-                    Some(ip) => ip,
-                },
-            })
-            .send()
-            .await
-            .unwrap()
-            .json::<IPData>()
-            .await
-            .unwrap();
-        enrich_uptime_report(&mut transaction, uptime_id, ip_data)
-            .await
-            .unwrap();
-        transaction.commit().await.unwrap();
+        let _ = enrich_ip(pool.clone(), state.client.clone(), query, addr, uptime_id).await;
     });
     let _ = state.tx.send(handle).await;
 
     Ok(Json(ReportUptimeResponse {
         status_code: u16::from(StatusCode::OK),
     }))
+}
+
+async fn enrich_ip(
+    pool: PgPool,
+    client: Client,
+    query: ReportUptimeRequest,
+    addr: SocketAddr,
+    uptime_id: Uuid,
+) -> anyhow::Result<()> {
+    let pool = pool.clone();
+    let mut transaction = pool.begin().await.map_err(Error::from).unwrap();
+    let ip_data = client
+        .post(BLOCK_MESH_IP_WORKER)
+        .json(&IpDataPostRequest {
+            ip: match &query.ip {
+                None => addr.ip().to_string(),
+                Some(ip) => ip.to_string(),
+            },
+        })
+        .send()
+        .await?
+        .json::<IPData>()
+        .await?;
+    enrich_uptime_report(&mut transaction, uptime_id, ip_data).await?;
+    transaction.commit().await?;
 }

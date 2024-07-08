@@ -3,7 +3,7 @@ use secret::Secret;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "Find Token", skip(transaction), ret, err)]
+#[tracing::instrument(name = "Find Token", level = "trace", skip(transaction), ret)]
 pub(crate) async fn find_token(
     transaction: &mut Transaction<'_, Postgres>,
     token: &Uuid,

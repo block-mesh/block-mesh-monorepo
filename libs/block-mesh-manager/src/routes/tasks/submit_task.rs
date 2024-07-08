@@ -15,7 +15,7 @@ use http::StatusCode;
 use http_body_util::BodyExt;
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "submit_task", skip(pool, request, query), err, ret)]
+#[tracing::instrument(name = "submit_task", skip(pool, request, query), level = "trace", ret)]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Query(query): Query<SubmitTaskRequest>,

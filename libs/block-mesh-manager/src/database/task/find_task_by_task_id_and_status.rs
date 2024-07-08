@@ -3,7 +3,7 @@ use crate::domain::task::TaskStatus;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "Find task task id and status", skip(transaction), ret, err)]
+#[tracing::instrument(name = "Find task task id and status", skip(transaction), ret)]
 pub(crate) async fn find_task_by_task_id_and_status(
     transaction: &mut Transaction<'_, Postgres>,
     task_id: &Uuid,
