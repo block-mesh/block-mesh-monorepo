@@ -68,9 +68,9 @@ pub async fn handler(
         .await
         .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;
-
+    let client = state.client.clone();
     let handle: JoinHandle<()> = tokio::spawn(async move {
-        let _ = enrich_ip(pool.clone(), state.client.clone(), query, addr, uptime_id).await;
+        let _ = enrich_ip(pool.clone(), client, query, addr, uptime_id).await;
     });
     let _ = state.tx.send(handle).await;
 
@@ -102,4 +102,5 @@ async fn enrich_ip(
         .await?;
     enrich_uptime_report(&mut transaction, uptime_id, ip_data).await?;
     transaction.commit().await?;
+    Ok(())
 }
