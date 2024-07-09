@@ -4,13 +4,7 @@
   "name": "BlockMesh Network",
   "short_name": "BlockMesh",
   "description": "BlockMesh Network allows you to generate passive income from your excessive bandwidth",
-<<<<<<< HEAD
   "version": "0.0.77",
-||||||| parent of f41faec (table)
-  "version": "0.0.77",
-=======
-  "version": "0.0.77",
->>>>>>> f41faec (table)
   "author": "ohaddahan@blockmesh.xyz",
   "externally_connectable": {
     "matches": [
