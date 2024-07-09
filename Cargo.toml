@@ -10,7 +10,7 @@ codegen-units = 1
 
 [workspace]
 members = ["libs/*", "programs/*", "libs/blockmesh-bin/src-tauri"]
-exclude = ["libs/renaissance-hackathon", "libs/installers"]
+exclude = ["libs/renaissance-hackathon", "libs/md-book", "libs/installers"]
 resolver = "2"
 
 [workspace.lints.rust]
