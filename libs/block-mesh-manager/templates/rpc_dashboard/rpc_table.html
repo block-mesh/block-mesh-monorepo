@@ -15,7 +15,7 @@
         </div>
         <div class="overflow-x-auto">
             <table id="rpc_table"
-                   class="cell-border stripe whitespace-no-wrap w-full table-auto text-left border-white border-solid border-2">
+                   class="cell-border hover stripe whitespace-no-wrap w-full table-auto text-left border-white border-solid border-2">
                 <thead>
                 <tr class="border-b bg-gray-800 text-xs font-semibold uppercase tracking-wide text-gray-500">
                     <th class="px-4 py-3">Location</th>
@@ -25,7 +25,7 @@
                     <th class="px-4 py-3">Samples</th>
                 </tr>
                 </thead>
-                <tbody class="divide-y bg-gray-500" id="tasks-content">
+                <tbody class="divide-y" id="tasks-content">
                 {% for result in results %}
                 {% include "rpc_row.html" %}
                 {% endfor %}

@@ -30,6 +30,7 @@ struct RpcDashboardTemplate {
 pub async fn handler(Extension(pool): Extension<PgPool>) -> Result<impl IntoResponse, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let results = get_tasks_rpc_results(&mut transaction, 600).await?;
+    transaction.commit().await.map_err(Error::from)?;
     let template = RpcDashboardTemplate {
         chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
         app_server: BLOCK_MESH_APP_SERVER.to_string(),
