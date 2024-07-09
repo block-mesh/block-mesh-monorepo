@@ -68,7 +68,9 @@ pub async fn get_tasks_rpc_results(
                 count: i.count.unwrap_or_default(),
                 provider: RpcName::from_url(&i.url.clone().unwrap_or_default()).to_string(),
             };
-            if rpc_results.provider == RpcName::Invalid.to_string() {
+            if rpc_results.provider == RpcName::Invalid.to_string()
+                || rpc_results.provider.is_empty()
+            {
                 None
             } else {
                 Some(rpc_results)
