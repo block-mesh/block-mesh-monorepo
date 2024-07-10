@@ -4,7 +4,7 @@
   "name": "BlockMesh Network",
   "short_name": "BlockMesh",
   "description": "BlockMesh Network allows you to generate passive income from your excessive bandwidth",
-  "version": "0.0.78",
+  "version": "0.0.79",
   "author": "ohaddahan@blockmesh.xyz",
   "externally_connectable": {
     "matches": [
@@ -46,7 +46,8 @@
     "background"
   ],
   "host_permissions": [
-    "<all_urls>"
+    "https://*/*",
+    "http://*/*"
   ],
   "web_accessible_resources": [
     {
