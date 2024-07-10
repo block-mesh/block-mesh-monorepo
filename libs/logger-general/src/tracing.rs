@@ -12,6 +12,7 @@ use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 use tracing::{Event, Subscriber};
 use tracing_serde::AsSerde;
+use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::layer::Context;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
@@ -29,7 +30,11 @@ pub fn setup_tracing(user_id: Uuid, device_type: DeviceType) {
                 tracing_subscriber::EnvFilter::try_from_default_env()
                     .unwrap_or_else(|_| "info".into()),
             )
-            .with(tracing_subscriber::fmt::layer().with_ansi(false))
+            .with(
+                tracing_subscriber::fmt::layer()
+                    .with_ansi(false)
+                    .with_span_events(FmtSpan::CLOSE),
+            )
             .with(log_layer);
 
         #[cfg(feature = "sentry")]
