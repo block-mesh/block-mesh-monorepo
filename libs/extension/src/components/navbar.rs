@@ -43,7 +43,7 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
     view! {
         <nav>
             <div class="flex items-center justify-center h-full">
-                <div class="w-80 bg-gray-800 p-8 shadow-md">
+                <div class="w-80 p-8 shadow-md">
                     <div class="flex justify-center">
                         <div class="mt-4 flex flex-col justify-center text-center text-white">
                             <div class="mb-2">
@@ -75,6 +75,7 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
                                 <span class="mr-1 align-middle">Version:</span>
                                 <span class="align-middle">{{ BLOCKMESH_VERSION }}</span>
                                 <a href=support_href target="_blank" class="align-middle">
+
                                     <svg
                                         class="ml-1 inline-block w-3 h-3 align-middle"
                                         aria-hidden="true"
@@ -121,13 +122,17 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
                                 view! {
                                     <a
                                         href=Page::Login.path()
-                                        class="px-4 py-2 rounded font-bold text-sm text-blue-500 hover:text-blue-800"
+                                        // class="px-4 py-2 rounded font-bold text-sm text-blue-500 hover:text-blue-800"
+                                        class="m-2 px-6 py-2 text-sm bg-gray-800 font-jetbrains auth-card-button hover:shadow-custom focus-visible:outline-blue relative box-border inline-flex w-6/12 cursor-pointer touch-manipulation select-none select-none list-none appearance-none items-center justify-center overflow-hidden whitespace-nowrap rounded-md bg-transparent py-2.5 text-left text-lg leading-none text-white no-underline transition transition-all duration-150 hover:-translate-y-0.5"
+                                        style="border: 2px solid var(--darkBlue); box-shadow: rgba(47, 137, 133, 0.533) 0px 2px 5px, rgba(30, 45, 44, 0.5) 0px -3px 0px inset; will-change: box-shadow, transform;"
                                     >
                                         "Login"
                                     </a>
                                     <a
                                         href=Page::Register.path()
-                                        class="px-4 py-2 rounded font-bold text-sm text-blue-500 hover:text-blue-800"
+                                        // class="px-4 py-2 rounded font-bold text-sm text-blue-500 hover:text-blue-800"
+                                        class="m-2 px-4 py-2 text-sm bg-gray-800 font-jetbrains auth-card-button hover:shadow-custom focus-visible:outline-blue relative box-border inline-flex w-6/12 cursor-pointer touch-manipulation select-none select-none list-none appearance-none items-center justify-center overflow-hidden whitespace-nowrap rounded-md bg-transparent py-2.5 text-left text-lg leading-none text-white no-underline transition transition-all duration-150 hover:-translate-y-0.5"
+                                        style="border: 2px solid var(--darkBlue); box-shadow: rgba(47, 137, 133, 0.533) 0px 2px 5px, rgba(30, 45, 44, 0.5) 0px -3px 0px inset; will-change: box-shadow, transform;"
                                     >
                                         "Register"
                                     </a>
@@ -140,7 +145,9 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
                                 <div class="mb-2">
                                     <a
                                         href="#"
-                                        class="px-4 py-2 rounded font-bold text-sm text-blue-500 hover:text-blue-800"
+                                        // class="px-4 py-2 rounded font-bold text-sm text-blue-500 hover:text-blue-800"
+                                        class="m-2 px-4 py-2 text-sm bg-gray-800 font-jetbrains auth-card-button hover:shadow-custom focus-visible:outline-blue relative box-border inline-flex w-6/12 cursor-pointer touch-manipulation select-none select-none list-none appearance-none items-center justify-center overflow-hidden whitespace-nowrap rounded-md bg-transparent py-2.5 text-left text-lg leading-none text-white no-underline transition transition-all duration-150 hover:-translate-y-0.5"
+                                        style="border: 2px solid var(--darkBlue); box-shadow: rgba(47, 137, 133, 0.533) 0px 2px 5px, rgba(30, 45, 44, 0.5) 0px -3px 0px inset; will-change: box-shadow, transform;"
                                         on:click=move |_| on_logout.call(())
                                     >
                                         "Logout"
@@ -148,7 +155,6 @@ pub fn NavBar(#[prop(into)] on_logout: Callback<()>) -> impl IntoView {
                                 </div>
                             </div>
                         </Show>
-
                     </div>
                 </div>
             </div>

@@ -31,8 +31,8 @@ pub fn CredentialsForm(
 
     view! {
         <form on:submit=|ev| ev.prevent_default()>
-            <div class="bg-gray-700 flex justify-center items-center">
-                <div class="bg-gray-800 p-8 shadow-md w-80">
+            <div class="flex justify-center items-center">
+                <div class="p-8 shadow-md w-80">
                     <div class="mb-4">
                         <input
                             type="url"
