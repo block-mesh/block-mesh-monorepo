@@ -7,6 +7,7 @@ use leptos_router::*;
 use crate::frontend::pages::dashboard_page::DashboardPage;
 use crate::frontend::pages::edit_invite_code_page::EditInvitePage;
 use crate::frontend::pages::login_page::LoginPage;
+use crate::frontend::pages::new_dashboard::NewDashboard;
 use crate::frontend::pages::new_password_page::NewPasswordPage;
 use crate::frontend::pages::register_page::RegisterPage;
 use crate::frontend::pages::resend_confirmation_email_page::ResendConfirmationEmailPage;
@@ -19,6 +20,7 @@ pub fn App() -> impl IntoView {
 
     view! {
         <Stylesheet href="https://r2-assets.blockmesh.xyz/tailwind.css"/>
+        <Stylesheet href="https://r2-assets.blockmesh.xyz/extra-styles.css"/>
         <Link
             href="https://fonts.googleapis.com/css2?family=Agbalumo&family=Varela+Round&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,500;1,600;1,700;1,800;1,900&display=swap"
             rel="stylesheet"
@@ -35,11 +37,8 @@ pub fn App() -> impl IntoView {
             // type_=Some(i)
             href="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"
         />
-        <Link
-            rel="stylesheet"
-            // type_=Some(c)
-            href="https://r2-assets.blockmesh.xyz/tailwind.css"
-        />
+        <Stylesheet href="https://rsms.me/inter/inter.css"/>
+        <Stylesheet href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"/>
         // async_=Some(t)
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-RYHLW3MDK2"/>
         <Script>
@@ -75,6 +74,7 @@ pub fn App() -> impl IntoView {
                         }
                     >
 
+                        <Route path="/new_dashboard" view=NewDashboard/>
                         <Route path="/login" view=LoginPage/>
                         <Route path="/reset_password" view=ResetPasswordPage/>
                         <Route path="/register" view=RegisterPage/>
