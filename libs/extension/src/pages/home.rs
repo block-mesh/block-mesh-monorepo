@@ -41,15 +41,21 @@ pub fn Home() -> impl IntoView {
         {move || match state.status.get() {
             AppStatus::LoggedIn => {
                 view! {
-                    <div class="bg-gray-700 flex justify-center items-center">
-                        <div class="bg-gray-800 p-8 shadow-md w-80">
-                            <button class="w-3/8 m-2 focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none">
+                    <div class="flex justify-center items-center">
+                        <div class="p-8 w-80 flex space-x-4">
+                            <button
+                                // class="w-3/8 m-2 focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+                                class="w-3/8 m-2 px-4 py-2 bg-gray-800 text-sm font-jetbrains auth-card-button hover:shadow-custom focus-visible:outline-blue relative box-border inline-flex cursor-pointer touch-manipulation select-none select-none list-none appearance-none items-center justify-center overflow-hidden whitespace-nowrap rounded-md bg-transparent text-left text-lg leading-none text-white no-underline transition transition-all duration-150 hover:-translate-y-0.5"
+                                style="border: 2px solid var(--darkBlue); box-shadow: rgba(47, 137, 133, 0.533) 0px 2px 5px, rgba(30, 45, 44, 0.5) 0px -3px 0px inset; will-change: box-shadow, transform;"
+                            >
                                 <a href=url.get() target="_blank">
-                                    Open Dashboard
+                                    Dashboard
                                 </a>
                             </button>
                             <button
-                                class="w-3/8 m-2 focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+                                // class="w-3/8 m-2 focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+                                class="w-3/8 m-2 px-8 py-2 bg-gray-800 text-sm font-jetbrains auth-card-button hover:shadow-custom focus-visible:outline-blue relative box-border inline-flex cursor-pointer touch-manipulation select-none select-none list-none appearance-none items-center justify-center overflow-hidden whitespace-nowrap rounded-md bg-transparent text-left text-lg leading-none text-white no-underline transition transition-all duration-150 hover:-translate-y-0.5"
+                                style="border: 2px solid var(--darkBlue); box-shadow: rgba(47, 137, 133, 0.533) 0px 2px 5px, rgba(30, 45, 44, 0.5) 0px -3px 0px inset; will-change: box-shadow, transform;"
                                 on:click=copy_to_clipboard
                             >
                                 Refer
@@ -61,8 +67,15 @@ pub fn Home() -> impl IntoView {
             }
             AppStatus::LoggedOut => {
                 view! {
-                    <div class="bg-gray-700 flex justify-center items-center text-center">
-                        <div class="bg-gray-800 p-8 shadow-md w-80">
+                    // class="w-3/8 m-2 focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+                    // class="w-3/8 m-2 focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+
+                    // class="w-3/8 m-2 focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+
+                    // class="w-3/8 m-2 focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+
+                    <div class="flex justify-center items-center text-center">
+                        <div class="p-8 shadow-md w-80">
                             <p class="text-white">You are not logged in</p>
                         </div>
                     </div>
@@ -71,8 +84,19 @@ pub fn Home() -> impl IntoView {
             }
             AppStatus::WaitingEmailVerification => {
                 view! {
-                    <div class="bg-gray-700 flex justify-center items-center text-center">
-                        <div class="bg-gray-800 p-8 shadow-md w-80">
+                    // class="w-3/8 m-2 focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+                    // class="w-3/8 m-2 focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+
+                    // class="w-3/8 m-2 focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+
+                    // class="w-3/8 m-2 focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+
+                    // class="w-3/8 m-2 focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+
+                    // class="w-3/8 m-2 focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+
+                    <div class="flex justify-center items-center text-center">
+                        <div class="p-8 shadow-md w-80">
                             <p class="text-white">Please verify your email address and login</p>
                         </div>
                     </div>

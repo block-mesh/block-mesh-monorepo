@@ -5,6 +5,13 @@ use web_sys::FocusEvent;
 pub fn ExtensionInput(label: String, input_type: String) -> impl IntoView {
     let (is_focused, set_is_focused) = create_signal(false);
     let (is_valid, set_is_valid) = create_signal(false);
+    let border_class = move || {
+        if is_focused.get() {
+            "border-bottom-color: 'var(--blue)'"
+        } else {
+            "border-bottom-color: '#555'"
+        }
+    };
 
     let handle_blur = move |e: FocusEvent| {
         set_is_focused.set(false);
@@ -43,7 +50,7 @@ pub fn ExtensionInput(label: String, input_type: String) -> impl IntoView {
             <input
                 type=input_type
                 class="font-jetbrains bg-transparent w-full text-base text-white border-b border-gray-600 pt-2 pb-1.5 focus:outline-none focus:border-none focus:border-b-2"
-                style=r#"borderBottom: "1px solid #555""#
+                style=move || format!("borderBottom: '1px solid #555'; {}", border_class())
                 on:focus=move |_| set_is_focused.set(true)
                 on:blur=handle_blur
             />

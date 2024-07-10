@@ -1,4 +1,3 @@
-use crate::components::extension_input::ExtensionInput;
 use leptos::*;
 
 #[component]
@@ -32,8 +31,8 @@ pub fn CredentialsForm(
 
     view! {
         <form on:submit=|ev| ev.prevent_default()>
-            <div class="bg-gray-700 flex justify-center items-center">
-                <div class="bg-gray-800 p-8 shadow-md w-80">
+            <div class="flex justify-center items-center">
+                <div class="p-8 shadow-md w-80">
                     <div class="mb-4">
                         <input
                             type="url"
@@ -44,9 +43,6 @@ pub fn CredentialsForm(
                             prop:value=url
                         />
                     </div>
-        <div class="mb-4">
-            <ExtensionInput input_type="text".to_string() label="email".to_string()/>
-        </div>
                     <div class="mb-4">
                         <input
                             type="email"
