@@ -1907,6 +1907,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "cloudflare-affiliate-plan-page"
+version = "0.0.80"
+dependencies = [
+ "askama",
+ "askama_axum",
+ "block-mesh-common",
+ "serde",
+ "serde_json",
+ "time",
+ "tracing",
+ "tracing-subscriber",
+ "tracing-web",
+ "worker",
+]
+
+[[package]]
 name = "cloudflare-landing-page"
 version = "0.0.80"
 dependencies = [
