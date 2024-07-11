@@ -1,3 +1,4 @@
+use crate::components::extension_input::ExtensionInput;
 use leptos::*;
 
 #[component]
@@ -44,6 +45,7 @@ pub fn CredentialsForm(
                         />
                     </div>
                     <div class="mb-4">
+        <ExtensionInput label="email".to_string() input_type="text".to_string() />
                         <input
                             type="email"
                             required
