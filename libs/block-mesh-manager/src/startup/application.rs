@@ -3,7 +3,7 @@ use crate::emails::email_client::EmailClient;
 use crate::envars::app_env_var::AppEnvVar;
 use crate::envars::env_var;
 use crate::envars::get_env_var_or_panic::get_env_var_or_panic;
-use crate::frontend::app::App;
+use crate::frontends::app::App;
 use crate::middlewares::authentication::{authentication_layer, Backend};
 use crate::routes;
 use axum::routing::{get, post};

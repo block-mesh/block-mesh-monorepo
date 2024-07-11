@@ -1,9 +1,9 @@
-use crate::frontend::components::error::ErrorComponent;
-use crate::frontend::components::invites::InvitesComponent;
-use crate::frontend::components::metrics::MetricsComponent;
-use crate::frontend::components::navbar::NavbarComponent;
-use crate::frontend::components::notification::NotificationComponent;
-use crate::frontend::context::webapp_context::WebAppContext;
+use crate::frontends::frontend_webserver::components::error::ErrorComponent;
+use crate::frontends::frontend_webserver::components::invites::InvitesComponent;
+use crate::frontends::frontend_webserver::components::metrics::MetricsComponent;
+use crate::frontends::frontend_webserver::components::navbar::NavbarComponent;
+use crate::frontends::frontend_webserver::components::notification::NotificationComponent;
+use crate::frontends::frontend_webserver::context::webapp_context::WebAppContext;
 use leptos::Suspense;
 use leptos::*;
 
