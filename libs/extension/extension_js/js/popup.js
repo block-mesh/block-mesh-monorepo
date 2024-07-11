@@ -1,5 +1,7 @@
 import initWasmModule, {mount_popup} from './wasm/blockmesh_ext.js';
 
+const channel = new MessageChannel();
+
 function onSuccess(message) {
     try {
         console.log(`onSuccess: ${JSON.stringify(message)}`);
@@ -23,6 +25,29 @@ document.addEventListener('DOMContentLoaded', async function () {
     await initWasmModule().then(onSuccess, onError);
     console.log("pre mount");
     mount_popup();
+    const iframe = document.createElement("iframe");
+    iframe.src = "http://localhost:8000/ext/login";
+    iframe.width = "300";
+    iframe.height = "400"
+
+    iframe.addEventListener("load", onLoad);
+
+    function onLoad() {
+        // Listen for messages on port1
+        channel.port1.onmessage = onMessage;
+
+        // Transfer port2 to the iframe
+        iframe.contentWindow.postMessage("Hello from the main page!", "*", [
+            channel.port2,
+        ]);
+    }
+
+    function onMessage(e) {
+        console.log("popup onMessage e => ", e);
+    }
+
+    const body = document.body;
+    body.appendChild(iframe);
     console.log("post mount");
 });
 

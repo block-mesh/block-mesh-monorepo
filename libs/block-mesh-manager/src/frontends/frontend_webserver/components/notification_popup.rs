@@ -1,4 +1,4 @@
-use crate::frontend::context::webapp_context::WebAppContext;
+use crate::frontends::frontend_webserver::context::webapp_context::WebAppContext;
 use leptos::*;
 
 #[component]

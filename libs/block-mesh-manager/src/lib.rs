@@ -1,6 +1,6 @@
 use cfg_if::cfg_if;
 
-pub mod frontend;
+pub mod frontends;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
     pub mod configuration;
@@ -22,7 +22,7 @@ cfg_if! { if #[cfg(feature = "hydrate")] {
     use wasm_bindgen::prelude::wasm_bindgen;
     // use logger_leptos::leptos_tracing::setup_leptos_tracing;
     // use block_mesh_common::constants::DeviceType;
-    use crate::frontend::app::App;
+    use crate::frontends::app::App;
     #[wasm_bindgen]
     pub fn hydrate() {
         // initializes logging using the `log` crate

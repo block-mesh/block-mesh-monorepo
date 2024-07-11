@@ -1,7 +1,7 @@
-use crate::frontend::components::error::ErrorComponent;
-use crate::frontend::components::navbar::NavbarComponent;
-use crate::frontend::components::notification::NotificationComponent;
-use crate::frontend::context::webapp_context::WebAppContext;
+use crate::frontends::frontend_webserver::components::error::ErrorComponent;
+use crate::frontends::frontend_webserver::components::navbar::NavbarComponent;
+use crate::frontends::frontend_webserver::components::notification::NotificationComponent;
+use crate::frontends::frontend_webserver::context::webapp_context::WebAppContext;
 use leptos::Suspense;
 use leptos::*;
 

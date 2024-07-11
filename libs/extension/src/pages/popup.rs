@@ -1,13 +1,7 @@
-use crate::components::navbar::NavBar;
-use crate::components::notifications::Notifications;
-use crate::pages::home::Home;
-use crate::pages::login::Login;
-use crate::pages::page::Page;
-use crate::pages::register::Register;
+use leptos::*;
+
 use crate::utils::ext_state::AppState;
 use crate::utils::log::log;
-use leptos::*;
-use leptos_router::{use_navigate, Route, Router, Routes};
 
 #[component]
 pub fn Popup() -> impl IntoView {
@@ -22,53 +16,54 @@ pub fn Popup() -> impl IntoView {
         };
     });
 
-    let on_logout = move |_| {
+    let _on_logout = move |_: ()| {
         log!("Logout");
         logout.dispatch(());
     };
 
     view! {
-        <div class="bg-image bg-fixed bg-cover bg-no-repeat bg-gray-800">
-            <Router>
-                <Notifications/>
-                <NavBar on_logout/>
-
-                <main>
-                    <Routes>
-                        <Route
-                            path=Page::Home.path()
-                            view=move || {
-                                view! { <Home/> }
-                            }
-                        />
-
-                        <Route
-                            path=Page::Login.path()
-                            view=move || {
-                                view! {
-                                    <Login on_success=move |_: ()| {
-                                        let navigate = use_navigate();
-                                        navigate(Page::Home.path(), Default::default());
-                                    }/>
-                                }
-                            }
-                        />
-
-                        <Route
-                            path=Page::Register.path()
-                            view=move || {
-                                view! {
-                                    <Register on_success=move |_: ()| {
-                                        let navigate = use_navigate();
-                                        navigate(Page::Home.path(), Default::default());
-                                    }/>
-                                }
-                            }
-                        />
-
-                    </Routes>
-                </main>
-            </Router>
-        </div>
+        // <iframe width="300" height="400" src="http://localhost:8000/ext/login"/>
+        // <div class="bg-image bg-fixed bg-cover bg-no-repeat bg-gray-800">
+        //     <Router>
+        //         <Notifications/>
+        //         <NavBar on_logout/>
+        //
+        //         <main>
+        //             <Routes>
+        //                 <Route
+        //                     path=Page::Home.path()
+        //                     view=move || {
+        //                         view! { <Home/> }
+        //                     }
+        //                 />
+        //
+        //                 <Route
+        //                     path=Page::Login.path()
+        //                     view=move || {
+        //                         view! {
+        //                             <Login on_success=move |_: ()| {
+        //                                 let navigate = use_navigate();
+        //                                 navigate(Page::Home.path(), Default::default());
+        //                             }/>
+        //                         }
+        //                     }
+        //                 />
+        //
+        //                 <Route
+        //                     path=Page::Register.path()
+        //                     view=move || {
+        //                         view! {
+        //                             <Register on_success=move |_: ()| {
+        //                                 let navigate = use_navigate();
+        //                                 navigate(Page::Home.path(), Default::default());
+        //                             }/>
+        //                         }
+        //                     }
+        //                 />
+        //
+        //             </Routes>
+        //         </main>
+        //     </Router>
+        // </div>
     }
 }
