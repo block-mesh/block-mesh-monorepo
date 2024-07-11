@@ -1,8 +1,15 @@
+use crate::frontends::frontend_extension::components::notification::Notifications;
+use crate::frontends::frontend_extension::extension_state::ExtensionState;
 use leptos::*;
 
 #[component]
 pub fn ExtensionLoggedIn() -> impl IntoView {
+    provide_context(ExtensionState::default());
+    let _state = use_context::<ExtensionState>().unwrap();
+
     view! {
+        <Notifications/>
+
         <div class="auth-card">
             <img
                 class="background-image"

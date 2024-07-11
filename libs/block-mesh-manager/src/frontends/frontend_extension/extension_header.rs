@@ -1,24 +1,5 @@
 use leptos::*;
 use leptos_meta::{Link, Meta, Script, Stylesheet, Title};
-use wasm_bindgen::prelude::wasm_bindgen;
-use wasm_bindgen::JsValue;
-
-#[wasm_bindgen(inline_js = r#"
-    export async function send_message(msg) {
-        try {
-            if (! window.message_channel_port ) {
-                console.log("message_channel_port is missing");
-                return;
-            }
-           window.message_channel_port.postMessage(msg);
-        } catch (e) {
-            return ""
-        }
-    };
-"#)]
-extern "C" {
-    pub async fn send_message(msg: &str) -> JsValue;
-}
 
 #[component]
 pub fn ExtensionServerHeader() -> impl IntoView {
@@ -41,6 +22,9 @@ pub fn ExtensionServerHeader() -> impl IntoView {
                     if (!e.ports.length) return;
                     e.ports[0].postMessage("A message from the iframe in page2.html");
                     window.message_channel_port = e.ports[0];
+                    window.message_channel_port.onmessage = (msg) => {
+                        console.log("msg =>", msg);
+                    }
                 }
                 console.log("inblock")
             "#

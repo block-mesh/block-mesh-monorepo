@@ -1,5 +1,6 @@
 use crate::components::notifications::Notifications;
 use crate::utils::ext_state::AppState;
+use leptos::logging::log;
 use leptos::*;
 use url::Url;
 
@@ -27,6 +28,7 @@ pub fn Options() -> impl IntoView {
     });
 
     let save_action = create_action(move |_| async move {
+        log!("hello");
         let s = match state.get() {
             None => return,
             Some(s) => s,

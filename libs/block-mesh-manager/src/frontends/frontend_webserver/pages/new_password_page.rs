@@ -20,7 +20,7 @@ pub fn NewPasswordPage() -> impl IntoView {
         set_origin.set(Some(window().origin()));
     });
 
-    let async_data = create_resource(
+    let async_data = create_local_resource(
         move || origin.get(),
         move |_| async move {
             origin.get()?;

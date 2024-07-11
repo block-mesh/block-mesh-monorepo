@@ -1,6 +1,7 @@
 import initWasmModule, {mount_popup} from './wasm/blockmesh_ext.js';
 
 const channel = new MessageChannel();
+window.message_channel_port = channel.port1;
 
 function onSuccess(message) {
     try {
@@ -26,7 +27,8 @@ document.addEventListener('DOMContentLoaded', async function () {
     console.log("pre mount");
     mount_popup();
     const iframe = document.createElement("iframe");
-    iframe.src = "http://localhost:8000/ext/login";
+    const url = (((await chrome.storage.sync.get("blockmesh_url"))?.blockmesh_url) || "https://app.blockmesh.xyz");
+    iframe.src = `${url}/ext/login`; // "http://localhost:8000/ext/login";
     iframe.width = "300";
     iframe.height = "400"
 
@@ -42,8 +44,22 @@ document.addEventListener('DOMContentLoaded', async function () {
         ]);
     }
 
-    function onMessage(e) {
+    async function onMessage(e) {
         console.log("popup onMessage e => ", e);
+        const {data} = e;
+        const {type, key, value} = data;
+        if (type === "GET" && key) {
+            let val = await chrome.storage.sync.get(key);
+            if (val) {
+                console.log("value =", val[key]);
+            }
+        }
+        if (type === "SET" && key) {
+            await chrome.storage.sync.set({[key]: value});
+        }
+        if (type === "DELETE" && key) {
+            await chrome.storage.sync.remove(key);
+        }
     }
 
     const body = document.body;

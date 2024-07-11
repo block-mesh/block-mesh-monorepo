@@ -1,36 +1,32 @@
-use block_mesh_common::interfaces::server_api::{GetTokenResponse, LoginForm};
+use crate::frontends::frontend_extension::components::notification::Notifications;
+use crate::frontends::frontend_extension::extension_state::ExtensionState;
+use crate::frontends::frontend_extension::utils::auth::login;
+use crate::frontends::frontend_extension::utils::connectors::send_message;
+use block_mesh_common::chrome_storage::{StorageMessage, StorageMessageType};
+use block_mesh_common::interfaces::server_api::LoginForm;
 use leptos::logging::log;
 use leptos::*;
 use leptos_router::{use_navigate, A};
 
-#[tracing::instrument(name = "login", skip(credentials), err)]
-pub async fn login(
-    blockmesh_url: &str,
-    credentials: &LoginForm,
-) -> anyhow::Result<GetTokenResponse> {
-    let url = format!("{}/api/get_token", blockmesh_url);
-    let client = reqwest::Client::new();
-    log!("pre");
-    let response = client
-        .post(&url)
-        .header("Content-Type", "application/json")
-        .json(&credentials)
-        .send()
-        .await?
-        .json()
-        .await?;
-    log!("post response {:?}", response);
-    Ok(response)
-}
-
 #[component]
 pub fn ExtensionLogin() -> impl IntoView {
+    provide_context(ExtensionState::default());
+    let state = use_context::<ExtensionState>().unwrap();
+    let _state = ExtensionState::init_resource(state);
+
     let (password, set_password) = create_signal(String::new());
     let (email, set_email) = create_signal(String::new());
     let url = "http://localhost:8000";
 
     let submit_action = create_action(move |_| async move {
-        // send_message("{ hello: \"world\"").await;
+        let get_blockmesh_url = StorageMessage {
+            r#type: StorageMessageType::GET,
+            key: "blockmesh_url".to_string(),
+            // value: None,
+        };
+        if let Ok(js_args) = serde_wasm_bindgen::to_value(&get_blockmesh_url) {
+            send_message(js_args).await;
+        }
 
         log!("bla");
         let credentials = LoginForm {
@@ -74,6 +70,7 @@ pub fn ExtensionLogin() -> impl IntoView {
     });
 
     view! {
+        <Notifications/>
         <div class="auth-card">
             <img
                 class="background-image"
@@ -89,7 +86,7 @@ pub fn ExtensionLogin() -> impl IntoView {
                     alt="logo"
                 />
                 <h1>BlockMesh</h1>
-                <form  on:submit=|ev| ev.prevent_default()>
+                <form on:submit=|ev| ev.prevent_default()>
                     <div class="auth-card-input-container">
                         <input
                             type="text"
