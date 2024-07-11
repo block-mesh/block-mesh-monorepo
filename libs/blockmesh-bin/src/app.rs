@@ -10,7 +10,7 @@ use crate::leptos_state::LeptosTauriAppState;
 pub fn App() -> impl IntoView {
     provide_context(LeptosTauriAppState::default());
     let state = expect_context::<LeptosTauriAppState>();
-    let resource = create_resource(
+    let resource = create_local_resource(
         move || {
             state.app_config.get().email.is_some() || state.app_config.get().api_token.is_some()
         },

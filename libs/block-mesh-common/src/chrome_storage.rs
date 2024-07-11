@@ -1,4 +1,6 @@
-use std::fmt::Display;
+use serde::{Deserialize, Serialize};
+use std::fmt::{Display, Formatter};
+use uuid::Uuid;
 
 #[derive(Debug)]
 pub enum StorageValues {
@@ -55,4 +57,36 @@ impl TryFrom<&String> for StorageValues {
     fn try_from(value: &String) -> Result<Self, Self::Error> {
         StorageValues::try_from(value.as_str())
     }
+}
+
+#[derive(Serialize)]
+pub enum StorageValue {
+    String(String),
+    F64(f64),
+    I64(i64),
+    UUID(Uuid),
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub enum StorageMessageType {
+    GET,
+    SET,
+    DELETE,
+}
+
+impl Display for StorageMessageType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match &self {
+            StorageMessageType::GET => f.write_str("GET"),
+            StorageMessageType::SET => f.write_str("SET"),
+            StorageMessageType::DELETE => f.write_str("DELETE"),
+        }
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct StorageMessage {
+    pub r#type: StorageMessageType,
+    pub key: String,
+    // value: Option<JsValue>,
 }

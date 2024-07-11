@@ -1,11 +1,9 @@
-use crate::pages::page::Page;
-use crate::utils::ext_state::{AppState, AppStatus};
+use crate::frontends::frontend_extension::extension_state::{AppStatus, ExtensionState};
 use leptos::*;
-use leptos_router::use_navigate;
 
 #[component]
 pub fn Notifications() -> impl IntoView {
-    let state = expect_context::<AppState>();
+    let state = expect_context::<ExtensionState>();
 
     let success = Signal::derive(move || state.success.get());
     let error = Signal::derive(move || state.error.get());
@@ -19,8 +17,8 @@ pub fn Notifications() -> impl IntoView {
 
     create_effect(move |_| {
         if state.status.get() == AppStatus::LoggedIn {
-            let navigate = use_navigate();
-            navigate(Page::Home.path(), Default::default());
+            // let navigate = use_navigate();
+            // navigate(Page::Home.path(), Default::default());
         }
     });
 

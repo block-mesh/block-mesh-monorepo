@@ -15,14 +15,16 @@ use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
+use block_mesh_common::chrome_storage::{StorageValue, StorageValues};
 use block_mesh_common::constants::DeviceType;
-use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
+use block_mesh_common::interfaces::server_api::{
+    CheckTokenRequest, GetLatestInviteCodeRequest, GetLatestInviteCodeResponse, GetTokenResponse,
+};
 use logger_leptos::leptos_tracing::setup_leptos_tracing;
 
-use crate::utils::auth::{check_token, get_latest_invite_code};
-use crate::utils::connectors::{get_storage_value, set_storage_value, storageOnChange};
-use crate::utils::storage::StorageValues;
-
+use crate::utils::connectors::{
+    get_storage_value, send_storage_value_to_iframe, set_storage_value, storageOnChange,
+};
 #[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
 pub enum AppStatus {
     LoggedIn,
@@ -127,6 +129,7 @@ impl AppState {
             let credentials = CheckTokenRequest { api_token, email };
             let result = check_token(&blockmesh_url, &credentials).await;
             if result.is_ok() {
+                // TODO
                 self.status.update(|v| *v = AppStatus::LoggedIn);
             };
         }
@@ -140,42 +143,82 @@ impl AppState {
                                 let value = value.as_str().unwrap_or_default().to_string();
                                 match storage_value {
                                     StorageValues::BlockMeshUrl => {
-                                        self.blockmesh_url.update(|v| *v = value);
+                                        self.blockmesh_url.update(|v| *v = value.clone());
+                                        send_storage_value_to_iframe(
+                                            StorageValues::BlockMeshUrl,
+                                            StorageValue::String(value),
+                                        );
                                     }
                                     StorageValues::ApiToken => {
-                                        self.api_token.update(|v| {
-                                            *v = Uuid::from_str(&value).unwrap_or_default()
-                                        });
+                                        let casted_value =
+                                            Uuid::from_str(&value).unwrap_or_default();
+                                        self.api_token.update(|v| *v = casted_value);
+                                        send_storage_value_to_iframe(
+                                            StorageValues::ApiToken,
+                                            StorageValue::UUID(casted_value),
+                                        );
                                     }
                                     StorageValues::Email => {
-                                        self.email.update(|v| *v = value);
+                                        self.email.update(|v| *v = value.clone());
+                                        send_storage_value_to_iframe(
+                                            StorageValues::Email,
+                                            StorageValue::String(value),
+                                        );
                                     }
                                     StorageValues::DeviceId => {
-                                        self.device_id.update(|v| {
-                                            *v = Uuid::from_str(&value).unwrap_or_default()
-                                        });
+                                        let casted_value =
+                                            Uuid::from_str(&value).unwrap_or_default();
+                                        self.device_id.update(|v| *v = casted_value);
+                                        send_storage_value_to_iframe(
+                                            StorageValues::DeviceId,
+                                            StorageValue::UUID(casted_value),
+                                        );
                                     }
                                     StorageValues::Uptime => {
-                                        self.uptime.update(|v| {
-                                            *v = f64::from_str(&value).unwrap_or_default()
-                                        });
+                                        let casted_value =
+                                            f64::from_str(&value).unwrap_or_default();
+                                        self.uptime.update(|v| *v = casted_value);
+                                        send_storage_value_to_iframe(
+                                            StorageValues::Uptime,
+                                            StorageValue::F64(casted_value),
+                                        );
                                     }
                                     StorageValues::InviteCode => {
-                                        self.invite_code.update(|v| *v = value);
+                                        self.invite_code.update(|v| *v = value.clone());
+                                        send_storage_value_to_iframe(
+                                            StorageValues::InviteCode,
+                                            StorageValue::String(value),
+                                        )
                                     }
                                     StorageValues::DownloadSpeed => {
+                                        let casted_value =
+                                            f64::from_str(&value).unwrap_or_default();
                                         self.download_speed.update(|v| {
                                             *v = f64::from_str(&value).unwrap_or_default()
                                         });
+                                        send_storage_value_to_iframe(
+                                            StorageValues::DownloadSpeed,
+                                            StorageValue::F64(casted_value),
+                                        );
                                     }
                                     StorageValues::UploadSpeed => {
-                                        self.upload_speed.update(|v| {
-                                            *v = f64::from_str(&value).unwrap_or_default()
-                                        });
+                                        let casted_value =
+                                            f64::from_str(&value).unwrap_or_default();
+                                        self.upload_speed.update(|v| *v = casted_value);
+                                        send_storage_value_to_iframe(
+                                            StorageValues::UploadSpeed,
+                                            StorageValue::F64(casted_value),
+                                        )
                                     }
-                                    StorageValues::LastUpdate => self
-                                        .last_update
-                                        .update(|v| *v = i64::from_str(&value).unwrap_or_default()),
+                                    StorageValues::LastUpdate => {
+                                        let casted_value =
+                                            i64::from_str(&value).unwrap_or_default();
+                                        self.last_update.update(|v| *v = casted_value);
+                                        send_storage_value_to_iframe(
+                                            StorageValues::LastUpdate,
+                                            StorageValue::I64(casted_value),
+                                        );
+                                    }
                                 }
                             }
                         }
@@ -254,7 +297,7 @@ impl AppState {
 
     #[tracing::instrument(name = "init_resource")]
     pub fn init_resource(state: AppState) -> Resource<(), AppState> {
-        create_resource(
+        create_local_resource(
             || (),
             move |_| async move {
                 state.init_with_storage().await;
@@ -281,6 +324,10 @@ impl AppState {
             JsValue::from_str(&blockmesh_url),
         )
         .await;
+        send_storage_value_to_iframe(
+            StorageValues::BlockMeshUrl,
+            StorageValue::String(blockmesh_url),
+        );
     }
 
     pub async fn store_device_id(device_id: String) {
@@ -289,10 +336,12 @@ impl AppState {
             JsValue::from_str(&device_id),
         )
         .await;
+        send_storage_value_to_iframe(StorageValues::DeviceId, StorageValue::String(device_id));
     }
 
     pub async fn store_email(email: String) {
         set_storage_value(&StorageValues::Email.to_string(), JsValue::from_str(&email)).await;
+        send_storage_value_to_iframe(StorageValues::Email, StorageValue::String(email));
     }
 
     pub async fn store_api_token(api_token: Uuid) {
@@ -301,6 +350,7 @@ impl AppState {
             JsValue::from_str(&api_token.to_string()),
         )
         .await;
+        send_storage_value_to_iframe(StorageValues::ApiToken, StorageValue::UUID(api_token));
     }
 
     pub async fn store_invite_code(invite_code: String) {
@@ -309,6 +359,7 @@ impl AppState {
             JsValue::from_str(&invite_code),
         )
         .await;
+        send_storage_value_to_iframe(StorageValues::InviteCode, StorageValue::String(invite_code))
     }
 
     pub async fn store_uptime(uptime: f64) {
@@ -317,6 +368,7 @@ impl AppState {
             JsValue::from_f64(uptime),
         )
         .await;
+        send_storage_value_to_iframe(StorageValues::Uptime, StorageValue::F64(uptime));
     }
 
     pub async fn store_last_update(last_update: i64) {
@@ -325,6 +377,7 @@ impl AppState {
             JsValue::from_f64(last_update as f64),
         )
         .await;
+        send_storage_value_to_iframe(StorageValues::LastUpdate, StorageValue::I64(last_update));
     }
 
     pub async fn store_download_speed(uptime: f64) {
@@ -333,6 +386,7 @@ impl AppState {
             JsValue::from_f64(uptime),
         )
         .await;
+        send_storage_value_to_iframe(StorageValues::DownloadSpeed, StorageValue::F64(uptime));
     }
 
     pub async fn store_upload_speed(uptime: f64) {
@@ -341,6 +395,7 @@ impl AppState {
             JsValue::from_f64(uptime),
         )
         .await;
+        send_storage_value_to_iframe(StorageValues::UploadSpeed, StorageValue::F64(uptime))
     }
 
     pub async fn get_blockmesh_url() -> String {
@@ -401,4 +456,39 @@ impl AppState {
         let str = value.as_string().unwrap_or_default();
         f64::from_str(&str).unwrap_or_default()
     }
+}
+
+#[tracing::instrument(name = "get_latest_invite_code", skip(credentials), err)]
+pub async fn get_latest_invite_code(
+    blockmesh_url: &str,
+    credentials: &GetLatestInviteCodeRequest,
+) -> anyhow::Result<GetLatestInviteCodeResponse> {
+    let url = format!("{}/api/get_latest_invite_code", blockmesh_url);
+    let client = reqwest::Client::new();
+    let response = client
+        .post(&url)
+        .header("Content-Type", "application/json")
+        .json(&credentials)
+        .send()
+        .await?
+        .json()
+        .await?;
+    Ok(response)
+}
+
+#[tracing::instrument(name = "check_token", skip(credentials), err)]
+pub async fn check_token(
+    blockmesh_url: &str,
+    credentials: &CheckTokenRequest,
+) -> anyhow::Result<GetTokenResponse> {
+    let url = format!("{}/api/check_token", blockmesh_url);
+    let client = reqwest::Client::new();
+    let response = client
+        .post(&url)
+        .json(credentials)
+        .send()
+        .await?
+        .json()
+        .await?;
+    Ok(response)
 }
