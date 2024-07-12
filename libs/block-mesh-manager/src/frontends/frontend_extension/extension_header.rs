@@ -23,7 +23,7 @@ pub fn ExtensionServerHeader() -> impl IntoView {
                     e.ports[0].postMessage("A message from the iframe in page2.html");
                     window.message_channel_port = e.ports[0];
                     window.message_channel_port.onmessage = (msg) => {
-                        console.log("msg =>", msg);
+                        console.log("msg", window.location.href , msg);
                     }
                 }
                 console.log("inblock")
