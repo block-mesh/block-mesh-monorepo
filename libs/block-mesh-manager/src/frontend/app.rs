@@ -32,15 +32,8 @@ pub fn App() -> impl IntoView {
         <Title text="BlockMesh Network"/>
         <Link
             rel="icon"
-            // type_=Some(i)
             href="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"
         />
-        <Link
-            rel="stylesheet"
-            // type_=Some(c)
-            href="https://r2-assets.blockmesh.xyz/tailwind.css"
-        />
-        // async_=Some(t)
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-RYHLW3MDK2"/>
         <Script>
             r#"
