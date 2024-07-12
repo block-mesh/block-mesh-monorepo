@@ -29,15 +29,14 @@ function onLoad(iframe) {
     iframe.contentWindow.postMessage("Hello from the main page!", "*", [
         window.channel.port2,
     ]);
-    // setTimeout(() => {
-    //     mount_popup();
-    // }, 500)
 }
 
 async function onMessage(e) {
     console.log("popup", window.location.href, "onMessage e => ", e);
     if (!window.mounted) {
-        mount_popup();
+        setTimeout(() => {
+            mount_popup();
+        }, 500)
         window.mounted = true;
     }
     const {data} = e;

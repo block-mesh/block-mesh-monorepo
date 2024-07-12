@@ -1,53 +1,60 @@
 use crate::frontends::frontend_extension::components::notification::Notifications;
+use crate::frontends::frontend_extension::extension_state::{AppStatus, ExtensionState};
 use crate::frontends::frontend_extension::utils::auth::login;
-use crate::frontends::frontend_extension::utils::connectors::{send_message, StorageMessage};
-use block_mesh_common::chrome_storage::{StorageMessageType, StorageValues};
+use crate::frontends::frontend_extension::utils::connectors::send_message_channel;
+use block_mesh_common::chrome_storage::{StorageMessageType, StorageValue, StorageValues};
 use block_mesh_common::interfaces::server_api::LoginForm;
 use leptos::logging::log;
 use leptos::*;
 use leptos_router::{use_navigate, A};
+use uuid::Uuid;
 
 #[component]
 pub fn ExtensionLogin() -> impl IntoView {
+    let state = use_context::<ExtensionState>().unwrap();
     let (password, set_password) = create_signal(String::new());
     let (email, set_email) = create_signal(String::new());
-    let url = "http://localhost:8000";
+    // let url = move || state.blockmesh_url.get();
+    // log!("1 url => {}", url());
 
     let submit_action = create_action(move |_| async move {
-        let get_blockmesh_url = StorageMessage {
-            msg_type: StorageMessageType::GET,
-            key: StorageValues::BlockMeshUrl,
-            value: None,
-        };
-        if let Ok(js_args) = serde_wasm_bindgen::to_value(&get_blockmesh_url) {
-            send_message(js_args).await;
-        }
-
-        log!("bla");
+        // log!("2 url => {}", url());
         let credentials = LoginForm {
             email: email.get_untracked(),
             password: password.get_untracked(),
         };
 
-        let result = login(url, &credentials).await;
+        let result = login(&state.blockmesh_url.get_untracked(), &credentials).await;
+        log!("result = {:?}", result);
         match result {
             Ok(res) => {
-                // state.email.update(|e| *e = credentials.email.clone());
-                // AppState::store_email(credentials.email).await;
                 if res.message.is_some() {
-                    // AppState::set_error(res.message.unwrap(), state.error);
+                    ExtensionState::set_error(res.message.unwrap(), state.error);
                     return;
                 }
-                if let Some(_api_token) = res.api_token {
-                    // if api_token != state.api_token.get_untracked()
-                    //     || state.api_token.get_untracked() == Uuid::default()
-                    // {
-                    //     tracing::info!("Store new api token");
-                    //     AppState::store_api_token(api_token).await;
-                    // } else {
-                    //     tracing::info!("Logged in");
-                    // }
-                    // state.status.update(|v| *v = AppStatus::LoggedIn);
+                if let Some(api_token) = res.api_token {
+                    if api_token != state.api_token.get_untracked()
+                        || state.api_token.get_untracked() == Uuid::default()
+                    {
+                        tracing::info!("Store new api token");
+                        state.api_token.update(|v| *v = api_token);
+                        state.email.update(|e| *e = credentials.email.clone());
+                        send_message_channel(
+                            StorageMessageType::SET,
+                            StorageValues::Email,
+                            Option::from(StorageValue::String(state.email.get_untracked())),
+                        )
+                        .await;
+                        send_message_channel(
+                            StorageMessageType::SET,
+                            StorageValues::ApiToken,
+                            Option::from(StorageValue::UUID(api_token)),
+                        )
+                        .await;
+                    } else {
+                        tracing::info!("Logged in");
+                    }
+                    state.status.update(|v| *v = AppStatus::LoggedIn);
                     let navigate = use_navigate();
                     navigate("/ext/logged_in", Default::default());
                 }

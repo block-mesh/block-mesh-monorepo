@@ -11,8 +11,6 @@ pub fn ExtensionWrapper(children: ChildrenFn) -> impl IntoView {
     view! {
         <Suspense fallback=move || {
             view! { Loading... }
-        }>
-            {move || { resource.get().map(|_| view.get()) }}
-        </Suspense>
+        }>{move || { resource.get().map(|_| view.get()) }}</Suspense>
     }
 }
