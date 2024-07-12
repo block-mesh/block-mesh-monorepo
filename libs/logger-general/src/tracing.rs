@@ -5,19 +5,53 @@ use reqwest::Client;
 #[cfg(feature = "sentry")]
 use sentry_tracing;
 use serde_json::{json, Value};
+use std::option::Option;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{mpsc, Arc, Once};
 use std::thread;
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
-use tracing::{Event, Subscriber};
+use tokio::time::Instant;
+use tracing::span::Attributes;
+use tracing::{field, Event, Id, Subscriber};
 use tracing_serde::AsSerde;
-use tracing_subscriber::fmt::format::FmtSpan;
 use tracing_subscriber::layer::Context;
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Layer;
 use uuid::Uuid;
+
+struct Timings {
+    idle: u64,
+    busy: u64,
+    last: Instant,
+}
+
+impl Timings {
+    fn new() -> Self {
+        Self {
+            idle: 0,
+            busy: 0,
+            last: Instant::now(),
+        }
+    }
+}
+
+macro_rules! with_event_from_span {
+    ($id:ident, $span:ident, $($field:literal = $value:expr),*, |$event:ident| $code:block) => {
+        let meta = $span.metadata();
+        let cs = meta.callsite();
+        let fs = field::FieldSet::new(&[$($field),*], cs);
+        #[allow(unused)]
+        let mut iter = fs.iter();
+        let v = [$(
+            (&iter.next().unwrap(), ::core::option::Option::Some(&$value as &dyn field::Value)),
+        )*];
+        let vs = fs.value_set(&v);
+        let $event = Event::new_child_of($id, meta, &vs);
+        $code
+    };
+}
 
 pub fn setup_tracing(user_id: Uuid, device_type: DeviceType) {
     static SET_HOOK: Once = Once::new();
@@ -31,9 +65,7 @@ pub fn setup_tracing(user_id: Uuid, device_type: DeviceType) {
                     .unwrap_or_else(|_| "info".into()),
             )
             .with(
-                tracing_subscriber::fmt::layer()
-                    .with_ansi(false)
-                    .with_span_events(FmtSpan::CLOSE),
+                tracing_subscriber::fmt::layer().with_ansi(false), // .with_span_events(FmtSpan::CLOSE),
             )
             .with(log_layer);
 
@@ -113,9 +145,111 @@ impl HttpLogLayer {
 
 impl<S> Layer<S> for HttpLogLayer
 where
-    S: Subscriber,
+    S: Subscriber
+        + for<'span> tracing_subscriber::registry::LookupSpan<'span>
+        + for<'lookup> tracing_subscriber::registry::LookupSpan<'lookup>,
     Self: 'static,
 {
+    fn on_new_span(&self, _attrs: &Attributes<'_>, id: &Id, ctx: Context<'_, S>) {
+        let span = ctx.span(id).expect("Span not found, this is a bug");
+        let mut extensions = span.extensions_mut();
+
+        if extensions.get_mut::<Timings>().is_none() {
+            extensions.insert(Timings::new());
+        }
+
+        with_event_from_span!(id, span, "message" = "new", |event| {
+            drop(extensions);
+            drop(span);
+            self.on_event(&event, ctx);
+        });
+    }
+
+    fn on_exit(&self, id: &Id, ctx: Context<'_, S>) {
+        let span = ctx.span(id).expect("Span not found, this is a bug");
+        let mut extensions = span.extensions_mut();
+        let mut busy: Option<u64> = None;
+        let mut idle: Option<u64> = None;
+        if let Some(timings) = extensions.get_mut::<Timings>() {
+            let now = Instant::now();
+            timings.busy += (now - timings.last).as_nanos() as u64;
+            timings.last = now;
+            busy = Option::from(timings.busy);
+            idle = Option::from(timings.idle);
+        }
+        with_event_from_span!(
+            id,
+            span,
+            "message" = "exit",
+            "time.busy" = busy,
+            "time.idle" = idle,
+            |event| {
+                drop(extensions);
+                drop(span);
+                self.on_event(&event, ctx);
+            }
+        );
+    }
+
+    fn on_enter(&self, id: &Id, ctx: Context<'_, S>) {
+        let span = ctx.span(id).expect("Span not found, this is a bug");
+        let mut extensions = span.extensions_mut();
+        let mut busy: Option<u64> = None;
+        let mut idle: Option<u64> = None;
+
+        if let Some(timings) = extensions.get_mut::<Timings>() {
+            let now = Instant::now();
+            timings.idle += (now - timings.last).as_nanos() as u64;
+            timings.last = now;
+            busy = Option::from(timings.busy);
+            idle = Option::from(timings.idle);
+        }
+        with_event_from_span!(
+            id,
+            span,
+            "message" = "enter",
+            "time.busy" = busy,
+            "time.idle" = idle,
+            |event| {
+                drop(extensions);
+                drop(span);
+                self.on_event(&event, ctx);
+            }
+        );
+    }
+
+    fn on_close(&self, id: Id, ctx: Context<'_, S>) {
+        let span = ctx.span(&id).expect("Span not found, this is a bug");
+        let extensions = span.extensions();
+        if let Some(timing) = extensions.get::<Timings>() {
+            let Timings {
+                busy,
+                mut idle,
+                last,
+            } = *timing;
+            idle += (Instant::now() - last).as_nanos() as u64;
+
+            with_event_from_span!(
+                id,
+                span,
+                "message" = "close",
+                "time.busy" = busy,
+                "time.idle" = idle,
+                |event| {
+                    drop(extensions);
+                    drop(span);
+                    self.on_event(&event, ctx);
+                }
+            );
+        } else {
+            with_event_from_span!(id, span, "message" = "close", |event| {
+                drop(extensions);
+                drop(span);
+                self.on_event(&event, ctx);
+            });
+        }
+    }
+
     fn on_event(&self, event: &Event, _ctx: Context<S>) {
         let user_id = self.user_id.clone();
         let log = json!({
