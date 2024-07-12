@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 use uuid::Uuid;
 
-#[derive(Debug)]
+#[derive(Serialize, Deserialize, Debug)]
 pub enum StorageValues {
     BlockMeshUrl,
     Email,
@@ -59,7 +59,7 @@ impl TryFrom<&String> for StorageValues {
     }
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Deserialize, Debug)]
 pub enum StorageValue {
     String(String),
     F64(f64),
@@ -82,11 +82,4 @@ impl Display for StorageMessageType {
             StorageMessageType::DELETE => f.write_str("DELETE"),
         }
     }
-}
-
-#[derive(Serialize, Deserialize, Debug)]
-pub struct StorageMessage {
-    pub r#type: StorageMessageType,
-    pub key: String,
-    // value: Option<JsValue>,
 }

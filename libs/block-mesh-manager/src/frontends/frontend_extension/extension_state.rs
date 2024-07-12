@@ -16,12 +16,13 @@ use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
-use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
-// use logger_leptos::leptos_tracing::setup_leptos_tracing; // TODO
-
-use crate::frontends::frontend_extension::utils::auth::{check_token, get_latest_invite_code};
-use crate::frontends::frontend_extension::utils::connectors::storageOnChangeViaPostMessage;
 use block_mesh_common::chrome_storage::StorageValues;
+use block_mesh_common::interfaces::server_api::GetLatestInviteCodeRequest;
+
+use crate::frontends::frontend_extension::utils::auth::get_latest_invite_code;
+use crate::frontends::frontend_extension::utils::connectors::storageOnChangeViaPostMessage;
+
+// use logger_leptos::leptos_tracing::setup_leptos_tracing; // TODO
 
 #[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
 pub enum AppStatus {
@@ -82,32 +83,39 @@ impl Debug for ExtensionState {
 }
 
 impl ExtensionState {
-    #[tracing::instrument(name = "AppState::init_with_storage")]
+    #[tracing::instrument(name = "init_resource")]
+    pub fn init_resource(state: ExtensionState) -> Resource<(), ExtensionState> {
+        create_local_resource(
+            || (),
+            move |_| async move {
+                state.init_with_storage().await;
+                state
+            },
+        )
+    }
+
+    #[tracing::instrument(name = "ExtensionState::init_with_storage")]
     pub async fn init_with_storage(self) {
         let now = Utc::now().timestamp();
-        let last_update = Self::get_last_update().await;
-        let mut blockmesh_url = Self::get_blockmesh_url().await;
+        let mut blockmesh_url = self.blockmesh_url.get_untracked();
         if blockmesh_url.is_empty() {
             blockmesh_url = "https://app.blockmesh.xyz".to_string();
-            Self::store_blockmesh_url(blockmesh_url.clone()).await;
+            self.blockmesh_url.update(|v| *v = blockmesh_url.clone());
         }
-        let email = Self::get_email().await;
-        let api_token = Self::get_api_token().await;
-        let api_token = uuid::Uuid::from_str(&api_token).unwrap_or_else(|_| Uuid::default());
-        let mut device_id = Self::get_device_id().await;
-        if device_id.is_empty() {
-            device_id = Uuid::new_v4().to_string();
-            Self::store_device_id(device_id.clone()).await;
+        let email = self.email.get_untracked();
+        let api_token = self.api_token.get_untracked();
+        let mut device_id = self.device_id.get_untracked();
+        if device_id.is_nil() || device_id == Uuid::default() {
+            device_id = Uuid::new_v4();
+            self.device_id.update(|v| *v = device_id);
         }
-        let device_id = uuid::Uuid::from_str(&device_id).unwrap_or_else(|_| Uuid::new_v4());
-        // setup_leptos_tracing(Option::from(device_id), DeviceType::Extension);
-        let uptime = Self::get_uptime().await;
-        let invite_code =
-            Self::update_invite_code(&api_token, now - last_update, &blockmesh_url, &email).await;
-        let download_speed = Self::get_download_speed().await;
-        let upload_speed = Self::get_upload_speed().await;
-
-        Self::store_last_update(now).await;
+        // setup_leptos_tracing(Option::from(device_id), DeviceType::Extension); // TODO
+        let uptime = self.uptime.get_untracked();
+        let invite_code = "".to_string();
+        // let invite_code =
+        //     Self::update_invite_code(&api_token, now - last_update, &blockmesh_url, &email).await; // TODO
+        let download_speed = self.download_speed.get_untracked();
+        let upload_speed = self.upload_speed.get_untracked();
 
         // Signals:
         self.invite_code.update(|v| *v = invite_code);
@@ -123,23 +131,19 @@ impl ExtensionState {
         self.upload_speed.update(|v| *v = upload_speed);
         self.last_update.update(|v| *v = now);
 
-        if !email.is_empty() && !api_token.is_nil() && api_token != Uuid::default() {
-            let credentials = CheckTokenRequest { api_token, email };
-            let result = check_token(&blockmesh_url, &credentials).await;
-            if result.is_ok() {
-                self.status.update(|v| *v = AppStatus::LoggedIn);
-            };
-        }
+        // if !email.is_empty() && !api_token.is_nil() && api_token != Uuid::default() {
+        //     let credentials = CheckTokenRequest { api_token, email };
+        //     let result = check_token(&blockmesh_url, &credentials).await;
+        //     if result.is_ok() {
+        //         self.status.update(|v| *v = AppStatus::LoggedIn);
+        //     };
+        // }
 
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
             if let Ok(data) = event.into_serde::<Value>() {
-                log!("data {:?}", data);
                 if let Some(obj) = data.as_object() {
-                    log!("obj {:?}", data);
                     for key in obj.keys() {
-                        log!("key {:?}", key);
                         if let Ok(storage_value) = StorageValues::try_from(key) {
-                            log!("storage_value {:?}", storage_value);
                             if let Some(value) = obj.get(key) {
                                 log!("in iframe {} => {}", storage_value, value);
                                 let value = value.as_str().unwrap_or_default().to_string();
@@ -201,7 +205,8 @@ impl ExtensionState {
         blockmesh_url: &str,
         email: &str,
     ) -> String {
-        let mut invite_code = Self::get_invite_code().await;
+        // let mut invite_code = Self::get_invite_code().await;
+        let mut invite_code = "".to_string();
         if !invite_code.is_empty() && time_diff < 600 {
             return invite_code;
         }
@@ -216,7 +221,7 @@ impl ExtensionState {
             .await
             {
                 invite_code = result.invite_code;
-                Self::store_invite_code(invite_code.clone()).await;
+                // Self::store_invite_code(invite_code.clone()).await;
             }
         }
         invite_code
@@ -257,17 +262,6 @@ impl ExtensionState {
         !(api_token.is_nil() || api_token == Uuid::default())
     }
 
-    #[tracing::instrument(name = "init_resource")]
-    pub fn init_resource(state: ExtensionState) -> Resource<(), ExtensionState> {
-        create_local_resource(
-            || (),
-            move |_| async move {
-                state.init_with_storage().await;
-                state
-            },
-        )
-    }
-
     #[tracing::instrument(name = "clear")]
     pub async fn clear(&self) {
         self.blockmesh_url
@@ -275,128 +269,5 @@ impl ExtensionState {
         self.email.update(|v| *v = "".to_string());
         self.api_token.update(|v| *v = Uuid::default());
         self.status.update(|v| *v = AppStatus::LoggedOut);
-        ExtensionState::store_api_token(Uuid::default()).await;
-        ExtensionState::store_email("".to_string()).await;
-        ExtensionState::store_blockmesh_url("https://app.blockmesh.xyz".to_string()).await;
-    }
-
-    pub async fn store_blockmesh_url(_blockmesh_url: String) {
-        // set_storage_value(
-        //     &StorageValues::BlockMeshUrl.to_string(),
-        //     JsValue::from_str(&blockmesh_url),
-        // )
-        //     .await;
-    }
-
-    pub async fn store_device_id(_device_id: String) {
-        // set_storage_value(
-        //     &StorageValues::DeviceId.to_string(),
-        //     JsValue::from_str(&device_id),
-        // )
-        //     .await;
-    }
-
-    pub async fn store_email(_email: String) {
-        // set_storage_value(&StorageValues::Email.to_string(), JsValue::from_str(&email)).await;
-    }
-
-    pub async fn store_api_token(_api_token: Uuid) {
-        // set_storage_value(
-        //     &StorageValues::ApiToken.to_string(),
-        //     JsValue::from_str(&api_token.to_string()),
-        // )
-        //     .await;
-    }
-
-    pub async fn store_invite_code(_invite_code: String) {
-        // set_storage_value(
-        //     &StorageValues::InviteCode.to_string(),
-        //     JsValue::from_str(&invite_code),
-        // )
-        //     .await;
-    }
-
-    pub async fn store_uptime(_uptime: f64) {
-        // set_storage_value(
-        //     &StorageValues::Uptime.to_string(),
-        //     JsValue::from_f64(uptime),
-        // )
-        //     .await;
-    }
-
-    pub async fn store_last_update(_last_update: i64) {
-        // set_storage_value(
-        //     &StorageValues::LastUpdate.to_string(),
-        //     JsValue::from_f64(last_update as f64),
-        // )
-        //     .await;
-    }
-
-    pub async fn get_blockmesh_url() -> String {
-        // get_storage_value(StorageValues::BlockMeshUrl.to_string().as_str())
-        //     .await
-        //     .as_string()
-        //     .unwrap_or("https://app.blockmesh.xyz".to_string())
-        "".to_string()
-    }
-
-    pub async fn get_email() -> String {
-        // get_storage_value(StorageValues::Email.to_string().as_str())
-        //     .await
-        //     .as_string()
-        //     .unwrap_or_default()
-        "".to_string()
-    }
-
-    pub async fn get_last_update() -> i64 {
-        // let value = get_storage_value(StorageValues::LastUpdate.to_string().as_str()).await;
-        // let str = value.as_string().unwrap_or_default();
-        // i64::from_str(&str).unwrap_or_default()
-        0
-    }
-
-    pub async fn get_api_token() -> String {
-        // get_storage_value(StorageValues::ApiToken.to_string().as_str())
-        //     .await
-        //     .as_string()
-        //     .unwrap_or_default()
-        "".to_string()
-    }
-
-    pub async fn get_device_id() -> String {
-        // get_storage_value(StorageValues::DeviceId.to_string().as_str())
-        //     .await
-        //     .as_string()
-        //     .unwrap_or_default()
-        "".to_string()
-    }
-
-    pub async fn get_invite_code() -> String {
-        // get_storage_value(StorageValues::InviteCode.to_string().as_str())
-        //     .await
-        //     .as_string()
-        //     .unwrap_or_default()
-        "".to_string()
-    }
-
-    pub async fn get_uptime() -> f64 {
-        // let value = get_storage_value(StorageValues::Uptime.to_string().as_str()).await;
-        // let str = value.as_string().unwrap_or_default();
-        // f64::from_str(&str).unwrap_or_default()
-        0.0
-    }
-
-    pub async fn get_download_speed() -> f64 {
-        // let value = get_storage_value(StorageValues::DownloadSpeed.to_string().as_str()).await;
-        // let str = value.as_string().unwrap_or_default();
-        // f64::from_str(&str).unwrap_or_default()
-        0.0
-    }
-
-    pub async fn get_upload_speed() -> f64 {
-        // let value = get_storage_value(StorageValues::UploadSpeed.to_string().as_str()).await;
-        // let str = value.as_string().unwrap_or_default();
-        // f64::from_str(&str).unwrap_or_default()
-        0.0
     }
 }

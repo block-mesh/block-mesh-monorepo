@@ -112,19 +112,36 @@ impl AppState {
         Self::store_last_update(now).await;
 
         // Signals:
-        self.invite_code.update(|v| *v = invite_code);
+        self.invite_code.update(|v| *v = invite_code.clone());
+        send_storage_value_to_iframe(
+            StorageValues::InviteCode,
+            StorageValue::String(invite_code.clone()),
+        );
         self.email.update(|v| *v = email.clone());
+        send_storage_value_to_iframe(StorageValues::Email, StorageValue::String(email.clone()));
         self.api_token.update(|v| *v = api_token);
+        send_storage_value_to_iframe(StorageValues::ApiToken, StorageValue::UUID(api_token));
         self.blockmesh_url.update(|v| *v = blockmesh_url.clone());
+        send_storage_value_to_iframe(
+            StorageValues::BlockMeshUrl,
+            StorageValue::String(blockmesh_url.clone()),
+        );
         self.status.update(|v| *v = AppStatus::LoggedOut);
         self.device_id.update(|v| *v = device_id);
+        send_storage_value_to_iframe(StorageValues::DeviceId, StorageValue::UUID(device_id));
         self.uptime.update(|v| *v = uptime);
+        send_storage_value_to_iframe(StorageValues::Uptime, StorageValue::F64(uptime));
         self.success.update(|v| *v = None);
         self.error.update(|v| *v = None);
         self.download_speed.update(|v| *v = download_speed);
+        send_storage_value_to_iframe(
+            StorageValues::DownloadSpeed,
+            StorageValue::F64(download_speed),
+        );
         self.upload_speed.update(|v| *v = upload_speed);
+        send_storage_value_to_iframe(StorageValues::UploadSpeed, StorageValue::F64(upload_speed));
         self.last_update.update(|v| *v = now);
-
+        send_storage_value_to_iframe(StorageValues::LastUpdate, StorageValue::I64(now));
         if !email.is_empty() && !api_token.is_nil() && api_token != Uuid::default() {
             let credentials = CheckTokenRequest { api_token, email };
             let result = check_token(&blockmesh_url, &credentials).await;
@@ -188,7 +205,7 @@ impl AppState {
                                         send_storage_value_to_iframe(
                                             StorageValues::InviteCode,
                                             StorageValue::String(value),
-                                        )
+                                        );
                                     }
                                     StorageValues::DownloadSpeed => {
                                         let casted_value =

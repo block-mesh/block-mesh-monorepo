@@ -1,5 +1,6 @@
 use leptos::*;
 use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::JsCast;
 
 #[allow(unused_imports)]
 use background::*;
@@ -26,7 +27,13 @@ mod utils;
 pub fn mount_popup() {
     set_panic_hook();
     setup_leptos_tracing(None, DeviceType::Extension);
-    mount_to_body(Popup);
+    mount_to(
+        document()
+            .get_element_by_id("mount_to")
+            .unwrap()
+            .unchecked_into(),
+        Popup,
+    );
 }
 
 #[wasm_bindgen]

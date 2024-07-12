@@ -1,4 +1,5 @@
 use crate::frontends::frontend_extension::extension_header::ExtensionServerHeader;
+use crate::frontends::frontend_extension::pages::extension_wrapper::ExtensionWrapper;
 use crate::frontends::frontend_extension::pages::logged_in::ExtensionLoggedIn;
 use crate::frontends::frontend_extension::pages::login::ExtensionLogin;
 use crate::frontends::frontend_extension::pages::register::ExtensionRegister;
@@ -53,7 +54,7 @@ pub fn App() -> impl IntoView {
                     }
                 >
 
-                    <Route path="/login" view=ExtensionLogin/>
+                    <Route path="/login" view=move || view!{ <ExtensionWrapper><ExtensionLogin/></ExtensionWrapper> }/>
                     <Route path="/register" view=ExtensionRegister/>
                     <Route path="/logged_in" view=ExtensionLoggedIn/>
                 </Route>
