@@ -22,8 +22,6 @@ use block_mesh_common::interfaces::server_api::GetLatestInviteCodeRequest;
 use crate::frontends::frontend_extension::utils::auth::get_latest_invite_code;
 use crate::frontends::frontend_extension::utils::connectors::storageOnChangeViaPostMessage;
 
-// use logger_leptos::leptos_tracing::setup_leptos_tracing; // TODO
-
 #[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
 pub enum AppStatus {
     LoggedIn,
@@ -109,11 +107,9 @@ impl ExtensionState {
             device_id = Uuid::new_v4();
             self.device_id.update(|v| *v = device_id);
         }
-        // setup_leptos_tracing(Option::from(device_id), DeviceType::Extension); // TODO
+
         let uptime = self.uptime.get_untracked();
         let invite_code = "".to_string();
-        // let invite_code =
-        //     Self::update_invite_code(&api_token, now - last_update, &blockmesh_url, &email).await; // TODO
         let download_speed = self.download_speed.get_untracked();
         let upload_speed = self.upload_speed.get_untracked();
 
@@ -141,14 +137,30 @@ impl ExtensionState {
 
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
             if let Ok(data) = event.into_serde::<Value>() {
+                // log!("data = {:#?}", data);
                 if let Some(obj) = data.as_object() {
                     for key in obj.keys() {
                         if let Ok(storage_value) = StorageValues::try_from(key) {
                             if let Some(value) = obj.get(key) {
-                                log!("in iframe {} => {}", storage_value, value);
-                                let value = value.as_str().unwrap_or_default().to_string();
+                                let value = if value.is_object() {
+                                    value
+                                        .as_object()
+                                        .unwrap()
+                                        .values()
+                                        .next()
+                                        .unwrap()
+                                        .to_string()
+                                        .trim_end_matches('"')
+                                        .trim_start_matches('"')
+                                        .to_string()
+                                } else {
+                                    "".to_string()
+                                };
+                                log!("1 in iframe {} => {}", storage_value, value);
+                                // let value = value.as_str().unwrap_or_default().to_string();
                                 match storage_value {
                                     StorageValues::BlockMeshUrl => {
+                                        log!("setting url {}", value);
                                         self.blockmesh_url.update(|v| *v = value);
                                     }
                                     StorageValues::ApiToken => {
@@ -160,6 +172,7 @@ impl ExtensionState {
                                         self.email.update(|v| *v = value);
                                     }
                                     StorageValues::DeviceId => {
+                                        // setup_leptos_tracing(Option::from(device_id), DeviceType::Extension); // TODO
                                         self.device_id.update(|v| {
                                             *v = Uuid::from_str(&value).unwrap_or_default()
                                         });

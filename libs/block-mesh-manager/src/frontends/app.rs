@@ -54,9 +54,36 @@ pub fn App() -> impl IntoView {
                     }
                 >
 
-                    <Route path="/login" view=move || view!{ <ExtensionWrapper><ExtensionLogin/></ExtensionWrapper> }/>
-                    <Route path="/register" view=ExtensionRegister/>
-                    <Route path="/logged_in" view=ExtensionLoggedIn/>
+                    <Route
+                        path="/login"
+                        view=move || {
+                            view! {
+                                <ExtensionWrapper>
+                                    <ExtensionLogin/>
+                                </ExtensionWrapper>
+                            }
+                        }
+                    />
+                    <Route
+                        path="/register"
+                        view=move || {
+                            view! {
+                                <ExtensionWrapper>
+                                    <ExtensionRegister/>
+                                </ExtensionWrapper>
+                            }
+                        }
+                    />
+                    <Route
+                        path="/logged_in"
+                        view=move || {
+                            view! {
+                                <ExtensionWrapper>
+                                    <ExtensionLoggedIn/>
+                                </ExtensionWrapper>
+                            }
+                        }
+                    />
                 </Route>
             </Routes>
         </Router>
