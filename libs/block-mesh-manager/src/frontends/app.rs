@@ -1,5 +1,5 @@
 use crate::frontends::frontend_extension::extension_header::ExtensionServerHeader;
-use crate::frontends::frontend_extension::pages::extension_wrapper::ExtensionWrapper;
+use crate::frontends::frontend_extension::extension_state::ExtensionState;
 use crate::frontends::frontend_extension::pages::logged_in::ExtensionLoggedIn;
 use crate::frontends::frontend_extension::pages::login::ExtensionLogin;
 use crate::frontends::frontend_extension::pages::register::ExtensionRegister;
@@ -13,6 +13,7 @@ use crate::frontends::frontend_webserver::pages::register_page::RegisterPage;
 use crate::frontends::frontend_webserver::pages::resend_confirmation_email_page::ResendConfirmationEmailPage;
 use crate::frontends::frontend_webserver::pages::reset_password_page::ResetPasswordPage;
 use crate::frontends::frontend_webserver::webserver_header::WebServerHeader;
+use crate::frontends::wrapper::Wrapper;
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
@@ -20,6 +21,10 @@ use leptos_router::*;
 #[component]
 pub fn App() -> impl IntoView {
     provide_meta_context();
+    provide_context(ExtensionState::default());
+
+    let extension_state = use_context::<ExtensionState>().unwrap();
+    let extension_resource = ExtensionState::init_resource(extension_state);
 
     view! {
         <Router fallback=|| { view! { <p>Error</p> }.into_view() }>
@@ -58,9 +63,9 @@ pub fn App() -> impl IntoView {
                         path="/login"
                         view=move || {
                             view! {
-                                <ExtensionWrapper>
+                                <Wrapper resource=extension_resource>
                                     <ExtensionLogin/>
-                                </ExtensionWrapper>
+                                </Wrapper>
                             }
                         }
                     />
@@ -68,9 +73,9 @@ pub fn App() -> impl IntoView {
                         path="/register"
                         view=move || {
                             view! {
-                                <ExtensionWrapper>
+                                <Wrapper resource=extension_resource>
                                     <ExtensionRegister/>
-                                </ExtensionWrapper>
+                                </Wrapper>
                             }
                         }
                     />
@@ -78,9 +83,9 @@ pub fn App() -> impl IntoView {
                         path="/logged_in"
                         view=move || {
                             view! {
-                                <ExtensionWrapper>
+                                <Wrapper resource=extension_resource>
                                     <ExtensionLoggedIn/>
-                                </ExtensionWrapper>
+                                </Wrapper>
                             }
                         }
                     />

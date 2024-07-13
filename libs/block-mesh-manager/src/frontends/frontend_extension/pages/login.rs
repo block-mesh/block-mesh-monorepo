@@ -170,7 +170,9 @@ pub fn ExtensionLogin() -> impl IntoView {
                             name="password"
                             on:keyup=move |ev: ev::KeyboardEvent| {
                                 match &*ev.key() {
-                                    "Enter" => { submit_action_resource.refetch(); },
+                                    "Enter" => {
+                                        submit_action_resource.refetch();
+                                    }
                                     _ => {
                                         let val = event_target_value(&ev);
                                         set_password.update(|p| *p = val);
@@ -187,7 +189,10 @@ pub fn ExtensionLogin() -> impl IntoView {
                         <label>Password</label>
                     </div>
                     <br/>
-                    <button class="auth-card-button" on:click=move |_ev| submit_action_resource.refetch() >
+                    <button
+                        class="auth-card-button"
+                        on:click=move |_ev| submit_action_resource.refetch()
+                    >
                         Login
                     </button>
                 </form>
