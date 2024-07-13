@@ -7,6 +7,7 @@ use std::time::Duration;
 
 use chrono::Utc;
 use gloo_utils::format::JsValueSerdeExt;
+use leptos::logging::log;
 use leptos::*;
 use leptos_dom::tracing;
 use serde::{Deserialize, Serialize};
@@ -235,6 +236,9 @@ impl AppState {
                                             StorageValues::LastUpdate,
                                             StorageValue::I64(casted_value),
                                         );
+                                    }
+                                    StorageValues::All => {
+                                        log!("GET_ALL")
                                     }
                                 }
                             }

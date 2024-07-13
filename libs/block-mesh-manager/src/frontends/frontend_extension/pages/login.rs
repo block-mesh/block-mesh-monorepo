@@ -14,60 +14,116 @@ pub fn ExtensionLogin() -> impl IntoView {
     let state = use_context::<ExtensionState>().unwrap();
     let (password, set_password) = create_signal(String::new());
     let (email, set_email) = create_signal(String::new());
-    // let url = move || state.blockmesh_url.get();
-    // log!("1 url => {}", url());
 
-    let submit_action = create_action(move |_| async move {
-        // log!("2 url => {}", url());
-        let credentials = LoginForm {
-            email: email.get_untracked(),
-            password: password.get_untracked(),
-        };
+    let submit_action_resource = create_local_resource(
+        move || (),
+        move |_| async move {
+            if email.get_untracked().is_empty() || password.get_untracked().is_empty() {
+                return;
+            }
+            log!("blockmesh_url {}", state.blockmesh_url.get_untracked());
+            let credentials = LoginForm {
+                email: email.get_untracked(),
+                password: password.get_untracked(),
+            };
 
-        let result = login(&state.blockmesh_url.get_untracked(), &credentials).await;
-        log!("result = {:?}", result);
-        match result {
-            Ok(res) => {
-                if res.message.is_some() {
-                    ExtensionState::set_error(res.message.unwrap(), state.error);
-                    return;
-                }
-                if let Some(api_token) = res.api_token {
-                    if api_token != state.api_token.get_untracked()
-                        || state.api_token.get_untracked() == Uuid::default()
-                    {
-                        tracing::info!("Store new api token");
-                        state.api_token.update(|v| *v = api_token);
-                        state.email.update(|e| *e = credentials.email.clone());
-                        send_message_channel(
-                            StorageMessageType::SET,
-                            StorageValues::Email,
-                            Option::from(StorageValue::String(state.email.get_untracked())),
-                        )
-                        .await;
-                        send_message_channel(
-                            StorageMessageType::SET,
-                            StorageValues::ApiToken,
-                            Option::from(StorageValue::UUID(api_token)),
-                        )
-                        .await;
-                    } else {
-                        tracing::info!("Logged in");
+            let result = login(&state.blockmesh_url.get_untracked(), &credentials).await;
+            log!("result {:#?}", result);
+            match result {
+                Ok(res) => {
+                    if res.message.is_some() {
+                        ExtensionState::set_error(res.message.unwrap(), state.error);
+                        return;
                     }
-                    state.status.update(|v| *v = AppStatus::LoggedIn);
-                    let navigate = use_navigate();
-                    navigate("/ext/logged_in", Default::default());
+                    if let Some(api_token) = res.api_token {
+                        if api_token != state.api_token.get_untracked()
+                            || state.api_token.get_untracked() == Uuid::default()
+                        {
+                            log!("Store new api token");
+                            state.api_token.update(|v| *v = api_token);
+                            state.email.update(|e| *e = credentials.email.clone());
+                            send_message_channel(
+                                StorageMessageType::SET,
+                                StorageValues::Email,
+                                Option::from(StorageValue::String(state.email.get_untracked())),
+                            )
+                            .await;
+                            send_message_channel(
+                                StorageMessageType::SET,
+                                StorageValues::ApiToken,
+                                Option::from(StorageValue::UUID(api_token)),
+                            )
+                            .await;
+                        } else {
+                            log!("Logged in");
+                        }
+                        log!("navigate");
+                        state.status.update(|v| *v = AppStatus::LoggedIn);
+                        let navigate = use_navigate();
+                        navigate("/ext/logged_in", Default::default());
+                    }
+                }
+                Err(_err) => {
+                    // tracing::error!("Unable to login with {}: {err}", credentials.email);
+                    // AppState::set_error(
+                    //     "Failed to login, please check your credentials again",
+                    //     state.error,
+                    // );
                 }
             }
-            Err(_err) => {
-                // tracing::error!("Unable to login with {}: {err}", credentials.email);
-                // AppState::set_error(
-                //     "Failed to login, please check your credentials again",
-                //     state.error,
-                // );
-            }
-        }
-    });
+        },
+    );
+
+    // let submit_action = create_action(move |_| async move {
+    //     let state = use_context::<ExtensionState>().unwrap();
+    //     let credentials = LoginForm {
+    //         email: email.get_untracked(),
+    //         password: password.get_untracked(),
+    //     };
+    //
+    //     let result = login(&state.blockmesh_url.get_untracked(), &credentials).await;
+    //     match result {
+    //         Ok(res) => {
+    //             if res.message.is_some() {
+    //                 ExtensionState::set_error(res.message.unwrap(), state.error);
+    //                 return;
+    //             }
+    //             if let Some(api_token) = res.api_token {
+    //                 if api_token != state.api_token.get_untracked()
+    //                     || state.api_token.get_untracked() == Uuid::default()
+    //                 {
+    //                     tracing::info!("Store new api token");
+    //                     state.api_token.update(|v| *v = api_token);
+    //                     state.email.update(|e| *e = credentials.email.clone());
+    //                     send_message_channel(
+    //                         StorageMessageType::SET,
+    //                         StorageValues::Email,
+    //                         Option::from(StorageValue::String(state.email.get_untracked())),
+    //                     )
+    //                     .await;
+    //                     send_message_channel(
+    //                         StorageMessageType::SET,
+    //                         StorageValues::ApiToken,
+    //                         Option::from(StorageValue::UUID(api_token)),
+    //                     )
+    //                     .await;
+    //                 } else {
+    //                     tracing::info!("Logged in");
+    //                 }
+    //                 state.status.update(|v| *v = AppStatus::LoggedIn);
+    //                 let navigate = use_navigate();
+    //                 navigate("/ext/logged_in", Default::default());
+    //             }
+    //         }
+    //         Err(_err) => {
+    //             // tracing::error!("Unable to login with {}: {err}", credentials.email);
+    //             // AppState::set_error(
+    //             //     "Failed to login, please check your credentials again",
+    //             //     state.error,
+    //             // );
+    //         }
+    //     }
+    // });
 
     view! {
         <Notifications/>
@@ -114,7 +170,7 @@ pub fn ExtensionLogin() -> impl IntoView {
                             name="password"
                             on:keyup=move |ev: ev::KeyboardEvent| {
                                 match &*ev.key() {
-                                    "Enter" => submit_action.dispatch(()),
+                                    "Enter" => { submit_action_resource.refetch(); },
                                     _ => {
                                         let val = event_target_value(&ev);
                                         set_password.update(|p| *p = val);
@@ -131,7 +187,7 @@ pub fn ExtensionLogin() -> impl IntoView {
                         <label>Password</label>
                     </div>
                     <br/>
-                    <button class="auth-card-button" on:click=move |_ev| submit_action.dispatch(())>
+                    <button class="auth-card-button" on:click=move |_ev| submit_action_resource.refetch() >
                         Login
                     </button>
                 </form>

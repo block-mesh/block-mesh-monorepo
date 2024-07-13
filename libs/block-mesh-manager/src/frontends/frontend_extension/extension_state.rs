@@ -20,7 +20,9 @@ use block_mesh_common::chrome_storage::StorageValues;
 use block_mesh_common::interfaces::server_api::GetLatestInviteCodeRequest;
 
 use crate::frontends::frontend_extension::utils::auth::get_latest_invite_code;
-use crate::frontends::frontend_extension::utils::connectors::storageOnChangeViaPostMessage;
+use crate::frontends::frontend_extension::utils::connectors::{
+    ask_for_all_storage_values, storageOnChangeViaPostMessage,
+};
 
 #[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
 pub enum AppStatus {
@@ -63,7 +65,7 @@ pub struct ExtensionState {
 
 impl Debug for ExtensionState {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        f.debug_struct("AppState")
+        f.debug_struct("ExtensionState")
             .field("email", &self.email.get_untracked())
             .field("user_id", &self.device_id.get_untracked())
             .field("api_token", &"********")
@@ -86,7 +88,9 @@ impl ExtensionState {
         create_local_resource(
             || (),
             move |_| async move {
+                log!("init_resource");
                 state.init_with_storage().await;
+                ask_for_all_storage_values().await;
                 state
             },
         )
@@ -94,6 +98,7 @@ impl ExtensionState {
 
     #[tracing::instrument(name = "ExtensionState::init_with_storage")]
     pub async fn init_with_storage(self) {
+        log!("init_with_storage");
         let now = Utc::now().timestamp();
         let mut blockmesh_url = self.blockmesh_url.get_untracked();
         if blockmesh_url.is_empty() {
@@ -137,7 +142,7 @@ impl ExtensionState {
 
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
             if let Ok(data) = event.into_serde::<Value>() {
-                // log!("data = {:#?}", data);
+                log!("data = {:#?}", data);
                 if let Some(obj) = data.as_object() {
                     for key in obj.keys() {
                         if let Ok(storage_value) = StorageValues::try_from(key) {
@@ -198,6 +203,9 @@ impl ExtensionState {
                                     StorageValues::LastUpdate => self
                                         .last_update
                                         .update(|v| *v = i64::from_str(&value).unwrap_or_default()),
+                                    StorageValues::All => {
+                                        log!("GET_ALL");
+                                    }
                                 }
                             }
                         }
