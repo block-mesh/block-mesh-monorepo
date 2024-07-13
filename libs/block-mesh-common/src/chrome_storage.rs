@@ -4,6 +4,7 @@ use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub enum StorageValues {
+    All,
     BlockMeshUrl,
     Email,
     ApiToken,
@@ -16,8 +17,9 @@ pub enum StorageValues {
 }
 
 impl Display for StorageValues {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let str = match self {
+            StorageValues::All => "all".to_string(),
             StorageValues::BlockMeshUrl => "blockmesh_url".to_string(),
             StorageValues::Email => "email".to_string(),
             StorageValues::ApiToken => "blockmesh_api_token".to_string(),
@@ -37,6 +39,7 @@ impl TryFrom<&str> for StorageValues {
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value {
+            "all" => Ok(StorageValues::All),
             "blockmesh_url" => Ok(StorageValues::BlockMeshUrl),
             "email" => Ok(StorageValues::Email),
             "blockmesh_api_token" => Ok(StorageValues::ApiToken),
@@ -67,8 +70,10 @@ pub enum StorageValue {
     UUID(Uuid),
 }
 
+#[allow(non_camel_case_types)]
 #[derive(Serialize, Deserialize, Debug)]
 pub enum StorageMessageType {
+    GET_ALL,
     GET,
     SET,
     DELETE,
@@ -77,6 +82,7 @@ pub enum StorageMessageType {
 impl Display for StorageMessageType {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match &self {
+            StorageMessageType::GET_ALL => f.write_str("GET_ALL"),
             StorageMessageType::GET => f.write_str("GET"),
             StorageMessageType::SET => f.write_str("SET"),
             StorageMessageType::DELETE => f.write_str("DELETE"),

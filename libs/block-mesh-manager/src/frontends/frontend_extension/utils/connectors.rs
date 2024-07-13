@@ -43,6 +43,17 @@ pub struct StorageMessage {
     pub value: Option<StorageValue>,
 }
 
+pub async fn ask_for_all_storage_values() {
+    let msg = StorageMessage {
+        msg_type: StorageMessageType::GET_ALL,
+        key: StorageValues::All,
+        value: None,
+    };
+    if let Ok(js_args) = serde_wasm_bindgen::to_value(&msg) {
+        send_message(js_args).await;
+    }
+}
+
 pub async fn send_message_channel(
     msg_type: StorageMessageType,
     key: StorageValues,

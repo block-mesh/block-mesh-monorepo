@@ -26,32 +26,44 @@ function onLoad(iframe) {
     // Listen for messages on port1
     window.channel.port1.onmessage = onMessage;
     // Transfer port2 to the iframe
-    iframe.contentWindow.postMessage("Hello from the main page!", "*", [
+    iframe.contentWindow.postMessage("READY", "*", [
         window.channel.port2,
     ]);
 }
 
 async function onMessage(e) {
-    console.log("popup", window.location.href, "onMessage e => ", e);
-    if (!window.mounted) {
+    const {data} = e;
+    console.log("popup", window.location.href, "onMessage e => ", e, data);
+    if (!window.mounted && data === "READY") {
         setTimeout(() => {
             mount_popup();
-        }, 500)
+        }, 150)
         window.mounted = true;
     }
-    const {data} = e;
-    const {type, key, value} = data;
-    if (type === "GET" && key) {
+    const {msg_type, key, value} = data;
+    if (msg_type === "GET" && key) {
         let val = await chrome.storage.sync.get(key);
         if (val) {
             console.log("value =", val[key]);
         }
     }
-    if (type === "SET" && key) {
+    if (msg_type === "SET" && key) {
         await chrome.storage.sync.set({[key]: value});
     }
-    if (type === "DELETE" && key) {
+    if (msg_type === "DELETE" && key) {
         await chrome.storage.sync.remove(key);
+    }
+    if (msg_type === "GET_ALL") {
+        console.log("GET_ALL", window.location.href);
+        await chrome.storage.sync.get(null, async function (items) {
+            const allKeys = Object.keys(items);
+            if (window.message_channel_port) {
+                for (const key of allKeys) {
+                    const value = await chrome.storage.sync.get(key);
+                    window.message_channel_port.postMessage({[key]: value});
+                }
+            }
+        });
     }
 }
 
