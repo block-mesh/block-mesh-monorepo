@@ -19,12 +19,9 @@ function onError(error) {
 
 document.addEventListener('DOMContentLoaded', async function () {
     await initWasmModule().then(onSuccess, onError);
-    console.log("pre mount");
     mount_options();
-    console.log("post mount");
     let delete_form = document.getElementById("delete_form");
     if (delete_form) {
-        console.log("removing delete_form");
         delete_form.parentNode.removeChild(delete_form);
     }
 });

@@ -16,36 +16,12 @@ use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
-use block_mesh_common::chrome_storage::StorageValues;
-use block_mesh_common::interfaces::server_api::GetLatestInviteCodeRequest;
-
-use crate::frontends::frontend_extension::utils::auth::get_latest_invite_code;
+use crate::frontends::frontend_extension::utils::auth::{check_token, get_latest_invite_code};
 use crate::frontends::frontend_extension::utils::connectors::{
-    ask_for_all_storage_values, storageOnChangeViaPostMessage,
+    ask_for_all_storage_values, send_message_channel, storageOnChangeViaPostMessage,
 };
-
-#[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
-pub enum AppStatus {
-    LoggedIn,
-    LoggedOut,
-    WaitingEmailVerification,
-}
-
-impl Display for AppStatus {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            AppStatus::LoggedIn => write!(f, "LoggedIn"),
-            AppStatus::LoggedOut => write!(f, "LoggedOut"),
-            AppStatus::WaitingEmailVerification => write!(f, "WaitingEmailVerification"),
-        }
-    }
-}
-
-impl Default for AppStatus {
-    fn default() -> Self {
-        Self::LoggedOut
-    }
-}
+use block_mesh_common::chrome_storage::{ExtensionStatus, MessageKey, MessageType};
+use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
 
 #[derive(Clone, Serialize, Deserialize, Default, Copy)]
 pub struct ExtensionState {
@@ -53,7 +29,7 @@ pub struct ExtensionState {
     pub api_token: RwSignal<Uuid>,
     pub device_id: RwSignal<Uuid>,
     pub blockmesh_url: RwSignal<String>,
-    pub status: RwSignal<AppStatus>,
+    pub status: RwSignal<ExtensionStatus>,
     pub uptime: RwSignal<f64>,
     pub invite_code: RwSignal<String>,
     pub success: RwSignal<Option<String>>,
@@ -123,7 +99,7 @@ impl ExtensionState {
         self.email.update(|v| *v = email.clone());
         self.api_token.update(|v| *v = api_token);
         self.blockmesh_url.update(|v| *v = blockmesh_url.clone());
-        self.status.update(|v| *v = AppStatus::LoggedOut);
+        self.status.update(|v| *v = ExtensionStatus::LoggedOut);
         self.device_id.update(|v| *v = device_id);
         self.uptime.update(|v| *v = uptime);
         self.success.update(|v| *v = None);
@@ -132,20 +108,12 @@ impl ExtensionState {
         self.upload_speed.update(|v| *v = upload_speed);
         self.last_update.update(|v| *v = now);
 
-        // if !email.is_empty() && !api_token.is_nil() && api_token != Uuid::default() {
-        //     let credentials = CheckTokenRequest { api_token, email };
-        //     let result = check_token(&blockmesh_url, &credentials).await;
-        //     if result.is_ok() {
-        //         self.status.update(|v| *v = AppStatus::LoggedIn);
-        //     };
-        // }
-
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
             if let Ok(data) = event.into_serde::<Value>() {
-                log!("data = {:#?}", data);
+                // log!("data = {:#?}", data);
                 if let Some(obj) = data.as_object() {
                     for key in obj.keys() {
-                        if let Ok(storage_value) = StorageValues::try_from(key) {
+                        if let Ok(storage_value) = MessageKey::try_from(key) {
                             if let Some(value) = obj.get(key) {
                                 let value = if value.is_object() {
                                     value
@@ -161,51 +129,69 @@ impl ExtensionState {
                                 } else {
                                     "".to_string()
                                 };
-                                log!("1 in iframe {} => {}", storage_value, value);
-                                // let value = value.as_str().unwrap_or_default().to_string();
                                 match storage_value {
-                                    StorageValues::BlockMeshUrl => {
-                                        log!("setting url {}", value);
+                                    MessageKey::BlockMeshUrl => {
                                         self.blockmesh_url.update(|v| *v = value);
                                     }
-                                    StorageValues::ApiToken => {
+                                    MessageKey::ApiToken => {
                                         self.api_token.update(|v| {
                                             *v = Uuid::from_str(&value).unwrap_or_default()
                                         });
                                     }
-                                    StorageValues::Email => {
+                                    MessageKey::Email => {
                                         self.email.update(|v| *v = value);
                                     }
-                                    StorageValues::DeviceId => {
+                                    MessageKey::DeviceId => {
                                         // setup_leptos_tracing(Option::from(device_id), DeviceType::Extension); // TODO
                                         self.device_id.update(|v| {
                                             *v = Uuid::from_str(&value).unwrap_or_default()
                                         });
                                     }
-                                    StorageValues::Uptime => {
+                                    MessageKey::Uptime => {
                                         self.uptime.update(|v| {
                                             *v = f64::from_str(&value).unwrap_or_default()
                                         });
                                     }
-                                    StorageValues::InviteCode => {
+                                    MessageKey::InviteCode => {
                                         self.invite_code.update(|v| *v = value);
                                     }
-                                    StorageValues::DownloadSpeed => {
+                                    MessageKey::DownloadSpeed => {
                                         self.download_speed.update(|v| {
                                             *v = f64::from_str(&value).unwrap_or_default()
                                         });
                                     }
-                                    StorageValues::UploadSpeed => {
+                                    MessageKey::UploadSpeed => {
                                         self.upload_speed.update(|v| {
                                             *v = f64::from_str(&value).unwrap_or_default()
                                         });
                                     }
-                                    StorageValues::LastUpdate => self
+                                    MessageKey::LastUpdate => self
                                         .last_update
                                         .update(|v| *v = i64::from_str(&value).unwrap_or_default()),
-                                    StorageValues::All => {
+                                    MessageKey::All => {
                                         log!("GET_ALL");
                                     }
+                                }
+
+                                if !self.email.get_untracked().is_empty()
+                                    && !self.api_token.get_untracked().is_nil()
+                                    && self.api_token.get_untracked() != Uuid::default()
+                                    && self.status.get_untracked() != ExtensionStatus::LoggedIn
+                                {
+                                    spawn_local(async move {
+                                        let credentials = CheckTokenRequest {
+                                            api_token: self.api_token.get_untracked(),
+                                            email: self.email.get_untracked(),
+                                        };
+                                        let result = check_token(
+                                            &self.blockmesh_url.get_untracked(),
+                                            &credentials,
+                                        )
+                                        .await;
+                                        if result.is_ok() {
+                                            self.status.update(|v| *v = ExtensionStatus::LoggedIn);
+                                        };
+                                    });
                                 }
                             }
                         }
@@ -285,10 +271,13 @@ impl ExtensionState {
 
     #[tracing::instrument(name = "clear")]
     pub async fn clear(&self) {
+        send_message_channel(MessageType::DELETE, MessageKey::ApiToken, None).await;
+        send_message_channel(MessageType::DELETE, MessageKey::Email, None).await;
+        send_message_channel(MessageType::DELETE, MessageKey::BlockMeshUrl, None).await;
         self.blockmesh_url
             .update(|v| *v = "https://app.blockmesh.xyz".to_string());
         self.email.update(|v| *v = "".to_string());
         self.api_token.update(|v| *v = Uuid::default());
-        self.status.update(|v| *v = AppStatus::LoggedOut);
+        self.status.update(|v| *v = ExtensionStatus::LoggedOut);
     }
 }

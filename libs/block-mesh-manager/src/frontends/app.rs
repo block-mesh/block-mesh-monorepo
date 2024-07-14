@@ -1,5 +1,8 @@
+use crate::frontends::frontend_extension::components::navigator::ExtensionNavigator;
+use crate::frontends::frontend_extension::components::notification::ExtensionNotifications;
 use crate::frontends::frontend_extension::extension_header::ExtensionServerHeader;
 use crate::frontends::frontend_extension::extension_state::ExtensionState;
+use crate::frontends::frontend_extension::pages::loading::ExtensionLoading;
 use crate::frontends::frontend_extension::pages::logged_in::ExtensionLoggedIn;
 use crate::frontends::frontend_extension::pages::login::ExtensionLogin;
 use crate::frontends::frontend_extension::pages::register::ExtensionRegister;
@@ -63,32 +66,50 @@ pub fn App() -> impl IntoView {
                         path="/login"
                         view=move || {
                             view! {
-                                <Wrapper resource=extension_resource>
+                                <Wrapper
+                                    resource=extension_resource
+                                    loading=|| view! { <ExtensionLoading/> }
+                                >
+                                    <ExtensionNotifications/>
+                                    <ExtensionNavigator/>
                                     <ExtensionLogin/>
                                 </Wrapper>
                             }
                         }
                     />
+
                     <Route
                         path="/register"
                         view=move || {
                             view! {
-                                <Wrapper resource=extension_resource>
+                                <Wrapper
+                                    resource=extension_resource
+                                    loading=|| view! { <ExtensionLoading/> }
+                                >
+                                    <ExtensionNotifications/>
+                                    <ExtensionNavigator/>
                                     <ExtensionRegister/>
                                 </Wrapper>
                             }
                         }
                     />
+
                     <Route
                         path="/logged_in"
                         view=move || {
                             view! {
-                                <Wrapper resource=extension_resource>
+                                <Wrapper
+                                    resource=extension_resource
+                                    loading=|| view! { <ExtensionLoading/> }
+                                >
+                                    <ExtensionNotifications/>
+                                    <ExtensionNavigator/>
                                     <ExtensionLoggedIn/>
                                 </Wrapper>
                             }
                         }
                     />
+
                 </Route>
             </Routes>
         </Router>

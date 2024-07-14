@@ -23,7 +23,7 @@ pub fn ExtensionServerHeader() -> impl IntoView {
                     e.ports[0].postMessage("READY");
                     window.message_channel_port = e.ports[0];
                     window.message_channel_port.onmessage = (msg) => {
-                        console.log("msg", window.location.href , msg, msg?.data);
+                        // console.log("msg", window.location.href , msg, msg?.data);
                     }
                 }
             "#

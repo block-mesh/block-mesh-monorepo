@@ -33,7 +33,6 @@ function onLoad(iframe) {
 
 async function onMessage(e) {
     const {data} = e;
-    console.log("popup", window.location.href, "onMessage e => ", e, data);
     if (!window.mounted && data === "READY") {
         setTimeout(() => {
             mount_popup();
@@ -42,10 +41,8 @@ async function onMessage(e) {
     }
     const {msg_type, key, value} = data;
     if (msg_type === "GET" && key) {
-        let val = await chrome.storage.sync.get(key);
-        if (val) {
-            console.log("value =", val[key]);
-        }
+        const val = await chrome.storage.sync.get(key);
+        window.message_channel_port.postMessage({[key]: val});
     }
     if (msg_type === "SET" && key) {
         await chrome.storage.sync.set({[key]: value});
@@ -59,11 +56,18 @@ async function onMessage(e) {
             const allKeys = Object.keys(items);
             if (window.message_channel_port) {
                 for (const key of allKeys) {
-                    const value = await chrome.storage.sync.get(key);
-                    window.message_channel_port.postMessage({[key]: value});
+                    const val = await chrome.storage.sync.get(key);
+                    window.message_channel_port.postMessage({[key]: val});
                 }
             }
         });
+    }
+    if (msg_type === "COPY_TO_CLIPBOARD" && key === "invite_code") {
+        try {
+            await navigator.clipboard.writeText(value);
+        } catch (e) {
+            console.error("Failed to copy to clipboard");
+        }
     }
 }
 
@@ -71,7 +75,6 @@ async function onMessage(e) {
 // Click handlers should be added when the popup is opened.
 document.addEventListener('DOMContentLoaded', async function () {
     await initWasmModule().then(onSuccess, onError);
-    console.log("pre mount");
     const iframe = document.createElement("iframe");
     const url = (((await chrome.storage.sync.get("blockmesh_url"))?.blockmesh_url) || "https://app.blockmesh.xyz");
     iframe.src = `${url}/ext/login`; // "http://localhost:8000/ext/login";

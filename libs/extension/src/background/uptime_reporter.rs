@@ -1,25 +1,25 @@
+use block_mesh_common::chrome_storage::ExtensionStatus;
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{ReportUptimeRequest, ReportUptimeResponse};
 use leptos::*;
 use logger_leptos::leptos_tracing::setup_leptos_tracing;
+use speed_test::metadata::fetch_metadata;
 use wasm_bindgen::prelude::wasm_bindgen;
 
-use speed_test::metadata::fetch_metadata;
-
 use crate::utils::connectors::set_panic_hook;
-use crate::utils::ext_state::{AppState, AppStatus};
+use crate::utils::extension_wrapper_state::ExtensionWrapperState;
 
 #[wasm_bindgen]
 pub async fn report_uptime() {
     set_panic_hook();
     setup_leptos_tracing(None, DeviceType::Extension);
-    let app_state = AppState::default();
+    let app_state = ExtensionWrapperState::default();
     app_state.init_with_storage().await;
 
     if !app_state.has_api_token() {
         return;
     }
-    if app_state.status.get_untracked() == AppStatus::LoggedOut {
+    if app_state.status.get_untracked() == ExtensionStatus::LoggedOut {
         return;
     }
 

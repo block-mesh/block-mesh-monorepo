@@ -16,7 +16,7 @@ use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
-use block_mesh_common::chrome_storage::{StorageValue, StorageValues};
+use block_mesh_common::chrome_storage::{ExtensionStatus, MessageKey, MessageValue};
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{
     CheckTokenRequest, GetLatestInviteCodeRequest, GetLatestInviteCodeResponse, GetTokenResponse,
@@ -26,36 +26,14 @@ use logger_leptos::leptos_tracing::setup_leptos_tracing;
 use crate::utils::connectors::{
     get_storage_value, send_storage_value_to_iframe, set_storage_value, storageOnChange,
 };
-#[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
-pub enum AppStatus {
-    LoggedIn,
-    LoggedOut,
-    WaitingEmailVerification,
-}
-
-impl Display for AppStatus {
-    fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
-        match self {
-            AppStatus::LoggedIn => write!(f, "LoggedIn"),
-            AppStatus::LoggedOut => write!(f, "LoggedOut"),
-            AppStatus::WaitingEmailVerification => write!(f, "WaitingEmailVerification"),
-        }
-    }
-}
-
-impl Default for AppStatus {
-    fn default() -> Self {
-        Self::LoggedOut
-    }
-}
 
 #[derive(Clone, Serialize, Deserialize, Default, Copy)]
-pub struct AppState {
+pub struct ExtensionWrapperState {
     pub email: RwSignal<String>,
     pub api_token: RwSignal<Uuid>,
     pub device_id: RwSignal<Uuid>,
     pub blockmesh_url: RwSignal<String>,
-    pub status: RwSignal<AppStatus>,
+    pub status: RwSignal<ExtensionStatus>,
     pub uptime: RwSignal<f64>,
     pub invite_code: RwSignal<String>,
     pub success: RwSignal<Option<String>>,
@@ -65,7 +43,7 @@ pub struct AppState {
     pub last_update: RwSignal<i64>,
 }
 
-impl Debug for AppState {
+impl Debug for ExtensionWrapperState {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.debug_struct("AppState")
             .field("email", &self.email.get_untracked())
@@ -84,7 +62,7 @@ impl Debug for AppState {
     }
 }
 
-impl AppState {
+impl ExtensionWrapperState {
     #[tracing::instrument(name = "AppState::init_with_storage")]
     pub async fn init_with_storage(self) {
         let now = Utc::now().timestamp();
@@ -115,40 +93,37 @@ impl AppState {
         // Signals:
         self.invite_code.update(|v| *v = invite_code.clone());
         send_storage_value_to_iframe(
-            StorageValues::InviteCode,
-            StorageValue::String(invite_code.clone()),
+            MessageKey::InviteCode,
+            MessageValue::String(invite_code.clone()),
         );
         self.email.update(|v| *v = email.clone());
-        send_storage_value_to_iframe(StorageValues::Email, StorageValue::String(email.clone()));
+        send_storage_value_to_iframe(MessageKey::Email, MessageValue::String(email.clone()));
         self.api_token.update(|v| *v = api_token);
-        send_storage_value_to_iframe(StorageValues::ApiToken, StorageValue::UUID(api_token));
+        send_storage_value_to_iframe(MessageKey::ApiToken, MessageValue::UUID(api_token));
         self.blockmesh_url.update(|v| *v = blockmesh_url.clone());
         send_storage_value_to_iframe(
-            StorageValues::BlockMeshUrl,
-            StorageValue::String(blockmesh_url.clone()),
+            MessageKey::BlockMeshUrl,
+            MessageValue::String(blockmesh_url.clone()),
         );
-        self.status.update(|v| *v = AppStatus::LoggedOut);
+        self.status.update(|v| *v = ExtensionStatus::LoggedOut);
         self.device_id.update(|v| *v = device_id);
-        send_storage_value_to_iframe(StorageValues::DeviceId, StorageValue::UUID(device_id));
+        send_storage_value_to_iframe(MessageKey::DeviceId, MessageValue::UUID(device_id));
         self.uptime.update(|v| *v = uptime);
-        send_storage_value_to_iframe(StorageValues::Uptime, StorageValue::F64(uptime));
+        send_storage_value_to_iframe(MessageKey::Uptime, MessageValue::F64(uptime));
         self.success.update(|v| *v = None);
         self.error.update(|v| *v = None);
         self.download_speed.update(|v| *v = download_speed);
-        send_storage_value_to_iframe(
-            StorageValues::DownloadSpeed,
-            StorageValue::F64(download_speed),
-        );
+        send_storage_value_to_iframe(MessageKey::DownloadSpeed, MessageValue::F64(download_speed));
         self.upload_speed.update(|v| *v = upload_speed);
-        send_storage_value_to_iframe(StorageValues::UploadSpeed, StorageValue::F64(upload_speed));
+        send_storage_value_to_iframe(MessageKey::UploadSpeed, MessageValue::F64(upload_speed));
         self.last_update.update(|v| *v = now);
-        send_storage_value_to_iframe(StorageValues::LastUpdate, StorageValue::I64(now));
+        send_storage_value_to_iframe(MessageKey::LastUpdate, MessageValue::I64(now));
         if !email.is_empty() && !api_token.is_nil() && api_token != Uuid::default() {
             let credentials = CheckTokenRequest { api_token, email };
             let result = check_token(&blockmesh_url, &credentials).await;
             if result.is_ok() {
                 // TODO
-                self.status.update(|v| *v = AppStatus::LoggedIn);
+                self.status.update(|v| *v = ExtensionStatus::LoggedIn);
             };
         }
 
@@ -156,88 +131,88 @@ impl AppState {
             if let Ok(data) = event.into_serde::<Value>() {
                 if let Some(obj) = data.as_object() {
                     for key in obj.keys() {
-                        if let Ok(storage_value) = StorageValues::try_from(key) {
+                        if let Ok(storage_value) = MessageKey::try_from(key) {
                             if let Some(value) = obj.get(key) {
                                 let value = value.as_str().unwrap_or_default().to_string();
                                 match storage_value {
-                                    StorageValues::BlockMeshUrl => {
+                                    MessageKey::BlockMeshUrl => {
                                         self.blockmesh_url.update(|v| *v = value.clone());
                                         send_storage_value_to_iframe(
-                                            StorageValues::BlockMeshUrl,
-                                            StorageValue::String(value),
+                                            MessageKey::BlockMeshUrl,
+                                            MessageValue::String(value),
                                         );
                                     }
-                                    StorageValues::ApiToken => {
+                                    MessageKey::ApiToken => {
                                         let casted_value =
                                             Uuid::from_str(&value).unwrap_or_default();
                                         self.api_token.update(|v| *v = casted_value);
                                         send_storage_value_to_iframe(
-                                            StorageValues::ApiToken,
-                                            StorageValue::UUID(casted_value),
+                                            MessageKey::ApiToken,
+                                            MessageValue::UUID(casted_value),
                                         );
                                     }
-                                    StorageValues::Email => {
+                                    MessageKey::Email => {
                                         self.email.update(|v| *v = value.clone());
                                         send_storage_value_to_iframe(
-                                            StorageValues::Email,
-                                            StorageValue::String(value),
+                                            MessageKey::Email,
+                                            MessageValue::String(value),
                                         );
                                     }
-                                    StorageValues::DeviceId => {
+                                    MessageKey::DeviceId => {
                                         let casted_value =
                                             Uuid::from_str(&value).unwrap_or_default();
                                         self.device_id.update(|v| *v = casted_value);
                                         send_storage_value_to_iframe(
-                                            StorageValues::DeviceId,
-                                            StorageValue::UUID(casted_value),
+                                            MessageKey::DeviceId,
+                                            MessageValue::UUID(casted_value),
                                         );
                                     }
-                                    StorageValues::Uptime => {
+                                    MessageKey::Uptime => {
                                         let casted_value =
                                             f64::from_str(&value).unwrap_or_default();
                                         self.uptime.update(|v| *v = casted_value);
                                         send_storage_value_to_iframe(
-                                            StorageValues::Uptime,
-                                            StorageValue::F64(casted_value),
+                                            MessageKey::Uptime,
+                                            MessageValue::F64(casted_value),
                                         );
                                     }
-                                    StorageValues::InviteCode => {
+                                    MessageKey::InviteCode => {
                                         self.invite_code.update(|v| *v = value.clone());
                                         send_storage_value_to_iframe(
-                                            StorageValues::InviteCode,
-                                            StorageValue::String(value),
+                                            MessageKey::InviteCode,
+                                            MessageValue::String(value),
                                         );
                                     }
-                                    StorageValues::DownloadSpeed => {
+                                    MessageKey::DownloadSpeed => {
                                         let casted_value =
                                             f64::from_str(&value).unwrap_or_default();
                                         self.download_speed.update(|v| {
                                             *v = f64::from_str(&value).unwrap_or_default()
                                         });
                                         send_storage_value_to_iframe(
-                                            StorageValues::DownloadSpeed,
-                                            StorageValue::F64(casted_value),
+                                            MessageKey::DownloadSpeed,
+                                            MessageValue::F64(casted_value),
                                         );
                                     }
-                                    StorageValues::UploadSpeed => {
+                                    MessageKey::UploadSpeed => {
                                         let casted_value =
                                             f64::from_str(&value).unwrap_or_default();
                                         self.upload_speed.update(|v| *v = casted_value);
                                         send_storage_value_to_iframe(
-                                            StorageValues::UploadSpeed,
-                                            StorageValue::F64(casted_value),
+                                            MessageKey::UploadSpeed,
+                                            MessageValue::F64(casted_value),
                                         )
                                     }
-                                    StorageValues::LastUpdate => {
+                                    MessageKey::LastUpdate => {
                                         let casted_value =
                                             i64::from_str(&value).unwrap_or_default();
                                         self.last_update.update(|v| *v = casted_value);
                                         send_storage_value_to_iframe(
-                                            StorageValues::LastUpdate,
-                                            StorageValue::I64(casted_value),
+                                            MessageKey::LastUpdate,
+                                            MessageValue::I64(casted_value),
                                         );
                                     }
-                                    StorageValues::All => {
+                                    MessageKey::All => {
                                         log!("GET_ALL")
                                     }
                                 }
@@ -317,7 +292,7 @@ impl AppState {
     }
 
     #[tracing::instrument(name = "init_resource")]
-    pub fn init_resource(state: AppState) -> Resource<(), AppState> {
+    pub fn init_resource(state: ExtensionWrapperState) -> Resource<(), ExtensionWrapperState> {
         create_local_resource(
             || (),
             move |_| async move {
@@ -333,147 +308,143 @@ impl AppState {
             .update(|v| *v = "https://app.blockmesh.xyz".to_string());
         self.email.update(|v| *v = "".to_string());
         self.api_token.update(|v| *v = Uuid::default());
-        self.status.update(|v| *v = AppStatus::LoggedOut);
-        AppState::store_api_token(Uuid::default()).await;
-        AppState::store_email("".to_string()).await;
-        AppState::store_blockmesh_url("https://app.blockmesh.xyz".to_string()).await;
+        self.status.update(|v| *v = ExtensionStatus::LoggedOut);
+        ExtensionWrapperState::store_api_token(Uuid::default()).await;
+        ExtensionWrapperState::store_email("".to_string()).await;
+        ExtensionWrapperState::store_blockmesh_url("https://app.blockmesh.xyz".to_string()).await;
     }
 
     pub async fn store_blockmesh_url(blockmesh_url: String) {
         set_storage_value(
-            &StorageValues::BlockMeshUrl.to_string(),
+            &MessageKey::BlockMeshUrl.to_string(),
             JsValue::from_str(&blockmesh_url),
         )
         .await;
         send_storage_value_to_iframe(
-            StorageValues::BlockMeshUrl,
-            StorageValue::String(blockmesh_url),
+            MessageKey::BlockMeshUrl,
+            MessageValue::String(blockmesh_url),
         );
     }
 
     pub async fn store_device_id(device_id: String) {
         set_storage_value(
-            &StorageValues::DeviceId.to_string(),
+            &MessageKey::DeviceId.to_string(),
             JsValue::from_str(&device_id),
         )
         .await;
-        send_storage_value_to_iframe(StorageValues::DeviceId, StorageValue::String(device_id));
+        send_storage_value_to_iframe(MessageKey::DeviceId, MessageValue::String(device_id));
     }
 
     pub async fn store_email(email: String) {
-        set_storage_value(&StorageValues::Email.to_string(), JsValue::from_str(&email)).await;
-        send_storage_value_to_iframe(StorageValues::Email, StorageValue::String(email));
+        set_storage_value(&MessageKey::Email.to_string(), JsValue::from_str(&email)).await;
+        send_storage_value_to_iframe(MessageKey::Email, MessageValue::String(email));
     }
 
     pub async fn store_api_token(api_token: Uuid) {
         set_storage_value(
-            &StorageValues::ApiToken.to_string(),
+            &MessageKey::ApiToken.to_string(),
             JsValue::from_str(&api_token.to_string()),
         )
         .await;
-        send_storage_value_to_iframe(StorageValues::ApiToken, StorageValue::UUID(api_token));
+        send_storage_value_to_iframe(MessageKey::ApiToken, MessageValue::UUID(api_token));
     }
 
     pub async fn store_invite_code(invite_code: String) {
         set_storage_value(
-            &StorageValues::InviteCode.to_string(),
+            &MessageKey::InviteCode.to_string(),
             JsValue::from_str(&invite_code),
         )
         .await;
-        send_storage_value_to_iframe(StorageValues::InviteCode, StorageValue::String(invite_code))
+        send_storage_value_to_iframe(MessageKey::InviteCode, MessageValue::String(invite_code))
     }
 
     pub async fn store_uptime(uptime: f64) {
-        set_storage_value(
-            &StorageValues::Uptime.to_string(),
-            JsValue::from_f64(uptime),
-        )
-        .await;
-        send_storage_value_to_iframe(StorageValues::Uptime, StorageValue::F64(uptime));
+        set_storage_value(&MessageKey::Uptime.to_string(), JsValue::from_f64(uptime)).await;
+        send_storage_value_to_iframe(MessageKey::Uptime, MessageValue::F64(uptime));
     }
 
     pub async fn store_last_update(last_update: i64) {
         set_storage_value(
-            &StorageValues::LastUpdate.to_string(),
+            &MessageKey::LastUpdate.to_string(),
             JsValue::from_f64(last_update as f64),
         )
         .await;
-        send_storage_value_to_iframe(StorageValues::LastUpdate, StorageValue::I64(last_update));
+        send_storage_value_to_iframe(MessageKey::LastUpdate, MessageValue::I64(last_update));
     }
 
     pub async fn store_download_speed(uptime: f64) {
         set_storage_value(
-            &StorageValues::DownloadSpeed.to_string(),
+            &MessageKey::DownloadSpeed.to_string(),
             JsValue::from_f64(uptime),
         )
         .await;
-        send_storage_value_to_iframe(StorageValues::DownloadSpeed, StorageValue::F64(uptime));
+        send_storage_value_to_iframe(MessageKey::DownloadSpeed, MessageValue::F64(uptime));
     }
 
     pub async fn store_upload_speed(uptime: f64) {
         set_storage_value(
-            &StorageValues::UploadSpeed.to_string(),
+            &MessageKey::UploadSpeed.to_string(),
             JsValue::from_f64(uptime),
         )
         .await;
-        send_storage_value_to_iframe(StorageValues::UploadSpeed, StorageValue::F64(uptime))
+        send_storage_value_to_iframe(MessageKey::UploadSpeed, MessageValue::F64(uptime))
     }
 
     pub async fn get_blockmesh_url() -> String {
-        get_storage_value(StorageValues::BlockMeshUrl.to_string().as_str())
+        get_storage_value(MessageKey::BlockMeshUrl.to_string().as_str())
             .await
             .as_string()
             .unwrap_or("https://app.blockmesh.xyz".to_string())
     }
 
     pub async fn get_email() -> String {
-        get_storage_value(StorageValues::Email.to_string().as_str())
+        get_storage_value(MessageKey::Email.to_string().as_str())
             .await
             .as_string()
             .unwrap_or_default()
     }
 
     pub async fn get_last_update() -> i64 {
-        let value = get_storage_value(StorageValues::LastUpdate.to_string().as_str()).await;
+        let value = get_storage_value(MessageKey::LastUpdate.to_string().as_str()).await;
         let str = value.as_string().unwrap_or_default();
         i64::from_str(&str).unwrap_or_default()
     }
 
     pub async fn get_api_token() -> String {
-        get_storage_value(StorageValues::ApiToken.to_string().as_str())
+        get_storage_value(MessageKey::ApiToken.to_string().as_str())
             .await
             .as_string()
             .unwrap_or_default()
     }
 
     pub async fn get_device_id() -> String {
-        get_storage_value(StorageValues::DeviceId.to_string().as_str())
+        get_storage_value(MessageKey::DeviceId.to_string().as_str())
             .await
             .as_string()
             .unwrap_or_default()
     }
 
     pub async fn get_invite_code() -> String {
-        get_storage_value(StorageValues::InviteCode.to_string().as_str())
+        get_storage_value(MessageKey::InviteCode.to_string().as_str())
             .await
             .as_string()
             .unwrap_or_default()
     }
 
     pub async fn get_uptime() -> f64 {
-        let value = get_storage_value(StorageValues::Uptime.to_string().as_str()).await;
+        let value = get_storage_value(MessageKey::Uptime.to_string().as_str()).await;
         let str = value.as_string().unwrap_or_default();
         f64::from_str(&str).unwrap_or_default()
     }
 
     pub async fn get_download_speed() -> f64 {
-        let value = get_storage_value(StorageValues::DownloadSpeed.to_string().as_str()).await;
+        let value = get_storage_value(MessageKey::DownloadSpeed.to_string().as_str()).await;
         let str = value.as_string().unwrap_or_default();
         f64::from_str(&str).unwrap_or_default()
     }
 
     pub async fn get_upload_speed() -> f64 {
-        let value = get_storage_value(StorageValues::UploadSpeed.to_string().as_str()).await;
+        let value = get_storage_value(MessageKey::UploadSpeed.to_string().as_str()).await;
         let str = value.as_string().unwrap_or_default();
         f64::from_str(&str).unwrap_or_default()
     }

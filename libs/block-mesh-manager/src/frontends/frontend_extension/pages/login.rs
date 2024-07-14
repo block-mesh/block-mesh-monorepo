@@ -1,12 +1,10 @@
-use crate::frontends::frontend_extension::components::notification::Notifications;
-use crate::frontends::frontend_extension::extension_state::{AppStatus, ExtensionState};
+use crate::frontends::frontend_extension::extension_state::ExtensionState;
 use crate::frontends::frontend_extension::utils::auth::login;
 use crate::frontends::frontend_extension::utils::connectors::send_message_channel;
-use block_mesh_common::chrome_storage::{StorageMessageType, StorageValue, StorageValues};
+use block_mesh_common::chrome_storage::{ExtensionStatus, MessageKey, MessageType, MessageValue};
 use block_mesh_common::interfaces::server_api::LoginForm;
 use leptos::logging::log;
 use leptos::*;
-use leptos_router::{use_navigate, A};
 use uuid::Uuid;
 
 #[component]
@@ -21,14 +19,12 @@ pub fn ExtensionLogin() -> impl IntoView {
             if email.get_untracked().is_empty() || password.get_untracked().is_empty() {
                 return;
             }
-            log!("blockmesh_url {}", state.blockmesh_url.get_untracked());
             let credentials = LoginForm {
                 email: email.get_untracked(),
                 password: password.get_untracked(),
             };
 
             let result = login(&state.blockmesh_url.get_untracked(), &credentials).await;
-            log!("result {:#?}", result);
             match result {
                 Ok(res) => {
                     if res.message.is_some() {
@@ -43,90 +39,36 @@ pub fn ExtensionLogin() -> impl IntoView {
                             state.api_token.update(|v| *v = api_token);
                             state.email.update(|e| *e = credentials.email.clone());
                             send_message_channel(
-                                StorageMessageType::SET,
-                                StorageValues::Email,
-                                Option::from(StorageValue::String(state.email.get_untracked())),
+                                MessageType::SET,
+                                MessageKey::Email,
+                                Option::from(MessageValue::String(state.email.get_untracked())),
                             )
                             .await;
                             send_message_channel(
-                                StorageMessageType::SET,
-                                StorageValues::ApiToken,
-                                Option::from(StorageValue::UUID(api_token)),
+                                MessageType::SET,
+                                MessageKey::ApiToken,
+                                Option::from(MessageValue::UUID(api_token)),
                             )
                             .await;
                         } else {
                             log!("Logged in");
                         }
-                        log!("navigate");
-                        state.status.update(|v| *v = AppStatus::LoggedIn);
-                        let navigate = use_navigate();
-                        navigate("/ext/logged_in", Default::default());
+                        ExtensionState::set_success("Successfully logged in", state.success);
+                        state.status.update(|v| *v = ExtensionStatus::LoggedIn);
                     }
                 }
-                Err(_err) => {
-                    // tracing::error!("Unable to login with {}: {err}", credentials.email);
-                    // AppState::set_error(
-                    //     "Failed to login, please check your credentials again",
-                    //     state.error,
-                    // );
+                Err(err) => {
+                    tracing::error!("Unable to login with {}: {err}", credentials.email);
+                    ExtensionState::set_error(
+                        "Failed to login, please check your credentials again",
+                        state.error,
+                    );
                 }
             }
         },
     );
 
-    // let submit_action = create_action(move |_| async move {
-    //     let state = use_context::<ExtensionState>().unwrap();
-    //     let credentials = LoginForm {
-    //         email: email.get_untracked(),
-    //         password: password.get_untracked(),
-    //     };
-    //
-    //     let result = login(&state.blockmesh_url.get_untracked(), &credentials).await;
-    //     match result {
-    //         Ok(res) => {
-    //             if res.message.is_some() {
-    //                 ExtensionState::set_error(res.message.unwrap(), state.error);
-    //                 return;
-    //             }
-    //             if let Some(api_token) = res.api_token {
-    //                 if api_token != state.api_token.get_untracked()
-    //                     || state.api_token.get_untracked() == Uuid::default()
-    //                 {
-    //                     tracing::info!("Store new api token");
-    //                     state.api_token.update(|v| *v = api_token);
-    //                     state.email.update(|e| *e = credentials.email.clone());
-    //                     send_message_channel(
-    //                         StorageMessageType::SET,
-    //                         StorageValues::Email,
-    //                         Option::from(StorageValue::String(state.email.get_untracked())),
-    //                     )
-    //                     .await;
-    //                     send_message_channel(
-    //                         StorageMessageType::SET,
-    //                         StorageValues::ApiToken,
-    //                         Option::from(StorageValue::UUID(api_token)),
-    //                     )
-    //                     .await;
-    //                 } else {
-    //                     tracing::info!("Logged in");
-    //                 }
-    //                 state.status.update(|v| *v = AppStatus::LoggedIn);
-    //                 let navigate = use_navigate();
-    //                 navigate("/ext/logged_in", Default::default());
-    //             }
-    //         }
-    //         Err(_err) => {
-    //             // tracing::error!("Unable to login with {}: {err}", credentials.email);
-    //             // AppState::set_error(
-    //             //     "Failed to login, please check your credentials again",
-    //             //     state.error,
-    //             // );
-    //         }
-    //     }
-    // });
-
     view! {
-        <Notifications/>
         <div class="auth-card">
             <img
                 class="background-image"
@@ -137,7 +79,7 @@ pub fn ExtensionLogin() -> impl IntoView {
             <div class="auth-card-top"></div>
             <div class="auth-card-body">
                 <img
-                    class="logo"
+                    class="h-16 w-16 m-auto"
                     src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"
                     alt="logo"
                 />
@@ -191,8 +133,11 @@ pub fn ExtensionLogin() -> impl IntoView {
                     <br/>
                     <button
                         class="auth-card-button"
-                        on:click=move |_ev| submit_action_resource.refetch()
+                        on:click=move |_ev| {
+                            submit_action_resource.refetch();
+                        }
                     >
+
                         Login
                     </button>
                 </form>
@@ -200,8 +145,11 @@ pub fn ExtensionLogin() -> impl IntoView {
             <div class="auth-card-bottom">
                 <small class="auth-card-sub-text">Doesnt have an account yet?</small>
                 <br/>
-                <small class="auth-card-link register-link">
-                    <A href="/ext/register">Register now</A>
+                <small
+                    class="auth-card-link register-link"
+                    on:click=move |_| { state.status.update(|v| *v = ExtensionStatus::Registering) }
+                >
+                    Register now
                 </small>
             </div>
         </div>

@@ -1,5 +1,6 @@
 use crate::utils::connectors::set_panic_hook;
-use crate::utils::ext_state::{AppState, AppStatus};
+use crate::utils::extension_wrapper_state::ExtensionWrapperState;
+use block_mesh_common::chrome_storage::ExtensionStatus;
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
 use leptos::*;
@@ -17,13 +18,13 @@ use wasm_bindgen::prelude::*;
 pub async fn measure_bandwidth() {
     set_panic_hook();
     setup_leptos_tracing(None, DeviceType::Extension);
-    let app_state = AppState::default();
+    let app_state = ExtensionWrapperState::default();
     app_state.init_with_storage().await;
 
     if !app_state.has_api_token() {
         return;
     }
-    if app_state.status.get_untracked() == AppStatus::LoggedOut {
+    if app_state.status.get_untracked() == ExtensionStatus::LoggedOut {
         return;
     }
     let url = &app_state.blockmesh_url.get_untracked();
@@ -31,8 +32,8 @@ pub async fn measure_bandwidth() {
     let upload_speed = test_upload(100_000).await.unwrap_or_default();
     let latency = test_latency().await.unwrap_or_default();
     let metadata = fetch_metadata().await.unwrap_or_default();
-    AppState::store_download_speed(download_speed).await;
-    AppState::store_upload_speed(upload_speed).await;
+    ExtensionWrapperState::store_download_speed(download_speed).await;
+    ExtensionWrapperState::store_upload_speed(upload_speed).await;
     app_state.download_speed.set(download_speed);
     app_state.upload_speed.set(upload_speed);
     let _ = submit_bandwidth(

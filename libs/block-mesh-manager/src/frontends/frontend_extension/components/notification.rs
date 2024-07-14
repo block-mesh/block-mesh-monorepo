@@ -1,8 +1,9 @@
-use crate::frontends::frontend_extension::extension_state::{AppStatus, ExtensionState};
 use leptos::*;
 
+use crate::frontends::frontend_extension::extension_state::ExtensionState;
+
 #[component]
-pub fn Notifications() -> impl IntoView {
+pub fn ExtensionNotifications() -> impl IntoView {
     let state = expect_context::<ExtensionState>();
 
     let success = Signal::derive(move || state.success.get());
@@ -15,22 +16,15 @@ pub fn Notifications() -> impl IntoView {
         }
     });
 
-    create_effect(move |_| {
-        if state.status.get() == AppStatus::LoggedIn {
-            // let navigate = use_navigate();
-            // navigate(Page::Home.path(), Default::default());
-        }
-    });
-
     view! {
         <div
             aria-live="assertive"
-            class="pointer-events-none fixed inset-0 flex items-start px-4 py-6 sm:items-start sm:p-6"
+            class="z-40 pointer-events-none fixed inset-0 flex items-start px-4 py-6 sm:items-start sm:p-6"
         >
             <div class="flex w-full flex-col items-center space-y-4 sm:items-end">
                 <div class=move || {
                     format!(
-                        "pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-gray-700 border-white border shadow-lg ring-1 ring-black ring-opacity-5 {}",
+                        "pointer-events-none w-full max-w-sm overflow-hidden rounded-lg bg-gray-700 border-white border shadow-lg ring-1 ring-black ring-opacity-5 {}",
                         opacity.get(),
                     )
                 }>

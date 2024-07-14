@@ -5,13 +5,10 @@
         const b1 = document.getElementById('toggle-menu-button-1');
         if (b1) {
             const c = b1.getAttribute('class');
-            console.log("classes ", c);
             if (c.includes("block")) {
-                console.log("block");
                 b1.classList.add("hidden");
                 b1.classList.remove("block");
             } else if (c.includes("hidden")) {
-                console.log("hidden");
                 b1.classList.remove("hidden");
                 b1.classList.add("block");
             }
@@ -19,13 +16,10 @@
         const b2 = document.getElementById('toggle-menu-button-2');
         if (b2) {
             const c = b2.getAttribute('class');
-            console.log("classes ", c);
             if (c.includes("block")) {
-                console.log("block");
                 b2.classList.add("hidden");
                 b2.classList.remove("block");
             } else if (c.includes("hidden")) {
-                console.log("hidden");
                 b2.classList.remove("hidden");
                 b2.classList.add("block");
             }

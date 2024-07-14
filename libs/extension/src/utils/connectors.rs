@@ -3,7 +3,7 @@ use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 
-use block_mesh_common::chrome_storage::{StorageValue, StorageValues};
+use block_mesh_common::chrome_storage::{MessageKey, MessageValue};
 
 /// This is a proxy for report_progress() in progress.js
 /// to send messages to other js scripts.
@@ -43,7 +43,7 @@ extern "C" {
     pub async fn send_to_iframe(key: &str, value: JsValue) -> JsValue;
 }
 
-pub fn send_storage_value_to_iframe(key: StorageValues, value: StorageValue) {
+pub fn send_storage_value_to_iframe(key: MessageKey, value: MessageValue) {
     if let Ok(js_args) = serde_wasm_bindgen::to_value(&value) {
         spawn_local(async move {
             send_to_iframe(&key.to_string(), js_args).await;

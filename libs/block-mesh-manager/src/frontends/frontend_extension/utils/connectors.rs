@@ -1,4 +1,4 @@
-use block_mesh_common::chrome_storage::{StorageMessageType, StorageValue, StorageValues};
+use block_mesh_common::chrome_storage::{MessageKey, MessageType, MessageValue};
 use serde::{Deserialize, Serialize};
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::wasm_bindgen;
@@ -6,11 +6,9 @@ use wasm_bindgen::JsValue;
 
 #[wasm_bindgen(inline_js = r#"
     export function storageOnChangeViaPostMessage(callback) {
-        console.log("msg in callback X");
         if (!window.message_channel_port) return;
         window.message_channel_port.addEventListener("message", (msg) => {
             const { data } = msg;
-            console.log("msg", window.location.href, "in callback", data);
             callback(data);
         });
     }
@@ -37,16 +35,16 @@ extern "C" {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
-pub struct StorageMessage {
-    pub msg_type: StorageMessageType,
-    pub key: StorageValues,
-    pub value: Option<StorageValue>,
+pub struct PostMessage {
+    pub msg_type: MessageType,
+    pub key: MessageKey,
+    pub value: Option<MessageValue>,
 }
 
 pub async fn ask_for_all_storage_values() {
-    let msg = StorageMessage {
-        msg_type: StorageMessageType::GET_ALL,
-        key: StorageValues::All,
+    let msg = PostMessage {
+        msg_type: MessageType::GET_ALL,
+        key: MessageKey::All,
         value: None,
     };
     if let Ok(js_args) = serde_wasm_bindgen::to_value(&msg) {
@@ -54,12 +52,23 @@ pub async fn ask_for_all_storage_values() {
     }
 }
 
+pub async fn send_to_clipboard(link: &str) {
+    let msg = PostMessage {
+        msg_type: MessageType::COPY_TO_CLIPBOARD,
+        key: MessageKey::InviteCode,
+        value: Option::from(MessageValue::String(link.to_string())),
+    };
+    if let Ok(js_args) = serde_wasm_bindgen::to_value(&msg) {
+        send_message(js_args).await;
+    }
+}
+
 pub async fn send_message_channel(
-    msg_type: StorageMessageType,
-    key: StorageValues,
-    value: Option<StorageValue>,
+    msg_type: MessageType,
+    key: MessageKey,
+    value: Option<MessageValue>,
 ) {
-    let msg = StorageMessage {
+    let msg = PostMessage {
         msg_type,
         key,
         value,
