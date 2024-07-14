@@ -19,7 +19,6 @@ env:
   LEPTOS_LIB_DIR: libs/block-mesh-manager
   LEPTOS_BIN_DIR: libs/block-mesh-manager
   LEPTOS_HASH_FILES: true
-  LEPTOS_HASH_FILE_NAME: hash.txt
   APP_ENVIRONMENT: production
   SENTRY: ${{ secrets.SENTRY }}
   MAPBOX: ${{ secrets.MAPBOX }}
