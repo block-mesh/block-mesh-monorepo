@@ -114,6 +114,13 @@ features = [
 crate-type = ["cdylib", "rlib"]
 
 [features]
+csr = [
+  "leptos/csr",
+  "leptos_meta/csr",
+  "leptos_router/csr",
+  "dep:logger-leptos",
+  "dep:web-sys"
+]
 hydrate = [
   "leptos/hydrate",
   "leptos_meta/hydrate",
@@ -198,7 +205,7 @@ bin-default-features = false
 # The features to use when compiling the lib target
 #
 # Optional. Can be over-ridden with the command line parameter --lib-features
-lib-features = ["hydrate"]
+lib-features = ["csr"]
 
 # If the --no-default-features flag should be used when compiling the lib target
 #
