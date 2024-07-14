@@ -54,7 +54,7 @@ jobs:
           echo PKG_VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g') >> $GITHUB_OUTPUT
   create-release:
     name: "Create release"
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs: "get-tag"
     runs-on: "ubuntu-latest"
     steps:
@@ -79,7 +79,7 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
   upload-assets:
     name: "Upload assets to Github releases"
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs:
       - "get-tag"
       - "create-release"
@@ -131,7 +131,7 @@ jobs:
   #          include: target/site/pkg/block-mesh-manager.wasm,target/site/pkg/block-mesh-manager.js,target/site/pkg/block-mesh-manager.css
   push-to-registry:
     name: "Push Docker image to Docker Hub"
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs:
       - "get-tag"
       - "upload-assets"
