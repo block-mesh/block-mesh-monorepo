@@ -11,10 +11,11 @@ where
     T: 'static + Clone,
 {
     let (view, _) = create_signal(move || children().into_view());
-    let load = store_value(loading);
+    let _load = store_value(loading);
     view! {
         <Suspense fallback=move || {
-            load.with_value(|v| v.clone().into_view())
+            // load.with_value(|v| v.clone().into_view())
+            view! {  }
         }>{move || { resource.get().map(|_| view.get()) }}</Suspense>
     }
 }
