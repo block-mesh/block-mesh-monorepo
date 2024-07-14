@@ -74,7 +74,6 @@ impl ExtensionState {
 
     #[tracing::instrument(name = "ExtensionState::init_with_storage")]
     pub async fn init_with_storage(self) {
-        log!("init_with_storage");
         let now = Utc::now().timestamp();
         let mut blockmesh_url = self.blockmesh_url.get_untracked();
         if blockmesh_url.is_empty() {
