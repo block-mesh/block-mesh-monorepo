@@ -105,7 +105,7 @@ jobs:
       - name: "Run Cargo Leptos"
         run: |
           cargo leptos build --project block-mesh-manager --release
-          tar acf block-mesh-manager-${{ matrix.target }}.tar.gz target/release target/site
+          tar acf block-mesh-manager-${{ matrix.target }}.tar.gz target/release/block-mesh-manager target/release/hash.txt target/site
       - name: Release
         uses: softprops/action-gh-release@v2
         #if: startsWith(github.ref, 'refs/tags/')
