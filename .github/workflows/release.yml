@@ -19,6 +19,7 @@ env:
   LEPTOS_LIB_DIR: libs/block-mesh-manager
   LEPTOS_BIN_DIR: libs/block-mesh-manager
   LEPTOS_HASH_FILES: true
+  LEPTOS_HASH_FILE_NAME: hash.txt
   APP_ENVIRONMENT: production
   SENTRY: ${{ secrets.SENTRY }}
   MAPBOX: ${{ secrets.MAPBOX }}
@@ -105,7 +106,7 @@ jobs:
       - name: "Run Cargo Leptos"
         run: |
           cargo leptos build --project block-mesh-manager --release
-          tar acf block-mesh-manager-${{ matrix.target }}.tar.gz target/release/block-mesh-manager target/site
+          tar acf block-mesh-manager-${{ matrix.target }}.tar.gz target/release/block-mesh-manager target/release/block-mesh-manager/hash.txt target/site
       - name: Release
         uses: softprops/action-gh-release@v2
         #if: startsWith(github.ref, 'refs/tags/')
