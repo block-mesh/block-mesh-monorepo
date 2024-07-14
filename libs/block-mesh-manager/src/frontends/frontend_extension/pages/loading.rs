@@ -12,11 +12,13 @@ pub fn ExtensionLoading() -> impl IntoView {
             <div class="auth-card-frame"></div>
             <div class="auth-card-top"></div>
             <div class="auth-card-body">
-                <img
-                    class="h-16 w-16 m-auto"
-                    src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"
-                    alt="logo"
-                />
+                <div class="flex justify-center">
+                    <img
+                        class="h-16 w-16 m-auto"
+                        src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"
+                        alt="logo"
+                    />
+                </div>
                 <h1>BlockMesh</h1>
                 <div class="auth-card-content">
                     <div class="pulse"></div>

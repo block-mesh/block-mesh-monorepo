@@ -3,7 +3,6 @@ use crate::frontends::frontend_extension::utils::auth::register;
 use crate::frontends::frontend_extension::utils::connectors::send_message_channel;
 use block_mesh_common::chrome_storage::{ExtensionStatus, MessageKey, MessageType, MessageValue};
 use block_mesh_common::interfaces::server_api::RegisterForm;
-use leptos::logging::log;
 use leptos::*;
 use leptos_router::A;
 
@@ -31,7 +30,6 @@ pub fn ExtensionRegister() -> impl IntoView {
                 },
             };
             let result = register(&state.blockmesh_url.get_untracked(), &credentials).await;
-            log!("result {:?}", result);
             match result {
                 Ok(_) => {
                     state.api_token.update(|t| *t = uuid::Uuid::default());
@@ -67,11 +65,14 @@ pub fn ExtensionRegister() -> impl IntoView {
             <div class="auth-card-frame"></div>
             <div class="auth-card-top"></div>
             <div class="auth-card-body">
-                <img
-                    class="h-16 w-16 m-auto"
-                    src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"
-                    alt="logo"
-                />
+                <div class="flex justify-center">
+
+                    <img
+                        class="h-16 w-16 m-auto"
+                        src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"
+                        alt="logo"
+                    />
+                </div>
                 <h1>BlockMesh</h1>
                 <form on:submit=|ev| ev.prevent_default()>
                     <div class="auth-card-input-container">

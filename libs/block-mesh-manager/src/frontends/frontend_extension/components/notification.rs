@@ -5,7 +5,6 @@ use crate::frontends::frontend_extension::extension_state::ExtensionState;
 #[component]
 pub fn ExtensionNotifications() -> impl IntoView {
     let state = expect_context::<ExtensionState>();
-
     let success = Signal::derive(move || state.success.get());
     let error = Signal::derive(move || state.error.get());
     let opacity = Signal::derive(move || {

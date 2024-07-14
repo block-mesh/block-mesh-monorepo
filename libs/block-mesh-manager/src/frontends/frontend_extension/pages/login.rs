@@ -50,15 +50,12 @@ pub fn ExtensionLogin() -> impl IntoView {
                                 Option::from(MessageValue::UUID(api_token)),
                             )
                             .await;
-                        } else {
-                            log!("Logged in");
                         }
                         ExtensionState::set_success("Successfully logged in", state.success);
                         state.status.update(|v| *v = ExtensionStatus::LoggedIn);
                     }
                 }
-                Err(err) => {
-                    tracing::error!("Unable to login with {}: {err}", credentials.email);
+                Err(_) => {
                     ExtensionState::set_error(
                         "Failed to login, please check your credentials again",
                         state.error,
@@ -78,11 +75,14 @@ pub fn ExtensionLogin() -> impl IntoView {
             <div class="auth-card-frame"></div>
             <div class="auth-card-top"></div>
             <div class="auth-card-body">
-                <img
-                    class="h-16 w-16 m-auto"
-                    src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"
-                    alt="logo"
-                />
+                <div class="flex justify-center">
+
+                    <img
+                        class="h-16 w-16 m-auto"
+                        src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"
+                        alt="logo"
+                    />
+                </div>
                 <h1>BlockMesh</h1>
                 <form on:submit=|ev| ev.prevent_default()>
                     <div class="auth-card-input-container">

@@ -4,7 +4,7 @@ use leptos_meta::{Link, Meta, Script, Stylesheet, Title};
 #[component]
 pub fn ExtensionServerHeader() -> impl IntoView {
     view! {
-        <Script src="https://cdn.tailwindcss.com"/>
+        <Stylesheet href="https://r2-assets.blockmesh.xyz/tailwind.css"/>
         <Stylesheet href="https://r2-assets.blockmesh.xyz/extension.css"/>
         <Meta charset="UTF-8"/>
         <Meta name="viewport" content="width=device-width, initial-scale=1.0"/>
