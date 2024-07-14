@@ -1,10 +1,9 @@
+use crate::frontends::frontend_webserver::context::webapp_context::WebAppContext;
 use leptos::*;
 
-use crate::utils::extension_wrapper_state::ExtensionWrapperState;
-
 #[component]
-pub fn ExtensionWrapperNotifications() -> impl IntoView {
-    let state = expect_context::<ExtensionWrapperState>();
+pub fn NotificationPopupComponent() -> impl IntoView {
+    let state = expect_context::<WebAppContext>();
     let success = Signal::derive(move || state.success.get());
     let error = Signal::derive(move || state.error.get());
     let opacity = Signal::derive(move || {
@@ -14,7 +13,6 @@ pub fn ExtensionWrapperNotifications() -> impl IntoView {
             "opacity-0"
         }
     });
-
     view! {
         <div
             aria-live="assertive"
@@ -23,12 +21,12 @@ pub fn ExtensionWrapperNotifications() -> impl IntoView {
             <div class="flex w-full flex-col items-center space-y-4 sm:items-end">
                 <div class=move || {
                     format!(
-                        "pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-gray-700 border-white border shadow-lg ring-1 ring-black ring-opacity-5 {}",
+                        "pointer-events-auto w-full max-w-sm overflow-hidden rounded-lg bg-gray-100 border-white border shadow-lg ring-1 ring-black ring-opacity-5 {}",
                         opacity.get(),
                     )
                 }>
 
-                    <div class="p-4">
+                    <div class="p-2">
                         <div class="flex items-start">
                             <div class="flex-shrink-0">
                                 <svg

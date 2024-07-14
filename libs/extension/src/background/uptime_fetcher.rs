@@ -5,13 +5,13 @@ use logger_leptos::leptos_tracing::setup_leptos_tracing;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::utils::connectors::set_panic_hook;
-use crate::utils::ext_state::AppState;
+use crate::utils::extension_wrapper_state::ExtensionWrapperState;
 
 #[wasm_bindgen]
 pub async fn uptime_fetcher() {
     set_panic_hook();
     setup_leptos_tracing(None, DeviceType::Extension);
-    let app_state = AppState::default();
+    let app_state = ExtensionWrapperState::default();
     app_state.init_with_storage().await;
 
     if !app_state.has_api_token() {
@@ -31,7 +31,7 @@ pub async fn uptime_fetcher() {
     {
         if let Ok(response) = response.json::<GetUserUptimeResponse>().await {
             let duration_seconds = response.duration_seconds.unwrap_or(0.0);
-            AppState::store_uptime(duration_seconds).await;
+            ExtensionWrapperState::store_uptime(duration_seconds).await;
             app_state.uptime.update(|v| *v = duration_seconds);
         }
     }

@@ -1,13 +1,13 @@
-use crate::components::notifications::Notifications;
-use crate::utils::ext_state::AppState;
+use crate::components::notifications::ExtensionWrapperNotifications;
+use crate::utils::extension_wrapper_state::ExtensionWrapperState;
 use leptos::*;
 use url::Url;
 
 #[component]
-pub fn Options() -> impl IntoView {
-    provide_context(AppState::default());
-    let state = use_context::<AppState>().unwrap();
-    let state = AppState::init_resource(state);
+pub fn ExtensionOptionsPage() -> impl IntoView {
+    provide_context(ExtensionWrapperState::default());
+    let state = use_context::<ExtensionWrapperState>().unwrap();
+    let state = ExtensionWrapperState::init_resource(state);
 
     let (url, set_url) = create_signal(
         state
@@ -21,7 +21,7 @@ pub fn Options() -> impl IntoView {
             None => (),
             Some(s) => {
                 s.clear().await;
-                AppState::set_success("Cache cleared".to_string(), s.success);
+                ExtensionWrapperState::set_success("Cache cleared".to_string(), s.success);
             }
         }
     });
@@ -32,26 +32,26 @@ pub fn Options() -> impl IntoView {
             Some(s) => s,
         };
         if url.get_untracked().is_empty() {
-            AppState::set_error("URL is empty".to_string(), s.error);
+            ExtensionWrapperState::set_error("URL is empty".to_string(), s.error);
             return;
         }
         let raw_url = url.get_untracked();
         let url = Url::parse(&url.get_untracked());
         match url {
             Err(error) => {
-                AppState::set_error(format!("Invalid URL: {}", error), s.error);
+                ExtensionWrapperState::set_error(format!("Invalid URL: {}", error), s.error);
                 return;
             }
             Ok(url) => url,
         };
         s.blockmesh_url.update(|v| *v = raw_url.clone());
         set_url.update(|v| *v = raw_url.clone());
-        AppState::store_blockmesh_url(raw_url).await;
-        AppState::set_success("URL saved".to_string(), s.success);
+        ExtensionWrapperState::store_blockmesh_url(raw_url).await;
+        ExtensionWrapperState::set_success("URL saved".to_string(), s.success);
     });
 
     view! {
-        <Notifications/>
+        <ExtensionWrapperNotifications/>
         <form on:submit=|ev| ev.prevent_default()>
             <div class="bg-gray-700 flex justify-center items-center">
                 <div class="bg-gray-800 p-8 shadow-md w-full">

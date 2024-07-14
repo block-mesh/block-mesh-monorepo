@@ -15,8 +15,8 @@ pub fn Dashboard(task_status: ReadSignal<String>) -> impl IntoView {
     };
 
     view! {
-        <div class="container mx-auto my-8">
-            <div class="bg-gray-800 shadow-md rounded-lg overflow-hidden">
+        <div class="bg-gray-800 container mx-auto my-8">
+            <div class="shadow-md rounded-lg overflow-hidden">
                 <div class="px-4 py-5 sm:px-6 bg-gray-900">
                     <h2 class="text-xl leading-6 font-medium text-white">Current Status</h2>
                 </div>

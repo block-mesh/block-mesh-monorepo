@@ -1,6 +1,9 @@
+use leptos::spawn_local;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
+
+use block_mesh_common::chrome_storage::{MessageKey, MessageValue};
 
 /// This is a proxy for report_progress() in progress.js
 /// to send messages to other js scripts.
@@ -20,6 +23,32 @@ use wasm_bindgen::JsValue;
     }"#)]
 extern "C" {
     pub fn report_progress(msg: &str);
+}
+
+#[wasm_bindgen(inline_js = r#"
+    export async function send_to_iframe(key, value) {
+        try {
+            if (!window.message_channel_port) {
+                console.log("message channel port missing");
+                return;
+            }
+            window.message_channel_port.postMessage({[key]: value});
+        } catch (e) {
+            return ""
+        }
+    };
+"#)]
+extern "C" {
+    // need to rewrite with this: https://github.com/Pauan/tab-organizer/blob/rust/web-extension/src/storage.rs
+    pub async fn send_to_iframe(key: &str, value: JsValue) -> JsValue;
+}
+
+pub fn send_storage_value_to_iframe(key: MessageKey, value: MessageValue) {
+    if let Ok(js_args) = serde_wasm_bindgen::to_value(&value) {
+        spawn_local(async move {
+            send_to_iframe(&key.to_string(), js_args).await;
+        })
+    }
 }
 
 #[wasm_bindgen(inline_js = r#"
