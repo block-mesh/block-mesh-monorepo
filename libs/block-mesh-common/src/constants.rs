@@ -35,7 +35,7 @@ pub static BLOCKMESH_SERVER_UUID_ENVAR: &str = "BLOCKMESH_SERVER_UUID";
 
 pub static BLOCKMESH_VERSION: &str = env!("CARGO_PKG_VERSION");
 
-#[derive(Debug, Clone, Copy, Deserialize, Serialize)]
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq)]
 pub enum DeviceType {
     Extension,
     Desktop,
