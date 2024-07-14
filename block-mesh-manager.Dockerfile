@@ -13,7 +13,7 @@ RUN cp -fr block-mesh-monorepo/libs/block-mesh-manager/* .
 RUN curl -sLO https://github.com/block-mesh/block-mesh-monorepo/releases/latest/download/block-mesh-manager-x86_64-unknown-linux-musl.tar.gz \
   && tar -xvf block-mesh-manager-x86_64-unknown-linux-musl.tar.gz \
   && mv target/* . \
-  && mv release/block-mesh-manger block-mesh-manger \
+  && mv release/block-mesh-manager block-mesh-manager \
   && chmod +x block-mesh-manager
 
 #RUN mkdir -p libs/block-mesh-manager/js-src/ && cp block-mesh-monorepo/libs/block-mesh-manager/js-src/connectors.js libs/block-mesh-manager/js-src/
