@@ -1,7 +1,6 @@
 use crate::frontends::frontend_extension::extension_state::ExtensionState;
 use crate::frontends::frontend_extension::utils::connectors::send_to_clipboard;
 use block_mesh_common::constants::BLOCKMESH_VERSION;
-use leptos::logging::log;
 use leptos::*;
 use leptos_router::A;
 
@@ -11,7 +10,7 @@ pub fn ExtensionLoggedIn() -> impl IntoView {
     let invite_code = Signal::derive(move || state.invite_code.get());
     let invite_url = Signal::derive(move || {
         format!(
-            "{}/register?invite_code={}",
+            "{}/ui/register?invite_code={}",
             state.blockmesh_url.get(),
             state.invite_code.get()
         )
@@ -30,7 +29,6 @@ pub fn ExtensionLoggedIn() -> impl IntoView {
     };
 
     let logout = create_action(move |_| async move {
-        log!("logout");
         state.clear().await;
     });
 

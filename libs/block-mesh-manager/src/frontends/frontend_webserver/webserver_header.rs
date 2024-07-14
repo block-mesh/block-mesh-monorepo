@@ -1,11 +1,10 @@
 use leptos::*;
-use leptos_meta::{Link, Script, Title};
+use leptos_meta::{Link, Script, Stylesheet, Title};
 
 #[component]
 pub fn WebServerHeader() -> impl IntoView {
     view! {
-        <Script src="https://cdn.tailwindcss.com"/>
-        // <Stylesheet href="https://r2-assets.blockmesh.xyz/tailwind.css"/>
+        <Stylesheet href="https://r2-assets.blockmesh.xyz/tailwind.css"/>
         <Link
             href="https://fonts.googleapis.com/css2?family=Agbalumo&family=Varela+Round&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,500;1,600;1,700;1,800;1,900&display=swap"
             rel="stylesheet"

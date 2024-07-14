@@ -39,60 +39,61 @@ pub fn EditInvitePage() -> impl IntoView {
                 }
             >
 
-                <NavbarComponent/>
-
-                <form action="/edit_invite_code" method="post">
-                    <div class="m-2">
-                        <div class="mb-4 rounded px-8 pb-8 pt-6 shadow-md bg-gray-800  border-white border-solid border-2">
-                            <div class="mb-4">
-                                <label
-                                    class="mb-2 block text-sm font-bold text-white"
-                                    for="current_invite_code"
-                                >
-                                    Current Invite
-                                    Code
-                                </label>
-                                <input
-                                    class="w-full appearance-none rounded border px-3 py-2 text-black shadow"
-                                    id="current_invite_code"
-                                    type="text"
-                                    name="current_invite_code"
-                                    disabled
-                                    value=move || {
-                                        match async_data.get() {
-                                            Some(Some(response)) => response.invite_code.clone(),
-                                            _ => "".to_string(),
+                <div class="bg-gray-800 h-screen">
+                    <NavbarComponent/>
+                    <form action="/edit_invite_code" method="post">
+                        <div class="m-2">
+                            <div class="mb-4 rounded px-8 pb-8 pt-6 shadow-md bg-gray-800  border-white border-solid border-2">
+                                <div class="mb-4">
+                                    <label
+                                        class="mb-2 block text-sm font-bold text-white"
+                                        for="current_invite_code"
+                                    >
+                                        Current Invite
+                                        Code
+                                    </label>
+                                    <input
+                                        class="w-full appearance-none rounded border px-3 py-2 text-black shadow"
+                                        id="current_invite_code"
+                                        type="text"
+                                        name="current_invite_code"
+                                        disabled
+                                        value=move || {
+                                            match async_data.get() {
+                                                Some(Some(response)) => response.invite_code.clone(),
+                                                _ => "".to_string(),
+                                            }
                                         }
-                                    }
 
-                                    placeholder="Current Invite Code"
-                                />
-                            </div>
-                            <div class="mb-4">
-                                <label
-                                    class="mb-2 block text-sm font-bold text-white"
-                                    for="new_invite_code"
+                                        placeholder="Current Invite Code"
+                                    />
+                                </div>
+                                <div class="mb-4">
+                                    <label
+                                        class="mb-2 block text-sm font-bold text-white"
+                                        for="new_invite_code"
+                                    >
+                                        New Invite Code
+                                    </label>
+                                    <input
+                                        class="w-full appearance-none rounded border px-3 py-2 text-black shadow"
+                                        id="new_invite_code"
+                                        type="text"
+                                        name="new_invite_code"
+                                        required
+                                        placeholder="New Invite Code"
+                                    />
+                                </div>
+                                <button
+                                    class="focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+                                    type="submit"
                                 >
-                                    New Invite Code
-                                </label>
-                                <input
-                                    class="w-full appearance-none rounded border px-3 py-2 text-black shadow"
-                                    id="new_invite_code"
-                                    type="text"
-                                    name="new_invite_code"
-                                    required
-                                    placeholder="New Invite Code"
-                                />
+                                    Create New Invite Code
+                                </button>
                             </div>
-                            <button
-                                class="focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
-                                type="submit"
-                            >
-                                Create New Invite Code
-                            </button>
                         </div>
-                    </div>
-                </form>
+                    </form>
+                </div>
             </Show>
         </Suspense>
     }
