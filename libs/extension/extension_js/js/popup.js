@@ -80,6 +80,7 @@ document.addEventListener('DOMContentLoaded', async function () {
     iframe.src = `${url}/ext/login`; // "http://localhost:8000/ext/login";
     iframe.width = "300";
     iframe.height = "400"
+    iframe.style = "border: 0px";
     iframe.addEventListener("load", (_) => onLoad(iframe));
     const body = document.body;
     body.appendChild(iframe);
