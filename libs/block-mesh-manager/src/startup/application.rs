@@ -19,7 +19,7 @@ use std::sync::Arc;
 use tokio::net::TcpListener;
 use tokio::task::JoinHandle;
 use tower_http::cors::CorsLayer;
-use tower_http::services::{ServeDir, ServeFile};
+use tower_http::services::ServeDir;
 
 pub struct Application {
     app: Router,
@@ -161,9 +161,9 @@ impl Application {
             .join(leptos_options.site_pkg_dir.clone());
         let leptos_pkg: Router<()> = Router::new().nest_service(
             &format!("/{}", leptos_options.site_pkg_dir),
-            ServeDir::new(path).fallback(ServeFile::new(
-                "libs/block-mesh-manager/js-src/connectors.js",
-            )),
+            ServeDir::new(path), // ServeDir::new(path).fallback(ServeFile::new(
+                                 //     "libs/block-mesh-manager/js-src/connectors.js",
+                                 // )),
         );
 
         let leptos_router: Router<()> = Router::new()

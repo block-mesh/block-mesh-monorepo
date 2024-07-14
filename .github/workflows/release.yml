@@ -1,11 +1,19 @@
 name: Release
 permissions:
   contents: "write"
+#on:
+#  workflow_run:
+#    workflows: ["Tag"]
+#    types:
+#      - "completed"
 on:
-  workflow_run:
-    workflows: ["Tag"]
-    types:
-      - "completed"
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - master
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -105,16 +113,22 @@ jobs:
       - name: "Run Cargo Leptos"
         run: |
           cargo leptos build --project block-mesh-manager --release
-      - name: "Upload Binaries"
-        uses: "taiki-e/upload-rust-binary-action@v1"
+          tar acf block-mesh-manager-${{ matrix.target }}.tar.gz target/${{ matrix.target}}/release/block-mesh-manager target/site
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        if: startsWith(github.ref, 'refs/tags/')
         with:
-          bin: "block-mesh-manager"
-          target: ${{ matrix.target }}
-          archive: $bin-${{ matrix.target }}
-          ref: refs/tags/v${{ needs.get-tag.outputs.pkg-version }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          features: ssr
-          include: target/site/pkg/block-mesh-manager.wasm,target/site/pkg/block-mesh-manager.js,target/site/pkg/block-mesh-manager.css
+          files: block-mesh-manager-${{ matrix.target }}.tar.gz
+  #      - name: "Upload Binaries"
+  #        uses: "taiki-e/upload-rust-binary-action@v1"
+  #        with:
+  #          bin: "block-mesh-manager"
+  #          target: ${{ matrix.target }}
+  #          archive: $bin-${{ matrix.target }}
+  #          ref: refs/tags/v${{ needs.get-tag.outputs.pkg-version }}
+  #          token: ${{ secrets.GITHUB_TOKEN }}
+  #          features: ssr
+  #          include: target/site/pkg/block-mesh-manager.wasm,target/site/pkg/block-mesh-manager.js,target/site/pkg/block-mesh-manager.css
   push-to-registry:
     name: "Push Docker image to Docker Hub"
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
