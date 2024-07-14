@@ -14,7 +14,7 @@ env:
 jobs:
   get-tag:
     name: "Get Tag From Package Version"
-    runs-on: "blacksmith-4vcpu-ubuntu-2204"
+    runs-on: "ubuntu-latest"
     outputs:
       pkg-version: ${{ steps.pkg-version.outputs.PKG_VERSION }}
     steps:
@@ -23,7 +23,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
-      - uses: useblacksmith/rust-cache@v3
+      - uses: Swatinem/rust-cache@v2
         with:
           key: release-tag-tauri
           cache-all-crates: true
@@ -48,7 +48,7 @@ jobs:
           - platform: "macos-latest" # for Intel based macs.
             args: "--target x86_64-apple-darwin"
             target: "x86_64-apple-darwin"
-          - platform: "blacksmith-4vcpu-ubuntu-2204" # for Tauri v1 you could replace this with ubuntu-20.04.
+          - platform: "ubuntu-22.04" # for Tauri v1 you could replace this with ubuntu-20.04.
             args: ""
             target: "x86_64-unknown-linux-gnu"
           - platform: "windows-latest"
@@ -63,7 +63,7 @@ jobs:
           toolchain: ${{ vars.RUSTC_VERSION }}
           targets: wasm32-unknown-unknown , ${{ matrix.target }}
       - name: "Cache"
-        uses: useblacksmith/rust-cache@v3
+        uses: Swatinem/rust-cache@v2
         with:
           key: tauri-build-${{ matrix.target }}
           cache-all-crates: true
@@ -77,14 +77,14 @@ jobs:
         with:
           version: 'latest'
       - name: setup node
-        uses: useblacksmith/setup-node@v5
+        uses: actions/setup-node@v4
         with:
           node-version: lts/*
       - name: install tauri cli
         run: |
           npm install -g @tauri-apps/cli@next
       - name: install dependencies (ubuntu only)
-        if: matrix.platform == 'blacksmith-4vcpu-ubuntu-2204' # This must match the platform value defined above.
+        if: matrix.platform == 'ubuntu-22.04' # This must match the platform value defined above.
         run: |
           sudo apt-get update
           sudo apt-get install -y libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev libappindicator3-dev librsvg2-dev patchelf
