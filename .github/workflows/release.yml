@@ -110,7 +110,7 @@ jobs:
         uses: softprops/action-gh-release@v2
         #if: startsWith(github.ref, 'refs/tags/')
         with:
-          tag_name: v${{ steps.pkg-version.outputs.PKG_VERSION }}
+          tag_name: v${{ needs.get-tag.outputs.PKG_VERSION }}
           files: block-mesh-manager-${{ matrix.target }}.tar.gz
   #      - name: "Upload Binaries"
   #        uses: "taiki-e/upload-rust-binary-action@v1"
