@@ -74,7 +74,7 @@ jobs:
         with:
           # (optional) Path to changelog.
           # changelog: CHANGELOG.md
-          branch: "master"
+          branch: "bring-hydration-back"
           ref: refs/tags/v${{ needs.get-tag.outputs.pkg-version }}
           token: ${{ secrets.GITHUB_TOKEN }}
   upload-assets:
