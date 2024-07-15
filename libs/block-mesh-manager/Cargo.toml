@@ -10,6 +10,7 @@ authors.workspace = true
 gloo-utils = { workspace = true }
 wasm-bindgen-futures = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
+
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = { workspace = true, optional = true }
 logger-leptos = { path = "../logger-leptos", optional = true }
@@ -17,8 +18,8 @@ logger-general = { path = "../logger-general", optional = true, features = ["sen
 tracing-subscriber-wasm = { workspace = true }
 num-traits = { workspace = true }
 reqwest = { workspace = true, default-features = false, features = [
-  "multipart",
-  "json",
+    "multipart",
+    "json",
 ] }
 validator = { workspace = true }
 sentry = { workspace = true, optional = true }
@@ -62,6 +63,7 @@ wasm-bindgen = { workspace = true }
 console_error_panic_hook = { workspace = true }
 console_log = { workspace = true }
 log = { workspace = true }
+tailwind_fuse = { version = "0.3", features = ["variant"] }
 
 [dependencies.rand]
 workspace = true
