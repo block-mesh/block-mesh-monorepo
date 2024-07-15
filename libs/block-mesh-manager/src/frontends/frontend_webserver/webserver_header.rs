@@ -9,6 +9,10 @@ pub fn WebServerHeader() -> impl IntoView {
             href="https://fonts.googleapis.com/css2?family=Agbalumo&family=Varela+Round&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,500;1,600;1,700;1,800;1,900&display=swap"
             rel="stylesheet"
         />
+        // <Link
+        // href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Open+Sans:wght@400;600&display=swap"
+        // rel="stylesheet"
+        // />
         <Link rel="preconnect" href="https://fonts.googleapis.com"/>
         <Link rel="preconnect" href="https://fonts.gstatic.com"/>
         <Link
@@ -18,8 +22,7 @@ pub fn WebServerHeader() -> impl IntoView {
         <Title text="BlockMesh Network"/>
         <Link
             rel="icon"
-            // type_=Some(i)
-            href="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"
+            href="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/e4f3cdc0-c2ba-442d-3e48-e2f31c0dc100/public"
         />
 
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-RYHLW3MDK2"/>

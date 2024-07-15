@@ -2,13 +2,14 @@ use crate::frontends::frontend_webserver::components::icons::chrome_icon::Chrome
 use crate::frontends::frontend_webserver::context::webapp_context::WebAppContext;
 use block_mesh_common::constants::BLOCK_MESH_CHROME_EXTENSION_LINK;
 use leptos::*;
+use leptos_router::A;
 
 #[component]
 pub fn MetricsComponent() -> impl IntoView {
     let async_data = WebAppContext::get_dashboard_data();
     view! {
         <div class="m-2">
-            <div class="border-white border m-2 relative overflow-hidden rounded-[30px] pt-6 md:pt-[33px] pb-7 md:pb-[39px] pl-[11px] md:pl-[44px]">
+            <div class="border-off-white border m-2 relative overflow-hidden rounded-[30px] pt-6 md:pt-[33px] pb-7 md:pb-[39px] pl-[11px] md:pl-[44px]">
                 <img
                     alt="back"
                     loading="lazy"
@@ -39,7 +40,7 @@ pub fn MetricsComponent() -> impl IntoView {
 
                         Overall Points
                     </div>
-                    <div class="text-green-300 mt-[7px] md:mt-2.5 text-[30px] md:text-[40px] font-semibold leading-[116%] max-md:ml-1.5">
+                    <div class="text-cyan mt-[7px] md:mt-2.5 text-[30px] md:text-[40px] font-semibold leading-[116%] max-md:ml-1.5">
                         {move || {
                             let p = match async_data.get() {
                                 Some(Some(response)) => response.points,
@@ -49,16 +50,17 @@ pub fn MetricsComponent() -> impl IntoView {
                         }}
 
                     </div>
-                    <p class="text-sm font-medium leading-6 text-gray-400">Chrome Extension</p>
+                    <p class="text-sm font-medium leading-6 text-off-white">Chrome Extension</p>
                     <p class="mt-2 flex items-baseline gap-x-2 text-white">
-                        <a
+                        <A
                             href=BLOCK_MESH_CHROME_EXTENSION_LINK
                             target="_blank"
-                            class="inline-flex items-center gap-x-1.5 rounded-md border px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                            class="hover:text-orange text-off-white py-2 px-4 border border-orange rounded font-bebas-neue focus:outline-none focus:shadow-outline"
+
                         >
                             Download
                             <ChromeIcon/>
-                        </a>
+                        </A>
                     </p>
                 </div>
             </div>

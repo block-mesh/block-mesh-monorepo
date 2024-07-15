@@ -9,27 +9,30 @@ pub fn ResetPasswordPage() -> impl IntoView {
             view! { <div class="lds-roller"></div> }
         }>
 
-            <div class="bg-gray-800 h-screen">
+            <div class="bg-dark-blue h-screen">
                 <form action="/reset_password" method="post">
-                    <div class="bg-gray-700 flex justify-center items-center h-screen">
-                        <div class="bg-gray-800 border-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
-                            <h2 class="text-white text-2xl font-semibold text-center mb-6">
+                    <div class="bg-dark-blue flex justify-center items-center h-screen">
+                        <div class="bg-dark-blue border-off-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
+                            <h2 class="font-bebas-neue text-off-white text-2xl font-semibold text-center mb-6">
                                 Reset Password
                             </h2>
                             <div class="flex justify-around mb-4">
                                 <A
-                                    class="px-4 py-2 rounded font-bold text-sm text-blue-500 hover:text-blue-800"
+                                    class="font-open-sans inline-block align-baseline font-bold text-xs text-cyan hover:text-cyan"
                                     href="/ui/login"
                                 >
                                     Login
                                 </A>
                             </div>
                             <div class="mb-4">
-                                <label class="block text-white text-sm font-bold mb-2" for="email">
+                                <label
+                                    class="font-bebas-neue block text-off-white text-sm font-bold mb-2"
+                                    for="email"
+                                >
                                     Email
                                 </label>
                                 <input
-                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                    class="shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline"
                                     type="text"
                                     id="email"
                                     placeholder="Email"
@@ -38,7 +41,7 @@ pub fn ResetPasswordPage() -> impl IntoView {
                             </div>
                             <div class="flex items-center justify-between">
                                 <button
-                                    class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                    class="hover:text-orange text-off-white py-2 px-4 border border-orange rounded font-bebas-neue focus:outline-none focus:shadow-outline"
                                     type="submit"
                                 >
                                     Submit

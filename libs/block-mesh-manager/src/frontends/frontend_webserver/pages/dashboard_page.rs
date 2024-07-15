@@ -40,7 +40,7 @@ pub fn DashboardPage() -> impl IntoView {
                 }
             >
 
-                <div class="bg-gray-800 h-screen">
+                <div class="bg-dark-blue h-screen">
                     <NavbarComponent/>
                     <MetricsComponent/>
                     <InvitesComponent/>

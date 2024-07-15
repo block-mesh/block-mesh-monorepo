@@ -20,14 +20,15 @@ pub fn NavbarComponent() -> impl IntoView {
     };
 
     view! {
-        <nav class="bg-gray-800" id="top-navbar">
+        <nav class="bg-dark-blue" id="top-navbar">
             <div class="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
                 <div class="relative flex h-16 items-center justify-between">
                     <div class="absolute inset-y-0 left-0 flex items-center sm:hidden">
                         <button
                             type="button"
                             on:click=move |_| click()
-                            class="relative inline-flex items-center justify-center rounded-md p-2 text-gray-400 hover:bg-gray-700 hover:text-white focus:outline-none focus:ring-2 focus:ring-inset focus:ring-white"
+                            class="hover:text-orange text-off-white py-2 px-4 border border-orange rounded font-bebas-neue focus:outline-none focus:shadow-outline"
+
                             aria-controls="mobile-menu"
                             aria-expanded="false"
                         >
@@ -77,19 +78,13 @@ pub fn NavbarComponent() -> impl IntoView {
                             <div class="flex space-x-4">
                                 <A
                                     href="/ui/dashboard"
-                                    class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                                    class="font-open-sans mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:text-cyan"
                                 >
                                     Dashboard
                                 </A>
-                                // <A
-                                // href="/ui/tasks_table"
-                                // class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-                                // >
-                                // Tasks
-                                // </A>
                                 <A
                                     href="/logout"
-                                    class="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                                    class="font-open-sans mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:text-cyan"
                                 >
                                     Logout
                                 </A>
@@ -106,19 +101,13 @@ pub fn NavbarComponent() -> impl IntoView {
                 <div class="space-y-1 px-2 pb-3 pt-2">
                     <A
                         href="/ui/dashboard"
-                        class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                        class="font-open-sans mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:text-cyan"
                     >
                         Dashboard
                     </A>
-                    // <A
-                    // href="/ui/tasks_table"
-                    // class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
-                    // >
-                    // Tasks
-                    // </A>
                     <A
                         href="/logout"
-                        class="block rounded-md px-3 py-2 text-base font-medium text-gray-300 hover:bg-gray-700 hover:text-white"
+                        class="font-open-sans mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:text-cyan"
                     >
                         Logout
                     </A>
