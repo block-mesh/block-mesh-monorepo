@@ -55,9 +55,12 @@ pub fn ExtensionLogin() -> impl IntoView {
                         state.status.update(|v| *v = ExtensionStatus::LoggedIn);
                     }
                 }
-                Err(_) => {
+                Err(e) => {
                     ExtensionState::set_error(
-                        "Failed to login, please check your credentials again",
+                        format!(
+                            "Failed to login, please check your credentials again : {:?}",
+                            e
+                        ),
                         state.error,
                     );
                 }

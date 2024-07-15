@@ -114,13 +114,6 @@ features = [
 crate-type = ["cdylib", "rlib"]
 
 [features]
-csr = [
-  "leptos/csr",
-  "leptos_meta/csr",
-  "leptos_router/csr",
-  "dep:logger-leptos",
-  "dep:web-sys"
-]
 hydrate = [
   "leptos/hydrate",
   "leptos_meta/hydrate",

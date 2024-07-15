@@ -1926,6 +1926,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "cloudflare-images-gallery-page"
+version = "0.0.102"
+dependencies = [
+ "anyhow",
+ "askama",
+ "askama_axum",
+ "block-mesh-common",
+ "reqwest 0.11.27",
+ "serde",
+ "serde_json",
+ "time",
+ "tracing",
+ "tracing-subscriber",
+ "tracing-web",
+ "worker",
+]
+
+[[package]]
 name = "cloudflare-landing-page"
 version = "0.0.102"
 dependencies = [
