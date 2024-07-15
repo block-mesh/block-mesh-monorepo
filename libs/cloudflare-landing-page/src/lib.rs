@@ -33,7 +33,7 @@ struct Home {
     pub twitter: String,
     pub gitbook: String,
     pub logo: String,
-    pub image: String,
+    // pub image: String,
     pub support: String,
     pub chat: String,
 }
@@ -47,7 +47,7 @@ async fn main(_req: Request, _env: Env, _ctx: Context) -> Result<Response> {
         twitter: BLOCK_MESH_TWITTER.to_string(),
         gitbook: BLOCK_MESH_GITBOOK.to_string(),
         logo: BLOCK_MESH_LOGO.to_string(),
-        image: BLOCK_MESH_LANDING_PAGE_IMAGE.to_string(),
+        // image: BLOCK_MESH_LANDING_PAGE_IMAGE.to_string(),
         support: BLOCK_MESH_SUPPORT_EMAIL.to_string(),
         chat: BLOCK_MESH_SUPPORT_CHAT.to_string(),
     }
