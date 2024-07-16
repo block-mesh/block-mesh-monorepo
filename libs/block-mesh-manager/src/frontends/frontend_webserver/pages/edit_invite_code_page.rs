@@ -39,21 +39,21 @@ pub fn EditInvitePage() -> impl IntoView {
                 }
             >
 
-                <div class="bg-gray-800 h-screen">
+                <div class="bg-dark-blue h-screen">
                     <NavbarComponent/>
                     <form action="/edit_invite_code" method="post">
                         <div class="m-2">
-                            <div class="mb-4 rounded px-8 pb-8 pt-6 shadow-md bg-gray-800  border-white border-solid border-2">
+                            <div class="mb-4 rounded px-8 pb-8 pt-6 shadow-md bg-dark-blue  border-white border-solid border-2">
                                 <div class="mb-4">
                                     <label
-                                        class="mb-2 block text-sm font-bold text-white"
+                                        class="font-bebas-neue mb-2 block text-sm font-bold text-off-white"
                                         for="current_invite_code"
                                     >
                                         Current Invite
                                         Code
                                     </label>
                                     <input
-                                        class="w-full appearance-none rounded border px-3 py-2 text-black shadow"
+                                        class="w-full appearance-none rounded border px-3 py-2 text-black shadow text-black"
                                         id="current_invite_code"
                                         type="text"
                                         name="current_invite_code"
@@ -70,7 +70,7 @@ pub fn EditInvitePage() -> impl IntoView {
                                 </div>
                                 <div class="mb-4">
                                     <label
-                                        class="mb-2 block text-sm font-bold text-white"
+                                        class="font-bebas-neue mb-2 block text-sm font-bold text-off-white"
                                         for="new_invite_code"
                                     >
                                         New Invite Code
@@ -85,7 +85,7 @@ pub fn EditInvitePage() -> impl IntoView {
                                     />
                                 </div>
                                 <button
-                                    class="focus:shadow-outline rounded bg-blue-500 px-4 py-2 font-bold text-white hover:bg-blue-700 focus:outline-none"
+                                    class="hover:text-orange text-off-white py-2 px-4 border border-orange rounded font-bebas-neue focus:outline-none focus:shadow-outline"
                                     type="submit"
                                 >
                                     Create New Invite Code

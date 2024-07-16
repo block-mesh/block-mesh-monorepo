@@ -1,3 +1,20 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/*@font-face {*/
+/*    font-family: 'Bebas Neue';*/
+/*url("https://r2-assets.blockmesh.xyz/BebasNeue-Regular.ttf") format('truetype'), font-weight: normal;*/
+/*    font-style: normal;*/
+/*}*/
+
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Open+Sans:wght@400;600&display=swap');
+
+.font-bebas-neue {
+    font-family: 'Bebas Neue', sans-serif;
+    text-transform: uppercase;
+}
+
+.font-open-sans {
+    font-family: 'Open Sans', sans-serif;
+}

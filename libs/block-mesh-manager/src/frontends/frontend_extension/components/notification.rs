@@ -23,7 +23,7 @@ pub fn ExtensionNotifications() -> impl IntoView {
             <div class="flex w-full flex-col items-center space-y-4 sm:items-end">
                 <div class=move || {
                     format!(
-                        "pointer-events-none w-full max-w-sm overflow-hidden rounded-lg bg-gray-700 border-white border shadow-lg ring-1 ring-black ring-opacity-5 {}",
+                        "pointer-events-none w-full max-w-sm overflow-hidden rounded-lg bg-dark-blue border-off-white border shadow-lg ring-1 ring-black ring-opacity-5 {}",
                         opacity.get(),
                     )
                 }>
@@ -47,7 +47,7 @@ pub fn ExtensionNotifications() -> impl IntoView {
                                 </svg>
                             </div>
                             <div class="ml-3 w-0 flex-1 pt-0.5">
-                                <p class="text-sm text-gray-500">
+                                <p class="text-sm text-off-white">
                                     {move || {
                                         error
                                             .get()

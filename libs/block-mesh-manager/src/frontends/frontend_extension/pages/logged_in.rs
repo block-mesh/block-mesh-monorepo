@@ -1,8 +1,11 @@
-use crate::frontends::frontend_extension::extension_state::ExtensionState;
-use crate::frontends::frontend_extension::utils::connectors::send_to_clipboard;
-use block_mesh_common::constants::BLOCKMESH_VERSION;
 use leptos::*;
 use leptos_router::A;
+
+use block_mesh_common::constants::BLOCKMESH_VERSION;
+
+use crate::frontends::frontend_extension::components::logo::Logo;
+use crate::frontends::frontend_extension::extension_state::ExtensionState;
+use crate::frontends::frontend_extension::utils::connectors::send_to_clipboard;
 
 #[component]
 pub fn ExtensionLoggedIn() -> impl IntoView {
@@ -36,7 +39,7 @@ pub fn ExtensionLoggedIn() -> impl IntoView {
         <div class="auth-card">
             <img
                 class="background-image"
-                src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/16475f13-7a36-4787-a076-580885250100/public"
+                src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/dc54851e-a585-44af-e6b6-18d16c984500/public"
                 alt="background"
             />
             <div class="auth-card-frame"></div>
@@ -48,7 +51,7 @@ pub fn ExtensionLoggedIn() -> impl IntoView {
                         height="24px"
                         viewBox="0 -960 960 960"
                         width="24px"
-                        fill="#fab457cc"
+                        fill="#FF7E07"
                         on:click=move |_| {
                             logout.dispatch(());
                         }
@@ -59,25 +62,17 @@ pub fn ExtensionLoggedIn() -> impl IntoView {
                 </div>
             </div>
             <div class="auth-card-body">
-                <div class="flex justify-center">
-
-                    <img
-                        class="h-16 w-16 m-auto"
-                        src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"
-                        alt="logo"
-                    />
-                </div>
-                <h1>BlockMesh</h1>
+                <Logo/>
                 <div class="auth-card-content">
                     <div class="pulse"></div>
-                    <small class="auth-card-version">Version: {{ BLOCKMESH_VERSION }}</small>
+                    <small class="relative text-off-white">Version: {{ BLOCKMESH_VERSION }}</small>
                     <div class="auth-card-chip auth-card-user">
                         <strong>{move || state.email.get()}</strong>
                     </div>
                 </div>
             </div>
             <div class="auth-card-bottom logged-bottom">
-                <button class="auth-card-button">
+                <button class="auth-card-button font-bebas-neue text-off-white">
                     <A
                         href=move || {
                             let url = state.blockmesh_url.get();
@@ -89,7 +84,7 @@ pub fn ExtensionLoggedIn() -> impl IntoView {
                         Dashboard
                     </A>
                 </button>
-                <button class="auth-card-button" on:click=copy_to_clipboard>
+                <button class="auth-card-button font-bebas-neue text-off-white" on:click=copy_to_clipboard>
                     Refer
                 </button>
             </div>

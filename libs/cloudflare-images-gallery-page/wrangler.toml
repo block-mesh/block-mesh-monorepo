@@ -1,4 +1,4 @@
-name = "cloudflare-privacy-page"
+name = "cloudflare-images-gallery-page"
 main = "build/worker/shim.mjs"
 compatibility_date = "2023-12-01"
 

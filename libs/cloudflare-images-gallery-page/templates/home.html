@@ -1,0 +1,27 @@
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BlockMesh Network</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+
+<script>
+    async function copy_to_clipboard(url) {
+        await navigator.clipboard.writeText(url);
+        alert(`Copied ${url}`);
+    }
+</script>
+<div class="bg-gray-900">
+    <div class="grid grid-cols-2 gap-2">
+        {% for image in images %}
+        <div>
+            <img class="h-auto max-w-full rounded-lg"
+                 src="{{ image }}" alt="" onclick='copy_to_clipboard("{{ image }}")'>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+</body>
+</html>

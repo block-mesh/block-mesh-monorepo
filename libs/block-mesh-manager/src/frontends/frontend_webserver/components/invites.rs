@@ -38,10 +38,12 @@ pub fn InvitesComponent() -> impl IntoView {
 
     view! {
         <div class="m-2">
-            <div class="border-white border m-2 relative overflow-hidden rounded-[30px] pt-6 md:pt-[33px] pb-7 md:pb-[39px] pl-[11px] md:pl-[44px]">
+            <div class="border-off-white border m-2 relative overflow-hidden rounded-[30px] pt-6 md:pt-[33px] pb-7 md:pb-[39px] pl-[11px] md:pl-[44px]">
                 <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 rounded">
                     <div class="py-6">
-                        <p class="text-sm font-medium leading-6 text-gray-400">Invite Code</p>
+                        <p class="font-bebas-neue text-sm font-medium leading-6 text-off-white">
+                            Invite Code
+                        </p>
                         <p class="mt-2 flex items-baseline gap-x-2">
                             <button
                                 type="button"
@@ -54,8 +56,7 @@ pub fn InvitesComponent() -> impl IntoView {
                                 }
 
                                 on:click=copy_to_clipboard
-                                // onclick="copy_invite_code_to_clipboard()"
-                                class="border border-white inline-flex items-center gap-x-1.5 rounded-md px-2.5 py-1.5 text-sm font-semibold text-white shadow-sm hover:bg-gray-300 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600"
+                                class="inline-flex hover:text-orange text-off-white py-2 px-4 border border-orange rounded font-bebas-neue focus:outline-none focus:shadow-outline"
                             >
                                 Copy Invite Link
                                 <ClipboardIcon/>
@@ -64,7 +65,9 @@ pub fn InvitesComponent() -> impl IntoView {
                         </p>
                     </div>
                     <div class="py-6 px-4 sm:px-6 lg:px-8">
-                        <p class="text-sm font-medium leading-6 text-gray-400">Users Invited</p>
+                        <p class="font-bebas-neue text-sm font-medium leading-6 text-off-white">
+                            Users Invited
+                        </p>
                         <p class="mt-2 flex items-baseline gap-x-2">
                             <span class="text-4xl font-semibold tracking-tight text-white">
                                 {move || {
@@ -79,7 +82,9 @@ pub fn InvitesComponent() -> impl IntoView {
                         </p>
                     </div>
                     <div class="py-6 px-4 sm:px-6 lg:px-8">
-                        <p class="text-sm font-medium leading-6 text-gray-400">Edit Invite Code</p>
+                        <p class="font-bebas-neue text-sm font-medium leading-6 text-off-white">
+                            Edit Invite Code
+                        </p>
                         <p class="mt-2 flex items-baseline gap-x-2">
                             <A
                                 href="/ui/edit_invite_code"

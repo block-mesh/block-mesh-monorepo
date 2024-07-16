@@ -25,6 +25,7 @@ use leptos_router::*;
 pub fn App() -> impl IntoView {
     provide_meta_context();
     provide_context(ExtensionState::default());
+    provide_context(WebAppContext::default());
 
     let extension_state = use_context::<ExtensionState>().unwrap();
     let extension_resource = ExtensionState::init_resource(extension_state);
@@ -35,7 +36,6 @@ pub fn App() -> impl IntoView {
                 <Route
                     path="/ui"
                     view=move || {
-                        provide_context(WebAppContext::default());
                         view! {
                             <WebServerHeader/>
                             <NotificationPopupComponent/>
