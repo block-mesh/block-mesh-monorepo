@@ -1,3 +1,4 @@
+use crate::frontends::frontend_extension::components::logo::Logo;
 use crate::frontends::frontend_extension::extension_state::ExtensionState;
 use crate::frontends::frontend_extension::utils::auth::register;
 use crate::frontends::frontend_extension::utils::connectors::send_message_channel;
@@ -60,21 +61,13 @@ pub fn ExtensionRegister() -> impl IntoView {
         <div class="auth-card">
             <img
                 class="background-image"
-                src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/16475f13-7a36-4787-a076-580885250100/public"
+                src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/0e42f33d-48e0-4f17-5ae0-9249a41bb200/public"
                 alt="background"
             />
             <div class="auth-card-frame"></div>
             <div class="auth-card-top"></div>
             <div class="auth-card-body">
-                <div class="flex justify-center">
-
-                    <img
-                        class="h-16 w-16 m-auto"
-                        src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"
-                        alt="logo"
-                    />
-                </div>
-                <h1>BlockMesh</h1>
+                <Logo/>
                 <form on:submit=|ev| ev.prevent_default()>
                     <div class="auth-card-input-container">
                         <input
@@ -91,7 +84,7 @@ pub fn ExtensionRegister() -> impl IntoView {
                             }
                         />
 
-                        <label>Email</label>
+                        <label class="font-bebas-neue text-off-white">Email</label>
                     </div>
                     <div class="auth-card-input-container">
                         <input
@@ -115,7 +108,7 @@ pub fn ExtensionRegister() -> impl IntoView {
                             }
                         />
 
-                        <label>Password</label>
+                        <label class="font-bebas-neue text-off-white">Password</label>
                     </div>
                     <div class="auth-card-input-container">
                         <input
@@ -131,10 +124,10 @@ pub fn ExtensionRegister() -> impl IntoView {
                             }
                         />
 
-                        <label>Refer Code</label>
+                        <label class="font-bebas-neue text-off-white">Refer Code</label>
                     </div>
                     <button
-                        class="auth-card-button"
+                        class="auth-card-button font-bebas-neue text-off-white"
                         on:click=move |_ev| submit_action_resource.refetch()
                     >
                         Register
@@ -142,10 +135,10 @@ pub fn ExtensionRegister() -> impl IntoView {
                 </form>
             </div>
             <div class="auth-card-bottom">
-                <small class="auth-card-sub-text">You already have an account?</small>
+                <small class="font-open-sans text-orange">You already have an account?</small>
                 <br/>
                 <small
-                    class="auth-card-link register-link"
+                    class="text-magenta underline cursor-pointer"
                     on:click=move |_| { state.status.update(|v| *v = ExtensionStatus::LoggedOut) }
                 >
                     <A href="/ext/login">Login now</A>

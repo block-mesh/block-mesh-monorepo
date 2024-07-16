@@ -78,13 +78,13 @@ pub fn NavbarComponent() -> impl IntoView {
                             <div class="flex space-x-4">
                                 <A
                                     href="/ui/dashboard"
-                                    class="font-open-sans mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:text-cyan"
+                                    class="rounded-md px-3 py-2 font-bebas-neue mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:bg-gray-700 hover:text-orange"
                                 >
                                     Dashboard
                                 </A>
                                 <A
                                     href="/logout"
-                                    class="font-open-sans mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:text-cyan"
+                                    class="rounded-md px-3 py-2 font-bebas-neue mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:bg-gray-700 hover:text-orange"
                                 >
                                     Logout
                                 </A>
@@ -101,13 +101,13 @@ pub fn NavbarComponent() -> impl IntoView {
                 <div class="space-y-1 px-2 pb-3 pt-2">
                     <A
                         href="/ui/dashboard"
-                        class="font-open-sans mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:text-cyan"
+                        class="block rounded-md px-3 py-2 font-bebas-neue mb-2 align-baseline font-bold text-xs text-cyan hover:bg-gray-700 hover:text-orange"
                     >
                         Dashboard
                     </A>
                     <A
                         href="/logout"
-                        class="font-open-sans mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:text-cyan"
+                        class="block rounded-md px-3 py-2 font-bebas-neue mb-2 align-baseline font-bold text-xs text-cyan hover:bg-gray-700 hover:text-orange"
                     >
                         Logout
                     </A>

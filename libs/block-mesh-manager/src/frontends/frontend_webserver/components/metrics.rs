@@ -18,11 +18,11 @@ pub fn MetricsComponent() -> impl IntoView {
                     decoding="async"
                     data-nimg="1"
                     class="absolute top-0 right-0 h-full w-[70%] max-w-[800px] object-cover object-left"
-                    src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/35b28e8e-2665-4c8d-a5cf-d7354fce4a00/public"
+                    src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/0e42f33d-48e0-4f17-5ae0-9249a41bb200/public"
                     style="color: transparent;"
                 />
                 <div class="relative z-[1]">
-                    <div class="flex items-center text-[#808080] leading-[153%] max-md:text-xs max-md:ml-1.5 text-green-300">
+                    <div class="flex items-center text-[#808080] leading-[153%] max-md:text-xs max-md:ml-1.5 text-cyan">
                         <svg
                             fill="none"
                             viewBox="0 0 24 24"
@@ -55,9 +55,9 @@ pub fn MetricsComponent() -> impl IntoView {
                         <A
                             href=BLOCK_MESH_CHROME_EXTENSION_LINK
                             target="_blank"
-                            class="hover:text-orange text-off-white py-2 px-4 border border-orange rounded font-bebas-neue focus:outline-none focus:shadow-outline"
-
+                            class="inline-flex gap-x-1.5 hover:text-orange text-off-white py-2 px-4 border border-orange rounded font-bebas-neue focus:outline-none focus:shadow-outline"
                         >
+
                             Download
                             <ChromeIcon/>
                         </A>

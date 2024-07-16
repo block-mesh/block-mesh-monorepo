@@ -1,3 +1,4 @@
+use crate::frontends::frontend_extension::components::logo::Logo;
 use crate::frontends::frontend_extension::extension_state::ExtensionState;
 use crate::frontends::frontend_extension::utils::auth::login;
 use crate::frontends::frontend_extension::utils::connectors::send_message_channel;
@@ -72,21 +73,13 @@ pub fn ExtensionLogin() -> impl IntoView {
         <div class="auth-card">
             <img
                 class="background-image"
-                src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/16475f13-7a36-4787-a076-580885250100/public"
+                src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/2f6630f8-f48a-47ed-753b-4445c9399e00/public"
                 alt="background"
             />
             <div class="auth-card-frame"></div>
             <div class="auth-card-top"></div>
             <div class="auth-card-body">
-                <div class="flex justify-center">
-
-                    <img
-                        class="h-16 w-16 m-auto"
-                        src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"
-                        alt="logo"
-                    />
-                </div>
-                <h1>BlockMesh</h1>
+                <Logo/>
                 <form on:submit=|ev| ev.prevent_default()>
                     <div class="auth-card-input-container">
                         <input
@@ -105,7 +98,7 @@ pub fn ExtensionLogin() -> impl IntoView {
                             }
                         />
 
-                        <label>Email</label>
+                        <label class="font-bebas-neue text-off-white">Email</label>
                     </div>
                     <div class="auth-card-input-container">
                         <input
@@ -131,11 +124,11 @@ pub fn ExtensionLogin() -> impl IntoView {
                             }
                         />
 
-                        <label>Password</label>
+                        <label class="font-bebas-neue text-off-white">Password</label>
                     </div>
                     <br/>
                     <button
-                        class="auth-card-button"
+                        class="auth-card-button font-bebas-neue text-off-white"
                         on:click=move |_ev| {
                             submit_action_resource.refetch();
                         }
@@ -146,10 +139,10 @@ pub fn ExtensionLogin() -> impl IntoView {
                 </form>
             </div>
             <div class="auth-card-bottom">
-                <small class="auth-card-sub-text">Doesnt have an account yet?</small>
+                <small class="font-open-sans text-orange">Doesnt have an account yet?</small>
                 <br/>
                 <small
-                    class="auth-card-link register-link"
+                    class="text-magenta underline cursor-pointer"
                     on:click=move |_| { state.status.update(|v| *v = ExtensionStatus::Registering) }
                 >
                     Register now
