@@ -22,12 +22,12 @@ pub async fn handler(
     let user = get_user_opt_by_email(&mut transaction, &email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    if !user.verified_email {
-        return Ok(Json(GetTokenResponse {
-            api_token: None,
-            message: Some("Email not verified yet".to_string()),
-        }));
-    }
+    // if !user.verified_email {
+    //     return Ok(Json(GetTokenResponse {
+    //         api_token: None,
+    //         message: Some("Email not verified yet".to_string()),
+    //     }));
+    // }
     let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
         .await?
         .ok_or_else(|| Error::NonceNotFound)?;

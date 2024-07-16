@@ -13,13 +13,16 @@ pub fn ExtensionLogin() -> impl IntoView {
     let state = use_context::<ExtensionState>().unwrap();
     let (password, set_password) = create_signal(String::new());
     let (email, set_email) = create_signal(String::new());
+    let (wait, set_wait) = create_signal(false);
 
     let submit_action_resource = create_local_resource(
         move || (),
         move |_| async move {
-            if email.get_untracked().is_empty() || password.get_untracked().is_empty() {
+            if wait.get() || email.get_untracked().is_empty() || password.get_untracked().is_empty()
+            {
                 return;
             }
+            set_wait.set(true);
             let credentials = LoginForm {
                 email: email.get_untracked(),
                 password: password.get_untracked(),
@@ -30,6 +33,7 @@ pub fn ExtensionLogin() -> impl IntoView {
                 Ok(res) => {
                     if res.message.is_some() {
                         ExtensionState::set_error(res.message.unwrap(), state.error);
+                        set_wait.set(false);
                         return;
                     }
                     if let Some(api_token) = res.api_token {
@@ -66,6 +70,7 @@ pub fn ExtensionLogin() -> impl IntoView {
                     );
                 }
             }
+            set_wait.set(false);
         },
     );
 

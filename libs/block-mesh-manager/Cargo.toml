@@ -144,8 +144,8 @@ ssr = [
 # Enables additional file hashes on outputted css, js, and wasm files
 #
 # Optional: Defaults to false. Can also be set with the LEPTOS_HASH_FILES=false env var (must be set at runtime too)
-#hash-files = true
-#hash-file-name = "hash.txt"
+hash-files = true
+hash-file-name = "hash.txt"
 
 # The name used by wasm-bindgen/cargo-leptos for the JS/WASM bundle. Defaults to the crate name
 output-name = "block-mesh-manager"

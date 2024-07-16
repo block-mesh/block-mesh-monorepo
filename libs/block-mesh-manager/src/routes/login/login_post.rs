@@ -34,7 +34,7 @@ pub async fn handler(
                 400,
                 "Authentication failed",
                 "Authentication failed. Please try again.",
-                "/login",
+                "/ui/login",
             ));
         }
     };
@@ -46,7 +46,7 @@ pub async fn handler(
                 400,
                 "Login Failed",
                 "Login failed. Please try again.",
-                "/login",
+                "/ui/login",
             ));
         }
     }
