@@ -14,13 +14,16 @@ pub fn ExtensionRegister() -> impl IntoView {
     let (password, set_password) = create_signal(String::new());
     let (email, set_email) = create_signal(String::new());
     let (invite_code, set_invite_code) = create_signal(String::new());
+    let (wait, set_wait) = create_signal(false);
 
     let submit_action_resource = create_local_resource(
         move || (),
         move |_| async move {
-            if email.get_untracked().is_empty() || password.get_untracked().is_empty() {
+            if wait.get() || email.get_untracked().is_empty() || password.get_untracked().is_empty()
+            {
                 return;
             }
+            set_wait.set(true);
             let credentials = RegisterForm {
                 email: email.get_untracked(),
                 password: password.get_untracked(),
@@ -54,6 +57,7 @@ pub fn ExtensionRegister() -> impl IntoView {
                     ExtensionState::set_error(err.to_string(), state.error);
                 }
             }
+            set_wait.set(false);
         },
     );
 
@@ -128,8 +132,11 @@ pub fn ExtensionRegister() -> impl IntoView {
                     </div>
                     <button
                         class="auth-card-button font-bebas-neue text-off-white"
-                        on:click=move |_ev| submit_action_resource.refetch()
+                        on:click=move |_ev| {
+                            submit_action_resource.refetch();
+                        }
                     >
+
                         Register
                     </button>
                 </form>

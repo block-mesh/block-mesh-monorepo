@@ -14,18 +14,18 @@
     ]
   },
   "icons": {
-    "128": "assets/block-mesh-logo.png",
-    "16": "assets/block-mesh-logo.png",
-    "32": "assets/block-mesh-logo.png",
-    "48": "assets/block-mesh-logo.png"
+    "128": "assets/blockmesh-icon-1.png",
+    "16": "assets/blockmesh-icon-1.png",
+    "32": "assets/blockmesh-icon-1.png",
+    "48": "assets/blockmesh-icon-1.png"
   },
   "action": {
-    "default_title": "BlockMesh",
+    "default_title": "BlockMesh Network",
     "default_icon": {
-      "16": "assets/block-mesh-logo.png",
-      "19": "assets/block-mesh-logo.png",
-      "32": "assets/block-mesh-logo.png",
-      "38": "assets/block-mesh-logo.png"
+      "16": "assets/blockmesh-icon-1.png",
+      "19": "assets/blockmesh-icon-1.png",
+      "32": "assets/blockmesh-icon-1.png",
+      "38": "assets/blockmesh-icon-1.png"
     },
     "default_popup": "js/popup.html"
   },

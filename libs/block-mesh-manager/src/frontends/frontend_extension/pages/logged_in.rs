@@ -84,7 +84,10 @@ pub fn ExtensionLoggedIn() -> impl IntoView {
                         Dashboard
                     </A>
                 </button>
-                <button class="auth-card-button font-bebas-neue text-off-white" on:click=copy_to_clipboard>
+                <button
+                    class="auth-card-button font-bebas-neue text-off-white"
+                    on:click=copy_to_clipboard
+                >
                     Refer
                 </button>
             </div>
