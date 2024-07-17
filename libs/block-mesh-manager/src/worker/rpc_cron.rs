@@ -6,12 +6,7 @@ use sqlx::PgPool;
 use std::time::Duration;
 use uuid::Uuid;
 
-#[tracing::instrument(
-    name = "create_rpc_tasks",
-    level = "trace",
-    skip(pool),
-    level = "trace"
-)]
+#[tracing::instrument(name = "create_rpc_tasks", level = "trace", skip(pool))]
 pub async fn create_rpc_tasks(pool: PgPool) -> anyhow::Result<()> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let uuid =
