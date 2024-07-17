@@ -2,7 +2,13 @@ use crate::domain::uptime_report::UptimeReport;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "get_user_uptimes", skip(transaction), ret, err)]
+#[tracing::instrument(
+    name = "get_user_uptimes",
+    skip(transaction),
+    ret,
+    err,
+    level = "trace"
+)]
 pub(crate) async fn get_user_uptimes(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,

@@ -3,7 +3,13 @@ use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "create_bandwidth_report", skip(transaction), ret, err)]
+#[tracing::instrument(
+    name = "create_bandwidth_report",
+    skip(transaction),
+    ret,
+    err,
+    level = "trace"
+)]
 pub(crate) async fn create_bandwidth_report(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,

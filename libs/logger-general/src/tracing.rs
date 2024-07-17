@@ -21,7 +21,11 @@ use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Layer;
 use uuid::Uuid;
 
-const FILTER_SPAM_MODULE_PATH: [&str; 2] = ["axum_login::service", "tower_sessions::service"];
+const FILTER_SPAM_MODULE_PATH: [&str; 3] = [
+    "axum_login::service",
+    "tower_sessions::service",
+    "tower_sessions_core::session",
+];
 
 struct Timings {
     idle: u64,
