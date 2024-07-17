@@ -21,6 +21,8 @@ use tracing_subscriber::util::SubscriberInitExt;
 use tracing_subscriber::Layer;
 use uuid::Uuid;
 
+const FILTER_SPAM_MODULE_PATH: [&str; 2] = ["axum_login::service", "tower_sessions::service"];
+
 struct Timings {
     idle: u64,
     busy: u64,
@@ -251,6 +253,11 @@ where
     }
 
     fn on_event(&self, event: &Event, _ctx: Context<S>) {
+        if let Some(module_path) = event.metadata().module_path() {
+            if FILTER_SPAM_MODULE_PATH.contains(&module_path) {
+                return;
+            }
+        }
         let user_id = self.user_id.clone();
         let log = json!({
             "timestamp": chrono::Utc::now().to_rfc3339(),

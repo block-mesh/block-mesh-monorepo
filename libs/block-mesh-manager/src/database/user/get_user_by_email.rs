@@ -4,7 +4,13 @@ use crate::domain::user::UserRole;
 use secret::Secret;
 use sqlx::{Postgres, Transaction};
 
-#[tracing::instrument(name = "Get User opt by email", skip(transaction), ret, err)]
+#[tracing::instrument(
+    name = "Get User opt by email",
+    skip(transaction),
+    ret,
+    err,
+    level = "trace"
+)]
 pub(crate) async fn get_user_opt_by_email(
     transaction: &mut Transaction<'_, Postgres>,
     email: &str,

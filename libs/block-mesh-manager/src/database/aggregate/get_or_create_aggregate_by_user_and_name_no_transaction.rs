@@ -7,6 +7,7 @@ use crate::domain::aggregate::{Aggregate, AggregateName};
 #[tracing::instrument(
     name = "get_or_create_aggregate_by_user_and_name_no_transaction",
     skip(pool),
+    level = "trace",
     ret,
     err
 )]

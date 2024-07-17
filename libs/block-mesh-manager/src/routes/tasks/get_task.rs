@@ -11,7 +11,7 @@ use block_mesh_common::interfaces::server_api::{GetTaskRequest, GetTaskResponse}
 use chrono::Utc;
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "get_task", skip(body, pool), fields(email = body.email))]
+#[tracing::instrument(name = "get_task", skip(body, pool), fields(email = body.email), level = "trace")]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Json(body): Json<GetTaskRequest>,

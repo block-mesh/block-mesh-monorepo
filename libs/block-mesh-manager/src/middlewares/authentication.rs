@@ -49,7 +49,7 @@ impl AuthnBackend for Backend {
     type Credentials = Credentials;
     type Error = Error;
 
-    #[tracing::instrument(name = "authenticate", skip(creds), err, ret)]
+    #[tracing::instrument(name = "authenticate", skip(creds), err, ret, level = "trace")]
     async fn authenticate(
         &self,
         creds: Self::Credentials,
@@ -70,7 +70,7 @@ impl AuthnBackend for Backend {
         }))
     }
 
-    #[tracing::instrument(name = "get_user", err, ret)]
+    #[tracing::instrument(name = "get_user", err, ret, level = "trace")]
     async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {
         let mut transaction = self.db.begin().await.map_err(Error::from)?;
         let user = get_user_opt_by_id(&mut transaction, user_id)
