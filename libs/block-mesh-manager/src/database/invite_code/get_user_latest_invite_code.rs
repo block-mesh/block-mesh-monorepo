@@ -2,7 +2,13 @@ use crate::domain::invite_code::InviteCode;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "get_user_latest_invite_code", skip(transaction), ret, err)]
+#[tracing::instrument(
+    name = "get_user_latest_invite_code",
+    skip(transaction),
+    ret,
+    err,
+    level = "trace"
+)]
 pub(crate) async fn get_user_latest_invite_code(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,

@@ -1,7 +1,13 @@
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "increment_tasks_count", skip(transaction), ret, err)]
+#[tracing::instrument(
+    name = "increment_tasks_count",
+    skip(transaction),
+    ret,
+    err,
+    level = "trace"
+)]
 pub(crate) async fn increment_tasks_count(
     transaction: &mut Transaction<'_, Postgres>,
     id: Uuid,

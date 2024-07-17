@@ -1,6 +1,6 @@
 use tokio::task::JoinHandle;
 
-#[tracing::instrument(name = "joiner", skip(rx))]
+#[tracing::instrument(name = "joiner", skip(rx), level = "trace")]
 pub async fn joiner_loop(
     mut rx: tokio::sync::mpsc::Receiver<JoinHandle<()>>,
 ) -> Result<(), anyhow::Error> {

@@ -4,7 +4,13 @@ use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "Create Server User", skip(transaction), ret, err)]
+#[tracing::instrument(
+    name = "Create Server User",
+    skip(transaction),
+    ret,
+    err,
+    level = "trace"
+)]
 pub(crate) async fn create_server_user(
     transaction: &mut Transaction<'_, Postgres>,
 ) -> anyhow::Result<Uuid> {
