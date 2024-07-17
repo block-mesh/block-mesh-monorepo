@@ -3,7 +3,13 @@ use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
 #[allow(clippy::too_many_arguments)]
-#[tracing::instrument(name = "finish_task", skip(transaction, response_raw), ret, err)]
+#[tracing::instrument(
+    name = "finish_task",
+    skip(transaction, response_raw),
+    ret,
+    err,
+    level = "trace"
+)]
 pub(crate) async fn finish_task(
     transaction: &mut Transaction<'_, Postgres>,
     task_id: Uuid,
