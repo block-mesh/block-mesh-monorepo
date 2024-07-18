@@ -6,6 +6,9 @@ use crate::frontends::frontend_extension::pages::loading::ExtensionLoading;
 use crate::frontends::frontend_extension::pages::logged_in::ExtensionLoggedIn;
 use crate::frontends::frontend_extension::pages::login::ExtensionLogin;
 use crate::frontends::frontend_extension::pages::register::ExtensionRegister;
+use crate::frontends::frontend_tauri::pages::login::TauriLogin;
+use crate::frontends::frontend_tauri::pages::register::TauriRegister;
+use crate::frontends::frontend_tauri::tauri_header::TauriHeader;
 use crate::frontends::frontend_webserver::components::notification_popup::NotificationPopupComponent;
 use crate::frontends::frontend_webserver::context::webapp_context::WebAppContext;
 use crate::frontends::frontend_webserver::pages::dashboard_page::DashboardPage;
@@ -51,6 +54,18 @@ pub fn App() -> impl IntoView {
                     <Route path="/resend_confirmation_email" view=ResendConfirmationEmailPage/>
                     <Route path="/new_password" view=NewPasswordPage/>
                     <Route path="/edit_invite_code" view=EditInvitePage/>
+                </Route>
+                <Route
+                    path="/tauri"
+                    view=move || {
+                        view! {
+                            <TauriHeader/>
+                            <Outlet/>
+                        }
+                    }
+                >
+                    <Route path="/login" view=TauriLogin/>
+                    <Route path="/register" view=TauriRegister/>
                 </Route>
                 <Route
                     path="/ext"

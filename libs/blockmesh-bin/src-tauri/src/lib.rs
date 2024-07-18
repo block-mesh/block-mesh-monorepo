@@ -1,3 +1,4 @@
+use std::env;
 use std::process::ExitCode;
 use std::sync::{Arc, OnceLock};
 
@@ -16,8 +17,8 @@ use logger_general::tracing::setup_tracing;
 
 use crate::background::channel_receiver;
 use crate::commands::{
-    check_token, get_app_config, get_ore_status, get_task_status, login, logout, open_main_window,
-    register, set_app_config, toggle_miner,
+    check_token, get_app_config, get_home_url, get_ore_status, get_task_status, login, logout,
+    open_main_window, register, set_app_config, toggle_miner,
 };
 use crate::run_events::on_run_events;
 use crate::system_tray::{set_dock_visible, setup_tray};
@@ -37,9 +38,14 @@ mod windows_events;
 pub static SYSTEM: OnceLock<Mutex<sysinfo::System>> = OnceLock::new();
 
 pub static CHANNEL_MSG_TX: OnceLock<broadcast::Sender<ChannelMessage>> = OnceLock::new();
+pub static APP_ENVIRONMENT: OnceLock<String> = OnceLock::new();
+
+const DEV_ENV: [&str; 3] = ["dev", "development", "local"];
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() -> anyhow::Result<ExitCode> {
+    let app_environment = env::var("APP_ENVIRONMENT").unwrap_or_default();
+    APP_ENVIRONMENT.set(app_environment).unwrap();
     let (incoming_tx, incoming_rx) = broadcast::channel::<ChannelMessage>(2);
     let args = CliArgs::parse();
     let mut config = if let Some(command) = args.command {
@@ -109,7 +115,8 @@ pub fn run() -> anyhow::Result<ExitCode> {
             login,
             register,
             check_token,
-            logout
+            logout,
+            get_home_url
         ])
         .build(tauri::generate_context!())
         .expect("error while running tauri application")

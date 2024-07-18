@@ -2003,6 +2003,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber",
  "tracing-web",
+ "uuid",
  "worker",
 ]
 

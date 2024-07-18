@@ -9,7 +9,7 @@ use wasm_bindgen::JsValue;
 #[wasm_bindgen(inline_js = r#"
         export async function invoke(cmd, args) {
             try {
-                return await window.__TAURI__.tauri.invoke(cmd, args);
+                return await window.__TAURI__.core.invoke(cmd, args);
             } catch (e) {
                 console.error(`Error in invoke ${cmd} : ${e}`);
                 const t = typeof e;
