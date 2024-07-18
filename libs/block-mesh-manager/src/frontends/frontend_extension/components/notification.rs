@@ -1,14 +1,13 @@
+use crate::frontends::context::notification_context::NotificationContext;
 use leptos::*;
-
-use crate::frontends::frontend_extension::extension_state::ExtensionState;
 
 #[component]
 pub fn ExtensionNotifications() -> impl IntoView {
-    let state = expect_context::<ExtensionState>();
-    let success = Signal::derive(move || state.success.get());
-    let error = Signal::derive(move || state.error.get());
+    let notifications = expect_context::<NotificationContext>();
+    let success = Signal::derive(move || notifications.success.get());
+    let error = Signal::derive(move || notifications.error.get());
     let opacity = Signal::derive(move || {
-        if state.success.get().is_some() || state.error.get().is_some() {
+        if notifications.success.get().is_some() || notifications.error.get().is_some() {
             "opacity-100"
         } else {
             "opacity-0"

@@ -1,8 +1,9 @@
+use crate::frontends::context::notification_context::NotificationContext;
 use crate::frontends::frontend_extension::components::logo::Logo;
 use crate::frontends::frontend_extension::extension_state::ExtensionState;
 use crate::frontends::frontend_extension::utils::auth::register;
 use crate::frontends::frontend_extension::utils::connectors::send_message_channel;
-use block_mesh_common::chrome_storage::{ExtensionStatus, MessageKey, MessageType, MessageValue};
+use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType, MessageValue};
 use block_mesh_common::interfaces::server_api::RegisterForm;
 use leptos::*;
 use leptos_dom::tracing;
@@ -11,6 +12,7 @@ use leptos_router::A;
 #[component]
 pub fn ExtensionRegister() -> impl IntoView {
     let state = use_context::<ExtensionState>().unwrap();
+    let notifications = expect_context::<NotificationContext>();
     let (password, set_password) = create_signal(String::new());
     let (email, set_email) = create_signal(String::new());
     let (invite_code, set_invite_code) = create_signal(String::new());
@@ -46,15 +48,15 @@ pub fn ExtensionRegister() -> impl IntoView {
                     .await;
                     state
                         .status
-                        .update(|v| *v = ExtensionStatus::WaitingEmailVerification);
-                    ExtensionState::set_success("Please confirm email and login", state.success);
+                        .update(|v| *v = AuthStatus::WaitingEmailVerification);
+                    notifications.set_success("Please confirm email and login");
                 }
                 Err(err) => {
                     tracing::error!(
                         "Unable to register new account for {}: {err}",
                         credentials.email
                     );
-                    ExtensionState::set_error(err.to_string(), state.error);
+                    notifications.set_error(err.to_string());
                 }
             }
             set_wait.set(false);
@@ -146,7 +148,7 @@ pub fn ExtensionRegister() -> impl IntoView {
                 <br/>
                 <small
                     class="text-magenta underline cursor-pointer"
-                    on:click=move |_| { state.status.update(|v| *v = ExtensionStatus::LoggedOut) }
+                    on:click=move |_| { state.status.update(|v| *v = AuthStatus::LoggedOut) }
                 >
                     <A href="/ext/login">Login now</A>
                 </small>

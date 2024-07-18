@@ -1,8 +1,5 @@
-use std::fmt::{Debug, Display};
-use std::time::Duration;
-
 use leptos::*;
-use leptos_dom::tracing;
+use std::fmt::Debug;
 
 use block_mesh_common::interfaces::server_api::{AuthStatusResponse, DashboardResponse};
 
@@ -10,8 +7,6 @@ use block_mesh_common::interfaces::server_api::{AuthStatusResponse, DashboardRes
 pub struct WebAppContext {
     pub points: RwSignal<f64>,
     pub number_of_users_invited: RwSignal<i64>,
-    pub error: RwSignal<Option<String>>,
-    pub success: RwSignal<Option<String>>,
 }
 
 impl Default for WebAppContext {
@@ -19,43 +14,11 @@ impl Default for WebAppContext {
         Self {
             points: create_rw_signal(0.0),
             number_of_users_invited: create_rw_signal(0),
-            error: create_rw_signal(None),
-            success: create_rw_signal(None),
         }
     }
 }
 
 impl WebAppContext {
-    #[tracing::instrument(name = "WebAppContext::set_success")]
-    pub fn set_success<T>(success: T, signal: RwSignal<Option<String>>)
-    where
-        T: Display + Clone + Into<String> + Debug,
-    {
-        let success = Option::from(success.clone().to_string());
-        signal.update(|v| *v = success);
-        set_timeout(
-            move || {
-                signal.update(|v| *v = None);
-            },
-            Duration::from_millis(3500),
-        );
-    }
-
-    #[tracing::instrument(name = "WebAppContext::set_error")]
-    pub fn set_error<T>(error: T, signal: RwSignal<Option<String>>)
-    where
-        T: Display + Clone + Into<String> + Debug,
-    {
-        let error = Option::from(error.clone().to_string());
-        signal.update(|v| *v = error);
-        set_timeout(
-            move || {
-                signal.update(|v| *v = None);
-            },
-            Duration::from_millis(3500),
-        );
-    }
-
     pub fn get_dashboard_data() -> Resource<Option<String>, Option<DashboardResponse>> {
         let (origin, set_origin) = create_signal(None::<String>);
         create_effect(move |_| {

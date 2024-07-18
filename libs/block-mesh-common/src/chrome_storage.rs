@@ -117,25 +117,25 @@ impl Display for MessageType {
 }
 
 #[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
-pub enum ExtensionStatus {
+pub enum AuthStatus {
     LoggedIn,
     Registering,
     LoggedOut,
     WaitingEmailVerification,
 }
 
-impl Display for ExtensionStatus {
+impl Display for AuthStatus {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            ExtensionStatus::LoggedIn => write!(f, "LoggedIn"),
-            ExtensionStatus::Registering => write!(f, "Registering"),
-            ExtensionStatus::LoggedOut => write!(f, "LoggedOut"),
-            ExtensionStatus::WaitingEmailVerification => write!(f, "WaitingEmailVerification"),
+            AuthStatus::LoggedIn => write!(f, "LoggedIn"),
+            AuthStatus::Registering => write!(f, "Registering"),
+            AuthStatus::LoggedOut => write!(f, "LoggedOut"),
+            AuthStatus::WaitingEmailVerification => write!(f, "WaitingEmailVerification"),
         }
     }
 }
 
-impl Default for ExtensionStatus {
+impl Default for AuthStatus {
     fn default() -> Self {
         Self::LoggedOut
     }

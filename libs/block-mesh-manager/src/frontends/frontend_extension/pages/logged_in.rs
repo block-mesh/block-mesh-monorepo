@@ -1,15 +1,16 @@
 use leptos::*;
 use leptos_router::A;
 
-use block_mesh_common::constants::BLOCKMESH_VERSION;
-
+use crate::frontends::context::notification_context::NotificationContext;
 use crate::frontends::frontend_extension::components::logo::Logo;
 use crate::frontends::frontend_extension::extension_state::ExtensionState;
 use crate::frontends::frontend_extension::utils::connectors::send_to_clipboard;
+use block_mesh_common::constants::BLOCKMESH_VERSION;
 
 #[component]
 pub fn ExtensionLoggedIn() -> impl IntoView {
     let state = use_context::<ExtensionState>().unwrap();
+    let notifications = expect_context::<NotificationContext>();
     let invite_code = Signal::derive(move || state.invite_code.get());
     let invite_url = Signal::derive(move || {
         format!(
@@ -23,11 +24,11 @@ pub fn ExtensionLoggedIn() -> impl IntoView {
         spawn_local(async move {
             let invite_url_string = invite_url.get_untracked();
             if invite_code.get_untracked().is_empty() {
-                ExtensionState::set_error("Missing invite code".to_string(), state.error);
+                notifications.set_error("Missing invite code".to_string());
                 return;
             }
             send_to_clipboard(&invite_url_string).await;
-            ExtensionState::set_success("Copied to clipboard".to_string(), state.success);
+            notifications.set_success("Copied to clipboard".to_string());
         });
     };
 

@@ -1,3 +1,5 @@
+use crate::frontends::context::auth_context::AuthContext;
+use crate::frontends::context::notification_context::NotificationContext;
 use crate::frontends::frontend_extension::components::navigator::ExtensionNavigator;
 use crate::frontends::frontend_extension::components::notification::ExtensionNotifications;
 use crate::frontends::frontend_extension::extension_header::ExtensionServerHeader;
@@ -27,6 +29,8 @@ use leptos_router::*;
 #[component]
 pub fn App() -> impl IntoView {
     provide_meta_context();
+    provide_context(AuthContext::default());
+    provide_context(NotificationContext::default());
     provide_context(ExtensionState::default());
     provide_context(WebAppContext::default());
 

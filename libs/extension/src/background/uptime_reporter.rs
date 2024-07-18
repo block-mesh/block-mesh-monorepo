@@ -1,4 +1,4 @@
-use block_mesh_common::chrome_storage::ExtensionStatus;
+use block_mesh_common::chrome_storage::AuthStatus;
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{ReportUptimeRequest, ReportUptimeResponse};
 use leptos::*;
@@ -19,7 +19,7 @@ pub async fn report_uptime() {
     if !app_state.has_api_token() {
         return;
     }
-    if app_state.status.get_untracked() == ExtensionStatus::LoggedOut {
+    if app_state.status.get_untracked() == AuthStatus::LoggedOut {
         return;
     }
 

@@ -1,8 +1,9 @@
+use crate::frontends::context::notification_context::NotificationContext;
 use crate::frontends::frontend_extension::components::logo::Logo;
 use crate::frontends::frontend_extension::extension_state::ExtensionState;
 use crate::frontends::frontend_extension::utils::auth::login;
 use crate::frontends::frontend_extension::utils::connectors::send_message_channel;
-use block_mesh_common::chrome_storage::{ExtensionStatus, MessageKey, MessageType, MessageValue};
+use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType, MessageValue};
 use block_mesh_common::interfaces::server_api::LoginForm;
 use leptos::logging::log;
 use leptos::*;
@@ -11,6 +12,7 @@ use uuid::Uuid;
 #[component]
 pub fn ExtensionLogin() -> impl IntoView {
     let state = use_context::<ExtensionState>().unwrap();
+    let notifications = expect_context::<NotificationContext>();
     let (password, set_password) = create_signal(String::new());
     let (email, set_email) = create_signal(String::new());
     let (wait, set_wait) = create_signal(false);
@@ -32,7 +34,7 @@ pub fn ExtensionLogin() -> impl IntoView {
             match result {
                 Ok(res) => {
                     if res.message.is_some() {
-                        ExtensionState::set_error(res.message.unwrap(), state.error);
+                        notifications.set_error(res.message.unwrap());
                         set_wait.set(false);
                         return;
                     }
@@ -56,18 +58,15 @@ pub fn ExtensionLogin() -> impl IntoView {
                             )
                             .await;
                         }
-                        ExtensionState::set_success("Successfully logged in", state.success);
-                        state.status.update(|v| *v = ExtensionStatus::LoggedIn);
+                        notifications.set_success("Successfully logged in");
+                        state.status.update(|v| *v = AuthStatus::LoggedIn);
                     }
                 }
                 Err(e) => {
-                    ExtensionState::set_error(
-                        format!(
-                            "Failed to login, please check your credentials again : {:?}",
-                            e
-                        ),
-                        state.error,
-                    );
+                    notifications.set_error(format!(
+                        "Failed to login, please check your credentials again : {:?}",
+                        e
+                    ));
                 }
             }
             set_wait.set(false);
@@ -148,7 +147,7 @@ pub fn ExtensionLogin() -> impl IntoView {
                 <br/>
                 <small
                     class="text-magenta underline cursor-pointer"
-                    on:click=move |_| { state.status.update(|v| *v = ExtensionStatus::Registering) }
+                    on:click=move |_| { state.status.update(|v| *v = AuthStatus::Registering) }
                 >
                     Register now
                 </small>
