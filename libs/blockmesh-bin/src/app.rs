@@ -1,4 +1,5 @@
 // use std::time::Duration;
+use leptos::logging::log;
 use leptos::*;
 // use crate::app_router::AppRouter;
 // use crate::components::app_footer::AppFooter;
@@ -6,20 +7,21 @@ use crate::leptos_state::LeptosTauriAppState;
 
 #[component]
 pub fn App() -> impl IntoView {
+    log!("starting App");
     provide_context(LeptosTauriAppState::default());
-    let _state = expect_context::<LeptosTauriAppState>();
-    // let resource = create_local_resource(
-    //     move || {
-    //         state.app_config.get().email.is_some() || state.app_config.get().api_token.is_some()
-    //     },
-    //     |_| async move {
-    //         let state = expect_context::<LeptosTauriAppState>();
-    //         LeptosTauriAppState::init_app_config(&state).await;
-    //         LeptosTauriAppState::check_token(&state).await;
-    //         LeptosTauriAppState::get_task_status(&state).await;
-    //         LeptosTauriAppState::get_ore_status(&state).await;
-    //     },
-    // );
+    let state = expect_context::<LeptosTauriAppState>();
+    let resource = create_local_resource(
+        move || {
+            state.app_config.get().email.is_some() || state.app_config.get().api_token.is_some()
+        },
+        |_| async move {
+            let state = expect_context::<LeptosTauriAppState>();
+            LeptosTauriAppState::init_app_config(&state).await;
+            LeptosTauriAppState::check_token(&state).await;
+            LeptosTauriAppState::get_task_status(&state).await;
+            LeptosTauriAppState::get_ore_status(&state).await;
+        },
+    );
     //
     // let _interval = set_interval_with_handle(
     //     move || {
@@ -33,14 +35,14 @@ pub fn App() -> impl IntoView {
     // );
 
     view! {
-        // <div class="bg-gray-800">
-        //     <Suspense fallback=move || view! { <p>Loading</p> }>
-        //         <div class="hidden">{resource.get()}</div>
-        //         <div class="">
-        //             // <AppRouter/>
-        //             // <AppFooter/>
-        //         </div>
-        //     </Suspense>
-        // </div>
+        <div class="hidden">
+            <Suspense fallback=move || view! { <p>Loading</p> }>
+                <div class="">{resource.get()}</div>
+                <div class="">
+                    // <AppRouter/>
+                    // <AppFooter/>
+                </div>
+            </Suspense>
+        </div>
     }
 }

@@ -7,5 +7,58 @@
     <link data-trunk rel="copy-dir" href="public"/>
     <link data-trunk rel="rust" data-wasm-opt="z"/>
     <link rel="stylesheet" type="text/css" href="https://r2-assets.blockmesh.xyz/tailwind.css">
+    <script>
+        const channel = new MessageChannel();
+        window.channel = channel;
+        window.message_channel_port = channel.port1;
+        window.mounted = false;
+
+        function onLoad(iframe) {
+            // Listen for messages on port1
+            window.channel.port1.onmessage = onMessage;
+            // Transfer port2 to the iframe
+            iframe.contentWindow.postMessage("READY", "*", [
+                window.channel.port2,
+            ]);
+        }
+
+        async function onMessage(e) {
+            const {data} = e;
+            if (!window.mounted && data === "READY") {
+                setTimeout(() => {
+                    window.wasmBindings.mount_tauri_leptos();
+                }, 250)
+                window.mounted = true;
+            }
+            const {msg_type, key, value} = data;
+            if (msg_type === "INVOKE") {
+                const val = await window.__TAURI__.core.invoke(key, {...value});
+                window.message_channel_port.postMessage({
+                    "invoke": {
+                        [key]: val
+                    }
+                });
+            }
+
+        }
+
+        document.addEventListener('DOMContentLoaded', async function () {
+            // window.wasmBindings.initSync();
+            const iframe = document.createElement("iframe");
+            const url = ((await window.__TAURI__.core.invoke("get_home_url")) || "https://app.blockmesh.xyz");
+            iframe.src = `${url}/login`;
+            iframe.width = window.innerWidth;
+            iframe.height = window.innerHeight;
+            iframe.style = "border: 0px";
+            iframe.classList.add("h-screen");
+            iframe.classList.add("w-screen");
+            iframe.addEventListener("load", (_) => onLoad(iframe));
+            const body = document.body;
+            body.appendChild(iframe);
+        });
+    </script>
 </head>
+<body>
+<div id="mount_to"></div>
+</body>
 </html>

@@ -235,6 +235,6 @@ pub async fn get_home_url() -> String {
     return if DEV_ENV.contains(&APP_ENVIRONMENT.get().unwrap().as_str()) {
         "http://localhost:8000/tauri".to_string()
     } else {
-        "http://app.blockmesh.xyz/tauri".to_string()
+        "https://app.blockmesh.xyz/tauri".to_string()
     };
 }

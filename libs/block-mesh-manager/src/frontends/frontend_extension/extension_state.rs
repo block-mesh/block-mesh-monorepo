@@ -1,4 +1,5 @@
 use std::cell::RefCell;
+
 use std::fmt;
 use std::fmt::{Debug, Formatter};
 use std::rc::Rc;
@@ -17,7 +18,7 @@ use wasm_bindgen::JsValue;
 
 use crate::frontends::frontend_extension::utils::auth::{check_token, get_latest_invite_code};
 use crate::frontends::frontend_extension::utils::connectors::{
-    ask_for_all_storage_values, send_message_channel, onPostMessage,
+    ask_for_all_storage_values, onPostMessage, send_message_channel,
 };
 use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType};
 use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};

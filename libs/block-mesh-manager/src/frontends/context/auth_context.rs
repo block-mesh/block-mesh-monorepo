@@ -55,32 +55,31 @@ impl AuthContext {
                 if let Ok(msg) = PostMessage::try_from(data.clone()) {
                     match &msg.msg_type {
                         MessageType::SET => match msg.key {
-                            MessageKey::Email => match msg.value {
-                                Some(MessageValue::String(email)) => self.email.set(email.clone()),
-                                _ => {}
-                            },
-                            MessageKey::ApiToken => match msg.value {
-                                Some(MessageValue::UUID(uuid)) => self.api_token.set(uuid.clone()),
-                                _ => {}
-                            },
-                            MessageKey::BlockMeshUrl => match msg.value {
-                                Some(MessageValue::String(url)) => {
+                            MessageKey::Email => {
+                                if let Some(MessageValue::String(email)) = msg.value {
+                                    self.email.set(email.clone());
+                                }
+                            }
+                            MessageKey::ApiToken => {
+                                if let Some(MessageValue::UUID(uuid)) = msg.value {
+                                    self.api_token.set(uuid);
+                                }
+                            }
+                            MessageKey::BlockMeshUrl => {
+                                if let Some(MessageValue::String(url)) = msg.value {
                                     self.blockmesh_url.set(url.clone())
                                 }
-                                _ => {}
-                            },
-                            MessageKey::DeviceId => match msg.value {
-                                Some(MessageValue::UUID(device_id)) => {
-                                    self.device_id.set(device_id.clone())
+                            }
+                            MessageKey::DeviceId => {
+                                if let Some(MessageValue::UUID(device_id)) = msg.value {
+                                    self.device_id.set(device_id)
                                 }
-                                _ => {}
-                            },
-                            MessageKey::InviteCode => match msg.value {
-                                Some(MessageValue::String(invite_code)) => {
+                            }
+                            MessageKey::InviteCode => {
+                                if let Some(MessageValue::String(invite_code)) = msg.value {
                                     self.invite_code.set(invite_code.clone())
                                 }
-                                _ => {}
-                            },
+                            }
                             _ => {}
                         },
                         _ => log!("msg no need? {:?}", msg),
