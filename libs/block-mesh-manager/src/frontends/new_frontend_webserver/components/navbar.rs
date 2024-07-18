@@ -77,3 +77,17 @@ pub fn NavbarItem(
         </span>
     }
 }
+
+#[component]
+pub fn NavbarLabel(
+    #[prop(into, optional)] class: MaybeSignal<String>,
+    children: Children,
+) -> impl IntoView {
+    let class = move || tw_merge!(class.get(), "truncate");
+
+    view! {
+        <span class=class>
+            {children()}
+        </span>
+    }
+}
