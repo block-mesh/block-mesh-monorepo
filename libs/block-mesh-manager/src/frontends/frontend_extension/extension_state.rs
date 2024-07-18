@@ -17,7 +17,7 @@ use wasm_bindgen::JsValue;
 
 use crate::frontends::frontend_extension::utils::auth::{check_token, get_latest_invite_code};
 use crate::frontends::frontend_extension::utils::connectors::{
-    ask_for_all_storage_values, send_message_channel, storageOnChangeViaPostMessage,
+    ask_for_all_storage_values, send_message_channel, onPostMessage,
 };
 use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType};
 use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
@@ -200,7 +200,7 @@ impl ExtensionState {
 
         let closure_ref = Rc::new(RefCell::new(Some(callback)));
         let closure_clone = closure_ref.clone();
-        storageOnChangeViaPostMessage(closure_clone.borrow().as_ref().unwrap());
+        onPostMessage(closure_clone.borrow().as_ref().unwrap());
         closure_ref.borrow_mut().take().unwrap().forget();
     }
 

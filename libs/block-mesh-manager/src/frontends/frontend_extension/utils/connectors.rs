@@ -6,7 +6,7 @@ use wasm_bindgen::JsValue;
 
 #[wasm_bindgen(module = "/js-src/connectors.js")]
 extern "C" {
-    pub fn storageOnChangeViaPostMessage(callback: &Closure<dyn Fn(JsValue)>);
+    pub fn onPostMessage(callback: &Closure<dyn Fn(JsValue)>);
     pub async fn send_message(msg: JsValue) -> JsValue;
 }
 

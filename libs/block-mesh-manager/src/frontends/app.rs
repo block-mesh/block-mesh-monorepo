@@ -35,9 +35,27 @@ pub fn App() -> impl IntoView {
     provide_context(WebAppContext::default());
 
     let extension_state = use_context::<ExtensionState>().unwrap();
+    let auth_state = use_context::<AuthContext>().unwrap();
     let extension_resource = ExtensionState::init_resource(extension_state);
+    let auth_state = AuthContext::init_as_resource(auth_state);
 
     view! {
+             <Script>
+            r#"
+                window.addEventListener("message", onMessage);
+                function onMessage(e) {
+                    console.log("server", { e });
+                    if (!e.ports.length) return;
+                    console.log("setting port");
+                    e.ports[0].postMessage("READY");
+                    window.message_channel_port = e.ports[0];
+                    window.message_channel_port.onmessage = (msg) => {
+                        console.log("53 =>", {msg});
+                        // console.log("msg", window.location.href , msg, msg?.data);
+                    }
+                }
+            "#
+        </Script>
         <Router fallback=|| { view! { <p>Error</p> }.into_view() }>
             <Routes>
                 <Route

@@ -1,5 +1,5 @@
 use leptos::*;
-use leptos_meta::{Link, Meta, Script, Stylesheet, Title};
+use leptos_meta::{Link, Meta, Stylesheet, Title};
 
 #[component]
 pub fn ExtensionServerHeader() -> impl IntoView {
@@ -15,18 +15,5 @@ pub fn ExtensionServerHeader() -> impl IntoView {
             rel="stylesheet"
         />
         <Title text="BlockMesh Network"/>
-        <Script>
-            r#"
-                window.addEventListener("message", onMessage);
-                function onMessage(e) {
-                    if (!e.ports.length) return;
-                    e.ports[0].postMessage("READY");
-                    window.message_channel_port = e.ports[0];
-                    window.message_channel_port.onmessage = (msg) => {
-                        // console.log("msg", window.location.href , msg, msg?.data);
-                    }
-                }
-            "#
-        </Script>
     }
 }

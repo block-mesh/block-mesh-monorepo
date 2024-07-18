@@ -21,7 +21,9 @@ pub fn TauriLogin() -> impl IntoView {
     let submit_action_resource = create_local_resource(
         move || (),
         move |_| async move {
-            if wait.get() || email.get_untracked().is_empty() || password.get_untracked().is_empty()
+            if wait.get_untracked()
+                || email.get_untracked().is_empty()
+                || password.get_untracked().is_empty()
             {
                 return;
             }
@@ -75,10 +77,12 @@ pub fn TauriLogin() -> impl IntoView {
     );
 
     view! {
-           <div>
+        <div>
             <div class="bg-dark-blue flex justify-center items-center h-screen">
                 <div class="bg-dark-blue border-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
-                    <h2 class="font-bebas-neue text-off-white text-2xl font-semibold text-center mb-6">Login</h2>
+                    <h2 class="font-bebas-neue text-off-white text-2xl font-semibold text-center mb-6">
+                        Login
+                    </h2>
                     <div class="flex justify-around mb-4">
                         <A
                             class="font-bebas-neue px-4 py-2 rounded font-bold text-sm text-cyan hover:text-orange"
@@ -88,7 +92,10 @@ pub fn TauriLogin() -> impl IntoView {
                         </A>
                     </div>
                     <div class="mb-4">
-                        <label class="font-bebas-neue block text-off-white text-sm font-bold mb-2" for="email">
+                        <label
+                            class="font-bebas-neue block text-off-white text-sm font-bold mb-2"
+                            for="email"
+                        >
                             Email
                         </label>
                         <input
@@ -110,7 +117,10 @@ pub fn TauriLogin() -> impl IntoView {
 
                     </div>
                     <div class="mb-4">
-                        <label class="font-bebas-neue block text-off-white text-sm font-bold mb-2" for="password">
+                        <label
+                            class="font-bebas-neue block text-off-white text-sm font-bold mb-2"
+                            for="password"
+                        >
                             Password
                         </label>
                         <input
@@ -142,7 +152,7 @@ pub fn TauriLogin() -> impl IntoView {
                         <button
                             class="hover:text-orange text-off-white py-2 px-4 border border-orange rounded font-bebas-neue focus:outline-none focus:shadow-outline"
                             type="submit"
-                            on:click=move |_| {  submit_action_resource.refetch() }
+                            on:click=move |_| { submit_action_resource.refetch() }
                         >
                             Submit
                         </button>
@@ -150,6 +160,5 @@ pub fn TauriLogin() -> impl IntoView {
                 </div>
             </div>
         </div>
-
     }
 }
