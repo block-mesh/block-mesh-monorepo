@@ -1,8 +1,8 @@
-use block_mesh_common::chrome_storage::{MessageKey, MessageType, MessageValue, PostMessage};
-use serde::{Deserialize, Serialize};
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
+
+use block_mesh_common::chrome_storage::{MessageKey, MessageType, MessageValue, PostMessage};
 
 #[wasm_bindgen(module = "/js-src/connectors.js")]
 extern "C" {

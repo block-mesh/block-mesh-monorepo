@@ -37,7 +37,7 @@ pub fn App() -> impl IntoView {
     let extension_state = use_context::<ExtensionState>().unwrap();
     let auth_state = use_context::<AuthContext>().unwrap();
     let extension_resource = ExtensionState::init_resource(extension_state);
-    let auth_state = AuthContext::init_as_resource(auth_state);
+    let _auth_state = AuthContext::init_as_resource(auth_state);
 
     view! {
              <Script>
