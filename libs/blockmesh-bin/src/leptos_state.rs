@@ -3,7 +3,6 @@ use block_mesh_common::app_config::{AppConfig, TaskStatus};
 use block_mesh_common::chrome_storage::{MessageKey, MessageType, MessageValue};
 use block_mesh_common::cli::CommandsEnum;
 use block_mesh_common::interfaces::server_api::GetTokenResponse;
-use leptos::logging::log;
 use leptos::*;
 use std::fmt::{Debug, Display};
 use std::time::Duration;
