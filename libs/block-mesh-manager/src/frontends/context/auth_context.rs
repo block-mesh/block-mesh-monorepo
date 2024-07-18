@@ -1,5 +1,7 @@
 use crate::frontends::frontend_extension::utils::connectors::onPostMessage;
-use block_mesh_common::chrome_storage::AuthStatus;
+use block_mesh_common::chrome_storage::{
+    AuthStatus, MessageKey, MessageType, MessageValue, PostMessage,
+};
 use gloo_utils::format::JsValueSerdeExt;
 use leptos::logging::log;
 use leptos::*;
@@ -50,11 +52,43 @@ impl AuthContext {
     pub async fn init(self) {
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
             if let Ok(data) = event.into_serde::<Value>() {
-                log!("data = {:#?}", data);
+                if let Ok(msg) = PostMessage::try_from(data.clone()) {
+                    match &msg.msg_type {
+                        MessageType::SET => match msg.key {
+                            MessageKey::Email => match msg.value {
+                                Some(MessageValue::String(email)) => self.email.set(email.clone()),
+                                _ => {}
+                            },
+                            MessageKey::ApiToken => match msg.value {
+                                Some(MessageValue::UUID(uuid)) => self.api_token.set(uuid.clone()),
+                                _ => {}
+                            },
+                            MessageKey::BlockMeshUrl => match msg.value {
+                                Some(MessageValue::String(url)) => {
+                                    self.blockmesh_url.set(url.clone())
+                                }
+                                _ => {}
+                            },
+                            MessageKey::DeviceId => match msg.value {
+                                Some(MessageValue::UUID(device_id)) => {
+                                    self.device_id.set(device_id.clone())
+                                }
+                                _ => {}
+                            },
+                            MessageKey::InviteCode => match msg.value {
+                                Some(MessageValue::String(invite_code)) => {
+                                    self.invite_code.set(invite_code.clone())
+                                }
+                                _ => {}
+                            },
+                            _ => {}
+                        },
+                        _ => log!("msg no need? {:?}", msg),
+                    }
+                }
                 if let Some(obj) = data.as_object() {
-                    log!("obj => {:#?}", obj);
                     for key in obj.keys() {
-                        println!("key = {}", key);
+                        println!("AuthContext::init => key = {}", key);
                     }
                 }
             }

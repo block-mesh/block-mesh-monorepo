@@ -1,6 +1,7 @@
 export function onPostMessage(callback) {
     if (!window.message_channel_port) return;
     window.message_channel_port.addEventListener("message", (msg) => {
+        console.log("connectors.js event listener", {msg});
         const {data} = msg;
         callback(data);
     });

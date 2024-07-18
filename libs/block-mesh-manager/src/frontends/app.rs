@@ -44,13 +44,10 @@ pub fn App() -> impl IntoView {
             r#"
                 window.addEventListener("message", onMessage);
                 function onMessage(e) {
-                    console.log("server", { e });
                     if (!e.ports.length) return;
-                    console.log("setting port");
                     e.ports[0].postMessage("READY");
                     window.message_channel_port = e.ports[0];
                     window.message_channel_port.onmessage = (msg) => {
-                        console.log("53 =>", {msg});
                         // console.log("msg", window.location.href , msg, msg?.data);
                     }
                 }
