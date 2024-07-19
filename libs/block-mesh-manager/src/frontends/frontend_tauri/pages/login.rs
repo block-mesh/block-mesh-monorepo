@@ -6,7 +6,6 @@ use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType, Mes
 use block_mesh_common::interfaces::server_api::LoginForm;
 use leptos::leptos_dom::log;
 use leptos::*;
-use leptos_router::A;
 use uuid::Uuid;
 
 #[component]
@@ -21,6 +20,13 @@ pub fn TauriLogin() -> impl IntoView {
     let submit_action_resource = create_local_resource(
         move || (),
         move |_| async move {
+            log!(
+                "starting wait {} email {} password {} url {}",
+                wait.get_untracked(),
+                email.get_untracked(),
+                password.get_untracked(),
+                state.blockmesh_url.get_untracked()
+            );
             if wait.get_untracked()
                 || email.get_untracked().is_empty()
                 || password.get_untracked().is_empty()
@@ -34,6 +40,7 @@ pub fn TauriLogin() -> impl IntoView {
             };
 
             let result = login(&state.blockmesh_url.get_untracked(), &credentials).await;
+            log!("result {:#?}", result);
             match result {
                 Ok(res) => {
                     if res.message.is_some() {
@@ -84,12 +91,14 @@ pub fn TauriLogin() -> impl IntoView {
                         Login
                     </h2>
                     <div class="flex justify-around mb-4">
-                        <A
-                            class="font-bebas-neue px-4 py-2 rounded font-bold text-sm text-cyan hover:text-orange"
-                            href="/tauri/register"
+                        <div
+                            class="cursor-pointer font-bebas-neue px-4 py-2 rounded font-bold text-sm text-cyan hover:text-orange"
+                            on:click=move |_| {
+                                state.status.update(|v| *v = AuthStatus::Registering)
+                            }
                         >
                             Register
-                        </A>
+                        </div>
                     </div>
                     <div class="mb-4">
                         <label

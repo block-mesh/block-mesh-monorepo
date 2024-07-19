@@ -7,6 +7,9 @@
     <link data-trunk rel="copy-dir" href="public"/>
     <link data-trunk rel="rust" data-wasm-opt="z"/>
     <link rel="stylesheet" type="text/css" href="https://r2-assets.blockmesh.xyz/tailwind.css">
+    <meta http-equiv="cache-control" content="no-cache">
+    <meta http-equiv="expires" content="0">
+    <meta http-equiv="pragma" content="no-cache">
     <script>
         const channel = new MessageChannel();
         window.channel = channel;
@@ -39,14 +42,22 @@
                     }
                 });
             }
-
+            if (msg_type === "GET_ALL") {
+                console.log("GET_ALL", window.location.href);
+                const config = JSON.parse(await window.__TAURI__.core.invoke("get_app_config"));
+                if (window.message_channel_port) {
+                    for (const [key, value] of Object.entries(config)) {
+                        window.message_channel_port.postMessage({[key]: value});
+                    }
+                }
+            }
         }
 
         document.addEventListener('DOMContentLoaded', async function () {
             // window.wasmBindings.initSync();
             const iframe = document.createElement("iframe");
             const url = ((await window.__TAURI__.core.invoke("get_home_url")) || "https://app.blockmesh.xyz");
-            iframe.src = `${url}/login`;
+            iframe.src = `${url}/tauri/login`;
             iframe.width = window.innerWidth;
             iframe.height = window.innerHeight;
             iframe.style = "border: 0px";

@@ -64,7 +64,7 @@ impl ExtensionState {
         create_local_resource(
             || (),
             move |_| async move {
-                log!("init_resource");
+                log!("ExtensionState => init_resource");
                 state.init_with_storage().await;
                 ask_for_all_storage_values().await;
                 state

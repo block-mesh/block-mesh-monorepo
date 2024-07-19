@@ -1,8 +1,11 @@
+use crate::frontends::context::auth_context::AuthContext;
+use block_mesh_common::chrome_storage::AuthStatus;
 use leptos::*;
-use leptos_router::A;
 
 #[component]
 pub fn TauriRegister() -> impl IntoView {
+    let state = expect_context::<AuthContext>();
+
     view! {
         <div class="bg-dark-blue h-screen">
             <div class="bg-dark-blue flex justify-center items-center h-screen">
@@ -81,12 +84,14 @@ pub fn TauriRegister() -> impl IntoView {
                         >
                             Submit
                         </button>
-                        <A
-                            class="font-open-sans mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:text-cyan"
-                            href="/tauri/login"
+                        <div
+                            class="cursor-pointer font-open-sans mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:text-cyan"
+                            on:click=move |_| {
+                                state.status.update(|v| *v = AuthStatus::LoggedOut)
+                            }
                         >
                             Login
-                        </A>
+                        </div>
                     </div>
                 </div>
             </div>

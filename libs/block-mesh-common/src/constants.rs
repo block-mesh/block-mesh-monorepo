@@ -1,6 +1,20 @@
 use serde::{Deserialize, Serialize};
+use std::env;
 use std::fmt::{Display, Formatter};
+use std::sync::OnceLock;
 
+pub const DEV_ENV: [&str; 3] = ["dev", "development", "local"];
+
+pub fn env_url() -> String {
+    static APP_ENVIRONMENT: OnceLock<String> = OnceLock::new();
+    let app_environment =
+        APP_ENVIRONMENT.get_or_init(|| env::var("APP_ENVIRONMENT").unwrap_or_default());
+    if DEV_ENV.contains(&app_environment.as_str()) {
+        "http://localhost:8000".to_string()
+    } else {
+        "https://app.blockmesh.xyz".to_string()
+    }
+}
 pub static BLOCK_MESH_SUPPORT_CHAT: &str = "https://blockmesh.xyz/support-chat";
 pub static BLOCK_MESH_SUPPORT_EMAIL: &str = "support@blockmesh.xyz";
 pub static BLOCK_MESH_LOGO: &str =

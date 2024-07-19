@@ -37,11 +37,7 @@ pub fn App() -> impl IntoView {
     view! {
         <div class="hidden">
             <Suspense fallback=move || view! { <p>Loading</p> }>
-                <div class="">{resource.get()}</div>
-                <div class="">
-                    // <AppRouter/>
-                    // <AppFooter/>
-                </div>
+                <div class="hidden">{resource.get()}</div>
             </Suspense>
         </div>
     }

@@ -2,6 +2,7 @@ use crate::cli::{
     ClientNodeMode, ClientNodeOptions, Commands, CommandsEnum, ProxyEndpointNodeOptions,
     ProxyMasterNodeOptions,
 };
+use crate::constants::env_url;
 use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
 use std::env;
@@ -13,6 +14,7 @@ pub struct AppConfig {
     pub auto_start_blockmesh: Option<TaskStatus>,
     pub email: Option<String>,
     pub api_token: Option<String>,
+    pub blockmesh_url: Option<String>,
     pub keypair_path: Option<String>,
     pub proxy_master_node_owner: Option<Pubkey>,
     pub program_id: Option<Pubkey>,
@@ -59,6 +61,7 @@ impl From<String> for TaskStatus {
 
 impl AppConfig {
     pub fn merge(&mut self, config: Self) {
+        self.blockmesh_url = self.blockmesh_url.clone().or(config.blockmesh_url);
         self.email = self.email.clone().or(config.email);
         self.api_token = self.api_token.clone().or(config.api_token);
         self.auto_start_blockmesh = self.auto_start_blockmesh.or(config.auto_start_blockmesh);
@@ -140,6 +143,7 @@ impl From<Commands> for AppConfig {
                 email: None,
                 api_token: None,
                 auto_start_blockmesh: None,
+                blockmesh_url: Some(env_url()),
                 keypair_path: Some(options.keypair_path),
                 proxy_master_node_owner: options.proxy_master_node_owner,
                 program_id: Some(options.program_id),
@@ -161,6 +165,7 @@ impl From<Commands> for AppConfig {
             Commands::ProxyMaster(options) => AppConfig {
                 email: None,
                 api_token: None,
+                blockmesh_url: Some(env_url()),
                 auto_start_blockmesh: None,
                 keypair_path: Some(options.keypair_path),
                 proxy_master_node_owner: None,
@@ -183,6 +188,7 @@ impl From<Commands> for AppConfig {
             Commands::ProxyEndpoint(options) => AppConfig {
                 email: None,
                 api_token: None,
+                blockmesh_url: Some(env_url()),
                 auto_start_blockmesh: None,
                 keypair_path: Some(options.keypair_path),
                 proxy_master_node_owner: options.proxy_master_node_owner,

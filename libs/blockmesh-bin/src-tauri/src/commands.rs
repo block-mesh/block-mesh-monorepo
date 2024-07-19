@@ -1,9 +1,9 @@
 use crate::system_tray::set_dock_visible;
 use crate::tauri_state::{AppState, ChannelMessage};
 use crate::tauri_storage::set_config_with_path;
-use crate::{APP_ENVIRONMENT, CHANNEL_MSG_TX, DEV_ENV};
+use crate::CHANNEL_MSG_TX;
 use block_mesh_common::app_config::{AppConfig, TaskStatus};
-use block_mesh_common::constants::BLOCK_MESH_APP_SERVER;
+use block_mesh_common::constants::{env_url, BLOCK_MESH_APP_SERVER};
 use block_mesh_common::interfaces::server_api::{
     CheckTokenRequest, GetTokenResponse, LoginForm, RegisterForm, RegisterResponse,
 };
@@ -232,9 +232,5 @@ pub async fn register(
 #[tauri::command]
 #[tracing::instrument(name = "get_home_url", ret)]
 pub async fn get_home_url() -> String {
-    return if DEV_ENV.contains(&APP_ENVIRONMENT.get().unwrap().as_str()) {
-        "http://localhost:8000/tauri".to_string()
-    } else {
-        "https://app.blockmesh.xyz/tauri".to_string()
-    };
+    return env_url();
 }

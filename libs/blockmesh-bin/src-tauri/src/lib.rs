@@ -38,14 +38,9 @@ mod windows_events;
 pub static SYSTEM: OnceLock<Mutex<sysinfo::System>> = OnceLock::new();
 
 pub static CHANNEL_MSG_TX: OnceLock<broadcast::Sender<ChannelMessage>> = OnceLock::new();
-pub static APP_ENVIRONMENT: OnceLock<String> = OnceLock::new();
-
-const DEV_ENV: [&str; 3] = ["dev", "development", "local"];
 
 #[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() -> anyhow::Result<ExitCode> {
-    let app_environment = env::var("APP_ENVIRONMENT").unwrap_or_default();
-    APP_ENVIRONMENT.set(app_environment).unwrap();
     let (incoming_tx, incoming_rx) = broadcast::channel::<ChannelMessage>(2);
     let args = CliArgs::parse();
     let mut config = if let Some(command) = args.command {

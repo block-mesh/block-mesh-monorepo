@@ -1,4 +1,6 @@
-use crate::frontends::frontend_extension::utils::connectors::onPostMessage;
+use crate::frontends::frontend_extension::utils::connectors::{
+    ask_for_all_storage_values, onPostMessage,
+};
 use block_mesh_common::chrome_storage::{
     AuthStatus, MessageKey, MessageType, MessageValue, PostMessage,
 };
@@ -43,7 +45,9 @@ impl AuthContext {
         create_local_resource(
             || {},
             move |_| async move {
+                log!("AuthContext => init_resource");
                 state.init().await;
+                ask_for_all_storage_values().await;
                 state
             },
         )
@@ -52,6 +56,7 @@ impl AuthContext {
     pub async fn init(self) {
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
             if let Ok(data) = event.into_serde::<Value>() {
+                log!("DATA = {:#?}", data);
                 if let Ok(msg) = PostMessage::try_from(data.clone()) {
                     match &msg.msg_type {
                         MessageType::SET => match msg.key {
@@ -67,6 +72,7 @@ impl AuthContext {
                             }
                             MessageKey::BlockMeshUrl => {
                                 if let Some(MessageValue::String(url)) = msg.value {
+                                    log!("Setting URL {}", url);
                                     self.blockmesh_url.set(url.clone())
                                 }
                             }

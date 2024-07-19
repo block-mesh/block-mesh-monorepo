@@ -8,6 +8,9 @@ use crate::frontends::frontend_extension::pages::loading::ExtensionLoading;
 use crate::frontends::frontend_extension::pages::logged_in::ExtensionLoggedIn;
 use crate::frontends::frontend_extension::pages::login::ExtensionLogin;
 use crate::frontends::frontend_extension::pages::register::ExtensionRegister;
+use crate::frontends::frontend_tauri::components::navigator::TauriNavigator;
+use crate::frontends::frontend_tauri::pages::loading::TauriLoading;
+use crate::frontends::frontend_tauri::pages::logged_in::TauriLoggedIn;
 use crate::frontends::frontend_tauri::pages::login::TauriLogin;
 use crate::frontends::frontend_tauri::pages::register::TauriRegister;
 use crate::frontends::frontend_tauri::tauri_header::TauriHeader;
@@ -37,10 +40,14 @@ pub fn App() -> impl IntoView {
     let extension_state = use_context::<ExtensionState>().unwrap();
     let auth_state = use_context::<AuthContext>().unwrap();
     let extension_resource = ExtensionState::init_resource(extension_state);
-    let _auth_state = AuthContext::init_as_resource(auth_state);
+    let none_extension_resource = None::<Resource<(), ExtensionState>>;
+    let auth_state = AuthContext::init_as_resource(auth_state);
 
     view! {
-             <Script>
+        <meta http-equiv="cache-control" content="no-cache"/>
+        <meta http-equiv="expires" content="0"/>
+        <meta http-equiv="pragma" content="no-cache"/>
+        <Script>
             r#"
                 window.addEventListener("message", onMessage);
                 function onMessage(e) {
@@ -83,8 +90,54 @@ pub fn App() -> impl IntoView {
                         }
                     }
                 >
-                    <Route path="/login" view=TauriLogin/>
-                    <Route path="/register" view=TauriRegister/>
+
+                    <Route
+                        path="/login"
+                        view=move || {
+                            view! {
+                                <Wrapper
+                                    resource=none_extension_resource
+                                    auth=Some(auth_state)
+                                    loading=|| view! { <TauriLoading/> }
+                                >
+                                    <TauriNavigator/>
+                                    <TauriLogin/>
+                                </Wrapper>
+                            }
+                        }
+                    />
+
+                    <Route
+                        path="/register"
+                        view=move || {
+                            view! {
+                                <Wrapper
+                                    resource=none_extension_resource
+                                    auth=Some(auth_state)
+                                    loading=|| view! { <TauriLoading/> }
+                                >
+                                    <TauriNavigator/>
+                                    <TauriRegister/>
+                                </Wrapper>
+                            }
+                        }
+                    />
+
+                    <Route
+                        path="/logged_in"
+                        view=move || {
+                            view! {
+                                <Wrapper
+                                    resource=none_extension_resource
+                                    auth=Some(auth_state)
+                                    loading=|| view! { <TauriLoading/> }
+                                >
+                                    <TauriNavigator/>
+                                    <TauriLoggedIn/>
+                                </Wrapper>
+                            }
+                        }
+                    />
                 </Route>
                 <Route
                     path="/ext"
@@ -101,7 +154,9 @@ pub fn App() -> impl IntoView {
                         view=move || {
                             view! {
                                 <Wrapper
-                                    resource=extension_resource
+                                    resource=Some(extension_resource)
+                                    auth=Some(auth_state)
+
                                     loading=|| view! { <ExtensionLoading/> }
                                 >
                                     <ExtensionNotifications/>
@@ -117,7 +172,8 @@ pub fn App() -> impl IntoView {
                         view=move || {
                             view! {
                                 <Wrapper
-                                    resource=extension_resource
+                                    resource=Some(extension_resource)
+                                    auth=Some(auth_state)
                                     loading=|| view! { <ExtensionLoading/> }
                                 >
                                     <ExtensionNotifications/>
@@ -133,7 +189,9 @@ pub fn App() -> impl IntoView {
                         view=move || {
                             view! {
                                 <Wrapper
-                                    resource=extension_resource
+                                    resource=Some(extension_resource)
+                                    auth=Some(auth_state)
+
                                     loading=|| view! { <ExtensionLoading/> }
                                 >
                                     <ExtensionNotifications/>
