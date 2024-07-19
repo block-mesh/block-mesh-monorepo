@@ -5,7 +5,21 @@ use leptos::tracing;
 use serde::{Deserialize, Serialize};
 use solana_sdk::wasm_bindgen;
 use std::fmt::Display;
+use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
+
+#[wasm_bindgen(inline_js = r#"
+    export function onPostMessage(callback) {
+        if (!window.message_channel_port) return;
+            window.message_channel_port.addEventListener("message", (msg) => {
+                console.log("connectors.js event listener", {msg});
+                const {data} = msg;
+                callback(data);
+            });
+        }"#)]
+extern "C" {
+    pub fn onPostMessage(callback: &Closure<dyn Fn(JsValue)>);
+}
 
 #[wasm_bindgen(inline_js = r#"
         export async function invoke(cmd, args) {
