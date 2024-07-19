@@ -2,7 +2,7 @@ use crate::frontends::context::notification_context::NotificationContext;
 use leptos::*;
 
 #[component]
-pub fn NotificationPopupComponent() -> impl IntoView {
+pub fn TauriNotification() -> impl IntoView {
     let notifications = expect_context::<NotificationContext>();
     let success = Signal::derive(move || notifications.success.get());
     let error = Signal::derive(move || notifications.error.get());

@@ -1,3 +1,4 @@
+use crate::frontends::components::notification_popup::NotificationPopup;
 use crate::frontends::context::auth_context::AuthContext;
 use crate::frontends::context::notification_context::NotificationContext;
 use crate::frontends::frontend_extension::components::navigator::ExtensionNavigator;
@@ -14,7 +15,6 @@ use crate::frontends::frontend_tauri::pages::logged_in::TauriLoggedIn;
 use crate::frontends::frontend_tauri::pages::login::TauriLogin;
 use crate::frontends::frontend_tauri::pages::register::TauriRegister;
 use crate::frontends::frontend_tauri::tauri_header::TauriHeader;
-use crate::frontends::frontend_webserver::components::notification_popup::NotificationPopupComponent;
 use crate::frontends::frontend_webserver::context::webapp_context::WebAppContext;
 use crate::frontends::frontend_webserver::pages::dashboard_page::DashboardPage;
 use crate::frontends::frontend_webserver::pages::edit_invite_code_page::EditInvitePage;
@@ -37,6 +37,7 @@ pub fn App() -> impl IntoView {
     provide_context(ExtensionState::default());
     provide_context(WebAppContext::default());
 
+    let _notification = use_context::<NotificationContext>().unwrap();
     let extension_state = use_context::<ExtensionState>().unwrap();
     let auth_state = use_context::<AuthContext>().unwrap();
     let extension_resource = ExtensionState::init_resource(extension_state);
@@ -67,7 +68,7 @@ pub fn App() -> impl IntoView {
                     view=move || {
                         view! {
                             <WebServerHeader/>
-                            <NotificationPopupComponent/>
+                            <NotificationPopup/>
                             <Outlet/>
                         }
                     }
@@ -86,6 +87,7 @@ pub fn App() -> impl IntoView {
                     view=move || {
                         view! {
                             <TauriHeader/>
+                            <NotificationPopup/>
                             <Outlet/>
                         }
                     }
@@ -138,6 +140,7 @@ pub fn App() -> impl IntoView {
                             }
                         }
                     />
+
                 </Route>
                 <Route
                     path="/ext"
