@@ -1,7 +1,7 @@
 # BlockMesh
 
 <p align="center" width="100%">
-    <img width="33%" src="https://github.com/block-mesh/.github/assets/20769037/2eea7195-1d85-469e-b8ec-d0a0f90febeb"> 
+    <img width="33%" src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/e4f3cdc0-c2ba-442d-3e48-e2f31c0dc100/public"> 
 </p>
 
 BlockMesh, is an innovative, open and secure network that allows you to easily monetize your excess bandwidth.
