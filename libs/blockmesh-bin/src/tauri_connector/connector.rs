@@ -3,9 +3,9 @@ use block_mesh_common::chrome_storage::{MessageKey, MessageType, MessageValue, P
 use block_mesh_common::interfaces::server_api::{LoginForm, RegisterForm};
 use leptos::tracing;
 use serde::{Deserialize, Serialize};
-use solana_sdk::wasm_bindgen;
 use std::fmt::Display;
 use wasm_bindgen::closure::Closure;
+use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
 
 #[wasm_bindgen(inline_js = r#"

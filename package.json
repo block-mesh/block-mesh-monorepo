@@ -1,5 +1,9 @@
 {
+  "type": "module",
   "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
     "solita": "npx ts-node solita.ts",
@@ -14,6 +18,9 @@
     "keccak256": "1.0.6"
   },
   "devDependencies": {
+    "internal-ip": "8.0.0",
+    "tslib": "2.6.0",
+    "vite": "4.4.4",
     "@tauri-apps/cli": ">=2.0.0-beta.0",
     "@types/bn.js": "5.1.5",
     "@types/chai": "4.3.12",

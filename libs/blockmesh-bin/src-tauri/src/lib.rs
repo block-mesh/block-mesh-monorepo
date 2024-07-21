@@ -39,7 +39,6 @@ pub static SYSTEM: OnceLock<Mutex<sysinfo::System>> = OnceLock::new();
 
 pub static CHANNEL_MSG_TX: OnceLock<broadcast::Sender<ChannelMessage>> = OnceLock::new();
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() -> anyhow::Result<ExitCode> {
     let (incoming_tx, incoming_rx) = broadcast::channel::<ChannelMessage>(2);
     let args = CliArgs::parse();
