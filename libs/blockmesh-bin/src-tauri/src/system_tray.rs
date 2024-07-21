@@ -1,6 +1,9 @@
 use std::fmt::{Display, Formatter};
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 use tauri::menu::{MenuBuilder, MenuItemBuilder};
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 use tauri::tray::{MouseButton, TrayIconBuilder, TrayIconEvent};
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 use tauri::{App, Manager};
 
 pub enum MenuItems {
@@ -32,6 +35,7 @@ impl From<String> for MenuItems {
     }
 }
 
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 pub fn setup_tray(app: &App) {
     let quit = MenuItemBuilder::new(MenuItems::Quit.to_string())
         .id(MenuItems::Quit)

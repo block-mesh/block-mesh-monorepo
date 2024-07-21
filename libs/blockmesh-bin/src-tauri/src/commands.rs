@@ -1,3 +1,4 @@
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 use crate::system_tray::set_dock_visible;
 use crate::tauri_state::{AppState, ChannelMessage};
 use crate::tauri_storage::set_config_with_path;
@@ -10,7 +11,11 @@ use block_mesh_common::interfaces::server_api::{
 use std::str::FromStr;
 use std::sync::Arc;
 use tauri::ipc::InvokeError;
-use tauri::{AppHandle, Manager, State};
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+use tauri::AppHandle;
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+use tauri::Manager;
+use tauri::State;
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
@@ -61,6 +66,7 @@ pub async fn set_app_config(
 
 #[tauri::command]
 #[tracing::instrument(name = "open_main_window", skip(app_handle), ret, err)]
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 pub fn open_main_window(app_handle: &AppHandle) -> anyhow::Result<()> {
     set_dock_visible(true);
     if let Some(window) = app_handle.get_webview_window("main") {
