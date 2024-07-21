@@ -1,2 +1,4 @@
 [build]
-target-dir = "target-tauri"
+target = "aarch64-apple-darwin"
+
+[target]
