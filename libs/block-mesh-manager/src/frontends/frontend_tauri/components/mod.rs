@@ -1,2 +1,2 @@
 pub mod navigator;
-mod notification;
+pub mod notification;
