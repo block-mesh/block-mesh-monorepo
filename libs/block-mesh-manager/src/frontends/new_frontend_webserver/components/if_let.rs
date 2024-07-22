@@ -23,7 +23,7 @@ where
 }
 
 #[derive(Clone)]
-pub struct ErrViewFn<E>(Rc<dyn Fn(E) -> View>);
+pub struct ErrViewFn<E>(Rc<dyn Fn(&E) -> View>);
 
 impl<E> Default for ErrViewFn<E> {
     fn default() -> Self {
@@ -33,7 +33,7 @@ impl<E> Default for ErrViewFn<E> {
 
 impl<F, IV, E> From<F> for ErrViewFn<E>
 where
-    F: Fn(E) -> IV + 'static,
+    F: Fn(&E) -> IV + 'static,
     IV: IntoView,
 {
     fn from(value: F) -> Self {
@@ -43,7 +43,7 @@ where
 
 impl<E> ErrViewFn<E> {
     /// Execute the wrapped function
-    pub fn run(&self, err: E) -> View {
+    pub fn run(&self, err: &E) -> View {
         (self.0)(err)
     }
 }
@@ -56,6 +56,7 @@ pub fn IfLetOk<T, E, CF, V>(
 ) -> impl IntoView
 where
     T: 'static,
+    E: 'static,
     CF: Fn(&T) -> V + 'static,
     V: IntoView + 'static,
 {

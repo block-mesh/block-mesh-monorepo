@@ -6,7 +6,7 @@ pub fn Navbar(
     #[prop(into, optional)] class: MaybeSignal<String>,
     children: Children,
 ) -> impl IntoView {
-    let class = move || tw_merge!(class, "flex flex-1 items-center gap-4 py-2.5");
+    let class = move || tw_merge!(class.get(), "flex flex-1 items-center gap-4 py-2.5");
 
     view! {
         <nav class=class>
@@ -20,11 +20,11 @@ pub fn NavbarSection(
     #[prop(into, optional)] class: MaybeSignal<String>,
     children: Children,
 ) -> impl IntoView {
-    let class = move || tw_merge!(class, "flex items-center gap-3");
+    let class = move || tw_merge!(class.get(), "flex items-center gap-3");
 
     view! {
         // TODO : framer layout group
-        <div class=class />
+        <div class=class>
             {children()}
         </div>
     }
@@ -32,21 +32,28 @@ pub fn NavbarSection(
 
 #[component]
 pub fn NavbarSpacer(#[prop(into, optional)] class: MaybeSignal<String>) -> impl IntoView {
-    let class = move || tw_merge!(class, "-ml-4 flex-1");
+    let class = move || tw_merge!(class.get(), "-ml-4 flex-1");
 
     view! {
-        <div class=class aria-hidden="true"/>
+        <div class=class aria-hidden="true">
         </div>
     }
 }
 
 #[component]
-pub fn NavbarItem(
+pub fn NavbarItem<F>(
     #[prop(into, optional)] class: MaybeSignal<String>,
-    #[prop(into, optional)] current: MaybeSignal<bool>,
+    #[prop(into)] aria_label: String,
+    on_click: F,
     children: Children,
-) -> impl IntoView {
-    let common_classes = tw_join!(
+) -> impl IntoView
+where
+    F: Fn() + 'static,
+{
+    let root_class = move || tw_merge!(class.get(), "relative");
+
+    let class = tw_join!(
+        "cursor-default",
         // Base
         "relative flex min-w-0 items-center gap-3 rounded-lg p-2 text-left text-base/6 font-medium text-zinc-950 sm:text-sm/5",
         // Leading icon/icon-only
@@ -65,15 +72,11 @@ pub fn NavbarItem(
         "dark:data-[active]:bg-white/5 dark:data-[slot=icon]:*:data-[active]:fill-white"
     );
 
-    let root_class = move || tw_merge!(class, "relative");
-
     view! {
         <span class=root_class>
-            // Current indicator
-            <Show when=move || current.get()>
-                <span class="absolute inset-x-2 -bottom-2.5 h-0.5 rounded-full bg-zinc-950 dark:bg-white">
-                </span>
-            </Show>
+            <button class=class on:click=move |_| on_click() aria-label=aria_label>
+                {children()}
+            </button>
         </span>
     }
 }
