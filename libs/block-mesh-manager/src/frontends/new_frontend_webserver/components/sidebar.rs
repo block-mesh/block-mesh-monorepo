@@ -9,11 +9,7 @@ pub fn Sidebar(
 ) -> impl IntoView {
     let class = move || tw_merge!(class.get(), "flex h-full min-h-0 flex-col");
 
-    view! {
-        <nav class=class>
-            {children()}
-        </nav>
-    }
+    view! { <nav class=class>{children()}</nav> }
 }
 
 #[component]
@@ -25,11 +21,7 @@ pub fn SidebarHeader(
         tw_merge!(class.get(), "flex flex-col border-b border-zinc-950/5 p-4 dark:border-white/5 [&>[data-slot=section]+[data-slot=section]]:mt-2.5")
     };
 
-    view! {
-        <div class=class>
-            {children()}
-        </div>
-    }
+    view! { <div class=class>{children()}</div> }
 }
 
 #[component]
@@ -41,11 +33,7 @@ pub fn SidebarBody(
         tw_merge!(class.get(), "flex flex-1 flex-col overflow-y-auto p-4 [&>[data-slot=section]+[data-slot=section]]:mt-8")
     };
 
-    view! {
-        <div class=class>
-            {children()}
-        </div>
-    }
+    view! { <div class=class>{children()}</div> }
 }
 
 #[component]
@@ -57,11 +45,7 @@ pub fn SidebarFooter(
         tw_merge!(class.get(), "flex flex-col border-t border-zinc-950/5 p-4 dark:border-white/5 [&>[data-slot=section]+[data-slot=section]]:mt-2.5")
     };
 
-    view! {
-        <div class=class>
-            {children()}
-        </div>
-    }
+    view! { <div class=class>{children()}</div> }
 }
 
 #[component]
@@ -82,10 +66,7 @@ pub fn SidebarSection(
 pub fn SidebarSpacer(#[prop(into, optional)] class: MaybeSignal<String>) -> impl IntoView {
     let class = move || tw_merge!(class.get(), "mt-8 flex-1");
 
-    view! {
-        <div class=class aria-hidden="true">
-        </div>
-    }
+    view! { <div class=class aria-hidden="true"></div> }
 }
 
 #[component]
@@ -136,9 +117,7 @@ pub fn SidebarItem(
 
     view! {
         <span class=span_class>
-            <button class=class>
-                {children()}
-            </button>
+            <button class=class>{children()}</button>
         </span>
     }
 }
