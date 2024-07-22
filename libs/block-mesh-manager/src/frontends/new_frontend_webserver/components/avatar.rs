@@ -28,30 +28,31 @@ pub fn Avatar(
 
     view! {
         <span data-slot="avatar" class=class>
-            <IfLetSome
-                opt=initials
-                let:initials
-            >
+            <IfLetSome opt=initials let:initials>
                 <svg
-                  className="size-full select-none fill-current p-[5%] text-[48px] font-medium uppercase"
-                  viewBox="0 0 100 100"
-                  aria-hidden={move || if alt.get().is_some() { "false" } else { "true" }}
+                    className="size-full select-none fill-current p-[5%] text-[48px] font-medium uppercase"
+                    viewBox="0 0 100 100"
+                    aria-hidden=move || if alt.get().is_some() { "false" } else { "true" }
                 >
                     <IfLetSome opt=alt let:alt>
                         <title>{alt}</title>
                     </IfLetSome>
 
-                    <text x="50%" y="50%" alignmentBaseline="middle" dominantBaseline="middle" textAnchor="middle" dy=".125em">
+                    <text
+                        x="50%"
+                        y="50%"
+                        alignmentBaseline="middle"
+                        dominantBaseline="middle"
+                        textAnchor="middle"
+                        dy=".125em"
+                    >
                         {initials}
                     </text>
                 </svg>
             </IfLetSome>
 
-            <IfLetSome
-                opt=src
-                let:src
-            >
-                <img class="size-full" src=src alt=alt />
+            <IfLetSome opt=src let:src>
+                <img class="size-full" src=src alt=alt/>
             </IfLetSome>
         </span>
     }
