@@ -2,8 +2,8 @@ use axum::body::Bytes;
 use axum::http::{header, HeaderValue};
 use block_mesh_common::cli::ClientNodeOptions;
 use block_mesh_common::http::{empty, full, host_addr};
-use block_mesh_solana_client::helpers::sign_message;
-use block_mesh_solana_client::manager::{FullRouteHeader, SolanaManager};
+// use block_mesh_solana_client::helpers::sign_message;
+// use block_mesh_solana_client::manager::{FullRouteHeader, SolanaManager};
 use http_body_util::combinators::BoxBody;
 use http_body_util::BodyExt;
 use hyper::client::conn::http1::Builder;
@@ -15,11 +15,12 @@ use hyper_util::rt::TokioIo;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::{TcpListener, TcpStream};
-use uuid::Uuid;
+// use uuid::Uuid;
 
-#[tracing::instrument(name = "proxy_mode", skip(solana_manager), ret, err)]
+// #[tracing::instrument(name = "proxy_mode", skip(solana_manager), ret, err)]
+#[tracing::instrument(name = "proxy_mode", ret, err)]
 pub async fn proxy_mode(
-    solana_manager: Arc<SolanaManager>,
+    // solana_manager: Arc<SolanaManager>,
     proxy_url: Arc<String>,
     client_node_cli_args: &ClientNodeOptions,
 ) -> anyhow::Result<()> {
@@ -29,16 +30,13 @@ pub async fn proxy_mode(
 
     while let Ok((stream, _)) = listener.accept().await {
         let proxy_url = proxy_url.clone();
-        let solana_manager = solana_manager.clone();
+        // let solana_manager = solana_manager.clone();
         tokio::task::spawn(async move {
             let io = TokioIo::new(stream);
             if let Err(err) = http1::Builder::new()
                 .preserve_header_case(true)
                 .title_case_headers(true)
-                .serve_connection(
-                    io,
-                    service_fn(move |req| proxy(req, solana_manager.clone(), proxy_url.clone())),
-                )
+                .serve_connection(io, service_fn(move |req| proxy(req, proxy_url.clone())))
                 .with_upgrades()
                 .await
             {
@@ -49,25 +47,27 @@ pub async fn proxy_mode(
     Ok(())
 }
 
-#[tracing::instrument(name = "proxy", skip(solana_manager), ret, err)]
+// #[tracing::instrument(name = "proxy", skip(solana_manager), ret, err)]
+#[tracing::instrument(name = "proxy", ret, err)]
 async fn proxy(
-    mut req: Request<hyper::body::Incoming>,
-    solana_manager: Arc<SolanaManager>,
+    req: Request<hyper::body::Incoming>,
+    // solana_manager: Arc<SolanaManager>,
     proxy_url: Arc<String>,
 ) -> anyhow::Result<Response<BoxBody<Bytes, hyper::Error>>> {
-    let nonce = Uuid::new_v4().to_string();
-    let signed_message = sign_message(&nonce, &solana_manager.get_keypair())?;
-    let solana_manager_header = FullRouteHeader::new(
-        nonce,
-        signed_message,
-        solana_manager.get_pubkey(),
-        solana_manager.get_api_token(),
-        "client-node".to_string(),
-    );
-    let json = serde_json::to_string(&solana_manager_header)?;
-    let proxy_authorization = HeaderValue::from_str(&json)?;
-    req.headers_mut()
-        .insert("Proxy-Authorization", proxy_authorization.clone());
+    // let nonce = Uuid::new_v4().to_string();
+    // let signed_message = sign_message(&nonce, &solana_manager.get_keypair())?;
+    // let solana_manager_header = FullRouteHeader::new(
+    //     nonce,
+    //     signed_message,
+    //     solana_manager.get_pubkey(),
+    //     solana_manager.get_api_token(),
+    //     "client-node".to_string(),
+    // );
+    // let json = serde_json::to_string(&solana_manager_header)?;
+    // let proxy_authorization = HeaderValue::from_str(&json)?;
+    // req.headers_mut()
+    //     .insert("Proxy-Authorization", proxy_authorization.clone());
+    let proxy_authorization = HeaderValue::from_str("{}")?;
     println!("req: {:?}", req);
     if Method::CONNECT == req.method() {
         // Received an HTTP request like:

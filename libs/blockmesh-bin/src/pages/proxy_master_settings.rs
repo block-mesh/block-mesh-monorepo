@@ -2,7 +2,6 @@ use crate::leptos_state::LeptosTauriAppState;
 use crate::tauri_connector::connector::{invoke_tauri, SetAppConfigArgs};
 use block_mesh_common::app_config::AppConfig;
 use leptos::*;
-use solana_sdk::pubkey::Pubkey;
 use std::str::FromStr;
 
 #[component]
@@ -24,9 +23,7 @@ pub fn ProxyMasterSettingsForm() -> impl IntoView {
     });
     let set_program_address = move |address: String| {
         state.app_config.update(|c| {
-            if let Ok(val) = Pubkey::from_str(&address) {
-                c.program_id = Some(val);
-            }
+            c.program_id = Some(address);
         });
     };
 
@@ -41,14 +38,14 @@ pub fn ProxyMasterSettingsForm() -> impl IntoView {
     };
 
     let submit_action = move || {
-        let program_address = Pubkey::from_str(&program_address.get());
-        if program_address.is_err() {
-            set_error.update(|e| *e = Some("Invalid Program Address".to_string()));
+        let program_address = if program_address.get().is_empty() {
             return;
-        }
+        } else {
+            program_address.get()
+        };
         let config = AppConfig {
             keypair_path: keypair_path.get(),
-            program_id: Some(program_address.unwrap()),
+            program_id: Some(program_address),
             proxy_port: Some(proxy_port.get()),
             client_port: Some(client_port.get()),
             mode: state.app_config.get().mode,

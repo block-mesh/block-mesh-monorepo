@@ -1,15 +1,16 @@
 mod management;
 mod modes;
 
-use crate::modes::cli::cli_mode;
+// use crate::modes::cli::cli_mode;
 use crate::modes::proxy_mode::proxy_mode;
-use anchor_lang::Discriminator;
+// use anchor_lang::Discriminator;
 use block_mesh_common::cli::{ClientNodeMode, ClientNodeOptions};
-use block_mesh_solana_client::helpers::get_provider_node_address;
-use block_mesh_solana_client::manager::{FullRouteHeader, SolanaManager};
-use blockmesh_program::state::provider_node::ProviderNode;
+// use block_mesh_solana_client::helpers::get_provider_node_address;
+// use block_mesh_solana_client::manager::{FullRouteHeader, SolanaManager};
+use block_mesh_solana_client::manager::FullRouteHeader;
+// use blockmesh_program::state::provider_node::ProviderNode;
 use solana_client::client_error::reqwest::Proxy;
-use std::process::{exit, ExitCode};
+use std::process::ExitCode;
 use std::sync::Arc;
 
 #[tracing::instrument(name = "get_proxy", ret, err)]
@@ -27,6 +28,7 @@ pub async fn get_proxy(
 pub async fn client_node_main(
     client_node_cli_args: &ClientNodeOptions,
 ) -> anyhow::Result<ExitCode> {
+    /*
     let mut solana_manager = SolanaManager::new(
         &client_node_cli_args.keypair_path,
         &client_node_cli_args.program_id,
@@ -83,8 +85,10 @@ pub async fn client_node_main(
             )
         }
     };
+     */
+    let proxy_url = "0.0.0.0";
     tracing::info!("Proxy URL: {}", proxy_url);
-    let solana_manager = Arc::new(solana_manager);
+    // let solana_manager = Arc::new(solana_manager);
     // register_token(
     //     &format!("http://{}/register", proxy_url),
     //     &solana_manager_header,
@@ -93,18 +97,21 @@ pub async fn client_node_main(
     // ?;
 
     match &client_node_cli_args.mode {
-        ClientNodeMode::Cli => {
-            tracing::info!("Starting in CLI mode");
-            cli_mode(solana_manager, &proxy_url, client_node_cli_args).await?;
-        }
+        // ClientNodeMode::Cli => {
+        //     tracing::info!("Starting in CLI mode");
+        //     cli_mode(solana_manager, &proxy_url, client_node_cli_args).await?;
+        // }
         ClientNodeMode::Proxy => {
             tracing::info!("Starting in proxy mode");
             proxy_mode(
-                solana_manager,
+                // solana_manager,
                 Arc::new(proxy_url.to_string()),
                 client_node_cli_args,
             )
             .await?;
+        }
+        _ => {
+            tracing::info!("")
         }
     };
     Ok(ExitCode::SUCCESS)

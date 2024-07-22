@@ -6,7 +6,7 @@ use axum::response::IntoResponse;
 use axum::Json;
 use block_mesh_solana_client::helpers::validate_signature;
 use block_mesh_solana_client::manager::FullRouteHeader;
-use blockmesh_program::state::api_token::ApiToken;
+// use blockmesh_program::state::api_token::ApiToken;
 use std::sync::Arc;
 
 #[tracing::instrument(name = "register_client", skip(state))]
@@ -19,24 +19,24 @@ pub async fn handler(
     let pubkey = body.client_signature.pubkey;
     let api_token = body.api_token;
     let validated = validate_signature(&nonce, &signature, &pubkey);
-    let api_token_account: anyhow::Result<ApiToken> = state
-        .solana_manager
-        .read()
-        .await
-        .get_deserialized_account(&api_token)
-        .await;
-    match api_token_account {
-        Ok(api_token_account) => {
-            if api_token_account.owner != pubkey {
-                tracing::error!("api token account owner does not match pubkey");
-                return (StatusCode::UNAUTHORIZED, "Unauthorized");
-            }
-        }
-        Err(e) => {
-            tracing::error!("failed to get api token account: {}", e);
-            return (StatusCode::UNAUTHORIZED, "Unauthorized");
-        }
-    }
+    // let api_token_account: anyhow::Result<ApiToken> = state
+    //     .solana_manager
+    //     .read()
+    //     .await
+    //     .get_deserialized_account(&api_token)
+    //     .await;
+    // match api_token_account {
+    //     Ok(api_token_account) => {
+    //         if api_token_account.owner != pubkey {
+    //             tracing::error!("api token account owner does not match pubkey");
+    //             return (StatusCode::UNAUTHORIZED, "Unauthorized");
+    //         }
+    //     }
+    //     Err(e) => {
+    //         tracing::error!("failed to get api token account: {}", e);
+    //         return (StatusCode::UNAUTHORIZED, "Unauthorized");
+    //     }
+    // }
     match validated {
         Ok(status) => match status {
             true => {

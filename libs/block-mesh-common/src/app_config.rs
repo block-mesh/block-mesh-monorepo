@@ -4,8 +4,7 @@ use crate::cli::{
 };
 use crate::constants::env_url;
 use serde::{Deserialize, Serialize};
-use solana_sdk::pubkey::Pubkey;
-use std::env;
+// use std::env;
 use std::fmt::Display;
 use uuid::Uuid;
 
@@ -16,8 +15,8 @@ pub struct AppConfig {
     pub api_token: Option<String>,
     pub blockmesh_url: Option<String>,
     pub keypair_path: Option<String>,
-    pub proxy_master_node_owner: Option<Pubkey>,
-    pub program_id: Option<Pubkey>,
+    pub proxy_master_node_owner: Option<String>,
+    pub program_id: Option<String>,
     pub proxy_override: Option<String>,
     pub proxy_port: Option<u16>,
     pub client_port: Option<u16>,
@@ -68,8 +67,9 @@ impl AppConfig {
         self.keypair_path = self.keypair_path.clone().or(config.keypair_path);
         self.proxy_master_node_owner = self
             .proxy_master_node_owner
+            .clone()
             .or(config.proxy_master_node_owner);
-        self.program_id = self.program_id.or(config.program_id);
+        self.program_id = self.program_id.clone().or(config.program_id);
         self.proxy_override = self.proxy_override.clone().or(config.proxy_override);
         self.proxy_port = self.proxy_port.or(config.proxy_port);
         self.client_port = self.client_port.or(config.client_port);
@@ -85,21 +85,22 @@ impl AppConfig {
     }
 
     pub async fn validate_keypair(&self) -> anyhow::Result<()> {
-        let path = env::current_dir()?;
-        match &self.keypair_path {
-            Some(keypair_path) => {
-                let _ = solana_sdk::signature::read_keypair_file(keypair_path).map_err(|e| {
-                    anyhow::anyhow!(
-                        "Error reading keypair file, cwd: '{:?}', path: '{}' , error: {}",
-                        path,
-                        keypair_path,
-                        e.to_string()
-                    )
-                })?;
-                Ok(())
-            }
-            None => Err(anyhow::anyhow!("Keypair path not set")),
-        }
+        Ok(())
+        // let path = env::current_dir()?;
+        // match &self.keypair_path {
+        //     Some(keypair_path) => {
+        //         let _ = solana_sdk::signature::read_keypair_file(keypair_path).map_err(|e| {
+        //             anyhow::anyhow!(
+        //                 "Error reading keypair file, cwd: '{:?}', path: '{}' , error: {}",
+        //                 path,
+        //                 keypair_path,
+        //                 e.to_string()
+        //             )
+        //         })?;
+        //         Ok(())
+        //     }
+        //     None => Err(anyhow::anyhow!("Keypair path not set")),
+        // }
     }
 }
 

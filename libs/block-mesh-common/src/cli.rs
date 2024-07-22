@@ -1,7 +1,6 @@
 use crate::constants::BLOCK_MESH_PROGRAM_ID;
 use clap::{Parser, Subcommand, ValueEnum};
 use serde::{Deserialize, Serialize};
-use solana_sdk::pubkey::Pubkey;
 use std::fmt::Display;
 use std::str::FromStr;
 
@@ -68,7 +67,7 @@ impl Commands {
                 Some(Commands::ProxyEndpoint(ProxyEndpointNodeOptions {
                     keypair_path: options.keypair_path.clone(),
                     proxy_master_node_owner: None,
-                    program_id: options.program_id,
+                    program_id: options.program_id.clone(),
                     proxy_override: None,
                     gui: options.gui,
                 }))
@@ -76,7 +75,7 @@ impl Commands {
             (Commands::ClientNode(options), CommandsEnum::ProxyMaster) => {
                 Some(Commands::ProxyMaster(ProxyMasterNodeOptions {
                     keypair_path: options.keypair_path.clone(),
-                    program_id: options.program_id,
+                    program_id: options.program_id.clone(),
                     proxy_port: 5000,
                     client_port: 4000,
                     gui: options.gui,
@@ -85,7 +84,7 @@ impl Commands {
             (Commands::ProxyMaster(options), CommandsEnum::ClientNode) => {
                 Some(Commands::ClientNode(ClientNodeOptions {
                     keypair_path: options.keypair_path.clone(),
-                    program_id: options.program_id,
+                    program_id: options.program_id.clone(),
                     proxy_master_node_owner: None,
                     target: "".to_string(),
                     proxy_override: None,
@@ -98,7 +97,7 @@ impl Commands {
                 Some(Commands::ProxyEndpoint(ProxyEndpointNodeOptions {
                     keypair_path: options.keypair_path.clone(),
                     proxy_master_node_owner: None,
-                    program_id: options.program_id,
+                    program_id: options.program_id.clone(),
                     proxy_override: None,
                     gui: options.gui,
                 }))
@@ -106,7 +105,7 @@ impl Commands {
             (Commands::ProxyEndpoint(options), CommandsEnum::ClientNode) => {
                 Some(Commands::ClientNode(ClientNodeOptions {
                     keypair_path: options.keypair_path.clone(),
-                    program_id: options.program_id,
+                    program_id: options.program_id.clone(),
                     proxy_master_node_owner: None,
                     target: "".to_string(),
                     proxy_override: None,
@@ -118,7 +117,7 @@ impl Commands {
             (Commands::ProxyEndpoint(options), CommandsEnum::ProxyMaster) => {
                 Some(Commands::ProxyMaster(ProxyMasterNodeOptions {
                     keypair_path: options.keypair_path.clone(),
-                    program_id: options.program_id,
+                    program_id: options.program_id.clone(),
                     proxy_port: 5000,
                     client_port: 4000,
                     gui: options.gui,
@@ -156,10 +155,10 @@ pub struct ProxyEndpointNodeOptions {
     pub keypair_path: String,
     #[arg(long)]
     /// Proxy-Master owner public key, by default will take first one found on-chain
-    pub proxy_master_node_owner: Option<Pubkey>,
+    pub proxy_master_node_owner: Option<String>,
     /// BlockMesh Solana Program ID
-    #[arg(long, default_value = BLOCK_MESH_PROGRAM_ID, value_parser = Pubkey::from_str)]
-    pub program_id: Pubkey,
+    #[arg(long, default_value = BLOCK_MESH_PROGRAM_ID, value_parser = String::from_str)]
+    pub program_id: String,
     #[arg(long)]
     /// Override the proxy-master URL, mostly for testing purposes
     pub proxy_override: Option<String>,
@@ -175,10 +174,10 @@ pub struct ClientNodeOptions {
     pub keypair_path: String,
     /// Proxy-Master owner public key, by default will take first one found on-chain
     #[arg(long)]
-    pub proxy_master_node_owner: Option<Pubkey>,
+    pub proxy_master_node_owner: Option<String>,
     /// BlockMesh Solana Program ID
-    #[arg(long, default_value = BLOCK_MESH_PROGRAM_ID, value_parser = Pubkey::from_str)]
-    pub program_id: Pubkey,
+    #[arg(long, default_value = BLOCK_MESH_PROGRAM_ID, value_parser = String::from_str)]
+    pub program_id: String,
     /// Target URL to fetch in CLI mode
     #[arg(long, default_value = "https://ifconfig.me/all.json")]
     pub target: String,
@@ -202,8 +201,8 @@ pub struct ProxyMasterNodeOptions {
     #[arg(long, default_value = "proxy-master-keypair.json")]
     pub keypair_path: String,
     /// BlockMesh Solana Program ID
-    #[arg(long, default_value = BLOCK_MESH_PROGRAM_ID, value_parser = Pubkey::from_str)]
-    pub program_id: Pubkey,
+    #[arg(long, default_value = BLOCK_MESH_PROGRAM_ID, value_parser = String::from_str)]
+    pub program_id: String,
     /// Port to listen for incoming proxy-endpoints
     #[arg(long, default_value = "5000")]
     pub proxy_port: u16,

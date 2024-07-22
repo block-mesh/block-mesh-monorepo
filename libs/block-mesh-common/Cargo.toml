@@ -20,7 +20,6 @@ hyper = { workspace = true, features = ["full"], optional = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 clap = { workspace = true, features = ["derive"], optional = true }
-solana-sdk = { workspace = true, optional = true }
 chrono = { workspace = true, features = ["clock", "serde"] }
 anyhow = { workspace = true }
 once_cell = { workspace = true }
@@ -42,6 +41,6 @@ features = [
 
 [features]
 http = ["dep:http-body-util", "dep:bytes", "dep:hyper"]
-cli = ["dep:clap", "dep:solana-sdk"]
-app-config = ["dep:clap", "dep:solana-sdk"]
+cli = ["dep:clap"]
+app-config = ["dep:clap"]
 ip-data = ["dep:ipgeolocate", "dep:reqwest"]

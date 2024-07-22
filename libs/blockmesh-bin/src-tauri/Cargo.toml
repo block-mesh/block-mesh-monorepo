@@ -28,9 +28,9 @@ tracing = { workspace = true }
 auto-launch = { workspace = true }
 whoami = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
-solana-sdk = { workspace = true }
+#solana-sdk = { workspace = true }
 blockmesh-program = { path = "../../../programs/blockmesh-program" }
-block-mesh-solana-client = { path = "../../block-mesh-solana-client" }
+#block-mesh-solana-client = { path = "../../block-mesh-solana-client" }
 block-mesh-common = { path = "../../block-mesh-common", features = ["http", "cli", "app-config"] }
 tokio = { workspace = true, features = ["full"] }
 client-node = { path = "../../client-node" }

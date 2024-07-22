@@ -7,15 +7,15 @@ pub mod token_management;
 
 use app_state::AppState;
 use block_mesh_common::cli::ProxyMasterNodeOptions;
-use block_mesh_solana_client::manager::SolanaManager;
+// use block_mesh_solana_client::manager::SolanaManager;
 use client_server::clients_endpoint::listen_for_clients_connecting;
 use futures_util::future::join_all;
 use ip_getter::get_ip;
 use proxy_server::proxy_endpoint::listen_for_proxies_connecting;
 use proxy_server::proxy_pool::ProxyPool;
 use rustc_hash::FxHashMap;
-use std::net::{IpAddr, SocketAddr};
-use std::process::{exit, ExitCode};
+use std::net::SocketAddr;
+use std::process::ExitCode;
 use std::sync::Arc;
 use token_management::channels::{update_token_manager, ChannelMessage, TokenManagerHashMap};
 use tokio::net::TcpListener;
@@ -37,31 +37,30 @@ pub async fn proxy_master_main(
     let client_listener = TcpListener::bind(addr_clients).await?;
     tracing::info!("Listening on for clients on: {}", addr_clients);
 
-    let ip_addr = match ip_addr {
-        IpAddr::V4(ip) => {
-            tracing::info!("IP address: {}", ip);
-            ip
-        }
-        _ => {
-            tracing::error!("IP address is not IPv4");
-            exit(1);
-        }
-    };
-
-    let mut solana_manager = SolanaManager::new(
-        &proxy_master_node_options.keypair_path,
-        &proxy_master_node_options.program_id,
-    )
-    .await?;
-    solana_manager
-        .create_or_update_provider_node_if_needed(
-            ip_addr,
-            proxy_master_node_options.proxy_port,
-            proxy_master_node_options.client_port,
-        )
-        .await?;
-
-    let solana_manager = Arc::new(tokio::sync::RwLock::new(solana_manager));
+    // let ip_addr = match ip_addr {
+    //     IpAddr::V4(ip) => {
+    //         tracing::info!("IP address: {}", ip);
+    //         ip
+    //     }
+    //     _ => {
+    //         tracing::error!("IP address is not IPv4");
+    //         exit(1);
+    //     }
+    // };
+    // let mut solana_manager = SolanaManager::new(
+    //     &proxy_master_node_options.keypair_path,
+    //     &proxy_master_node_options.program_id,
+    // )
+    // .await?;
+    // solana_manager
+    //     .create_or_update_provider_node_if_needed(
+    //         ip_addr,
+    //         proxy_master_node_options.proxy_port,
+    //         proxy_master_node_options.client_port,
+    //     )
+    //     .await?;
+    //
+    // let solana_manager = Arc::new(tokio::sync::RwLock::new(solana_manager));
     let token_manager: TokenManagerHashMap = FxHashMap::default();
     let token_manager = Arc::new(tokio::sync::RwLock::new(token_manager));
     let (tx, mut rx) = broadcast::channel::<ChannelMessage>(16);
@@ -77,7 +76,7 @@ pub async fn proxy_master_main(
     let app_state = Arc::new(AppState {
         tx,
         token_manager,
-        solana_manager,
+        // solana_manager,
     });
 
     // let clients_router = Router::new()

@@ -2,7 +2,6 @@ use crate::leptos_state::LeptosTauriAppState;
 use crate::tauri_connector::connector::{invoke_tauri, SetAppConfigArgs};
 use block_mesh_common::app_config::AppConfig;
 use leptos::*;
-use solana_sdk::pubkey::Pubkey;
 use std::str::FromStr;
 
 #[component]
@@ -22,9 +21,7 @@ pub fn ClientNodeSettingsForm() -> impl IntoView {
     });
     let set_proxy_master_address = move |address: String| {
         state.app_config.update(|c| {
-            if let Ok(val) = Pubkey::from_str(&address) {
-                c.proxy_master_node_owner = Some(val);
-            }
+            c.proxy_master_node_owner = Some(address);
         });
     };
 
@@ -38,9 +35,7 @@ pub fn ClientNodeSettingsForm() -> impl IntoView {
     });
     let set_program_address = move |address: String| {
         state.app_config.update(|c| {
-            if let Ok(val) = Pubkey::from_str(&address) {
-                c.program_id = Some(val);
-            }
+            c.program_id = Some(address);
         });
     };
     let proxy_override = Signal::derive(move || {
@@ -63,24 +58,22 @@ pub fn ClientNodeSettingsForm() -> impl IntoView {
 
     let submit_action = move || {
         if state.app_config.get().mode.is_some() {
-            let proxy_master_address = match Pubkey::from_str(&proxy_master_address.get()) {
-                Ok(val) => Some(val),
-                Err(_) => {
-                    set_error.update(|e| *e = Some("Invalid Proxy Master Address".to_string()));
-                    return;
-                }
+            let proxy_master_address = if proxy_master_address.get().is_empty() {
+                return;
+            } else {
+                proxy_master_address.get()
             };
 
-            let program_address = Pubkey::from_str(&program_address.get());
-            if program_address.is_err() {
+            let program_address = program_address.get();
+            if program_address.is_empty() {
                 set_error.update(|e| *e = Some("Invalid Program Address".to_string()));
                 return;
             }
 
             let config = AppConfig {
                 keypair_path: keypair_path.get(),
-                proxy_master_node_owner: proxy_master_address,
-                program_id: Some(program_address.unwrap()),
+                proxy_master_node_owner: Option::from(proxy_master_address),
+                program_id: Some(program_address),
                 proxy_override: Some(proxy_override.get()),
                 proxy_port: Some(proxy_port.get()),
                 mode: state.app_config.get().mode,

@@ -1,6 +1,6 @@
-use crate::endpoint_headers::process_endpoint_headers;
+// use crate::endpoint_headers::process_endpoint_headers;
 use block_mesh_common::http::{empty, full, host_addr};
-use block_mesh_solana_client::manager::{EndpointNodeToProviderNodeHeader, SolanaManager};
+// use block_mesh_solana_client::manager::{EndpointNodeToProviderNodeHeader, SolanaManager};
 use bytes::Bytes;
 use http::header;
 use http_body_util::combinators::BoxBody;
@@ -10,18 +10,19 @@ use hyper::upgrade::Upgraded;
 use hyper::{client, http, Method, Request, Response};
 use hyper_util::rt::TokioIo;
 use std::net::{SocketAddr, ToSocketAddrs};
-use std::sync::Arc;
+// use std::sync::Arc;
 use tokio::net::TcpStream;
 
-#[tracing::instrument(name = "listen_for_proxies_connecting", skip(solana_manager), ret, err)]
+// #[tracing::instrument(name = "listen_for_proxies_connecting", skip(solana_manager), ret, err)]
+#[tracing::instrument(name = "listen_for_proxies_connecting", ret, err)]
 pub async fn listen_for_proxies_connecting(
     addr: SocketAddr,
-    auth_header: EndpointNodeToProviderNodeHeader,
-    solana_manager: Arc<SolanaManager>,
+    // auth_header: EndpointNodeToProviderNodeHeader,
+    // solana_manager: Arc<SolanaManager>,
 ) -> anyhow::Result<()> {
     while let Ok(stream) = TcpStream::connect(addr).await {
-        let auth_header = auth_header.clone();
-        let solana_manager = solana_manager.clone();
+        // let auth_header = auth_header.clone();
+        // let solana_manager = solana_manager.clone();
         tracing::info!("Connected to {}", addr);
         // Initial registration
         let (mut send_request, conn) = client::conn::http1::Builder::new()
@@ -42,6 +43,7 @@ pub async fn listen_for_proxies_connecting(
         //     .unwrap();
         // let _res = send_request.send_request(req).await?;
 
+        let auth_header = "{}";
         let req = Request::builder()
             .method(Method::CONNECT)
             // whatever
@@ -61,10 +63,7 @@ pub async fn listen_for_proxies_connecting(
         if let Err(err) = http1::Builder::new()
             .preserve_header_case(true)
             .title_case_headers(true)
-            .serve_connection(
-                stream,
-                service_fn(move |req| proxy(req, solana_manager.clone())),
-            )
+            .serve_connection(stream, service_fn(proxy))
             .with_upgrades()
             .await
         {
@@ -74,13 +73,14 @@ pub async fn listen_for_proxies_connecting(
     Ok(())
 }
 
-#[tracing::instrument(name = "proxy", skip(solana_manager), ret, err)]
+// #[tracing::instrument(name = "proxy", skip(solana_manager), ret, err)]
+#[tracing::instrument(name = "proxy", ret, err)]
 async fn proxy(
-    mut req: Request<hyper::body::Incoming>,
-    solana_manager: Arc<SolanaManager>,
+    req: Request<hyper::body::Incoming>,
+    // solana_manager: Arc<SolanaManager>,
 ) -> anyhow::Result<Response<BoxBody<Bytes, hyper::Error>>> {
-    let proxy_authorization = process_endpoint_headers(solana_manager.clone(), &mut req).await?;
-    let memos = proxy_authorization.prepare_for_memo();
+    // let proxy_authorization = process_endpoint_headers(solana_manager.clone(), &mut req).await?;
+    // let memos = proxy_authorization.prepare_for_memo();
     if Method::CONNECT == req.method() {
         // Received an HTTP request like:
         // ```
@@ -102,9 +102,9 @@ async fn proxy(
                         match tunnel(upgraded, addr).await {
                             Ok(_) => {
                                 // TODO : send memo here
-                                if let Err(e) = solana_manager.send_memos(memos).await {
-                                    tracing::error!("send memo error: {}", e);
-                                }
+                                // if let Err(e) = solana_manager.send_memos(memos).await {
+                                //     tracing::error!("send memo error: {}", e);
+                                // }
                                 tracing::info!("tunnel success");
                             }
                             Err(e) => tracing::error!("server io error: {}", e),
