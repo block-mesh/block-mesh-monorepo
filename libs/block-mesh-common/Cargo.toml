@@ -7,11 +7,15 @@ authors.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+rand = { workspace = true }
+borsh = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter", "time", "json"] }
 tracing-serde = { workspace = true }
 http-body-util = { workspace = true, optional = true }
 bytes = { workspace = true, optional = true }
+thiserror = { workspace = true }
+bs58 = { workspace = true }
 hyper = { workspace = true, features = ["full"], optional = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
@@ -20,7 +24,7 @@ solana-sdk = { workspace = true, optional = true }
 chrono = { workspace = true, features = ["clock", "serde"] }
 anyhow = { workspace = true }
 once_cell = { workspace = true }
-reqwest = { workspace = true, optional = true, features = [
+reqwest = { workspace = true, optional = true, default-features = false, features = [
   "json",
   "hickory-dns"
 ] }

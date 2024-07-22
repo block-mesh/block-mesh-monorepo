@@ -1,6 +1,6 @@
 use crate::utils::connectors::set_panic_hook;
 use crate::utils::extension_wrapper_state::ExtensionWrapperState;
-use block_mesh_common::chrome_storage::ExtensionStatus;
+use block_mesh_common::chrome_storage::AuthStatus;
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
 use leptos::*;
@@ -24,7 +24,7 @@ pub async fn measure_bandwidth() {
     if !app_state.has_api_token() {
         return;
     }
-    if app_state.status.get_untracked() == ExtensionStatus::LoggedOut {
+    if app_state.status.get_untracked() == AuthStatus::LoggedOut {
         return;
     }
     let url = &app_state.blockmesh_url.get_untracked();

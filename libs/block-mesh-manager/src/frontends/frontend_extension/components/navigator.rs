@@ -1,5 +1,5 @@
 use crate::frontends::frontend_extension::extension_state::ExtensionState;
-use block_mesh_common::chrome_storage::ExtensionStatus;
+use block_mesh_common::chrome_storage::AuthStatus;
 use leptos::*;
 use leptos_router::use_navigate;
 
@@ -8,16 +8,16 @@ pub fn ExtensionNavigator() -> impl IntoView {
     let state = expect_context::<ExtensionState>();
     let navigate = use_navigate();
     create_effect(move |_| match state.status.get() {
-        ExtensionStatus::LoggedIn => {
+        AuthStatus::LoggedIn => {
             navigate("/ext/logged_in", Default::default());
         }
-        ExtensionStatus::Registering => {
+        AuthStatus::Registering => {
             navigate("/ext/register", Default::default());
         }
-        ExtensionStatus::LoggedOut => {
+        AuthStatus::LoggedOut => {
             navigate("/ext/login", Default::default());
         }
-        ExtensionStatus::WaitingEmailVerification => {
+        AuthStatus::WaitingEmailVerification => {
             navigate("/ext/login", Default::default());
         }
     });

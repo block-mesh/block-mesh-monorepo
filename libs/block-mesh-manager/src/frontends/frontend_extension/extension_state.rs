@@ -1,9 +1,9 @@
 use std::cell::RefCell;
+
 use std::fmt;
-use std::fmt::{Debug, Display, Formatter};
+use std::fmt::{Debug, Formatter};
 use std::rc::Rc;
 use std::str::FromStr;
-use std::time::Duration;
 
 use chrono::Utc;
 use gloo_utils::format::JsValueSerdeExt;
@@ -18,9 +18,9 @@ use wasm_bindgen::JsValue;
 
 use crate::frontends::frontend_extension::utils::auth::{check_token, get_latest_invite_code};
 use crate::frontends::frontend_extension::utils::connectors::{
-    ask_for_all_storage_values, send_message_channel, storageOnChangeViaPostMessage,
+    ask_for_all_storage_values, onPostMessage, send_message_channel,
 };
-use block_mesh_common::chrome_storage::{ExtensionStatus, MessageKey, MessageType};
+use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType};
 use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
 
 #[derive(Clone, Serialize, Deserialize, Default, Copy)]
@@ -29,7 +29,7 @@ pub struct ExtensionState {
     pub api_token: RwSignal<Uuid>,
     pub device_id: RwSignal<Uuid>,
     pub blockmesh_url: RwSignal<String>,
-    pub status: RwSignal<ExtensionStatus>,
+    pub status: RwSignal<AuthStatus>,
     pub uptime: RwSignal<f64>,
     pub invite_code: RwSignal<String>,
     pub success: RwSignal<Option<String>>,
@@ -64,7 +64,7 @@ impl ExtensionState {
         create_local_resource(
             || (),
             move |_| async move {
-                log!("init_resource");
+                log!("ExtensionState => init_resource");
                 state.init_with_storage().await;
                 ask_for_all_storage_values().await;
                 state
@@ -98,7 +98,7 @@ impl ExtensionState {
         self.email.update(|v| *v = email.clone());
         self.api_token.update(|v| *v = api_token);
         self.blockmesh_url.update(|v| *v = blockmesh_url.clone());
-        self.status.update(|v| *v = ExtensionStatus::LoggedOut);
+        self.status.update(|v| *v = AuthStatus::LoggedOut);
         self.device_id.update(|v| *v = device_id);
         self.uptime.update(|v| *v = uptime);
         self.success.update(|v| *v = None);
@@ -175,7 +175,7 @@ impl ExtensionState {
                                 if !self.email.get_untracked().is_empty()
                                     && !self.api_token.get_untracked().is_nil()
                                     && self.api_token.get_untracked() != Uuid::default()
-                                    && self.status.get_untracked() != ExtensionStatus::LoggedIn
+                                    && self.status.get_untracked() != AuthStatus::LoggedIn
                                 {
                                     spawn_local(async move {
                                         let credentials = CheckTokenRequest {
@@ -188,7 +188,7 @@ impl ExtensionState {
                                         )
                                         .await;
                                         if result.is_ok() {
-                                            self.status.update(|v| *v = ExtensionStatus::LoggedIn);
+                                            self.status.update(|v| *v = AuthStatus::LoggedIn);
                                         };
                                     });
                                 }
@@ -201,7 +201,7 @@ impl ExtensionState {
 
         let closure_ref = Rc::new(RefCell::new(Some(callback)));
         let closure_clone = closure_ref.clone();
-        storageOnChangeViaPostMessage(closure_clone.borrow().as_ref().unwrap());
+        onPostMessage(closure_clone.borrow().as_ref().unwrap());
         closure_ref.borrow_mut().take().unwrap().forget();
     }
 
@@ -233,36 +233,6 @@ impl ExtensionState {
         invite_code
     }
 
-    #[tracing::instrument(name = "AppState::set_success")]
-    pub fn set_success<T>(success: T, signal: RwSignal<Option<String>>)
-    where
-        T: Display + Clone + Into<String> + Debug,
-    {
-        let success = Option::from(success.clone().to_string());
-        signal.update(|v| *v = success);
-        set_timeout(
-            move || {
-                signal.update(|v| *v = None);
-            },
-            Duration::from_millis(3500),
-        );
-    }
-
-    #[tracing::instrument(name = "AppState::set_error")]
-    pub fn set_error<T>(error: T, signal: RwSignal<Option<String>>)
-    where
-        T: Display + Clone + Into<String> + Debug,
-    {
-        let error = Option::from(error.clone().to_string());
-        signal.update(|v| *v = error);
-        set_timeout(
-            move || {
-                signal.update(|v| *v = None);
-            },
-            Duration::from_millis(3500),
-        );
-    }
-
     pub fn has_api_token(&self) -> bool {
         let api_token = self.api_token.get_untracked();
         !(api_token.is_nil() || api_token == Uuid::default())
@@ -277,6 +247,6 @@ impl ExtensionState {
             .update(|v| *v = "https://app.blockmesh.xyz".to_string());
         self.email.update(|v| *v = "".to_string());
         self.api_token.update(|v| *v = Uuid::default());
-        self.status.update(|v| *v = ExtensionStatus::LoggedOut);
+        self.status.update(|v| *v = AuthStatus::LoggedOut);
     }
 }

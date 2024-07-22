@@ -7,6 +7,7 @@ use leptos_router::A;
 #[component]
 pub fn InvitesComponent() -> impl IntoView {
     let async_data = WebAppContext::get_dashboard_data();
+
     fn get_invite_code() -> Option<String> {
         let doc = document();
         let el = match doc.get_element_by_id("copy_invite_code") {
@@ -19,16 +20,17 @@ pub fn InvitesComponent() -> impl IntoView {
     let copy_to_clipboard = move |_| {
         #[cfg(all(web_sys_unstable_apis, feature = "hydrate"))]
         {
-            let state = expect_context::<WebAppContext>();
+            use crate::frontends::context::notification_context::NotificationContext;
+            let notifications = expect_context::<NotificationContext>();
             if let Some(clipboard) = web_sys::window().unwrap().navigator().clipboard() {
                 if let Some(invite_url_string) = get_invite_code() {
                     let _ = clipboard.write_text(&format!(
                         "https://app.blockmesh.xyz/register?invite_code={}",
                         invite_url_string
                     ));
-                    WebAppContext::set_success("Successfully Copied", state.success);
+                    notifications.set_success("Successfully Copied");
                 } else {
-                    WebAppContext::set_error("Failed to copy invite code", state.error);
+                    notifications.set_error("Failed to copy invite code");
                 }
             }
         }

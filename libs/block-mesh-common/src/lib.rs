@@ -7,3 +7,4 @@ pub mod constants;
 #[cfg(feature = "http")]
 pub mod http;
 pub mod interfaces;
+pub mod tauri_message_channel;

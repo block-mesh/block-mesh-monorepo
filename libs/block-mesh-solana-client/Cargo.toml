@@ -11,6 +11,7 @@ spl-memo = { workspace = true }
 anyhow = { workspace = true }
 anchor-lang = { workspace = true }
 blockmesh-program = { path = "../../programs/blockmesh-program" }
+block-mesh-common = { path = "../block-mesh-common" }
 solana-client = { workspace = true }
 solana-sdk = { workspace = true }
 solana-account-decoder = { workspace = true }

@@ -16,7 +16,7 @@ use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
-use block_mesh_common::chrome_storage::{ExtensionStatus, MessageKey, MessageValue};
+use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageValue};
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{
     CheckTokenRequest, GetLatestInviteCodeRequest, GetLatestInviteCodeResponse, GetTokenResponse,
@@ -33,7 +33,7 @@ pub struct ExtensionWrapperState {
     pub api_token: RwSignal<Uuid>,
     pub device_id: RwSignal<Uuid>,
     pub blockmesh_url: RwSignal<String>,
-    pub status: RwSignal<ExtensionStatus>,
+    pub status: RwSignal<AuthStatus>,
     pub uptime: RwSignal<f64>,
     pub invite_code: RwSignal<String>,
     pub success: RwSignal<Option<String>>,
@@ -105,7 +105,7 @@ impl ExtensionWrapperState {
             MessageKey::BlockMeshUrl,
             MessageValue::String(blockmesh_url.clone()),
         );
-        self.status.update(|v| *v = ExtensionStatus::LoggedOut);
+        self.status.update(|v| *v = AuthStatus::LoggedOut);
         self.device_id.update(|v| *v = device_id);
         send_storage_value_to_iframe(MessageKey::DeviceId, MessageValue::UUID(device_id));
         self.uptime.update(|v| *v = uptime);
@@ -123,7 +123,7 @@ impl ExtensionWrapperState {
             let result = check_token(&blockmesh_url, &credentials).await;
             if result.is_ok() {
                 // TODO
-                self.status.update(|v| *v = ExtensionStatus::LoggedIn);
+                self.status.update(|v| *v = AuthStatus::LoggedIn);
             };
         }
 
@@ -308,7 +308,7 @@ impl ExtensionWrapperState {
             .update(|v| *v = "https://app.blockmesh.xyz".to_string());
         self.email.update(|v| *v = "".to_string());
         self.api_token.update(|v| *v = Uuid::default());
-        self.status.update(|v| *v = ExtensionStatus::LoggedOut);
+        self.status.update(|v| *v = AuthStatus::LoggedOut);
         ExtensionWrapperState::store_api_token(Uuid::default()).await;
         ExtensionWrapperState::store_email("".to_string()).await;
         ExtensionWrapperState::store_blockmesh_url("https://app.blockmesh.xyz".to_string()).await;

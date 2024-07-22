@@ -13,7 +13,7 @@ pub fn LoginPage() -> impl IntoView {
                         </h2>
                         <div class="flex justify-around mb-4">
                             <A
-                                class="font-bebas-neue px-4 py-2 rounded font-bold text-sm text-cyan hover:text-cyan"
+                                class="font-bebas-neue px-4 py-2 rounded font-bold text-sm text-cyan hover:text-orange"
                                 href="/ui/register"
                             >
                                 Register

@@ -1,8 +1,9 @@
-use serde_json::Value;
+use serde_json::{json, Value};
 use tracing_subscriber::fmt::format::Pretty;
 use tracing_subscriber::fmt::time::UtcTime;
 use tracing_subscriber::prelude::*;
 use tracing_web::{performance_layer, MakeConsoleWriter};
+use uuid::Uuid;
 use worker::*;
 
 #[event(start)]
@@ -19,9 +20,45 @@ fn start() {
         .init();
 }
 
+fn extract_device_type(log: &Value) -> String {
+    if log.is_object() {
+        if let Some(device_type) = log.as_object().unwrap().get("device_type") {
+            return device_type.to_string();
+        }
+    }
+    "".to_string()
+}
+
+fn extract_message(log: &Value) -> String {
+    if log.is_object() {
+        if let Some(event) = log.as_object().unwrap().get("event") {
+            if let Some(message) = event.as_object().unwrap().get("message") {
+                return message.to_string();
+            }
+        }
+    }
+    "".to_string()
+}
+
 #[tracing::instrument(name = "tracing::send_log", ret, err)]
-async fn send_log(url: &str, log: Value) -> anyhow::Result<()> {
-    match reqwest::Client::new().post(url).json(&log).send().await {
+async fn send_log(url: &str, api_key: &str, log: Value) -> anyhow::Result<()> {
+    let device_type = extract_device_type(&log);
+    let message = extract_message(&log);
+    let uuid = Uuid::new_v4();
+    let event = json!({
+        "data": log,
+        "requestId": uuid,
+        "namespace": device_type,
+        "message": message
+    });
+    match reqwest::Client::new()
+        .post(url)
+        .header("x-api-key", api_key)
+        .header("x-service", &device_type)
+        .json(&event)
+        .send()
+        .await
+    {
         Ok(r) => {
             console_log!("Successfully sent log to: {} {}", url, r.status());
             Ok(())
@@ -53,6 +90,7 @@ async fn main(mut req: Request, env: Env, _ctx: Context) -> Result<Response> {
         _ => return Response::error("Only accept POST/OPTIONS requests", 400),
     }
     let url = env.secret("log_url").unwrap().to_string();
+    let api_key = env.secret("api_key").unwrap().to_string();
     let body: Value = match req.json().await {
         Ok(json) => json,
         Err(e) => {
@@ -62,11 +100,11 @@ async fn main(mut req: Request, env: Env, _ctx: Context) -> Result<Response> {
     };
 
     if body.is_object() {
-        let _ = send_log(&url, body).await;
+        let _ = send_log(&url, &api_key, body).await;
     } else if body.is_array() {
         let array = body.as_array().unwrap();
         for item in array {
-            let _ = send_log(&url, item.to_owned()).await;
+            let _ = send_log(&url, &api_key, item.to_owned()).await;
         }
     }
 

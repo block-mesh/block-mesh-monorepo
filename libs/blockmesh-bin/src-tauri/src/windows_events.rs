@@ -1,5 +1,7 @@
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 use tauri::{Window, WindowEvent};
 
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 pub fn on_window_event(window: &Window, event: &WindowEvent) {
     match event {
         WindowEvent::CloseRequested { api, .. } => {

@@ -1,16 +1,21 @@
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 use crate::system_tray::set_dock_visible;
 use crate::tauri_state::{AppState, ChannelMessage};
 use crate::tauri_storage::set_config_with_path;
 use crate::CHANNEL_MSG_TX;
 use block_mesh_common::app_config::{AppConfig, TaskStatus};
-use block_mesh_common::constants::BLOCK_MESH_APP_SERVER;
+use block_mesh_common::constants::{env_url, BLOCK_MESH_APP_SERVER};
 use block_mesh_common::interfaces::server_api::{
     CheckTokenRequest, GetTokenResponse, LoginForm, RegisterForm, RegisterResponse,
 };
 use std::str::FromStr;
 use std::sync::Arc;
 use tauri::ipc::InvokeError;
-use tauri::{AppHandle, Manager, State};
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+use tauri::AppHandle;
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+use tauri::Manager;
+use tauri::State;
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
@@ -61,6 +66,7 @@ pub async fn set_app_config(
 
 #[tauri::command]
 #[tracing::instrument(name = "open_main_window", skip(app_handle), ret, err)]
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 pub fn open_main_window(app_handle: &AppHandle) -> anyhow::Result<()> {
     set_dock_visible(true);
     if let Some(window) = app_handle.get_webview_window("main") {
@@ -227,4 +233,10 @@ pub async fn register(
                 .unwrap_or_else(|| "Failed to register".to_string()),
         ))
     }
+}
+
+#[tauri::command]
+#[tracing::instrument(name = "get_home_url", ret)]
+pub async fn get_home_url() -> String {
+    return env_url();
 }

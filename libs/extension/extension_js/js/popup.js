@@ -36,7 +36,7 @@ async function onMessage(e) {
     if (!window.mounted && data === "READY") {
         setTimeout(() => {
             mount_popup();
-        }, 150)
+        }, 250)
         window.mounted = true;
     }
     const {msg_type, key, value} = data;

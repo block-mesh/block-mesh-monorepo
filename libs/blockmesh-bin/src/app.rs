@@ -1,13 +1,13 @@
-use std::time::Duration;
-
+// use std::time::Duration;
+use leptos::logging::log;
 use leptos::*;
-
-use crate::app_router::AppRouter;
-use crate::components::app_footer::AppFooter;
+// use crate::app_router::AppRouter;
+// use crate::components::app_footer::AppFooter;
 use crate::leptos_state::LeptosTauriAppState;
 
 #[component]
 pub fn App() -> impl IntoView {
+    log!("starting App");
     provide_context(LeptosTauriAppState::default());
     let state = expect_context::<LeptosTauriAppState>();
     let resource = create_local_resource(
@@ -22,26 +22,22 @@ pub fn App() -> impl IntoView {
             LeptosTauriAppState::get_ore_status(&state).await;
         },
     );
-
-    let _interval = set_interval_with_handle(
-        move || {
-            spawn_local(async move {
-                let state = expect_context::<LeptosTauriAppState>();
-                LeptosTauriAppState::get_task_status(&state).await;
-                LeptosTauriAppState::get_ore_status(&state).await;
-            });
-        },
-        Duration::from_secs(10),
-    );
+    //
+    // let _interval = set_interval_with_handle(
+    //     move || {
+    //         spawn_local(async move {
+    //             let state = expect_context::<LeptosTauriAppState>();
+    //             LeptosTauriAppState::get_task_status(&state).await;
+    //             LeptosTauriAppState::get_ore_status(&state).await;
+    //         });
+    //     },
+    //     Duration::from_secs(10),
+    // );
 
     view! {
-        <div class="h-screen bg-gray-800">
+        <div class="hidden">
             <Suspense fallback=move || view! { <p>Loading</p> }>
                 <div class="hidden">{resource.get()}</div>
-                <div class="h-full">
-                    <AppRouter/>
-                    <AppFooter/>
-                </div>
             </Suspense>
         </div>
     }

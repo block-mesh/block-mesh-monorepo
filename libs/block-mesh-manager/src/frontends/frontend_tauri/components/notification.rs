@@ -1,13 +1,13 @@
-use crate::frontends::frontend_webserver::context::webapp_context::WebAppContext;
+use crate::frontends::context::notification_context::NotificationContext;
 use leptos::*;
 
 #[component]
-pub fn NotificationPopupComponent() -> impl IntoView {
-    let state = expect_context::<WebAppContext>();
-    let success = Signal::derive(move || state.success.get());
-    let error = Signal::derive(move || state.error.get());
+pub fn TauriNotification() -> impl IntoView {
+    let notifications = expect_context::<NotificationContext>();
+    let success = Signal::derive(move || notifications.success.get());
+    let error = Signal::derive(move || notifications.error.get());
     let opacity = Signal::derive(move || {
-        if state.success.get().is_some() || state.error.get().is_some() {
+        if notifications.success.get().is_some() || notifications.error.get().is_some() {
             "opacity-100"
         } else {
             "opacity-0"

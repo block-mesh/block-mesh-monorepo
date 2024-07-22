@@ -1,7 +1,7 @@
 use crate::tauri_state::AppState;
 use anyhow::anyhow;
 use block_mesh_common::app_config::AppConfig;
-use block_mesh_common::constants::CONFIG_FILENAME;
+use block_mesh_common::constants::{env_url, CONFIG_FILENAME};
 use std::path::PathBuf;
 use std::sync::Arc;
 use tauri::{AppHandle, Manager};
@@ -60,6 +60,7 @@ pub async fn setup_storage(app_handle: AppHandle) -> anyhow::Result<()> {
             .ok_or(anyhow!("Failed to get buf string"))?
             .to_string(),
     );
+    storage_config.blockmesh_url = Some(env_url());
     let state = app_handle.state::<Arc<Mutex<AppState>>>();
     let mut app_state = state.lock().await;
     app_state.config.merge(storage_config);

@@ -1,15 +1,30 @@
 use block_mesh_common::app_config::{AppConfig, TaskStatus};
+use block_mesh_common::chrome_storage::{MessageKey, MessageType, MessageValue, PostMessage};
 use block_mesh_common::interfaces::server_api::{LoginForm, RegisterForm};
 use leptos::tracing;
 use serde::{Deserialize, Serialize};
-use solana_sdk::wasm_bindgen;
 use std::fmt::Display;
+use wasm_bindgen::closure::Closure;
+use wasm_bindgen::prelude::wasm_bindgen;
 use wasm_bindgen::JsValue;
+
+#[wasm_bindgen(inline_js = r#"
+    export function onPostMessage(callback) {
+        if (!window.message_channel_port) return;
+            window.message_channel_port.addEventListener("message", (msg) => {
+                console.log("tauri connector.rs event listener", {msg});
+                const {data} = msg;
+                callback(data);
+            });
+        }"#)]
+extern "C" {
+    pub fn onPostMessage(callback: &Closure<dyn Fn(JsValue)>);
+}
 
 #[wasm_bindgen(inline_js = r#"
         export async function invoke(cmd, args) {
             try {
-                return await window.__TAURI__.tauri.invoke(cmd, args);
+                return await window.__TAURI__.core.invoke(cmd, args);
             } catch (e) {
                 console.error(`Error in invoke ${cmd} : ${e}`);
                 const t = typeof e;
@@ -24,6 +39,37 @@ use wasm_bindgen::JsValue;
         }"#)]
 extern "C" {
     pub async fn invoke(cmd: &str, args: JsValue) -> JsValue;
+}
+
+#[wasm_bindgen(inline_js = r#"
+    export async function send_message(msg) {
+        try {
+            if (!window.message_channel_port) {
+                console.log("blockmesh-bin message_channel_port is missing", window.mounted, window.message_channel_port);
+                return;
+            }
+            window.message_channel_port.postMessage(msg);
+        } catch (e) {
+            return ""
+        }
+    }"#)]
+extern "C" {
+    pub async fn send_message(msg: JsValue) -> JsValue;
+}
+
+pub async fn send_message_channel(
+    msg_type: MessageType,
+    key: MessageKey,
+    value: Option<MessageValue>,
+) {
+    let msg = PostMessage {
+        msg_type,
+        key,
+        value,
+    };
+    if let Ok(js_args) = serde_wasm_bindgen::to_value(&msg) {
+        send_message(js_args).await;
+    }
 }
 
 pub async fn invoke_tauri(cmd: &str, args: JsValue) -> Result<JsValue, MyJsError> {

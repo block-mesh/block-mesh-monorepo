@@ -4,4 +4,3 @@ pub mod invites;
 pub mod metrics;
 pub mod navbar;
 pub mod notification;
-pub mod notification_popup;

@@ -1,6 +1,6 @@
 {
   "build": {
-    "beforeDevCommand": "trunk serve",
+    "beforeDevCommand": "../../scripts/beforeDevCommand.sh",
     "beforeBuildCommand": "trunk build",
     "frontendDist": "../dist",
     "devUrl": "http://localhost:1420"
@@ -44,11 +44,9 @@
     "withGlobalTauri": true,
     "windows": [
       {
-        "title": "blockmesh",
-        "width": 1050,
-        "height": 700,
-        "minWidth": 1050,
-        "minHeight": 700
+        "title": "BlockMesh Network",
+        "width": 393,
+        "height": 852
       }
     ]
   }

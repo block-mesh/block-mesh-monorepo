@@ -3,6 +3,7 @@ set -x
 export APP_ENVIRONMENT="local"
 export _PWD="$(pwd)"
 export ROOT="$(git rev-parse --show-toplevel)"
+export CARGO_TARGET_DIR="${ROOT}/target/WEBSERVER"
 source "${ROOT}/scripts/setup.sh"
 #cd "${ROOT}/libs/block-mesh-manager" || exit 1
 set +x
@@ -12,8 +13,9 @@ if [ -f "${ROOT}/.env" ] ; then
   source "${ROOT}/.env"
 fi
 ensure "${ROOT}/scripts/init_db.sh"
-ensure "${ROOT}/scripts/build.sh"
+#ensure "${ROOT}/scripts/build.sh"
 #"${ROOT}/target/debug/block-mesh-manager" &
+export LEPTOS_HASH_FILES=false
 cargo leptos watch --project block-mesh-manager | bunyan &
 export backend=$!
 function cleanup()

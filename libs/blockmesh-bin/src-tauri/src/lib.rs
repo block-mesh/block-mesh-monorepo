@@ -1,3 +1,4 @@
+use std::env;
 use std::process::ExitCode;
 use std::sync::{Arc, OnceLock};
 
@@ -5,6 +6,7 @@ use clap::Parser;
 #[cfg(target_os = "macos")]
 use tauri::ActivationPolicy;
 use tauri::Manager;
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 use tauri_plugin_autostart::MacosLauncher;
 use tokio::sync::{broadcast, Mutex};
 use uuid::Uuid;
@@ -15,14 +17,19 @@ use block_mesh_common::constants::DeviceType;
 use logger_general::tracing::setup_tracing;
 
 use crate::background::channel_receiver;
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+use crate::commands::open_main_window;
 use crate::commands::{
-    check_token, get_app_config, get_ore_status, get_task_status, login, logout, open_main_window,
+    check_token, get_app_config, get_home_url, get_ore_status, get_task_status, login, logout,
     register, set_app_config, toggle_miner,
 };
 use crate::run_events::on_run_events;
-use crate::system_tray::{set_dock_visible, setup_tray};
+use crate::system_tray::set_dock_visible;
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
+use crate::system_tray::setup_tray;
 use crate::tauri_state::{AppState, ChannelMessage};
 use crate::tauri_storage::setup_storage;
+#[cfg(not(any(target_os = "android", target_os = "ios")))]
 use crate::windows_events::on_window_event;
 
 mod background;
@@ -38,7 +45,6 @@ pub static SYSTEM: OnceLock<Mutex<sysinfo::System>> = OnceLock::new();
 
 pub static CHANNEL_MSG_TX: OnceLock<broadcast::Sender<ChannelMessage>> = OnceLock::new();
 
-#[cfg_attr(mobile, tauri::mobile_entry_point)]
 pub fn run() -> anyhow::Result<ExitCode> {
     let (incoming_tx, incoming_rx) = broadcast::channel::<ChannelMessage>(2);
     let args = CliArgs::parse();
@@ -65,54 +71,63 @@ pub fn run() -> anyhow::Result<ExitCode> {
     tauri::async_runtime::set(tokio::runtime::Handle::current());
     tokio::spawn(channel_receiver(incoming_rx, app_state.clone()));
     let app_state = app_state.clone();
-    tauri::Builder::default()
-        .plugin(tauri_plugin_autostart::init(
-            MacosLauncher::LaunchAgent,
-            Some(vec!["--minimized"]),
-        ))
-        .plugin(tauri_plugin_single_instance::init(
-            move |app, _argv, _cwd| {
-                open_main_window(app).unwrap();
-            },
-        ))
-        .manage(app_state.clone())
-        .setup(move |app| {
-            setup_tray(app);
-            #[cfg(desktop)]
+    let app = tauri::Builder::default();
+
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    let app = app.plugin(tauri_plugin_autostart::init(
+        MacosLauncher::LaunchAgent,
+        Some(vec!["--minimized"]),
+    ));
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    let app = app.plugin(tauri_plugin_single_instance::init(
+        move |app, _argv, _cwd| {
+            open_main_window(app).unwrap();
+        },
+    ));
+    let app = app.manage(app_state.clone()).setup(move |app| {
+        #[cfg(not(any(target_os = "android", target_os = "ios")))]
+        setup_tray(app);
+        #[cfg(desktop)]
+        {
+            app.handle()
+                .plugin(tauri_plugin_updater::Builder::new().build())?;
+        }
+        #[cfg(target_os = "macos")]
+        {
+            app.set_activation_policy(ActivationPolicy::Accessory);
+        }
+        let app_handle = app.app_handle();
+        tauri::async_runtime::spawn(setup_storage(app_handle.clone()));
+        let app_handle = app.app_handle();
+        if args.minimized {
+            #[cfg(not(any(target_os = "android", target_os = "ios")))]
             {
-                app.handle()
-                    .plugin(tauri_plugin_updater::Builder::new().build())?;
-            }
-            #[cfg(target_os = "macos")]
-            {
-                app.set_activation_policy(ActivationPolicy::Accessory);
-            }
-            let app_handle = app.app_handle();
-            tauri::async_runtime::spawn(setup_storage(app_handle.clone()));
-            let app_handle = app.app_handle();
-            if args.minimized {
                 let window = app_handle.get_webview_window("main").unwrap();
                 window.hide().unwrap();
-                set_dock_visible(false);
-            } else {
-                open_main_window(app.app_handle()).unwrap();
             }
-            Ok(())
-        })
-        .on_window_event(on_window_event)
-        .invoke_handler(tauri::generate_handler![
-            get_app_config,
-            set_app_config,
-            get_task_status,
-            toggle_miner,
-            get_ore_status,
-            login,
-            register,
-            check_token,
-            logout
-        ])
-        .build(tauri::generate_context!())
-        .expect("error while running tauri application")
-        .run(on_run_events);
+            set_dock_visible(false);
+        } else {
+            #[cfg(not(any(target_os = "android", target_os = "ios")))]
+            open_main_window(app.app_handle()).unwrap();
+        }
+        Ok(())
+    });
+    #[cfg(not(any(target_os = "android", target_os = "ios")))]
+    let app = app.on_window_event(on_window_event);
+    app.invoke_handler(tauri::generate_handler![
+        get_app_config,
+        set_app_config,
+        get_task_status,
+        toggle_miner,
+        get_ore_status,
+        login,
+        register,
+        check_token,
+        logout,
+        get_home_url
+    ])
+    .build(tauri::generate_context!())
+    .expect("error while running tauri application")
+    .run(on_run_events);
     Ok(ExitCode::SUCCESS)
 }

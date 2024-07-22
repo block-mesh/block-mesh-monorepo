@@ -1,6 +1,9 @@
 use serde::{Deserialize, Serialize, Serializer};
+use serde_json::Value;
 use std::fmt;
 use std::fmt::{Display, Formatter};
+use std::option::Option;
+use std::str::FromStr;
 use uuid::Uuid;
 
 #[derive(Deserialize, Debug)]
@@ -45,9 +48,10 @@ impl Display for MessageKey {
 }
 
 impl TryFrom<&str> for MessageKey {
-    type Error = &'static str;
+    type Error = String;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let value = value.trim_matches('"');
         match value {
             "all" => Ok(MessageKey::All),
             "blockmesh_url" => Ok(MessageKey::BlockMeshUrl),
@@ -59,13 +63,13 @@ impl TryFrom<&str> for MessageKey {
             "download_speed" => Ok(MessageKey::DownloadSpeed),
             "upload_speed" => Ok(MessageKey::UploadSpeed),
             "last_update" => Ok(MessageKey::LastUpdate),
-            _ => Err("Invalid storage value"),
+            _ => Err(format!("Invalid MessageKey value {}", value)),
         }
     }
 }
 
 impl TryFrom<&String> for MessageKey {
-    type Error = &'static str;
+    type Error = String;
 
     fn try_from(value: &String) -> Result<Self, Self::Error> {
         MessageKey::try_from(value.as_str())
@@ -116,27 +120,113 @@ impl Display for MessageType {
     }
 }
 
+impl TryFrom<&String> for MessageType {
+    type Error = String;
+
+    fn try_from(value: &String) -> Result<Self, Self::Error> {
+        MessageType::try_from(value.as_str())
+    }
+}
+
+impl TryFrom<&str> for MessageType {
+    type Error = String;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let value = value.trim_matches('"');
+        match value {
+            "GET_ALL" => Ok(MessageType::GET_ALL),
+            "GET" => Ok(MessageType::GET),
+            "SET" => Ok(MessageType::SET),
+            "DELETE" => Ok(MessageType::DELETE),
+            "COPY_TO_CLIPBOARD" => Ok(MessageType::COPY_TO_CLIPBOARD),
+            _ => Err(format!("Invalid MessageType: {}", value)),
+        }
+    }
+}
+
 #[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
-pub enum ExtensionStatus {
+pub enum AuthStatus {
     LoggedIn,
     Registering,
     LoggedOut,
     WaitingEmailVerification,
 }
 
-impl Display for ExtensionStatus {
+impl Display for AuthStatus {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         match self {
-            ExtensionStatus::LoggedIn => write!(f, "LoggedIn"),
-            ExtensionStatus::Registering => write!(f, "Registering"),
-            ExtensionStatus::LoggedOut => write!(f, "LoggedOut"),
-            ExtensionStatus::WaitingEmailVerification => write!(f, "WaitingEmailVerification"),
+            AuthStatus::LoggedIn => write!(f, "LoggedIn"),
+            AuthStatus::Registering => write!(f, "Registering"),
+            AuthStatus::LoggedOut => write!(f, "LoggedOut"),
+            AuthStatus::WaitingEmailVerification => write!(f, "WaitingEmailVerification"),
         }
     }
 }
 
-impl Default for ExtensionStatus {
+impl Default for AuthStatus {
     fn default() -> Self {
         Self::LoggedOut
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct PostMessage {
+    pub msg_type: MessageType,
+    pub key: MessageKey,
+    pub value: Option<MessageValue>,
+}
+
+impl TryFrom<&str> for MessageValue {
+    type Error = String;
+
+    fn try_from(value: &str) -> Result<Self, Self::Error> {
+        let value = value.trim_matches('"');
+        if let Ok(i) = i64::from_str(value) {
+            return Ok(MessageValue::I64(i));
+        }
+        if let Ok(f) = f64::from_str(value) {
+            return Ok(MessageValue::F64(f));
+        }
+        if let Ok(uuid) = Uuid::parse_str(value) {
+            return Ok(MessageValue::UUID(uuid));
+        }
+        Ok(MessageValue::String(value.to_string()))
+    }
+}
+
+impl TryFrom<&String> for MessageValue {
+    type Error = String;
+
+    fn try_from(value: &String) -> Result<Self, Self::Error> {
+        MessageValue::try_from(value.as_str())
+    }
+}
+
+impl TryFrom<Value> for PostMessage {
+    type Error = String;
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        if let Some(object) = value.as_object() {
+            let key = object.get("key").ok_or("Missing key")?.to_string();
+            let msg_type = object
+                .get("msg_type")
+                .ok_or("Missing msg_type")?
+                .to_string();
+            let value = object.get("value").ok_or("Missing value")?.to_string();
+
+            let key = MessageKey::try_from(&key)?;
+            let msg_type = MessageType::try_from(&msg_type)?;
+            let value = MessageValue::try_from(&value)?;
+
+            Ok(PostMessage {
+                key,
+                msg_type,
+                value: Option::from(value),
+            })
+        } else {
+            Err(format!(
+                "Failed to convert value to post message => {}",
+                value
+            ))
+        }
     }
 }

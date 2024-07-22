@@ -1,7 +1,9 @@
-use crate::tauri_connector::connector::invoke_tauri;
+use crate::tauri_connector::connector::{invoke_tauri, send_message_channel};
 use block_mesh_common::app_config::{AppConfig, TaskStatus};
+use block_mesh_common::chrome_storage::{MessageKey, MessageType, MessageValue};
 use block_mesh_common::cli::CommandsEnum;
 use block_mesh_common::interfaces::server_api::GetTokenResponse;
+use leptos::logging::log;
 use leptos::*;
 use std::fmt::{Debug, Display};
 use std::time::Duration;
@@ -53,6 +55,35 @@ impl LeptosTauriAppState {
             app_config.mode = Some(CommandsEnum::ClientNode);
         }
         tracing::info!("Loaded app_config: {:?}", app_config);
+        log!("Loaded app_config: {:?}", app_config);
+        if app_config.email.is_some() {
+            send_message_channel(
+                MessageType::SET,
+                MessageKey::Email,
+                Option::from(MessageValue::String(app_config.email.clone().unwrap())),
+            )
+            .await;
+        }
+
+        if app_config.api_token.is_some() {
+            send_message_channel(
+                MessageType::SET,
+                MessageKey::ApiToken,
+                Option::from(MessageValue::String(app_config.api_token.clone().unwrap())),
+            )
+            .await;
+        }
+
+        if app_config.blockmesh_url.is_some() {
+            send_message_channel(
+                MessageType::SET,
+                MessageKey::BlockMeshUrl,
+                Option::from(MessageValue::String(
+                    app_config.blockmesh_url.clone().unwrap(),
+                )),
+            )
+            .await;
+        }
         state.app_config.set(app_config);
     }
 
