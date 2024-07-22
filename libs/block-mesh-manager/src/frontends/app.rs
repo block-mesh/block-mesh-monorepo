@@ -16,6 +16,7 @@ use crate::frontends::frontend_webserver::pages::register_page::RegisterPage;
 use crate::frontends::frontend_webserver::pages::resend_confirmation_email_page::ResendConfirmationEmailPage;
 use crate::frontends::frontend_webserver::pages::reset_password_page::ResetPasswordPage;
 use crate::frontends::frontend_webserver::webserver_header::WebServerHeader;
+use crate::frontends::new_frontend_webserver::Home;
 use crate::frontends::wrapper::Wrapper;
 use leptos::*;
 use leptos_meta::*;
@@ -30,87 +31,102 @@ pub fn App() -> impl IntoView {
     let extension_resource = ExtensionState::init_resource(extension_state);
 
     view! {
+        <Html
+            lang="en"
+            class="text-zinc-950 antialiased lg:bg-zinc-100 dark:bg-zinc-900 dark:text-white dark:lg:bg-zinc-950"
+        />
+        <Link rel="preconnect" href="https://rsms.me/"/>
+        <Link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
+        <Link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+        />
+
+        <Stylesheet id="leptos" href="/pkg/block-mesh-manager.css"/>
+
         <Router fallback=|| { view! { <p>Error</p> }.into_view() }>
             <Routes>
-                <Route
-                    path="/ui"
-                    view=move || {
-                        provide_context(WebAppContext::default());
-                        view! {
-                            <WebServerHeader/>
-                            <NotificationPopupComponent/>
-                            <Outlet/>
-                        }
-                    }
-                >
+                <Route path="/ui" view=Home/>
 
-                    <Route path="/login" view=LoginPage/>
-                    <Route path="/reset_password" view=ResetPasswordPage/>
-                    <Route path="/register" view=RegisterPage/>
-                    <Route path="/dashboard" view=DashboardPage/>
-                    <Route path="/resend_confirmation_email" view=ResendConfirmationEmailPage/>
-                    <Route path="/new_password" view=NewPasswordPage/>
-                    <Route path="/edit_invite_code" view=EditInvitePage/>
-                </Route>
-                <Route
-                    path="/ext"
-                    view=move || {
-                        view! {
-                            <ExtensionServerHeader/>
-                            <Outlet/>
-                        }
-                    }
-                >
-
-                    <Route
-                        path="/login"
-                        view=move || {
-                            view! {
-                                <Wrapper
-                                    resource=extension_resource
-                                    loading=|| view! { <ExtensionLoading/> }
-                                >
-                                    <ExtensionNotifications/>
-                                    <ExtensionNavigator/>
-                                    <ExtensionLogin/>
-                                </Wrapper>
-                            }
-                        }
-                    />
-
-                    <Route
-                        path="/register"
-                        view=move || {
-                            view! {
-                                <Wrapper
-                                    resource=extension_resource
-                                    loading=|| view! { <ExtensionLoading/> }
-                                >
-                                    <ExtensionNotifications/>
-                                    <ExtensionNavigator/>
-                                    <ExtensionRegister/>
-                                </Wrapper>
-                            }
-                        }
-                    />
-
-                    <Route
-                        path="/logged_in"
-                        view=move || {
-                            view! {
-                                <Wrapper
-                                    resource=extension_resource
-                                    loading=|| view! { <ExtensionLoading/> }
-                                >
-                                    <ExtensionNotifications/>
-                                    <ExtensionNavigator/>
-                                    <ExtensionLoggedIn/>
-                                </Wrapper>
-                            }
-                        }
-                    />
-
-                </Route>
+                // <Route
+                //     path="/ui"
+                //     view=move || {
+                //         provide_context(WebAppContext::default());
+                //         view! {
+                //             <WebServerHeader/>
+                //             <NotificationPopupComponent/>
+                //             <Outlet/>
+                //         }
+                //     }
+                // >
+                //
+                //     <Route path="/login" view=LoginPage/>
+                //     <Route path="/reset_password" view=ResetPasswordPage/>
+                //     <Route path="/register" view=RegisterPage/>
+                //     <Route path="/dashboard" view=DashboardPage/>
+                //     <Route path="/resend_confirmation_email" view=ResendConfirmationEmailPage/>
+                //     <Route path="/new_password" view=NewPasswordPage/>
+                //     <Route path="/edit_invite_code" view=EditInvitePage/>
+                // </Route>
+                // <Route
+                //     path="/ext"
+                //     view=move || {
+                //         view! {
+                //             <ExtensionServerHeader/>
+                //             <Outlet/>
+                //         }
+                //     }
+                // >
+                //
+                //     <Route
+                //         path="/login"
+                //         view=move || {
+                //             view! {
+                //                 <Wrapper
+                //                     resource=extension_resource
+                //                     loading=|| view! { <ExtensionLoading/> }
+                //                 >
+                //                     <ExtensionNotifications/>
+                //                     <ExtensionNavigator/>
+                //                     <ExtensionLogin/>
+                //                 </Wrapper>
+                //             }
+                //         }
+                //     />
+                //
+                //     <Route
+                //         path="/register"
+                //         view=move || {
+                //             view! {
+                //                 <Wrapper
+                //                     resource=extension_resource
+                //                     loading=|| view! { <ExtensionLoading/> }
+                //                 >
+                //                     <ExtensionNotifications/>
+                //                     <ExtensionNavigator/>
+                //                     <ExtensionRegister/>
+                //                 </Wrapper>
+                //             }
+                //         }
+                //     />
+                //
+                //     <Route
+                //         path="/logged_in"
+                //         view=move || {
+                //             view! {
+                //                 <Wrapper
+                //                     resource=extension_resource
+                //                     loading=|| view! { <ExtensionLoading/> }
+                //                 >
+                //                     <ExtensionNotifications/>
+                //                     <ExtensionNavigator/>
+                //                     <ExtensionLoggedIn/>
+                //                 </Wrapper>
+                //             }
+                //         }
+                //     />
+                //
+                // </Route>
             </Routes>
         </Router>
     }
