@@ -15,10 +15,17 @@ where
     let view = store_value(children);
 
     view! {
-        {move || opt.with(|value| view.with_value(|view| value.as_ref().map_or_else(
-            || fallback.run(),
-            |value| view(value).into_view(),
-        )))}
+        {move || {
+            opt
+                .with(|value| {
+                    view
+                        .with_value(|view| {
+                            value
+                                .as_ref()
+                                .map_or_else(|| fallback.run(), |value| view(value).into_view())
+                        })
+                })
+        }}
     }
 }
 
@@ -63,9 +70,19 @@ where
     let view = store_value(children);
 
     view! {
-        {move || opt.with(|value| view.with_value(|view| value.as_ref().map_or_else(
-            |err| fallback.run(err),
-            |value| view(value).into_view(),
-        )))}
+        {move || {
+            opt
+                .with(|value| {
+                    view
+                        .with_value(|view| {
+                            value
+                                .as_ref()
+                                .map_or_else(
+                                    |err| fallback.run(err),
+                                    |value| view(value).into_view(),
+                                )
+                        })
+                })
+        }}
     }
 }

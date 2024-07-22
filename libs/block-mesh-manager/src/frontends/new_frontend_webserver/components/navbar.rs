@@ -8,11 +8,7 @@ pub fn Navbar(
 ) -> impl IntoView {
     let class = move || tw_merge!(class.get(), "flex flex-1 items-center gap-4 py-2.5");
 
-    view! {
-        <nav class=class>
-            {children()}
-        </nav>
-    }
+    view! { <nav class=class>{children()}</nav> }
 }
 
 #[component]
@@ -22,22 +18,14 @@ pub fn NavbarSection(
 ) -> impl IntoView {
     let class = move || tw_merge!(class.get(), "flex items-center gap-3");
 
-    view! {
-        // TODO : framer layout group
-        <div class=class>
-            {children()}
-        </div>
-    }
+    view! { <div class=class>{children()}</div> }
 }
 
 #[component]
 pub fn NavbarSpacer(#[prop(into, optional)] class: MaybeSignal<String>) -> impl IntoView {
     let class = move || tw_merge!(class.get(), "-ml-4 flex-1");
 
-    view! {
-        <div class=class aria-hidden="true">
-        </div>
-    }
+    view! { <div class=class aria-hidden="true"></div> }
 }
 
 #[component]
@@ -88,9 +76,5 @@ pub fn NavbarLabel(
 ) -> impl IntoView {
     let class = move || tw_merge!(class.get(), "truncate");
 
-    view! {
-        <span class=class>
-            {children()}
-        </span>
-    }
+    view! { <span class=class>{children()}</span> }
 }
