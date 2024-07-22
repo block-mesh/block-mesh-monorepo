@@ -46,14 +46,19 @@ where
             </div>
         </aside>
 
-        <div class=backdrop_class aria-hidden="true" on:click=on_close>
+        <div
+            class=backdrop_class
+            aria-hidden="true"
+            on:click={
+                let on_close = on_close.clone();
+                move |_| on_close()
+            }
+        >
             <div class="flex h-full flex-col rounded-lg bg-white shadow-sm ring-1 ring-zinc-950/5 dark:bg-zinc-900 dark:ring-white/10">
                 <div class="-mb-3 px-4 pt-3">
-                    <span class="relative">
-                        <button class="cursor-default relative flex min-w-0 items-center gap-3 rounded-lg p-2 text-left text-base/6 font-medium text-zinc-950 sm:text-sm/5 data-[slot=icon]:*:size-6 data-[slot=icon]:*:shrink-0 data-[slot=icon]:*:fill-zinc-500 sm:data-[slot=icon]:*:size-5 data-[slot=icon]:last:[&:not(:nth-child(2))]:*:ml-auto data-[slot=icon]:last:[&:not(:nth-child(2))]:*:size-5 sm:data-[slot=icon]:last:[&:not(:nth-child(2))]:*:size-4 data-[slot=avatar]:*:-m-0.5 data-[slot=avatar]:*:size-7 data-[slot=avatar]:*:[--avatar-radius:theme(borderRadius.DEFAULT)] data-[slot=avatar]:*:[--ring-opacity:10%] sm:data-[slot=avatar]:*:size-6 data-[hover]:bg-zinc-950/5 data-[slot=icon]:*:data-[hover]:fill-zinc-950 data-[active]:bg-zinc-950/5 data-[slot=icon]:*:data-[active]:fill-zinc-950 dark:text-white dark:data-[slot=icon]:*:fill-zinc-400 dark:data-[hover]:bg-white/5 dark:data-[slot=icon]:*:data-[hover]:fill-white dark:data-[active]:bg-white/5 dark:data-[slot=icon]:*:data-[active]:fill-white" aria-label="Close navigation" type="button" on:click=on_close.clone()>
-                            <CloseMenuIcon />
-                        </button>
-                    </span>
+                    <NavbarItem on_click=on_close aria_label="Close navigation">
+                        <CloseMenuIcon />
+                    </NavbarItem>
                 </div>
 
                 {children()}
@@ -79,7 +84,7 @@ where
     view! {
         <div class="relative isolate flex min-h-svh w-full bg-white max-lg:flex-col lg:bg-zinc-100 dark:bg-zinc-900 dark:lg:bg-zinc-950">
             // Sidebar on desktop
-            <div class="fixed inset-y-0 left-0 w-64 max-lg:hidden">{sidebar}</div>
+            <div class="fixed inset-y-0 left-0 w-64 max-lg:hidden">{sidebar.clone()}</div>
 
             // Sidebar on mobile
             <MobileSidebar
@@ -92,7 +97,7 @@ where
             // Navbar on mobile
             <header class="flex items-center px-4 lg:hidden">
                 <div class="py-2.5">
-                    <NavbarItem on:click=move |_| set_show_sidebar.set(true) aria-label="Open navigation">
+                    <NavbarItem on_click={move || set_show_sidebar.set(true)} aria_label="Open navigation">
                         <OpenMenuIcon />
                     </NavbarItem>
                 </div>
