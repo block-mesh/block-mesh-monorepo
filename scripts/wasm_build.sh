@@ -54,7 +54,7 @@ rm -f chrome.zip && \
 (cd extension_js && zip -rq ../chrome.zip .) && \
 (cd extension_js && rm -f manifest.json) && \
 (cp -f chrome.zip "${ROOT}/tmp_ext/chrome/") && \
-(cd "${ROOT}/tmp_ext/chrome/" && unzip chrome.zip) && \
+(cd "${ROOT}/tmp_ext/chrome/" && unzip -f chrome.zip) && \
 echo Chrome package: chrome.zip || exit 1
 
 ## create firefox package, exclude chrome manifest and rename FF manifest to its default file name
@@ -63,6 +63,6 @@ rm -f firefox.zip && \
 (cd extension_js && zip -rq ../firefox.zip .) && \
 (cd extension_js && rm -f manifest.json) && \
 (cp -f firefox.zip "${ROOT}/tmp_ext/firefox/") && \
-(cd "${ROOT}/tmp_ext/firefox/" && unzip firefox.zip) && \
+(cd "${ROOT}/tmp_ext/firefox/" && unzip -f firefox.zip) && \
 echo Firefox package: firefox.zip || exit 1
 
