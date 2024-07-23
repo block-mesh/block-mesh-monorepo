@@ -27,7 +27,7 @@ use crate::utils::connectors::{
     get_storage_value, send_storage_value_to_iframe, set_storage_value, storageOnChange,
 };
 
-#[derive(Clone, Serialize, Deserialize, Default, Copy)]
+#[derive(Clone, Serialize, Deserialize, Copy)]
 pub struct ExtensionWrapperState {
     pub email: RwSignal<String>,
     pub api_token: RwSignal<Uuid>,
@@ -41,6 +41,25 @@ pub struct ExtensionWrapperState {
     pub download_speed: RwSignal<f64>,
     pub upload_speed: RwSignal<f64>,
     pub last_update: RwSignal<i64>,
+}
+
+impl Default for ExtensionWrapperState {
+    fn default() -> Self {
+        Self {
+            email: create_rw_signal(String::default()),
+            api_token: create_rw_signal(Uuid::default()),
+            device_id: create_rw_signal(Uuid::default()),
+            blockmesh_url: create_rw_signal("https://app.blockmesh.xyz".to_string()),
+            status: create_rw_signal(AuthStatus::LoggedOut),
+            uptime: create_rw_signal(0.0),
+            invite_code: create_rw_signal(String::default()),
+            success: create_rw_signal(None),
+            error: create_rw_signal(None),
+            download_speed: create_rw_signal(0.0),
+            upload_speed: Default::default(),
+            last_update: create_rw_signal(0),
+        }
+    }
 }
 
 impl Debug for ExtensionWrapperState {

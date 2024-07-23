@@ -20,7 +20,9 @@ pub fn ExtensionLogin() -> impl IntoView {
     let submit_action_resource = create_local_resource(
         move || (),
         move |_| async move {
-            if wait.get() || email.get_untracked().is_empty() || password.get_untracked().is_empty()
+            if wait.get_untracked()
+                || email.get_untracked().is_empty()
+                || password.get_untracked().is_empty()
             {
                 return;
             }

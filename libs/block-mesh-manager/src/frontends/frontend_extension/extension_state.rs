@@ -23,7 +23,7 @@ use crate::frontends::frontend_extension::utils::connectors::{
 use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType};
 use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
 
-#[derive(Clone, Serialize, Deserialize, Default, Copy)]
+#[derive(Clone, Serialize, Deserialize, Copy)]
 pub struct ExtensionState {
     pub email: RwSignal<String>,
     pub api_token: RwSignal<Uuid>,
@@ -37,6 +37,25 @@ pub struct ExtensionState {
     pub download_speed: RwSignal<f64>,
     pub upload_speed: RwSignal<f64>,
     pub last_update: RwSignal<i64>,
+}
+
+impl Default for ExtensionState {
+    fn default() -> Self {
+        Self {
+            email: create_rw_signal(String::default()),
+            api_token: create_rw_signal(Uuid::default()),
+            device_id: create_rw_signal(Uuid::default()),
+            blockmesh_url: create_rw_signal("https://app.blockmesh.xyz".to_string()),
+            status: create_rw_signal(AuthStatus::LoggedOut),
+            uptime: create_rw_signal(0.0),
+            invite_code: create_rw_signal(String::default()),
+            success: create_rw_signal(None),
+            error: create_rw_signal(None),
+            download_speed: create_rw_signal(0.0),
+            upload_speed: Default::default(),
+            last_update: create_rw_signal(0),
+        }
+    }
 }
 
 impl Debug for ExtensionState {
