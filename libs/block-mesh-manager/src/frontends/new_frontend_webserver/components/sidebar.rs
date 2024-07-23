@@ -7,7 +7,7 @@ pub fn Sidebar(
     #[prop(into, optional)] class: MaybeSignal<String>,
     children: Children,
 ) -> impl IntoView {
-    let class = move || tw_merge!(class.get(), "flex h-full min-h-0 flex-col");
+    let class = move || tw_join!(class.get(), "flex h-full min-h-0 flex-col");
 
     view! { <nav class=class>{children()}</nav> }
 }
@@ -18,7 +18,7 @@ pub fn SidebarHeader(
     children: Children,
 ) -> impl IntoView {
     let class = move || {
-        tw_merge!(class.get(), "flex flex-col border-b border-zinc-950/5 p-4 dark:border-white/5 [&>[data-slot=section]+[data-slot=section]]:mt-2.5")
+        tw_join!(class.get(), "flex flex-col border-b border-zinc-950/5 p-4 dark:border-white/5 [&>[data-slot=section]+[data-slot=section]]:mt-2.5")
     };
 
     view! { <div class=class>{children()}</div> }
@@ -30,7 +30,7 @@ pub fn SidebarBody(
     children: Children,
 ) -> impl IntoView {
     let class = move || {
-        tw_merge!(class.get(), "flex flex-1 flex-col overflow-y-auto p-4 [&>[data-slot=section]+[data-slot=section]]:mt-8")
+        tw_join!(class.get(), "flex flex-1 flex-col overflow-y-auto p-4 [&>[data-slot=section]+[data-slot=section]]:mt-8")
     };
 
     view! { <div class=class>{children()}</div> }
@@ -42,7 +42,7 @@ pub fn SidebarFooter(
     children: Children,
 ) -> impl IntoView {
     let class = move || {
-        tw_merge!(class.get(), "flex flex-col border-t border-zinc-950/5 p-4 dark:border-white/5 [&>[data-slot=section]+[data-slot=section]]:mt-2.5")
+        tw_join!(class.get(), "flex flex-col border-t border-zinc-950/5 p-4 dark:border-white/5 [&>[data-slot=section]+[data-slot=section]]:mt-2.5")
     };
 
     view! { <div class=class>{children()}</div> }
@@ -53,7 +53,7 @@ pub fn SidebarSection(
     #[prop(into, optional)] class: MaybeSignal<String>,
     children: Children,
 ) -> impl IntoView {
-    let class = move || tw_merge!(class.get(), "flex flex-col gap-0.5");
+    let class = move || tw_join!(class.get(), "flex flex-col gap-0.5");
 
     view! {
         <div class=class data-slot="section">
@@ -64,7 +64,7 @@ pub fn SidebarSection(
 
 #[component]
 pub fn SidebarSpacer(#[prop(into, optional)] class: MaybeSignal<String>) -> impl IntoView {
-    let class = move || tw_merge!(class.get(), "mt-8 flex-1");
+    let class = move || tw_join!(class.get(), "mt-8 flex-1");
 
     view! { <div class=class aria-hidden="true"></div> }
 }
@@ -83,10 +83,10 @@ pub fn SidebarItemLink(
         move || pathname.get().starts_with(&href)
     });
 
-    let span_class = move || tw_merge!(class.get(), "relative");
+    let span_class = move || tw_join!(class.get(), "relative");
 
     let class = move || {
-        tw_merge!(
+        tw_join!(
             current.get().then_some("text-darkOrange"),
             sidebar_item_classes(),
         )
@@ -111,9 +111,9 @@ pub fn SidebarItem(
     #[prop(into, optional)] class: MaybeSignal<String>,
     children: Children,
 ) -> impl IntoView {
-    let span_class = move || tw_merge!(class.get(), "relative");
+    let span_class = move || tw_join!(class.get(), "relative");
 
-    let class = tw_merge!("cursor-default", sidebar_item_classes(),);
+    let class = tw_join!("cursor-default", sidebar_item_classes(),);
 
     view! {
         <span class=span_class>
@@ -127,7 +127,7 @@ pub fn SidebarLabel(
     #[prop(into, optional)] class: MaybeSignal<String>,
     children: Children,
 ) -> impl IntoView {
-    let class = move || tw_merge!(class.get(), "truncate");
+    let class = move || tw_join!(class.get(), "truncate");
 
     view! {
         <span class=class data-slot="section">

@@ -22,7 +22,7 @@ pub fn Stat(
             <div>
                 <div class="mt-6 text-lg/6 font-medium sm:text-sm/6">
                     <span>
-                        {title} <small class="text-zinc-500 stat-box-subtext">{subtext}</small>
+                        {title} <small class="ml-2 text-zinc-500 stat-box-subtext">{subtext}</small>
                     </span>
                 </div>
                 <div class="flex justify-between items-center mt-2 text-orange">
@@ -51,11 +51,11 @@ pub fn BandwidthCard(
                 </div>
                 <div class="flex justify-between items-center">
                     <div class="bandwidth-card-value">
-                        <span class="font-bold text-large">{value}</span>
+                        <span class="font-bold text-4xl">{value}</span>
                         <small>{value_scale}</small>
                     </div>
                     <div class="bandwidth-card-logo">
-                        <span class="material-symbols-outlined" style:fontSize="2.3em">
+                        <span class="material-symbols-outlined" style="font-size: 2.3em">
                             {icon}
                         </span>
                     </div>
@@ -82,7 +82,12 @@ pub fn Home() -> impl IntoView {
 
             <Subheading>Bandwidth Statistics</Subheading>
             <div class="mt-10 grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
-                <BandwidthCard title="Download Speed" value="58" icon="download" value_scale="Mbps"/>
+                <BandwidthCard
+                    title="Download Speed"
+                    value="58"
+                    icon="download"
+                    value_scale="Mbps"
+                />
                 <BandwidthCard title="Upload Speed" value="21" icon="upload" value_scale="Mbps"/>
                 <BandwidthCard title="Latency" value="125" icon="network_check" value_scale="ms"/>
             </div>
