@@ -1,0 +1,43 @@
+# https://github.com/LukeMathWalker/zero-to-production/blob/main/.github/workflows/general.yml
+name: BUILD
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    types: [opened, synchronize, reopened]
+    branches:
+      - master
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Install deps
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y  \
+            libwebkit2gtk-4.0-dev libwebkit2gtk-4.1-dev librsvg2-dev patchelf \
+            build-essential curl wget file libssl-dev libgtk-3-dev libayatana-appindicator3-dev
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: build-sqlx-${{ vars.SQLX_VERSION }}
+          cache-all-crates: true
+      - name: Install sqlx-cli
+        run: cargo install sqlx-cli
+          --version=${{ vars.SQLX_VERSION }}
+          --features ${{ vars.SQLX_FEATURES }}
+          --no-default-features
+          --locked
+      - name: Build
+        run: cargo build --release
