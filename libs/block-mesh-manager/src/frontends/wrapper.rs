@@ -15,10 +15,11 @@ where
 {
     let (view, _) = create_signal(move || children().into_view());
     let load = store_value(loading);
-    let resources_ready = Signal::derive(move || {
-        let r = resource.is_some_and(|r| r.get().is_some());
-        let a = auth.is_some_and(|a| a.get().is_some());
-        r || a
+    let resources_ready = Signal::derive(move || match (resource, auth) {
+        (None, None) => true,
+        (Some(r), None) => r.get().is_some(),
+        (None, Some(a)) => a.get().is_some(),
+        (Some(r), Some(a)) => r.get().is_some() && a.get().is_some(),
     });
     view! {
         <Suspense fallback=move || { load.with_value(|v| v.clone().into_view()) }>

@@ -18,7 +18,7 @@ use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
-#[derive(Clone, Serialize, Deserialize, Default, Copy)]
+#[derive(Clone, Serialize, Deserialize, Copy)]
 pub struct AuthContext {
     pub email: RwSignal<String>,
     pub api_token: RwSignal<Uuid>,
@@ -38,6 +38,19 @@ impl Debug for AuthContext {
             .field("invite_code", &self.invite_code.get_untracked())
             .field("status", &self.status.get_untracked())
             .finish()
+    }
+}
+
+impl Default for AuthContext {
+    fn default() -> Self {
+        Self {
+            email: create_rw_signal(String::default()),
+            api_token: create_rw_signal(Uuid::default()),
+            device_id: create_rw_signal(Uuid::default()),
+            blockmesh_url: create_rw_signal("https://app.blockmesh.xyz".to_string()),
+            status: create_rw_signal(AuthStatus::LoggedOut),
+            invite_code: create_rw_signal(String::default()),
+        }
     }
 }
 

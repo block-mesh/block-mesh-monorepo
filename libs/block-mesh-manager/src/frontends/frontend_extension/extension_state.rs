@@ -128,7 +128,6 @@ impl ExtensionState {
 
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
             if let Ok(data) = event.into_serde::<Value>() {
-                // log!("data = {:#?}", data);
                 if let Some(obj) = data.as_object() {
                     for key in obj.keys() {
                         if let Ok(storage_value) = MessageKey::try_from(key) {
@@ -140,6 +139,12 @@ impl ExtensionState {
                                         .values()
                                         .next()
                                         .unwrap()
+                                        .to_string()
+                                        .trim_end_matches('"')
+                                        .trim_start_matches('"')
+                                        .to_string()
+                                } else if value.is_string() {
+                                    value
                                         .to_string()
                                         .trim_end_matches('"')
                                         .trim_start_matches('"')
