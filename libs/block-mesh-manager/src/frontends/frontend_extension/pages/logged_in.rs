@@ -24,7 +24,9 @@ pub fn ExtensionLoggedIn() -> impl IntoView {
         spawn_local(async move {
             let invite_url_string = invite_url.get_untracked();
             if invite_code.get_untracked().is_empty() {
-                notifications.set_error("Missing invite code".to_string());
+                notifications.set_error(
+                    "Missing invite code, please close and reopen the extension popup".to_string(),
+                );
                 return;
             }
             send_to_clipboard(&invite_url_string).await;

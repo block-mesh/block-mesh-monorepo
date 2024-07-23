@@ -4,7 +4,7 @@
   "name": "BlockMesh Network",
   "short_name": "BlockMesh",
   "description": "BlockMesh Network allows you to generate passive income from your excessive bandwidth",
-  "version": "0.0.108",
+  "version": "0.0.109",
   "author": "ohaddahan@blockmesh.xyz",
   "externally_connectable": {
     "matches": [
@@ -14,18 +14,18 @@
     ]
   },
   "icons": {
-    "128": "assets/blockmesh-icon-1.png",
-    "16": "assets/blockmesh-icon-1.png",
-    "32": "assets/blockmesh-icon-1.png",
-    "48": "assets/blockmesh-icon-1.png"
+    "128": "assets/blockmesh-icon-transparent-600x600.png",
+    "16": "assets/blockmesh-icon-transparent-600x600.png",
+    "32": "assets/blockmesh-icon-transparent-600x600.png",
+    "48": "assets/blockmesh-icon-transparent-600x600.png"
   },
   "action": {
     "default_title": "BlockMesh Network",
     "default_icon": {
-      "16": "assets/blockmesh-icon-1.png",
-      "19": "assets/blockmesh-icon-1.png",
-      "32": "assets/blockmesh-icon-1.png",
-      "38": "assets/blockmesh-icon-1.png"
+      "16": "assets/blockmesh-icon-transparent-600x600.png",
+      "19": "assets/blockmesh-icon-transparent-600x600.png",
+      "32": "assets/blockmesh-icon-transparent-600x600.png",
+      "38": "assets/blockmesh-icon-transparent-600x600.png"
     },
     "default_popup": "js/popup.html"
   },

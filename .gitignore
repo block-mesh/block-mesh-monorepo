@@ -1,4 +1,6 @@
 tailwind.css.gz
+tmp_ext/chrome
+tmp_ext/firefox
 .wrangler
 tailwind.css
 .env
