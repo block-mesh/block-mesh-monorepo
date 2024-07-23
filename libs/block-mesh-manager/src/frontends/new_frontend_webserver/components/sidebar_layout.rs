@@ -30,7 +30,7 @@ where
     CloseFn: Fn() + Clone + 'static,
 {
     let aside_class =
-        Signal::derive(move || tw_join!("lg:hidden z-20", (!open.get()).then(|| "hidden")));
+        Signal::derive(move || tw_join!("lg:hidden z-20", open.get().then_some("hidden")));
     let backdrop_class = move || {
         tw_join!(
             "fixed inset-0 bg-black/30 z-10",
