@@ -1,6 +1,10 @@
 /** @type {import('tailwindcss').Config} */
 module.exports = {
-    content: ["./libs/**/*.{html,js,rs}"],
+    content: [
+        "!./node_modules",
+        "!./libs/react-native-app/node_modules",
+        "./libs/**/*.{html,js,rs}"
+    ],
     /*
     safelist: [
         {
@@ -18,19 +22,30 @@ module.exports = {
                 'magenta-3': '#A700A8',
                 'magenta-4': '#670068',
                 'cyan': '#01FEFC',
-                'orange': '#FF7E07',
+                // 'orange': '#FF7E07',
                 'off-white': '#EDEDED',
-                'blue': '#25e4d3',
-                'darkBlue': '#0C1120',
-                'light': '#EDEDED',
-                'darkOrange': '#f97432',
-                'dark': '#0C1120',
+                // 'blue': '#25e4d3',
+                // 'darkBlue': '#0C1120',
+                // 'light': '#EDEDED',
+                // 'darkOrange': '#f97432',
+                // 'dark': '#0C1120',
+                blue: '#25e4d3 !important',
+                darkBlue: '#2f8985 !important',
+                orange: '#fab457 !important',
+                darkOrange: '#f97432 !important',
+                light: '#55555588 !important',
+                lightDark: '#88888811 !important',
+                dark: '#202525 !important',
             },
             boxShadow: {
-                'dark': '-5px 5px 10px 5px #0C1120',
-                'blue': '0 0 3px #25e4d3',
-                'light': '0 0 3px #EDEDED',
-                'darkOrange': '0 0 3px #FF7E07',
+                'dark': '-5px 5px 10px 5px #111111 !important',
+                'blue': '0 0 3px #25e4d3 !important',
+                'light': '0 0 3px #ffffff8 !important',
+                'darkOrange': '0 0 3px #f97432 !important',
+                // 'dark': '-5px 5px 10px 5px #0C1120',
+                // 'blue': '0 0 3px #25e4d3',
+                // 'light': '0 0 3px #EDEDED',
+                // 'darkOrange': '0 0 3px #FF7E07',
             },
             fontFamily: {
                 sans: ['Inter, sans-serif', {fontFeatureSettings: '"cv11"'}],

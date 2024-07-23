@@ -6,7 +6,7 @@ pub fn Navbar(
     #[prop(into, optional)] class: MaybeSignal<String>,
     children: Children,
 ) -> impl IntoView {
-    let class = move || tw_merge!(class.get(), "flex flex-1 items-center gap-4 py-2.5");
+    let class = move || tw_join!(class.get(), "flex flex-1 items-center gap-4 py-2.5");
 
     view! { <nav class=class>{children()}</nav> }
 }
@@ -16,14 +16,14 @@ pub fn NavbarSection(
     #[prop(into, optional)] class: MaybeSignal<String>,
     children: Children,
 ) -> impl IntoView {
-    let class = move || tw_merge!(class.get(), "flex items-center gap-3");
+    let class = move || tw_join!(class.get(), "flex items-center gap-3");
 
     view! { <div class=class>{children()}</div> }
 }
 
 #[component]
 pub fn NavbarSpacer(#[prop(into, optional)] class: MaybeSignal<String>) -> impl IntoView {
-    let class = move || tw_merge!(class.get(), "-ml-4 flex-1");
+    let class = move || tw_join!(class.get(), "-ml-4 flex-1");
 
     view! { <div class=class aria-hidden="true"></div> }
 }
@@ -38,7 +38,7 @@ pub fn NavbarItem<F>(
 where
     F: Fn() + 'static,
 {
-    let root_class = move || tw_merge!(class.get(), "relative");
+    let root_class = move || tw_join!(class.get(), "relative");
 
     let class = tw_join!(
         "cursor-default",
@@ -74,7 +74,7 @@ pub fn NavbarLabel(
     #[prop(into, optional)] class: MaybeSignal<String>,
     children: Children,
 ) -> impl IntoView {
-    let class = move || tw_merge!(class.get(), "truncate");
+    let class = move || tw_join!(class.get(), "truncate");
 
     view! { <span class=class>{children()}</span> }
 }

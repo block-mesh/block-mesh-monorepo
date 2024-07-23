@@ -38,12 +38,15 @@ pub fn App() -> impl IntoView {
     provide_context(ExtensionState::default());
     provide_context(WebAppContext::default());
 
+    let none_resource: Option<Resource<(), ()>> = None;
     let _notification = use_context::<NotificationContext>().unwrap();
     let extension_state = use_context::<ExtensionState>().unwrap();
     let auth_state = use_context::<AuthContext>().unwrap();
     let extension_resource = ExtensionState::init_resource(extension_state);
     let none_extension_resource = None::<Resource<(), ExtensionState>>;
     let auth_state = AuthContext::init_as_resource(auth_state);
+
+    let new_server_class = "text-zinc-950 antialiased lg:bg-zinc-100 dark:bg-zinc-900 dark:text-white dark:lg:bg-zinc-950";
 
     view! {
         <Link rel="preconnect" href="https://rsms.me/"/>
@@ -71,7 +74,23 @@ pub fn App() -> impl IntoView {
         </Script>
         <Router fallback=|| { view! { <p>Error</p> }.into_view() }>
             <Routes>
-                <Route path="new" view=Home/>
+                <Route
+                    path="new"
+
+                    view=move || {
+                        view! {
+                            <Wrapper
+                                resource=none_resource
+                                auth=none_resource
+                                loading=|| view! { <p>Loading</p> }
+                                class=new_server_class
+                            >
+                                <Home/>
+                            </Wrapper>
+                        }
+                    }
+                />
+
                 <Route
                     path="/ui"
                     view=move || {
@@ -110,6 +129,7 @@ pub fn App() -> impl IntoView {
                                     resource=none_extension_resource
                                     auth=Some(auth_state)
                                     loading=|| view! { <TauriLoading/> }
+                                    class=""
                                 >
                                     <TauriNavigator/>
                                     <TauriLogin/>
@@ -126,6 +146,7 @@ pub fn App() -> impl IntoView {
                                     resource=none_extension_resource
                                     auth=Some(auth_state)
                                     loading=|| view! { <TauriLoading/> }
+                                    class=""
                                 >
                                     <TauriNavigator/>
                                     <TauriRegister/>
@@ -142,6 +163,7 @@ pub fn App() -> impl IntoView {
                                     resource=none_extension_resource
                                     auth=Some(auth_state)
                                     loading=|| view! { <TauriLoading/> }
+                                    class=""
                                 >
                                     <TauriNavigator/>
                                     <TauriLoggedIn/>
@@ -168,7 +190,7 @@ pub fn App() -> impl IntoView {
                                 <Wrapper
                                     resource=Some(extension_resource)
                                     auth=Some(auth_state)
-
+                                    class=""
                                     loading=|| view! { <ExtensionLoading/> }
                                 >
                                     <ExtensionNotifications/>
@@ -184,6 +206,7 @@ pub fn App() -> impl IntoView {
                         view=move || {
                             view! {
                                 <Wrapper
+                                    class=""
                                     resource=Some(extension_resource)
                                     auth=Some(auth_state)
                                     loading=|| view! { <ExtensionLoading/> }
@@ -201,9 +224,9 @@ pub fn App() -> impl IntoView {
                         view=move || {
                             view! {
                                 <Wrapper
+                                    class=""
                                     resource=Some(extension_resource)
                                     auth=Some(auth_state)
-
                                     loading=|| view! { <ExtensionLoading/> }
                                 >
                                     <ExtensionNotifications/>

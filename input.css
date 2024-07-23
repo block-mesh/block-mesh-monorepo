@@ -19,6 +19,14 @@
     font-family: 'Open Sans', sans-serif;
 }
 
+
+:root {
+    --blue: #25e4d3;
+    --darkBlue: #2f8985;
+    --orange: #fab457;
+    --darkOrange: #f97432;
+}
+
 /* Customer scrollbar */
 
 /* width */
