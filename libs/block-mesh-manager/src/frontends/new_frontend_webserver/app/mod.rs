@@ -1,4 +1,5 @@
 mod application_layout;
-mod page;
+mod home;
+mod referer;
 
-pub use page::Home;
+pub use home::Home;
