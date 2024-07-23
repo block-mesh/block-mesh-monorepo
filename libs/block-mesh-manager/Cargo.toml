@@ -18,8 +18,8 @@ logger-general = { path = "../logger-general", optional = true, features = ["sen
 tracing-subscriber-wasm = { workspace = true }
 num-traits = { workspace = true }
 reqwest = { workspace = true, default-features = false, features = [
-    "multipart",
-    "json",
+  "multipart",
+  "json",
 ] }
 validator = { workspace = true }
 sentry = { workspace = true, optional = true }
@@ -217,6 +217,4 @@ lib-default-features = false
 lib-profile-release = "release"
 
 # Tailwind
-tailwind-input-file = "style/tailwind.css"
-tailwind-config-file = "tailwind.config.js"
-leptos-tailwind-version = "3.4.4"
+style-file = "../../output-server.css"

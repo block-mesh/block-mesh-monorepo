@@ -24,6 +24,7 @@ use crate::frontends::frontend_webserver::pages::register_page::RegisterPage;
 use crate::frontends::frontend_webserver::pages::resend_confirmation_email_page::ResendConfirmationEmailPage;
 use crate::frontends::frontend_webserver::pages::reset_password_page::ResetPasswordPage;
 use crate::frontends::frontend_webserver::webserver_header::WebServerHeader;
+use crate::frontends::new_frontend_webserver::Home;
 use crate::frontends::wrapper::Wrapper;
 use leptos::*;
 use leptos_meta::*;
@@ -45,9 +46,16 @@ pub fn App() -> impl IntoView {
     let auth_state = AuthContext::init_as_resource(auth_state);
 
     view! {
+        <Link rel="preconnect" href="https://rsms.me/"/>
+        <Link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
+        <Link
+            rel="stylesheet"
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
+        />
         <meta http-equiv="cache-control" content="no-cache"/>
         <meta http-equiv="expires" content="0"/>
         <meta http-equiv="pragma" content="no-cache"/>
+        <Stylesheet id="leptos" href="/pkg/block-mesh-manager.css"/>
         <Script>
             r#"
                 window.addEventListener("message", onMessage);
@@ -63,6 +71,7 @@ pub fn App() -> impl IntoView {
         </Script>
         <Router fallback=|| { view! { <p>Error</p> }.into_view() }>
             <Routes>
+                <Route path="new" view=Home/>
                 <Route
                     path="/ui"
                     view=move || {
