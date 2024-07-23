@@ -1,8 +1,27 @@
-import {Iframe} from "@bounceapp/iframe"
+import {WebView} from 'react-native-webview';
+import {StyleSheet, View} from 'react-native';
 
+const styles = StyleSheet.create({
+    container: {
+        flex: 1,
+    },
+    webview: {
+        flex: 1,
+    },
+});
 
-export default function IFrameWraooer() {
+export default function IFrameWrapper() {
+    const injectedJavaScript = ``;
+
     return (
-        <Iframe uri="http://localhost:8000/tauri/login" style={{flex: 1}}/>
+        <View style={styles.container}>
+            <WebView
+                originWhitelist={['*']}
+                source={{uri: 'http://localhost:8000/tauri/login'}}
+                style={styles.webview}
+                injectedJavaScript={injectedJavaScript}
+                javaScriptEnabled={true}
+            />
+        </View>
     )
 }

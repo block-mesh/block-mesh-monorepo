@@ -91,15 +91,14 @@ pub fn TauriLogin() -> impl IntoView {
                         Login
                     </h2>
                     <div class="flex justify-around mb-4">
-                        <div
+                        <button
                             class="cursor-pointer font-bebas-neue px-4 py-2 rounded font-bold text-sm text-cyan hover:text-orange"
                             on:click=move |_| {
                                 state.status.update(|v| *v = AuthStatus::Registering)
                             }
                         >
-
                             Register
-                        </div>
+                        </button>
                     </div>
                     <div class="mb-4">
                         <label
