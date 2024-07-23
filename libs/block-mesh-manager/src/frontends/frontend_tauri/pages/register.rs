@@ -5,6 +5,7 @@ use crate::frontends::frontend_extension::utils::connectors::send_message_channe
 use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType, MessageValue};
 use block_mesh_common::interfaces::server_api::RegisterForm;
 use leptos::*;
+use leptos_dom::tracing;
 
 #[component]
 pub fn TauriRegister() -> impl IntoView {
