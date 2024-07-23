@@ -5,6 +5,7 @@ use block_mesh_common::cli::CommandsEnum;
 use block_mesh_common::interfaces::server_api::GetTokenResponse;
 use leptos::logging::log;
 use leptos::*;
+use leptos_dom::tracing;
 use std::fmt::{Debug, Display};
 use std::time::Duration;
 use wasm_bindgen::JsValue;

@@ -1,7 +1,6 @@
 use block_mesh_common::app_config::{AppConfig, TaskStatus};
 use block_mesh_common::chrome_storage::{MessageKey, MessageType, MessageValue, PostMessage};
 use block_mesh_common::interfaces::server_api::{LoginForm, RegisterForm};
-use leptos::tracing;
 use serde::{Deserialize, Serialize};
 use std::fmt::Display;
 use wasm_bindgen::closure::Closure;
@@ -78,7 +77,6 @@ pub async fn invoke_tauri(cmd: &str, args: JsValue) -> Result<JsValue, MyJsError
     if let Ok(error) = js_sys::Reflect::get(&result, &error_attribute) {
         if error.is_string() {
             let error = error.as_string().unwrap();
-            tracing::error!("Command: '{}' , Failed with error: '{}'", cmd, error);
             return Err(MyJsError {
                 message: error,
                 cmd: cmd.to_string(),
