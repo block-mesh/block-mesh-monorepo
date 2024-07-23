@@ -7,6 +7,7 @@ use block_mesh_common::chrome_storage::{
 use gloo_utils::format::JsValueSerdeExt;
 use leptos::logging::log;
 use leptos::*;
+use leptos_dom::tracing;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::cell::RefCell;
