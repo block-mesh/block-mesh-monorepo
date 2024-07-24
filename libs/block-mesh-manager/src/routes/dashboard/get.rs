@@ -4,6 +4,7 @@ use axum::Extension;
 use axum_login::AuthSession;
 use chrono::Utc;
 use sqlx::PgPool;
+#[allow(unused_imports)]
 use tracing::Level;
 
 use block_mesh_common::constants::{

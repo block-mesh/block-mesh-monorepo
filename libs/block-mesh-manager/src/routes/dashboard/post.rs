@@ -10,6 +10,7 @@ use axum::{Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::DashboardResponse;
 use sqlx::PgPool;
+#[allow(unused_imports)]
 use tracing::Level;
 #[tracing::instrument(name = "dashboard post", skip(auth), level = "trace",  err(level = Level::TRACE))]
 pub async fn handler(
