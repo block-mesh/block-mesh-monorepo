@@ -44,7 +44,7 @@ struct DashboardTemplate {
     pub points: f64,
 }
 
-#[tracing::instrument(name = "dashboard", skip(auth))]
+#[tracing::instrument(name = "dashboard", skip(auth), level = "trace",  err(level = Level::TRACE))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,
