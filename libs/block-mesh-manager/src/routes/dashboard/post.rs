@@ -1,9 +1,3 @@
-use axum::{Extension, Json};
-use axum_login::AuthSession;
-use sqlx::PgPool;
-
-use block_mesh_common::interfaces::server_api::DashboardResponse;
-
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
 use crate::database::invite_code::get_number_of_users_invited::get_number_of_users_invited;
 use crate::database::invite_code::get_user_latest_invite_code::get_user_latest_invite_code;
@@ -12,7 +6,11 @@ use crate::domain::aggregate::AggregateName;
 use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
-
+use axum::{Extension, Json};
+use axum_login::AuthSession;
+use block_mesh_common::interfaces::server_api::DashboardResponse;
+use sqlx::PgPool;
+use tracing::Level;
 #[tracing::instrument(name = "dashboard post", skip(auth), level = "trace",  err(level = Level::TRACE))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,

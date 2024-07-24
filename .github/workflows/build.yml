@@ -39,5 +39,14 @@ jobs:
           --features ${{ vars.SQLX_FEATURES }}
           --no-default-features
           --locked
+      - name: "Install Cargo Leptos"
+        run: |
+          cargo install cargo-leptos
+      - name: "Run Cargo Leptos"
+        run: |
+          export CARGO_TARGET_DIR="target/LEPTOS"
+          cargo leptos build --release
       - name: Build
-        run: cargo build --release
+        run: |
+          export CARGO_TARGET_DIR="target/REGULAR"
+          cargo build --release
