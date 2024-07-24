@@ -13,7 +13,7 @@ use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 
-#[tracing::instrument(name = "dashboard post", skip(auth))]
+#[tracing::instrument(name = "dashboard post", skip(auth), level = "trace",  err(level = Level::TRACE))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,
