@@ -42,7 +42,7 @@ jobs:
           --locked
       - name: "Install Cargo Leptos"
         run: |
-          cargo install cargo-leptos
+          cargo install cargo-leptos --version=${{ vars.LEPTOS_VERSION }} --locked
       - name: "Run Cargo Leptos"
         run: |
           export CARGO_TARGET_DIR="target/LEPTOS"

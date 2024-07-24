@@ -101,7 +101,7 @@ jobs:
           cache-all-crates: true
       - name: "Install Cargo Leptos"
         run: |
-          cargo install cargo-leptos
+          cargo install cargo-leptos --version=${{ vars.LEPTOS_VERSION }} --locked
       - name: "Run Cargo Leptos"
         run: |
           cargo leptos build --project block-mesh-manager --release
