@@ -1,0 +1,12 @@
+name = "cloudflare-feature-flags"
+main = "build/worker/shim.mjs"
+compatibility_date = "2023-12-01"
+
+kv_namespaces = [
+  { binding = "feature_flags", id = "cf6f66737161442d83e31dcdc306c826" },
+  { binding = "feature_flags_authorization", id = "631e5f2e91754425ac62b495ffb1e8c8" }
+]
+
+[build]
+command = "cargo install -q worker-build && worker-build --release"
+watch_dir = ["src", "templates"]
