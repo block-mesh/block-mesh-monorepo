@@ -4,6 +4,8 @@ use axum::Extension;
 use axum_login::AuthSession;
 use chrono::Utc;
 use sqlx::PgPool;
+#[allow(unused_imports)]
+use tracing::Level;
 
 use block_mesh_common::constants::{
     BLOCK_MESH_APP_SERVER, BLOCK_MESH_CHROME_EXTENSION_LINK, BLOCK_MESH_GITBOOK, BLOCK_MESH_GITHUB,
