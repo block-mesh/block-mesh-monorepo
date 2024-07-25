@@ -4,6 +4,8 @@ pub mod chrome_storage;
 #[cfg(feature = "cli")]
 pub mod cli;
 pub mod constants;
+#[cfg(feature = "feature-flag")]
+pub mod feature_flag_client;
 #[cfg(feature = "http")]
 pub mod http;
 pub mod interfaces;
