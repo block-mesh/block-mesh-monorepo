@@ -45,3 +45,7 @@ http = ["dep:http-body-util", "dep:bytes", "dep:hyper"]
 cli = ["dep:clap", "dep:solana-sdk"]
 app-config = ["dep:clap", "dep:solana-sdk"]
 ip-data = ["dep:ipgeolocate", "dep:reqwest"]
+feature-flag = ["dep:reqwest"]
+
+[dev-dependencies]
+tokio = { workspace = true, features = ["full"] }

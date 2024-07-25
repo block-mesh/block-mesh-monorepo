@@ -66,19 +66,25 @@ pub async fn handler(
     }
 
     transaction.commit().await.map_err(Error::from)?;
-    let client = state.client.clone();
-    let handle: JoinHandle<()> = tokio::spawn(async move {
-        let _ = enrich_ip_and_cleanup(
-            pool.clone(),
-            client,
-            query,
-            addr,
-            uptime_id,
-            user.id.clone(),
-        )
-        .await;
-    });
-    let _ = state.tx.send(handle).await;
+    let flag = state
+        .flags
+        .get("enrich_ip_and_cleanup_in_background")
+        .unwrap_or(&false);
+    if *flag {
+        let client = state.client.clone();
+        let handle: JoinHandle<()> = tokio::spawn(async move {
+            let _ = enrich_ip_and_cleanup(
+                pool.clone(),
+                client,
+                query,
+                addr,
+                uptime_id,
+                user.id.clone(),
+            )
+            .await;
+        });
+        let _ = state.tx.send(handle).await;
+    }
 
     Ok(Json(ReportUptimeResponse {
         status_code: u16::from(StatusCode::OK),

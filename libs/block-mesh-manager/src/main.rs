@@ -68,12 +68,16 @@ async fn run() -> anyhow::Result<()> {
         configuration.application.base_url.clone(),
     ));
     let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(100);
+    let client = Client::new();
+
+    let flags = get_all_flags(&client).await?;
 
     let app_state = Arc::new(AppState {
         email_client,
         pool: db_pool.clone(),
-        client: Client::new(),
+        client,
         tx,
+        flags,
     });
     let application = Application::build(configuration, app_state, db_pool.clone()).await;
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));

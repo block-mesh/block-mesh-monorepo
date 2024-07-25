@@ -111,15 +111,22 @@ pub async fn handler(
     .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;
 
-    let handle: JoinHandle<()> = tokio::spawn(async move {
-        let mut transaction = pool.begin().await.map_err(Error::from).unwrap();
-        delete_bandwidth_reports_by_time(&mut transaction, user.id, 60 * 60)
-            .await
-            .map_err(Error::from)
-            .unwrap();
-        transaction.commit().await.map_err(Error::from).unwrap();
-    });
-    let _ = state.tx.send(handle).await;
+    let flag = state
+        .flags
+        .get("submit_bandwidth_run_background")
+        .unwrap_or(&false);
+
+    if *flag {
+        let handle: JoinHandle<()> = tokio::spawn(async move {
+            let mut transaction = pool.begin().await.map_err(Error::from).unwrap();
+            delete_bandwidth_reports_by_time(&mut transaction, user.id, 60 * 60)
+                .await
+                .map_err(Error::from)
+                .unwrap();
+            transaction.commit().await.map_err(Error::from).unwrap();
+        });
+        let _ = state.tx.send(handle).await;
+    }
 
     Ok(Json(ReportBandwidthResponse {
         status_code: u16::from(StatusCode::OK),
