@@ -109,6 +109,7 @@ pub async fn handler(
     )
     .await
     .map_err(Error::from)?;
+    transaction.commit().await.map_err(Error::from)?;
 
     let handle: JoinHandle<()> = tokio::spawn(async move {
         let mut transaction = pool.begin().await.map_err(Error::from).unwrap();
@@ -119,8 +120,6 @@ pub async fn handler(
         transaction.commit().await.map_err(Error::from).unwrap();
     });
     let _ = state.tx.send(handle).await;
-
-    transaction.commit().await.map_err(Error::from)?;
 
     Ok(Json(ReportBandwidthResponse {
         status_code: u16::from(StatusCode::OK),
