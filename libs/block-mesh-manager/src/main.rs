@@ -5,6 +5,7 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use block_mesh_common::feature_flag_client::get_all_flags;
     use tokio::task::JoinHandle;
     use block_mesh_manager::worker::joiner::joiner_loop;
     #[cfg(not(target_env = "msvc"))]
