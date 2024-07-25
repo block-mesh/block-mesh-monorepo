@@ -7,14 +7,19 @@ use crate::database::bandwidth::get_latest_bandwidth_reports::get_latest_bandwid
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
+use crate::startup::application::AppState;
+use axum::extract::State;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
 use http::StatusCode;
 use sqlx::PgPool;
+use std::sync::Arc;
+use tokio::task::JoinHandle;
 
-#[tracing::instrument(name = "submit_bandwidth", skip(pool, body), level = "trace", fields(email = body.email), ret)]
+#[tracing::instrument(name = "submit_bandwidth", skip(pool, body, state), level = "trace", fields(email = body.email), ret)]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
+    State(state): State<Arc<AppState>>,
     Json(body): Json<ReportBandwidthRequest>,
 ) -> Result<Json<ReportBandwidthResponse>, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
@@ -104,11 +109,17 @@ pub async fn handler(
     )
     .await
     .map_err(Error::from)?;
-
-    delete_bandwidth_reports_by_time(&mut transaction, user.id, 60 * 60)
-        .await
-        .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;
+
+    let handle: JoinHandle<()> = tokio::spawn(async move {
+        let mut transaction = pool.begin().await.map_err(Error::from).unwrap();
+        delete_bandwidth_reports_by_time(&mut transaction, user.id, 60 * 60)
+            .await
+            .map_err(Error::from)
+            .unwrap();
+        transaction.commit().await.map_err(Error::from).unwrap();
+    });
+    let _ = state.tx.send(handle).await;
 
     Ok(Json(ReportBandwidthResponse {
         status_code: u16::from(StatusCode::OK),

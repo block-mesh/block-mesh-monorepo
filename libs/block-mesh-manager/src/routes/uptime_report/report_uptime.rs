@@ -64,13 +64,19 @@ pub async fn handler(
             .map_err(Error::from)?;
         }
     }
-    delete_uptime_report_by_time(&mut transaction, user.id, 60 * 60)
-        .await
-        .map_err(Error::from)?;
+
     transaction.commit().await.map_err(Error::from)?;
     let client = state.client.clone();
     let handle: JoinHandle<()> = tokio::spawn(async move {
-        let _ = enrich_ip(pool.clone(), client, query, addr, uptime_id).await;
+        let _ = enrich_ip_and_cleanup(
+            pool.clone(),
+            client,
+            query,
+            addr,
+            uptime_id,
+            user.id.clone(),
+        )
+        .await;
     });
     let _ = state.tx.send(handle).await;
 
@@ -79,15 +85,19 @@ pub async fn handler(
     }))
 }
 
-async fn enrich_ip(
+async fn enrich_ip_and_cleanup(
     pool: PgPool,
     client: Client,
     query: ReportUptimeRequest,
     addr: SocketAddr,
     uptime_id: Uuid,
+    user_id: Uuid,
 ) -> anyhow::Result<()> {
     let pool = pool.clone();
     let mut transaction = pool.begin().await.map_err(Error::from).unwrap();
+    delete_uptime_report_by_time(&mut transaction, user_id, 60 * 60)
+        .await
+        .map_err(Error::from)?;
     let ip_data = client
         .post(BLOCK_MESH_IP_WORKER)
         .json(&IpDataPostRequest {
