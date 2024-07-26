@@ -5,6 +5,7 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use block_mesh_manager::worker::finalize_daily_cron::finalize_daily_cron;
     use block_mesh_common::feature_flag_client::get_all_flags;
     use tokio::task::JoinHandle;
     use block_mesh_manager::worker::joiner::joiner_loop;
@@ -84,11 +85,13 @@ async fn run() -> anyhow::Result<()> {
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
     let application_task = tokio::spawn(application.run());
     let joiner_task = tokio::spawn(joiner_loop(rx));
+    let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
 
     tokio::select! {
         o = application_task => report_exit("API", o),
         o = rpc_worker_task =>  report_exit("RPC Background worker failed", o),
         o = joiner_task => report_exit("Joiner task failed", o),
+        o = finalize_daily_stats_task => report_exit("Finalize daily task failed", o)
     };
     Ok(())
 }

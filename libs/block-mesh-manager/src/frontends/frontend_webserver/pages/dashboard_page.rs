@@ -1,8 +1,9 @@
 use crate::frontends::frontend_webserver::components::error::ErrorComponent;
 use crate::frontends::frontend_webserver::components::invites::InvitesComponent;
-use crate::frontends::frontend_webserver::components::metrics::MetricsComponent;
 use crate::frontends::frontend_webserver::components::navbar::NavbarComponent;
+use crate::frontends::frontend_webserver::components::network_status::NetworkStatusComponent;
 use crate::frontends::frontend_webserver::components::notification::NotificationComponent;
+use crate::frontends::frontend_webserver::components::points::PointsComponent;
 use crate::frontends::frontend_webserver::context::webapp_context::WebAppContext;
 use leptos::Suspense;
 use leptos::*;
@@ -42,8 +43,11 @@ pub fn DashboardPage() -> impl IntoView {
 
                 <div class="bg-dark-blue h-screen">
                     <NavbarComponent/>
-                    <MetricsComponent/>
-                    <InvitesComponent/>
+                    <div class="m-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+                        <PointsComponent/>
+                        <NetworkStatusComponent/>
+                        <InvitesComponent/>
+                    </div>
                 </div>
             </Show>
         </Suspense>

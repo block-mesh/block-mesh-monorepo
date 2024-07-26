@@ -60,6 +60,7 @@ pub struct DailyStat {
     pub id: Uuid,
     pub user_id: Uuid,
     pub tasks_count: i64,
+    pub uptime: f64,
     pub status: DailyStatStatus,
     pub day: NaiveDate,
     pub created_at: DateTime<Utc>,

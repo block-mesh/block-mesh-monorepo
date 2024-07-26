@@ -48,6 +48,9 @@ pub fn App() -> impl IntoView {
         <meta http-equiv="cache-control" content="no-cache"/>
         <meta http-equiv="expires" content="0"/>
         <meta http-equiv="pragma" content="no-cache"/>
+        // <script src="https://cdn.tailwindcss.com"></script>
+        <script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"></script>
         <Script>
             r#"
                 window.addEventListener("message", onMessage);

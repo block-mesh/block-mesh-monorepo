@@ -1199,6 +1199,7 @@ dependencies = [
  "bcrypt",
  "block-mesh-common",
  "cfg-if",
+ "charming",
  "chrono",
  "config",
  "console_error_panic_hook",
@@ -1209,6 +1210,7 @@ dependencies = [
  "gloo-utils 0.2.0",
  "http 1.1.0",
  "http-body-util",
+ "js-sys",
  "leptos",
  "leptos_axum",
  "leptos_meta",
@@ -1778,6 +1780,20 @@ name = "cfg_aliases"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
+
+[[package]]
+name = "charming"
+version = "0.3.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f4c6b6990238a64b4ae139e7085ce2a11815cb67a0c066a3333ce40f3a329be3"
+dependencies = [
+ "handlebars",
+ "serde",
+ "serde-wasm-bindgen 0.6.5",
+ "serde_json",
+ "wasm-bindgen",
+ "web-sys",
+]
 
 [[package]]
 name = "chrono"
@@ -4103,6 +4119,20 @@ checksum = "6dd08c532ae367adf81c312a4580bc67f1d0fe8bc9c460520283f4c0ff277888"
 dependencies = [
  "cfg-if",
  "crunchy",
+]
+
+[[package]]
+name = "handlebars"
+version = "4.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "faa67bab9ff362228eb3d00bd024a4965d8231bbb7921167f0cfa66c6626b225"
+dependencies = [
+ "log",
+ "pest",
+ "pest_derive",
+ "serde",
+ "serde_json",
+ "thiserror",
 ]
 
 [[package]]

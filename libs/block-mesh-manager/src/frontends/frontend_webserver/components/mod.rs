@@ -1,6 +1,7 @@
 pub mod error;
 pub mod icons;
 pub mod invites;
-pub mod metrics;
 pub mod navbar;
+pub mod network_status;
 pub mod notification;
+pub mod points;
