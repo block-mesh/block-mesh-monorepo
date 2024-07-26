@@ -1,4 +1,8 @@
+use crate::frontends::new_frontend_webserver::components::{
+    Heading, IfLetSome, Subheading, Table, TableCell, TableHead, TableHeader,
+};
 use leptos::*;
+use serde::{Deserialize, Serialize};
 use tailwind_fuse::*;
 
 #[component]
@@ -32,6 +36,7 @@ pub fn RefererRank(
                                     }
                                 }
                             >
+
                                 <span class="flex h-10 w-10 items-center justify-center rounded-full bg-blue">
                                     <svg
                                         class="h-6 w-6 text-dark"
@@ -74,5 +79,194 @@ pub fn RefererRank(
                 </Show>
             </div>
         </li>
+    }
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize)]
+pub struct Referral {
+    id: i64,
+    name: String,
+    email: String,
+    start_date: String,
+    reward: u8,
+}
+
+async fn get_referrals(_: ()) -> Vec<Referral> {
+    vec![
+        Referral {
+            id: 1,
+            name: "Sean Mckinney".to_string(),
+            email: "sean.mckney@gmail.com".to_string(),
+            start_date: "May 9, 2024".to_string(),
+            reward: 10,
+        },
+        Referral {
+            id: 2,
+            name: "Laura Smith".to_string(),
+            email: "laura.smith@example.com".to_string(),
+            start_date: "June 10, 2024".to_string(),
+            reward: 20,
+        },
+        Referral {
+            id: 3,
+            name: "John Doe".to_string(),
+            email: "john.doe@example.com".to_string(),
+            start_date: "July 15, 2024".to_string(),
+            reward: 15,
+        },
+        Referral {
+            id: 4,
+            name: "Alice Johnson".to_string(),
+            email: "alice.johnson@example.com".to_string(),
+            start_date: "August 1, 2024".to_string(),
+            reward: 25,
+        },
+        Referral {
+            id: 5,
+            name: "Michael Brown".to_string(),
+            email: "michael.brown@example.com".to_string(),
+            start_date: "September 5, 2024".to_string(),
+            reward: 30,
+        },
+        Referral {
+            id: 6,
+            name: "Emily Davis".to_string(),
+            email: "emily.davis@example.com".to_string(),
+            start_date: "October 12, 2024".to_string(),
+            reward: 18,
+        },
+        Referral {
+            id: 7,
+            name: "Daniel Wilson".to_string(),
+            email: "daniel.wilson@example.com".to_string(),
+            start_date: "November 20, 2024".to_string(),
+            reward: 22,
+        },
+        Referral {
+            id: 8,
+            name: "Sophia Martinez".to_string(),
+            email: "sophia.martinez@example.com".to_string(),
+            start_date: "December 8, 2024".to_string(),
+            reward: 28,
+        },
+        Referral {
+            id: 9,
+            name: "James Lee".to_string(),
+            email: "james.lee@example.com".to_string(),
+            start_date: "January 10, 2025".to_string(),
+            reward: 35,
+        },
+        Referral {
+            id: 10,
+            name: "Olivia Harris".to_string(),
+            email: "olivia.harris@example.com".to_string(),
+            start_date: "February 14, 2025".to_string(),
+            reward: 40,
+        },
+        Referral {
+            id: 11,
+            name: "Christopher White".to_string(),
+            email: "christopher.white@example.com".to_string(),
+            start_date: "March 18, 2025".to_string(),
+            reward: 12,
+        },
+        Referral {
+            id: 12,
+            name: "Jessica Lewis".to_string(),
+            email: "jessica.lewis@example.com".to_string(),
+            start_date: "April 25, 2025".to_string(),
+            reward: 27,
+        },
+    ]
+}
+
+#[component]
+pub fn Orders() -> impl IntoView {
+    let referral_resource = Resource::new(|| {}, get_referrals);
+
+    view! {
+        <div class="flex items-end justify-between gap-4">
+            <Heading>Referrals</Heading>
+            <button class="-my-0.5 cursor-pointer">
+                <span class="material-symbols-outlined">link</span>
+                Copy Referer Link
+            </button>
+        </div>
+
+        <div class="referer-ranking my-12">
+            <div>
+                <Subheading class="mt-14">Ranking</Subheading>
+                <nav class="mt-4 mx-auto max-w-7xl" aria-label="Progress">
+                    <ol role="list" class="rounded-md lg:flex lg:rounded-none ">
+                        <RefererRank
+                            title="Iron"
+                            description="Entry-level tasks completed"
+                            step=1
+                            is_complete=true
+                        />
+                        <RefererRank
+                            title="Bronze"
+                            description="Basic proficiency achieved"
+                            step=2
+                            is_complete=true
+                        />
+                        <RefererRank
+                            title="Silver"
+                            description="Intermediate skills demonstrated"
+                            step=3
+                            is_complete=false
+                        />
+                        <RefererRank
+                            title="Gold"
+                            description="Advanced capabilities shown"
+                            step=4
+                            is_complete=false
+                        />
+                        <RefererRank
+                            title="Diamond"
+                            description="Expert level mastery attained"
+                            step=5
+                            is_complete=false
+                        />
+                    </ol>
+                </nav>
+            </div>
+
+        </div>
+
+        <Subheading class="mt-14">Referrals List</Subheading>
+        <Table class="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]">
+            <TableHead>
+                <tr>
+                    <TableHeader>Name</TableHeader>
+                    <TableHeader>Email</TableHeader>
+                    <TableHeader>Start Date</TableHeader>
+                    <TableHeader class="text-right">My Reward</TableHeader>
+                </tr>
+            </TableHead>
+            <tbody>
+                <Suspense>
+                    <IfLetSome opt=Signal::derive(move || referral_resource.get()) let:referrals>
+                        {referrals
+                            .clone()
+                            .into_iter()
+                            .map(|referral| {
+                                view! {
+                                    <tr>
+                                        <TableCell>{referral.name.clone()}</TableCell>
+                                        <TableCell>{referral.email.clone()}</TableCell>
+                                        <TableCell>{referral.start_date.clone()}</TableCell>
+                                        <TableCell class="text-right">
+                                            {referral.reward.to_string()}
+                                        </TableCell>
+                                    </tr>
+                                }
+                            })
+                            .collect_view()}
+                    </IfLetSome>
+                </Suspense>
+
+            </tbody>
+        </Table>
     }
 }
