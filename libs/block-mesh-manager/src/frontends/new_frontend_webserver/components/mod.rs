@@ -5,6 +5,7 @@ mod if_let;
 mod navbar;
 mod sidebar;
 mod sidebar_layout;
+mod table;
 
 pub use avatar::*;
 pub use divider::*;
@@ -13,3 +14,4 @@ pub use if_let::*;
 pub use navbar::*;
 pub use sidebar::*;
 pub use sidebar_layout::*;
+pub use table::*;
