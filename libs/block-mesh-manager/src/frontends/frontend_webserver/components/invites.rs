@@ -1,34 +1,13 @@
-use chrono::{DateTime, NaiveDateTime, NaiveTime, Utc};
 use leptos::*;
 use leptos_router::A;
 
-use crate::frontends::components::bar_chart::ChartData;
 use crate::frontends::frontend_webserver::components::icons::clipboard_icon::ClipboardIcon;
 use crate::frontends::frontend_webserver::components::icons::edit_icon::EditIcon;
 use crate::frontends::frontend_webserver::context::webapp_context::WebAppContext;
 
 #[component]
 pub fn InvitesComponent() -> impl IntoView {
-    let _debug = Signal::derive(move || false);
     let async_data = WebAppContext::get_dashboard_data();
-    let _data: Signal<Vec<ChartData>> =
-        Signal::derive(move || match async_data.get().unwrap_or_default() {
-            Some(data) => data
-                .daily_stats
-                .into_iter()
-                .map(|i| ChartData {
-                    x: {
-                        let naive_time = NaiveTime::from_hms_opt(0, 0, 0).unwrap_or_default();
-                        let naive_date_time = NaiveDateTime::new(i.day, naive_time);
-                        let date_time_utc: DateTime<Utc> =
-                            DateTime::from_naive_utc_and_offset(naive_date_time, Utc);
-                        date_time_utc
-                    },
-                    y: i.points,
-                })
-                .collect(),
-            None => vec![],
-        });
 
     fn get_invite_code() -> Option<String> {
         let doc = document();
@@ -119,9 +98,5 @@ pub fn InvitesComponent() -> impl IntoView {
                 </div>
             </div>
         </div>
-
-        // <div class="border-off-white border m-2 relative overflow-hidden rounded-[30px] pt-6 md:pt-[33px] pb-7 md:pb-[39px] pl-[11px] md:pl-[44px]">
-        //     <BarChart debug=debug data=data/>
-        // </div>
     }
 }

@@ -185,7 +185,7 @@ pub struct ReportBandwidthResponse {
     pub status_code: u16,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, Default)]
+#[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
 pub struct DashboardResponse {
     pub points: f64,
     pub number_of_users_invited: i64,
@@ -194,7 +194,7 @@ pub struct DashboardResponse {
     pub daily_stats: Vec<DailyStatForDashboard>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Default, Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct DailyStatForDashboard {
     pub tasks_count: i64,
     pub uptime: f64,
