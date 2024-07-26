@@ -1,3 +1,4 @@
+use crate::frontends::components::bar_chart::BarChart;
 use crate::frontends::context::webapp_context::WebAppContext;
 use crate::frontends::frontend_webserver::components::error::ErrorComponent;
 use crate::frontends::frontend_webserver::components::invites::InvitesComponent;
@@ -48,6 +49,9 @@ pub fn DashboardPage() -> impl IntoView {
                         <PointsComponent/>
                         <NetworkStatusComponent/>
                         <InvitesComponent/>
+                    </div>
+                    <div class="m-2 grid grid-cols-1">
+                        <BarChart/>
                     </div>
                 </div>
             </Show>
