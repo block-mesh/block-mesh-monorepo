@@ -6,6 +6,7 @@ use axum::{Extension, Json};
 use block_mesh_common::constants::BLOCK_MESH_IP_WORKER;
 use block_mesh_common::interfaces::ip_data::{IPData, IpDataPostRequest};
 use block_mesh_common::interfaces::server_api::{ReportUptimeRequest, ReportUptimeResponse};
+use chrono::Utc;
 use http::StatusCode;
 use reqwest::Client;
 use sqlx::PgPool;
@@ -15,6 +16,9 @@ use uuid::Uuid;
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
 use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::api_token::find_token::find_token;
+use crate::database::daily_stat::create_daily_stat::create_daily_stat;
+use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
+use crate::database::daily_stat::increment_uptime::increment_uptime;
 use crate::database::uptime_report::create_uptime_report::create_uptime_report;
 use crate::database::uptime_report::delete_uptime_report_by_time::delete_uptime_report_by_time;
 use crate::database::uptime_report::enrich_uptime_report::enrich_uptime_report;
@@ -41,8 +45,14 @@ pub async fn handler(
     if user.email != query.email {
         return Err(Error::UserNotFound);
     }
-    let uptime_id = create_uptime_report(&mut transaction, user.id).await?;
 
+    let daily_stat_opt =
+        get_daily_stat_by_user_id_and_day(&mut transaction, user.id, Utc::now().date_naive())
+            .await?;
+    if daily_stat_opt.is_none() {
+        create_daily_stat(&mut transaction, user.id).await?;
+    }
+    let uptime_id = create_uptime_report(&mut transaction, user.id).await?;
     let uptimes = get_user_uptimes(&mut transaction, user.id, 2).await?;
     if uptimes.len() == 2 {
         let diff = uptimes[0].created_at - uptimes[1].created_at;
@@ -54,6 +64,14 @@ pub async fn handler(
             )
             .await
             .map_err(Error::from)?;
+            if daily_stat_opt.is_some() {
+                increment_uptime(
+                    &mut transaction,
+                    daily_stat_opt.unwrap().id,
+                    diff.num_seconds() as f64,
+                )
+                .await?;
+            }
             let sum = aggregate.value.as_f64().unwrap_or_default() + diff.num_seconds() as f64;
             update_aggregate(
                 &mut transaction,

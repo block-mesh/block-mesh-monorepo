@@ -20,6 +20,32 @@
 }
 
 
+.parent-container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+.figure-container {
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    width: 100%;
+}
+
+.figure-container figure {
+    max-width: 100%;
+    height: auto;
+}
+
+.figure-container figcaption {
+    margin-top: 10px;
+    font-size: 1em;
+    color: #666;
+}
+
 :root {
     --blue: #25e4d3;
     --darkBlue: #2f8985;

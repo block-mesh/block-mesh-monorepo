@@ -1,3 +1,4 @@
+pub mod bar_chart;
 pub mod avatar;
 pub mod bandwidth_card;
 pub mod conditionals;
