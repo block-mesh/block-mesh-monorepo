@@ -75,7 +75,7 @@ pub fn App() -> impl IntoView {
         <Router fallback=|| { view! { <p>Error</p> }.into_view() }>
             <Routes>
                 <Route
-                    path="new"
+                    path="/new"
 
                     view=move || {
                         view! {
@@ -92,7 +92,7 @@ pub fn App() -> impl IntoView {
                 />
 
                 <Route
-                    path="new"
+                    path="/referer"
 
                     view=move || {
                         view! {

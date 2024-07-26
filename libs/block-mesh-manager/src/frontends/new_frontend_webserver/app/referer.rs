@@ -1,3 +1,4 @@
+use crate::frontends::new_frontend_webserver::app::application_layout::ApplicationLayout;
 use crate::frontends::new_frontend_webserver::components::{
     Heading, IfLetSome, Subheading, Table, TableCell, TableHead, TableHeader,
 };
@@ -185,88 +186,93 @@ pub fn Orders() -> impl IntoView {
     let referral_resource = Resource::new(|| {}, get_referrals);
 
     view! {
-        <div class="flex items-end justify-between gap-4">
-            <Heading>Referrals</Heading>
-            <button class="-my-0.5 cursor-pointer">
-                <span class="material-symbols-outlined">link</span>
-                Copy Referer Link
-            </button>
-        </div>
-
-        <div class="referer-ranking my-12">
-            <div>
-                <Subheading class="mt-14">Ranking</Subheading>
-                <nav class="mt-4 mx-auto max-w-7xl" aria-label="Progress">
-                    <ol role="list" class="rounded-md lg:flex lg:rounded-none ">
-                        <RefererRank
-                            title="Iron"
-                            description="Entry-level tasks completed"
-                            step=1
-                            is_complete=true
-                        />
-                        <RefererRank
-                            title="Bronze"
-                            description="Basic proficiency achieved"
-                            step=2
-                            is_complete=true
-                        />
-                        <RefererRank
-                            title="Silver"
-                            description="Intermediate skills demonstrated"
-                            step=3
-                            is_complete=false
-                        />
-                        <RefererRank
-                            title="Gold"
-                            description="Advanced capabilities shown"
-                            step=4
-                            is_complete=false
-                        />
-                        <RefererRank
-                            title="Diamond"
-                            description="Expert level mastery attained"
-                            step=5
-                            is_complete=false
-                        />
-                    </ol>
-                </nav>
+        <ApplicationLayout>
+            <div class="flex items-end justify-between gap-4">
+                <Heading>Referrals</Heading>
+                <button class="-my-0.5 cursor-pointer">
+                    <span class="material-symbols-outlined">link</span>
+                    Copy Referer Link
+                </button>
             </div>
 
-        </div>
+            <div class="referer-ranking my-12">
+                <div>
+                    <Subheading class="mt-14">Ranking</Subheading>
+                    <nav class="mt-4 mx-auto max-w-7xl" aria-label="Progress">
+                        <ol role="list" class="rounded-md lg:flex lg:rounded-none ">
+                            <RefererRank
+                                title="Iron"
+                                description="Entry-level tasks completed"
+                                step=1
+                                is_complete=true
+                            />
+                            <RefererRank
+                                title="Bronze"
+                                description="Basic proficiency achieved"
+                                step=2
+                                is_complete=true
+                            />
+                            <RefererRank
+                                title="Silver"
+                                description="Intermediate skills demonstrated"
+                                step=3
+                                is_complete=false
+                            />
+                            <RefererRank
+                                title="Gold"
+                                description="Advanced capabilities shown"
+                                step=4
+                                is_complete=false
+                            />
+                            <RefererRank
+                                title="Diamond"
+                                description="Expert level mastery attained"
+                                step=5
+                                is_complete=false
+                            />
+                        </ol>
+                    </nav>
+                </div>
 
-        <Subheading class="mt-14">Referrals List</Subheading>
-        <Table class="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]">
-            <TableHead>
-                <tr>
-                    <TableHeader>Name</TableHeader>
-                    <TableHeader>Email</TableHeader>
-                    <TableHeader>Start Date</TableHeader>
-                    <TableHeader class="text-right">My Reward</TableHeader>
-                </tr>
-            </TableHead>
-            <tbody>
-                <Suspense>
-                    <IfLetSome opt=Signal::derive(move || referral_resource.get()) let:referrals>
-                        {referrals
-                            .clone()
-                            .into_iter()
-                            .map(|referral| {
-                                view! {
-                                    <tr>
-                                        <TableCell>{referral.name.clone()}</TableCell>
-                                        <TableCell>{referral.email.clone()}</TableCell>
-                                        <TableCell>{referral.start_date.clone()}</TableCell>
-                                        <TableCell class="text-right">
-                                            {referral.reward.to_string()}
-                                        </TableCell>
-                                    </tr>
-                                }
-                            })
-                            .collect_view()}
-                    </IfLetSome>
-                </Suspense>
+            </div>
 
-            </tbody>
-        </Table>
+            <Subheading class="mt-14">Referrals List</Subheading>
+            <Table class="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]">
+                <TableHead>
+                    <tr>
+                        <TableHeader>Name</TableHeader>
+                        <TableHeader>Email</TableHeader>
+                        <TableHeader>Start Date</TableHeader>
+                        <TableHeader class="text-right">My Reward</TableHeader>
+                    </tr>
+                </TableHead>
+                <tbody>
+                    <Suspense>
+                        <IfLetSome
+                            opt=Signal::derive(move || referral_resource.get())
+                            let:referrals
+                        >
+                            {referrals
+                                .clone()
+                                .into_iter()
+                                .map(|referral| {
+                                    view! {
+                                        <tr>
+                                            <TableCell>{referral.name.clone()}</TableCell>
+                                            <TableCell>{referral.email.clone()}</TableCell>
+                                            <TableCell>{referral.start_date.clone()}</TableCell>
+                                            <TableCell class="text-right">
+                                                {referral.reward.to_string()}
+                                            </TableCell>
+                                        </tr>
+                                    }
+                                })
+                                .collect_view()}
+                        </IfLetSome>
+                    </Suspense>
+
+                </tbody>
+            </Table>
+        </ApplicationLayout>
     }
 }
