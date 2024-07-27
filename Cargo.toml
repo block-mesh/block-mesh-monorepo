@@ -52,10 +52,10 @@ version = "0.0.117"
 ##
 ## For curve25519-dalek we’re using commit from a PR, see
 ## https://github.com/dalek-cryptography/curve25519-dalek/pull/606
-#aes-gcm-siv = { git = "https://github.com/RustCrypto/AEADs", rev = "6105d7a5591aefa646a95d12b5e8d3f55a9214ef" }
-aes-gcm-siv = { git = 'https://github.com/block-mesh/AEADs', branch = 'rustls-dep-hell' }
-#curve25519-dalek = { git = "https://github.com/dalek-cryptography/curve25519-dalek", rev = "8274d5cbb6fc3f38cdc742b4798173895cd2a290" }
-curve25519-dalek = { git = "https://github.com/block-mesh/curve25519-dalek", branch = "rustls-dep-hell" }
+
+curve25519-dalek = { git = 'https://github.com/ivs/curve25519-dalek', branch='rustls-dep-hell-1-18' }
+aes-gcm-siv = { git = 'https://github.com/ivs/AEADs', branch='rustls-dep-hell-1-18' }
+
 
 [workspace.dependencies]
 borsh = { version = "1.5.1" }
@@ -69,7 +69,7 @@ tracing-subscriber-wasm = { version = "0.1.0" }
 num-traits = { version = "0.2.19" }
 sendgrid = { version = "0.21.0" }
 tracing-wasm = { version = "0.2.1" }
-tauri = { version = "2.0.0-beta", features = ["native-tls-vendored"] }
+tauri = { version = "2.0.0-beta.24", features = ["rustls-tls"] }
 tauri-build = { version = "2.0.0-beta", features = [] }
 tauri-plugin-autostart = "2.0.0-beta"
 tauri-plugin-single-instance = "2.0.0-beta"
@@ -116,12 +116,12 @@ sentry = { version = "0.34.0" }
 sentry-tracing = { version = "0.34.0" }
 h2 = { version = "0.4.2" }
 http = { version = "1.0.0" }
-solana-client = { version = "1.18.2" }
-solana-program-test = { version = "1.18.2" }
-#solana-zk-token-sdk = { version = "1.18.2" }
-solana-account-decoder = { version = "1.18.2" }
-solana-program = { version = "1.18.2" }
-solana-sdk = { version = "1.18.2" }
+solana-client = { version = "1.18.20" }
+solana-program-test = { version = "1.18.20" }
+solana-zk-token-sdk = { version = "1.18.20" }
+solana-account-decoder = { version = "1.18.20" }
+solana-program = { version = "1.18.20" }
+solana-sdk = { version = "1.18.20" }
 anchor-client = { version = "0.30.1", features = ["async"] }
 anchor-lang = { version = "0.30.1" }
 anchor-spl = { version = "0.30.1", features = ["spl-associated-token-account", "spl-token", "metadata"] }
@@ -182,6 +182,7 @@ ipinfo = { version = "3.0.0" }
 cargo-husky = { version = "1.5.0", features = ["precommit-hook", "run-cargo-clippy", "run-cargo-fmt"] }
 bcrypt = { version = "0.15" }
 cocoa = { version = "0.25.0" }
+subtle = { version = "2.5.0" }
 
 [workspace.dependencies.web-sys]
 version = "0.3"

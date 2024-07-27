@@ -23,3 +23,4 @@ serde-wasm-bindgen = { workspace = true }
 console_error_panic_hook = { workspace = true }
 block-mesh-common = { path = "../block-mesh-common", features = ["http", "cli", "app-config"] }
 solana-sdk = { workspace = true }
+subtle = { workspace = true }
