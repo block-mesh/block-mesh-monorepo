@@ -1,5 +1,7 @@
 mod avatar;
 mod divider;
+mod extension_button;
+mod extension_input;
 mod heading;
 mod if_let;
 mod navbar;
@@ -9,6 +11,8 @@ mod table;
 
 pub use avatar::*;
 pub use divider::*;
+pub use extension_button::*;
+pub use extension_input::*;
 pub use heading::*;
 pub use if_let::*;
 pub use navbar::*;

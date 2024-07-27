@@ -160,9 +160,9 @@ anyhow = { version = "1.0.71" }
 thiserror = { version = "1.0.40" }
 dotenv = { version = "0.15.0" }
 reqwest = { version = "0.11.18", default-features = false, features = [
-  "json",
-  "rustls-tls",
-  "cookies"
+    "json",
+    "rustls-tls",
+    "cookies"
 ] }
 bytes = { version = "1.5.0" }
 argon2 = { version = "0.5.0", features = ["std"] }
@@ -187,15 +187,15 @@ cocoa = { version = "0.25.0" }
 [workspace.dependencies.web-sys]
 version = "0.3"
 features = [
-  "console",
-  "WorkerGlobalScope",
-  "Window",
-  'Headers',
-  'Request',
-  'RequestInit',
-  'RequestMode',
-  'Response',
-  "MessageEvent"
+    "console",
+    "WorkerGlobalScope",
+    "Window",
+    'Headers',
+    'Request',
+    'RequestInit',
+    'RequestMode',
+    'Response',
+    "MessageEvent"
 ]
 
 [workspace.dependencies.rand]
@@ -206,24 +206,24 @@ features = ["min_const_gen"]
 version = "0.7.3"
 default-features = false
 features = [
-  "any",
-  "runtime-tokio-rustls",
-  "macros",
-  "postgres",
-  "uuid",
-  "chrono",
-  "migrate",
-  "json",
-  "bigdecimal"
+    "any",
+    "runtime-tokio-rustls",
+    "macros",
+    "postgres",
+    "uuid",
+    "chrono",
+    "migrate",
+    "json",
+    "bigdecimal"
 ]
 
 [workspace.dependencies.uuid]
 version = "1.3.4"
 features = [
-  "v4", # Lets you generate random UUIDs
-  "fast-rng", # Use a faster (but still sufficiently random) RNG
-  "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
-  "serde", # Enable serialization/deserialization of UUIDs
-  "js", # Enable UUID generation in WebAssembly
+    "v4", # Lets you generate random UUIDs
+    "fast-rng", # Use a faster (but still sufficiently random) RNG
+    "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
+    "serde", # Enable serialization/deserialization of UUIDs
+    "js", # Enable UUID generation in WebAssembly
 ]
 
