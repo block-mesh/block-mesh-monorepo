@@ -40,6 +40,7 @@ pub fn TableCell(#[prop(into, optional)] class: String, children: Children) -> i
         &class,
         "relative px-4 first:pl-[var(--gutter,theme(spacing.2))] last:pr-[var(--gutter,theme(spacing.2))]",
         "border-b border-zinc-950/5 dark:border-white/5",
+        "py-4",
         "sm:first:pl-1 sm:last:pr-1",
     );
 
