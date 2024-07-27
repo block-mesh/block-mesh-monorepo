@@ -18,8 +18,8 @@ logger-general = { path = "../logger-general", optional = true, features = ["sen
 tracing-subscriber-wasm = { workspace = true }
 num-traits = { workspace = true }
 reqwest = { workspace = true, default-features = false, features = [
-  "multipart",
-  "json",
+    "multipart",
+    "json",
 ] }
 validator = { workspace = true }
 sentry = { workspace = true, optional = true }
@@ -58,6 +58,7 @@ leptos_axum = { workspace = true, optional = true }
 leptos = { workspace = true }
 leptos_meta = { workspace = true }
 leptos_router = { workspace = true }
+leptos-use = { workspace = true, features = ["math"] }
 cfg-if = { workspace = true }
 wasm-bindgen = { workspace = true }
 console_error_panic_hook = { workspace = true }
@@ -72,17 +73,17 @@ features = ["min_const_gen"]
 [dependencies.web-sys]
 workspace = true
 features = [
-  "console",
-  "WorkerGlobalScope",
-  "Window",
-  'Headers',
-  'Request',
-  'RequestInit',
-  'RequestMode',
-  'Response',
-  "Clipboard",
-  "Navigator",
-  "MessageEvent"
+    "console",
+    "WorkerGlobalScope",
+    "Window",
+    'Headers',
+    'Request',
+    'RequestInit',
+    'RequestMode',
+    'Response',
+    "Clipboard",
+    "Navigator",
+    "MessageEvent"
 ]
 
 [dependencies.sqlx]
@@ -90,25 +91,25 @@ workspace = true
 default-features = false
 optional = true
 features = [
-  "any",
-  "runtime-tokio-rustls",
-  "macros",
-  "postgres",
-  "uuid",
-  "chrono",
-  "migrate",
-  "json",
-  "bigdecimal",
+    "any",
+    "runtime-tokio-rustls",
+    "macros",
+    "postgres",
+    "uuid",
+    "chrono",
+    "migrate",
+    "json",
+    "bigdecimal",
 ]
 
 [dependencies.uuid]
 workspace = true
 features = [
-  "v4", # Lets you generate random UUIDs
-  "fast-rng", # Use a faster (but still sufficiently random) RNG
-  "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
-  "serde", # Enable serialization/deserialization of UUIDs
-  "js"
+    "v4", # Lets you generate random UUIDs
+    "fast-rng", # Use a faster (but still sufficiently random) RNG
+    "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
+    "serde", # Enable serialization/deserialization of UUIDs
+    "js"
 ]
 
 [lib]
@@ -116,30 +117,31 @@ crate-type = ["cdylib", "rlib"]
 
 [features]
 hydrate = [
-  "leptos/hydrate",
-  "leptos_meta/hydrate",
-  "leptos_router/hydrate",
-  "dep:logger-leptos"
+    "leptos/hydrate",
+    "leptos_meta/hydrate",
+    "leptos_router/hydrate",
+    "dep:logger-leptos"
 ]
 ssr = [
-  "dep:tikv-jemallocator",
-  "dep:tokio-stream",
-  "dep:axum",
-  "dep:tokio",
-  "dep:tower",
-  "dep:tower-http",
-  "dep:tracing-bunyan-formatter",
-  "dep:leptos_axum",
-  "leptos/ssr",
-  "leptos_meta/ssr",
-  "leptos_router/ssr",
-  "dep:sqlx",
-  "dep:tracing",
-  "dep:tower-sessions-sqlx-store",
-  "dep:axum-login",
-  "dep:secret",
-  "dep:logger-general",
-  "dep:sentry"
+    "dep:tikv-jemallocator",
+    "dep:tokio-stream",
+    "dep:axum",
+    "dep:tokio",
+    "dep:tower",
+    "dep:tower-http",
+    "dep:tracing-bunyan-formatter",
+    "dep:leptos_axum",
+    "leptos/ssr",
+    "leptos_meta/ssr",
+    "leptos_router/ssr",
+    "leptos-use/ssr",
+    "dep:sqlx",
+    "dep:tracing",
+    "dep:tower-sessions-sqlx-store",
+    "dep:axum-login",
+    "dep:secret",
+    "dep:logger-general",
+    "dep:sentry"
 ]
 
 [package.metadata.leptos]
