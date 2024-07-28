@@ -53,6 +53,28 @@ pub fn App() -> impl IntoView {
 
     view! {
         <CommonHeader/>
+        <Script>
+            r#"
+                window.addEventListener("message", onMessage);
+                function onMessage(e) {
+                    if (window?.webkit?.messageHandlers?.ReactNativeWebView && !window.message_channel_port) {
+                        window.message_channel_port = window?.webkit?.messageHandlers?.ReactNativeWebView;
+                        window.message_channel_port.postMessage("READY");
+                        return;
+                    }
+                    if (!e.ports.length) return;
+                    e.ports[0].postMessage("READY");
+                    window.message_channel_port = e.ports[0];
+                    window.message_channel_port.onmessage = (msg) => {
+                        // console.log("msg", window.location.href , msg, msg?.data);
+                    }
+                }
+                // window.addEventListener("message", onMessage2);
+                // function onMessage2(e) {
+                //     window.webkit.messageHandlers.ReactNativeWebView.postMessage(`hello from server ${JSON.stringify(e)}`);
+                // }
+            "#
+        </Script>
         <Router fallback=|| { view! { <p>Error</p> }.into_view() }>
             <Routes>
                 <Route
