@@ -67,6 +67,8 @@ jobs:
         with:
           key: tauri-build-${{ matrix.target }}
           cache-all-crates: true
+      - name: Install sccache
+        run: cargo install sccache --locked
       - name: Install sqlx-cli
         run: cargo install sqlx-cli
           --version=${{ vars.SQLX_VERSION }}

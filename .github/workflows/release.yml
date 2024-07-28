@@ -39,6 +39,8 @@ jobs:
         with:
           key: release-tag-server
           cache-all-crates: true
+      - name: Install sccache
+        run: cargo install sccache --locked
       - name: "Get tag"
         id: "pkg-version"
         shell: "bash"
@@ -61,6 +63,8 @@ jobs:
         with:
           key: release-build
           cache-all-crates: true
+      - name: Install sccache
+        run: cargo install sccache --locked
       - name: "Create release"
         uses: "taiki-e/create-gh-release-action@v1"
         with:
@@ -99,6 +103,8 @@ jobs:
         with:
           key: release-upload-${{ matrix.target }}
           cache-all-crates: true
+      - name: Install sccache
+        run: cargo install sccache --locked
       - name: "Install Cargo Leptos"
         run: |
           cargo install cargo-leptos --version=${{ vars.LEPTOS_VERSION }} --locked
@@ -141,6 +147,8 @@ jobs:
         with:
           key: release-push
           cache-all-crates: true
+      - name: Install sccache
+        run: cargo install sccache --locked
       - name: "Log in to Docker Hub"
         uses: "docker/login-action@v3"
         with:

@@ -25,5 +25,7 @@ jobs:
         with:
           key: rustfmt-sqlx-${{ vars.SQLX_VERSION }}
           cache-all-crates: true
+      - name: Install sccache
+        run: cargo install sccache --locked
       - name: Enforce formatting
         run: cargo fmt --all -- --check
