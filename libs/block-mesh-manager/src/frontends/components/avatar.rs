@@ -1,4 +1,4 @@
-use super::IfLetSome;
+use crate::frontends::components::conditionals::if_let_some::IfLetSome;
 use leptos::*;
 use tailwind_fuse::*;
 

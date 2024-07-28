@@ -1,4 +1,5 @@
 pub mod app;
+pub mod common_header;
 pub mod components;
 pub mod context;
 pub mod frontend_extension;

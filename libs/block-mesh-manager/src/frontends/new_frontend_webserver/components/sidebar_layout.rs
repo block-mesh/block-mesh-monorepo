@@ -1,4 +1,4 @@
-use crate::frontends::new_frontend_webserver::components::NavbarItem;
+use crate::frontends::components::navbars::navbar_item::NavbarItem;
 use leptos::*;
 use tailwind_fuse::*;
 

@@ -1,32 +1,5 @@
 use leptos::*;
-use tailwind_fuse::*;
-
-#[component]
-pub fn Navbar(
-    #[prop(into, optional)] class: MaybeSignal<String>,
-    children: Children,
-) -> impl IntoView {
-    let class = move || tw_join!(class.get(), "flex flex-1 items-center gap-4 py-2.5");
-
-    view! { <nav class=class>{children()}</nav> }
-}
-
-#[component]
-pub fn NavbarSection(
-    #[prop(into, optional)] class: MaybeSignal<String>,
-    children: Children,
-) -> impl IntoView {
-    let class = move || tw_join!(class.get(), "flex items-center gap-3");
-
-    view! { <div class=class>{children()}</div> }
-}
-
-#[component]
-pub fn NavbarSpacer(#[prop(into, optional)] class: MaybeSignal<String>) -> impl IntoView {
-    let class = move || tw_join!(class.get(), "-ml-4 flex-1");
-
-    view! { <div class=class aria-hidden="true"></div> }
-}
+use tailwind_fuse::tw_join;
 
 #[component]
 pub fn NavbarItem<F>(
@@ -67,14 +40,4 @@ where
             </button>
         </span>
     }
-}
-
-#[component]
-pub fn NavbarLabel(
-    #[prop(into, optional)] class: MaybeSignal<String>,
-    children: Children,
-) -> impl IntoView {
-    let class = move || tw_join!(class.get(), "truncate");
-
-    view! { <span class=class>{children()}</span> }
 }

@@ -1,21 +1,2 @@
-mod avatar;
-mod divider;
-mod extension_button;
-mod extension_input;
-mod heading;
-mod if_let;
-mod navbar;
-mod sidebar;
-mod sidebar_layout;
-mod table;
-
-pub use avatar::*;
-pub use divider::*;
-pub use extension_button::*;
-pub use extension_input::*;
-pub use heading::*;
-pub use if_let::*;
-pub use navbar::*;
-pub use sidebar::*;
-pub use sidebar_layout::*;
-pub use table::*;
+pub mod sidebar;
+pub mod sidebar_layout;

@@ -1,8 +1,13 @@
-use crate::frontends::new_frontend_webserver::components::{
-    Avatar, Navbar, NavbarSection, NavbarSpacer, Sidebar, SidebarBody, SidebarFooter,
-    SidebarHeader, SidebarItem, SidebarItemLink, SidebarLabel, SidebarLayout, SidebarSection,
-    SidebarSpacer,
+use crate::frontends::components::avatar::Avatar;
+use crate::frontends::components::navbars::navbar::Navbar;
+use crate::frontends::components::navbars::navbar_section::NavbarSection;
+use crate::frontends::components::navbars::navbar_spacer::NavbarSpacer;
+use crate::frontends::new_frontend_webserver::components::sidebar::{
+    Sidebar, SidebarBody, SidebarFooter, SidebarHeader, SidebarItem, SidebarItemLink, SidebarLabel,
+    SidebarSection, SidebarSpacer,
 };
+use crate::frontends::new_frontend_webserver::components::sidebar_layout::SidebarLayout;
+use block_mesh_common::constants::BLOCK_MESH_LOGO;
 use leptos::*;
 use tailwind_fuse::*;
 
@@ -47,7 +52,7 @@ pub fn ApplicationSidebar() -> impl IntoView {
         <Sidebar>
             <SidebarHeader>
                 <SidebarItem>
-                    <Avatar src="/app/logo.png"/>
+                    <Avatar src=BLOCK_MESH_LOGO/>
                     <SidebarLabel>BlockMesh</SidebarLabel>
                     <OnlineChip is_online=true/>
                 </SidebarItem>

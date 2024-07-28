@@ -1,15 +1,15 @@
 use leptos::*;
 use leptos_router::A;
 
+use crate::frontends::context::extension_state::ExtensionContext;
 use crate::frontends::context::notification_context::NotificationContext;
 use crate::frontends::frontend_extension::components::logo::Logo;
-use crate::frontends::frontend_extension::extension_state::ExtensionState;
 use crate::frontends::frontend_extension::utils::connectors::send_to_clipboard;
 use block_mesh_common::constants::BLOCKMESH_VERSION;
 
 #[component]
 pub fn ExtensionLoggedIn() -> impl IntoView {
-    let state = use_context::<ExtensionState>().unwrap();
+    let state = use_context::<ExtensionContext>().unwrap();
     let notifications = expect_context::<NotificationContext>();
     let invite_code = Signal::derive(move || state.invite_code.get());
     let invite_url = Signal::derive(move || {
