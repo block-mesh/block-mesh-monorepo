@@ -29,7 +29,7 @@ module.exports = {
         // 'light': '#EDEDED',
         // 'darkOrange': '#f97432',
         // 'dark': '#0C1120',
-        blue: '#25e4d3',
+        'light-blue': '#25e4d3',
         darkBlue: '#2f8985',
         // orange: '#fab457',
         darkOrange: '#f97432',

@@ -23,7 +23,7 @@ pub fn Register() -> impl IntoView {
                     email: e.clone(),
                     password: p,
                     password_confirm: pc.clone(),
-                    invite_code: if i.is_empty() { None } else { Some(i) },
+                    invite_code: i,
                 },
             };
             if let Ok(js_args) = serde_wasm_bindgen::to_value(&args) {

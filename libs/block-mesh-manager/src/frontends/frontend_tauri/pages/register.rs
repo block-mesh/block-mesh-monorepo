@@ -24,6 +24,7 @@ pub fn TauriRegister() -> impl IntoView {
                 || email.get_untracked().is_empty()
                 || password.get_untracked().is_empty()
                 || password_confirm.get_untracked().is_empty()
+                || invite_code.get_untracked().is_empty()
             {
                 return;
             }
@@ -36,11 +37,7 @@ pub fn TauriRegister() -> impl IntoView {
                 email: email.get_untracked(),
                 password: password.get_untracked(),
                 password_confirm: password.get_untracked(),
-                invite_code: if invite_code.get_untracked().is_empty() {
-                    None
-                } else {
-                    Some(invite_code.get_untracked())
-                },
+                invite_code: invite_code.get_untracked(),
             };
             let result = register(&state.blockmesh_url.get_untracked(), &credentials).await;
             match result {

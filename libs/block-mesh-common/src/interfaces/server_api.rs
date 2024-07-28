@@ -131,7 +131,7 @@ pub struct RegisterForm {
     pub email: String,
     pub password: String,
     pub password_confirm: String,
-    pub invite_code: Option<String>,
+    pub invite_code: String,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

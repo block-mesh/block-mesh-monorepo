@@ -16,7 +16,7 @@ pub fn Stat(
 
     view! {
         <div>
-            <Divider class="border-blue shadow-light"/>
+            <Divider class="border-light-blue shadow-light"/>
 
             <div>
                 <div class="mt-6 text-lg/6 font-medium sm:text-sm/6">
