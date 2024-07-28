@@ -10,6 +10,7 @@ authors.workspace = true
 gloo-utils = { workspace = true }
 wasm-bindgen-futures = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
+
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = { workspace = true, optional = true }
 logger-leptos = { path = "../logger-leptos", optional = true }
@@ -57,11 +58,13 @@ leptos_axum = { workspace = true, optional = true }
 leptos = { workspace = true }
 leptos_meta = { workspace = true }
 leptos_router = { workspace = true }
+leptos-use = { workspace = true, features = ["math"] }
 cfg-if = { workspace = true }
 wasm-bindgen = { workspace = true }
 console_error_panic_hook = { workspace = true }
 console_log = { workspace = true }
 log = { workspace = true }
+tailwind_fuse = { version = "0.3", features = ["variant"] }
 
 [dependencies.rand]
 workspace = true
@@ -131,6 +134,7 @@ ssr = [
   "leptos/ssr",
   "leptos_meta/ssr",
   "leptos_router/ssr",
+  "leptos-use/ssr",
   "dep:sqlx",
   "dep:tracing",
   "dep:tower-sessions-sqlx-store",
@@ -158,7 +162,7 @@ site-root = "target/site"
 site-pkg-dir = "pkg"
 
 # [Optional] The source CSS file. If it ends with .sass or .scss then it will be compiled by dart-sass into CSS. The CSS is optimized by Lightning CSS before being written to <site-root>/<site-pkg>/app.css
-style-file = "style/main.scss"
+# style-file = "style/main.scss"
 # Assets source dir. All files found here will be copied and synchronized to site-root.
 # The assets-dir cannot have a sub directory with the same name/path as site-pkg-dir.
 #
@@ -213,3 +217,6 @@ lib-default-features = false
 #
 # Optional. Defaults to "release".
 lib-profile-release = "release"
+
+# Tailwind
+style-file = "../../output-server.css"

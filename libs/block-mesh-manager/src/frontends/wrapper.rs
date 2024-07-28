@@ -6,6 +6,7 @@ pub fn Wrapper<S1, T1, S2, T2>(
     resource: Option<Resource<S1, T1>>,
     auth: Option<Resource<S2, T2>>,
     loading: impl IntoView + 'static + Clone,
+    class: &'static str,
 ) -> impl IntoView
 where
     S1: 'static + Clone,
@@ -24,7 +25,7 @@ where
     view! {
         <Suspense fallback=move || { load.with_value(|v| v.clone().into_view()) }>
             <Show fallback=move || view! {} when=move || resources_ready.get()>
-                {move || view.get()}
+                <div class=class>{move || view.get()}</div>
             </Show>
         </Suspense>
     }

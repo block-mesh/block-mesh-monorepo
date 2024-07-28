@@ -18,3 +18,39 @@
 .font-open-sans {
     font-family: 'Open Sans', sans-serif;
 }
+
+
+:root {
+    --blue: #25e4d3;
+    --darkBlue: #2f8985;
+    --orange: #fab457;
+    --darkOrange: #f97432;
+}
+
+/* Customer scrollbar */
+
+/* width */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: var(--darkOrange);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: var(--darkOrange);
+}
+
+@media screen and (max-width: 600px) {
+    ::-webkit-scrollbar {
+        width: 4px;
+    }
+}
