@@ -73,6 +73,7 @@ pub fn RegisterPage() -> impl IntoView {
                                 id="invite_code"
                                 name="invite_code"
                                 placeholder="Invite Code"
+                                required
                             />
                         </div>
                         <div class="flex items-center justify-between">

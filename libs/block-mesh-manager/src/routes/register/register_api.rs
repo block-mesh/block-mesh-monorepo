@@ -80,21 +80,24 @@ pub async fn handler(
     create_api_token(&mut transaction, user_id).await?;
     create_invite_code(&mut transaction, user_id, Uuid::new_v4().to_string()).await?;
     create_uptime_report(&mut transaction, user_id).await?;
-    if let Some(invite_code) = form.invite_code {
-        if !invite_code.is_empty() {
-            match get_user_opt_by_invited_code(&mut transaction, invite_code).await? {
-                Some(invited_by_user) => {
-                    let invited_by_user_id = invited_by_user.user_id;
-                    update_user_invited_by(&mut transaction, user_id, invited_by_user_id).await?;
-                }
-                None => {
-                    return Ok(Json(RegisterResponse {
-                        status_code: 400,
-                        error: Some("Please check if the invite you insert is correct".to_string()),
-                    }))
-                }
+    if !form.invite_code.is_empty() {
+        match get_user_opt_by_invited_code(&mut transaction, form.invite_code).await? {
+            Some(invited_by_user) => {
+                let invited_by_user_id = invited_by_user.user_id;
+                update_user_invited_by(&mut transaction, user_id, invited_by_user_id).await?;
+            }
+            None => {
+                return Ok(Json(RegisterResponse {
+                    status_code: 400,
+                    error: Some("Please check if the invite you insert is correct".to_string()),
+                }))
             }
         }
+    } else {
+        return Ok(Json(RegisterResponse {
+            status_code: 400,
+            error: Some("Please provide an invite code".to_string()),
+        }));
     }
     transaction.commit().await.map_err(Error::from)?;
 
