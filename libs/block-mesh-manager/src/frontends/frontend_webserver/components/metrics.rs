@@ -1,5 +1,5 @@
-use crate::frontends::frontend_webserver::components::icons::chrome_icon::ChromeIcon;
-use crate::frontends::frontend_webserver::context::webapp_context::WebAppContext;
+use crate::frontends::components::icons::chrome_icon::ChromeIcon;
+use crate::frontends::context::webapp_context::WebAppContext;
 use block_mesh_common::constants::BLOCK_MESH_CHROME_EXTENSION_LINK;
 use leptos::*;
 use leptos_router::A;

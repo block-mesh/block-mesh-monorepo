@@ -24,7 +24,7 @@ use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType};
 use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
 
 #[derive(Clone, Serialize, Deserialize, Copy)]
-pub struct ExtensionState {
+pub struct ExtensionContext {
     pub email: RwSignal<String>,
     pub api_token: RwSignal<Uuid>,
     pub device_id: RwSignal<Uuid>,
@@ -39,7 +39,7 @@ pub struct ExtensionState {
     pub last_update: RwSignal<i64>,
 }
 
-impl Default for ExtensionState {
+impl Default for ExtensionContext {
     fn default() -> Self {
         Self {
             email: create_rw_signal(String::default()),
@@ -58,7 +58,7 @@ impl Default for ExtensionState {
     }
 }
 
-impl Debug for ExtensionState {
+impl Debug for ExtensionContext {
     fn fmt(&self, f: &mut Formatter<'_>) -> fmt::Result {
         f.debug_struct("ExtensionState")
             .field("email", &self.email.get_untracked())
@@ -77,9 +77,9 @@ impl Debug for ExtensionState {
     }
 }
 
-impl ExtensionState {
+impl ExtensionContext {
     #[tracing::instrument(name = "init_resource")]
-    pub fn init_resource(state: ExtensionState) -> Resource<(), ExtensionState> {
+    pub fn init_resource(state: ExtensionContext) -> Resource<(), ExtensionContext> {
         create_local_resource(
             || (),
             move |_| async move {

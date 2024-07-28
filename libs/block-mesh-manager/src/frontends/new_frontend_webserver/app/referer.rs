@@ -1,7 +1,11 @@
+use crate::frontends::components::conditionals::if_let_some::IfLetSome;
+use crate::frontends::components::heading::Heading;
+use crate::frontends::components::sub_heading::Subheading;
+use crate::frontends::components::tables::table::Table;
+use crate::frontends::components::tables::table_cell::TableCell;
+use crate::frontends::components::tables::table_head::TableHead;
+use crate::frontends::components::tables::table_header::TableHeader;
 use crate::frontends::new_frontend_webserver::app::application_layout::ApplicationLayout;
-use crate::frontends::new_frontend_webserver::components::{
-    Heading, IfLetSome, Subheading, Table, TableCell, TableHead, TableHeader,
-};
 use leptos::*;
 use serde::{Deserialize, Serialize};
 use tailwind_fuse::*;
