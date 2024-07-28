@@ -34,6 +34,8 @@ jobs:
         with:
           key: cloudflare-deploy-${{ matrix.workdir }}
           cache-all-crates: true
+      - name: Install sccache
+        run: cargo install sccache --locked
       - name: Build & Deploy Worker
         uses: cloudflare/wrangler-action@v3
         with:

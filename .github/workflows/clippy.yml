@@ -33,6 +33,8 @@ jobs:
         with:
           key: clippy-sqlx-${{ vars.SQLX_VERSION }}
           cache-all-crates: true
+      - name: Install sccache
+        run: cargo install sccache --locked
       - name: Install sqlx-cli
         run: cargo install sqlx-cli
           --version=${{ vars.SQLX_VERSION }}
