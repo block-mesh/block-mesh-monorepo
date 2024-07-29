@@ -29,7 +29,7 @@ pub fn NetworkStatusComponent() -> impl IntoView {
                 height="433"
                 decoding="async"
                 data-nimg="1"
-                class="absolute top-0 right-0 h-full w-[70%] max-w-[800px] object-cover object-left"
+                class="opacity-30 absolute top-0 right-0 h-full w-[70%] max-w-[800px] object-cover object-left"
                 src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/b589b8b1-ae33-488c-e7d6-0259a1cd0d00/public"
                 style="color: transparent;"
             />

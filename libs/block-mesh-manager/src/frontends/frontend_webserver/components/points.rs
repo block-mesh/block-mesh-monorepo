@@ -17,7 +17,7 @@ pub fn PointsComponent() -> impl IntoView {
                 height="433"
                 decoding="async"
                 data-nimg="1"
-                class="absolute top-0 right-0 h-full w-[70%] max-w-[800px] object-cover object-left"
+                class="opacity-50 absolute top-0 right-0 h-full w-[70%] max-w-[800px] object-cover object-left"
                 src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/0e42f33d-48e0-4f17-5ae0-9249a41bb200/public"
                 style="color: transparent;"
             />

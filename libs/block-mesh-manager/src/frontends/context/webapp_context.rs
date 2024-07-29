@@ -1,7 +1,6 @@
+use block_mesh_common::interfaces::server_api::{AuthStatusResponse, DashboardResponse};
 use leptos::*;
 use std::fmt::Debug;
-
-use block_mesh_common::interfaces::server_api::{AuthStatusResponse, DashboardResponse};
 
 #[derive(Debug, Clone)]
 pub struct WebAppContext {

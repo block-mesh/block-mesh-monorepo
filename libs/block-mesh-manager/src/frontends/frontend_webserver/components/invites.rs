@@ -65,15 +65,13 @@ pub fn InvitesComponent() -> impl IntoView {
                             on:click=copy_to_clipboard
                             class="inline-flex hover:text-orange text-off-white py-2 px-4 border border-orange rounded font-bebas-neue focus:outline-none focus:shadow-outline"
                         >
-                            Copy Invite Link
                             <ClipboardIcon/>
                         </button>
-
                     </p>
                 </div>
                 <div class="py-6 px-4 sm:px-6 lg:px-8">
                     <p class="font-bebas-neue text-sm font-medium leading-6 text-off-white">
-                        Users Invited
+                        Referrals
                     </p>
                     <p class="mt-2 flex items-baseline gap-x-2">
                         <span class="text-4xl font-semibold tracking-tight text-white">
@@ -90,7 +88,7 @@ pub fn InvitesComponent() -> impl IntoView {
                 </div>
                 <div class="py-6 px-4 sm:px-6 lg:px-8">
                     <p class="font-bebas-neue text-sm font-medium leading-6 text-off-white">
-                        Edit Invite Code
+                        Edit
                     </p>
                     <p class="mt-2 flex items-baseline gap-x-2">
                         <A
