@@ -52,12 +52,6 @@ pub fn App() -> impl IntoView {
     let new_server_class = "text-zinc-950 antialiased lg:bg-zinc-100 dark:bg-zinc-900 dark:text-white dark:lg:bg-zinc-950";
 
     view! {
-        <meta http-equiv="cache-control" content="no-cache"/>
-        <meta http-equiv="expires" content="0"/>
-        <meta http-equiv="pragma" content="no-cache"/>
-        // <script src="https://cdn.tailwindcss.com"></script>
-        <Script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"/>
-        <Script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"/>
         <CommonHeader/>
         <Router fallback=|| { view! { <p>Error</p> }.into_view() }>
             <Routes>
