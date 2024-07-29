@@ -65,8 +65,8 @@ jobs:
         with:
           key: release-build
           cache-all-crates: true
-      - name: Install sccache
-        run: cargo install sccache --locked
+      - name: Sccache Action
+        uses: Mozilla-Actions/sccache-action@v0.0.5
       - name: "Create release"
         uses: "taiki-e/create-gh-release-action@v1"
         with:
@@ -105,8 +105,8 @@ jobs:
         with:
           key: release-upload-${{ matrix.target }}
           cache-all-crates: true
-      - name: Install sccache
-        run: cargo install sccache --locked
+      - name: Sccache Action
+        uses: Mozilla-Actions/sccache-action@v0.0.5
       - name: "Install Cargo Leptos"
         run: |
           cargo install cargo-leptos --version=${{ vars.LEPTOS_VERSION }} --locked
@@ -149,8 +149,8 @@ jobs:
         with:
           key: release-push
           cache-all-crates: true
-      - name: Install sccache
-        run: cargo install sccache --locked
+      - name: Sccache Action
+        uses: Mozilla-Actions/sccache-action@v0.0.5
       - name: "Log in to Docker Hub"
         uses: "docker/login-action@v3"
         with:
