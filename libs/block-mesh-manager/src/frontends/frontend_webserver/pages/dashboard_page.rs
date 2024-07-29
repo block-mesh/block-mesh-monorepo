@@ -6,7 +6,6 @@ use crate::frontends::frontend_webserver::components::navbar::NavbarComponent;
 use crate::frontends::frontend_webserver::components::network_status::NetworkStatusComponent;
 use crate::frontends::frontend_webserver::components::notification::NotificationComponent;
 use crate::frontends::frontend_webserver::components::points::PointsComponent;
-use crate::frontends::frontend_webserver::context::webapp_context::WebAppContext;
 use leptos::Suspense;
 use leptos::*;
 

@@ -1,5 +1,5 @@
 use crate::frontends::context::size_context::SizeContext;
-use crate::frontends::frontend_webserver::context::webapp_context::WebAppContext;
+use crate::frontends::context::webapp_context::WebAppContext;
 use charming::{
     component::Axis,
     element::{AxisType, BackgroundStyle},

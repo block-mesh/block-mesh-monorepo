@@ -1,9 +1,3 @@
-use leptos::*;
-use leptos_router::A;
-
-use crate::frontends::frontend_webserver::components::icons::clipboard_icon::ClipboardIcon;
-use crate::frontends::frontend_webserver::components::icons::edit_icon::EditIcon;
-use crate::frontends::frontend_webserver::context::webapp_context::WebAppContext;
 use crate::frontends::components::icons::clipboard_icon::ClipboardIcon;
 use crate::frontends::components::icons::edit_icon::EditIcon;
 use crate::frontends::context::webapp_context::WebAppContext;
