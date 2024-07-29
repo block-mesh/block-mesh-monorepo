@@ -39,7 +39,7 @@ dead_code = "forbid"
 
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.124"
+version = "0.0.125"
 
 [patch.crates-io]
 ## aes-gcm-siv 0.10.3 and curve25519-dalek 3.x pin zeroize to <1.4
@@ -58,6 +58,7 @@ aes-gcm-siv = { git = 'https://github.com/block-mesh/AEADs', branch = 'rustls-de
 curve25519-dalek = { git = "https://github.com/block-mesh/curve25519-dalek", branch = "rustls-dep-hell-1-18" }
 
 [workspace.dependencies]
+rayon = { version = "1.10.0" }
 charming = { version = "0.3.1", features = ["wasm"] }
 borsh = { version = "1.5.1" }
 sysinfo = { version = "0.30.12" }

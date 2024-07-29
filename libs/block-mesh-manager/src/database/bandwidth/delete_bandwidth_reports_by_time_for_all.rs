@@ -1,6 +1,5 @@
 use chrono::{Duration, Utc};
 use sqlx::{Postgres, Transaction};
-use uuid::Uuid;
 
 #[tracing::instrument(
     name = "delete_bandwidth_reports_by_time_for_all",
@@ -23,7 +22,6 @@ pub(crate) async fn delete_bandwidth_reports_by_time_for_all(
             created_at < $1
         "#,
         diff,
-        user_id,
     )
     .execute(&mut **transaction)
     .await?;

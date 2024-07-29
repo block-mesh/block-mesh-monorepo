@@ -1,9 +1,8 @@
 use chrono::{Duration, Utc};
 use sqlx::{Postgres, Transaction};
-use uuid::Uuid;
 
 #[tracing::instrument(
-    name = "delete_uptime_report_by_time_for_anyy",
+    name = "delete_uptime_report_by_time_for_all",
     skip(transaction),
     ret,
     err,
@@ -23,7 +22,6 @@ pub(crate) async fn delete_uptime_report_by_time_for_all(
             created_at < $1
         "#,
         diff,
-        user_id,
     )
     .execute(&mut **transaction)
     .await?;

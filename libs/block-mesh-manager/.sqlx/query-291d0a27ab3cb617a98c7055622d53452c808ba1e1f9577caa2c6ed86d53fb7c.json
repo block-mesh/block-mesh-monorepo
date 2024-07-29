@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        DELETE\n            FROM bandwidth_reports\n        WHERE\n            created_at < $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "291d0a27ab3cb617a98c7055622d53452c808ba1e1f9577caa2c6ed86d53fb7c"
+}

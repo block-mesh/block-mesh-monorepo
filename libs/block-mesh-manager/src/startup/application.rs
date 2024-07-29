@@ -6,6 +6,7 @@ use crate::envars::get_env_var_or_panic::get_env_var_or_panic;
 use crate::frontends::app::App;
 use crate::middlewares::authentication::{authentication_layer, Backend};
 use crate::routes;
+use crate::worker::db_cleaner_cron::EnrichIp;
 use axum::routing::{get, post};
 use axum::{Extension, Router};
 use axum_login::login_required;
@@ -18,6 +19,7 @@ use std::net::SocketAddr;
 use std::path::Path;
 use std::sync::Arc;
 use tokio::net::TcpListener;
+use tokio::sync::mpsc::UnboundedSender;
 use tokio::task::JoinHandle;
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
@@ -33,6 +35,7 @@ pub struct AppState {
     pub client: Client,
     pub tx: tokio::sync::mpsc::Sender<JoinHandle<()>>,
     pub flags: HashMap<String, bool>,
+    pub cleaner_tx: UnboundedSender<EnrichIp>,
 }
 
 #[derive(Clone)]

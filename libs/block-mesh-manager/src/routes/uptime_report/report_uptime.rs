@@ -27,6 +27,7 @@ use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
+use crate::worker::db_cleaner_cron::EnrichIp;
 
 #[tracing::instrument(name = "report_uptime", level = "trace", skip(pool, query, state), ret)]
 pub async fn handler(
@@ -52,7 +53,7 @@ pub async fn handler(
     if daily_stat_opt.is_none() {
         create_daily_stat(&mut transaction, user.id).await?;
     }
-    let uptime_id = create_uptime_report(&mut transaction, user.id).await?;
+    let uptime_id = create_uptime_report(&mut transaction, &user.id, &query.ip).await?;
     let uptimes = get_user_uptimes(&mut transaction, user.id, 2).await?;
     if uptimes.len() == 2 {
         let diff = uptimes[0].created_at - uptimes[1].created_at;
@@ -84,6 +85,19 @@ pub async fn handler(
     }
 
     transaction.commit().await.map_err(Error::from)?;
+
+    let flag = state.flags.get("send_cleanup_to_rayon").unwrap_or(&false);
+    if *flag {
+        let _ = state.cleaner_tx.send(EnrichIp {
+            uptime_id,
+            user_id: user.id,
+            ip: match &query.ip {
+                None => addr.ip().to_string(),
+                Some(ip) => ip.to_string(),
+            },
+        });
+    }
+
     let flag = state
         .flags
         .get("enrich_ip_and_cleanup_in_background")

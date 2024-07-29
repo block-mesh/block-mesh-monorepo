@@ -5,6 +5,7 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use block_mesh_manager::worker::db_cleaner_cron::{db_cleaner_cron, EnrichIp};
     use block_mesh_manager::worker::finalize_daily_cron::finalize_daily_cron;
     use block_mesh_common::feature_flag_client::get_all_flags;
     use tokio::task::JoinHandle;
@@ -70,6 +71,7 @@ async fn run() -> anyhow::Result<()> {
         configuration.application.base_url.clone(),
     ));
     let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(100);
+    let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::unbounded_channel::<EnrichIp>();
     let client = Client::new();
 
     let flags = get_all_flags(&client).await?;
@@ -80,18 +82,21 @@ async fn run() -> anyhow::Result<()> {
         client,
         tx,
         flags,
+        cleaner_tx,
     });
     let application = Application::build(configuration, app_state, db_pool.clone()).await;
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
     let application_task = tokio::spawn(application.run());
     let joiner_task = tokio::spawn(joiner_loop(rx));
     let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
+    let db_cleaner_task = tokio::spawn(db_cleaner_cron(db_pool.clone(), cleaner_rx));
 
     tokio::select! {
         o = application_task => report_exit("API", o),
         o = rpc_worker_task =>  report_exit("RPC Background worker failed", o),
         o = joiner_task => report_exit("Joiner task failed", o),
-        o = finalize_daily_stats_task => report_exit("Finalize daily task failed", o)
+        o = finalize_daily_stats_task => report_exit("Finalize daily task failed", o),
+        o = db_cleaner_task => report_exit("DB cleaner task failed", o)
     };
     Ok(())
 }
