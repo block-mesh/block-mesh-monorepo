@@ -3,9 +3,10 @@ use reqwest::Client;
 use serde_json::Value;
 use std::collections::HashMap;
 
-const FLAGS: [&str; 2] = [
+const FLAGS: [&str; 3] = [
     "enrich_ip_and_cleanup_in_background",
     "submit_bandwidth_run_background",
+    "send_cleanup_to_rayon",
 ];
 
 pub async fn get_all_flags(client: &Client) -> anyhow::Result<HashMap<String, bool>> {

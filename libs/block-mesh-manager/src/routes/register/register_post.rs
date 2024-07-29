@@ -93,7 +93,7 @@ pub async fn handler(
     create_nonce(&mut transaction, &user_id, &nonce_secret).await?;
     create_api_token(&mut transaction, user_id).await?;
     create_invite_code(&mut transaction, user_id, Uuid::new_v4().to_string()).await?;
-    create_uptime_report(&mut transaction, user_id).await?;
+    create_uptime_report(&mut transaction, &user_id, &None).await?;
     if !form.invite_code.is_empty() {
         match get_user_opt_by_invited_code(&mut transaction, form.invite_code).await? {
             Some(invited_by_user) => {
