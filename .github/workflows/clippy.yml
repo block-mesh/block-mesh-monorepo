@@ -31,6 +31,10 @@ jobs:
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
           components: clippy
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: clippy-sqlx-${{ vars.SQLX_VERSION }}
+          cache-all-crates: true
       - name: Sccache Action
         uses: Mozilla-Actions/sccache-action@v0.0.5
       - name: Linting
