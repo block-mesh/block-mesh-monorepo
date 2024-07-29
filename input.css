@@ -54,3 +54,49 @@
         width: 4px;
     }
 }
+
+.data-\[slot\=icon\]\:\*\:size-6 > *[data-slot=icon] {
+  width: 1.5rem;
+  height: 1.5rem;
+}
+
+.data-\[slot\=icon\]\:\*\:shrink-0 > *[data-slot=icon] {
+  flex-shrink: 0;
+}
+
+.data-\[slot\=icon\]\:\*\:data-\[active\]\:fill-zinc-950[data-active] > *[data-slot=icon] {
+  fill: #09090b;
+}
+
+.data-\[slot\=icon\]\:\*\:data-\[current\]\:fill-zinc-950[data-current] > *[data-slot=icon] {
+  fill: #09090b;
+}
+
+.data-\[slot\=icon\]\:\*\:data-\[hover\]\:fill-zinc-950[data-hover] > *[data-slot=icon] {
+  fill: #09090b;
+}
+
+.data-\[slot\=icon\]\:\*\:fill-zinc-500 > *[data-slot=icon] {
+  fill: #71717a;
+}
+
+.data-\[slot\=icon\]\:last\:\*\:ml-auto > *:last-child[data-slot=icon] {
+  margin-left: auto;
+}
+
+.data-\[slot\=icon\]\:last\:\*\:size-5 > *:last-child[data-slot=icon] {
+  width: 1.25rem;
+  height: 1.25rem;
+}
+
+@media (min-width: 640px) {
+  .sm\:data-\[slot\=icon\]\:\*\:size-5 > *[data-slot=icon] {
+    width: 1.25rem;
+    height: 1.25rem;
+  }
+
+  .sm\:data-\[slot\=icon\]\:last\:\*\:size-6 > *:last-child[data-slot=icon] {
+    width: 1.5rem;
+    height: 1.5rem;
+  }
+}
