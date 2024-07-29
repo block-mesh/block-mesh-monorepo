@@ -62,6 +62,7 @@ pub async fn handler(
                 day: i.day,
             }
         })
+        .rev()
         .collect();
 
     transaction.commit().await.map_err(Error::from)?;

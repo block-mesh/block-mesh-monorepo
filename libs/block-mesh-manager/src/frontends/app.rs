@@ -1,6 +1,7 @@
 use crate::frontends::components::notification_popup::NotificationPopup;
 use crate::frontends::context::auth_context::AuthContext;
 use crate::frontends::context::notification_context::NotificationContext;
+use crate::frontends::context::size_context::SizeContext;
 use crate::frontends::frontend_extension::components::navigator::ExtensionNavigator;
 use crate::frontends::frontend_extension::components::notification::ExtensionNotifications;
 use crate::frontends::frontend_extension::extension_header::ExtensionServerHeader;
@@ -36,6 +37,7 @@ pub fn App() -> impl IntoView {
     provide_context(NotificationContext::default());
     provide_context(ExtensionState::default());
     provide_context(WebAppContext::default());
+    provide_context(SizeContext::default());
 
     let _notification = use_context::<NotificationContext>().unwrap();
     let extension_state = use_context::<ExtensionState>().unwrap();
