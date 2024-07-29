@@ -7,6 +7,9 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+env:
+  SCCACHE_GHA_ENABLED: "true"
+  RUSTC_WRAPPER: "sccache"
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -34,8 +37,8 @@ jobs:
         with:
           key: cloudflare-deploy-${{ matrix.workdir }}
           cache-all-crates: true
-      - name: Install sccache
-        run: cargo install sccache --locked
+      - name: Sccache Action
+        uses: Mozilla-Actions/sccache-action@v0.0.5
       - name: Build & Deploy Worker
         uses: cloudflare/wrangler-action@v3
         with:

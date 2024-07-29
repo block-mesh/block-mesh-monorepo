@@ -9,6 +9,9 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+env:
+  SCCACHE_GHA_ENABLED: "true"
+  RUSTC_WRAPPER: "sccache"
 jobs:
   get-tag:
     name: "Get Tag From Package Version"
@@ -25,6 +28,8 @@ jobs:
         with:
           key: release-tag-extension
           cache-all-crates: true
+      - name: Sccache Action
+        uses: Mozilla-Actions/sccache-action@v0.0.5
       - name: "Get tag"
         id: "pkg-version"
         shell: "bash"

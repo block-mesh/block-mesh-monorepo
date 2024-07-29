@@ -13,6 +13,8 @@ concurrency:
   cancel-in-progress: true
 env:
   BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
+  SCCACHE_GHA_ENABLED: "true"
+  RUSTC_WRAPPER: "sccache"
 jobs:
   clippy:
     name: Clippy
@@ -33,13 +35,7 @@ jobs:
         with:
           key: clippy-sqlx-${{ vars.SQLX_VERSION }}
           cache-all-crates: true
-      - name: Install sccache
-        run: cargo install sccache --locked
-      - name: Install sqlx-cli
-        run: cargo install sqlx-cli
-          --version=${{ vars.SQLX_VERSION }}
-          --features ${{ vars.SQLX_FEATURES }}
-          --no-default-features
-          --locked
+      - name: Sccache Action
+        uses: Mozilla-Actions/sccache-action@v0.0.5
       - name: Linting
         run: cargo clippy --all -- -D warnings
