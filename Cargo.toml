@@ -58,10 +58,12 @@ aes-gcm-siv = { git = 'https://github.com/block-mesh/AEADs', branch = 'rustls-de
 curve25519-dalek = { git = "https://github.com/block-mesh/curve25519-dalek", branch = "rustls-dep-hell-1-18" }
 
 [workspace.dependencies]
+charming = { version = "0.3.1", features = ["wasm"] }
 borsh = { version = "1.5.1" }
 sysinfo = { version = "0.30.12" }
 tikv-jemallocator = { version = "0.5" }
 leptos_axum = { version = "0.6.12" }
+leptos-chartistry = { version = "0.1.6" }
 leptos-use = { version = "0.10.10" }
 leptos_meta = { version = "0.6.12" }
 gloo-utils = { version = "0.2.0" }

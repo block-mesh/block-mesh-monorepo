@@ -39,63 +39,59 @@ pub fn InvitesComponent() -> impl IntoView {
     };
 
     view! {
-        <div class="m-2">
-            <div class="border-off-white border m-2 relative overflow-hidden rounded-[30px] pt-6 md:pt-[33px] pb-7 md:pb-[39px] pl-[11px] md:pl-[44px]">
-                <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 rounded">
-                    <div class="py-6">
-                        <p class="font-bebas-neue text-sm font-medium leading-6 text-off-white">
-                            Invite Code
-                        </p>
-                        <p class="mt-2 flex items-baseline gap-x-2">
-                            <button
-                                type="button"
-                                id="copy_invite_code"
-                                invite_code=move || {
-                                    match async_data.get() {
-                                        Some(Some(response)) => response.invite_code.clone(),
-                                        _ => "".to_string(),
-                                    }
+        <div class="border-off-white border m-2 relative overflow-hidden rounded-[30px] pt-6 md:pt-[33px] pb-7 md:pb-[39px] pl-[11px] md:pl-[44px]">
+            <div class="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-3 rounded">
+                <div class="py-6">
+                    <p class="font-bebas-neue text-sm font-medium leading-6 text-off-white">
+                        Invite Code
+                    </p>
+                    <p class="mt-2 flex items-baseline gap-x-2">
+                        <button
+                            type="button"
+                            id="copy_invite_code"
+                            invite_code=move || {
+                                match async_data.get() {
+                                    Some(Some(response)) => response.invite_code.clone(),
+                                    _ => "".to_string(),
                                 }
+                            }
 
-                                on:click=copy_to_clipboard
-                                class="inline-flex hover:text-orange text-off-white py-2 px-4 border border-orange rounded font-bebas-neue focus:outline-none focus:shadow-outline"
-                            >
-                                Copy Invite Link
-                                <ClipboardIcon/>
-                            </button>
+                            on:click=copy_to_clipboard
+                            class="inline-flex hover:text-orange text-off-white py-2 px-4 border border-orange rounded font-bebas-neue focus:outline-none focus:shadow-outline"
+                        >
+                            <ClipboardIcon/>
+                        </button>
+                    </p>
+                </div>
+                <div class="py-6 px-4 sm:px-6 lg:px-8">
+                    <p class="font-bebas-neue text-sm font-medium leading-6 text-off-white">
+                        Referrals
+                    </p>
+                    <p class="mt-2 flex items-baseline gap-x-2">
+                        <span class="text-4xl font-semibold tracking-tight text-white">
+                            {move || {
+                                let number_of_users_invited = match async_data.get() {
+                                    Some(Some(response)) => response.number_of_users_invited,
+                                    _ => 0i64,
+                                };
+                                format!("{}", number_of_users_invited)
+                            }}
 
-                        </p>
-                    </div>
-                    <div class="py-6 px-4 sm:px-6 lg:px-8">
-                        <p class="font-bebas-neue text-sm font-medium leading-6 text-off-white">
-                            Users Invited
-                        </p>
-                        <p class="mt-2 flex items-baseline gap-x-2">
-                            <span class="text-4xl font-semibold tracking-tight text-white">
-                                {move || {
-                                    let number_of_users_invited = match async_data.get() {
-                                        Some(Some(response)) => response.number_of_users_invited,
-                                        _ => 0i64,
-                                    };
-                                    format!("{}", number_of_users_invited)
-                                }}
-
-                            </span>
-                        </p>
-                    </div>
-                    <div class="py-6 px-4 sm:px-6 lg:px-8">
-                        <p class="font-bebas-neue text-sm font-medium leading-6 text-off-white">
-                            Edit Invite Code
-                        </p>
-                        <p class="mt-2 flex items-baseline gap-x-2">
-                            <A
-                                href="/ui/edit_invite_code"
-                                class="text-4xl font-semibold tracking-tight text-white"
-                            >
-                                <EditIcon/>
-                            </A>
-                        </p>
-                    </div>
+                        </span>
+                    </p>
+                </div>
+                <div class="py-6 px-4 sm:px-6 lg:px-8">
+                    <p class="font-bebas-neue text-sm font-medium leading-6 text-off-white">
+                        Edit
+                    </p>
+                    <p class="mt-2 flex items-baseline gap-x-2">
+                        <A
+                            href="/ui/edit_invite_code"
+                            class="text-4xl font-semibold tracking-tight text-white"
+                        >
+                            <EditIcon/>
+                        </A>
+                    </p>
                 </div>
             </div>
         </div>

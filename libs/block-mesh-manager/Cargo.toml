@@ -7,6 +7,8 @@ authors.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+charming = { workspace = true, features = ["wasm"] }
+js-sys = { workspace = true }
 gloo-utils = { workspace = true }
 wasm-bindgen-futures = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
@@ -219,4 +221,4 @@ lib-default-features = false
 lib-profile-release = "release"
 
 # Tailwind
-style-file = "../../output-server.css"
+#style-file = "../../output-server.css"

@@ -12,13 +12,14 @@ pub(crate) async fn create_daily_stat(
     let day = now.date_naive();
     let id = Uuid::new_v4();
     sqlx::query!(
-        r#"INSERT INTO daily_stats (id, created_at, user_id, tasks_count, status, day) VALUES ($1, $2, $3, $4, $5, $6)"#,
+        r#"INSERT INTO daily_stats (id, created_at, user_id, tasks_count, status, day, uptime) VALUES ($1, $2, $3, $4, $5, $6, $7)"#,
         id,
         now,
         user_id,
         0,
         DailyStatStatus::OnGoing.to_string(),
-        day
+        day,
+        0.0
     )
         .execute(&mut **transaction)
         .await?;

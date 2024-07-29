@@ -20,9 +20,9 @@ pub fn CommonHeader() -> impl IntoView {
             rel="stylesheet"
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
         />
-        <meta http-equiv="cache-control" content="no-cache"/>
-        <meta http-equiv="expires" content="0"/>
-        <meta http-equiv="pragma" content="no-cache"/>
+        <Meta http_equiv="cache-control" content="no-cache"/>
+        <Meta http_equiv="expires" content="0"/>
+        <Meta http_equiv="pragma" content="no-cache"/>
         <Stylesheet href="https://r2-assets.blockmesh.xyz/tailwind.css"/>
         <Stylesheet id="leptos" href="/pkg/block-mesh-manager.css"/>
 
@@ -43,7 +43,6 @@ pub fn CommonHeader() -> impl IntoView {
             rel="icon"
             href="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/e4f3cdc0-c2ba-442d-3e48-e2f31c0dc100/public"
         />
-
         <Script>
             r#"
              window.addEventListener("message", onMessage);
@@ -57,7 +56,8 @@ pub fn CommonHeader() -> impl IntoView {
              }
             "#
         </Script>
-
+        <Script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"/>
+        <Script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"/>
         <Script src="https://www.googletagmanager.com/gtag/js?id=G-RYHLW3MDK2"/>
         <Script>
             r#"

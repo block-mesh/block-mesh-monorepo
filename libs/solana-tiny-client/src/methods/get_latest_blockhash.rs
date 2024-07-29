@@ -55,7 +55,7 @@ mod tests {
             .get_latest_blockhash(None, None)
             .await
             .unwrap();
-        assert!(response.result.value.blockhash.len() > 0);
+        assert!(!response.result.value.blockhash.is_empty());
         assert!(response.result.value.lastValidBlockHeight > 0);
     }
 }
