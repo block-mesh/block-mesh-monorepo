@@ -22,6 +22,8 @@ env:
   APP_ENVIRONMENT: production
   SENTRY: ${{ secrets.SENTRY }}
   MAPBOX: ${{ secrets.MAPBOX }}
+  SCCACHE_GHA_ENABLED: "true"
+  RUSTC_WRAPPER: "sccache"
 jobs:
   get-tag:
     name: "Get Tag From Package Version"
@@ -39,8 +41,8 @@ jobs:
         with:
           key: release-tag-server
           cache-all-crates: true
-      - name: Install sccache
-        run: cargo install sccache --locked
+      - name: Sccache Action
+        uses: Mozilla-Actions/sccache-action@v0.0.5
       - name: "Get tag"
         id: "pkg-version"
         shell: "bash"
