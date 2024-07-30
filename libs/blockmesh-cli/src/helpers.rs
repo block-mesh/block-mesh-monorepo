@@ -18,6 +18,6 @@ pub async fn login(login_form: LoginForm) -> anyhow::Result<Uuid> {
         .map_err(|e| anyhow!(e.to_string()))?;
     match response.api_token {
         Some(api_token) => Ok(api_token),
-        None => return Err(anyhow!("missing api_token")),
+        None => Err(anyhow!("missing api_token")),
     }
 }
