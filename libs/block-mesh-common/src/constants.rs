@@ -61,6 +61,7 @@ pub enum DeviceType {
     TestProxyMaster,
     TestProxyEndpoint,
     AppServer,
+    Cli,
 }
 
 impl Display for DeviceType {
@@ -74,6 +75,7 @@ impl Display for DeviceType {
             DeviceType::TestProxyMaster => write!(f, "test-proxy-master"),
             DeviceType::TestProxyEndpoint => write!(f, "test-proxy-endpoint"),
             DeviceType::AppServer => write!(f, "app-server"),
+            DeviceType::Cli => write!(f, "cli"),
         }
     }
 }
