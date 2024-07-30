@@ -3,6 +3,8 @@ use crate::{BASE_URL, DOWNLOAD_URL};
 use anyhow::anyhow;
 use reqwest::{header::HeaderValue, Client};
 
+const EMPTY_HEADER: HeaderValue = HeaderValue::from_static("");
+
 fn extract_header_value(
     headers: &reqwest::header::HeaderMap,
     header_name: &str,
@@ -10,9 +12,9 @@ fn extract_header_value(
 ) -> String {
     headers
         .get(header_name)
-        .unwrap_or(&HeaderValue::from_str(na_value).unwrap())
+        .unwrap_or(&HeaderValue::from_str(na_value).unwrap_or(EMPTY_HEADER))
         .to_str()
-        .unwrap()
+        .unwrap_or(na_value)
         .to_owned()
 }
 
@@ -44,5 +46,21 @@ mod tests {
         let metadata = fetch_metadata().await;
         assert!(metadata.is_ok());
         println!("metadata: {:#?}", metadata.unwrap());
+    }
+
+    #[tokio::test]
+    async fn test_extract_header_1() {
+        let headers = reqwest::header::HeaderMap::new();
+        let header_value = extract_header_value(&headers, "cf-meta-city", "City N/A");
+        assert_eq!("City N/A", header_value);
+    }
+
+    #[tokio::test]
+    async fn test_extract_header_2() {
+        let mut headers = reqwest::header::HeaderMap::new();
+        let value = HeaderValue::from_str("VALUE").unwrap();
+        headers.insert("TEST", value);
+        let header_value = extract_header_value(&headers, "TEST", "City N/A");
+        assert_eq!("VALUE", header_value);
     }
 }
