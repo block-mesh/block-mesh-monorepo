@@ -19,3 +19,7 @@ reqwest = { workspace = true, features = [
 tracing = { workspace = true }
 anyhow = { workspace = true }
 uuid = { workspace = true, features = ["v4", "fast-rng", "macro-diagnostics", "serde", "js"] }
+chrono = { workspace = true }
+speed-test = { path = "../speed-test" }
+logger-general = { path = "../logger-general" }
+

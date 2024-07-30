@@ -1314,10 +1314,13 @@ version = "0.0.125"
 dependencies = [
  "anyhow",
  "block-mesh-common",
+ "chrono",
  "clap 4.5.8",
+ "logger-general",
  "reqwest 0.11.27",
  "serde",
  "serde_json",
+ "speed-test",
  "tokio",
  "tracing",
  "uuid",
