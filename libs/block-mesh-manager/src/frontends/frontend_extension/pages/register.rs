@@ -7,7 +7,6 @@ use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType, Mes
 use block_mesh_common::interfaces::server_api::RegisterForm;
 use leptos::*;
 use leptos_dom::tracing;
-use leptos_router::A;
 
 #[component]
 pub fn ExtensionRegister() -> impl IntoView {
