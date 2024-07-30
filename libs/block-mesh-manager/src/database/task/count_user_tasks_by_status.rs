@@ -17,7 +17,7 @@ pub async fn count_user_tasks_by_status(
             SELECT 1
             FROM tasks
             WHERE
-            user_id = $1
+            assigned_user_id = $1
             AND
             status = $2
         ) as subquery
