@@ -146,12 +146,9 @@ pub fn ExtensionRegister() -> impl IntoView {
             <div class="auth-card-bottom">
                 <small class="font-open-sans text-orange">You already have an account?</small>
                 <br/>
-                <small
-                    class="text-magenta underline cursor-pointer"
-                    on:click=move |_| { state.status.update(|v| *v = AuthStatus::LoggedOut) }
-                >
-                    <A href="/ext/login">Login now</A>
-                </small>
+                <button on:click=move |_| { state.status.update(|v| *v = AuthStatus::LoggedOut) }>
+                    <small class="text-magenta underline cursor-pointer">Login now</small>
+                </button>
             </div>
         </div>
     }

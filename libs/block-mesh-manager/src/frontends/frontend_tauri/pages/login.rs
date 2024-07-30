@@ -97,6 +97,7 @@ pub fn TauriLogin() -> impl IntoView {
                                 state.status.update(|v| *v = AuthStatus::Registering)
                             }
                         >
+
                             Register
                         </button>
                     </div>
