@@ -3,7 +3,7 @@ use crate::{BASE_URL, DOWNLOAD_URL};
 use anyhow::anyhow;
 use reqwest::{header::HeaderValue, Client};
 
-const EMPTY_HEADER: HeaderValue = HeaderValue::from_static("");
+static EMPTY_HEADER: HeaderValue = HeaderValue::from_static("");
 
 fn extract_header_value(
     headers: &reqwest::header::HeaderMap,
@@ -12,7 +12,7 @@ fn extract_header_value(
 ) -> String {
     headers
         .get(header_name)
-        .unwrap_or(&HeaderValue::from_str(na_value).unwrap_or(EMPTY_HEADER))
+        .unwrap_or(&HeaderValue::from_str(na_value).unwrap_or_else(|_| EMPTY_HEADER.clone()))
         .to_str()
         .unwrap_or(na_value)
         .to_owned()
