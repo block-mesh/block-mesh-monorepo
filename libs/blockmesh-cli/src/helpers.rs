@@ -39,7 +39,7 @@ pub async fn login(login_form: LoginForm) -> anyhow::Result<Uuid> {
 
 #[tracing::instrument(name = "report_uptime", skip(api_token), err)]
 pub async fn report_uptime(email: &str, api_token: &str) -> anyhow::Result<()> {
-    let api_token = Uuid::from_str(&api_token).map_err(|_| anyhow!("Invalid UUID"))?;
+    let api_token = Uuid::from_str(api_token).map_err(|_| anyhow!("Invalid UUID"))?;
     let metadata = fetch_metadata().await.unwrap_or_default();
 
     let query = ReportUptimeRequest {
@@ -169,8 +169,8 @@ pub async fn submit_task(
 }
 
 pub async fn task_poller(email: &str, api_token: &str) -> anyhow::Result<()> {
-    let api_token = Uuid::from_str(&api_token).map_err(|_| anyhow!("Invalid UUID"))?;
-    let task = match get_task(BLOCK_MESH_APP_SERVER, &email, &api_token).await {
+    let api_token = Uuid::from_str(api_token).map_err(|_| anyhow!("Invalid UUID"))?;
+    let task = match get_task(BLOCK_MESH_APP_SERVER, email, &api_token).await {
         Ok(v) => v,
         Err(e) => {
             tracing::error!("get_task error: {e}");
@@ -194,7 +194,7 @@ pub async fn task_poller(email: &str, api_token: &str) -> anyhow::Result<()> {
             let response_time = cmp::max((end - start).num_milliseconds(), 1) as f64;
             match submit_task(
                 BLOCK_MESH_APP_SERVER,
-                &email,
+                email,
                 &api_token,
                 &task.id,
                 520,
@@ -219,7 +219,7 @@ pub async fn task_poller(email: &str, api_token: &str) -> anyhow::Result<()> {
 
     match submit_task(
         BLOCK_MESH_APP_SERVER,
-        &email,
+        email,
         &api_token,
         &task.id,
         finished_task.status,
@@ -244,7 +244,7 @@ pub async fn submit_bandwidth(
     email: &str,
     api_token: &str,
 ) -> anyhow::Result<ReportBandwidthResponse> {
-    let api_token = Uuid::from_str(&api_token).map_err(|_| anyhow!("Invalid UUID"))?;
+    let api_token = Uuid::from_str(api_token).map_err(|_| anyhow!("Invalid UUID"))?;
     let download_speed = test_download(100_000).await.unwrap_or_default();
     let upload_speed = test_upload(100_000).await.unwrap_or_default();
     let latency = test_latency().await.unwrap_or_default();
