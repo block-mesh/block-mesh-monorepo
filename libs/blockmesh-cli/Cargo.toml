@@ -1,0 +1,21 @@
+[package]
+name = "blockmesh-cli"
+edition = "2021"
+authors.workspace = true
+version.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+clap = { workspace = true, features = ["derive"] }
+block-mesh-common = { path = "../block-mesh-common", features = ["http", "cli", "app-config"] }
+tokio = { workspace = true, features = ["full"] }
+serde = { workspace = true, features = ['derive'] }
+serde_json = { workspace = true }
+reqwest = { workspace = true, features = [
+  "json",
+  "hickory-dns"
+] }
+tracing = { workspace = true }
+anyhow = { workspace = true }
+uuid = { workspace = true, features = ["v4", "fast-rng", "macro-diagnostics", "serde", "js"] }

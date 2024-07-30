@@ -213,3 +213,13 @@ pub struct ProxyMasterNodeOptions {
     #[clap(long, short)]
     pub gui: bool,
 }
+
+#[derive(Parser, Debug, Clone, PartialEq, Default)]
+pub struct CliOpts {
+    /// Email
+    #[arg(long)]
+    pub email: String,
+    /// Password
+    #[arg(long)]
+    pub password: String,
+}

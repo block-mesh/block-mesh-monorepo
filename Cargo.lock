@@ -1309,6 +1309,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "blockmesh-cli"
+version = "0.0.125"
+dependencies = [
+ "anyhow",
+ "block-mesh-common",
+ "clap 4.5.8",
+ "reqwest 0.11.27",
+ "serde",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
 name = "blockmesh-leptos"
 version = "0.0.125"
 dependencies = [
