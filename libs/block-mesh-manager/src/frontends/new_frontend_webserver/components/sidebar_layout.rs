@@ -29,9 +29,8 @@ pub fn MobileSidebar<CloseFn>(
 where
     CloseFn: Fn() + Clone + 'static,
 {
-    let aside_class = Signal::derive(move || {
-        tw_join!("lg:hidden", (!open.get()).then_some("hidden"))
-    });
+    let aside_class =
+        Signal::derive(move || tw_join!("lg:hidden", (!open.get()).then_some("hidden")));
 
     let backdrop_class = move || {
         tw_join!(

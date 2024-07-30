@@ -219,4 +219,4 @@ lib-default-features = false
 lib-profile-release = "release"
 
 # Tailwind
-style-file = "../../output-server.css"
+#style-file = "../../output-server.css"
