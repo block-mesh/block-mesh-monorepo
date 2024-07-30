@@ -8,6 +8,7 @@ use crate::domain::aggregate::AggregateName;
 use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
+use crate::utils::points::calc_points;
 use axum::{Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::{DailyStatForDashboard, DashboardResponse};
@@ -54,7 +55,7 @@ pub async fn handler(
         .await?
         .into_iter()
         .map(|i| {
-            let points = (i.uptime / (24 * 60 * 60) as f64) * 100.0 + (i.tasks_count as f64 * 10.0);
+            let points = calc_points(i.uptime, i.tasks_count);
             DailyStatForDashboard {
                 tasks_count: i.tasks_count,
                 uptime: i.uptime,
@@ -64,12 +65,8 @@ pub async fn handler(
         })
         .rev()
         .collect();
-
+    let points = calc_points(overall_uptime, overall_task_count);
     transaction.commit().await.map_err(Error::from)?;
-
-    let points =
-        (overall_uptime / (24 * 60 * 60) as f64) * 100.0 + (overall_task_count as f64 * 10.0);
-
     Ok(Json(DashboardResponse {
         points,
         number_of_users_invited,
