@@ -26,24 +26,31 @@ fn start() {
 }
 
 #[event(fetch)]
-async fn main(_req: Request, _env: Env, _ctx: Context) -> Result<Response> {
+async fn main(req: Request, _env: Env, _ctx: Context) -> Result<Response> {
+    let path = req.path();
+    console_log!("path {}", path);
     let latest = match get_release().await {
         Ok(latest) => latest,
         Err(_) => {
             return Response::error("Failed to fetch latest release", 500);
         }
     };
-    let json_asset = match latest.get_json() {
-        Some(asset) => asset,
-        None => {
-            return Response::error("Failed to find json asset", 500);
-        }
-    };
-    let json = match get_json(&json_asset.browser_download_url).await {
-        Ok(json) => json,
-        Err(_) => {
-            return Response::error("Failed to fetch asset", 500);
-        }
-    };
-    Response::from_json(&json)
+    console_log!("Latest {:#?}", latest);
+    if path == "/cli" {
+        Response::from_json(&latest.get_cli())
+    } else {
+        let json_asset = match latest.get_json() {
+            Some(asset) => asset,
+            None => {
+                return Response::error("Failed to find json asset", 500);
+            }
+        };
+        let json = match get_json(&json_asset.browser_download_url).await {
+            Ok(json) => json,
+            Err(_) => {
+                return Response::error("Failed to fetch asset", 500);
+            }
+        };
+        Response::from_json(&json)
+    }
 }
