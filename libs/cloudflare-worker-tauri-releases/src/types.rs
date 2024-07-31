@@ -50,9 +50,19 @@ impl Asset {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 #[allow(dead_code)]
 pub struct LatestRelease {
+    pub tag_name: String,
+    pub name: String,
+    pub created_at: String,
     pub url: String,
     pub id: u64,
     pub assets: Vec<Asset>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct CliVersion {
+    pub tag_name: String,
+    pub name: String,
+    pub url: String,
 }
 
 impl LatestRelease {
@@ -63,6 +73,18 @@ impl LatestRelease {
             }
         }
         None
+    }
+
+    pub fn get_cli(&self) -> Vec<CliVersion> {
+        self.assets
+            .iter()
+            .filter(|asset| asset.name.contains("blockmesh-cli"))
+            .map(|asset| CliVersion {
+                tag_name: self.tag_name.clone(),
+                name: self.name.clone(),
+                url: asset.browser_download_url.clone(),
+            })
+            .collect()
     }
 
     #[allow(dead_code)]
