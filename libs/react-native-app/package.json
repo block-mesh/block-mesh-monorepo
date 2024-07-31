@@ -17,6 +17,7 @@
   "dependencies": {
     "@bounceapp/iframe": "^0.3.0",
     "@expo/vector-icons": "^14.0.2",
+    "@react-native-async-storage/async-storage": "^1.24.0",
     "@react-navigation/native": "^6.0.2",
     "expo": "~51.0.21",
     "expo-constants": "~16.0.2",
@@ -38,13 +39,13 @@
     "react-native-webview": "13.8.6"
   },
   "devDependencies": {
-    "react-devtools": "^5.3.1",
     "@babel/core": "^7.20.0",
     "@types/jest": "^29.5.12",
     "@types/react": "~18.2.45",
     "@types/react-test-renderer": "^18.0.7",
     "jest": "^29.2.1",
     "jest-expo": "~51.0.3",
+    "react-devtools": "^5.3.1",
     "react-test-renderer": "18.2.0",
     "typescript": "~5.3.3"
   },

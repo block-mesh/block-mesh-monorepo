@@ -68,10 +68,6 @@ pub fn App() -> impl IntoView {
                         // console.log("msg", window.location.href , msg, msg?.data);
                     }
                 }
-                // window.addEventListener("message", onMessage2);
-                // function onMessage2(e) {
-                //     window.webkit.messageHandlers.ReactNativeWebView.postMessage(`hello from server ${JSON.stringify(e)}`);
-                // }
             "#
         </Script>
         <Router fallback=|| { view! { <p>Error</p> }.into_view() }>

@@ -1,5 +1,5 @@
 use crate::frontends::frontend_extension::utils::connectors::{
-    ask_for_all_storage_values, onPostMessage,
+    ask_for_all_storage_values, onPostMessage, send_message_channel,
 };
 use block_mesh_common::chrome_storage::{
     AuthStatus, MessageKey, MessageType, MessageValue, PostMessage,
