@@ -263,7 +263,7 @@ pub fn App() -> impl IntoView {
                                     class=""
                                     loading=|| view! { <ExtensionLoading/> }
                                 >
-                                    <ExtensionNotifications/>
+                                    <NotificationPopup/>
                                     <ExtensionNavigator/>
                                     <ExtensionLogin/>
                                 </Wrapper>
@@ -281,7 +281,7 @@ pub fn App() -> impl IntoView {
                                     auth=Some(auth_state)
                                     loading=|| view! { <ExtensionLoading/> }
                                 >
-                                    <ExtensionNotifications/>
+                                    <NotificationPopup/>
                                     <ExtensionNavigator/>
                                     <ExtensionRegister/>
                                 </Wrapper>
@@ -299,7 +299,7 @@ pub fn App() -> impl IntoView {
                                     auth=Some(auth_state)
                                     loading=|| view! { <ExtensionLoading/> }
                                 >
-                                    <ExtensionNotifications/>
+                                    <NotificationPopup/>
                                     <ExtensionNavigator/>
                                     <ExtensionLoggedIn/>
                                 </Wrapper>
