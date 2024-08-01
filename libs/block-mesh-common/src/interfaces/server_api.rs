@@ -192,6 +192,14 @@ pub struct DashboardResponse {
     pub invite_code: String,
     pub connected: bool,
     pub daily_stats: Vec<DailyStatForDashboard>,
+    pub perks: Vec<PerkUI>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
+pub struct PerkUI {
+    pub id: Uuid,
+    pub name: String,
+    pub multiplier: f64,
 }
 
 #[derive(Default, Serialize, Deserialize, Debug, Clone, PartialEq)]
