@@ -70,13 +70,13 @@ export default function IFrameWrapper() {
             const message: PostMessage = {
               msg_type: 'SET',
               key: 'blockmesh_url',
-              value: 'http://localhost:8000'
+              value: url
             }
             webview_ref.current?.postMessage(JSON.stringify(message))
           }, 500)
         }}
         originWhitelist={['*']}
-        source={{ uri: 'http://localhost:8000/tauri/login' }}
+        source={{ uri: `${url}/tauri/login` }}
         style={styles.webview}
         injectedJavaScript={injectedJavaScript}
         javaScriptEnabled={true}
