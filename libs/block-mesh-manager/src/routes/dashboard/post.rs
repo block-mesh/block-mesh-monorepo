@@ -2,6 +2,7 @@ use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_tran
 use crate::database::daily_stat::get_daily_stats_by_user_id::get_daily_stats_by_user_id;
 use crate::database::invite_code::get_number_of_users_invited::get_number_of_users_invited;
 use crate::database::invite_code::get_user_latest_invite_code::get_user_latest_invite_code;
+use crate::database::perks::get_user_perks::get_user_perks;
 use crate::database::task::count_user_tasks_by_status::count_user_tasks_by_status;
 use crate::database::uptime_report::get_user_uptimes::get_user_uptimes;
 use crate::domain::aggregate::AggregateName;
@@ -51,11 +52,16 @@ pub async fn handler(
     } else {
         false
     };
+    let perks: Vec<f64> = get_user_perks(&mut transaction, user.id)
+        .await?
+        .into_iter()
+        .map(|i| i.multiplier)
+        .collect();
     let daily_stats = get_daily_stats_by_user_id(&mut transaction, &user.id)
         .await?
         .into_iter()
         .map(|i| {
-            let points = calc_points(i.uptime, i.tasks_count);
+            let points = calc_points(i.uptime, i.tasks_count, &perks);
             DailyStatForDashboard {
                 tasks_count: i.tasks_count,
                 uptime: i.uptime,
@@ -65,7 +71,7 @@ pub async fn handler(
         })
         .rev()
         .collect();
-    let points = calc_points(overall_uptime, overall_task_count);
+    let points = calc_points(overall_uptime, overall_task_count, &perks);
     transaction.commit().await.map_err(Error::from)?;
     Ok(Json(DashboardResponse {
         points,

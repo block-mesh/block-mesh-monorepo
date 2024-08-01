@@ -26,3 +26,26 @@ export async function send_message(msg) {
     return ''
   }
 }
+
+export async function pubkey() {
+  if (!window.backpack) {
+    return ''
+  }
+  await window.backpack.connect()
+  return window.backpack.publicKey.toBase58()
+}
+
+export async function sign_message(msg) {
+  try {
+    if (!window.backpack) {
+      return ''
+    }
+    await window.backpack.connect()
+    const message = new TextEncoder().encode(msg)
+    const out = await window.backpack.signMessage(message)
+    return out.signature
+  } catch (e) {
+    console.error('sign_message error:', e)
+    return ''
+  }
+}

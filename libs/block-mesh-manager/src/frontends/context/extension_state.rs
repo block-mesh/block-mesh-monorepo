@@ -16,8 +16,8 @@ use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
-use crate::frontends::frontend_extension::utils::auth::{check_token, get_latest_invite_code};
-use crate::frontends::frontend_extension::utils::connectors::{
+use crate::frontends::utils::auth::{check_token, get_latest_invite_code};
+use crate::frontends::utils::connectors::{
     ask_for_all_storage_values, onPostMessage, send_message_channel,
 };
 use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType};

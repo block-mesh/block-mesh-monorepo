@@ -13,12 +13,9 @@ use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
+use crate::frontends::utils::connectors::{ask_for_all_storage_values, onPostMessage};
 use block_mesh_common::chrome_storage::{
     AuthStatus, MessageKey, MessageType, MessageValue, PostMessage,
-};
-
-use crate::frontends::frontend_extension::utils::connectors::{
-    ask_for_all_storage_values, onPostMessage,
 };
 
 #[derive(Clone, Serialize, Deserialize, Copy)]

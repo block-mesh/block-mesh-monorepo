@@ -11,6 +11,7 @@ pub mod logout;
 pub mod map;
 pub mod notification;
 pub mod password;
+pub mod perks;
 pub mod register;
 pub mod rpc;
 pub mod tasks;

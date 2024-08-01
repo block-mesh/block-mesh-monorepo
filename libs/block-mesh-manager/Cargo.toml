@@ -13,7 +13,7 @@ js-sys = { workspace = true }
 gloo-utils = { workspace = true }
 wasm-bindgen-futures = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
-
+solana-sdk = { workspace = true, optional = true }
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = { workspace = true, optional = true }
 logger-leptos = { path = "../logger-leptos", optional = true }
@@ -126,6 +126,7 @@ hydrate = [
   "dep:logger-leptos"
 ]
 ssr = [
+  "dep:solana-sdk",
   "dep:tikv-jemallocator",
   "dep:tokio-stream",
   "dep:axum",

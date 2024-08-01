@@ -1,0 +1,18 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO perks\n        (id, user_id, created_at, name, multiplier)\n        VALUES\n        ($1, $2, $3, $4, $5)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Timestamptz",
+        "Text",
+        "Float8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4e46c2add87c94c4cdb51abaf6f93deb4a4b8236fe659d99315f3f4ae6cea458"
+}

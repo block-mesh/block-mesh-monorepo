@@ -79,6 +79,10 @@ impl Application {
 
         let api_router = Router::new()
             .route(
+                "/connect_wallet",
+                post(routes::perks::connect_wallet::handler),
+            )
+            .route(
                 "/report_uptime",
                 post(routes::uptime_report::report_uptime::handler),
             )
