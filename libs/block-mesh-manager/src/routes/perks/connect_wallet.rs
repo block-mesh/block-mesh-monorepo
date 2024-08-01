@@ -1,0 +1,36 @@
+use std::str::FromStr;
+
+use axum::{Extension, Json};
+use axum_login::AuthSession;
+use solana_sdk::pubkey::Pubkey;
+use solana_sdk::signature::Signature;
+use sqlx::PgPool;
+
+use crate::database::perks::add_perk_to_user::add_perk_to_user;
+use crate::database::user::update_user_wallet::update_user_wallet;
+use crate::errors::error::Error;
+use crate::middlewares::authentication::Backend;
+use block_mesh_common::interfaces::server_api::{ConnectWalletRequest, ConnectWalletResponse};
+
+#[tracing::instrument(name = "connect_wallet", skip(auth))]
+pub async fn handler(
+    Extension(pool): Extension<PgPool>,
+    Extension(auth): Extension<AuthSession<Backend>>,
+    Json(body): Json<ConnectWalletRequest>,
+) -> Result<Json<ConnectWalletResponse>, Error> {
+    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let user = auth.user.ok_or(Error::UserNotFound)?;
+    let signature =
+        Signature::try_from(body.signature.as_slice()).map_err(|_| Error::InternalServer)?;
+    let pubkey = Pubkey::from_str(body.pubkey.as_str()).unwrap_or_default();
+    let message = body.message.as_bytes();
+    match signature.verify(pubkey.as_ref(), message) {
+        true => {
+            add_perk_to_user(&mut transaction, user.id).await?;
+            update_user_wallet(&mut transaction, user.id, body.pubkey).await?
+        }
+        false => return Err(Error::SignatureMismatch),
+    }
+    transaction.commit().await.map_err(Error::from)?;
+    Ok(Json(ConnectWalletResponse { status: 200 }))
+}

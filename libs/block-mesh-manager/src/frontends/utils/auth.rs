@@ -3,8 +3,8 @@ use leptos::leptos_dom;
 use leptos_dom::tracing;
 
 use block_mesh_common::interfaces::server_api::{
-    CheckTokenRequest, GetLatestInviteCodeRequest, GetLatestInviteCodeResponse, GetTokenResponse,
-    LoginForm, RegisterForm, RegisterResponse,
+    CheckTokenRequest, ConnectWalletRequest, ConnectWalletResponse, GetLatestInviteCodeRequest,
+    GetLatestInviteCodeResponse, GetTokenResponse, LoginForm, RegisterForm, RegisterResponse,
 };
 
 #[tracing::instrument(name = "check_token", skip(credentials), err)]
@@ -69,6 +69,23 @@ pub async fn get_latest_invite_code(
         .post(&url)
         .header("Content-Type", "application/json")
         .json(&credentials)
+        .send()
+        .await?
+        .json()
+        .await?;
+    Ok(response)
+}
+
+#[tracing::instrument(name = "connect_wallet", err)]
+pub async fn connect_wallet(
+    origin: String,
+    connect_wallet_request: ConnectWalletRequest,
+) -> anyhow::Result<ConnectWalletResponse> {
+    let client = reqwest::Client::new();
+    let response = client
+        .post(format!("{}/api/connect_wallet", origin))
+        .header("Content-Type", "application/json")
+        .json(&connect_wallet_request)
         .send()
         .await?
         .json()

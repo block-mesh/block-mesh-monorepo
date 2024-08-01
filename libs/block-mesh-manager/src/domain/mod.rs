@@ -5,6 +5,7 @@ pub mod daily_stat;
 pub mod invite_code;
 pub mod nonce;
 pub mod option_uuid;
+pub mod perk;
 pub mod provider_master_status;
 pub mod proxy_master;
 pub mod rpc;

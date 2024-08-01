@@ -4,7 +4,7 @@ use leptos_router::A;
 use crate::frontends::context::extension_state::ExtensionContext;
 use crate::frontends::context::notification_context::NotificationContext;
 use crate::frontends::frontend_extension::components::logo::Logo;
-use crate::frontends::frontend_extension::utils::connectors::send_to_clipboard;
+use crate::frontends::utils::connectors::send_to_clipboard;
 use block_mesh_common::constants::BLOCKMESH_VERSION;
 
 #[component]

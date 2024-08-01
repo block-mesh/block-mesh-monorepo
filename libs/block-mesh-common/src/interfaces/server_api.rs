@@ -214,3 +214,15 @@ pub struct RunTaskResponse {
     pub status: i32,
     pub raw: String,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ConnectWalletRequest {
+    pub pubkey: String,
+    pub message: String,
+    pub signature: Vec<u8>,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ConnectWalletResponse {
+    pub status: i32,
+}

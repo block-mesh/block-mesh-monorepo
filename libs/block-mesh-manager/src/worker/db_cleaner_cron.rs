@@ -27,30 +27,29 @@ pub async fn db_cleaner_cron(
         .unwrap();
 
     while let Some(job) = rx.recv().await {
+        let pool = pool.clone();
+        let client = client.clone();
         thread_pool
             .install(|| async {
-                let mut transaction = pool.begin().await.unwrap();
-                delete_uptime_report_by_time_for_all(&mut transaction, 60 * 60)
-                    .await
-                    .unwrap();
-                delete_bandwidth_reports_by_time_for_all(&mut transaction, 60 * 60)
-                    .await
-                    .unwrap();
-                let ip_data = client
-                    .post(BLOCK_MESH_IP_WORKER)
-                    .json(&IpDataPostRequest { ip: job.ip })
-                    .send()
-                    .await
-                    .unwrap()
-                    .json::<IPData>()
-                    .await
-                    .unwrap();
-                enrich_uptime_report(&mut transaction, job.uptime_id, ip_data)
-                    .await
-                    .unwrap();
-                transaction.commit().await.unwrap();
+                let _ = run_job(pool, client, job).await;
             })
             .await;
     }
+    Ok(())
+}
+
+pub async fn run_job(pool: PgPool, client: Client, job: EnrichIp) -> anyhow::Result<()> {
+    let mut transaction = pool.begin().await?;
+    delete_uptime_report_by_time_for_all(&mut transaction, 60 * 60).await?;
+    delete_bandwidth_reports_by_time_for_all(&mut transaction, 60 * 60).await?;
+    let ip_data = client
+        .post(BLOCK_MESH_IP_WORKER)
+        .json(&IpDataPostRequest { ip: job.ip })
+        .send()
+        .await?
+        .json::<IPData>()
+        .await?;
+    enrich_uptime_report(&mut transaction, job.uptime_id, ip_data).await?;
+    transaction.commit().await?;
     Ok(())
 }

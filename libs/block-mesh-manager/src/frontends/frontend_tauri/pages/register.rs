@@ -1,7 +1,7 @@
 use crate::frontends::context::auth_context::AuthContext;
 use crate::frontends::context::notification_context::NotificationContext;
-use crate::frontends::frontend_extension::utils::auth::register;
-use crate::frontends::frontend_extension::utils::connectors::send_message_channel;
+use crate::frontends::utils::auth::register;
+use crate::frontends::utils::connectors::send_message_channel;
 use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType, MessageValue};
 use block_mesh_common::interfaces::server_api::RegisterForm;
 use leptos::*;
