@@ -1,22 +1,25 @@
-use crate::frontends::frontend_extension::utils::connectors::{
-    ask_for_all_storage_values, onPostMessage,
-};
-use block_mesh_common::chrome_storage::{
-    AuthStatus, MessageKey, MessageType, MessageValue, PostMessage,
-};
+use std::cell::RefCell;
+use std::fmt;
+use std::fmt::{Debug, Formatter};
+use std::rc::Rc;
+
 use gloo_utils::format::JsValueSerdeExt;
 use leptos::logging::log;
 use leptos::*;
 use leptos_dom::tracing;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use std::cell::RefCell;
-use std::fmt;
-use std::fmt::{Debug, Formatter};
-use std::rc::Rc;
 use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
+
+use block_mesh_common::chrome_storage::{
+    AuthStatus, MessageKey, MessageType, MessageValue, PostMessage,
+};
+
+use crate::frontends::frontend_extension::utils::connectors::{
+    ask_for_all_storage_values, onPostMessage,
+};
 
 #[derive(Clone, Serialize, Deserialize, Copy)]
 pub struct AuthContext {

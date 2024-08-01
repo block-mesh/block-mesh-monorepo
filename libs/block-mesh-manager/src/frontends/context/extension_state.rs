@@ -125,6 +125,7 @@ impl ExtensionContext {
         self.download_speed.update(|v| *v = download_speed);
         self.upload_speed.update(|v| *v = upload_speed);
         self.last_update.update(|v| *v = now);
+        let default_value: Value = Value::String("".to_string());
 
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
             if let Ok(data) = event.into_serde::<Value>() {
@@ -138,7 +139,7 @@ impl ExtensionContext {
                                         .unwrap()
                                         .values()
                                         .next()
-                                        .unwrap()
+                                        .unwrap_or(&default_value)
                                         .to_string()
                                         .trim_end_matches('"')
                                         .trim_start_matches('"')

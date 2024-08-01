@@ -2,5 +2,5 @@ use leptos::*;
 
 #[component]
 pub fn TauriLoggedIn() -> impl IntoView {
-    view! { Logged In }
+    view! { <p class="m-2 text-off-white">Logged In</p> }
 }

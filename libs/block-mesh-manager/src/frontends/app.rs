@@ -6,7 +6,6 @@ use crate::frontends::context::notification_context::NotificationContext;
 use crate::frontends::context::size_context::SizeContext;
 use crate::frontends::context::webapp_context::WebAppContext;
 use crate::frontends::frontend_extension::components::navigator::ExtensionNavigator;
-use crate::frontends::frontend_extension::components::notification::ExtensionNotifications;
 use crate::frontends::frontend_extension::extension_header::ExtensionServerHeader;
 use crate::frontends::frontend_extension::pages::loading::ExtensionLoading;
 use crate::frontends::frontend_extension::pages::logged_in::ExtensionLoggedIn;
@@ -242,7 +241,7 @@ pub fn App() -> impl IntoView {
                                     class=""
                                     loading=|| view! { <ExtensionLoading/> }
                                 >
-                                    <ExtensionNotifications/>
+                                    <NotificationPopup/>
                                     <ExtensionNavigator/>
                                     <ExtensionLogin/>
                                 </Wrapper>
@@ -260,7 +259,7 @@ pub fn App() -> impl IntoView {
                                     auth=Some(auth_state)
                                     loading=|| view! { <ExtensionLoading/> }
                                 >
-                                    <ExtensionNotifications/>
+                                    <NotificationPopup/>
                                     <ExtensionNavigator/>
                                     <ExtensionRegister/>
                                 </Wrapper>
@@ -278,7 +277,7 @@ pub fn App() -> impl IntoView {
                                     auth=Some(auth_state)
                                     loading=|| view! { <ExtensionLoading/> }
                                 >
-                                    <ExtensionNotifications/>
+                                    <NotificationPopup/>
                                     <ExtensionNavigator/>
                                     <ExtensionLoggedIn/>
                                 </Wrapper>

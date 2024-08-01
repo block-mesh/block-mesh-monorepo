@@ -81,9 +81,7 @@ pub fn InvitesComponent() -> impl IntoView {
                     </p>
                 </div>
                 <div class="py-6 px-4 sm:px-6 lg:px-8">
-                    <p class="font-bebas-neue text-sm font-medium leading-6 text-off-white">
-                        Edit
-                    </p>
+                    <p class="font-bebas-neue text-sm font-medium leading-6 text-off-white">Edit</p>
                     <p class="mt-2 flex items-baseline gap-x-2">
                         <A
                             href="/ui/edit_invite_code"

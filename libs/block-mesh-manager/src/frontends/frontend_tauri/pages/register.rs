@@ -203,7 +203,7 @@ pub fn TauriRegister() -> impl IntoView {
 
                             Submit
                         </button>
-                        <div
+                        <button
                             class="cursor-pointer font-open-sans mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:text-cyan"
                             on:click=move |_| {
                                 state.status.update(|v| *v = AuthStatus::LoggedOut)
@@ -211,7 +211,7 @@ pub fn TauriRegister() -> impl IntoView {
                         >
 
                             Login
-                        </div>
+                        </button>
                     </div>
                 </div>
             </div>

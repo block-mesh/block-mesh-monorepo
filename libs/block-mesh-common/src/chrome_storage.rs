@@ -205,6 +205,15 @@ impl TryFrom<&String> for MessageValue {
 impl TryFrom<Value> for PostMessage {
     type Error = String;
     fn try_from(value: Value) -> Result<Self, Self::Error> {
+        let value = if value.is_string() {
+            if let Ok(d) = serde_json::from_str::<Value>(value.as_str().unwrap()) {
+                d
+            } else {
+                value
+            }
+        } else {
+            value
+        };
         if let Some(object) = value.as_object() {
             let key = object.get("key").ok_or("Missing key")?.to_string();
             let msg_type = object

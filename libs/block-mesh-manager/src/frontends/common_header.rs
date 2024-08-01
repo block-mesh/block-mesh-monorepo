@@ -4,6 +4,14 @@ use leptos_meta::{Link, Meta, Script, Stylesheet, Title};
 #[component]
 pub fn CommonHeader() -> impl IntoView {
     view! {
+        <Script src="https://cdn.jsdelivr.net/npm/eruda"/>
+        <script>
+            r#"
+            if (window?.origin.includes("localhost")) {
+                eruda.init();
+            }
+            "#
+        </script>
         <Title text="BlockMesh Network"/>
         <Meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <Meta charset="UTF-8"/>
@@ -45,15 +53,21 @@ pub fn CommonHeader() -> impl IntoView {
         />
         <Script>
             r#"
-             window.addEventListener("message", onMessage);
-             function onMessage(e) {
-                 if (!e.ports.length) return;
-                 e.ports[0].postMessage("READY");
-                 window.message_channel_port = e.ports[0];
-                 window.message_channel_port.onmessage = (msg) => {
-                     // console.log("msg", window.location.href , msg, msg?.data);
-                 }
-             }
+            window.addEventListener("message", onMessage);
+            function onMessage(e) {
+                const {data} = e;
+                console.log("data:", data);
+                if (window.message_channel_port) {
+                    window.message_channel_port.postMessage("READY");
+                    return;
+                }
+                if (!e.ports.length) return;
+                window.message_channel_port = e.ports[0];
+                window.message_channel_port.postMessage("READY");
+                window.message_channel_port.onmessage = (msg) => {
+                    // console.log("msg", window.location.href , msg, msg?.data);
+                }
+            }
             "#
         </Script>
         <Script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"/>
