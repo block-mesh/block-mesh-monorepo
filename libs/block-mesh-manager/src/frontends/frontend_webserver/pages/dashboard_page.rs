@@ -5,6 +5,7 @@ use crate::frontends::frontend_webserver::components::invites::InvitesComponent;
 use crate::frontends::frontend_webserver::components::navbar::NavbarComponent;
 use crate::frontends::frontend_webserver::components::network_status::NetworkStatusComponent;
 use crate::frontends::frontend_webserver::components::notification::NotificationComponent;
+use crate::frontends::frontend_webserver::components::perks::PerksComponenet;
 use crate::frontends::frontend_webserver::components::points::PointsComponent;
 use leptos::Suspense;
 use leptos::*;
@@ -44,10 +45,11 @@ pub fn DashboardPage() -> impl IntoView {
 
                 <div class="bg-dark-blue h-screen">
                     <NavbarComponent/>
-                    <div class="m-2 grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <div class="m-2 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
                         <PointsComponent/>
                         <NetworkStatusComponent/>
                         <InvitesComponent/>
+                        <PerksComponenet/>
                     </div>
                     <div class="m-2 grid grid-cols-1">
                         <BarChart/>

@@ -12,7 +12,7 @@ use crate::middlewares::authentication::Backend;
 use crate::utils::points::calc_points;
 use axum::{Extension, Json};
 use axum_login::AuthSession;
-use block_mesh_common::interfaces::server_api::{DailyStatForDashboard, DashboardResponse};
+use block_mesh_common::interfaces::server_api::{DailyStatForDashboard, DashboardResponse, PerkUI};
 use sqlx::PgPool;
 #[allow(unused_imports)]
 use tracing::Level;
@@ -52,16 +52,13 @@ pub async fn handler(
     } else {
         false
     };
-    let perks: Vec<f64> = get_user_perks(&mut transaction, user.id)
-        .await?
-        .into_iter()
-        .map(|i| i.multiplier)
-        .collect();
+    let perks = get_user_perks(&mut transaction, user.id).await?;
+    let perks_multipliers = perks.iter().map(|i| i.multiplier.clone()).collect();
     let daily_stats = get_daily_stats_by_user_id(&mut transaction, &user.id)
         .await?
         .into_iter()
         .map(|i| {
-            let points = calc_points(i.uptime, i.tasks_count, &perks);
+            let points = calc_points(i.uptime, i.tasks_count, &perks_multipliers);
             DailyStatForDashboard {
                 tasks_count: i.tasks_count,
                 uptime: i.uptime,
@@ -71,7 +68,7 @@ pub async fn handler(
         })
         .rev()
         .collect();
-    let points = calc_points(overall_uptime, overall_task_count, &perks);
+    let points = calc_points(overall_uptime, overall_task_count, &perks_multipliers);
     transaction.commit().await.map_err(Error::from)?;
     Ok(Json(DashboardResponse {
         points,
@@ -79,5 +76,13 @@ pub async fn handler(
         invite_code: user_invite_code.invite_code,
         connected,
         daily_stats,
+        perks: perks
+            .into_iter()
+            .map(|i| PerkUI {
+                id: i.id,
+                name: i.name.to_string(),
+                multiplier: i.multiplier,
+            })
+            .collect(),
     }))
 }
