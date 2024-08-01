@@ -4,7 +4,6 @@ use crate::frontends::utils::connectors::{pubkey, sign_message};
 use block_mesh_common::constants::BLOCK_MESH_LOGO;
 use block_mesh_common::interfaces::server_api::ConnectWalletRequest;
 use js_sys::Uint8Array;
-use leptos::logging::log;
 use leptos::*;
 use leptos_router::A;
 use uuid::Uuid;
