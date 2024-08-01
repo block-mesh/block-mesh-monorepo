@@ -3,7 +3,16 @@ use leptos_meta::{Link, Meta, Script, Stylesheet, Title};
 
 #[component]
 pub fn CommonHeader() -> impl IntoView {
+    // let origin = create_rw_signal("".to_string());
+    // create_effect(move |_| {
+    //     origin.set(window().origin());
+    // });
+
     view! {
+        // <Show when=move || origin.get().contains("localhost") fallback=move || view! {}>
+        //     <script src="https://cdn.jsdelivr.net/npm/eruda"></script>
+        //     <script>eruda.init();</script>
+        // </Show>
         <Title text="BlockMesh Network"/>
         <Meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <Meta charset="UTF-8"/>

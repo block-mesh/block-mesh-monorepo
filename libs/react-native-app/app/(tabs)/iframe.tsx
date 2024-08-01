@@ -3,6 +3,7 @@ import { BackHandler, Platform, StyleSheet, View } from 'react-native'
 import { useEffect, useRef, useState } from 'react'
 import { getData, storeData } from '@/utils/storage'
 import { API_TOKEN, EMAIL } from '@/utils/constants'
+import { handleMessage, PostMessage } from '@/utils/messages'
 
 
 const styles = StyleSheet.create({
@@ -35,31 +36,6 @@ export default function IFrameWrapper() {
   }, [])
 
 
-  async function handleMessage(event: any): Promise<void> {
-    console.log('Message from WebView:', { data: event.nativeEvent.data })
-    const data = event.nativeEvent.data
-    const { msg_type, key, value } = data
-    if (msg_type === 'SET' && key) {
-      if ([EMAIL, API_TOKEN].includes(key)) {
-        await storeData(key, value)
-      }
-    } else if (msg_type === 'GET' && key) {
-      if ([EMAIL, API_TOKEN].includes(key)) {
-        const value = await getData(key)
-        if (value) {
-          webview_ref.current?.postMessage(JSON.stringify({ [key]: value }))
-        }
-      }
-    } else if (msg_type === 'GET_ALL') {
-      for (const key in [EMAIL, API_TOKEN]) {
-        const value = await getData(key)
-        if (value) {
-          webview_ref.current?.postMessage(JSON.stringify({ [key]: value }))
-        }
-      }
-    }
-  }
-
   const injectedJavaScript = `
       true; // note: this is required, or you'll sometimes get silent failures
     `
@@ -86,17 +62,29 @@ export default function IFrameWrapper() {
       <WebView
         allowsBackForwardNavigationGestures={true}
         ref={webview_ref}
-        onMessage={handleMessage}
+        onMessage={(e) => handleMessage(e, webview_ref)}
         onLoad={() => {
           if (webview_ref.current === null) return
-          console.log('on load')
-          // webview_ref.current?.postMessage(JSON.stringify({ blockmesh_url: url }))
+          setTimeout(() => {
+            console.log('on load')
+            const message: PostMessage = {
+              msg_type: 'SET',
+              key: 'blockmesh_url',
+              value: 'http://localhost:8000'
+            }
+            webview_ref.current?.postMessage(JSON.stringify(message))
+          }, 500)
         }}
         originWhitelist={['*']}
         source={{ uri: 'http://localhost:8000/tauri/login' }}
         style={styles.webview}
         injectedJavaScript={injectedJavaScript}
         javaScriptEnabled={true}
+        injectedJavaScriptBeforeContentLoaded={`
+         if (window?.webkit?.messageHandlers?.ReactNativeWebView && !window.message_channel_port) {
+            window.message_channel_port = window?.webkit?.messageHandlers?.ReactNativeWebView;
+         }
+        true`}
       />
     </View>
   )

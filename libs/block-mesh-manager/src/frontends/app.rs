@@ -56,14 +56,15 @@ pub fn App() -> impl IntoView {
             r#"
                 window.addEventListener("message", onMessage);
                 function onMessage(e) {
-                    if (window?.webkit?.messageHandlers?.ReactNativeWebView && !window.message_channel_port) {
-                        window.message_channel_port = window?.webkit?.messageHandlers?.ReactNativeWebView;
+                    const {data} = e;
+                    console.log("data:", data);
+                    if (window.message_channel_port) {
                         window.message_channel_port.postMessage("READY");
                         return;
                     }
                     if (!e.ports.length) return;
-                    e.ports[0].postMessage("READY");
                     window.message_channel_port = e.ports[0];
+                    window.message_channel_port.postMessage("READY");
                     window.message_channel_port.onmessage = (msg) => {
                         // console.log("msg", window.location.href , msg, msg?.data);
                     }

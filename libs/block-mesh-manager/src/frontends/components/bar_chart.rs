@@ -53,7 +53,11 @@ pub fn BarChart() -> impl IntoView {
             <div class="m-2 grid grid-cols-1">
                 <div class="text-off-white">Daily Points Earnings</div>
                 <Show when=move || ready.get()>
-                    <iframe srcdoc=move || html_chart.get() width=move || width.get() height="450"></iframe>
+                    <iframe
+                        srcdoc=move || html_chart.get()
+                        width=move || width.get()
+                        height="450"
+                    ></iframe>
                 </Show>
             </div>
         </div>
