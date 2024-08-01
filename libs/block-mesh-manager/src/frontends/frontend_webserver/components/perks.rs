@@ -1,5 +1,4 @@
 use crate::frontends::context::webapp_context::WebAppContext;
-use leptos::logging::log;
 use leptos::*;
 
 #[component]
