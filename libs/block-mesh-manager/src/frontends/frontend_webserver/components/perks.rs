@@ -6,16 +6,13 @@ use leptos::*;
 pub fn PerksComponenet() -> impl IntoView {
     let async_data = WebAppContext::get_dashboard_data();
     let data = Signal::derive(move || {
-        let v = vec![];
-        let out = match async_data.get() {
-            Some(i) => match i {
-                Some(j) => j.perks,
-                None => v,
-            },
-            None => v,
-        };
-        log!("out {:#?}", out);
-        out
+        let mut v = vec![];
+        if let Some(i) = async_data.get() {
+            if let Some(j) = i {
+                v = j.perks
+            }
+        }
+        v
     });
 
     view! {
