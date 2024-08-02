@@ -1,8 +1,4 @@
-mod application_layout;
-mod extension;
-mod home;
-mod referer;
-
-pub use extension::Extension;
-pub use home::Home;
-pub use referer::Orders;
+pub mod application_layout;
+pub mod extension;
+pub mod new_dashboard;
+pub mod referer;

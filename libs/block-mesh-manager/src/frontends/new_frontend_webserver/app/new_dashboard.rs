@@ -1,5 +1,6 @@
 use super::application_layout::ApplicationLayout;
 use crate::frontends::components::bandwidth_card::BandwidthCard;
+use crate::frontends::components::bar_chart::BarChart;
 use crate::frontends::components::heading::Heading;
 use crate::frontends::components::stat::Stat;
 use crate::frontends::components::sub_heading::Subheading;
@@ -7,8 +8,25 @@ use crate::frontends::context::webapp_context::WebAppContext;
 use leptos::*;
 
 #[component]
-pub fn Home() -> impl IntoView {
+pub fn NewDashboard() -> impl IntoView {
     let async_data = WebAppContext::get_dashboard_data();
+    let connected = Signal::derive(move || {
+        if let Some(data) = async_data.get() {
+            data.is_some_and(|d| d.connected)
+        } else {
+            false
+        }
+    });
+
+    let connected_status = Signal::derive(move || {
+        if connected.get() {
+            "Connected"
+        } else {
+            "Disconnected"
+        }
+        .to_string()
+    });
+
     let points = Signal::derive(move || {
         let p = if let Some(Some(i)) = async_data.get() {
             i.points
@@ -70,8 +88,13 @@ pub fn Home() -> impl IntoView {
         <ApplicationLayout>
             <Suspense fallback=move || view! {}>
                 <Heading>Dashboard</Heading>
-                <div class="mt-10 grid gap-8 sm:grid-cols-2 xl:grid-cols-4">
-
+                <div class="mt-10 grid gap-8 sm:grid-cols-2 xl:grid-cols-5">
+                    <Stat
+                        title="Connection Status"
+                        value=move || connected_status.get()
+                        icon="wifi"
+                        // subtext="seconds"
+                    />
                     <Stat
                         title="Uptime"
                         value=move || uptime.get()
@@ -116,6 +139,7 @@ pub fn Home() -> impl IntoView {
                         value_scale="ms"
                     />
                 </div>
+                <BarChart/>
             </Suspense>
         </ApplicationLayout>
     }

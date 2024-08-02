@@ -19,10 +19,10 @@ where
 
     view! {
         <div>
-            <Divider class="border-light-blue shadow-light"/>
+            <Divider class="border-cyan"/>
 
             <div>
-                <div class="mt-6 text-lg/6 font-medium sm:text-sm/6">
+                <div class="text-off-white mt-6 text-lg/6 font-medium sm:text-sm/6">
                     <span>
                         {title} <small class="ml-2 text-zinc-500 stat-box-subtext">{subtext}</small>
                     </span>
