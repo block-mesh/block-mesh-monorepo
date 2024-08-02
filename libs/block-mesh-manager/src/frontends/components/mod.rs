@@ -9,6 +9,8 @@ pub mod heading;
 pub mod icons;
 pub mod navbars;
 pub mod notification_popup;
+pub mod online_chip;
+pub mod referer_rank;
 pub mod stat;
 pub mod sub_heading;
 pub mod tables;

@@ -198,6 +198,7 @@ pub struct DashboardResponse {
     pub connected: bool,
     pub daily_stats: Vec<DailyStatForDashboard>,
     pub perks: Vec<PerkUI>,
+    pub referrals: Vec<Referral>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
@@ -239,4 +240,11 @@ pub struct ConnectWalletRequest {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConnectWalletResponse {
     pub status: i32,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Referral {
+    pub email: String,
+    pub created_at: DateTime<Utc>,
+    pub verified_email: bool,
 }

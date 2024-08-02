@@ -25,7 +25,7 @@ use crate::frontends::frontend_webserver::pages::resend_confirmation_email_page:
 use crate::frontends::frontend_webserver::pages::reset_password_page::ResetPasswordPage;
 use crate::frontends::frontend_webserver::webserver_header::WebServerHeader;
 use crate::frontends::new_frontend_webserver::app::new_dashboard::NewDashboard;
-use crate::frontends::new_frontend_webserver::app::referer::Orders;
+use crate::frontends::new_frontend_webserver::app::referrals::Referrals;
 use crate::frontends::wrapper::Wrapper;
 use leptos::*;
 use leptos_meta::*;
@@ -54,22 +54,7 @@ pub fn App() -> impl IntoView {
         <CommonHeader/>
         <Router fallback=|| { view! { <p>Error</p> }.into_view() }>
             <Routes>
-                <Route
-                    path="/referer"
 
-                    view=move || {
-                        view! {
-                            <Wrapper
-                                resource=none_resource
-                                auth=none_resource
-                                loading=|| view! { <p>Loading</p> }
-                                class=new_server_class
-                            >
-                                <Orders/>
-                            </Wrapper>
-                        }
-                    }
-                />
                 <Route
                     path="/ui"
                     view=move || {
@@ -85,6 +70,7 @@ pub fn App() -> impl IntoView {
                     <Route path="/reset_password" view=ResetPasswordPage/>
                     <Route path="/register" view=RegisterPage/>
                     <Route path="/dashboard" view=NewDashboard/>
+                    <Route path="/referrals" view=Referrals/>
                     <Route path="/resend_confirmation_email" view=ResendConfirmationEmailPage/>
                     <Route path="/new_password" view=NewPasswordPage/>
                     <Route path="/edit_invite_code" view=EditInvitePage/>
@@ -100,23 +86,6 @@ pub fn App() -> impl IntoView {
                                     class=new_server_class
                                 >
                                     <NewDashboard/>
-                                </Wrapper>
-                            }
-                        }
-                    />
-
-                    <Route
-                        path="/referral"
-
-                        view=move || {
-                            view! {
-                                <Wrapper
-                                    resource=none_resource
-                                    auth=none_resource
-                                    loading=|| view! { <p>Loading</p> }
-                                    class=new_server_class
-                                >
-                                    <Orders/>
                                 </Wrapper>
                             }
                         }

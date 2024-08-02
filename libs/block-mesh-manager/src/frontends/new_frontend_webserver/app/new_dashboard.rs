@@ -93,14 +93,10 @@ pub fn NewDashboard() -> impl IntoView {
                         title="Connection Status"
                         value=move || connected_status.get()
                         icon="wifi"
-                        // subtext="seconds"
                     />
-                    <Stat
-                        title="Uptime"
-                        value=move || uptime.get()
-                        icon="trending_up"
-                        // subtext="seconds"
-                    />
+                    // subtext="seconds"
+                    <Stat title="Uptime" value=move || uptime.get() icon="trending_up"/>
+                    // subtext="seconds"
                     <Stat
                         title="Number of invites"
                         value=move || invites.get()

@@ -183,7 +183,7 @@ impl Application {
         let application_base_url = ApplicationBaseUrl(settings.application.base_url.clone());
         let backend = Router::new()
             .nest("/", auth_router)
-            .route_layer(login_required!(Backend, login_url = "/login"))
+            .route_layer(login_required!(Backend, login_url = "/ui/login"))
             .nest("/api", api_router)
             .nest("/", un_auth_router)
             .layer(Extension(application_base_url))

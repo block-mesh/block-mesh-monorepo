@@ -43,7 +43,7 @@ pub fn EditInvitePage() -> impl IntoView {
                     <NavbarComponent/>
                     <form action="/edit_invite_code" method="post">
                         <div class="m-2">
-                            <div class="mb-4 rounded px-8 pb-8 pt-6 shadow-md bg-dark-blue  border-white border-solid border-2">
+                            <div class="mb-4 rounded px-8 pb-8 pt-6 shadow-md bg-dark-blue border-cyan border-solid border-2">
                                 <div class="mb-4">
                                     <label
                                         class="font-bebas-neue mb-2 block text-sm font-bold text-off-white"

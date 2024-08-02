@@ -2,6 +2,7 @@ use crate::frontends::components::avatar::Avatar;
 use crate::frontends::components::navbars::navbar::Navbar;
 use crate::frontends::components::navbars::navbar_section::NavbarSection;
 use crate::frontends::components::navbars::navbar_spacer::NavbarSpacer;
+// use crate::frontends::components::online_chip::OnlineChip;
 use crate::frontends::new_frontend_webserver::components::sidebar::{
     Sidebar, SidebarBody, SidebarFooter, SidebarHeader, SidebarItem, SidebarItemLink, SidebarLabel,
     SidebarSection, SidebarSpacer,
@@ -9,38 +10,15 @@ use crate::frontends::new_frontend_webserver::components::sidebar::{
 use crate::frontends::new_frontend_webserver::components::sidebar_layout::SidebarLayout;
 use block_mesh_common::constants::BLOCK_MESH_LOGO;
 use leptos::*;
-use tailwind_fuse::*;
-
-#[component]
-pub fn OnlineChip(#[prop(into)] is_online: MaybeSignal<bool>) -> impl IntoView {
-    let span_class = move || {
-        tw_join!(
-            "h-2 w-2 mr-2",
-            "rounded-full",
-            if is_online.get() {
-                "bg-blue shadow-blue"
-            } else {
-                "bg-darkOrange shadow-darkOrange"
-            }
-        )
-    };
-
-    view! {
-        <div class="rounded-lg px-2 flex items-center text-gray-400 ml-auto bg-light">
-            <span class=span_class></span>
-            <span>{move || if is_online.get() { "Online" } else { "Offline" }}</span>
-        </div>
-    }
-}
 
 #[component]
 pub fn ApplicationNavbar() -> impl IntoView {
     view! {
         <Navbar>
             <NavbarSpacer/>
-
             <NavbarSection>
-                <OnlineChip is_online=true/>
+                <div></div>
+            // <OnlineChip is_online=true/>
             </NavbarSection>
         </Navbar>
     }
@@ -54,23 +32,19 @@ pub fn ApplicationSidebar() -> impl IntoView {
                 <SidebarItem>
                     <Avatar src=BLOCK_MESH_LOGO/>
                     <SidebarLabel>BlockMesh</SidebarLabel>
-                    <OnlineChip is_online=true/>
+                // <OnlineChip is_online=true/>
                 </SidebarItem>
             </SidebarHeader>
 
             <SidebarBody>
                 <SidebarSection>
-                    <SidebarItemLink href="/">
+                    <SidebarItemLink href="/ui/dashboard">
                         <HomeIcon/>
                         <SidebarLabel>Dashboard</SidebarLabel>
                     </SidebarItemLink>
-                    <SidebarItemLink href="/referer">
+                    <SidebarItemLink href="/ui/referrals">
                         <LinkIcon/>
                         <SidebarLabel>Referrals</SidebarLabel>
-                    </SidebarItemLink>
-                    <SidebarItemLink href="/extension">
-                        <LinkIcon/>
-                        <SidebarLabel>Extension</SidebarLabel>
                     </SidebarItemLink>
                 </SidebarSection>
 

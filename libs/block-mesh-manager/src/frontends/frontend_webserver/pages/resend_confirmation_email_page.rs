@@ -7,7 +7,7 @@ pub fn ResendConfirmationEmailPage() -> impl IntoView {
         <div class="bg-dark-blue h-screen">
             <form action="/resend_confirmation_email" method="post">
                 <div class="bg-dark-blue flex justify-center items-center h-screen">
-                    <div class="bg-dark-blue border-off-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
+                    <div class="bg-dark-blue border-cyan border-solid border-2 p-8 rounded-lg shadow-md w-80">
                         <h2 class="font-bebas-neue text-off-white text-center mb-6">
                             Resend Confirmation Email
                         </h2>

@@ -1,5 +1,4 @@
 use block_mesh_common::interfaces::server_api::{AuthStatusResponse, DashboardResponse};
-use leptos::logging::log;
 use leptos::*;
 use std::fmt::Debug;
 
@@ -35,10 +34,7 @@ impl WebAppContext {
                     let response = client.post(&format!("{}/dashboard", origin)).send().await;
                     match response {
                         Ok(response) => match response.json::<DashboardResponse>().await {
-                            Ok(json) => {
-                                log!("JSON => {:#?}", json);
-                                Some(json)
-                            }
+                            Ok(json) => Some(json),
                             Err(e) => {
                                 logging::log!("error: {}", e);
                                 None
