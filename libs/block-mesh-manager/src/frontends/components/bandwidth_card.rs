@@ -1,12 +1,15 @@
 use leptos::*;
 
 #[component]
-pub fn BandwidthCard(
+pub fn BandwidthCard<F>(
     title: &'static str,
-    value: &'static str,
+    value: F,
     value_scale: &'static str,
     icon: &'static str,
-) -> impl IntoView {
+) -> impl IntoView
+where
+    F: Fn() -> String + 'static,
+{
     view! {
         <div class="h-44 rounded-xl shadow-dark bg-bandwidth-card bg-cover p-2">
             <div class="w-full h-full rounded-lg py-[15px] px-[20px] pt-[5px] flex flex-col justify-between bg-lightDark">
@@ -15,7 +18,7 @@ pub fn BandwidthCard(
                 </div>
                 <div class="flex justify-between items-center">
                     <div class="bandwidth-card-value">
-                        <span class="font-bold text-4xl">{value}</span>
+                        <span class="font-bold text-4xl">{move || value()}</span>
                         <small>{value_scale}</small>
                     </div>
                     <div class="bandwidth-card-logo">

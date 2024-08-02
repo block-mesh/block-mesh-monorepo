@@ -187,6 +187,11 @@ pub struct ReportBandwidthResponse {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
 pub struct DashboardResponse {
+    pub upload: f64,
+    pub download: f64,
+    pub latency: f64,
+    pub uptime: f64,
+    pub tasks: i64,
     pub points: f64,
     pub number_of_users_invited: i64,
     pub invite_code: String,

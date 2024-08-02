@@ -69,9 +69,35 @@ pub async fn handler(
         .rev()
         .collect();
     let points = calc_points(overall_uptime, overall_task_count, &perks_multipliers);
+    let download = get_or_create_aggregate_by_user_and_name_no_transaction(
+        &pool,
+        AggregateName::Download,
+        user.id,
+    )
+    .await?;
+
+    let upload = get_or_create_aggregate_by_user_and_name_no_transaction(
+        &pool,
+        AggregateName::Upload,
+        user.id,
+    )
+    .await?;
+
+    let latency = get_or_create_aggregate_by_user_and_name_no_transaction(
+        &pool,
+        AggregateName::Latency,
+        user.id,
+    )
+    .await?;
+
     transaction.commit().await.map_err(Error::from)?;
     Ok(Json(DashboardResponse {
+        upload: upload.value.as_f64().unwrap_or_default(),
+        download: download.value.as_f64().unwrap_or_default(),
+        latency: latency.value.as_f64().unwrap_or_default(),
         points,
+        uptime: overall_uptime,
+        tasks: overall_task_count,
         number_of_users_invited,
         invite_code: user_invite_code.invite_code,
         connected,

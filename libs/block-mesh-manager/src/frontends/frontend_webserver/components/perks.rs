@@ -2,7 +2,7 @@ use crate::frontends::context::webapp_context::WebAppContext;
 use leptos::*;
 
 #[component]
-pub fn PerksComponenet() -> impl IntoView {
+pub fn PerksComponent() -> impl IntoView {
     let async_data = WebAppContext::get_dashboard_data();
     let data = Signal::derive(move || {
         if let Some(Some(i)) = async_data.get() {

@@ -2,12 +2,15 @@ use crate::frontends::components::divider::Divider;
 use leptos::*;
 
 #[component]
-pub fn Stat(
+pub fn Stat<F>(
     title: &'static str,
-    value: &'static str,
+    value: F,
     icon: &'static str,
     #[prop(optional)] subtext: &'static str,
-) -> impl IntoView {
+) -> impl IntoView
+where
+    F: Fn() -> String + 'static,
+{
     let subtext = if subtext.is_empty() {
         "".to_string()
     } else {
@@ -26,7 +29,7 @@ pub fn Stat(
                 </div>
                 <div class="flex justify-between items-center mt-2 text-orange">
                     <div class="text-3xl/8 font-semibold sm:text-2xl/8">
-                        <span>{value}</span>
+                        <span>{move || value()}</span>
                     </div>
                     <span class="material-symbols-outlined">{icon}</span>
                 </div>
