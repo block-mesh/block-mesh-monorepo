@@ -29,7 +29,7 @@ where
                 </div>
                 <div class="flex justify-between items-center mt-2 text-orange">
                     <div class="text-3xl/8 font-semibold sm:text-2xl/8">
-                        <span>{move || value()}</span>
+                        <span>{value}</span>
                     </div>
                     <span class="material-symbols-outlined">{icon}</span>
                 </div>
