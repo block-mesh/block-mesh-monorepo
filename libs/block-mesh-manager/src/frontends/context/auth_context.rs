@@ -70,7 +70,7 @@ impl AuthContext {
     pub async fn init(self) {
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
             if let Ok(data) = event.into_serde::<Value>() {
-                log!("DATA = {:#?}", data);
+                // log!("DATA = {:#?}", data);
                 if let Ok(msg) = PostMessage::try_from(data.clone()) {
                     match &msg.msg_type {
                         MessageType::SET => match msg.key {
