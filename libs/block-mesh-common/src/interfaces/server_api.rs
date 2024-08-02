@@ -219,6 +219,7 @@ pub struct DailyStatForDashboard {
 pub struct AuthStatusResponse {
     pub status_code: u16,
     pub logged_in: bool,
+    pub wallet_address: Option<String>,
     pub email: Option<String>,
 }
 

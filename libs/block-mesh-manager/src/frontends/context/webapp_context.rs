@@ -7,6 +7,7 @@ use std::fmt::Debug;
 pub struct WebAppContext {
     pub points: RwSignal<f64>,
     pub number_of_users_invited: RwSignal<i64>,
+    pub wallet_address: RwSignal<String>,
 }
 
 impl Default for WebAppContext {
@@ -14,6 +15,7 @@ impl Default for WebAppContext {
         Self {
             points: create_rw_signal(0.0),
             number_of_users_invited: create_rw_signal(0),
+            wallet_address: create_rw_signal(String::default()),
         }
     }
 }

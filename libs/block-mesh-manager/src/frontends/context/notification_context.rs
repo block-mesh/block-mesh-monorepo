@@ -34,7 +34,7 @@ impl NotificationContext {
             move || {
                 signal.update(|v| *v = None);
             },
-            Duration::from_millis(3500),
+            Duration::from_millis(5000),
         );
     }
 
@@ -50,7 +50,7 @@ impl NotificationContext {
             move || {
                 signal.update(|v| *v = None);
             },
-            Duration::from_millis(3500),
+            Duration::from_millis(5000),
         );
     }
 }
