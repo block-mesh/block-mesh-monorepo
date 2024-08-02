@@ -18,7 +18,7 @@ where
                 </div>
                 <div class="flex justify-between items-center">
                     <div class="bandwidth-card-value">
-                        <span class="font-bold text-4xl">{move || value()}</span>
+                        <span class="font-bold text-4xl">{value}</span>
                         <small>{value_scale}</small>
                     </div>
                     <div class="bandwidth-card-logo">
