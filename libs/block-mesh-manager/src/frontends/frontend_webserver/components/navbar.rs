@@ -1,4 +1,5 @@
 use crate::frontends::context::notification_context::NotificationContext;
+use crate::frontends::context::webapp_context::WebAppContext;
 use crate::frontends::utils::auth::connect_wallet;
 use crate::frontends::utils::connectors::{pubkey, sign_message};
 use block_mesh_common::constants::BLOCK_MESH_LOGO;
@@ -12,6 +13,15 @@ use wasm_bindgen::JsValue;
 #[component]
 pub fn NavbarComponent() -> impl IntoView {
     let notifications = expect_context::<NotificationContext>();
+    let logged_in = WebAppContext::is_logged_in();
+    let wallet = Signal::derive(move || {
+        if let Some(Some(l)) = logged_in.get() {
+            l.wallet_address
+        } else {
+            None
+        }
+    });
+    let button_enable = Signal::derive(move || wallet.get().is_none());
     let (b1, set_b1) = create_signal("block");
     let (b2, set_b2) = create_signal("hidden");
     let (menu, set_menu) = create_signal("hidden");
@@ -29,6 +39,10 @@ pub fn NavbarComponent() -> impl IntoView {
 
     let click_button = move || {
         spawn_local(async move {
+            if !button_enable.get() {
+                notifications.set_error("Backpack already connected");
+                return;
+            }
             if !window().has_own_property(&JsValue::from_str("backpack")) {
                 notifications.set_error("Backpack wallet not found");
             }
@@ -49,7 +63,10 @@ pub fn NavbarComponent() -> impl IntoView {
             )
             .await
             {
-                Ok(_) => notifications.set_success("Connected successfully"),
+                Ok(_) => {
+                    logged_in.refetch();
+                    notifications.set_success("Connected successfully");
+                }
                 Err(_) => notifications.set_error("Failed to connect"),
             }
         })
@@ -130,7 +147,14 @@ pub fn NavbarComponent() -> impl IntoView {
                                     on:click=move |_| click_button()
                                     class="rounded-md px-3 py-2 font-bebas-neue mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:bg-gray-700 hover:text-orange"
                                 >
-                                    Connect Wallet
+                                    {move || {
+                                        if button_enable.get() {
+                                            "Connect Wallet"
+                                        } else {
+                                            "Wallet Connected"
+                                        }
+                                    }}
+
                                 </button>
                             </div>
                         </div>
