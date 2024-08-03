@@ -1,4 +1,3 @@
-use crate::frontends::components::conditionals::if_let_some::IfLetSome;
 use crate::frontends::components::heading::Heading;
 use crate::frontends::components::referer_rank::RefererRank;
 use crate::frontends::components::sub_heading::Subheading;
