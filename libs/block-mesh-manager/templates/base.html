@@ -1,30 +1,30 @@
 <!DOCTYPE html>
 <html lang="en" class="h-full bg-gray-900">
 <head>
-    <link rel="icon" type="image/x-icon"
-          href="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"/>
-    <link rel="stylesheet" type="text/css" href="https://r2-assets.blockmesh.xyz/tailwind.css">
-    <title>BlockMesh</title>
-    <!-- Google tag (gtag.js) -->
-    <script async src="https://www.googletagmanager.com/gtag/js?id=G-RYHLW3MDK2"></script>
-    <script>
-        window.dataLayer = window.dataLayer || [];
+  <link rel="icon" type="image/x-icon"
+        href="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/e4f3cdc0-c2ba-442d-3e48-e2f31c0dc100/public" />
+  <link rel="stylesheet" type="text/css" href="https://r2-assets.blockmesh.xyz/tailwind.css">
+  <title>BlockMesh</title>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-RYHLW3MDK2"></script>
+  <script>
+    window.dataLayer = window.dataLayer || []
 
-        function gtag() {
-            dataLayer.push(arguments);
-        }
+    function gtag() {
+      dataLayer.push(arguments)
+    }
 
-        gtag('js', new Date());
+    gtag('js', new Date())
 
-        gtag('config', 'G-RYHLW3MDK2');
-    </script>
-    {% block head %}{% endblock %}
+    gtag('config', 'G-RYHLW3MDK2')
+  </script>
+  {% block head %}{% endblock %}
 </head>
 <body class="flex flex-col min-h-screen">
 <div id="content" class="h-screen">
-    {% block content %}
-    <p>Placeholder content</p>
-    {% endblock %}
+  {% block content %}
+  <p>Placeholder content</p>
+  {% endblock %}
 </div>
 {% include "notification.html" %}
 </body>

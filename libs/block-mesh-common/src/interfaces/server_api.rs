@@ -248,3 +248,8 @@ pub struct Referral {
     pub created_at: DateTime<Utc>,
     pub verified_email: bool,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct EditInviteCodeForm {
+    pub new_invite_code: String,
+}

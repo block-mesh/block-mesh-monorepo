@@ -3,6 +3,11 @@ use crate::frontends::components::navbars::navbar::Navbar;
 use crate::frontends::components::navbars::navbar_section::NavbarSection;
 use crate::frontends::components::navbars::navbar_spacer::NavbarSpacer;
 // use crate::frontends::components::online_chip::OnlineChip;
+use crate::frontends::components::icons::home_icon::HomeIcon;
+use crate::frontends::components::icons::link_icon::LinkIcon;
+use crate::frontends::components::icons::logout_icon::LogoutIcon;
+use crate::frontends::components::icons::perk_icon::PerkIcon;
+use crate::frontends::context::webapp_context::WebAppContext;
 use crate::frontends::new_frontend_webserver::components::sidebar::{
     Sidebar, SidebarBody, SidebarFooter, SidebarHeader, SidebarItem, SidebarItemLink, SidebarLabel,
     SidebarSection, SidebarSpacer,
@@ -26,6 +31,14 @@ pub fn ApplicationNavbar() -> impl IntoView {
 
 #[component]
 pub fn ApplicationSidebar() -> impl IntoView {
+    let logged_in = WebAppContext::is_logged_in();
+    let email = Signal::derive(move || {
+        if let Some(Some(r)) = logged_in.get() {
+            r.email
+        } else {
+            None
+        }
+    });
     view! {
         <Sidebar>
             <SidebarHeader>
@@ -45,6 +58,10 @@ pub fn ApplicationSidebar() -> impl IntoView {
                     <SidebarItemLink href="/ui/referrals">
                         <LinkIcon/>
                         <SidebarLabel>Referrals</SidebarLabel>
+                    </SidebarItemLink>
+                    <SidebarItemLink href="/ui/perks">
+                        <PerkIcon/>
+                        <SidebarLabel>Perks</SidebarLabel>
                     </SidebarItemLink>
                 </SidebarSection>
 
@@ -66,7 +83,7 @@ pub fn ApplicationSidebar() -> impl IntoView {
                                 Ohad
                             </span>
                             <span class="block truncate text-xs/5 font-normal text-zinc-500 dark:text-zinc-400">
-                                Ohad@blockmesh.com
+                                {move || email.get()}
                             </span>
                         </span>
                     </span>
@@ -82,68 +99,5 @@ pub fn ApplicationLayout(children: Children) -> impl IntoView {
         <SidebarLayout navbar=ApplicationNavbar sidebar=ApplicationSidebar>
             {children()}
         </SidebarLayout>
-    }
-}
-
-#[component]
-pub fn LogoutIcon() -> impl IntoView {
-    view! {
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-            fill="currentColor"
-            aria-hidden="true"
-            data-slot="icon"
-            class="cursor-pointer rotate-180"
-        >
-            <path
-                fill-rule="evenodd"
-                d="M2 4.75A2.75 2.75 0 0 1 4.75 2h3a2.75 2.75 0 0 1 2.75 2.75v.5a.75.75 0 0 1-1.5 0v-.5c0-.69-.56-1.25-1.25-1.25h-3c-.69 0-1.25.56-1.25 1.25v6.5c0 .69.56 1.25 1.25 1.25h3c.69 0 1.25-.56 1.25-1.25v-.5a.75.75 0 0 1 1.5 0v.5A2.75 2.75 0 0 1 7.75 14h-3A2.75 2.75 0 0 1 2 11.25v-6.5Zm9.47.47a.75.75 0 0 1 1.06 0l2.25 2.25a.75.75 0 0 1 0 1.06l-2.25 2.25a.75.75 0 1 1-1.06-1.06l.97-.97H5.25a.75.75 0 0 1 0-1.5h7.19l-.97-.97a.75.75 0 0 1 0-1.06Z"
-                clip-rule="evenodd"
-            ></path>
-        </svg>
-    }
-}
-
-#[component]
-pub fn LinkIcon() -> impl IntoView {
-    view! {
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 16 16"
-            fill="currentColor"
-            aria-hidden="true"
-            data-slot="icon"
-        >
-            <path
-                fill-rule="evenodd"
-                d="M8.914 6.025a.75.75 0 0 1 1.06 0 3.5 3.5 0 0 1 0 4.95l-2 2a3.5 3.5 0 0 1-5.396-4.402.75.75 0 0 1 1.251.827 2 2 0 0 0 3.085 2.514l2-2a2 2 0 0 0 0-2.828.75.75 0 0 1 0-1.06Z"
-                clip-rule="evenodd"
-            ></path>
-            <path
-                fill-rule="evenodd"
-                d="M7.086 9.975a.75.75 0 0 1-1.06 0 3.5 3.5 0 0 1 0-4.95l2-2a3.5 3.5 0 0 1 5.396 4.402.75.75 0 0 1-1.251-.827 2 2 0 0 0-3.085-2.514l-2 2a2 2 0 0 0 0 2.828.75.75 0 0 1 0 1.06Z"
-                clip-rule="evenodd"
-            ></path>
-        </svg>
-    }
-}
-
-#[component]
-pub fn HomeIcon() -> impl IntoView {
-    view! {
-        <svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            aria-hidden="true"
-            data-slot="icon"
-        >
-            <path
-                fill-rule="evenodd"
-                d="M9.293 2.293a1 1 0 0 1 1.414 0l7 7A1 1 0 0 1 17 11h-1v6a1 1 0 0 1-1 1h-2a1 1 0 0 1-1-1v-3a1 1 0 0 0-1-1H9a1 1 0 0 0-1 1v3a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1v-6H3a1 1 0 0 1-.707-1.707l7-7Z"
-                clip-rule="evenodd"
-            ></path>
-        </svg>
     }
 }
