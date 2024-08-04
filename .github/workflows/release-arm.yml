@@ -66,7 +66,7 @@ jobs:
       - name: "Install deps"
         run: |
           sudo apt-get update
-          sudo apt-get install -y build-essential pkg-config openssl libssl-dev musl-tools gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          sudo apt-get install -y file core-utils build-essential pkg-config openssl libssl-dev musl-tools gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
@@ -78,9 +78,12 @@ jobs:
           cache-all-crates: true
       - name: Sccache Action
         uses: Mozilla-Actions/sccache-action@v0.0.5
+      - name: Install zigbuild
+        run: |
+          cargo install --locked cargo-zigbuild
       - name: "Build CLI"
         run: |
-          cargo build -p blockmesh-cli --release
+          cargo zigbuild -p blockmesh-cli --release
           tar acf blockmesh-cli-${{ matrix.target }}.tar.gz target/release/blockmesh-cli
       - name: Release
         uses: softprops/action-gh-release@v2
