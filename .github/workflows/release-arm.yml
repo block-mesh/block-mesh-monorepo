@@ -78,12 +78,14 @@ jobs:
           cache-all-crates: true
       - name: Sccache Action
         uses: Mozilla-Actions/sccache-action@v0.0.5
+      - name: Setup Zig
+        uses: goto-bus-stop/setup-zig@v2.2.0
       - name: Install zigbuild
         run: |
           cargo install --locked cargo-zigbuild
       - name: "Build CLI"
         run: |
-          cargo zigbuild -p blockmesh-cli --release
+          cargo zigbuild -p blockmesh-cli --release --target ${{ matrix.target }}
           tar acf blockmesh-cli-${{ matrix.target }}.tar.gz target/release/blockmesh-cli
       - name: Release
         uses: softprops/action-gh-release@v2
