@@ -17,7 +17,6 @@ use crate::frontends::frontend_tauri::pages::logged_in::TauriLoggedIn;
 use crate::frontends::frontend_tauri::pages::login::TauriLogin;
 use crate::frontends::frontend_tauri::pages::register::TauriRegister;
 use crate::frontends::frontend_tauri::tauri_header::TauriHeader;
-use crate::frontends::frontend_webserver::pages::dashboard_page::DashboardPage;
 use crate::frontends::frontend_webserver::pages::edit_invite_code_page::EditInvitePage;
 use crate::frontends::frontend_webserver::pages::login_page::LoginPage;
 use crate::frontends::frontend_webserver::pages::new_password_page::NewPasswordPage;
@@ -25,7 +24,9 @@ use crate::frontends::frontend_webserver::pages::register_page::RegisterPage;
 use crate::frontends::frontend_webserver::pages::resend_confirmation_email_page::ResendConfirmationEmailPage;
 use crate::frontends::frontend_webserver::pages::reset_password_page::ResetPasswordPage;
 use crate::frontends::frontend_webserver::webserver_header::WebServerHeader;
-use crate::frontends::new_frontend_webserver::{Extension, Home, Orders};
+use crate::frontends::new_frontend_webserver::app::new_dashboard::NewDashboard;
+use crate::frontends::new_frontend_webserver::app::perks::Perks;
+use crate::frontends::new_frontend_webserver::app::referrals::Referrals;
 use crate::frontends::wrapper::Wrapper;
 use leptos::*;
 use leptos_meta::*;
@@ -54,56 +55,6 @@ pub fn App() -> impl IntoView {
         <CommonHeader/>
         <Router fallback=|| { view! { <p>Error</p> }.into_view() }>
             <Routes>
-                <Route
-                    path="/new"
-
-                    view=move || {
-                        view! {
-                            <Wrapper
-                                resource=none_resource
-                                auth=none_resource
-                                loading=|| view! { <p>Loading</p> }
-                                class=new_server_class
-                            >
-                                <Home/>
-                            </Wrapper>
-                        }
-                    }
-                />
-
-                <Route
-                    path="/referer"
-
-                    view=move || {
-                        view! {
-                            <Wrapper
-                                resource=none_resource
-                                auth=none_resource
-                                loading=|| view! { <p>Loading</p> }
-                                class=new_server_class
-                            >
-                                <Orders/>
-                            </Wrapper>
-                        }
-                    }
-                />
-
-                <Route
-                    path="/extension"
-
-                    view=move || {
-                        view! {
-                            <Wrapper
-                                resource=none_resource
-                                auth=none_resource
-                                loading=|| view! { <p>Loading</p> }
-                                class=new_server_class
-                            >
-                                <Extension/>
-                            </Wrapper>
-                        }
-                    }
-                />
 
                 <Route
                     path="/ui"
@@ -119,7 +70,9 @@ pub fn App() -> impl IntoView {
                     <Route path="/login" view=LoginPage/>
                     <Route path="/reset_password" view=ResetPasswordPage/>
                     <Route path="/register" view=RegisterPage/>
-                    <Route path="/dashboard" view=DashboardPage/>
+                    <Route path="/dashboard" view=NewDashboard/>
+                    <Route path="/referrals" view=Referrals/>
+                    <Route path="/perks" view=Perks/>
                     <Route path="/resend_confirmation_email" view=ResendConfirmationEmailPage/>
                     <Route path="/new_password" view=NewPasswordPage/>
                     <Route path="/edit_invite_code" view=EditInvitePage/>
@@ -134,24 +87,7 @@ pub fn App() -> impl IntoView {
                                     loading=|| view! { <p>Loading</p> }
                                     class=new_server_class
                                 >
-                                    <Home/>
-                                </Wrapper>
-                            }
-                        }
-                    />
-
-                    <Route
-                        path="/referral"
-
-                        view=move || {
-                            view! {
-                                <Wrapper
-                                    resource=none_resource
-                                    auth=none_resource
-                                    loading=|| view! { <p>Loading</p> }
-                                    class=new_server_class
-                                >
-                                    <Orders/>
+                                    <NewDashboard/>
                                 </Wrapper>
                             }
                         }

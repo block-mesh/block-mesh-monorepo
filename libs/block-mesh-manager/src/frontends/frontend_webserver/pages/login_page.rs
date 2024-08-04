@@ -7,7 +7,7 @@ pub fn LoginPage() -> impl IntoView {
         <div class="bg-dark-blue h-screen">
             <form action="/login" method="post">
                 <div class="bg-dark-blue flex justify-center items-center h-screen">
-                    <div class="border-off-white border-solid border-2 p-8 rounded-lg shadow-md w-80">
+                    <div class="border-cyan border-solid border-2 p-8 rounded-lg shadow-md w-80">
                         <h2 class="font-bebas-neue text-off-white text-2xl text-center mb-6">
                             Login
                         </h2>

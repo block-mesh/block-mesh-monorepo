@@ -1,18 +1,11 @@
-use axum::response::Redirect;
-use axum::{Extension, Form};
-use axum_login::AuthSession;
-use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
-
 use crate::database::invite_code::create_invite_code::create_invite_code;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
-
-#[allow(dead_code)]
-#[derive(Serialize, Deserialize, Debug)]
-pub struct EditInviteCodeForm {
-    pub new_invite_code: String,
-}
+use axum::response::Redirect;
+use axum::{Extension, Form};
+use axum_login::AuthSession;
+use block_mesh_common::interfaces::server_api::EditInviteCodeForm;
+use sqlx::PgPool;
 
 #[tracing::instrument(name = "edit_invite_code_post", skip(auth, pool))]
 pub async fn handler(

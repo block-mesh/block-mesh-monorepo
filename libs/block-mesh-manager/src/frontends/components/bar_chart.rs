@@ -49,9 +49,8 @@ pub fn BarChart() -> impl IntoView {
         })
     });
     view! {
-        <div class="flex justify-center items-center border-off-white border m-2 relative overflow-hidden rounded-[30px] pt-6 md:pt-[33px] pb-7 md:pb-[39px] pl-[11px] md:pl-[44px]">
+        <div class="flex justify-center items-center mt-4 m-2 relative overflow-hidden rounded-[30px] pt-6 md:pt-[33px] pb-7 md:pb-[39px] pl-[11px] md:pl-[44px]">
             <div class="m-2 grid grid-cols-1">
-                <div class="text-off-white">Daily Points Earnings</div>
                 <Show when=move || ready.get()>
                     <iframe
                         srcdoc=move || html_chart.get()

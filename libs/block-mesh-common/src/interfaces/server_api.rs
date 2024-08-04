@@ -187,12 +187,18 @@ pub struct ReportBandwidthResponse {
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
 pub struct DashboardResponse {
+    pub upload: f64,
+    pub download: f64,
+    pub latency: f64,
+    pub uptime: f64,
+    pub tasks: i64,
     pub points: f64,
     pub number_of_users_invited: i64,
     pub invite_code: String,
     pub connected: bool,
     pub daily_stats: Vec<DailyStatForDashboard>,
     pub perks: Vec<PerkUI>,
+    pub referrals: Vec<Referral>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
@@ -234,4 +240,16 @@ pub struct ConnectWalletRequest {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConnectWalletResponse {
     pub status: i32,
+}
+
+#[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
+pub struct Referral {
+    pub email: String,
+    pub created_at: DateTime<Utc>,
+    pub verified_email: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct EditInviteCodeForm {
+    pub new_invite_code: String,
 }
