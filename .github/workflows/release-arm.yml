@@ -66,7 +66,7 @@ jobs:
       - name: "Install deps"
         run: |
           sudo apt-get update
-          sudo apt-get install -y pkg-config openssl libssl-dev musl-tools
+          sudo apt-get install -y pkg-config openssl libssl-dev musl-tools gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
