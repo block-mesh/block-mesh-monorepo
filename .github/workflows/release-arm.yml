@@ -106,16 +106,9 @@ jobs:
           cache-all-crates: true
       - name: Sccache Action
         uses: Mozilla-Actions/sccache-action@v0.0.5
-      - name: "Install Cargo Leptos"
-        run: |
-          cargo install cargo-leptos --version=${{ vars.LEPTOS_VERSION }} --locked
-      - name: "Run Cargo Leptos"
-        run: |
-          cargo leptos build --project block-mesh-manager --release
-          tar acf block-mesh-manager-${{ matrix.target }}.tar.gz target/release/block-mesh-manager target/release/hash.txt target/site
       - name: "Build CLI"
         run: |
-          cargo build -p blockmesh-cli --release
+          cargo build -p blockmesh-cli --release --target ${{ matrix.target }}
           tar acf blockmesh-cli-${{ matrix.target }}.tar.gz target/release/blockmesh-cli
       - name: Release
         uses: softprops/action-gh-release@v2
