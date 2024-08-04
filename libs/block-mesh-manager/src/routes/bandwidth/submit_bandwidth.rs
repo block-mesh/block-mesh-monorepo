@@ -52,20 +52,20 @@ pub async fn handler(
         .map_err(Error::from)?;
 
     let download = get_or_create_aggregate_by_user_and_name_no_transaction(
-        &pool,
+        &mut transaction,
         AggregateName::Download,
         user.id,
     )
     .await?;
     let upload = get_or_create_aggregate_by_user_and_name_no_transaction(
-        &pool,
+        &mut transaction,
         AggregateName::Upload,
         user.id,
     )
     .await?;
 
     let latency = get_or_create_aggregate_by_user_and_name_no_transaction(
-        &pool,
+        &mut transaction,
         AggregateName::Latency,
         user.id,
     )
