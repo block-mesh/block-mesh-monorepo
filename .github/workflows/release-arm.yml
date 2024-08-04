@@ -37,7 +37,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
-          targets: wasm32-unknown-unknown
+          targets: wasm32-unknown-unknown, aarch64-unknown-linux-gnu
       - uses: Swatinem/rust-cache@v2
         with:
           key: release-tag-server-arm
@@ -70,7 +70,7 @@ jobs:
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
-          targets: wasm32-unknown-unknown
+          targets: wasm32-unknown-unknown, aarch64-unknown-linux-gnu
       - name: "Cache"
         uses: Swatinem/rust-cache@v2
         with:
