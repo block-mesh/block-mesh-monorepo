@@ -54,15 +54,7 @@ pub async fn handler(
         return Err(Error::UserNotFound);
     }
     let header_ip = headers.get("cf-connecting-ip");
-
-    tracing::info!("header_ip {:#?}", header_ip);
-
     let ip = resolve_ip(&query.ip, &header_ip, addr.ip().to_string());
-
-    let opt_ip = get_opt_ip_address(&mut transaction, &ip)
-        .await
-        .map_err(Error::from)?;
-
     let daily_stat_opt =
         get_daily_stat_by_user_id_and_day(&mut transaction, user.id, Utc::now().date_naive())
             .await?;
