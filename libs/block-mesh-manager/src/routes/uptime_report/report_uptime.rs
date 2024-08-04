@@ -1,36 +1,43 @@
-use std::net::SocketAddr;
-use std::sync::Arc;
-
-use axum::extract::{ConnectInfo, Query, State};
-use axum::{Extension, Json};
-use block_mesh_common::constants::BLOCK_MESH_IP_WORKER;
-use block_mesh_common::interfaces::ip_data::{IPData, IpDataPostRequest};
-use block_mesh_common::interfaces::server_api::{ReportUptimeRequest, ReportUptimeResponse};
-use chrono::Utc;
-use http::StatusCode;
-use reqwest::Client;
-use sqlx::PgPool;
-use tokio::task::JoinHandle;
-use uuid::Uuid;
-
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
 use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
 use crate::database::daily_stat::increment_uptime::increment_uptime;
+use crate::database::ip_address::get_opt_ip_address::get_opt_ip_address;
 use crate::database::uptime_report::create_uptime_report::create_uptime_report;
-use crate::database::uptime_report::delete_uptime_report_by_time::delete_uptime_report_by_time;
-use crate::database::uptime_report::enrich_uptime_report::enrich_uptime_report;
 use crate::database::uptime_report::get_user_uptimes::get_user_uptimes;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use crate::worker::db_cleaner_cron::EnrichIp;
+use axum::extract::{ConnectInfo, Query, State};
+use axum::{Extension, Json};
+use block_mesh_common::interfaces::server_api::{ReportUptimeRequest, ReportUptimeResponse};
+use chrono::Utc;
+use http::{HeaderMap, HeaderValue, StatusCode};
+use sqlx::PgPool;
+use std::net::SocketAddr;
+use std::sync::Arc;
+
+pub fn resolve_ip(
+    query_ip: &Option<String>,
+    header_ip: &Option<&HeaderValue>,
+    addr_ip: String,
+) -> String {
+    if header_ip.is_some() {
+        header_ip.unwrap().to_str().unwrap_or_default().to_string()
+    } else if query_ip.is_some() {
+        query_ip.clone().unwrap().clone()
+    } else {
+        addr_ip
+    }
+}
 
 #[tracing::instrument(name = "report_uptime", level = "trace", skip(pool, query, state), ret)]
 pub async fn handler(
+    headers: HeaderMap,
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
@@ -46,6 +53,15 @@ pub async fn handler(
     if user.email != query.email {
         return Err(Error::UserNotFound);
     }
+    let header_ip = headers.get("cf-connecting-ip");
+
+    tracing::info!("header_ip {:#?}", header_ip);
+
+    let ip = resolve_ip(&query.ip, &header_ip, addr.ip().to_string());
+
+    let opt_ip = get_opt_ip_address(&mut transaction, &ip)
+        .await
+        .map_err(Error::from)?;
 
     let daily_stat_opt =
         get_daily_stat_by_user_id_and_day(&mut transaction, user.id, Utc::now().date_naive())
@@ -53,13 +69,14 @@ pub async fn handler(
     if daily_stat_opt.is_none() {
         create_daily_stat(&mut transaction, user.id).await?;
     }
-    let uptime_id = create_uptime_report(&mut transaction, &user.id, &query.ip).await?;
+    let uptime_id =
+        create_uptime_report(&mut transaction, &user.id, &Option::from(ip.clone())).await?;
     let uptimes = get_user_uptimes(&mut transaction, user.id, 2).await?;
     if uptimes.len() == 2 {
         let diff = uptimes[0].created_at - uptimes[1].created_at;
         if diff.num_seconds() < 60 {
             let aggregate = get_or_create_aggregate_by_user_and_name_no_transaction(
-                &pool,
+                &mut transaction,
                 AggregateName::Uptime,
                 user.id,
             )
@@ -91,64 +108,11 @@ pub async fn handler(
         let _ = state.cleaner_tx.send(EnrichIp {
             uptime_id,
             user_id: user.id,
-            ip: match &query.ip {
-                None => addr.ip().to_string(),
-                Some(ip) => ip.to_string(),
-            },
+            ip: ip.clone(),
         });
-    }
-
-    let flag = state
-        .flags
-        .get("enrich_ip_and_cleanup_in_background")
-        .unwrap_or(&false);
-    if *flag {
-        let client = state.client.clone();
-        let handle: JoinHandle<()> = tokio::spawn(async move {
-            let _ = enrich_ip_and_cleanup(
-                pool.clone(),
-                client,
-                query,
-                addr,
-                uptime_id,
-                user.id.clone(),
-            )
-            .await;
-        });
-        let _ = state.tx.send(handle).await;
     }
 
     Ok(Json(ReportUptimeResponse {
         status_code: u16::from(StatusCode::OK),
     }))
-}
-
-async fn enrich_ip_and_cleanup(
-    pool: PgPool,
-    client: Client,
-    query: ReportUptimeRequest,
-    addr: SocketAddr,
-    uptime_id: Uuid,
-    user_id: Uuid,
-) -> anyhow::Result<()> {
-    let pool = pool.clone();
-    let mut transaction = pool.begin().await.map_err(Error::from).unwrap();
-    delete_uptime_report_by_time(&mut transaction, user_id, 60 * 60)
-        .await
-        .map_err(Error::from)?;
-    let ip_data = client
-        .post(BLOCK_MESH_IP_WORKER)
-        .json(&IpDataPostRequest {
-            ip: match &query.ip {
-                None => addr.ip().to_string(),
-                Some(ip) => ip.to_string(),
-            },
-        })
-        .send()
-        .await?
-        .json::<IPData>()
-        .await?;
-    enrich_uptime_report(&mut transaction, uptime_id, ip_data).await?;
-    transaction.commit().await?;
-    Ok(())
 }

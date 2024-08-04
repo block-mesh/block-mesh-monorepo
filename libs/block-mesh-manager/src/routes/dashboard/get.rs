@@ -59,8 +59,6 @@ pub async fn handler(
         .ok_or(Error::UserNotFound)?;
     let overall_task_count =
         count_user_tasks_by_status(&mut transaction, &user.id, TaskStatus::Completed).await?;
-    // let rank =
-    //     get_user_rank_by_task_status(&mut transaction, user.id, TaskStatus::Completed).await?;
     let user_invite_code = get_user_latest_invite_code(&mut transaction, user.id)
         .await
         .map_err(Error::from)?;
@@ -68,7 +66,7 @@ pub async fn handler(
         .await
         .map_err(Error::from)?;
     let uptime_aggregate = get_or_create_aggregate_by_user_and_name_no_transaction(
-        &pool,
+        &mut transaction,
         AggregateName::Uptime,
         user.id,
     )

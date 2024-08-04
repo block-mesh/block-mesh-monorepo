@@ -1,18 +1,18 @@
 use chrono::Utc;
-use sqlx::PgPool;
+use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
 use crate::domain::aggregate::{Aggregate, AggregateName};
 
 #[tracing::instrument(
     name = "get_or_create_aggregate_by_user_and_name_no_transaction",
-    skip(pool),
+    skip(transaction),
     level = "trace",
     ret,
     err
 )]
 pub(crate) async fn get_or_create_aggregate_by_user_and_name_no_transaction(
-    pool: &PgPool,
+    transaction: &mut Transaction<'_, Postgres>,
     name: AggregateName,
     user_id: Uuid,
 ) -> anyhow::Result<Aggregate> {
@@ -42,7 +42,7 @@ pub(crate) async fn get_or_create_aggregate_by_user_and_name_no_transaction(
         name.to_string(),
         value
     )
-    .fetch_one(pool)
+    .fetch_one(&mut **transaction)
     .await?;
     Ok(aggregate)
 }
