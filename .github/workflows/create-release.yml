@@ -44,6 +44,8 @@ jobs:
     needs: "get-tag"
     runs-on: "ubuntu-latest"
     steps:
+      - name: "Check out the repo"
+        uses: actions/checkout@v4
       - name: "Create release"
         uses: "taiki-e/create-gh-release-action@v1"
         with:
