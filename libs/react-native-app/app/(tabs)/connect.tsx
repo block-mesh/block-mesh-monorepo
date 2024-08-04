@@ -1,6 +1,6 @@
 import { WebView } from 'react-native-webview'
-import { BackHandler, Platform, StyleSheet, View } from 'react-native'
-import { useEffect, useRef, useState } from 'react'
+import { BackHandler, Image, Platform, StyleSheet, View } from 'react-native'
+import React, { useEffect, useRef, useState } from 'react'
 import { getData, storeData } from '@/utils/storage'
 import { API_TOKEN, EMAIL } from '@/utils/constants'
 import { handleMessage, PostMessage } from '@/utils/messages'
@@ -12,10 +12,17 @@ const styles = StyleSheet.create({
   },
   webview: {
     flex: 1
+  },
+  logo: {
+    height: 178,
+    width: 290,
+    bottom: 0,
+    left: 0,
+    position: 'absolute'
   }
 })
 
-export default function IFrameWrapper() {
+export default function ConnectPage() {
   const webview_ref = useRef<WebView>(null)
   const [email, setEmail] = useState<string>()
   const [apiToken, setApiToken] = useState<string>()

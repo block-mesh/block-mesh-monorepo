@@ -1,18 +1,40 @@
-import { Image, StyleSheet, Platform } from 'react-native';
+import { Image, StyleSheet, Platform } from 'react-native'
 
-import { HelloWave } from '@/components/HelloWave';
-import ParallaxScrollView from '@/components/ParallaxScrollView';
-import { ThemedText } from '@/components/ThemedText';
-import { ThemedView } from '@/components/ThemedView';
+import { HelloWave } from '@/components/HelloWave'
+import ParallaxScrollView from '@/components/ParallaxScrollView'
+import { ThemedText } from '@/components/ThemedText'
+import { ThemedView } from '@/components/ThemedView'
+import { useEffect, useState } from 'react'
+import { getData } from '@/utils/storage'
+import { API_TOKEN, EMAIL } from '@/utils/constants'
 
 export default function HomeScreen() {
+  const [email, setEmail] = useState<string>()
+  const [apiToken, setApiToken] = useState<string>()
+  const [url, setUrl] = useState<string>('http://localhost:8000')
+
+  useEffect(() => {
+    (async () => {
+      const e = await getData(EMAIL)
+      if (e) {
+        setEmail(e)
+      }
+      const token = await getData(API_TOKEN)
+      if (token) {
+        setApiToken(token)
+      }
+
+    })()
+  }, [])
+
+
   return (
     <ParallaxScrollView
-      headerBackgroundColor={{ light: '#A1CEDC', dark: '#1D3D47' }}
+      headerBackgroundColor={{ light: '#0C1120', dark: '#0C1120' }}
       headerImage={
         <Image
-          source={require('@/assets/images/partial-react-logo.png')}
-          style={styles.reactLogo}
+          source={{ uri: 'https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/3ef1afb4-e176-4423-7bd3-3eed38102b00/public' }}
+          style={styles.logo}
         />
       }>
       <ThemedView style={styles.titleContainer}>
@@ -47,24 +69,24 @@ export default function HomeScreen() {
         </ThemedText>
       </ThemedView>
     </ParallaxScrollView>
-  );
+  )
 }
 
 const styles = StyleSheet.create({
   titleContainer: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: 8
   },
   stepContainer: {
     gap: 8,
-    marginBottom: 8,
+    marginBottom: 8
   },
-  reactLogo: {
+  logo: {
     height: 178,
     width: 290,
     bottom: 0,
     left: 0,
-    position: 'absolute',
-  },
-});
+    position: 'absolute'
+  }
+})
