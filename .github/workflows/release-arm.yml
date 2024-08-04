@@ -66,7 +66,7 @@ jobs:
       - name: "Install deps"
         run: |
           sudo apt-get update
-          sudo apt-get install -y file core-utils build-essential pkg-config openssl libssl-dev musl-tools gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+          sudo apt-get install -y file build-essential pkg-config openssl libssl-dev musl-tools gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
