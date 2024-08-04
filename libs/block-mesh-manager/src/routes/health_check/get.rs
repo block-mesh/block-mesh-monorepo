@@ -5,6 +5,7 @@ use block_mesh_common::constants::{
     BLOCK_MESH_LANDING_PAGE_IMAGE, BLOCK_MESH_LOGO, BLOCK_MESH_SUPPORT_CHAT,
     BLOCK_MESH_SUPPORT_EMAIL, BLOCK_MESH_TWITTER,
 };
+use http::{HeaderMap, Method};
 
 #[allow(dead_code)]
 #[derive(Template)]
@@ -22,7 +23,12 @@ struct HealthCheckTemplate {
 }
 
 #[tracing::instrument(name = "Health check")]
-pub async fn handler() -> impl IntoResponse {
+pub async fn handler(method: Method, headers: HeaderMap) -> impl IntoResponse {
+    tracing::info!(
+        "health_check:: method => {:#?} , headers => {:#?}",
+        method,
+        headers
+    );
     HealthCheckTemplate {
         chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
         app_server: BLOCK_MESH_APP_SERVER.to_string(),
