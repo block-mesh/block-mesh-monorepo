@@ -24,8 +24,8 @@ pub fn RefererRank(
                                 when=move || is_complete
                                 fallback=move || {
                                     view! {
-                                        <span class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-darkOrange">
-                                            <span class="text-gray-500 text-darkOrange">
+                                        <span class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-orange">
+                                            <span class="text-off-white">
                                                 {step.to_string()}
                                             </span>
                                         </span>
@@ -52,15 +52,15 @@ pub fn RefererRank(
                         </span>
 
                         <span class="ml-4 mt-0.5 flex min-w-0 flex-col">
-                            <span class="text-sm font-medium text-darkOrange">{title}</span>
-                            <span class="text-sm font-medium text-gray-500">{description}</span>
+                            <span class="font-bebas-neue text-sm font-medium text-orange">{title}</span>
+                            <span class="font-open-sans text-sm font-medium text-off-white">{description}</span>
                         </span>
                     </span>
                 </div>
                 <Show when=move || step != 1>
                     <div class="absolute inset-0 top-0 hidden w-3 lg:block" aria-hidden="true">
                         <svg
-                            class="h-full w-full text-gray-300"
+                            class="h-full w-full text-off-white"
                             viewBox="0 0 12 82"
                             fill="none"
                             preserveAspectRatio="none"

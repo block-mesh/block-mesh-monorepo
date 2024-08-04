@@ -98,16 +98,16 @@ pub fn NewDashboard() -> impl IntoView {
                     <Stat title="Uptime" value=move || uptime.get() icon="trending_up"/>
                     // subtext="seconds"
                     <Stat
-                        title="Number of invites"
+                        title="# Invites"
                         value=move || invites.get()
                         icon="notification_multiple"
                     />
                     <Stat
-                        title="Number of tasks performed"
+                        title="# Tasks"
                         value=move || tasks.get()
                         icon="task_alt"
                     />
-                    <Stat title="Points Accumulated" value=move || points.get() icon="my_location"/>
+                    <Stat title="Points" value=move || points.get() icon="my_location"/>
 
                 </div>
 
@@ -135,6 +135,7 @@ pub fn NewDashboard() -> impl IntoView {
                         value_scale="ms"
                     />
                 </div>
+                <Subheading>Daily points earnings</Subheading>
                 <BarChart/>
             </Suspense>
         </ApplicationLayout>

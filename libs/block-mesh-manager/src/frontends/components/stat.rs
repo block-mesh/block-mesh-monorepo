@@ -22,13 +22,13 @@ where
             <Divider class="border-cyan"/>
 
             <div>
-                <div class="text-off-white mt-6 text-lg/6 font-medium sm:text-sm/6">
-                    <span>
-                        {title} <small class="ml-2 text-zinc-500 stat-box-subtext">{subtext}</small>
+                <div class="font-bebas-neue text-off-white mt-6 text-lg/6 font-medium sm:text-sm/6">
+                    <span class="font-open-sans">
+                        {title} <small class="ml-2 text-off-white stat-box-subtext">{subtext}</small>
                     </span>
                 </div>
                 <div class="flex justify-between items-center mt-2 text-orange">
-                    <div class="text-3xl/8 font-semibold sm:text-2xl/8">
+                    <div class="font-open-sans text-3xl/8 font-semibold sm:text-2xl/8">
                         <span>{value}</span>
                     </div>
                     <span class="material-symbols-outlined">{icon}</span>
