@@ -3,7 +3,7 @@ permissions:
   contents: "write"
 on:
   workflow_run:
-    workflows: ["Tag"]
+    workflows: ["Create Release"]
     types:
       - "completed"
 concurrency:
@@ -49,39 +49,11 @@ jobs:
         shell: "bash"
         run: |
           echo PKG_VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g') >> $GITHUB_OUTPUT
-  create-release:
-    name: "Create release"
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    needs: "get-tag"
-    runs-on: "ubuntu-latest"
-    steps:
-      - name: "Check out the repo"
-        uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: ${{ vars.RUSTC_VERSION }}
-          targets: wasm32-unknown-unknown, aarch64-unknown-linux-gnu
-      - name: "Cache"
-        uses: Swatinem/rust-cache@v2
-        with:
-          key: release-build-arm
-          cache-all-crates: true
-      - name: Sccache Action
-        uses: Mozilla-Actions/sccache-action@v0.0.5
-      - name: "Create release"
-        uses: "taiki-e/create-gh-release-action@v1"
-        with:
-          # (optional) Path to changelog.
-          # changelog: CHANGELOG.md
-          branch: "master"
-          ref: refs/tags/v${{ needs.get-tag.outputs.pkg-version }}
-          token: ${{ secrets.GITHUB_TOKEN }}
   upload-assets:
     name: "Upload assets to Github releases"
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs:
       - "get-tag"
-      - "create-release"
     strategy:
       matrix:
         include:

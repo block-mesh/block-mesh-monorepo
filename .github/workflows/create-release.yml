@@ -1,0 +1,54 @@
+name: Create Release
+permissions:
+  contents: "write"
+on:
+  workflow_run:
+    workflows: ["Tag"]
+    types:
+      - "completed"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
+  LEPTOS_OUTPUT_NAME: block-mesh-manager
+  LEPTOS_SITE_ROOT: target/site
+  LEPTOS_SITE_PKG_DIR: pkg
+  LEPTOS_SITE_ADDR: 127.0.0.1:8000
+  LEPTOS_RELOAD_PORT: 3001
+  LEPTOS_LIB_DIR: libs/block-mesh-manager
+  LEPTOS_BIN_DIR: libs/block-mesh-manager
+  LEPTOS_HASH_FILES: true
+  APP_ENVIRONMENT: production
+  SENTRY: ${{ secrets.SENTRY }}
+  MAPBOX: ${{ secrets.MAPBOX }}
+  SCCACHE_GHA_ENABLED: "true"
+  RUSTC_WRAPPER: "sccache"
+jobs:
+  get-tag:
+    name: "Get Tag From Package Version"
+    runs-on: "ubuntu-latest"
+    outputs:
+      pkg-version: ${{ steps.pkg-version.outputs.PKG_VERSION }}
+    steps:
+      - name: "Check out the repo"
+        uses: actions/checkout@v4
+      - name: "Get tag"
+        id: "pkg-version"
+        shell: "bash"
+        run: |
+          echo PKG_VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g') >> $GITHUB_OUTPUT
+  create-release:
+    name: "Create release"
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs: "get-tag"
+    runs-on: "ubuntu-latest"
+    steps:
+      - name: "Create release"
+        uses: "taiki-e/create-gh-release-action@v1"
+        with:
+          # (optional) Path to changelog.
+          # changelog: CHANGELOG.md
+          branch: "master"
+          ref: refs/tags/v${{ needs.get-tag.outputs.pkg-version }}
+          token: ${{ secrets.GITHUB_TOKEN }}
