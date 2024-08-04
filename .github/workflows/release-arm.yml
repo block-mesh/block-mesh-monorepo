@@ -1,4 +1,4 @@
-name: Release
+name: Release ARM
 permissions:
   contents: "write"
 on:
@@ -40,7 +40,7 @@ jobs:
           targets: wasm32-unknown-unknown
       - uses: Swatinem/rust-cache@v2
         with:
-          key: release-tag-server
+          key: release-tag-server-arm
           cache-all-crates: true
       - name: Sccache Action
         uses: Mozilla-Actions/sccache-action@v0.0.5
@@ -64,7 +64,7 @@ jobs:
       - name: "Cache"
         uses: Swatinem/rust-cache@v2
         with:
-          key: release-build
+          key: release-build-arm
           cache-all-crates: true
       - name: Sccache Action
         uses: Mozilla-Actions/sccache-action@v0.0.5
@@ -102,7 +102,7 @@ jobs:
       - name: "Cache"
         uses: Swatinem/rust-cache@v2
         with:
-          key: release-upload-${{ matrix.target }}
+          key: release-upload-${{ matrix.target }}-arm
           cache-all-crates: true
       - name: Sccache Action
         uses: Mozilla-Actions/sccache-action@v0.0.5
@@ -125,53 +125,4 @@ jobs:
           files: |
             block-mesh-manager-${{ matrix.target }}.tar.gz
             blockmesh-cli-${{ matrix.target }}.tar.gz
-  #      - name: "Upload Binaries"
-  #        uses: "taiki-e/upload-rust-binary-action@v1"
-  #        with:
-  #          bin: "block-mesh-manager"
-  #          target: ${{ matrix.target }}
-  #          archive: $bin-${{ matrix.target }}
-  #          ref: refs/tags/v${{ needs.get-tag.outputs.pkg-version }}
-  #          token: ${{ secrets.GITHUB_TOKEN }}
-  #          features: ssr
-  #          include: target/site/pkg/block-mesh-manager.wasm,target/site/pkg/block-mesh-manager.js,target/site/pkg/block-mesh-manager.css
-  push-to-registry:
-    name: "Push Docker image to Docker Hub"
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
-    needs:
-      - "get-tag"
-      - "upload-assets"
-    runs-on: "ubuntu-latest"
-    steps:
-      - name: "Check out the repo"
-        uses: actions/checkout@v4
-      - uses: dtolnay/rust-toolchain@stable
-        with:
-          toolchain: ${{ vars.RUSTC_VERSION }}
-          targets: wasm32-unknown-unknown
-      - name: "Cache"
-        uses: Swatinem/rust-cache@v2
-        with:
-          key: release-push
-          cache-all-crates: true
-      - name: Sccache Action
-        uses: Mozilla-Actions/sccache-action@v0.0.5
-      - name: "Log in to Docker Hub"
-        uses: "docker/login-action@v3"
-        with:
-          username: ${{ secrets.DOCKER_USERNAME }}
-          password: ${{ secrets.DOCKER_TOKEN }}
-      - name: "Extract metadata (tags, labels) for Docker"
-        id: "meta"
-        uses: "docker/metadata-action@v5"
-        with:
-          images: "blockmesh/block-mesh-manager"
-      - name: "Build and push Docker image"
-        uses: "docker/build-push-action@v5"
-        with:
-          context: .
-          file: block-mesh-manager.Dockerfile
-          push: true
-          tags: blockmesh/block-mesh-manager:latest,blockmesh/block-mesh-manager:v${{ needs.get-tag.outputs.pkg-version }}
-          labels: ${{ steps.meta.outputs.labels }}
 # https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/
