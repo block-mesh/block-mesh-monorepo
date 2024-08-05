@@ -73,6 +73,7 @@ pub fn SidebarSpacer(#[prop(into, optional)] class: MaybeSignal<String>) -> impl
 pub fn SidebarItemLink(
     #[prop(into, optional)] class: MaybeSignal<String>,
     #[prop(into)] href: String,
+    #[prop(into, optional)] rel: String,
     children: Children,
 ) -> impl IntoView {
     let pathname = use_location().pathname;
@@ -87,7 +88,7 @@ pub fn SidebarItemLink(
 
     let class = move || {
         tw_join!(
-            current.get().then_some("text-darkOrange"),
+            current.get().then_some("text-orange"),
             sidebar_item_classes(),
         )
     };
@@ -96,10 +97,10 @@ pub fn SidebarItemLink(
         <span class=span_class>
             <Show when=move || current.get()>
                 // Current indicator
-                <span class="absolute inset-y-2 -left-4 w-0.5 rounded-full bg-zinc-950 dark:bg-white"></span>
+                <span class="absolute inset-y-2 -left-4 w-0.5 rounded-full text-off-white dark:bg-off-white"></span>
             </Show>
 
-            <a href=href class=class data-current=current>
+            <a href=href rel=rel class=class data-current=current>
                 {children()}
             </a>
         </span>

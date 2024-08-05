@@ -68,7 +68,7 @@ pub fn ApplicationSidebar() -> impl IntoView {
                 <SidebarSpacer/>
 
                 <SidebarSection>
-                    <SidebarItemLink href="logout">
+                    <SidebarItemLink href="/logout" rel="external">
                         <LogoutIcon/>
                         <SidebarLabel>Logout</SidebarLabel>
                     </SidebarItemLink>

@@ -21,7 +21,7 @@ pub async fn handler(
             400,
             "Password Mismatch",
             "Please check if your password and password confirm are the same",
-            "/ui/register",
+            "/register",
         ));
     }
     let user = get_user_opt_by_email(&mut transaction, &email)
@@ -39,6 +39,6 @@ pub async fn handler(
     Ok(NotificationRedirect::redirect(
         "Password updated",
         "Please use the new password and login",
-        "/ui/login",
+        "/login",
     ))
 }

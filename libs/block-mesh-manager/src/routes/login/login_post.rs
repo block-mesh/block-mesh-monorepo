@@ -6,6 +6,7 @@ use axum::response::Redirect;
 use axum::{Extension, Form};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::LoginForm;
+use block_mesh_common::routes_enum::RoutesEnum;
 use secret::Secret;
 use sqlx::PgPool;
 
@@ -34,7 +35,7 @@ pub async fn handler(
                 400,
                 "Authentication failed",
                 "Authentication failed. Please try again.",
-                "/ui/login",
+                RoutesEnum::Static_UnAuth_Login.to_string().as_str(),
             ));
         }
     };
@@ -46,7 +47,7 @@ pub async fn handler(
                 400,
                 "Login Failed",
                 "Login failed. Please try again.",
-                "/ui/login",
+                RoutesEnum::Static_UnAuth_Login.to_string().as_str(),
             ));
         }
     }

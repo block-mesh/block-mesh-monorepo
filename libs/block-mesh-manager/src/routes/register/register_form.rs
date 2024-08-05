@@ -30,7 +30,7 @@ pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<impl IntoResponse, Redirect> {
     return match auth.user {
-        Some(_) => Err(Redirect::to("/dashboard")),
+        Some(_) => Err(Redirect::to("/register")),
         None => Ok(RegisterTemplate {
             chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
             app_server: BLOCK_MESH_APP_SERVER.to_string(),

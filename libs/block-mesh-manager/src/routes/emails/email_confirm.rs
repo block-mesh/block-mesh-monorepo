@@ -50,7 +50,7 @@ pub async fn handler(
                 Ok(NotificationRedirect::redirect(
                     "Please Login",
                     "You email confirmed, please login into your account",
-                    "/ui/login",
+                    "/login",
                 ))
             }
         }

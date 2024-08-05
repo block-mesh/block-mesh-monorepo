@@ -137,12 +137,12 @@ pub fn NavbarComponent() -> impl IntoView {
                                 >
                                     Dashboard
                                 </A>
-                                <A
+                                <a
                                     href="/logout"
                                     class="rounded-md px-3 py-2 font-bebas-neue mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:bg-gray-700 hover:text-orange"
                                 >
                                     Logout
-                                </A>
+                                </a>
                                 <button
                                     on:click=move |_| click_button()
                                     class="rounded-md px-3 py-2 font-bebas-neue mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:bg-gray-700 hover:text-orange"
