@@ -3,6 +3,7 @@ use crate::frontends::context::webapp_context::WebAppContext;
 use crate::frontends::frontend_webserver::components::error::ErrorComponent;
 use crate::frontends::frontend_webserver::components::notification::NotificationComponent;
 use block_mesh_common::interfaces::server_api::EditInviteCodeForm;
+use block_mesh_common::routes_enum::RoutesEnum;
 use leptos::Suspense;
 use leptos::*;
 use reqwest::Client;
@@ -48,7 +49,7 @@ pub fn EditInviteCode() -> impl IntoView {
                 <NotificationComponent
                     summary="Loading...".to_string()
                     detailed="Please wait while we load the dashboard".to_string()
-                    go_to="/ui/login".to_string()
+                    go_to=RoutesEnum::Static_UnAuth_Login.to_string()
                 />
             }
         }>
@@ -66,7 +67,7 @@ pub fn EditInviteCode() -> impl IntoView {
                             code=401
                             summary="Not Logged In".to_string()
                             detailed="You must be logged in to view this page".to_string()
-                            go_to="/ui/login".to_string()
+                            go_to=RoutesEnum::Static_UnAuth_Login.to_string()
                         />
                     }
                 }

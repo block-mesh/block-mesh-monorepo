@@ -10,3 +10,5 @@ pub mod feature_flag_client;
 pub mod http;
 pub mod interfaces;
 pub mod tauri_message_channel;
+
+pub mod routes_enum;

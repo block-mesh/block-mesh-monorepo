@@ -11,7 +11,7 @@ pub fn ErrorComponent(
     view! {
         <div class="bg-dark-blue flex justify-center items-center h-screen">
             <span class="sr-only">Error Page</span>
-            <div class="bg-dark-blue border-off-white border-solid border-2 p-8 rounded-lg shadow-md m-2">
+            <div class="bg-dark-blue border-cyan border-solid border-2 p-8 rounded-lg shadow-md m-2">
                 <div class="text-center">
                     <p class="font-bebas-neue font-semibold text-red-600 text-2xl">{{ code }}</p>
                     <h1 class="font-bebas-neue mt-4 text-3xl font-bold tracking-tight text-white sm:text-5xl">

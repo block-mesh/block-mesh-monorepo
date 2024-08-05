@@ -4,7 +4,6 @@ use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
 use crate::database::daily_stat::increment_uptime::increment_uptime;
-use crate::database::ip_address::get_opt_ip_address::get_opt_ip_address;
 use crate::database::uptime_report::create_uptime_report::create_uptime_report;
 use crate::database::uptime_report::get_user_uptimes::get_user_uptimes;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;

@@ -14,7 +14,7 @@ pub fn ExtensionLoggedIn() -> impl IntoView {
     let invite_code = Signal::derive(move || state.invite_code.get());
     let invite_url = Signal::derive(move || {
         format!(
-            "{}/ui/register?invite_code={}",
+            "{}/register?invite_code={}",
             state.blockmesh_url.get(),
             state.invite_code.get()
         )
