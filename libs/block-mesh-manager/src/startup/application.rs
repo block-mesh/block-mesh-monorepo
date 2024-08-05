@@ -89,7 +89,6 @@ impl Application {
 
         let app = Router::new()
             .nest("/", leptos_router)
-            .route_layer(login_required!(Backend, login_url = "/login"))
             .nest("/", backend)
             .nest("/", leptos_pkg)
             .layer(auth_layer);
