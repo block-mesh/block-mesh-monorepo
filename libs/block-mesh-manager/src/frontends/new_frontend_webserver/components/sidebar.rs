@@ -18,7 +18,7 @@ pub fn SidebarHeader(
     children: Children,
 ) -> impl IntoView {
     let class = move || {
-        tw_join!(class.get(), "flex flex-col border-b border-zinc-950/5 p-4 dark:border-white/5 [&>[data-slot=section]+[data-slot=section]]:mt-2.5")
+        tw_join!(class.get(), "flex flex-col border-b border-zinc-950/5 p-4 border-white/5 [&>[data-slot=section]+[data-slot=section]]:mt-2.5")
     };
 
     view! { <div class=class>{children()}</div> }
@@ -42,7 +42,7 @@ pub fn SidebarFooter(
     children: Children,
 ) -> impl IntoView {
     let class = move || {
-        tw_join!(class.get(), "flex flex-col border-t border-zinc-950/5 p-4 dark:border-white/5 [&>[data-slot=section]+[data-slot=section]]:mt-2.5")
+        tw_join!(class.get(), "flex flex-col border-t border-zinc-950/5 p-4 border-white/5 [&>[data-slot=section]+[data-slot=section]]:mt-2.5")
     };
 
     view! { <div class=class>{children()}</div> }
@@ -97,7 +97,7 @@ pub fn SidebarItemLink(
         <span class=span_class>
             <Show when=move || current.get()>
                 // Current indicator
-                <span class="absolute inset-y-2 -left-4 w-0.5 rounded-full text-off-white dark:bg-off-white"></span>
+                <span class="absolute inset-y-2 -left-4 w-0.5 rounded-full text-off-white bg-off-white"></span>
             </Show>
 
             <a href=href rel=rel class=class data-current=current>
@@ -128,7 +128,7 @@ pub fn SidebarLabel(
     #[prop(into, optional)] class: MaybeSignal<String>,
     children: Children,
 ) -> impl IntoView {
-    let class = move || tw_join!(class.get(), "truncate");
+    let class = move || tw_join!(class.get(), "truncate  text-off-white");
 
     view! {
         <span class=class data-slot="section">
@@ -152,11 +152,11 @@ fn sidebar_item_classes() -> String {
         // Active
         "data-[active]:bg-zinc-950/5 data-[slot=icon]:*:data-[active]:fill-zinc-950",
         // Current
-        "data-[slot=icon]:*:data-[current]:fill-zinc-950",
+        "data-[slot=icon]:*:data-[current]:fill-off-white",
         // Dark mode
-        "dark:text-white dark:data-[slot=icon]:*:fill-zinc-400",
-        "dark:data-[hover]:bg-white/5 dark:data-[slot=icon]:*:data-[hover]:fill-white",
-        "dark:data-[active]:bg-white/5 dark:data-[slot=icon]:*:data-[active]:fill-white",
-        "dark:data-[slot=icon]:*:data-[current]:fill-white",
+        "text-off-white data-[slot=icon]:*:fill-zinc-400",
+        "data-[hover]:bg-white/5 data-[slot=icon]:*:data-[hover]:fill-white",
+        "data-[active]:bg-white/5 data-[slot=icon]:*:data-[active]:fill-white",
+        "data-[slot=icon]:*:data-[current]:fill-white",
     )
 }

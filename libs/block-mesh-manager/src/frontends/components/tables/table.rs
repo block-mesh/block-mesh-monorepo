@@ -7,7 +7,7 @@ pub fn Table(#[prop(into, optional)] class: String, children: Children) -> impl 
         <div className="flow-root">
             <div class=tw_join!(& class, "-mx-[--gutter] overflow-x-auto whitespace-nowrap")>
                 <div class=tw_join!("inline-block min-w-full align-middle", "sm:px-[--gutter]")>
-                    <table class="min-w-full text-left text-sm/6 text-zinc-950 dark:text-white">
+                    <table class="min-w-full text-left text-sm/6 text-zinc-950 text-white">
                         {children()}
                     </table>
                 </div>
