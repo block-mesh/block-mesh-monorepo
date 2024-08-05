@@ -7,6 +7,7 @@ use axum::response::Redirect;
 use axum::{Extension, Form};
 use bcrypt::{hash, DEFAULT_COST};
 use block_mesh_common::interfaces::server_api::NewPasswordForm;
+use block_mesh_common::routes_enum::RoutesEnum;
 use sqlx::PgPool;
 
 #[tracing::instrument(name = "new_password_post", skip(form, pool))]
@@ -21,7 +22,7 @@ pub async fn handler(
             400,
             "Password Mismatch",
             "Please check if your password and password confirm are the same",
-            "/register",
+            RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
         ));
     }
     let user = get_user_opt_by_email(&mut transaction, &email)
@@ -39,6 +40,6 @@ pub async fn handler(
     Ok(NotificationRedirect::redirect(
         "Password updated",
         "Please use the new password and login",
-        "/login",
+        RoutesEnum::Static_UnAuth_Login.to_string().as_str(),
     ))
 }

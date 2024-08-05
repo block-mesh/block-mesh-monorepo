@@ -1,3 +1,4 @@
+use crate::middlewares::authentication::Backend;
 use askama::Template;
 use askama_axum::IntoResponse;
 use axum::response::Redirect;
@@ -8,8 +9,7 @@ use block_mesh_common::constants::{
     BLOCK_MESH_LANDING_PAGE_IMAGE, BLOCK_MESH_LOGO, BLOCK_MESH_SUPPORT_CHAT,
     BLOCK_MESH_SUPPORT_EMAIL, BLOCK_MESH_TWITTER,
 };
-
-use crate::middlewares::authentication::Backend;
+use block_mesh_common::routes_enum::RoutesEnum;
 
 #[allow(dead_code)]
 #[derive(Template)]
@@ -31,7 +31,9 @@ pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<impl IntoResponse, Redirect> {
     return match auth.user {
-        Some(_) => Err(Redirect::to("/register")),
+        Some(_) => Err(Redirect::to(
+            RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
+        )),
         None => Ok(ResetPasswordTemplate {
             chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
             app_server: BLOCK_MESH_APP_SERVER.to_string(),

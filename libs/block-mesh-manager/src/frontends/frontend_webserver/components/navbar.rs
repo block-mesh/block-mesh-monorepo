@@ -4,6 +4,7 @@ use crate::frontends::utils::auth::connect_wallet;
 use crate::frontends::utils::connectors::{pubkey, sign_message};
 use block_mesh_common::constants::BLOCK_MESH_LOGO;
 use block_mesh_common::interfaces::server_api::ConnectWalletRequest;
+use block_mesh_common::routes_enum::RoutesEnum;
 use js_sys::Uint8Array;
 use leptos::*;
 use leptos_router::A;
@@ -138,7 +139,8 @@ pub fn NavbarComponent() -> impl IntoView {
                                     Dashboard
                                 </A>
                                 <a
-                                    href="/logout"
+                                    href=RoutesEnum::Static_Auth_Logout.to_string()
+                                    rel="external"
                                     class="rounded-md px-3 py-2 font-bebas-neue mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:bg-gray-700 hover:text-orange"
                                 >
                                     Logout
@@ -173,12 +175,13 @@ pub fn NavbarComponent() -> impl IntoView {
                     >
                         Dashboard
                     </A>
-                    <A
-                        href="/logout"
+                    <a
+                        rel="external"
+                        href=RoutesEnum::Static_Auth_Logout.to_string()
                         class="block rounded-md px-3 py-2 font-bebas-neue mb-2 align-baseline font-bold text-xs text-cyan hover:bg-gray-700 hover:text-orange"
                     >
                         Logout
-                    </A>
+                    </a>
                 </div>
             </div>
         </nav>

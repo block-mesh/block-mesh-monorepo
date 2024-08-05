@@ -7,6 +7,7 @@ use axum::extract::Query;
 use axum::response::Redirect;
 use axum::Extension;
 use block_mesh_common::interfaces::server_api::ConfirmEmailRequest;
+use block_mesh_common::routes_enum::RoutesEnum;
 use sqlx::PgPool;
 
 #[tracing::instrument(name = "email_confirm", skip(pool, query))]
@@ -50,7 +51,7 @@ pub async fn handler(
                 Ok(NotificationRedirect::redirect(
                     "Please Login",
                     "You email confirmed, please login into your account",
-                    "/login",
+                    RoutesEnum::Static_UnAuth_Login.to_string().as_str(),
                 ))
             }
         }
