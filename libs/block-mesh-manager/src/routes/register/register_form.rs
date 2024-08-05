@@ -32,7 +32,7 @@ pub async fn handler(
 ) -> Result<impl IntoResponse, Redirect> {
     return match auth.user {
         Some(_) => Err(Redirect::to(
-            RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
+            RoutesEnum::Static_UnAuth_Login.to_string().as_str(),
         )),
         None => Ok(RegisterTemplate {
             chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
