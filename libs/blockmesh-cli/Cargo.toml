@@ -22,4 +22,8 @@ uuid = { workspace = true, features = ["v4", "fast-rng", "macro-diagnostics", "s
 chrono = { workspace = true }
 speed-test = { path = "../speed-test" }
 logger-general = { path = "../logger-general" }
+futures-util = { workspace = true }
+rayon = { workspace = true }
 
+[lib]
+crate-type = ["cdylib", "rlib"]

@@ -18,6 +18,7 @@ use std::cmp;
 use std::str::FromStr;
 use uuid::Uuid;
 
+#[allow(dead_code)]
 pub async fn login(login_form: LoginForm) -> anyhow::Result<Uuid> {
     let url = format!("{}/api/get_token", BLOCK_MESH_APP_SERVER);
     let client = reqwest::Client::new();
@@ -168,6 +169,7 @@ pub async fn submit_task(
     Ok(response)
 }
 
+#[allow(dead_code)]
 pub async fn task_poller(email: &str, api_token: &str) -> anyhow::Result<()> {
     let api_token = Uuid::from_str(api_token).map_err(|_| anyhow!("Invalid UUID"))?;
     let task = match get_task(BLOCK_MESH_APP_SERVER, email, &api_token).await {
