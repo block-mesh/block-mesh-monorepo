@@ -1,31 +1,15 @@
-import { Image, StyleSheet, Platform } from 'react-native'
-
+import { Image, StyleSheet, Platform, TextInput } from 'react-native'
 import { HelloWave } from '@/components/HelloWave'
 import ParallaxScrollView from '@/components/ParallaxScrollView'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
-import { useEffect, useState } from 'react'
-import { getData } from '@/utils/storage'
-import { API_TOKEN, EMAIL } from '@/utils/constants'
+import { useStorage } from '@/hooks/useStorage'
+import React, { useRef } from 'react'
 
 export default function HomeScreen() {
-  const [email, setEmail] = useState<string>()
-  const [apiToken, setApiToken] = useState<string>()
-  const [url, setUrl] = useState<string>('http://localhost:8000')
-
-  useEffect(() => {
-    (async () => {
-      const e = await getData(EMAIL)
-      if (e) {
-        setEmail(e)
-      }
-      const token = await getData(API_TOKEN)
-      if (token) {
-        setApiToken(token)
-      }
-
-    })()
-  }, [])
+  const inputRef = useRef('')
+  const storage = useStorage()
+  console.log('storage => ', { storage })
 
 
   return (
@@ -68,6 +52,22 @@ export default function HomeScreen() {
           <ThemedText type="defaultSemiBold">app-example</ThemedText>.
         </ThemedText>
       </ThemedView>
+      <ThemedView style={styles.stepContainer}>
+        <TextInput
+          ref={inputRef}
+          style={styles.input}
+          onChangeText={storage.setEmail}
+          value={storage.email}
+          placeholder="Fill email"
+        />
+        <TextInput
+          style={styles.input}
+          onChangeText={storage.setUrl}
+          value={storage.url}
+          placeholder="Fill URL"
+          // keyboardType="te"
+        />
+      </ThemedView>
     </ParallaxScrollView>
   )
 }
@@ -88,5 +88,11 @@ const styles = StyleSheet.create({
     bottom: 0,
     left: 0,
     position: 'absolute'
+  },
+  input: {
+    height: 40,
+    margin: 12,
+    borderWidth: 1,
+    padding: 10
   }
 })
