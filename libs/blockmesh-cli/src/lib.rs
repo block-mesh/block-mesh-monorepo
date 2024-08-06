@@ -17,7 +17,6 @@ use uuid::Uuid;
 
 /// # Safety
 /// This method should be called by any external program that want to use BlockMesh Network CLI
-// #[allow(unsafe_code)]
 #[no_mangle]
 #[allow(improper_ctypes_definitions)]
 pub unsafe extern "C" fn run_lib(email: *const c_char, password: *const c_char) -> i8 {
