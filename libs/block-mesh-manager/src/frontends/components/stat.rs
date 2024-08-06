@@ -24,7 +24,8 @@ where
             <div>
                 <div class="font-bebas-neue text-off-white mt-6 text-lg/6 font-medium sm:text-sm/6">
                     <span class="font-open-sans">
-                        {title} <small class="ml-2 text-off-white stat-box-subtext">{subtext}</small>
+                        {title}
+                        <small class="ml-2 text-off-white stat-box-subtext">{subtext}</small>
                     </span>
                 </div>
                 <div class="flex justify-between items-center mt-2 text-orange">

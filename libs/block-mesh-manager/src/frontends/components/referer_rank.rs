@@ -25,9 +25,7 @@ pub fn RefererRank(
                                 fallback=move || {
                                     view! {
                                         <span class="flex h-10 w-10 items-center justify-center rounded-full border-2 border-orange">
-                                            <span class="text-off-white">
-                                                {step.to_string()}
-                                            </span>
+                                            <span class="text-off-white">{step.to_string()}</span>
                                         </span>
                                     }
                                 }
@@ -52,8 +50,12 @@ pub fn RefererRank(
                         </span>
 
                         <span class="ml-4 mt-0.5 flex min-w-0 flex-col">
-                            <span class="font-bebas-neue text-sm font-medium text-orange">{title}</span>
-                            <span class="font-open-sans text-sm font-medium text-off-white">{description}</span>
+                            <span class="font-bebas-neue text-sm font-medium text-orange">
+                                {title}
+                            </span>
+                            <span class="font-open-sans text-sm font-medium text-off-white">
+                                {description}
+                            </span>
                         </span>
                     </span>
                 </div>

@@ -1,12 +1,11 @@
+use charming::component::Grid;
+use charming::datatype::CompositeValue;
+use charming::element::{AxisLabel, AxisPointer, AxisPointerType, Tooltip, Trigger};
+use charming::{component::Axis, element::AxisType, series::Bar, Chart, HtmlRenderer};
+use leptos::*;
+
 use crate::frontends::context::size_context::SizeContext;
 use crate::frontends::context::webapp_context::WebAppContext;
-use charming::{
-    component::Axis,
-    element::{AxisType, BackgroundStyle},
-    series::Bar,
-    Chart, HtmlRenderer,
-};
-use leptos::*;
 
 #[component]
 pub fn BarChart() -> impl IntoView {
@@ -23,18 +22,26 @@ pub fn BarChart() -> impl IntoView {
             if let Some(data) = r {
                 let data = data.daily_stats;
                 let chart = Chart::new()
+                    .grid(
+                        Grid::new()
+                            .contain_label(true)
+                            .left(CompositeValue::String("3%".to_string()))
+                            .right(CompositeValue::String("4%".to_string()))
+                            .bottom(CompositeValue::String("3%".to_string())),
+                    )
                     .x_axis(
                         Axis::new()
                             .type_(AxisType::Category)
+                            .axis_label(AxisLabel::new().show(true))
                             .data(data.iter().map(|i| i.day.to_string()).collect()),
                     )
                     .y_axis(Axis::new().type_(AxisType::Value))
+                    .axis_pointer(AxisPointer::new().type_(AxisPointerType::Shadow))
+                    .tooltip(Tooltip::new().trigger(Trigger::Axis))
                     .series(
                         Bar::new()
-                            .show_background(true)
-                            .background_style(
-                                BackgroundStyle::new().color("rgba(180, 180, 180, 0.2)"),
-                            )
+                            .bar_width(60)
+                            .name("Points")
                             .data(data.iter().map(|i| i.points).collect()),
                     );
                 let html_renderer = HtmlRenderer::new("Daily Points", width.get() as u64, 400);

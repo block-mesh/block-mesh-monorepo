@@ -59,6 +59,7 @@ pub fn App() -> impl IntoView {
                         }
                     }
                 >
+
                     <Route path="/dashboard" view=NewDashboard/>
                     <Route path="/referrals" view=Referrals/>
                     <Route path="/perks" view=Perks/>
@@ -78,6 +79,7 @@ pub fn App() -> impl IntoView {
                             }
                         }
                     />
+
                 </Route>
                 <Route
                     path="/tauri"
@@ -89,6 +91,7 @@ pub fn App() -> impl IntoView {
                         }
                     }
                 >
+
                     <Route
                         path="/login"
                         view=move || {

@@ -9,6 +9,7 @@ pub fn TableCell(#[prop(into, optional)] class: String, children: Children) -> i
         "border-b border-zinc-950/5 border-white/5",
         "py-4",
         "sm:first:pl-1 sm:last:pr-1",
+        "text-off-white"
     );
 
     view! { <td class=class>{children()}</td> }
