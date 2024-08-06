@@ -20,7 +20,7 @@ pub async fn handler(
     let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    if user.email != query.email {
+    if user.email.to_ascii_lowercase() != query.email.to_ascii_lowercase() {
         return Err(Error::UserNotFound);
     }
     let user_latest_uptime = get_user_latest_uptime(&mut transaction, user.id).await?;

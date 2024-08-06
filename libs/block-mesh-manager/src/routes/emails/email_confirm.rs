@@ -22,7 +22,7 @@ pub async fn handler(
             500,
             "Didn't find token",
             "Please contact our support",
-            "/",
+            RoutesEnum::Static_UnAuth_Root.to_string().as_str(),
         )),
         Some(nonce) => {
             if *nonce.nonce.expose_secret() != query.token {
@@ -30,7 +30,7 @@ pub async fn handler(
                     500,
                     "Token mismatch",
                     "Please contact our support",
-                    "/",
+                    RoutesEnum::Static_UnAuth_Root.to_string().as_str(),
                 ))
             } else {
                 let user = get_user_opt_by_id(&mut transaction, &nonce.user_id)
@@ -41,7 +41,7 @@ pub async fn handler(
                         500,
                         "User not found",
                         "Please contact our support",
-                        "/",
+                        RoutesEnum::Static_UnAuth_Root.to_string().as_str(),
                     ));
                 }
                 update_verified_email(&mut transaction, user.unwrap().id, true)

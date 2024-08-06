@@ -19,7 +19,7 @@ pub async fn handler(
         transaction.commit().await.map_err(Error::from)?;
         if let Some(db_user) = db_user {
             return Ok(Json(AuthStatusResponse {
-                email: Some(user.email),
+                email: Some(user.email.to_ascii_lowercase()),
                 status_code: 200,
                 logged_in: true,
                 wallet_address: db_user.wallet_address,

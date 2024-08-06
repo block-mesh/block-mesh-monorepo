@@ -116,12 +116,12 @@ pub fn TauriLogin() -> impl IntoView {
                             name="email"
                             on:keyup=move |ev: ev::KeyboardEvent| {
                                 let val = event_target_value(&ev);
-                                set_email.update(|v| *v = val);
+                                set_email.update(|v| *v = val.to_ascii_lowercase());
                             }
 
                             on:change=move |ev| {
                                 let val = event_target_value(&ev);
-                                set_email.update(|v| *v = val);
+                                set_email.update(|v| *v = val.to_ascii_lowercase());
                             }
                         />
 

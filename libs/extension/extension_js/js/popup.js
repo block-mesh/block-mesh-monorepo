@@ -46,7 +46,11 @@ async function onMessage(e) {
     window.message_channel_port.postMessage({ [key]: val })
   }
   if (msg_type === 'SET' && key) {
-    await chrome.storage.sync.set({ [key]: value })
+    if (key === 'email') {
+      await chrome.storage.sync.set({ [key]: value.toLocaleLowerCase() })
+    } else {
+      await chrome.storage.sync.set({ [key]: value })
+    }
   }
   if (msg_type === 'DELETE' && key) {
     await chrome.storage.sync.remove(key)
