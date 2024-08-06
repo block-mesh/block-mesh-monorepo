@@ -102,11 +102,7 @@ pub fn NewDashboard() -> impl IntoView {
                         value=move || invites.get()
                         icon="notification_multiple"
                     />
-                    <Stat
-                        title="# Tasks"
-                        value=move || tasks.get()
-                        icon="task_alt"
-                    />
+                    <Stat title="# Tasks" value=move || tasks.get() icon="task_alt"/>
                     <Stat title="Points" value=move || points.get() icon="my_location"/>
 
                 </div>

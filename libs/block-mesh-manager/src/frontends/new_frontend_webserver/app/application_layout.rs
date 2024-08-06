@@ -79,8 +79,7 @@ pub fn ApplicationSidebar() -> impl IntoView {
                 <SidebarItem>
                     <span class="flex min-w-0 items-center gap-3">
                         <span class="min-w-0">
-                            <span class="block truncate text-sm/5 font-medium text-zinc-950 text-orange">
-                            </span>
+                            <span class="block truncate text-sm/5 font-medium text-zinc-950 text-orange"></span>
                             <span class="block truncate text-xs/5 font-normal text-zinc-500 text-zinc-400">
                                 {move || email.get()}
                             </span>
