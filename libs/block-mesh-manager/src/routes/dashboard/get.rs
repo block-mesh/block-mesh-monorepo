@@ -86,7 +86,7 @@ pub async fn handler(
         invite_code: user_invite_code.invite_code,
         number_of_users_invited,
         user_since,
-        email: db_user.email,
+        email: db_user.email.to_ascii_lowercase(),
         email_status: (if db_user.verified_email {
             "Verified"
         } else {

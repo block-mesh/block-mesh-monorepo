@@ -23,7 +23,7 @@ pub async fn handler(
     let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    if user.email != body.email {
+    if user.email.to_ascii_lowercase() != body.email.to_ascii_lowercase() {
         return Err(Error::UserNotFound);
     }
     let task = find_task_by_status(&mut transaction, TaskStatus::Pending).await?;

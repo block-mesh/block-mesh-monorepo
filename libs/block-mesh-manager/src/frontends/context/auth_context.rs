@@ -76,7 +76,7 @@ impl AuthContext {
                         MessageType::SET => match msg.key {
                             MessageKey::Email => {
                                 if let Some(MessageValue::String(email)) = msg.value {
-                                    self.email.set(email.clone());
+                                    self.email.set(email.clone().to_ascii_lowercase());
                                 }
                             }
                             MessageKey::ApiToken => {

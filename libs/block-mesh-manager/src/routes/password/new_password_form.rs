@@ -51,7 +51,7 @@ pub async fn handler(
     return match auth.user {
         Some(_) => Err(Error::UserAlreadyExists),
         None => Ok(NewPasswordTemplate {
-            email: user.email,
+            email: user.email.to_ascii_lowercase(),
             token,
             chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
             app_server: BLOCK_MESH_APP_SERVER.to_string(),

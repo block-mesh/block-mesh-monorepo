@@ -7,6 +7,7 @@ use axum::extract::State;
 use axum::response::Redirect;
 use axum::{Extension, Form};
 use block_mesh_common::interfaces::server_api::ResendConfirmEmailForm;
+use block_mesh_common::routes_enum::RoutesEnum;
 use sqlx::PgPool;
 use std::sync::Arc;
 
@@ -17,7 +18,7 @@ pub async fn handler(
     Form(form): Form<ResendConfirmEmailForm>,
 ) -> Result<Redirect, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
-    let user = get_user_opt_by_email(&mut transaction, &form.email)
+    let user = get_user_opt_by_email(&mut transaction, &form.email.to_ascii_lowercase())
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
@@ -31,6 +32,6 @@ pub async fn handler(
     Ok(NotificationRedirect::redirect(
         "Email Sent",
         "Please check your email",
-        "/login",
+        RoutesEnum::Static_UnAuth_Login.to_string().as_str(),
     ))
 }

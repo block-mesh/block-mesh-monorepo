@@ -163,7 +163,7 @@ impl ExtensionContext {
                                         });
                                     }
                                     MessageKey::Email => {
-                                        self.email.update(|v| *v = value);
+                                        self.email.update(|v| *v = value.to_ascii_lowercase());
                                     }
                                     MessageKey::DeviceId => {
                                         // setup_leptos_tracing(Option::from(device_id), DeviceType::Extension); // TODO

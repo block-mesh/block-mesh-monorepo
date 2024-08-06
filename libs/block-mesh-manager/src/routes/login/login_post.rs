@@ -17,14 +17,14 @@ pub async fn handler(
     Form(form): Form<LoginForm>,
 ) -> Result<Redirect, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
-    let user = get_user_opt_by_email(&mut transaction, &form.email)
+    let user = get_user_opt_by_email(&mut transaction, &form.email.to_ascii_lowercase())
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
         .await?
         .ok_or_else(|| Error::NonceNotFound)?;
     let creds: Credentials = Credentials {
-        email: form.email,
+        email: form.email.to_ascii_lowercase(),
         password: Secret::from(form.password),
         nonce: nonce.nonce.as_ref().to_string(),
     };
