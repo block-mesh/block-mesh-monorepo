@@ -114,7 +114,7 @@ pub async fn handler(
     auth.login(&session)
         .await
         .map_err(|_| Error::Auth(anyhow!("Login failed").to_string()))?;
-    state
+    let _ = state
         .email_client
         .send_confirmation_email(&email, nonce_secret.expose_secret())
         .await;

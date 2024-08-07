@@ -63,13 +63,10 @@ async fn run() -> anyhow::Result<()> {
     let database_url = get_env_var_or_panic(AppEnvVar::DatabaseUrl);
     let database_url = <EnvVar as AsRef<Secret<String>>>::as_ref(&database_url);
     let mailgun_token = get_env_var_or_panic(AppEnvVar::MailgunSendKey);
-    let mailgun_token = <EnvVar as AsRef<Secret<String>>>::as_ref(&mailgun_token);
+    let _mailgun_token = <EnvVar as AsRef<Secret<String>>>::as_ref(&mailgun_token);
     let db_pool = get_connection_pool(&configuration.database, Option::from(database_url)).await?;
     migrate(&db_pool).await.expect("Failed to migrate database");
-    let email_client = Arc::new(EmailClient::new(
-        mailgun_token.clone(),
-        configuration.application.base_url.clone(),
-    ));
+    let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
     let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(100);
     let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::unbounded_channel::<EnrichIp>();
     let client = Client::new();
