@@ -2083,6 +2083,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "cloudflare-worker-echo-debug"
+version = "0.0.160"
+dependencies = [
+ "anyhow",
+ "block-mesh-common",
+ "reqwest 0.11.27",
+ "rsyslog",
+ "serde",
+ "serde_json",
+ "syslog_rfc5424",
+ "time",
+ "tracing",
+ "tracing-subscriber",
+ "tracing-web",
+ "uuid",
+ "worker",
+]
+
+[[package]]
 name = "cloudflare-worker-ip-data"
 version = "0.0.160"
 dependencies = [
@@ -5824,6 +5843,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "nom-regex"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "72e5c7731c4c1370b61604ed52a2475e861aac9e08dec9f23903d4ddfdc91c18"
+dependencies = [
+ "nom",
+ "regex",
+]
+
+[[package]]
 name = "ntapi"
 version = "0.4.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7559,6 +7588,16 @@ dependencies = [
  "syn 2.0.68",
  "syn_derive",
  "thiserror",
+]
+
+[[package]]
+name = "rsyslog"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8f5963755808e34aea5b05a720a0044e2f10f39f61d69bbed56ecbb3369a1541"
+dependencies = [
+ "nom",
+ "nom-regex",
 ]
 
 [[package]]
@@ -10075,6 +10114,16 @@ dependencies = [
  "once_cell",
  "rayon",
  "windows 0.52.0",
+]
+
+[[package]]
+name = "syslog_rfc5424"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e9f89eda0701efea38626f5bbbb81a049aeb52ad01d24fe6cfd0eb4d10efc191"
+dependencies = [
+ "thiserror",
+ "time",
 ]
 
 [[package]]
