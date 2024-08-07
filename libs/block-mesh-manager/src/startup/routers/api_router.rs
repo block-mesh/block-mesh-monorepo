@@ -48,6 +48,10 @@ pub fn get_api_router() -> Router<Arc<AppState>> {
             post(routes::api_token::check_token::handler),
         )
         .route(
+            RoutesEnum::Api_Dashboard.to_string().as_str(),
+            post(routes::dashboard::dashboard_api::handler),
+        )
+        .route(
             RoutesEnum::Api_EMailViaToken.to_string().as_str(),
             post(routes::api_token::get_email_via_token::handler),
         );

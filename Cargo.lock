@@ -1164,7 +1164,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-common"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anyhow",
  "borsh 1.5.1",
@@ -1191,7 +1191,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anyhow",
  "askama",
@@ -1258,7 +1258,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-solana-client"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -1311,7 +1311,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-cli"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -1331,7 +1331,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-leptos"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -1352,7 +1352,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-program"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -1361,7 +1361,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh_tauri"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anyhow",
  "auto-launch",
@@ -1975,7 +1975,7 @@ checksum = "4b82cf0babdbd58558212896d1a4272303a57bdb245c2bf1147185fb45640e70"
 
 [[package]]
 name = "client-node"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -2002,7 +2002,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-affiliate-plan-page"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2018,7 +2018,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-feature-flags"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2034,7 +2034,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-images-gallery-page"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anyhow",
  "askama",
@@ -2052,7 +2052,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-landing-page"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2068,7 +2068,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-privacy-page"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2084,7 +2084,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-ip-data"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "block-mesh-common",
  "rustc-hash",
@@ -2099,7 +2099,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-logger-proxy"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -2116,7 +2116,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-logs-queue"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2136,7 +2136,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-solana-relay"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "rustc-hash",
  "serde",
@@ -2152,7 +2152,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-tauri-releases"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anyhow",
  "reqwest 0.11.27",
@@ -2713,7 +2713,7 @@ checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 
 [[package]]
 name = "debug-area"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "tokio",
 ]
@@ -3278,7 +3278,7 @@ dependencies = [
 
 [[package]]
 name = "extension"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -5425,7 +5425,7 @@ checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
 name = "logger-general"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -5445,7 +5445,7 @@ dependencies = [
 
 [[package]]
 name = "logger-leptos"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -6950,7 +6950,7 @@ dependencies = [
 
 [[package]]
 name = "proxy-endpoint"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -6979,7 +6979,7 @@ dependencies = [
 
 [[package]]
 name = "proxy-master"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -7808,7 +7808,7 @@ dependencies = [
 
 [[package]]
 name = "secret"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "serde",
  "sqlx",
@@ -9061,7 +9061,7 @@ dependencies = [
 
 [[package]]
 name = "solana-tiny-client"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anyhow",
  "bincode",
@@ -9254,7 +9254,7 @@ dependencies = [
 
 [[package]]
 name = "speed-test"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anyhow",
  "chrono",
@@ -10510,7 +10510,7 @@ dependencies = [
 
 [[package]]
 name = "test-proxy-endpoint"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "block-mesh-common",
  "bytes",
@@ -10529,7 +10529,7 @@ dependencies = [
 
 [[package]]
 name = "test-proxy-master"
-version = "0.0.157"
+version = "0.0.158"
 dependencies = [
  "anyhow",
  "block-mesh-common",

@@ -30,6 +30,7 @@ pub enum RoutesEnum {
     Api_CreateTaskWithToken,
     Api_CheckToken,
     Api_EMailViaToken,
+    Api_Dashboard,
 }
 
 impl Display for RoutesEnum {
@@ -65,6 +66,7 @@ impl Display for RoutesEnum {
             RoutesEnum::Api_CreateTaskWithToken => write!(f, "/create_task_with_token"),
             RoutesEnum::Api_CheckToken => write!(f, "/check_token"),
             RoutesEnum::Api_EMailViaToken => write!(f, "/get_email_via_token"),
+            RoutesEnum::Api_Dashboard => write!(f, "/dashboard"),
         }
     }
 }

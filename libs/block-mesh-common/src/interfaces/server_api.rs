@@ -44,6 +44,12 @@ pub struct ReportUptimeRequest {
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+pub struct DashboardRequest {
+    pub email: String,
+    pub api_token: Uuid,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ReportUptimeResponse {
     pub status_code: u16,
 }

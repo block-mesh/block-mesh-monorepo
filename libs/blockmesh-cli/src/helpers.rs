@@ -1,11 +1,12 @@
 use anyhow::anyhow;
 use block_mesh_common::constants::BLOCK_MESH_APP_SERVER;
 use block_mesh_common::interfaces::server_api::{
-    GetTaskRequest, GetTaskResponse, ReportBandwidthRequest, ReportBandwidthResponse,
-    ReportUptimeRequest, ReportUptimeResponse, RunTaskResponse, SubmitTaskRequest,
-    SubmitTaskResponse,
+    DashboardRequest, DashboardResponse, GetTaskRequest, GetTaskResponse, RegisterForm,
+    RegisterResponse, ReportBandwidthRequest, ReportBandwidthResponse, ReportUptimeRequest,
+    ReportUptimeResponse, RunTaskResponse, SubmitTaskRequest, SubmitTaskResponse,
 };
 use block_mesh_common::interfaces::server_api::{GetTokenResponse, LoginForm};
+use block_mesh_common::routes_enum::RoutesEnum;
 use chrono::Utc;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
 use serde_json::Value;
@@ -19,8 +20,40 @@ use std::str::FromStr;
 use uuid::Uuid;
 
 #[allow(dead_code)]
-pub async fn login(login_form: LoginForm) -> anyhow::Result<Uuid> {
-    let url = format!("{}/api/get_token", BLOCK_MESH_APP_SERVER);
+pub async fn dashboard(url: &str, credentials: &DashboardRequest) -> anyhow::Result<()> {
+    let url = format!("{}/api{}", url, RoutesEnum::Api_Dashboard);
+    let client = reqwest::Client::new();
+    let response = client.post(&url).json(credentials).send().await?;
+    let response: DashboardResponse = response.json().await?;
+    tracing::info!("Dashboard data:");
+    println!(
+        "{}",
+        serde_json::to_string_pretty(&response).unwrap_or_default()
+    );
+    Ok(())
+}
+
+#[allow(dead_code)]
+pub async fn register(url: &str, credentials: &RegisterForm) -> anyhow::Result<()> {
+    let url = format!("{}{}", url, RoutesEnum::Static_UnAuth_RegisterApi);
+    let client = reqwest::Client::new();
+    let response = client.post(&url).form(credentials).send().await?;
+    let response: RegisterResponse = response.json().await?;
+    if response.status_code == 200 {
+        tracing::info!("Successfully registered");
+        Ok(())
+    } else {
+        tracing::error!(
+            "Failed to registered with error : {}",
+            response.error.unwrap_or_default()
+        );
+        Err(anyhow!("Failed to register"))
+    }
+}
+
+#[allow(dead_code)]
+pub async fn login(url: &str, login_form: LoginForm) -> anyhow::Result<Uuid> {
+    let url = format!("{}/api{}", url, RoutesEnum::Api_GetToken);
     let client = reqwest::Client::new();
     let response: GetTokenResponse = client
         .post(&url)
@@ -33,13 +66,19 @@ pub async fn login(login_form: LoginForm) -> anyhow::Result<Uuid> {
         .await
         .map_err(|e| anyhow!(e.to_string()))?;
     match response.api_token {
-        Some(api_token) => Ok(api_token),
-        None => Err(anyhow!("missing api_token")),
+        Some(api_token) => {
+            tracing::info!("Login successful");
+            Ok(api_token)
+        }
+        None => {
+            tracing::error!("Failed to login");
+            Err(anyhow!("missing api_token"))
+        }
     }
 }
 
 #[tracing::instrument(name = "report_uptime", skip(api_token), err)]
-pub async fn report_uptime(email: &str, api_token: &str) -> anyhow::Result<()> {
+pub async fn report_uptime(url: &str, email: &str, api_token: &str) -> anyhow::Result<()> {
     let api_token = Uuid::from_str(api_token).map_err(|_| anyhow!("Invalid UUID"))?;
     let metadata = fetch_metadata().await.unwrap_or_default();
 
@@ -54,7 +93,7 @@ pub async fn report_uptime(email: &str, api_token: &str) -> anyhow::Result<()> {
     };
 
     if let Ok(response) = reqwest::Client::new()
-        .post(format!("{}/api/report_uptime", BLOCK_MESH_APP_SERVER))
+        .post(format!("{}/api/report_uptime", url))
         .query(&query)
         .send()
         .await
@@ -170,9 +209,9 @@ pub async fn submit_task(
 }
 
 #[allow(dead_code)]
-pub async fn task_poller(email: &str, api_token: &str) -> anyhow::Result<()> {
+pub async fn task_poller(url: &str, email: &str, api_token: &str) -> anyhow::Result<()> {
     let api_token = Uuid::from_str(api_token).map_err(|_| anyhow!("Invalid UUID"))?;
-    let task = match get_task(BLOCK_MESH_APP_SERVER, email, &api_token).await {
+    let task = match get_task(url, email, &api_token).await {
         Ok(v) => v,
         Err(e) => {
             tracing::error!("get_task error: {e}");
@@ -243,6 +282,7 @@ pub async fn task_poller(email: &str, api_token: &str) -> anyhow::Result<()> {
 
 #[tracing::instrument(name = "submit_bandwidth", err)]
 pub async fn submit_bandwidth(
+    url: &str,
     email: &str,
     api_token: &str,
 ) -> anyhow::Result<ReportBandwidthResponse> {
@@ -266,7 +306,7 @@ pub async fn submit_bandwidth(
     };
 
     let response = reqwest::Client::new()
-        .post(format!("{}/api/submit_bandwidth", BLOCK_MESH_APP_SERVER))
+        .post(format!("{}/api/submit_bandwidth", url))
         .json(&body)
         .send()
         .await?;
