@@ -3,7 +3,6 @@ use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::api_token::find_token::find_token;
 use crate::database::bandwidth::create_bandwidth_report::create_bandwidth_report;
 use crate::database::bandwidth::delete_bandwidth_reports_by_time::delete_bandwidth_reports_by_time;
-use crate::database::bandwidth::get_latest_bandwidth_reports::get_latest_bandwidth_reports;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
