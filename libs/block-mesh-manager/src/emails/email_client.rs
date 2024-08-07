@@ -39,7 +39,7 @@ impl EmailClient {
         let body_content = Content::builder()
             .data(CONFIRM_EMAIL.replace(
                 "{{action_url}}",
-                &format!("{}/email_confirm={}", self.base_url, token),
+                &format!("{}/email_confirm?token={}", self.base_url, token),
             ))
             .charset("UTF-8")
             .build()?;
@@ -69,7 +69,7 @@ impl EmailClient {
         let body_content = Content::builder()
             .data(RESET_EMAIL.replace(
                 "{{action_url}}",
-                &format!("{}/new_password={}", self.base_url, token),
+                &format!("{}/new_password?token={}", self.base_url, token),
             ))
             .charset("UTF-8")
             .build()?;
