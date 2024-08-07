@@ -11,10 +11,8 @@ use crate::database::invite_code::get_number_of_users_invited::get_number_of_use
 use crate::database::invite_code::get_user_latest_invite_code::get_user_latest_invite_code;
 use crate::database::invite_code::get_user_referrals::get_user_referrals;
 use crate::database::perks::get_user_perks::get_user_perks;
-use crate::database::task::count_user_tasks_by_status::count_user_tasks_by_status;
 use crate::database::uptime_report::get_user_uptimes::get_user_uptimes;
 use crate::domain::aggregate::AggregateName;
-use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
 use crate::utils::points::calc_points;
 
@@ -23,8 +21,13 @@ pub async fn dashboard_data_extractor(
     user_id: Uuid,
 ) -> anyhow::Result<DashboardResponse> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
-    let overall_task_count =
-        count_user_tasks_by_status(&mut transaction, &user_id, TaskStatus::Completed).await?;
+    let tasks = get_or_create_aggregate_by_user_and_name_no_transaction(
+        &mut transaction,
+        AggregateName::Tasks,
+        user_id,
+    )
+    .await?;
+    let overall_task_count = tasks.value.as_i64().unwrap_or_default();
     let number_of_users_invited = get_number_of_users_invited(&mut transaction, user_id)
         .await
         .map_err(Error::from)?;
