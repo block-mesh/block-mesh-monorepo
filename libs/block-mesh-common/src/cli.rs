@@ -222,4 +222,20 @@ pub struct CliOpts {
     /// Password
     #[arg(long)]
     pub password: String,
+    #[arg(value_enum, default_value_t = CliOptMod::Login)]
+    /// Mode
+    pub mode: CliOptMod,
+    /// Server URL
+    #[arg(long, default_value = "https://app.blockmesh.xyz")]
+    pub url: String,
+    #[arg(long, default_value = "blockmesh-cli")]
+    pub invite_code: String,
+}
+
+#[derive(Debug, Clone, Copy, Deserialize, Serialize, ValueEnum, PartialEq, Default)]
+pub enum CliOptMod {
+    #[default]
+    Login,
+    Register,
+    Dashboard,
 }
