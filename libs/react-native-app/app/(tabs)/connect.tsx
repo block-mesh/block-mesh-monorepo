@@ -4,6 +4,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { getData, storeData } from '@/utils/storage'
 import { API_TOKEN, EMAIL } from '@/utils/constants'
 import { handleMessage, PostMessage } from '@/utils/messages'
+import { useStorage } from '@/hooks/useStorage'
 
 
 const styles = StyleSheet.create({
@@ -23,25 +24,9 @@ const styles = StyleSheet.create({
 })
 
 export default function ConnectPage() {
+  const storage = useStorage()
   const webview_ref = useRef<WebView>(null)
-  const [email, setEmail] = useState<string>()
-  const [apiToken, setApiToken] = useState<string>()
-  const [url, setUrl] = useState<string>('http://localhost:8000')
-
-  useEffect(() => {
-    (async () => {
-      const e = await getData(EMAIL)
-      if (e) {
-        setEmail(e)
-      }
-      const token = await getData(API_TOKEN)
-      if (token) {
-        setApiToken(token)
-      }
-
-    })()
-  }, [])
-
+  const [url, setUrl] = useState<string>(storage.url)
 
   const injectedJavaScript = `
       true; // note: this is required, or you'll sometimes get silent failures

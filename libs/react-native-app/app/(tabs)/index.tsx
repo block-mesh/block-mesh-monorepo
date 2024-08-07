@@ -1,15 +1,19 @@
-import { Image, StyleSheet, Platform, TextInput } from 'react-native'
+import { Image, StyleSheet, Platform, TextInput, Button } from 'react-native'
 import { HelloWave } from '@/components/HelloWave'
 import ParallaxScrollView from '@/components/ParallaxScrollView'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { useStorage } from '@/hooks/useStorage'
-import React, { useRef } from 'react'
+import React, { useRef, useState } from 'react'
 
 export default function HomeScreen() {
-  const inputRef = useRef('')
+  const emailRef = useRef()
+  const passwordRef = useRef()
+  const urlRef = useRef()
   const storage = useStorage()
-  console.log('storage => ', { storage })
+  const [email, setEmail] = useState(storage.email)
+  const [password, setPassword] = useState(storage.password)
+  const [url, setUrl] = useState(storage.url)
 
 
   return (
@@ -26,46 +30,41 @@ export default function HomeScreen() {
         <HelloWave />
       </ThemedView>
       <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 1: Try it</ThemedText>
-        <ThemedText>
-          Edit <ThemedText type="defaultSemiBold">app/(tabs)/index.tsx</ThemedText> to see changes.
-          Press{' '}
-          <ThemedText type="defaultSemiBold">
-            {Platform.select({ ios: 'cmd + d', android: 'cmd + m' })}
-          </ThemedText>{' '}
-          to open developer tools.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 2: Explore</ThemedText>
-        <ThemedText>
-          Tap the Explore tab to learn more about what's included in this starter app.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
-        <ThemedText type="subtitle">Step 3: Get a fresh start</ThemedText>
-        <ThemedText>
-          When you're ready, run{' '}
-          <ThemedText type="defaultSemiBold">npm run reset-project</ThemedText> to get a fresh{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> directory. This will move the current{' '}
-          <ThemedText type="defaultSemiBold">app</ThemedText> to{' '}
-          <ThemedText type="defaultSemiBold">app-example</ThemedText>.
-        </ThemedText>
-      </ThemedView>
-      <ThemedView style={styles.stepContainer}>
+        <ThemedText type="subtitle">Email</ThemedText>
         <TextInput
-          ref={inputRef}
+          ref={emailRef}
           style={styles.input}
-          onChangeText={storage.setEmail}
-          value={storage.email}
+          onChangeText={setEmail}
+          value={email}
           placeholder="Fill email"
+          autoCapitalize={false}
         />
+        <ThemedText type="subtitle">Password</ThemedText>
         <TextInput
+          ref={passwordRef}
           style={styles.input}
-          onChangeText={storage.setUrl}
-          value={storage.url}
+          onChangeText={setPassword}
+          value={password}
+          placeholder="Fill password"
+          autoCapitalize={false}
+        />
+        <ThemedText type="subtitle">URL</ThemedText>
+        <TextInput
+          ref={urlRef}
+          style={styles.input}
+          onChangeText={setUrl}
+          value={url}
           placeholder="Fill URL"
-          // keyboardType="te"
+          autoCapitalize={false}
+        />
+        <Button
+          title="Save"
+          color="#f194ff"
+          onPress={() => {
+            storage.setEmail(email)
+            storage.setPassword(password)
+            storage.setUrl(url)
+          }}
         />
       </ThemedView>
     </ParallaxScrollView>

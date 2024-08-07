@@ -7,16 +7,18 @@ import {
   useState
 } from 'react'
 import { getData, storeData } from '@/utils/storage'
-import { API_TOKEN, BLOCKMESH_URL, EMAIL } from '@/utils/constants'
+import { API_TOKEN, BLOCKMESH_URL, EMAIL, PASSWORD } from '@/utils/constants'
 
 
 export interface StorageType {
   email: string;
   api_token: string;
+  password: string;
   url: string;
   setEmail: (email: string) => void;
   setApiToken: (api_token: string) => void;
   setUrl: (url: string) => void;
+  setPassword: (password: string) => void;
 }
 
 export const Context = createContext<StorageType>(
@@ -35,6 +37,7 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
   const [email, setEmailInternal] = useState('')
   const [api_token, setApiTokenInternal] = useState('')
   const [url, setUrlInternal] = useState('')
+  const [password, setPasswordInternal] = useState('')
 
   useEffect(() => {
     (async () => {
@@ -50,13 +53,17 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
       if (url) {
         setUrlInternal(url)
       }
+      const password = await getData(PASSWORD)
+      if (url) {
+        setPasswordInternal(url)
+      }
     })()
   }, [])
 
   function setEmail(email: string) {
     try {
-      storeData(EMAIL, email).then(() => {
-        setEmailInternal(email)
+      storeData(EMAIL, email.toLowerCase()).then(() => {
+        setEmailInternal(email.toLowerCase())
       }).catch((e) => {
         console.error(`setEmail:: email = '${email} , error = '${e}`)
       })
@@ -89,6 +96,18 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
     }
   }
 
+  function setPassword(password: string) {
+    try {
+      storeData(PASSWORD, password).then(() => {
+        setPasswordInternal(password)
+      }).catch((e) => {
+        console.error(`setPassword:: password = '${password} , error = '${e}`)
+      })
+    } catch (e: any) {
+      console.error(`setPassword:: password = '${password} , error = '${e}`)
+    }
+  }
+
 
   return (
     <Context.Provider
@@ -96,10 +115,11 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
         email,
         api_token,
         url,
+        password,
         setEmail,
         setApiToken,
-        setUrl
-
+        setUrl,
+        setPassword
       }}
     >
       {children}
