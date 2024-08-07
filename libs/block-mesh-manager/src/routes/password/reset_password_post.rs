@@ -24,7 +24,7 @@ pub async fn handler(
     let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
         .await?
         .ok_or_else(|| Error::NonceNotFound)?;
-    state
+    let _ = state
         .email_client
         .send_reset_password_email(&user.email, nonce.nonce.expose_secret())
         .await;

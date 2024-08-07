@@ -205,6 +205,7 @@ pub struct DashboardResponse {
     pub daily_stats: Vec<DailyStatForDashboard>,
     pub perks: Vec<PerkUI>,
     pub referrals: Vec<Referral>,
+    pub verified_email: bool,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]

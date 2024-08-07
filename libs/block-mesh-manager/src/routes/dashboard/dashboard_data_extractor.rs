@@ -12,6 +12,7 @@ use crate::database::invite_code::get_user_latest_invite_code::get_user_latest_i
 use crate::database::invite_code::get_user_referrals::get_user_referrals;
 use crate::database::perks::get_user_perks::get_user_perks;
 use crate::database::uptime_report::get_user_uptimes::get_user_uptimes;
+use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::utils::points::calc_points;
@@ -21,6 +22,9 @@ pub async fn dashboard_data_extractor(
     user_id: Uuid,
 ) -> anyhow::Result<DashboardResponse> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let user = get_user_opt_by_id(&mut transaction, &user_id)
+        .await?
+        .ok_or_else(|| Error::UserNotFound)?;
     let tasks = get_or_create_aggregate_by_user_and_name_no_transaction(
         &mut transaction,
         AggregateName::Tasks,
@@ -97,6 +101,7 @@ pub async fn dashboard_data_extractor(
 
     transaction.commit().await.map_err(Error::from)?;
     Ok(DashboardResponse {
+        verified_email: user.verified_email,
         referrals,
         upload: upload.value.as_f64().unwrap_or_default(),
         download: download.value.as_f64().unwrap_or_default(),
