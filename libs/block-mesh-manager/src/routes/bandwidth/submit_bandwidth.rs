@@ -33,10 +33,6 @@ pub async fn handler(
         return Err(Error::UserNotFound);
     }
 
-    let bandwidth_report = get_latest_bandwidth_reports(&mut transaction, user.id, 60 * 60)
-        .await
-        .map_err(Error::from)?;
-
     let download_speed = serde_json::Value::from(body.download_speed)
         .as_f64()
         .unwrap_or_default();
@@ -75,10 +71,7 @@ pub async fn handler(
         &mut transaction,
         download.id.unwrap_or_default(),
         &serde_json::Value::from(
-            (bandwidth_report.download_speed.unwrap_or_default()
-                + latency.value.as_f64().unwrap_or_default()
-                + download_speed)
-                / 3.0,
+            (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
         ),
     )
     .await
@@ -87,12 +80,7 @@ pub async fn handler(
     update_aggregate(
         &mut transaction,
         upload.id.unwrap_or_default(),
-        &serde_json::Value::from(
-            (bandwidth_report.upload_speed.unwrap_or_default()
-                + upload.value.as_f64().unwrap_or_default()
-                + upload_speed)
-                / 3.0,
-        ),
+        &serde_json::Value::from((upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0),
     )
     .await
     .map_err(Error::from)?;
@@ -101,10 +89,7 @@ pub async fn handler(
         &mut transaction,
         latency.id.unwrap_or_default(),
         &serde_json::Value::from(
-            (bandwidth_report.latency.unwrap_or_default()
-                + latency.value.as_f64().unwrap_or_default()
-                + latency_report)
-                / 3.0,
+            (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,
         ),
     )
     .await

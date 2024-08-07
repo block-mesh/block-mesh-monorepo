@@ -1,3 +1,5 @@
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
+use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
@@ -5,6 +7,7 @@ use crate::database::daily_stat::increment_tasks_count::increment_tasks_count;
 use crate::database::task::find_task_by_task_id_and_status::find_task_by_task_id_and_status;
 use crate::database::task::finish_task::finish_task;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
+use crate::domain::aggregate::AggregateName;
 use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
 use axum::extract::{Query, Request};
@@ -70,6 +73,24 @@ pub async fn handler(
         Some(daily_stat) => daily_stat.id,
         None => create_daily_stat(&mut transaction, user.id).await?,
     };
+
+    if query.response_code.unwrap_or(520) == 200 {
+        let tasks = get_or_create_aggregate_by_user_and_name_no_transaction(
+            &mut transaction,
+            AggregateName::Tasks,
+            user.id,
+        )
+        .await?;
+
+        update_aggregate(
+            &mut transaction,
+            tasks.id.unwrap_or_default(),
+            &serde_json::Value::from(tasks.value.as_i64().unwrap_or_default() + 1),
+        )
+        .await
+        .map_err(Error::from)?;
+    }
+
     increment_tasks_count(&mut transaction, daily_stat_opt_id).await?;
     transaction.commit().await.map_err(Error::from)?;
     Ok(Json(SubmitTaskResponse {
