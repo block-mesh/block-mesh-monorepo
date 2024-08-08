@@ -1694,6 +1694,7 @@ dependencies = [
  "chrono",
  "clap 4.5.8",
  "futures-util",
+ "jni 0.19.0",
  "logger-general",
  "rayon",
  "reqwest 0.11.27",
@@ -5312,6 +5313,20 @@ dependencies = [
  "gobject-sys",
  "libc",
  "system-deps",
+]
+
+[[package]]
+name = "jni"
+version = "0.19.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c6df18c2e3db7e453d3c6ac5b3e9d5182664d28788126d39b91f2d1e22b017ec"
+dependencies = [
+ "cesu8",
+ "combine 4.6.7",
+ "jni-sys",
+ "log",
+ "thiserror",
+ "walkdir",
 ]
 
 [[package]]
@@ -10660,7 +10675,7 @@ dependencies = [
  "gdkx11-sys",
  "gtk",
  "instant",
- "jni",
+ "jni 0.21.1",
  "lazy_static",
  "libc",
  "log",
@@ -10727,7 +10742,7 @@ dependencies = [
  "gtk",
  "heck 0.5.0",
  "http 1.1.0",
- "jni",
+ "jni 0.21.1",
  "libc",
  "log",
  "mime",
@@ -10906,7 +10921,7 @@ dependencies = [
  "dpi",
  "gtk",
  "http 1.1.0",
- "jni",
+ "jni 0.21.1",
  "raw-window-handle 0.6.2",
  "serde",
  "serde_json",
@@ -10925,7 +10940,7 @@ dependencies = [
  "cocoa",
  "gtk",
  "http 1.1.0",
- "jni",
+ "jni 0.21.1",
  "log",
  "percent-encoding",
  "raw-window-handle 0.6.2",
@@ -12876,7 +12891,7 @@ dependencies = [
  "html5ever",
  "http 1.1.0",
  "javascriptcore-rs",
- "jni",
+ "jni 0.21.1",
  "kuchikiki",
  "libc",
  "ndk",
