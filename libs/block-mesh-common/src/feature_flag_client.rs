@@ -27,6 +27,8 @@ pub async fn get_flag_value(flag: &str, client: &Client) -> anyhow::Result<Optio
 #[cfg(test)]
 mod tests {
     use super::*;
+    use reqwest::ClientBuilder;
+    use std::time::Duration;
     use uuid::Uuid;
 
     #[tokio::test]
