@@ -3,7 +3,8 @@ use crate::emails::reset_email::RESET_EMAIL;
 use aws_config::meta::region::RegionProviderChain;
 use aws_sdk_sesv2::config::Region;
 use aws_sdk_sesv2::types::{Body, Content, Destination, EmailContent, Message};
-use reqwest::Client;
+use reqwest::{Client, ClientBuilder};
+use std::time::Duration;
 
 const _BASE_URL: &str = "https://api.mailgun.net/v3/blockmesh.xyz/messages";
 const _CONFIRM_TEMPLATE_ID: &str = "confirmation email";
@@ -27,7 +28,10 @@ impl EmailClient {
 
         Self {
             base_url,
-            client: Client::new(),
+            client: ClientBuilder::new()
+                .timeout(Duration::from_secs(3))
+                .build()
+                .unwrap_or_default(),
             aws_client,
         }
     }

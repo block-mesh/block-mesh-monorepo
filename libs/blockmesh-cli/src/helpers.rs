@@ -9,6 +9,7 @@ use block_mesh_common::interfaces::server_api::{GetTokenResponse, LoginForm};
 use block_mesh_common::routes_enum::RoutesEnum;
 use chrono::Utc;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
+use reqwest::ClientBuilder;
 use serde_json::Value;
 use speed_test::download::test_download;
 use speed_test::latency::test_latency;
@@ -17,12 +18,16 @@ use speed_test::upload::test_upload;
 use speed_test::Metadata;
 use std::cmp;
 use std::str::FromStr;
+use std::time::Duration;
 use uuid::Uuid;
 
 #[allow(dead_code)]
 pub async fn dashboard(url: &str, credentials: &DashboardRequest) -> anyhow::Result<()> {
     let url = format!("{}/api{}", url, RoutesEnum::Api_Dashboard);
-    let client = reqwest::Client::new();
+    let client = ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default();
     let response = client.post(&url).json(credentials).send().await?;
     let response: DashboardResponse = response.json().await?;
     tracing::info!("Dashboard data:");
@@ -36,7 +41,10 @@ pub async fn dashboard(url: &str, credentials: &DashboardRequest) -> anyhow::Res
 #[allow(dead_code)]
 pub async fn register(url: &str, credentials: &RegisterForm) -> anyhow::Result<()> {
     let url = format!("{}{}", url, RoutesEnum::Static_UnAuth_RegisterApi);
-    let client = reqwest::Client::new();
+    let client = ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default();
     let response = client.post(&url).form(credentials).send().await?;
     let response: RegisterResponse = response.json().await?;
     if response.status_code == 200 {
@@ -54,7 +62,10 @@ pub async fn register(url: &str, credentials: &RegisterForm) -> anyhow::Result<(
 #[allow(dead_code)]
 pub async fn login(url: &str, login_form: LoginForm) -> anyhow::Result<Uuid> {
     let url = format!("{}/api{}", url, RoutesEnum::Api_GetToken);
-    let client = reqwest::Client::new();
+    let client = ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default();
     let response: GetTokenResponse = client
         .post(&url)
         .header("Content-Type", "application/json")
@@ -92,7 +103,10 @@ pub async fn report_uptime(url: &str, email: &str, api_token: &str) -> anyhow::R
         },
     };
 
-    if let Ok(response) = reqwest::Client::new()
+    if let Ok(response) = ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default()
         .post(format!("{}/api/report_uptime", url))
         .query(&query)
         .send()
@@ -114,7 +128,10 @@ pub async fn get_task(
         api_token: *api_token,
     };
 
-    let response: Option<GetTaskResponse> = reqwest::Client::new()
+    let response: Option<GetTaskResponse> = ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default()
         .post(format!("{}/api/get_task", base_url))
         .json(&body)
         .send()
@@ -131,7 +148,10 @@ pub async fn run_task(
     headers: Option<Value>,
     body: Option<Value>,
 ) -> anyhow::Result<RunTaskResponse> {
-    let client = reqwest::Client::new();
+    let client = ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default();
     let mut client = match method {
         "GET" => client.get(url),
         "POST" => match body {
@@ -305,7 +325,10 @@ pub async fn submit_bandwidth(
         colo: metadata.colo,
     };
 
-    let response = reqwest::Client::new()
+    let response = ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default()
         .post(format!("{}/api/submit_bandwidth", url))
         .json(&body)
         .send()

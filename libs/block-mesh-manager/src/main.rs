@@ -5,6 +5,8 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use std::time::Duration;
+    use reqwest::ClientBuilder;
     use block_mesh_manager::worker::db_cleaner_cron::{db_cleaner_cron, EnrichIp};
     use block_mesh_manager::worker::finalize_daily_cron::finalize_daily_cron;
     use block_mesh_common::feature_flag_client::get_all_flags;
@@ -31,7 +33,6 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use secret::Secret;
     use std::sync::Arc;
     use uuid::Uuid;
-    use reqwest::Client;
 }}
 
 #[cfg(feature = "ssr")]
@@ -69,7 +70,10 @@ async fn run() -> anyhow::Result<()> {
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
     let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(100);
     let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::unbounded_channel::<EnrichIp>();
-    let client = Client::new();
+    let client = ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default();
 
     let flags = get_all_flags(&client).await?;
 

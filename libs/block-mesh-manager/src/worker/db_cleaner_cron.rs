@@ -7,9 +7,10 @@ use crate::database::uptime_report::enrich_uptime_report::enrich_uptime_report;
 use crate::errors::error::Error;
 use block_mesh_common::constants::BLOCK_MESH_IP_WORKER;
 use block_mesh_common::interfaces::ip_data::{IPData, IpDataPostRequest, LocatorDe};
-use reqwest::Client;
+use reqwest::{Client, ClientBuilder};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
+use std::time::Duration;
 use tokio::sync::mpsc::UnboundedReceiver;
 use uuid::Uuid;
 
@@ -24,7 +25,10 @@ pub async fn db_cleaner_cron(
     pool: PgPool,
     mut rx: UnboundedReceiver<EnrichIp>,
 ) -> Result<(), anyhow::Error> {
-    let client = Client::new();
+    let client = ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default();
     let thread_pool = rayon::ThreadPoolBuilder::new()
         .num_threads(16)
         .build()

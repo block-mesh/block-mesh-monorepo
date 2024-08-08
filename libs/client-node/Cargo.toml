@@ -28,3 +28,7 @@ rustc-hash = { workspace = true }
 serde_json = { workspace = true }
 block-mesh-common = { path = "../block-mesh-common", features = ["http", "ip-data"] }
 http-body-util = { workspace = true }
+reqwest = { workspace = true, features = [
+  "json",
+  "hickory-dns"
+] }

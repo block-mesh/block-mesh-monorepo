@@ -18,11 +18,13 @@ use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::path::Path;
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::task::JoinHandle;
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
+use tower_http::timeout::TimeoutLayer;
 
 pub struct Application {
     app: Router,
@@ -91,7 +93,8 @@ impl Application {
             .nest("/", leptos_router)
             .nest("/", backend)
             .nest("/", leptos_pkg)
-            .layer(auth_layer);
+            .layer(auth_layer)
+            .layer(TimeoutLayer::new(Duration::from_millis(3500)));
 
         let listener = TcpListener::bind(settings.application.address())
             .await

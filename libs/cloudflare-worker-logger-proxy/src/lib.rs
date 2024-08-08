@@ -1,4 +1,6 @@
+use reqwest::ClientBuilder;
 use serde_json::{json, Value};
+use std::time::Duration;
 use tracing_subscriber::fmt::format::Pretty;
 use tracing_subscriber::fmt::time::UtcTime;
 use tracing_subscriber::prelude::*;
@@ -51,7 +53,10 @@ async fn send_log(url: &str, api_key: &str, log: Value) -> anyhow::Result<()> {
         "namespace": device_type,
         "message": message
     });
-    match reqwest::Client::new()
+    match ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default()
         .post(url)
         .header("x-api-key", api_key)
         .header("x-service", &device_type)
