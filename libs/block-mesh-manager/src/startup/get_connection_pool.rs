@@ -36,7 +36,12 @@ pub async fn get_connection_pool(
             ));
         }
         let pool_connection = PgPoolOptions::new()
-            .acquire_timeout(Duration::from_secs(5))
+            .acquire_timeout(Duration::from_secs(
+                env::var("ACQUIRE_TIMEOUT")
+                    .unwrap_or("35".to_string())
+                    .parse()
+                    .unwrap_or(35),
+            ))
             .min_connections(3)
             .max_connections(
                 env::var("MAX_CONNECTIONS")
