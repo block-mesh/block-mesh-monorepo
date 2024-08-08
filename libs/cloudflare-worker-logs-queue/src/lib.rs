@@ -1,7 +1,6 @@
-use reqwest::ClientBuilder;
+use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::{Map, Value};
-use std::time::Duration;
 use tracing_subscriber::fmt::format::Pretty;
 use tracing_subscriber::fmt::time::UtcTime;
 use tracing_subscriber::prelude::*;
@@ -94,10 +93,7 @@ pub async fn main(message_batch: MessageBatch<Value>, env: Env, _: Context) -> R
                 })
                 .collect();
             for message in messages {
-                match ClientBuilder::new()
-                    .timeout(Duration::from_secs(3))
-                    .build()
-                    .unwrap_or_default()
+                match Client::new()
                     .post(&url)
                     .header("Content-Type", "application/json")
                     .body(message)
