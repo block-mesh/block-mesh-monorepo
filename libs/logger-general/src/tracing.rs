@@ -2,8 +2,6 @@ use block_mesh_common::constants::{
     DeviceType, BLOCKMESH_LOG_ENV, BLOCKMESH_VERSION, BLOCK_MESH_LOGGER,
 };
 use reqwest::{Client, ClientBuilder};
-#[cfg(feature = "sentry")]
-use sentry_tracing;
 use serde_json::{json, Value};
 use std::option::Option;
 use std::sync::mpsc::{Receiver, Sender};
@@ -60,6 +58,19 @@ macro_rules! with_event_from_span {
     };
 }
 
+pub fn setup_tracing_stdout_only() {
+    static SET_HOOK: Once = Once::new();
+    SET_HOOK.call_once(|| {
+        let sub = tracing_subscriber::registry()
+            .with(
+                tracing_subscriber::EnvFilter::try_from_default_env()
+                    .unwrap_or_else(|_| "info".into()),
+            )
+            .with(tracing_subscriber::fmt::layer().with_ansi(false));
+        sub.init();
+    });
+}
+
 pub fn setup_tracing(user_id: Uuid, device_type: DeviceType) {
     static SET_HOOK: Once = Once::new();
     SET_HOOK.call_once(|| {
@@ -75,15 +86,7 @@ pub fn setup_tracing(user_id: Uuid, device_type: DeviceType) {
                 tracing_subscriber::fmt::layer().with_ansi(false), // .with_span_events(FmtSpan::CLOSE),
             )
             .with(log_layer);
-
-        #[cfg(feature = "sentry")]
-        {
-            sub.with(sentry_tracing::layer()).init();
-        }
-        #[cfg(not(feature = "sentry"))]
-        {
-            sub.init();
-        }
+        sub.init();
     });
 }
 
