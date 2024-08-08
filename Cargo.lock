@@ -874,6 +874,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "1505bd5d3d116872e7271a6d4e16d81d0c8570876c8de68093a09ac269d8aac0"
 
 [[package]]
+name = "atomic-write-file"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cbf54d4588732bdfc5ebc3eb9f74f20e027112fc31de412fc7ff0cd1c6896dae"
+dependencies = [
+ "nix 0.28.0",
+ "rand 0.8.5",
+]
+
+[[package]]
 name = "attribute-derive"
 version = "0.9.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1527,7 +1537,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-common"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anyhow",
  "borsh 1.5.1",
@@ -1554,7 +1564,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anyhow",
  "askama",
@@ -1623,7 +1633,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-solana-client"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -1676,7 +1686,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-cli"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -1696,7 +1706,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-leptos"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -1717,7 +1727,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-program"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -1726,7 +1736,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh_tauri"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anyhow",
  "auto-launch",
@@ -1798,7 +1808,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a6362ed55def622cddc70a4746a68554d7b687713770de539e59a739b249f8ed"
 dependencies = [
  "borsh-derive 1.5.1",
- "cfg_aliases",
+ "cfg_aliases 0.2.1",
 ]
 
 [[package]]
@@ -2189,6 +2199,12 @@ checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
 name = "cfg_aliases"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fd16c4719339c4530435d38e511904438d07cce7950afa3718a84ac36c10e89e"
+
+[[package]]
+name = "cfg_aliases"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
@@ -2350,7 +2366,7 @@ checksum = "4b82cf0babdbd58558212896d1a4272303a57bdb245c2bf1147185fb45640e70"
 
 [[package]]
 name = "client-node"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -2378,7 +2394,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-affiliate-plan-page"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2394,7 +2410,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-feature-flags"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2410,7 +2426,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-images-gallery-page"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anyhow",
  "askama",
@@ -2428,7 +2444,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-landing-page"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2444,7 +2460,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-privacy-page"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2460,7 +2476,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-echo-debug"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -2479,7 +2495,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-ip-data"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "block-mesh-common",
  "rustc-hash",
@@ -2494,7 +2510,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-logger-proxy"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -2511,7 +2527,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-logs-queue"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2531,7 +2547,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-solana-relay"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "rustc-hash",
  "serde",
@@ -2547,7 +2563,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-tauri-releases"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anyhow",
  "reqwest 0.11.27",
@@ -3108,7 +3124,7 @@ checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 
 [[package]]
 name = "debug-area"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "tokio",
 ]
@@ -3691,7 +3707,7 @@ dependencies = [
 
 [[package]]
 name = "extension"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -5840,7 +5856,7 @@ checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
 name = "logger-general"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -5860,7 +5876,7 @@ dependencies = [
 
 [[package]]
 name = "logger-leptos"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -6211,13 +6227,25 @@ dependencies = [
 
 [[package]]
 name = "nix"
+version = "0.28.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ab2156c4fce2f8df6c499cc1c763e4394b7482525bf2a9701c9d79d215f519e4"
+dependencies = [
+ "bitflags 2.6.0",
+ "cfg-if",
+ "cfg_aliases 0.1.1",
+ "libc",
+]
+
+[[package]]
+name = "nix"
 version = "0.29.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "71e2746dc3a24dd78b3cfcb7be93368c6de9963d30f43a6a73998a9cf4b17b46"
 dependencies = [
  "bitflags 2.6.0",
  "cfg-if",
- "cfg_aliases",
+ "cfg_aliases 0.2.1",
  "libc",
  "memoffset 0.9.1",
 ]
@@ -7391,7 +7419,7 @@ dependencies = [
 
 [[package]]
 name = "proxy-endpoint"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -7420,7 +7448,7 @@ dependencies = [
 
 [[package]]
 name = "proxy-master"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -8274,7 +8302,7 @@ dependencies = [
 
 [[package]]
 name = "secret"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "serde",
  "sqlx",
@@ -8928,7 +8956,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d623bff5d06f60d738990980d782c8c866997d9194cfe79ecad00aa2f76826dd"
 dependencies = [
  "bytemuck",
- "cfg_aliases",
+ "cfg_aliases 0.2.1",
  "core-graphics",
  "foreign-types 0.5.0",
  "js-sys",
@@ -9528,7 +9556,7 @@ dependencies = [
 
 [[package]]
 name = "solana-tiny-client"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anyhow",
  "bincode",
@@ -9721,7 +9749,7 @@ dependencies = [
 
 [[package]]
 name = "speed-test"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anyhow",
  "chrono",
@@ -10167,9 +10195,9 @@ dependencies = [
 
 [[package]]
 name = "sqlx"
-version = "0.7.4"
+version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c9a2ccff1a000a5a59cd33da541d9f2fdcd9e6e8229cc200565942bff36d0aaa"
+checksum = "dba03c279da73694ef99763320dea58b51095dfe87d001b1d4b5fe78ba8763cf"
 dependencies = [
  "sqlx-core",
  "sqlx-macros",
@@ -10180,9 +10208,9 @@ dependencies = [
 
 [[package]]
 name = "sqlx-core"
-version = "0.7.4"
+version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "24ba59a9342a3d9bab6c56c118be528b27c9b60e490080e9711a04dccac83ef6"
+checksum = "d84b0a3c3739e220d94b3239fd69fb1f74bc36e16643423bd99de3b43c21bfbd"
 dependencies = [
  "ahash 0.8.11",
  "atoi",
@@ -10192,6 +10220,7 @@ dependencies = [
  "chrono",
  "crc",
  "crossbeam-queue",
+ "dotenvy",
  "either",
  "event-listener 2.5.3",
  "futures-channel",
@@ -10226,9 +10255,9 @@ dependencies = [
 
 [[package]]
 name = "sqlx-macros"
-version = "0.7.4"
+version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4ea40e2345eb2faa9e1e5e326db8c34711317d2b5e08d0d5741619048a803127"
+checksum = "89961c00dc4d7dffb7aee214964b065072bff69e36ddb9e2c107541f75e4f2a5"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -10239,10 +10268,11 @@ dependencies = [
 
 [[package]]
 name = "sqlx-macros-core"
-version = "0.7.4"
+version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5833ef53aaa16d860e92123292f1f6a3d53c34ba8b1969f152ef1a7bb803f3c8"
+checksum = "d0bd4519486723648186a08785143599760f7cc81c52334a55d6a83ea1e20841"
 dependencies = [
+ "atomic-write-file",
  "dotenvy",
  "either",
  "heck 0.4.1",
@@ -10265,9 +10295,9 @@ dependencies = [
 
 [[package]]
 name = "sqlx-mysql"
-version = "0.7.4"
+version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "1ed31390216d20e538e447a7a9b959e06ed9fc51c37b514b46eb758016ecd418"
+checksum = "e37195395df71fd068f6e2082247891bc11e3289624bbc776a0cdfa1ca7f1ea4"
 dependencies = [
  "atoi",
  "base64 0.21.7",
@@ -10311,9 +10341,9 @@ dependencies = [
 
 [[package]]
 name = "sqlx-postgres"
-version = "0.7.4"
+version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7c824eb80b894f926f89a0b9da0c7f435d27cdd35b8c655b114e58223918577e"
+checksum = "d6ac0ac3b7ccd10cc96c7ab29791a7dd236bd94021f31eec7ba3d46a74aa1c24"
 dependencies = [
  "atoi",
  "base64 0.21.7",
@@ -10341,6 +10371,7 @@ dependencies = [
  "rand 0.8.5",
  "serde",
  "serde_json",
+ "sha1",
  "sha2 0.10.8",
  "smallvec",
  "sqlx-core",
@@ -10354,9 +10385,9 @@ dependencies = [
 
 [[package]]
 name = "sqlx-sqlite"
-version = "0.7.4"
+version = "0.7.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b244ef0a8414da0bed4bb1910426e890b19e5e9bccc27ada6b797d05c55ae0aa"
+checksum = "210976b7d948c7ba9fced8ca835b11cbb2d677c59c79de41ac0d397e14547490"
 dependencies = [
  "atoi",
  "chrono",
@@ -10987,7 +11018,7 @@ dependencies = [
 
 [[package]]
 name = "test-proxy-endpoint"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "block-mesh-common",
  "bytes",
@@ -11006,7 +11037,7 @@ dependencies = [
 
 [[package]]
 name = "test-proxy-master"
-version = "0.0.166"
+version = "0.0.167"
 dependencies = [
  "anyhow",
  "block-mesh-common",
