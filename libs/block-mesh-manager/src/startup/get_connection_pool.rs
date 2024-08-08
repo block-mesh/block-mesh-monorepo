@@ -5,7 +5,7 @@ use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use sqlx::{ConnectOptions, PgPool};
 use std::str::FromStr;
 use std::time::Duration;
-use std::{thread, time};
+use std::{env, thread, time};
 use tracing::log;
 
 #[tracing::instrument(
@@ -38,7 +38,12 @@ pub async fn get_connection_pool(
         let pool_connection = PgPoolOptions::new()
             .acquire_timeout(Duration::from_secs(5))
             .min_connections(3)
-            .max_connections(100)
+            .max_connections(
+                env::var("MAX_CONNECTIONS")
+                    .unwrap_or("35".to_string())
+                    .parse()
+                    .unwrap_or(35),
+            )
             .idle_timeout(Duration::from_secs(1))
             .test_before_acquire(true)
             .connect_with(settings.clone())
