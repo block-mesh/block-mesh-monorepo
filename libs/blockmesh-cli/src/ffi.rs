@@ -8,6 +8,8 @@ use jni::objects::{JClass, JString};
 use jni::sys::jint;
 use jni::JNIEnv;
 
+/// # Safety
+/// This method should be called by any external program that want to use BlockMesh Network CLI
 /// cbindgen:ignore
 #[no_mangle]
 pub unsafe extern "C" fn Java_xyz_blockmesh_runLib(
