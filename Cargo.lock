@@ -1579,6 +1579,7 @@ dependencies = [
  "cfg-if",
  "charming",
  "chrono",
+ "clap 4.5.8",
  "config",
  "console_error_panic_hook",
  "console_log 1.0.0",

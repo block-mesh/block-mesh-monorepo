@@ -1,8 +1,7 @@
 use askama::Template;
-use reqwest::ClientBuilder;
+use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-use std::time::Duration;
 use tracing_subscriber::fmt::format::Pretty;
 use tracing_subscriber::fmt::time::UtcTime;
 use tracing_subscriber::prelude::*;
@@ -58,10 +57,7 @@ async fn main(_req: Request, env: Env, _ctx: Context) -> Result<Response> {
     let api_token = env.secret("IMAGES_API_TOKEN").unwrap().to_string();
     let account_id = env.secret("ACCOUNT_ID").unwrap().to_string();
     let image_delivery = env.secret("DELIVERY_URL").unwrap().to_string();
-    let client = ClientBuilder::new()
-        .timeout(Duration::from_secs(3))
-        .build()
-        .unwrap_or_default();
+    let client = Client::new();
     let response = match client
         .get(format!(
             "https://api.cloudflare.com/client/v4/accounts/{}/images/v1",

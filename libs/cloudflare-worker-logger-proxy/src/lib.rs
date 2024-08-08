@@ -1,6 +1,8 @@
-use reqwest::ClientBuilder;
+#![allow(dead_code)]
+#![allow(unused_mut)]
+#![allow(unused_variables)]
+use reqwest::Client;
 use serde_json::{json, Value};
-use std::time::Duration;
 use tracing_subscriber::fmt::format::Pretty;
 use tracing_subscriber::fmt::time::UtcTime;
 use tracing_subscriber::prelude::*;
@@ -53,10 +55,7 @@ async fn send_log(url: &str, api_key: &str, log: Value) -> anyhow::Result<()> {
         "namespace": device_type,
         "message": message
     });
-    match ClientBuilder::new()
-        .timeout(Duration::from_secs(3))
-        .build()
-        .unwrap_or_default()
+    match Client::new()
         .post(url)
         .header("x-api-key", api_key)
         .header("x-service", &device_type)
@@ -89,6 +88,8 @@ pub fn respond_good() -> Result<Response> {
 
 #[event(fetch)]
 async fn main(mut req: Request, env: Env, _ctx: Context) -> Result<Response> {
+    Ok(Response::builder().with_status(200).empty())
+    /*
     match req.method() {
         Method::Options => return respond_good(),
         Method::Post => {}
@@ -122,4 +123,6 @@ async fn main(mut req: Request, env: Env, _ctx: Context) -> Result<Response> {
         .with_headers(headers)
         .with_status(200)
         .empty())
+
+     */
 }
