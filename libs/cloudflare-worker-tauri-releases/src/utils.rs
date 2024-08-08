@@ -1,14 +1,10 @@
 use crate::types::LatestRelease;
 use crate::LATEST_RELEASE;
-use reqwest::{Client, ClientBuilder};
-use std::time::Duration;
+use reqwest::Client;
 
 #[tracing::instrument(name = "get_release", err)]
 pub async fn get_release() -> anyhow::Result<LatestRelease> {
-    Ok(ClientBuilder::new()
-        .timeout(Duration::from_secs(3))
-        .build()
-        .unwrap_or_default()
+    Ok(Client::new()
         .get(LATEST_RELEASE)
         .header("Accept", "application/vnd.github+json")
         .header("X-GitHub-Api-Version", "2022-11-28")
