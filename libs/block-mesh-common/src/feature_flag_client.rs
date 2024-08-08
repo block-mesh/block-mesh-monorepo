@@ -27,11 +27,16 @@ pub async fn get_flag_value(flag: &str, client: &Client) -> anyhow::Result<Optio
 #[cfg(test)]
 mod tests {
     use super::*;
+    use reqwest::ClientBuilder;
+    use std::time::Duration;
     use uuid::Uuid;
 
     #[tokio::test]
     async fn test_test_boolean_false() {
-        let client = Client::new();
+        let client = ClientBuilder::new()
+            .timeout(Duration::from_secs(3))
+            .build()
+            .unwrap_or_default();
         let value = get_flag_value("test_boolean_false", &client).await;
         assert!(value.is_ok());
         let value = value.unwrap();
@@ -42,7 +47,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_test_boolean_true() {
-        let client = Client::new();
+        let client = ClientBuilder::new()
+            .timeout(Duration::from_secs(3))
+            .build()
+            .unwrap_or_default();
         let value = get_flag_value("test_boolean_true", &client).await;
         assert!(value.is_ok());
         let value = value.unwrap();
@@ -53,7 +61,10 @@ mod tests {
 
     #[tokio::test]
     async fn test_missing_value() {
-        let client = Client::new();
+        let client = ClientBuilder::new()
+            .timeout(Duration::from_secs(3))
+            .build()
+            .unwrap_or_default();
         let uuid = Uuid::new_v4();
         let value = get_flag_value(&uuid.to_string(), &client).await;
         assert!(value.is_err());

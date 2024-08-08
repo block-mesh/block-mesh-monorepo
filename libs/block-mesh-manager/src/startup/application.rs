@@ -15,14 +15,17 @@ use leptos::leptos_config::get_config_from_env;
 use reqwest::Client;
 use sqlx::postgres::PgPool;
 use std::collections::HashMap;
+use std::env;
 use std::net::SocketAddr;
 use std::path::Path;
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::task::JoinHandle;
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
+use tower_http::timeout::TimeoutLayer;
 
 pub struct Application {
     app: Router,
@@ -86,13 +89,17 @@ impl Application {
             .layer(cors)
             .layer(auth_layer.clone())
             .with_state(app_state.clone());
-
         let app = Router::new()
             .nest("/", leptos_router)
             .nest("/", backend)
             .nest("/", leptos_pkg)
-            .layer(auth_layer);
-
+            .layer(auth_layer)
+            .layer(TimeoutLayer::new(Duration::from_millis(
+                env::var("REQUEST_TIMEOUT")
+                    .unwrap_or("3500".to_string())
+                    .parse()
+                    .unwrap_or(3500),
+            )));
         let listener = TcpListener::bind(settings.application.address())
             .await
             .unwrap();

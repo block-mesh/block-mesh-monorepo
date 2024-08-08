@@ -1,7 +1,7 @@
 use block_mesh_common::constants::{
     DeviceType, BLOCKMESH_LOG_ENV, BLOCKMESH_VERSION, BLOCK_MESH_LOGGER,
 };
-use reqwest::Client;
+use reqwest::{Client, ClientBuilder};
 #[cfg(feature = "sentry")]
 use sentry_tracing;
 use serde_json::{json, Value};
@@ -9,6 +9,7 @@ use std::option::Option;
 use std::sync::mpsc::{Receiver, Sender};
 use std::sync::{mpsc, Arc, Once};
 use std::thread;
+use std::time::Duration;
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 use tokio::time::Instant;
@@ -99,7 +100,10 @@ struct HttpLogLayer {
 impl HttpLogLayer {
     fn new(url: String, env: String, user_id: Uuid, device_type: DeviceType) -> Self {
         let init_buffer: Arc<Mutex<Vec<Value>>> = Arc::new(Mutex::new(Vec::new()));
-        let init_client = Client::new();
+        let init_client = ClientBuilder::new()
+            .timeout(Duration::from_secs(3))
+            .build()
+            .unwrap_or_default();
         let user_id = Arc::new(user_id);
         let init_url = Arc::new(url);
         let x_url = init_url.clone();

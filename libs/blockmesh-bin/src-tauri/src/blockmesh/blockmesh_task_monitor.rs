@@ -6,11 +6,13 @@ use block_mesh_common::interfaces::server_api::{
 };
 use chrono::Utc;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
+use reqwest::ClientBuilder;
 use serde_json::Value;
 use speed_test::metadata::fetch_metadata;
 use speed_test::Metadata;
 use std::cmp;
 use std::str::FromStr;
+use std::time::Duration;
 use uuid::Uuid;
 
 #[tracing::instrument(name = "report_uptime", skip(api_token), err)]
@@ -28,7 +30,10 @@ pub async fn report_uptime(email: String, api_token: String) -> anyhow::Result<(
         },
     };
 
-    if let Ok(response) = reqwest::Client::new()
+    if let Ok(response) = ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default()
         .post(format!("{}/api/report_uptime", BLOCK_MESH_APP_SERVER))
         .query(&query)
         .send()
@@ -50,7 +55,10 @@ pub async fn get_task(
         api_token: *api_token,
     };
 
-    let response: Option<GetTaskResponse> = reqwest::Client::new()
+    let response: Option<GetTaskResponse> = ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default()
         .post(format!("{}/api/get_task", base_url))
         .json(&body)
         .send()
@@ -67,7 +75,10 @@ pub async fn run_task(
     headers: Option<Value>,
     body: Option<Value>,
 ) -> anyhow::Result<RunTaskResponse> {
-    let client = reqwest::Client::new();
+    let client = ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default();
     let mut client = match method {
         "GET" => client.get(url),
         "POST" => match body {
@@ -134,7 +145,10 @@ pub async fn submit_task(
         colo: Option::from(metadata.colo.clone()),
         response_time: Option::from(response_time),
     };
-    let response = reqwest::Client::new()
+    let response = ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default()
         .post(format!("{}/api/submit_task", base_url))
         .query(&query)
         .body(response_raw)

@@ -8,8 +8,10 @@ use block_mesh_common::constants::{env_url, BLOCK_MESH_APP_SERVER};
 use block_mesh_common::interfaces::server_api::{
     CheckTokenRequest, GetTokenResponse, LoginForm, RegisterForm, RegisterResponse,
 };
+use reqwest::ClientBuilder;
 use std::str::FromStr;
 use std::sync::Arc;
+use std::time::Duration;
 use tauri::ipc::InvokeError;
 #[cfg(not(any(target_os = "android", target_os = "ios")))]
 use tauri::AppHandle;
@@ -134,7 +136,10 @@ pub async fn login(
     login_form: LoginForm,
 ) -> Result<GetTokenResponse, InvokeError> {
     let url = format!("{}/api/get_token", BLOCK_MESH_APP_SERVER);
-    let client = reqwest::Client::new();
+    let client = ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default();
     let response: GetTokenResponse = client
         .post(&url)
         .header("Content-Type", "application/json")
@@ -182,7 +187,10 @@ pub async fn check_token(
     let api_token = Uuid::from_str(&uuid).unwrap_or_default();
     let credentials = CheckTokenRequest { email, api_token };
     let url = format!("{}/api/check_token", BLOCK_MESH_APP_SERVER);
-    let client = reqwest::Client::new();
+    let client = ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default();
     let response: GetTokenResponse = client
         .post(&url)
         .json(&credentials)
@@ -210,7 +218,10 @@ pub async fn register(
     register_form: RegisterForm,
 ) -> Result<(), InvokeError> {
     let url = format!("{}/register_api", BLOCK_MESH_APP_SERVER);
-    let client = reqwest::Client::new();
+    let client = ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default();
     tracing::info!("register_form = {:?}", register_form);
     let response = client
         .post(&url)
