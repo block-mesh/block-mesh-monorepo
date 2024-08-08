@@ -3,9 +3,9 @@
 #![deny(unreachable_pub)]
 
 use cfg_if::cfg_if;
-use logger_general::tracing::setup_tracing_stdout_only;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use logger_general::tracing::setup_tracing_stdout_only;
     use std::time::Duration;
     use reqwest::ClientBuilder;
     use block_mesh_manager::worker::db_cleaner_cron::{db_cleaner_cron, EnrichIp};
