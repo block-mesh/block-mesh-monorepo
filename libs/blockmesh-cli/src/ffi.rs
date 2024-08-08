@@ -4,6 +4,56 @@ use std::os::raw::c_char;
 use std::sync::Arc;
 use tokio::runtime::Builder;
 
+use jni::objects::{JClass, JString};
+use jni::sys::jint;
+use jni::JNIEnv;
+
+/// cbindgen:ignore
+#[no_mangle]
+pub unsafe extern "C" fn Java_xyz_blockmesh_runLib(
+    mut env: JNIEnv,
+    _class: JClass,
+    url: JString,
+    email: JString,
+    password: JString,
+) -> jint {
+    let runtime = Arc::new(
+        Builder::new_multi_thread()
+            .thread_name("blockmesh-cli")
+            .enable_all()
+            .build()
+            .unwrap(),
+    );
+    let url: String = match env.get_string(&url) {
+        Ok(s) => s.into(),
+        Err(e) => {
+            eprintln!("Failed to load url {}", e);
+            return -1;
+        }
+    };
+
+    let email: String = match env.get_string(&email) {
+        Ok(s) => s.into(),
+        Err(e) => {
+            eprintln!("Failed to load email {}", e);
+            return -1;
+        }
+    };
+
+    let password: String = match env.get_string(&password) {
+        Ok(s) => s.into(),
+        Err(e) => {
+            eprintln!("Failed to load password {}", e);
+            return -1;
+        }
+    };
+
+    runtime.block_on(async {
+        let _ = login_mode(&url, &email, &password).await;
+    });
+    -1
+}
+
 /// # Safety
 /// This method should be called by any external program that want to use BlockMesh Network CLI
 #[no_mangle]

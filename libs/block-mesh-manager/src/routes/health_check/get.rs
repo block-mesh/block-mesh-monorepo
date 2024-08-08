@@ -24,6 +24,7 @@ struct HealthCheckTemplate {
 
 #[tracing::instrument(name = "Health check")]
 pub async fn handler(method: Method, headers: HeaderMap) -> impl IntoResponse {
+    tracing::info!("HEALTH-CHECK:: {:#?}", method);
     HealthCheckTemplate {
         chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
         app_server: BLOCK_MESH_APP_SERVER.to_string(),

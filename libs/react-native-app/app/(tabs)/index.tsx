@@ -5,6 +5,8 @@ import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { useStorage } from '@/hooks/useStorage'
 import React, { useRef, useState } from 'react'
+import RustModule from '@/native/native'
+
 
 export default function HomeScreen() {
   const emailRef = useRef()
@@ -14,6 +16,10 @@ export default function HomeScreen() {
   const [email, setEmail] = useState(storage.email)
   const [password, setPassword] = useState(storage.password)
   const [url, setUrl] = useState(storage.url)
+
+  function click() {
+    console.log(RustModule.runLib('http://localhost:8000', 'ohaddahan@gmail.com', 'dudedude@'))
+  }
 
 
   return (
@@ -64,6 +70,7 @@ export default function HomeScreen() {
             storage.setEmail(email)
             storage.setPassword(password)
             storage.setUrl(url)
+            click()
           }}
         />
       </ThemedView>

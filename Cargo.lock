@@ -1694,6 +1694,7 @@ dependencies = [
  "chrono",
  "clap 4.5.8",
  "futures-util",
+ "jni",
  "logger-general",
  "rayon",
  "reqwest 0.11.27",
