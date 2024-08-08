@@ -3,6 +3,7 @@
 #![deny(unreachable_pub)]
 
 use cfg_if::cfg_if;
+use logger_general::tracing::setup_tracing_stdout_only;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
     use std::time::Duration;
@@ -17,8 +18,6 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     #[cfg(not(target_env = "msvc"))]
     #[global_allocator]
     static GLOBAL: Jemalloc = Jemalloc;
-    use logger_general::tracing::setup_tracing;
-    use block_mesh_common::constants::{DeviceType, BLOCKMESH_SERVER_UUID_ENVAR};
     use block_mesh_manager::configuration::get_configuration::get_configuration;
     use block_mesh_manager::database::migrate::migrate;
     use block_mesh_manager::emails::email_client::EmailClient;
@@ -32,19 +31,10 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_manager::worker::rpc_cron::rpc_worker_loop;
     use secret::Secret;
     use std::sync::Arc;
-    use uuid::Uuid;
 }}
 
 #[cfg(feature = "ssr")]
 fn main() {
-    let _guard = sentry::init((
-        std::env::var("SENTRY").unwrap_or_default(),
-        sentry::ClientOptions {
-            traces_sample_rate: 0.1,
-            release: sentry::release_name!(),
-            ..Default::default()
-        },
-    ));
     let _ = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
@@ -55,10 +45,7 @@ fn main() {
 #[cfg(feature = "ssr")]
 async fn run() -> anyhow::Result<()> {
     load_dotenv();
-    setup_tracing(
-        Uuid::parse_str(std::env::var(BLOCKMESH_SERVER_UUID_ENVAR).unwrap().as_str()).unwrap(),
-        DeviceType::AppServer,
-    );
+    setup_tracing_stdout_only();
     let configuration = get_configuration().expect("Failed to read configuration");
     tracing::info!("Starting with configuration {:#?}", configuration);
     let database_url = get_env_var_or_panic(AppEnvVar::DatabaseUrl);
