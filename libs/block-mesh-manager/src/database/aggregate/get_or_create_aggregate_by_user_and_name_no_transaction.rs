@@ -24,7 +24,7 @@ pub(crate) async fn get_or_create_aggregate_by_user_and_name_no_transaction(
         r#"
         WITH
             extant AS (
-                SELECT id, user_id, name, value, created_at FROM aggregates WHERE (user_id, name) = ($3, $4)
+                SELECT id, user_id, name, value, created_at FROM aggregates WHERE user_id = $3 AND name = $4
             ),
             inserted AS (
                 INSERT INTO aggregates (id , created_at, user_id, name, value)
