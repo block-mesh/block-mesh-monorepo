@@ -116,14 +116,14 @@ pub unsafe extern "C" fn run_lib(
             return -1;
         }
     };
-    let email = match unsafe { CStr::from_ptr(email) }.to_str() {
+    let _email = match unsafe { CStr::from_ptr(email) }.to_str() {
         Ok(s) => s,
         Err(e) => {
             eprintln!("Failed to load email {}", e);
             return -1;
         }
     };
-    let password = match unsafe { CStr::from_ptr(password) }.to_str() {
+    let _password = match unsafe { CStr::from_ptr(password) }.to_str() {
         Ok(s) => s,
         Err(e) => {
             eprintln!("Failed to load password {}", e);
