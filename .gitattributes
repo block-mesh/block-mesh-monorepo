@@ -1,2 +1,4 @@
 .so filter=lfs diff=lfs merge=lfs -text
 .a filter=lfs diff=lfs merge=lfs -text
+libs/react-native-app/blockmesh-cli.xcframework/ios-arm64/libblockmesh_cli.a filter=lfs diff=lfs merge=lfs -text
+libs/react-native-app/blockmesh-cli.xcframework/ios-arm64-simulator/libblockmesh_cli.a filter=lfs diff=lfs merge=lfs -text

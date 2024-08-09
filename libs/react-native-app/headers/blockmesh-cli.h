@@ -3,12 +3,6 @@
 #include <stdint.h>
 #include <stdlib.h>
 
-jint Java_xyz_blockmesh_runLib(JNIEnv env,
-                               JClass _class,
-                               JString url,
-                               JString email,
-                               JString password);
-
 /**
  * # Safety
  * This method should be called by any external program that want to use BlockMesh Network CLI

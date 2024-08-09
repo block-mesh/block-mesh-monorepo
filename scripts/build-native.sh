@@ -38,16 +38,17 @@ if [ "${BUILD_IOS}" == "true" ]; then
 
   ensure cd "${ROOT}/libs/blockmesh-cli" \
   && cbindgen --only-target-dependencies --lang c --crate blockmesh-cli --output "${ROOT}/libs/react-native-app/headers/blockmesh-cli.h" \
-  && cd "${_PWD}"
+  && cd "${_PWD}" || exit 1
 
-  ensure rm -fr "${ROOT}/libs/react-native-app/blockmesh-cli.xcframework"
-  # Use the xcodebuild tool to create an xcframework
-  xcodebuild -create-xcframework \
+  ensure cd "${ROOT}/libs/react-native-app" \
+  && ensure rm -fr "${ROOT}/libs/react-native-app/blockmesh-cli.xcframework" \
+  && ensure xcodebuild -create-xcframework \
   -library "${ROOT}/target/aarch64-apple-ios/release/${LIB_NAME}.a" \
   -headers ./headers \
   -library "${ROOT}/target/aarch64-apple-ios-sim/release/${LIB_NAME}.a" \
   -headers ./headers \
-  -output blockmesh-cli.xcframework
+  -output blockmesh-cli.xcframework \
+  && cd "${_PWD}" || exit 1
 fi
 
 if [ "${BUILD_ANDROID}" == "true" ] ; then
