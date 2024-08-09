@@ -33,8 +33,8 @@ fi
 
 
 if [ "${BUILD_IOS}" == "true" ]; then
-  cargo build -p blockmesh-cli --release --target aarch64-apple-ios
-  cargo build -p blockmesh-cli --release --target aarch64-apple-ios-sim
+  ensure cargo build -p blockmesh-cli --release --target aarch64-apple-ios
+  ensure cargo build -p blockmesh-cli --release --target aarch64-apple-ios-sim
 
   ensure cd "${ROOT}/libs/blockmesh-cli" \
   && cbindgen --only-target-dependencies --lang c --crate blockmesh-cli --output "${ROOT}/libs/react-native-app/headers/blockmesh-cli.h" \

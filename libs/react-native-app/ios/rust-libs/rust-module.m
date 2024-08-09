@@ -16,7 +16,13 @@ RCT_EXPORT_METHOD(runLib:(NSString *)url
     const char *cUrl = [url UTF8String];
     const char *cEmail = [email UTF8String];
     const char *cPassword = [password UTF8String];
-    int8_t result = run_lib(cUrl, cEmail, cPassword);
+    int result = run_lib(cUrl, cEmail, cPassword);
+    resolve(@(result));
+}
+
+RCT_EXPORT_METHOD(stopLib:(RCTPromiseResolveBlock)resolve
+                      rejecter:(RCTPromiseRejectBlock)reject) {
+    int result = stop_lib();
     resolve(@(result));
 }
 
