@@ -5,11 +5,11 @@
 
 int main(int argc, char** argv) {
     void *handle;
-    void (*func_run_lib)(const char*, const char*);
+    void (*func_run_lib)(const char*, const char*, const char*);
 
     printf("argc = %d\n", argc);
 
-    if (argc != 4) {
+    if (argc != 5) {
         fprintf(stderr, "Usage: lib_path email password\n");
         return EXIT_FAILURE;
     }
@@ -28,8 +28,8 @@ int main(int argc, char** argv) {
         return EXIT_FAILURE;
     }
 
-    printf("email = '%s' , password = '%s'\n", argv[2], argv[3]);
-    func_run_lib(argv[2], argv[3]);
+    printf("url = '%s' , email = '%s' , password = '%s'\n", argv[2], argv[3], argv[4]);
+    func_run_lib(argv[2], argv[3], argv[4]);
     dlclose(handle);
     printf("Finished\n");
     return EXIT_SUCCESS;
