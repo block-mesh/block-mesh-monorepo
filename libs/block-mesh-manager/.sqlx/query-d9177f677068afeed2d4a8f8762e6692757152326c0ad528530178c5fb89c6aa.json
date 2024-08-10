@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        DELETE FROM bandwidth_reports\n        WHERE id IN (\n            SELECT id\n                FROM bandwidth_reports\n            WHERE\n                created_at < $1\n            AND\n                user_id = $2\n            LIMIT 10000\n        )\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Timestamptz",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d9177f677068afeed2d4a8f8762e6692757152326c0ad528530178c5fb89c6aa"
+}
