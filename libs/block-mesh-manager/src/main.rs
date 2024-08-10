@@ -56,8 +56,8 @@ async fn run() -> anyhow::Result<()> {
     let db_pool = get_connection_pool(&configuration.database, Option::from(database_url)).await?;
     migrate(&db_pool).await.expect("Failed to migrate database");
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
-    let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(100);
-    let (tx_sql_agg, rx_sql_agg) = tokio::sync::mpsc::channel::<UpdateBulkMessage>(100);
+    let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(500);
+    let (tx_sql_agg, rx_sql_agg) = tokio::sync::mpsc::channel::<UpdateBulkMessage>(500);
     let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::unbounded_channel::<EnrichIp>();
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
