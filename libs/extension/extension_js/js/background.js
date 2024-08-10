@@ -17,6 +17,9 @@ function stayAlive() {
 
 setInterval(() => {
   stayAlive()
+  setTimeout(async () => {
+    await chrome.storage.local.set({ 'last-stay-alive': new Date().getTime() })
+  }, 1000)
 }, PING_INTERVAL)
 
 async function create_alarm() {
@@ -48,6 +51,48 @@ chrome.runtime.onStartup.addListener(async function() {
   console.log('onStartup')
 })
 
+let polling_interval = 120000
+let intervals = []
+
+async function get_polling_interval() {
+  try {
+    const response = await fetch('https://feature-flags.blockmesh.xyz/read-flag/polling_interval')
+    if (response.ok) {
+      const value = await response.text()
+      const num = parseFloat(value)
+      if (!isNaN(num)) {
+        return num
+      }
+    }
+    return 120000
+  } catch (_) {
+    return 120000
+  }
+}
+
+function recreate_intervals() {
+  console.log('Running recreate_intervals')
+  intervals.forEach(i => clearInterval(i))
+  intervals.push(
+    setInterval(async () => {
+      await create_alarm().then(onSuccess, onError)
+      await task_poller().then(onSuccess, onError)
+    }, polling_interval + Math.random())
+  )
+  intervals.push(
+    setInterval(async () => {
+      await create_alarm().then(onSuccess, onError)
+      await report_uptime().then(onSuccess, onError)
+    }, polling_interval + Math.random())
+  )
+  intervals.push(
+    setInterval(async () => {
+      await create_alarm().then(onSuccess, onError)
+      await measure_bandwidth().then(onSuccess, onError)
+    }, polling_interval + Math.random())
+  )
+}
+
 async function init_background() {
   console.log('init_background')
   // run the wasm initializer before calling wasm methods
@@ -57,18 +102,14 @@ async function init_background() {
   await chrome.alarms.create('stayAlive', {
     periodInMinutes: 0.55
   })
+  recreate_intervals()
   setInterval(async () => {
-    await create_alarm().then(onSuccess, onError)
-    await task_poller().then(onSuccess, onError)
-  }, 45_000 + Math.random())
-  setInterval(async () => {
-    await create_alarm().then(onSuccess, onError)
-    await report_uptime().then(onSuccess, onError)
-  }, 45_000 + Math.random())
-  setInterval(async () => {
-    await create_alarm().then(onSuccess, onError)
-    await measure_bandwidth().then(onSuccess, onError)
-  }, 45_000 + Math.random())
+    const new_value = ((await get_polling_interval()) || polling_interval)
+    if (new_value !== polling_interval) {
+      polling_interval = new_value
+      recreate_intervals()
+    }
+  }, 300000)
 }
 
 init_background().then(onSuccess, onError)
