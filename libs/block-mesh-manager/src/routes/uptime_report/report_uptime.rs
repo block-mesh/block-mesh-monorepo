@@ -83,7 +83,7 @@ pub async fn handler(
             }
             let sum = aggregate.value.as_f64().unwrap_or_default() + diff.num_seconds() as f64;
             update_aggregate(
-                &mut transaction,
+                &pool,
                 aggregate.id.0.unwrap_or_default(),
                 &serde_json::Value::from(sum),
             )
