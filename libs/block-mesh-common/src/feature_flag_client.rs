@@ -3,17 +3,20 @@ use reqwest::Client;
 use serde_json::Value;
 use std::collections::HashMap;
 
-const FLAGS: [&str; 3] = [
+const FLAGS: [&str; 4] = [
     "enrich_ip_and_cleanup_in_background",
     "submit_bandwidth_run_background",
     "send_cleanup_to_rayon",
+    "polling_interval",
 ];
 
 pub async fn get_all_flags(client: &Client) -> anyhow::Result<HashMap<String, bool>> {
     let mut flags: HashMap<String, bool> = HashMap::new();
     for flag in FLAGS {
         let value = get_flag_value(flag, client).await?.unwrap();
-        flags.insert(flag.to_string(), value.as_bool().unwrap());
+        if value.is_boolean() {
+            flags.insert(flag.to_string(), value.as_bool().unwrap());
+        }
     }
     Ok(flags)
 }
