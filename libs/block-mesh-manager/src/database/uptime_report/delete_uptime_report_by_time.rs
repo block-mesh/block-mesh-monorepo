@@ -24,6 +24,7 @@ pub(crate) async fn delete_uptime_report_by_time(
             created_at < $1
         AND
             user_id = $2
+        LIMIT 10000
         "#,
         diff,
         user_id,

@@ -20,6 +20,7 @@ pub(crate) async fn delete_uptime_report_by_time_for_all(
             FROM uptime_reports
         WHERE
             created_at < $1
+        LIMIT 10000
         "#,
         diff,
     )
