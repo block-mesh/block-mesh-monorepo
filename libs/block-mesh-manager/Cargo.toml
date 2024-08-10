@@ -7,7 +7,7 @@ authors.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
-redis = { workspace = true, optional = true, features = ["tokio-comp", "tokio-rustls-comp"] }
+redis = { workspace = true, optional = true, features = ["tokio-comp", "tokio-rustls-comp", "tls-rustls-insecure"] }
 tower_governor = { workspace = true, optional = true }
 aws-config = { workspace = true, optional = true }
 aws-sdk-sesv2 = { workspace = true, optional = true }
