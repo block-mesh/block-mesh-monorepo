@@ -2,14 +2,13 @@ use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_tran
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
-use crate::database::daily_stat::increment_uptime::increment_uptime;
 use crate::database::uptime_report::create_uptime_report::create_uptime_report;
 use crate::database::uptime_report::get_user_uptimes::get_user_uptimes;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
-use crate::worker::db_agg::UpdateAggMessage;
+use crate::worker::db_agg::{Table, UpdateBulkMessage};
 use crate::worker::db_cleaner_cron::EnrichIp;
 use axum::extract::{ConnectInfo, Query, State};
 use axum::{Extension, Json};
@@ -74,19 +73,22 @@ pub async fn handler(
             .await
             .map_err(Error::from)?;
             if daily_stat_opt.is_some() {
-                increment_uptime(
-                    &mut transaction,
-                    daily_stat_opt.unwrap().id,
-                    diff.num_seconds() as f64,
-                )
-                .await?;
+                let _ = state
+                    .tx_sql_agg
+                    .send(UpdateBulkMessage {
+                        id: daily_stat_opt.unwrap().id,
+                        value: serde_json::Value::from(diff.num_seconds() as f64),
+                        table: Table::DailyStat,
+                    })
+                    .await;
             }
             let sum = aggregate.value.as_f64().unwrap_or_default() + diff.num_seconds() as f64;
             let _ = state
                 .tx_sql_agg
-                .send(UpdateAggMessage {
+                .send(UpdateBulkMessage {
                     id: aggregate.id.0.unwrap_or_default(),
                     value: serde_json::Value::from(sum),
+                    table: Table::Aggregate,
                 })
                 .await;
         }
