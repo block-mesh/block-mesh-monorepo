@@ -13,6 +13,7 @@ use crate::worker::db_cleaner_cron::EnrichIp;
 use axum::{Extension, Router};
 use axum_login::login_required;
 use leptos::leptos_config::get_config_from_env;
+use redis::aio::MultiplexedConnection;
 use reqwest::Client;
 use sqlx::postgres::PgPool;
 use std::collections::HashMap;
@@ -42,6 +43,7 @@ pub struct AppState {
     pub tx_sql_agg: tokio::sync::mpsc::Sender<UpdateBulkMessage>,
     pub flags: HashMap<String, bool>,
     pub cleaner_tx: UnboundedSender<EnrichIp>,
+    pub redis: MultiplexedConnection,
 }
 
 #[derive(Clone)]
@@ -81,10 +83,7 @@ impl Application {
             governor_limiter.retain_recent();
         });
 
-        let client = redis::Client::open(env::var("REDIS_URL").unwrap()).unwrap();
-        let con = client.get_multiplexed_async_connection().await.unwrap();
-
-        let auth_layer = authentication_layer(&db_pool, &con).await;
+        let auth_layer = authentication_layer(&db_pool, &app_state.redis).await;
 
         let app_env = get_env_var_or_panic(AppEnvVar::AppEnvironment);
         let app_env = <env_var::EnvVar as AsRef<String>>::as_ref(&app_env);

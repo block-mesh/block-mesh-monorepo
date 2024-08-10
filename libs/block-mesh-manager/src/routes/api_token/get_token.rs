@@ -1,33 +1,30 @@
 use crate::database::api_token::get_api_token_by_user_id_and_status::get_api_token_by_usr_and_status;
 use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
-use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::domain::api_token::ApiTokenStatus;
 use crate::errors::error::Error;
-use crate::middlewares::authentication::{Backend, Credentials};
+use crate::middlewares::authentication::{get_user_from_redis, Backend, Credentials};
+use crate::startup::application::AppState;
 use anyhow::anyhow;
+use axum::extract::State;
 use axum::{Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::{GetTokenRequest, GetTokenResponse};
 use secret::Secret;
 use sqlx::PgPool;
+use std::sync::Arc;
 
-#[tracing::instrument(name = "get_token", skip(body, auth), fields(email = body.email))]
+#[tracing::instrument(name = "get_token", skip(body, auth, state), fields(email = body.email))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
+    State(state): State<Arc<AppState>>,
     Extension(mut auth): Extension<AuthSession<Backend>>,
     Json(body): Json<GetTokenRequest>,
 ) -> Result<Json<GetTokenResponse>, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let email = body.email.clone().to_ascii_lowercase();
-    let user = get_user_opt_by_email(&mut transaction, &email)
-        .await?
-        .ok_or_else(|| Error::UserNotFound)?;
-    // if !user.verified_email {
-    //     return Ok(Json(GetTokenResponse {
-    //         api_token: None,
-    //         message: Some("Email not verified yet".to_string()),
-    //     }));
-    // }
+    let user = get_user_from_redis(&email, &state.redis)
+        .await
+        .map_err(|_| Error::UserNotFound)?;
     let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
         .await?
         .ok_or_else(|| Error::NonceNotFound)?;

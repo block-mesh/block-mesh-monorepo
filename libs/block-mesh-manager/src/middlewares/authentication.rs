@@ -1,8 +1,10 @@
 #![allow(clippy::blocks_in_conditions)]
+
 use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::errors::error::Error;
+use anyhow::anyhow;
 use async_trait::async_trait;
 use axum_login::tower_sessions::cookie::time::Duration;
 use axum_login::{
@@ -74,7 +76,8 @@ impl AuthnBackend for Backend {
         let user = match get_user_opt_by_email(&mut transaction, &creds.email).await {
             Ok(u) => u,
             Err(e) => {
-                let _: RedisResult<()> = c.set(creds.email, "{}").await;
+                let _: RedisResult<()> = c.set(creds.email.clone(), "{}").await;
+                let _: RedisResult<()> = c.expire(creds.email, 60 * 60 * 24).await;
                 return Err(Error::Auth(e.to_string()));
             }
         };
@@ -82,7 +85,8 @@ impl AuthnBackend for Backend {
         let user = match user {
             Some(u) => u,
             None => {
-                let _: RedisResult<()> = c.set(creds.email, "{}").await;
+                let _: RedisResult<()> = c.set(creds.email.clone(), "{}").await;
+                let _: RedisResult<()> = c.expire(creds.email, 60 * 60 * 24).await;
                 return Err(Error::Auth("User not found".to_string()));
             }
         };
@@ -95,8 +99,12 @@ impl AuthnBackend for Backend {
             email: user.email,
         };
         let _: RedisResult<()> = c
-            .set(creds.email, serde_json::to_string(&session_user).unwrap())
+            .set(
+                creds.email.clone(),
+                serde_json::to_string(&session_user).unwrap(),
+            )
             .await;
+        let _: RedisResult<()> = c.expire(creds.email, 60 * 60 * 24).await;
         transaction.commit().await.map_err(Error::from)?;
         Ok(Option::from(session_user))
     }
@@ -121,6 +129,7 @@ impl AuthnBackend for Backend {
             Ok(u) => u,
             Err(e) => {
                 let _: RedisResult<()> = c.set(user_id.to_string(), "{}").await;
+                let _: RedisResult<()> = c.expire(user_id.to_string(), 60 * 60 * 24).await;
                 return Err(Error::Auth(e.to_string()));
             }
         };
@@ -129,6 +138,7 @@ impl AuthnBackend for Backend {
             Some(u) => u,
             None => {
                 let _: RedisResult<()> = c.set(user_id.to_string(), "{}").await;
+                let _: RedisResult<()> = c.expire(user_id.to_string(), 60 * 60 * 24).await;
                 return Err(Error::Auth("User not found".to_string()));
             }
         };
@@ -146,8 +156,12 @@ impl AuthnBackend for Backend {
             nonce: nonce.nonce.as_ref().to_string(),
         };
         let _: RedisResult<()> = c
-            .set(user.email, serde_json::to_string(&session_user).unwrap())
+            .set(
+                user.email.clone(),
+                serde_json::to_string(&session_user).unwrap(),
+            )
             .await;
+        let _: RedisResult<()> = c.expire(user.email, 60 * 60 * 24).await;
         Ok(Option::from(session_user))
     }
 }
@@ -186,4 +200,22 @@ pub async fn authentication_layer(
 
     let backend = Backend::new(pool.clone(), con.clone());
     AuthManagerLayerBuilder::new(backend, session_layer).build()
+}
+
+pub async fn get_user_from_redis(
+    email: &str,
+    con: &MultiplexedConnection,
+) -> anyhow::Result<SessionUser> {
+    let mut c = con.clone();
+    let redis_user: RedisResult<String> = c.get(email.to_string()).await;
+    match redis_user {
+        Ok(redis_user) => {
+            return if let Ok(value) = serde_json::from_str::<SessionUser>(&redis_user) {
+                Ok(value)
+            } else {
+                Err(anyhow!("Cant deserialize user from redis".to_string()))
+            };
+        }
+        Err(_) => Err(anyhow!("User not found".to_string())),
+    }
 }
