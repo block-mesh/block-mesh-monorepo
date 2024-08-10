@@ -1,6 +1,5 @@
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
 use crate::database::api_token::find_token::find_token;
-use crate::database::bandwidth::create_bandwidth_report::create_bandwidth_report;
 use crate::database::bandwidth::delete_bandwidth_reports_by_time::delete_bandwidth_reports_by_time;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
@@ -41,10 +40,6 @@ pub async fn handler(
     let latency_report = serde_json::Value::from(body.latency)
         .as_f64()
         .unwrap_or_default();
-
-    create_bandwidth_report(&mut transaction, user.id, body)
-        .await
-        .map_err(Error::from)?;
 
     let download = get_or_create_aggregate_by_user_and_name_no_transaction(
         &mut transaction,
