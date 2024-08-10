@@ -1,6 +1,5 @@
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
 use crate::database::api_token::find_token::find_token;
-use crate::database::bandwidth::create_bandwidth_report::create_bandwidth_report;
 use crate::database::bandwidth::delete_bandwidth_reports_by_time::delete_bandwidth_reports_by_time;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
@@ -42,10 +41,6 @@ pub async fn handler(
         .as_f64()
         .unwrap_or_default();
 
-    create_bandwidth_report(&mut transaction, user.id, body)
-        .await
-        .map_err(Error::from)?;
-
     let download = get_or_create_aggregate_by_user_and_name_no_transaction(
         &mut transaction,
         AggregateName::Download,
@@ -65,6 +60,7 @@ pub async fn handler(
         user.id,
     )
     .await?;
+    transaction.commit().await.map_err(Error::from)?;
 
     let _ = state
         .tx_sql_agg
@@ -96,7 +92,6 @@ pub async fn handler(
             table: Table::Aggregate,
         })
         .await;
-    transaction.commit().await.map_err(Error::from)?;
 
     let flag = state
         .flags

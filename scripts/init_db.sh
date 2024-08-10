@@ -48,6 +48,14 @@ then
     -p "${DB_PORT}":5555 \
     -d postgres:15.3-alpine3.18 \
     postgres -p ${DB_PORT} -N 1000
+
+ DOCKERS="$(docker ps -a -q --filter ancestor=redis:alpine3.20 --format="{{.ID}}")"
+ if [ -n "$DOCKERS" ]
+ then
+  ensure docker rm --force --volumes $DOCKERS
+ fi
+ ensure docker run --name redis -p 6379:6379 -d redis:alpine3.20
+ export REDIS_URL="redis://127.0.0.1:6379"
 fi
 
 export PGPASSWORD="${DB_PASSWORD}"

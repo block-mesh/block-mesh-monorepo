@@ -410,6 +410,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d301b3b94cb4b2f23d7917810addbbaff90738e0ca2be692bd027e70d7e0330c"
 
 [[package]]
+name = "arc-swap"
+version = "1.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "69f7f8c3906b62b754cd5326047894316021dcfe5a194c8ea52bdd94934a3457"
+
+[[package]]
 name = "ark-bn254"
 version = "0.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1537,7 +1543,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-common"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anyhow",
  "borsh 1.5.1",
@@ -1564,7 +1570,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anyhow",
  "askama",
@@ -1601,6 +1607,7 @@ dependencies = [
  "num-traits",
  "rand 0.8.5",
  "rayon",
+ "redis",
  "reqwest 0.11.27",
  "secret",
  "sentry",
@@ -1635,7 +1642,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-solana-client"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -1688,7 +1695,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-cli"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -1708,7 +1715,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-leptos"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -1729,7 +1736,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-program"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -1738,7 +1745,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh_tauri"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anyhow",
  "auto-launch",
@@ -2368,7 +2375,7 @@ checksum = "4b82cf0babdbd58558212896d1a4272303a57bdb245c2bf1147185fb45640e70"
 
 [[package]]
 name = "client-node"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -2396,7 +2403,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-affiliate-plan-page"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2412,7 +2419,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-feature-flags"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2428,7 +2435,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-images-gallery-page"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anyhow",
  "askama",
@@ -2446,7 +2453,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-landing-page"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2462,7 +2469,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-privacy-page"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2478,7 +2485,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-echo-debug"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -2497,7 +2504,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-ip-data"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "block-mesh-common",
  "rustc-hash",
@@ -2512,7 +2519,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-logger-proxy"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -2529,7 +2536,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-logs-queue"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2549,7 +2556,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-solana-relay"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "rustc-hash",
  "serde",
@@ -2565,7 +2572,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-tauri-releases"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anyhow",
  "reqwest 0.11.27",
@@ -2641,7 +2648,11 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ba5a308b75df32fe02788e748662718f03fde005016435c444eea572398219fd"
 dependencies = [
  "bytes",
+ "futures-core",
  "memchr",
+ "pin-project-lite",
+ "tokio",
+ "tokio-util",
 ]
 
 [[package]]
@@ -3126,7 +3137,7 @@ checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 
 [[package]]
 name = "debug-area"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "tokio",
 ]
@@ -3709,7 +3720,7 @@ dependencies = [
 
 [[package]]
 name = "extension"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -5031,7 +5042,7 @@ dependencies = [
  "hyper 0.14.29",
  "log",
  "rustls 0.21.12",
- "rustls-native-certs",
+ "rustls-native-certs 0.6.3",
  "tokio",
  "tokio-rustls 0.24.1",
 ]
@@ -5894,7 +5905,7 @@ checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
 name = "logger-general"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -5914,7 +5925,7 @@ dependencies = [
 
 [[package]]
 name = "logger-leptos"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -7475,7 +7486,7 @@ dependencies = [
 
 [[package]]
 name = "proxy-endpoint"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -7504,7 +7515,7 @@ dependencies = [
 
 [[package]]
 name = "proxy-master"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -7625,7 +7636,7 @@ dependencies = [
  "ring 0.16.20",
  "rustc-hash",
  "rustls 0.21.12",
- "rustls-native-certs",
+ "rustls-native-certs 0.6.3",
  "slab",
  "thiserror",
  "tinyvec",
@@ -7818,6 +7829,34 @@ dependencies = [
  "ring 0.16.20",
  "time",
  "yasna",
+]
+
+[[package]]
+name = "redis"
+version = "0.26.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e902a69d09078829137b4a5d9d082e0490393537badd7c91a3d69d14639e115f"
+dependencies = [
+ "arc-swap",
+ "async-trait",
+ "bytes",
+ "combine 4.6.7",
+ "futures-util",
+ "itoa 1.0.11",
+ "num-bigint 0.4.6",
+ "percent-encoding",
+ "pin-project-lite",
+ "rustls 0.23.12",
+ "rustls-native-certs 0.7.1",
+ "rustls-pemfile 2.1.2",
+ "rustls-pki-types",
+ "ryu",
+ "sha1_smol",
+ "socket2",
+ "tokio",
+ "tokio-rustls 0.26.0",
+ "tokio-util",
+ "url",
 ]
 
 [[package]]
@@ -8225,6 +8264,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "rustls"
+version = "0.23.12"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c58f8c84392efc0a126acce10fa59ff7b3d2ac06ab451a33f2741989b806b044"
+dependencies = [
+ "once_cell",
+ "ring 0.17.8",
+ "rustls-pki-types",
+ "rustls-webpki 0.102.6",
+ "subtle",
+ "zeroize",
+]
+
+[[package]]
 name = "rustls-native-certs"
 version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8232,6 +8285,19 @@ checksum = "a9aace74cb666635c918e9c12bc0d348266037aa8eb599b5cba565709a8dff00"
 dependencies = [
  "openssl-probe",
  "rustls-pemfile 1.0.4",
+ "schannel",
+ "security-framework",
+]
+
+[[package]]
+name = "rustls-native-certs"
+version = "0.7.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a88d6d420651b496bdd98684116959239430022a115c1240e6c3993be0b15fba"
+dependencies = [
+ "openssl-probe",
+ "rustls-pemfile 2.1.2",
+ "rustls-pki-types",
  "schannel",
  "security-framework",
 ]
@@ -8382,7 +8448,7 @@ dependencies = [
 
 [[package]]
 name = "secret"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "serde",
  "sqlx",
@@ -8885,6 +8951,12 @@ dependencies = [
  "cpufeatures",
  "digest 0.10.7",
 ]
+
+[[package]]
+name = "sha1_smol"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bbfa15b3dddfee50a0fff136974b3e1bde555604ba463834a7eb7deb6417705d"
 
 [[package]]
 name = "sha2"
@@ -9636,7 +9708,7 @@ dependencies = [
 
 [[package]]
 name = "solana-tiny-client"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anyhow",
  "bincode",
@@ -9829,7 +9901,7 @@ dependencies = [
 
 [[package]]
 name = "speed-test"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anyhow",
  "chrono",
@@ -11107,7 +11179,7 @@ dependencies = [
 
 [[package]]
 name = "test-proxy-endpoint"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "block-mesh-common",
  "bytes",
@@ -11126,7 +11198,7 @@ dependencies = [
 
 [[package]]
 name = "test-proxy-master"
-version = "0.0.174"
+version = "0.0.176"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -11348,6 +11420,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "775e0c0f0adb3a2f22a00c4745d728b479985fc15ee7ca6a2608388c5569860f"
 dependencies = [
  "rustls 0.22.4",
+ "rustls-pki-types",
+ "tokio",
+]
+
+[[package]]
+name = "tokio-rustls"
+version = "0.26.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c7bc40d0e5a97695bb96e27995cd3a08538541b0a846f65bba7a359f36700d4"
+dependencies = [
+ "rustls 0.23.12",
  "rustls-pki-types",
  "tokio",
 ]

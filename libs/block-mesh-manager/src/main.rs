@@ -5,6 +5,7 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use std::env;
     use block_mesh_manager::worker::db_agg::{db_agg, UpdateBulkMessage};
     use logger_general::tracing::setup_tracing_stdout_only;
     use std::time::Duration;
@@ -65,6 +66,11 @@ async fn run() -> anyhow::Result<()> {
         .unwrap_or_default();
 
     let flags = get_all_flags(&client).await?;
+    let redis_client = redis::Client::open(env::var("REDIS_URL").unwrap()).unwrap();
+    let redis = redis_client
+        .get_multiplexed_async_connection()
+        .await
+        .unwrap();
 
     let app_state = Arc::new(AppState {
         email_client,
@@ -74,6 +80,7 @@ async fn run() -> anyhow::Result<()> {
         tx_sql_agg,
         flags,
         cleaner_tx,
+        redis,
     });
     let application = Application::build(configuration, app_state, db_pool.clone()).await;
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));

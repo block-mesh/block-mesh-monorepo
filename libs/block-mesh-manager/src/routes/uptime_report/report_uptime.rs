@@ -62,9 +62,12 @@ pub async fn handler(
     let uptime_id =
         create_uptime_report(&mut transaction, &user.id, &Option::from(ip.clone())).await?;
     let uptimes = get_user_uptimes(&mut transaction, user.id, 2).await?;
+    transaction.commit().await.map_err(Error::from)?;
+
     if uptimes.len() == 2 {
         let diff = uptimes[0].created_at - uptimes[1].created_at;
         if diff.num_seconds() < 60 {
+            let mut transaction = pool.begin().await.map_err(Error::from)?;
             let aggregate = get_or_create_aggregate_by_user_and_name_no_transaction(
                 &mut transaction,
                 AggregateName::Uptime,
@@ -72,6 +75,8 @@ pub async fn handler(
             )
             .await
             .map_err(Error::from)?;
+            transaction.commit().await.map_err(Error::from)?;
+
             if daily_stat_opt.is_some() {
                 let _ = state
                     .tx_sql_agg
@@ -93,8 +98,6 @@ pub async fn handler(
                 .await;
         }
     }
-
-    transaction.commit().await.map_err(Error::from)?;
 
     let flag = state.flags.get("send_cleanup_to_rayon").unwrap_or(&false);
     if *flag {
