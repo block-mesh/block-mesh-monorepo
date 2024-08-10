@@ -119,10 +119,6 @@ impl Application {
             .layer(auth_layer.clone())
             .with_state(app_state.clone());
         let app = Router::new()
-            .nest("/", leptos_router)
-            .nest("/", backend)
-            .nest("/", leptos_pkg)
-            .layer(auth_layer)
             .layer(TimeoutLayer::new(Duration::from_millis(
                 env::var("REQUEST_TIMEOUT")
                     .unwrap_or("3500".to_string())
@@ -131,7 +127,12 @@ impl Application {
             )))
             .layer(GovernorLayer {
                 config: governor_conf,
-            });
+            })
+            .nest("/", leptos_router)
+            .nest("/", backend)
+            .nest("/", leptos_pkg)
+            .layer(auth_layer);
+
         let listener = TcpListener::bind(settings.application.address())
             .await
             .unwrap();
