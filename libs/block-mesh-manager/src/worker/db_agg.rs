@@ -1,4 +1,5 @@
 use crate::database::aggregate::update_aggregate::update_aggregate_bulk;
+use crate::database::daily_stat::increment_uptime::update_daily_stat_uptime_bulk;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::PgPool;
@@ -6,14 +7,21 @@ use std::collections::HashMap;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct UpdateAggMessage {
-    pub(crate) id: Uuid,
-    pub(crate) value: Value,
+pub struct UpdateBulkMessage {
+    pub id: Uuid,
+    pub value: Value,
+    pub table: Table,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum Table {
+    DailyStat,
+    Aggregate,
 }
 
 pub async fn db_agg(
     pool: PgPool,
-    mut rx: tokio::sync::mpsc::Receiver<UpdateAggMessage>,
+    mut rx: tokio::sync::mpsc::Receiver<UpdateBulkMessage>,
 ) -> Result<(), anyhow::Error> {
     let mut queries: Vec<String> = Vec::with_capacity(100);
     let mut calls: HashMap<Uuid, Value> = HashMap::new();
@@ -23,9 +31,19 @@ pub async fn db_agg(
         count += 1;
         if count == 100 {
             if let Ok(mut transaction) = pool.begin().await {
-                match update_aggregate_bulk(&mut transaction, &mut calls).await {
-                    Ok(_) => {}
-                    Err(e) => tracing::error!("ERROR update_aggregate_bulk {}", e),
+                match query.table {
+                    Table::Aggregate => {
+                        match update_aggregate_bulk(&mut transaction, &mut calls).await {
+                            Ok(_) => {}
+                            Err(e) => tracing::error!("ERROR update_aggregate_bulk {}", e),
+                        }
+                    }
+                    Table::DailyStat => {
+                        match update_daily_stat_uptime_bulk(&mut transaction, &mut calls).await {
+                            Ok(_) => {}
+                            Err(e) => tracing::error!("ERROR update_daily_stat_uptime_bulk {}", e),
+                        }
+                    }
                 }
                 match transaction.commit().await {
                     Ok(_) => {}

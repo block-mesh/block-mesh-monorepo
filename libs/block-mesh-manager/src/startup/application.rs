@@ -8,7 +8,7 @@ use crate::startup::routers::api_router::get_api_router;
 use crate::startup::routers::leptos_router::get_leptos_router;
 use crate::startup::routers::static_auth_router::get_static_auth_router;
 use crate::startup::routers::static_un_auth_router::get_static_un_auth_router;
-use crate::worker::db_agg::UpdateAggMessage;
+use crate::worker::db_agg::UpdateBulkMessage;
 use crate::worker::db_cleaner_cron::EnrichIp;
 use axum::{Extension, Router};
 use axum_login::login_required;
@@ -38,7 +38,7 @@ pub struct AppState {
     pub email_client: Arc<EmailClient>,
     pub client: Client,
     pub tx: tokio::sync::mpsc::Sender<JoinHandle<()>>,
-    pub tx_sql_agg: tokio::sync::mpsc::Sender<UpdateAggMessage>,
+    pub tx_sql_agg: tokio::sync::mpsc::Sender<UpdateBulkMessage>,
     pub flags: HashMap<String, bool>,
     pub cleaner_tx: UnboundedSender<EnrichIp>,
 }
