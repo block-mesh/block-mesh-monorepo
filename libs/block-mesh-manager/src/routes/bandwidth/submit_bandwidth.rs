@@ -67,7 +67,7 @@ pub async fn handler(
     .await?;
 
     update_aggregate(
-        &mut transaction,
+        &pool,
         download.id.unwrap_or_default(),
         &serde_json::Value::from(
             (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
@@ -77,7 +77,7 @@ pub async fn handler(
     .map_err(Error::from)?;
 
     update_aggregate(
-        &mut transaction,
+        &pool,
         upload.id.unwrap_or_default(),
         &serde_json::Value::from((upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0),
     )
@@ -85,7 +85,7 @@ pub async fn handler(
     .map_err(Error::from)?;
 
     update_aggregate(
-        &mut transaction,
+        &pool,
         latency.id.unwrap_or_default(),
         &serde_json::Value::from(
             (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,

@@ -83,7 +83,7 @@ pub async fn handler(
         .await?;
 
         update_aggregate(
-            &mut transaction,
+            &pool,
             tasks.id.unwrap_or_default(),
             &serde_json::Value::from(tasks.value.as_i64().unwrap_or_default() + 1),
         )

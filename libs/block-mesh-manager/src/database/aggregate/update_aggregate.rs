@@ -1,15 +1,9 @@
-use sqlx::{Postgres, Transaction};
+use sqlx::PgPool;
 use uuid::Uuid;
 
-#[tracing::instrument(
-    name = "update_aggregate",
-    skip(transaction),
-    ret,
-    err,
-    level = "trace"
-)]
+#[tracing::instrument(name = "update_aggregate", skip(pool), ret, err, level = "trace")]
 pub(crate) async fn update_aggregate(
-    transaction: &mut Transaction<'_, Postgres>,
+    pool: &PgPool,
     id: Uuid,
     value: &serde_json::Value,
 ) -> anyhow::Result<Uuid> {
@@ -18,7 +12,7 @@ pub(crate) async fn update_aggregate(
         value,
         id,
     )
-    .execute(&mut **transaction)
+    .execute(pool)
     .await?;
     Ok(id)
 }
