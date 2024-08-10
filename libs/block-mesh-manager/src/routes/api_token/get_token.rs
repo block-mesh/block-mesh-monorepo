@@ -71,7 +71,7 @@ pub async fn handler(
                 body.email.clone().to_ascii_lowercase(),
                 body.password
             ),
-            api_token.token.to_string(),
+            api_token.token.expose_secret().to_string(),
         )
         .await;
     let _: RedisResult<()> = c
