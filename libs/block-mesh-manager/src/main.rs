@@ -3,9 +3,9 @@
 #![deny(unreachable_pub)]
 
 use cfg_if::cfg_if;
-use std::env;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use std::env;
     use block_mesh_manager::worker::db_agg::{db_agg, UpdateBulkMessage};
     use logger_general::tracing::setup_tracing_stdout_only;
     use std::time::Duration;
