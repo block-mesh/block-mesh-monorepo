@@ -60,7 +60,8 @@ impl AuthnBackend for Backend {
         creds: Self::Credentials,
     ) -> Result<Option<Self::User>, Self::Error> {
         let mut c = self.con.clone();
-        let redis_user: RedisResult<String> = c.get(creds.email.clone()).await;
+        let key = format!("{}-{}", creds.email.clone(), creds.nonce.clone());
+        let redis_user: RedisResult<String> = c.get(key.clone()).await;
         match redis_user {
             Ok(redis_user) => {
                 return if let Ok(value) = serde_json::from_str::<SessionUser>(&redis_user) {
@@ -76,8 +77,8 @@ impl AuthnBackend for Backend {
         let user = match get_user_opt_by_email(&mut transaction, &creds.email).await {
             Ok(u) => u,
             Err(e) => {
-                let _: RedisResult<()> = c.set(creds.email.clone(), "{}").await;
-                let _: RedisResult<()> = c.expire(creds.email, 60 * 60 * 24).await;
+                let _: RedisResult<()> = c.set(key.clone(), "{}").await;
+                let _: RedisResult<()> = c.expire(key, 60 * 60 * 24).await;
                 return Err(Error::Auth(e.to_string()));
             }
         };
@@ -85,8 +86,8 @@ impl AuthnBackend for Backend {
         let user = match user {
             Some(u) => u,
             None => {
-                let _: RedisResult<()> = c.set(creds.email.clone(), "{}").await;
-                let _: RedisResult<()> = c.expire(creds.email, 60 * 60 * 24).await;
+                let _: RedisResult<()> = c.set(key.clone(), "{}").await;
+                let _: RedisResult<()> = c.expire(key.clone(), 60 * 60 * 24).await;
                 return Err(Error::Auth("User not found".to_string()));
             }
         };
@@ -99,10 +100,7 @@ impl AuthnBackend for Backend {
             email: user.email,
         };
         let _: RedisResult<()> = c
-            .set(
-                creds.email.clone(),
-                serde_json::to_string(&session_user).unwrap(),
-            )
+            .set(key, serde_json::to_string(&session_user).unwrap())
             .await;
         let _: RedisResult<()> = c.expire(creds.email, 60 * 60 * 24).await;
         transaction.commit().await.map_err(Error::from)?;
