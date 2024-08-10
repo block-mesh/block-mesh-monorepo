@@ -20,6 +20,7 @@ pub(crate) async fn delete_bandwidth_reports_by_time_for_all(
             FROM bandwidth_reports
         WHERE
             created_at < $1
+        LIMIT 10000
         "#,
         diff,
     )
