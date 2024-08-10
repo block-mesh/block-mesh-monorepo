@@ -1,4 +1,3 @@
-use crate::database::aggregate::update_aggregate::update_aggregate;
 use serde_json::Value;
 use sqlx::{Postgres, Transaction};
 use std::collections::HashMap;
