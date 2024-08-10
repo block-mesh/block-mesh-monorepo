@@ -52,7 +52,7 @@ pub async fn handler(
                 body.email.clone().to_ascii_lowercase(),
                 body.api_token.to_string()
             ),
-            api_token.token.to_string(),
+            body.api_token.to_string(),
         )
         .await;
     let _: RedisResult<()> = c
