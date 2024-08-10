@@ -81,14 +81,18 @@ pub async fn handler(
         Some(daily_stat) => daily_stat.id,
         None => create_daily_stat(&mut transaction, user.id).await?,
     };
+    increment_tasks_count(&mut transaction, daily_stat_opt_id).await?;
+    transaction.commit().await.map_err(Error::from)?;
 
     if query.response_code.unwrap_or(520) == 200 {
+        let mut transaction = pool.begin().await.map_err(Error::from)?;
         let tasks = get_or_create_aggregate_by_user_and_name_no_transaction(
             &mut transaction,
             AggregateName::Tasks,
             user.id,
         )
         .await?;
+        transaction.commit().await.map_err(Error::from)?;
         let _ = state
             .tx_sql_agg
             .send(UpdateBulkMessage {
@@ -99,8 +103,6 @@ pub async fn handler(
             .await;
     }
 
-    increment_tasks_count(&mut transaction, daily_stat_opt_id).await?;
-    transaction.commit().await.map_err(Error::from)?;
     Ok(Json(SubmitTaskResponse {
         status_code: u16::from(StatusCode::OK),
     }))

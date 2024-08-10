@@ -65,6 +65,7 @@ pub async fn handler(
         user.id,
     )
     .await?;
+    transaction.commit().await.map_err(Error::from)?;
 
     let _ = state
         .tx_sql_agg
@@ -96,7 +97,6 @@ pub async fn handler(
             table: Table::Aggregate,
         })
         .await;
-    transaction.commit().await.map_err(Error::from)?;
 
     let flag = state
         .flags
