@@ -3,6 +3,7 @@ use crate::database::user::create_server_user::create_server_user;
 use crate::errors::error::Error;
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
 use sqlx::PgPool;
+use std::env;
 use std::time::Duration;
 use uuid::Uuid;
 
@@ -31,6 +32,12 @@ pub async fn rpc_worker_loop(pool: PgPool) -> Result<(), anyhow::Error> {
                 tracing::error!("worker_loop: create_rpc_tasks: error: {}", e);
             }
         }
-        tokio::time::sleep(Duration::from_millis(10_000)).await;
+        tokio::time::sleep(Duration::from_millis(
+            env::var("RPC_CRON_INTERVAL")
+                .unwrap_or("30000".to_string())
+                .parse()
+                .unwrap_or(30_000),
+        ))
+        .await;
     }
 }
