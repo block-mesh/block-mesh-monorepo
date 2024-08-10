@@ -81,7 +81,10 @@ impl Application {
             governor_limiter.retain_recent();
         });
 
-        let auth_layer = authentication_layer(&db_pool).await;
+        let client = redis::Client::open(env::var("REDIS_URL").unwrap()).unwrap();
+        let con = client.get_multiplexed_async_connection().await.unwrap();
+
+        let auth_layer = authentication_layer(&db_pool, &con).await;
 
         let app_env = get_env_var_or_panic(AppEnvVar::AppEnvironment);
         let app_env = <env_var::EnvVar as AsRef<String>>::as_ref(&app_env);

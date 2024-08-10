@@ -9,6 +9,7 @@ source "${ROOT}/scripts/setup.sh"
 set +x
 source "${ROOT}/scripts/setup.sh"
 export DATABASE_URL="postgres://postgres:password@localhost:5555/block-mesh"
+export REDIS_URL="redis://127.0.0.1:6379"
 if [ -f "${ROOT}/.env" ] ; then
   source "${ROOT}/.env"
 fi
