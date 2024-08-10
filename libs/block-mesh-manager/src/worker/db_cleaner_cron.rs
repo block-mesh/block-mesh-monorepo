@@ -3,7 +3,6 @@ use crate::database::ip_address::create_ip_address::create_ip_address;
 use crate::database::ip_address::enrich_ip_address::enrich_ip_address;
 use crate::database::ip_address::get_ip_address::get_ip_address;
 use crate::database::ip_address::get_opt_ip_address::get_opt_ip_address;
-use crate::database::uptime_report::delete_uptime_report_by_time::delete_uptime_report_by_time;
 use crate::database::uptime_report::delete_uptime_report_by_time_for_all::delete_uptime_report_by_time_for_all;
 use crate::database::uptime_report::enrich_uptime_report::enrich_uptime_report;
 use crate::errors::error::Error;
