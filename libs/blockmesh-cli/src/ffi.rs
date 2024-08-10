@@ -21,7 +21,7 @@ pub static STATUS: OnceCell<Arc<Mutex<i8>>> = OnceCell::new();
 
 pub fn get_status() -> i8 {
     let value = STATUS.get_or_init(|| Arc::new(Mutex::new(0)));
-    value.lock().unwrap().clone()
+    *value.lock().unwrap()
 }
 
 pub fn set_status(status: i8) {
