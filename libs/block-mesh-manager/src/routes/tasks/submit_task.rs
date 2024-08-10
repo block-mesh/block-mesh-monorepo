@@ -1,5 +1,4 @@
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
-use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
@@ -10,17 +9,26 @@ use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
-use axum::extract::{Query, Request};
+use crate::startup::application::AppState;
+use crate::worker::db_agg::UpdateAggMessage;
+use axum::extract::{Query, Request, State};
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{SubmitTaskRequest, SubmitTaskResponse};
 use chrono::Utc;
 use http::StatusCode;
 use http_body_util::BodyExt;
 use sqlx::PgPool;
+use std::sync::Arc;
 
-#[tracing::instrument(name = "submit_task", skip(pool, request, query), level = "trace", ret)]
+#[tracing::instrument(
+    name = "submit_task",
+    skip(pool, request, query, state),
+    level = "trace",
+    ret
+)]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
+    State(state): State<Arc<AppState>>,
     Query(query): Query<SubmitTaskRequest>,
     request: Request,
 ) -> Result<Json<SubmitTaskResponse>, Error> {
@@ -81,14 +89,13 @@ pub async fn handler(
             user.id,
         )
         .await?;
-
-        update_aggregate(
-            &pool,
-            tasks.id.unwrap_or_default(),
-            &serde_json::Value::from(tasks.value.as_i64().unwrap_or_default() + 1),
-        )
-        .await
-        .map_err(Error::from)?;
+        let _ = state
+            .tx_sql_agg
+            .send(UpdateAggMessage {
+                id: tasks.id.unwrap_or_default(),
+                value: serde_json::Value::from(tasks.value.as_i64().unwrap_or_default() + 1),
+            })
+            .await;
     }
 
     increment_tasks_count(&mut transaction, daily_stat_opt_id).await?;

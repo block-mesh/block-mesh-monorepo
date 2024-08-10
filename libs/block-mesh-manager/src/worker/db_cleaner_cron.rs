@@ -1,8 +1,9 @@
+use crate::database::bandwidth::delete_bandwidth_reports_by_time_for_all::delete_bandwidth_reports_by_time_for_all;
 use crate::database::ip_address::create_ip_address::create_ip_address;
 use crate::database::ip_address::enrich_ip_address::enrich_ip_address;
 use crate::database::ip_address::get_ip_address::get_ip_address;
 use crate::database::ip_address::get_opt_ip_address::get_opt_ip_address;
-use crate::database::uptime_report::delete_uptime_report_by_time::delete_uptime_report_by_time;
+use crate::database::uptime_report::delete_uptime_report_by_time_for_all::delete_uptime_report_by_time_for_all;
 use crate::database::uptime_report::enrich_uptime_report::enrich_uptime_report;
 use crate::errors::error::Error;
 use block_mesh_common::constants::BLOCK_MESH_IP_WORKER;
@@ -53,7 +54,10 @@ pub async fn enrich_ip_and_cleanup(
 ) -> anyhow::Result<()> {
     let pool = pool.clone();
     let mut transaction = pool.begin().await.map_err(Error::from)?;
-    delete_uptime_report_by_time(&mut transaction, job.user_id, 60 * 60)
+    delete_uptime_report_by_time_for_all(&mut transaction, 60 * 60)
+        .await
+        .map_err(Error::from)?;
+    delete_bandwidth_reports_by_time_for_all(&mut transaction, 60 * 60)
         .await
         .map_err(Error::from)?;
     let ip_address = match get_opt_ip_address(&mut transaction, &job.ip)
