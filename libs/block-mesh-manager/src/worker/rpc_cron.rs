@@ -34,7 +34,7 @@ pub async fn rpc_worker_loop(pool: PgPool) -> Result<(), anyhow::Error> {
         }
         tokio::time::sleep(Duration::from_millis(
             env::var("RPC_CRON_INTERVAL")
-                .unwrap_or("30_000".to_string())
+                .unwrap_or("30000".to_string())
                 .parse()
                 .unwrap_or(30_000),
         ))
