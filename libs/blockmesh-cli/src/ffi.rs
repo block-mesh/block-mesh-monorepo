@@ -2,19 +2,44 @@ use crate::login_mode::login_mode;
 use chrono::Utc;
 use std::ffi::CStr;
 use std::os::raw::c_char;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use std::time::Duration;
-use tokio::runtime::Builder;
+use tokio::runtime::{Builder, Runtime};
 
 use jni::objects::{JClass, JString};
 use jni::sys::jint;
 use jni::JNIEnv;
+use once_cell::sync::OnceCell;
 use reqwest::Client;
 use tokio::time::sleep;
 
-#[no_mangle]
-#[used]
-pub static mut RUNNING: i8 = 0;
+// #[no_mangle]
+// #[used]
+// pub static mut RUNNING: i8 = 0;
+
+pub static STATUS: OnceCell<Arc<Mutex<i8>>> = OnceCell::new();
+
+pub fn get_status() -> i8 {
+    let value = STATUS.get_or_init(|| Arc::new(Mutex::new(0)));
+    value.lock().unwrap().clone()
+}
+
+pub fn set_status(status: i8) {
+    let value = STATUS.get_or_init(|| Arc::new(Mutex::new(0)));
+    let mut val = value.lock().unwrap();
+    *val = status;
+}
+
+pub fn create_current_thread_runtime() -> Arc<Runtime> {
+    let runtime = Arc::new(
+        Builder::new_current_thread()
+            .thread_name("blockmesh-cli")
+            .enable_all()
+            .build()
+            .unwrap(),
+    );
+    runtime
+}
 
 /// # Safety
 /// This method should be called by any external program that want to use BlockMesh Network CLI
@@ -27,13 +52,7 @@ pub unsafe extern "C" fn Java_xyz_blockmesh_runLib(
     email: JString,
     password: JString,
 ) -> jint {
-    let runtime = Arc::new(
-        Builder::new_multi_thread()
-            .thread_name("blockmesh-cli")
-            .enable_all()
-            .build()
-            .unwrap(),
-    );
+    let runtime = create_current_thread_runtime();
     let url: String = match env.get_string(&url) {
         Ok(s) => s.into(),
         Err(e) => {
@@ -69,32 +88,27 @@ pub unsafe extern "C" fn Java_xyz_blockmesh_runLib(
 #[no_mangle]
 #[allow(improper_ctypes_definitions)]
 pub unsafe extern "C" fn stop_lib() -> i8 {
-    // RUNNING = -2;
-    let runtime = Arc::new(
-        Builder::new_multi_thread()
-            .thread_name("blockmesh-cli-stop-lib")
-            .enable_all()
-            .build()
-            .unwrap(),
-    );
+    let runtime = create_current_thread_runtime();
     runtime.block_on(async {
         let _ = Client::new()
             .get(format!(
                 "{}/health_check?RUNNING={}&stop_lib=before",
-                "http://localhost:8000", RUNNING
+                "http://localhost:8000",
+                get_status()
             ))
             .send()
             .await;
-        // RUNNING = -1;
+        set_status(-1);
         let _ = Client::new()
             .get(format!(
                 "{}/health_check?RUNNING={}&stop_lib=after",
-                "http://localhost:8000", RUNNING
+                "http://localhost:8000",
+                get_status()
             ))
             .send()
             .await;
     });
-    RUNNING
+    get_status()
 }
 
 /// # Safety
@@ -106,7 +120,7 @@ pub unsafe extern "C" fn run_lib(
     email: *const c_char,
     password: *const c_char,
 ) -> i8 {
-    if RUNNING == 1 {
+    if get_status() == 1 {
         return 0;
     }
     let url = match unsafe { CStr::from_ptr(url) }.to_str() {
@@ -131,25 +145,22 @@ pub unsafe extern "C" fn run_lib(
         }
     };
 
-    let runtime = Arc::new(
-        Builder::new_multi_thread()
-            .thread_name("blockmesh-cli-run-lib")
-            .enable_all()
-            .build()
-            .unwrap(),
-    );
-
+    let runtime = create_current_thread_runtime();
     runtime.block_on(async {
-        RUNNING = 1;
+        set_status(1);
         loop {
-            if RUNNING == -1 {
+            if get_status() == -1 {
                 break;
             }
+            let v = get_status();
+            set_status(v + 1);
             let now = Utc::now();
             let _ = Client::new()
                 .get(format!(
                     "{}/health_check?time={}&RUNNING={}",
-                    url, now, RUNNING
+                    url,
+                    now,
+                    get_status()
                 ))
                 .send()
                 .await;
@@ -157,6 +168,6 @@ pub unsafe extern "C" fn run_lib(
         }
         // let _ = login_mode(url, email, password).await;
     });
-    RUNNING = 0;
+    set_status(0);
     -1
 }

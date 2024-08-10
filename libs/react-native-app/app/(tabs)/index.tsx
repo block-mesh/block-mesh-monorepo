@@ -6,7 +6,27 @@ import { ThemedView } from '@/components/ThemedView'
 import { useStorage } from '@/hooks/useStorage'
 import React, { useRef, useState } from 'react'
 import RustModule from '@/native/native'
+import BackgroundService from 'react-native-background-actions'
 
+
+async function sleep(time: number): Promise<void> {
+  new Promise<void>((resolve) => setTimeout(() => resolve(), time))
+}
+
+const options = {
+  taskName: 'Example',
+  taskTitle: 'ExampleTask title',
+  taskDesc: 'ExampleTask description',
+  taskIcon: {
+    name: 'ic_launcher',
+    type: 'mipmap'
+  },
+  color: '#ff00ff',
+  linkingURI: 'yourSchemeHere://chat/jane', // See Deep Linking for more info
+  parameters: {
+    delay: 1000
+  }
+}
 
 export default function HomeScreen() {
   const emailRef = useRef()
@@ -17,11 +37,29 @@ export default function HomeScreen() {
   const [password, setPassword] = useState(storage.password)
   const [url, setUrl] = useState(storage.url)
 
-  function click() {
-    console.log(RustModule.runLib('http://localhost:8000', 'ohaddahan@gmail.com', 'dudedude@'))
+
+  async function run_lib(): Promise<void> {
+    if (storage.run_lib !== '') {
+      // if (BackgroundService.isRunning()) {
+      console.log('already running')
+      return
+    }
+    await new Promise<void>(async (resolve): Promise<void> => {
+      storage.setRunLib('true')
+      RustModule.runLib('http://localhost:8000', 'ohaddahan@gmail.com', 'dudedude@')
+      await sleep(5_000)
+      storage.setRunLib('')
+      resolve()
+    })
   }
 
-  function stop() {
+  async function click() {
+    // RustModule.runLib('http://localhost:8000', 'ohaddahan@gmail.com', 'dudedude@')
+    await BackgroundService.start(run_lib, options)
+  }
+
+  async function stop() {
+    await BackgroundService.stop()
     console.log('Stop lib', Date.now())
     console.log(RustModule.stopLib())
   }
