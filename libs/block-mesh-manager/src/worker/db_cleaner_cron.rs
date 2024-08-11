@@ -5,6 +5,7 @@ use crate::database::ip_address::get_ip_address::get_ip_address;
 use crate::database::ip_address::get_opt_ip_address::get_opt_ip_address;
 use crate::database::uptime_report::delete_uptime_report_by_time_for_all::delete_uptime_report_by_time_for_all;
 use crate::database::uptime_report::enrich_uptime_report::enrich_uptime_report;
+use crate::database::users_ip::get_or_create_users_ip::get_or_create_users_ip;
 use crate::errors::error::Error;
 use block_mesh_common::constants::BLOCK_MESH_IP_WORKER;
 use block_mesh_common::interfaces::ip_data::{IPData, IpDataPostRequest, LocatorDe};
@@ -74,6 +75,9 @@ pub async fn enrich_ip_and_cleanup(
         }
         Some(ip_address) => ip_address,
     };
+    get_or_create_users_ip(&mut transaction, &job.user_id, &ip_address.id)
+        .await
+        .map_err(Error::from)?;
     if ip_address.enriched {
         let ip_data: IPData = IPData {
             cf_connecting_ip: Option::from(ip_address.ip.clone()),
