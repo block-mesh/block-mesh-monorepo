@@ -42,6 +42,7 @@ export default function HomeScreen() {
   }, [storage.email, storage.url, storage.password, storage.api_token])
 
   async function run_lib(): Promise<void> {
+    console.log('starting run_lib')
     await new Promise<void>(async (resolve): Promise<void> => {
       MyRustModule.run_lib(url, email, password).then(() => {
         console.log('run_lib finished')
@@ -51,6 +52,7 @@ export default function HomeScreen() {
       console.log('after run_lib')
       resolve()
     })
+    console.log('finished run_lib')
   }
 
   async function click() {
@@ -67,6 +69,7 @@ export default function HomeScreen() {
   }
 
   async function stop() {
+    console.log('start stop')
     await BackgroundService.stop()
     await MyRustModule.stop_lib()
     Alert.alert('INFO', 'Node stopped', [
@@ -74,6 +77,7 @@ export default function HomeScreen() {
         text: 'OK'
       }
     ])
+    console.log('finished stop')
   }
 
   return (

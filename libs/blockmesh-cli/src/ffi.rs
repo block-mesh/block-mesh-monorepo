@@ -1,21 +1,17 @@
 use crate::login_mode::login_mode;
 use chrono::Utc;
-use std::ffi::CStr;
 use std::os::raw::c_char;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::runtime::{Builder, Runtime};
 
+use crate::{char_to_str, jstring_to_str};
 use jni::objects::{JClass, JString};
 use jni::sys::jint;
 use jni::JNIEnv;
 use once_cell::sync::OnceCell;
 use reqwest::Client;
 use tokio::time::sleep;
-
-// #[no_mangle]
-// #[used]
-// pub static mut RUNNING: i8 = 0;
 
 pub static STATUS: OnceCell<Arc<Mutex<i8>>> = OnceCell::new();
 
@@ -45,7 +41,7 @@ pub fn create_current_thread_runtime() -> Arc<Runtime> {
 /// This method should be called by any external program that want to use BlockMesh Network CLI
 /// cbindgen:ignore
 #[no_mangle]
-pub unsafe extern "C" fn Java_xyz_blockmesh_runLib(
+pub unsafe extern "C" fn Java_expo_modules_myrustmodule_MyRustModule_run_lib(
     mut env: JNIEnv,
     _class: JClass,
     url: JString,
@@ -53,30 +49,9 @@ pub unsafe extern "C" fn Java_xyz_blockmesh_runLib(
     password: JString,
 ) -> jint {
     let runtime = create_current_thread_runtime();
-    let url: String = match env.get_string(&url) {
-        Ok(s) => s.into(),
-        Err(e) => {
-            eprintln!("Failed to load url {}", e);
-            return -1;
-        }
-    };
-
-    let email: String = match env.get_string(&email) {
-        Ok(s) => s.into(),
-        Err(e) => {
-            eprintln!("Failed to load email {}", e);
-            return -1;
-        }
-    };
-
-    let password: String = match env.get_string(&password) {
-        Ok(s) => s.into(),
-        Err(e) => {
-            eprintln!("Failed to load password {}", e);
-            return -1;
-        }
-    };
-
+    let url: String = jstring_to_str!(&url, env, "url");
+    let email: String = jstring_to_str!(&email, env, "email");
+    let password: String = jstring_to_str!(&password, env, "password");
     runtime.block_on(async {
         let _ = login_mode(&url, &email, &password).await;
     });
@@ -120,30 +95,12 @@ pub unsafe extern "C" fn run_lib(
     email: *const c_char,
     password: *const c_char,
 ) -> i8 {
-    if get_status() == 1 {
+    if get_status() != 0 {
         return 0;
     }
-    let url = match unsafe { CStr::from_ptr(url) }.to_str() {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("Failed to load url {}", e);
-            return -1;
-        }
-    };
-    let _email = match unsafe { CStr::from_ptr(email) }.to_str() {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("Failed to load email {}", e);
-            return -1;
-        }
-    };
-    let _password = match unsafe { CStr::from_ptr(password) }.to_str() {
-        Ok(s) => s,
-        Err(e) => {
-            eprintln!("Failed to load password {}", e);
-            return -1;
-        }
-    };
+    let url = char_to_str!(url, "url");
+    let _email = char_to_str!(email, "email");
+    let _password = char_to_str!(password, "password");
 
     let runtime = create_current_thread_runtime();
     runtime.block_on(async {
