@@ -1,5 +1,4 @@
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
-use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
@@ -10,17 +9,26 @@ use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
-use axum::extract::{Query, Request};
+use crate::startup::application::AppState;
+use crate::worker::db_agg::{Table, UpdateBulkMessage};
+use axum::extract::{Query, Request, State};
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{SubmitTaskRequest, SubmitTaskResponse};
 use chrono::Utc;
 use http::StatusCode;
 use http_body_util::BodyExt;
 use sqlx::PgPool;
+use std::sync::Arc;
 
-#[tracing::instrument(name = "submit_task", skip(pool, request, query), level = "trace", ret)]
+#[tracing::instrument(
+    name = "submit_task",
+    skip(pool, request, query, state),
+    level = "trace",
+    ret
+)]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
+    State(state): State<Arc<AppState>>,
     Query(query): Query<SubmitTaskRequest>,
     request: Request,
 ) -> Result<Json<SubmitTaskResponse>, Error> {
@@ -73,26 +81,28 @@ pub async fn handler(
         Some(daily_stat) => daily_stat.id,
         None => create_daily_stat(&mut transaction, user.id).await?,
     };
+    increment_tasks_count(&mut transaction, daily_stat_opt_id).await?;
+    transaction.commit().await.map_err(Error::from)?;
 
     if query.response_code.unwrap_or(520) == 200 {
+        let mut transaction = pool.begin().await.map_err(Error::from)?;
         let tasks = get_or_create_aggregate_by_user_and_name_no_transaction(
             &mut transaction,
             AggregateName::Tasks,
             user.id,
         )
         .await?;
-
-        update_aggregate(
-            &mut transaction,
-            tasks.id.unwrap_or_default(),
-            &serde_json::Value::from(tasks.value.as_i64().unwrap_or_default() + 1),
-        )
-        .await
-        .map_err(Error::from)?;
+        transaction.commit().await.map_err(Error::from)?;
+        let _ = state
+            .tx_sql_agg
+            .send(UpdateBulkMessage {
+                id: tasks.id.unwrap_or_default(),
+                value: serde_json::Value::from(tasks.value.as_i64().unwrap_or_default() + 1),
+                table: Table::Aggregate,
+            })
+            .await;
     }
 
-    increment_tasks_count(&mut transaction, daily_stat_opt_id).await?;
-    transaction.commit().await.map_err(Error::from)?;
     Ok(Json(SubmitTaskResponse {
         status_code: u16::from(StatusCode::OK),
     }))

@@ -1,12 +1,11 @@
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
-use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::api_token::find_token::find_token;
-use crate::database::bandwidth::create_bandwidth_report::create_bandwidth_report;
 use crate::database::bandwidth::delete_bandwidth_reports_by_time::delete_bandwidth_reports_by_time;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
+use crate::worker::db_agg::{Table, UpdateBulkMessage};
 use axum::extract::State;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
@@ -42,10 +41,6 @@ pub async fn handler(
         .as_f64()
         .unwrap_or_default();
 
-    create_bandwidth_report(&mut transaction, user.id, body)
-        .await
-        .map_err(Error::from)?;
-
     let download = get_or_create_aggregate_by_user_and_name_no_transaction(
         &mut transaction,
         AggregateName::Download,
@@ -65,35 +60,38 @@ pub async fn handler(
         user.id,
     )
     .await?;
-
-    update_aggregate(
-        &mut transaction,
-        download.id.unwrap_or_default(),
-        &serde_json::Value::from(
-            (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
-        ),
-    )
-    .await
-    .map_err(Error::from)?;
-
-    update_aggregate(
-        &mut transaction,
-        upload.id.unwrap_or_default(),
-        &serde_json::Value::from((upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0),
-    )
-    .await
-    .map_err(Error::from)?;
-
-    update_aggregate(
-        &mut transaction,
-        latency.id.unwrap_or_default(),
-        &serde_json::Value::from(
-            (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,
-        ),
-    )
-    .await
-    .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;
+
+    let _ = state
+        .tx_sql_agg
+        .send(UpdateBulkMessage {
+            id: download.id.unwrap_or_default(),
+            value: serde_json::Value::from(
+                (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
+            ),
+            table: Table::Aggregate,
+        })
+        .await;
+    let _ = state
+        .tx_sql_agg
+        .send(UpdateBulkMessage {
+            id: upload.id.unwrap_or_default(),
+            value: serde_json::Value::from(
+                (upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0,
+            ),
+            table: Table::Aggregate,
+        })
+        .await;
+    let _ = state
+        .tx_sql_agg
+        .send(UpdateBulkMessage {
+            id: latency.id.unwrap_or_default(),
+            value: serde_json::Value::from(
+                (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,
+            ),
+            table: Table::Aggregate,
+        })
+        .await;
 
     let flag = state
         .flags

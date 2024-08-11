@@ -5,6 +5,8 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use std::env;
+    use block_mesh_manager::worker::db_agg::{db_agg, UpdateBulkMessage};
     use logger_general::tracing::setup_tracing_stdout_only;
     use std::time::Duration;
     use reqwest::ClientBuilder;
@@ -55,7 +57,8 @@ async fn run() -> anyhow::Result<()> {
     let db_pool = get_connection_pool(&configuration.database, Option::from(database_url)).await?;
     migrate(&db_pool).await.expect("Failed to migrate database");
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
-    let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(100);
+    let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(500);
+    let (tx_sql_agg, rx_sql_agg) = tokio::sync::mpsc::channel::<UpdateBulkMessage>(500);
     let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::unbounded_channel::<EnrichIp>();
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
@@ -63,14 +66,21 @@ async fn run() -> anyhow::Result<()> {
         .unwrap_or_default();
 
     let flags = get_all_flags(&client).await?;
+    let redis_client = redis::Client::open(env::var("REDIS_URL").unwrap()).unwrap();
+    let redis = redis_client
+        .get_multiplexed_async_connection()
+        .await
+        .unwrap();
 
     let app_state = Arc::new(AppState {
         email_client,
         pool: db_pool.clone(),
         client,
         tx,
+        tx_sql_agg,
         flags,
         cleaner_tx,
+        redis,
     });
     let application = Application::build(configuration, app_state, db_pool.clone()).await;
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
@@ -78,13 +88,15 @@ async fn run() -> anyhow::Result<()> {
     let joiner_task = tokio::spawn(joiner_loop(rx));
     let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
     let db_cleaner_task = tokio::spawn(db_cleaner_cron(db_pool.clone(), cleaner_rx));
+    let db_agg_task = tokio::spawn(db_agg(db_pool.clone(), rx_sql_agg));
 
     tokio::select! {
         o = application_task => report_exit("API", o),
         o = rpc_worker_task =>  report_exit("RPC Background worker failed", o),
         o = joiner_task => report_exit("Joiner task failed", o),
         o = finalize_daily_stats_task => report_exit("Finalize daily task failed", o),
-        o = db_cleaner_task => report_exit("DB cleaner task failed", o)
+        o = db_cleaner_task => report_exit("DB cleaner task failed", o),
+        o = db_agg_task => report_exit("DB aggregator", o)
     };
     Ok(())
 }

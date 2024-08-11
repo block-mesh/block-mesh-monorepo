@@ -1,15 +1,14 @@
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
-use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
-use crate::database::daily_stat::increment_uptime::increment_uptime;
 use crate::database::uptime_report::create_uptime_report::create_uptime_report;
 use crate::database::uptime_report::get_user_uptimes::get_user_uptimes;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
+use crate::worker::db_agg::{Table, UpdateBulkMessage};
 use crate::worker::db_cleaner_cron::EnrichIp;
 use axum::extract::{ConnectInfo, Query, State};
 use axum::{Extension, Json};
@@ -63,9 +62,12 @@ pub async fn handler(
     let uptime_id =
         create_uptime_report(&mut transaction, &user.id, &Option::from(ip.clone())).await?;
     let uptimes = get_user_uptimes(&mut transaction, user.id, 2).await?;
+    transaction.commit().await.map_err(Error::from)?;
+
     if uptimes.len() == 2 {
         let diff = uptimes[0].created_at - uptimes[1].created_at;
         if diff.num_seconds() < 60 {
+            let mut transaction = pool.begin().await.map_err(Error::from)?;
             let aggregate = get_or_create_aggregate_by_user_and_name_no_transaction(
                 &mut transaction,
                 AggregateName::Uptime,
@@ -73,26 +75,29 @@ pub async fn handler(
             )
             .await
             .map_err(Error::from)?;
+            transaction.commit().await.map_err(Error::from)?;
+
             if daily_stat_opt.is_some() {
-                increment_uptime(
-                    &mut transaction,
-                    daily_stat_opt.unwrap().id,
-                    diff.num_seconds() as f64,
-                )
-                .await?;
+                let _ = state
+                    .tx_sql_agg
+                    .send(UpdateBulkMessage {
+                        id: daily_stat_opt.unwrap().id,
+                        value: serde_json::Value::from(diff.num_seconds() as f64),
+                        table: Table::DailyStat,
+                    })
+                    .await;
             }
             let sum = aggregate.value.as_f64().unwrap_or_default() + diff.num_seconds() as f64;
-            update_aggregate(
-                &mut transaction,
-                aggregate.id.0.unwrap_or_default(),
-                &serde_json::Value::from(sum),
-            )
-            .await
-            .map_err(Error::from)?;
+            let _ = state
+                .tx_sql_agg
+                .send(UpdateBulkMessage {
+                    id: aggregate.id.0.unwrap_or_default(),
+                    value: serde_json::Value::from(sum),
+                    table: Table::Aggregate,
+                })
+                .await;
         }
     }
-
-    transaction.commit().await.map_err(Error::from)?;
 
     let flag = state.flags.get("send_cleanup_to_rayon").unwrap_or(&false);
     if *flag {

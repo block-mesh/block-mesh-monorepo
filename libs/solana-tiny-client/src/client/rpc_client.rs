@@ -4,9 +4,8 @@ use crate::methods::send_transaction::{SendTransactionInput, SendTransactionOutp
 use anyhow::anyhow;
 use bincode::serialize;
 use reqwest::header::CONTENT_TYPE;
-use reqwest::{Client, ClientBuilder};
+use reqwest::Client;
 use solana_sdk::bs58;
-use std::time::Duration;
 
 #[derive(Debug)]
 pub struct RpcClient {
@@ -18,10 +17,7 @@ pub struct RpcClient {
 impl RpcClient {
     pub fn new(default_url: String, default_commitment: Commitment) -> Self {
         RpcClient {
-            client: ClientBuilder::new()
-                .timeout(Duration::from_secs(3))
-                .build()
-                .unwrap_or_default(),
+            client: Client::new(),
             default_url,
             default_commitment,
         }

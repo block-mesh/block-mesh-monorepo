@@ -8,10 +8,12 @@ use crate::startup::routers::api_router::get_api_router;
 use crate::startup::routers::leptos_router::get_leptos_router;
 use crate::startup::routers::static_auth_router::get_static_auth_router;
 use crate::startup::routers::static_un_auth_router::get_static_un_auth_router;
+use crate::worker::db_agg::UpdateBulkMessage;
 use crate::worker::db_cleaner_cron::EnrichIp;
 use axum::{Extension, Router};
 use axum_login::login_required;
 use leptos::leptos_config::get_config_from_env;
+use redis::aio::MultiplexedConnection;
 use reqwest::Client;
 use sqlx::postgres::PgPool;
 use std::collections::HashMap;
@@ -23,6 +25,7 @@ use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio::sync::mpsc::UnboundedSender;
 use tokio::task::JoinHandle;
+use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
 use tower_http::timeout::TimeoutLayer;
@@ -37,8 +40,10 @@ pub struct AppState {
     pub email_client: Arc<EmailClient>,
     pub client: Client,
     pub tx: tokio::sync::mpsc::Sender<JoinHandle<()>>,
+    pub tx_sql_agg: tokio::sync::mpsc::Sender<UpdateBulkMessage>,
     pub flags: HashMap<String, bool>,
     pub cleaner_tx: UnboundedSender<EnrichIp>,
+    pub redis: MultiplexedConnection,
 }
 
 #[derive(Clone)]
@@ -52,7 +57,33 @@ impl ApplicationBaseUrl {
 
 impl Application {
     pub async fn build(settings: Settings, app_state: Arc<AppState>, db_pool: PgPool) -> Self {
-        let auth_layer = authentication_layer(&db_pool).await;
+        let governor_conf = Arc::new(
+            GovernorConfigBuilder::default()
+                .per_second(
+                    env::var("REQUEST_PER_SECOND")
+                        .unwrap_or("10".to_string())
+                        .parse()
+                        .unwrap_or(10),
+                )
+                .burst_size(
+                    env::var("REQUEST_PER_SECOND_BURST")
+                        .unwrap_or("30".to_string())
+                        .parse()
+                        .unwrap_or(30),
+                )
+                .finish()
+                .unwrap(),
+        );
+        let governor_limiter = governor_conf.limiter().clone();
+        let interval = Duration::from_secs(60);
+        // a separate background task to clean up
+        std::thread::spawn(move || loop {
+            std::thread::sleep(interval);
+            tracing::info!("rate limiting storage size: {}", governor_limiter.len());
+            governor_limiter.retain_recent();
+        });
+
+        let auth_layer = authentication_layer(&db_pool, &app_state.redis).await;
 
         let app_env = get_env_var_or_panic(AppEnvVar::AppEnvironment);
         let app_env = <env_var::EnvVar as AsRef<String>>::as_ref(&app_env);
@@ -90,16 +121,20 @@ impl Application {
             .layer(auth_layer.clone())
             .with_state(app_state.clone());
         let app = Router::new()
-            .nest("/", leptos_router)
-            .nest("/", backend)
-            .nest("/", leptos_pkg)
-            .layer(auth_layer)
             .layer(TimeoutLayer::new(Duration::from_millis(
                 env::var("REQUEST_TIMEOUT")
                     .unwrap_or("3500".to_string())
                     .parse()
                     .unwrap_or(3500),
-            )));
+            )))
+            .layer(GovernorLayer {
+                config: governor_conf,
+            })
+            .nest("/", leptos_router)
+            .nest("/", backend)
+            .nest("/", leptos_pkg)
+            .layer(auth_layer);
+
         let listener = TcpListener::bind(settings.application.address())
             .await
             .unwrap();

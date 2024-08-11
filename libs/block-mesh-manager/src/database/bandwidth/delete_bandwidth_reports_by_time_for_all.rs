@@ -16,10 +16,12 @@ pub(crate) async fn delete_bandwidth_reports_by_time_for_all(
     let diff = now - Duration::seconds(seconds);
     sqlx::query!(
         r#"
-        DELETE
-            FROM bandwidth_reports
-        WHERE
-            created_at < $1
+        DELETE FROM bandwidth_reports WHERE id in (
+            SELECT id FROM bandwidth_reports
+                WHERE
+                    created_at < $1
+                LIMIT 10000
+        )
         "#,
         diff,
     )
