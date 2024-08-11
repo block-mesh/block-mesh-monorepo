@@ -71,7 +71,9 @@ export default function HomeScreen() {
   async function stop() {
     console.log('start stop')
     await BackgroundService.stop()
-    await MyRustModule.stop_lib()
+    console.log('hello', MyRustModule.hello())
+    const x = await MyRustModule.stop_lib()
+    console.log('x = ', x)
     Alert.alert('INFO', 'Node stopped', [
       {
         text: 'OK'

@@ -55,10 +55,10 @@ if [ "${BUILD_IOS}" == "true" ]; then
 fi
 
 if [ "${BUILD_ANDROID}" == "true" ] ; then
-  ensure cd "${ROOT}/libs/blockmesh-cli" && cargo ndk --target aarch64-linux-android    --platform 21 -- build --release && cd "${_PWD}" || exit 1
-  ensure cd "${ROOT}/libs/blockmesh-cli" && cargo ndk --target armv7-linux-androideabi  --platform 21 -- build --release && cd "${_PWD}" || exit 1
-  ensure cd "${ROOT}/libs/blockmesh-cli" && cargo ndk --target i686-linux-android       --platform 21 -- build --release && cd "${_PWD}" || exit 1
-  ensure cd "${ROOT}/libs/blockmesh-cli" && cargo ndk --target x86_64-linux-android     --platform 21 -- build --release && cd "${_PWD}" || exit 1
+  ensure cd "${ROOT}/libs/blockmesh-cli" && cargo ndk --target aarch64-linux-android    --platform 31 -- build --release && cd "${_PWD}" || exit 1
+  ensure cd "${ROOT}/libs/blockmesh-cli" && cargo ndk --target armv7-linux-androideabi  --platform 31 -- build --release && cd "${_PWD}" || exit 1
+  ensure cd "${ROOT}/libs/blockmesh-cli" && cargo ndk --target i686-linux-android       --platform 31 -- build --release && cd "${_PWD}" || exit 1
+  ensure cd "${ROOT}/libs/blockmesh-cli" && cargo ndk --target x86_64-linux-android     --platform 31 -- build --release && cd "${_PWD}" || exit 1
   mkdir -p "${REACT_NATIVE_ANDROID_DIR}/jniLibs/arm64-v8a"
   mkdir -p "${REACT_NATIVE_ANDROID_DIR}/jniLibs/armeabi-v7a"
   mkdir -p "${REACT_NATIVE_ANDROID_DIR}/jniLibs/x86"
