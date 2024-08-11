@@ -58,6 +58,7 @@ aes-gcm-siv = { git = 'https://github.com/block-mesh/AEADs', branch = 'rustls-de
 curve25519-dalek = { git = "https://github.com/block-mesh/curve25519-dalek", branch = "rustls-dep-hell-1-18" }
 
 [workspace.dependencies]
+jni = "0.21.1"
 redis = "0.26.1"
 tower_governor = "0.4.2"
 aws-config = { version = "1.0.1", features = ["behavior-version-latest"] }

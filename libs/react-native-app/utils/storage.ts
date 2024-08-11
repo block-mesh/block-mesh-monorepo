@@ -3,7 +3,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage'
 export async function storeData(key: string, value: string): Promise<void> {
   try {
     console.log(`storeData: ${key} => ${value}`)
-    await AsyncStorage.setItem('my-key', value)
+    await AsyncStorage.setItem(key, value)
   } catch (e) {
     console.error(`storeData Error: ${key} => ${value} | error ${e}`)
   }

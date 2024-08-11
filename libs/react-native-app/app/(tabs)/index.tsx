@@ -1,10 +1,30 @@
-import { Image, StyleSheet, Platform, TextInput, Button } from 'react-native'
+import { Image, StyleSheet, Alert, TextInput, Button } from 'react-native'
 import { HelloWave } from '@/components/HelloWave'
 import ParallaxScrollView from '@/components/ParallaxScrollView'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { useStorage } from '@/hooks/useStorage'
-import React, { useRef, useState } from 'react'
+import React, { useEffect, useRef, useState } from 'react'
+import BackgroundService from 'react-native-background-actions'
+import MyRustModule from '@/modules/my-rust-module/src/MyRustModule'
+
+async function sleep(time: number): Promise<void> {
+  new Promise<void>((resolve) => setTimeout(() => resolve(), time))
+}
+
+const options = {
+  taskName: 'BlockMesh Network',
+  taskTitle: 'BlockMesh Network Node',
+  taskDesc: 'Running BlockMesh Network node',
+  taskIcon: {
+    name: 'ic_launcher',
+    type: 'mipmap'
+  },
+  color: '#ff00ff',
+  parameters: {
+    delay: 1000
+  }
+}
 
 export default function HomeScreen() {
   const emailRef = useRef()
@@ -15,6 +35,46 @@ export default function HomeScreen() {
   const [password, setPassword] = useState(storage.password)
   const [url, setUrl] = useState(storage.url)
 
+  useEffect(() => {
+    setEmail(storage.email)
+    setPassword(storage.password)
+    setUrl(storage.url)
+  }, [storage.email, storage.url, storage.password, storage.api_token])
+
+  async function run_lib(): Promise<void> {
+    await new Promise<void>(async (resolve): Promise<void> => {
+      MyRustModule.run_lib(url, email, password).then(() => {
+        console.log('run_lib finished')
+      }, () => {
+        console.log('run_lib error')
+      })
+      console.log('after run_lib')
+      resolve()
+    })
+  }
+
+  async function click() {
+    if (url === '' || email === '' || password === '') {
+      Alert.alert('Error', 'Please set URL/EMAIL/PASSWORD', [
+        {
+          text: 'OK',
+          style: 'cancel'
+        }
+      ])
+    } else {
+      await BackgroundService.start(run_lib, options)
+    }
+  }
+
+  async function stop() {
+    await BackgroundService.stop()
+    await MyRustModule.stop_lib()
+    Alert.alert('INFO', 'Node stopped', [
+      {
+        text: 'OK'
+      }
+    ])
+  }
 
   return (
     <ParallaxScrollView
@@ -58,12 +118,20 @@ export default function HomeScreen() {
           autoCapitalize={false}
         />
         <Button
-          title="Save"
+          title="Run"
           color="#f194ff"
           onPress={() => {
             storage.setEmail(email)
             storage.setPassword(password)
             storage.setUrl(url)
+            click()
+          }}
+        />
+        <Button
+          title="Stop"
+          color="#f194ff"
+          onPress={() => {
+            stop()
           }}
         />
       </ThemedView>

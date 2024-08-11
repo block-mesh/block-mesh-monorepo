@@ -7,12 +7,14 @@ version.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+jni = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 block-mesh-common = { path = "../block-mesh-common", features = ["http", "cli", "app-config"] }
 tokio = { workspace = true, features = ["full"] }
 serde = { workspace = true, features = ['derive'] }
 serde_json = { workspace = true }
 reqwest = { workspace = true, features = [
+  "blocking",
   "json",
   "hickory-dns"
 ] }
@@ -24,6 +26,8 @@ speed-test = { path = "../speed-test" }
 logger-general = { path = "../logger-general" }
 futures-util = { workspace = true }
 rayon = { workspace = true }
+lazy_static = { workspace = true }
+once_cell = { workspace = true }
 
 [lib]
-crate-type = ["cdylib", "rlib"]
+crate-type = ["cdylib", "rlib", "staticlib"]
