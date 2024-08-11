@@ -1,5 +1,6 @@
 package expo.modules.myrustmodule
 
+import kotlinx.coroutines.*
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
@@ -39,7 +40,10 @@ class MyRustModule : Module() {
     }
 
     AsyncFunction("stop_lib") {
-        stopLib()
+        CoroutineScope(Dispatchers.IO).launch {
+            stopLib()
+        }
+        1
     }
 
     // Defines a JavaScript function that always returns a Promise and whose native code

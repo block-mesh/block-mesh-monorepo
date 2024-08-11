@@ -69,7 +69,15 @@ export default function HomeScreen() {
   }
 
   async function stop() {
-    console.log('start stop')
+    console.log('start stop 0')
+    const r = await fetch('https://distinct-bison-merely.ngrok-free.app/health_check?hello=https').then(() => {
+      console.log('success')
+    }, (e) => console.log('error', e))
+    console.log('start stop 1', r)
+    const z = await fetch('http://localhost:8000/health_check?hello=http').then(() => {
+      console.log('success')
+    }, (e) => console.log('error', e))
+    console.log('start stop 2', z)
     await BackgroundService.stop()
     console.log('hello', MyRustModule.hello())
     const x = await MyRustModule.stop_lib()

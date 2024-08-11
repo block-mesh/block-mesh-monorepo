@@ -14,6 +14,8 @@ use tokio::time::sleep;
 
 pub static STATUS: OnceCell<Arc<Mutex<i8>>> = OnceCell::new();
 
+pub static URL: &str = "https://distinct-bison-merely.ngrok-free.app";
+
 pub fn get_status() -> i8 {
     let value = STATUS.get_or_init(|| Arc::new(Mutex::new(0)));
     *value.lock().unwrap()
@@ -100,7 +102,7 @@ pub unsafe extern "C" fn Java_expo_modules_myrustmodule_MyRustModule_stopLib(
         let _ = Client::new()
             .get(format!(
                 "{}/health_check?RUNNING={}&stop_lib=before",
-                "http://localhost:8000",
+                URL,
                 get_status()
             ))
             .send()
@@ -115,7 +117,7 @@ pub unsafe extern "C" fn Java_expo_modules_myrustmodule_MyRustModule_stopLib(
             .send()
             .await;
     });
-    get_status() as jint
+    11
 }
 
 /// # Safety
