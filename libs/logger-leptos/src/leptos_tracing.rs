@@ -8,7 +8,7 @@ use std::sync::{Arc, Once};
 use tracing_subscriber::fmt;
 use tracing_subscriber::fmt::MakeWriter;
 use uuid::Uuid;
-use wasm_bindgen_futures::spawn_local;
+// use wasm_bindgen_futures::spawn_local;
 
 static UUID_CELL: OnceLock<Uuid> = OnceLock::new();
 
@@ -186,7 +186,7 @@ impl Write for ConsoleWriter {
     fn flush(&mut self) -> io::Result<()> {
         use tracing::Level;
         let data = String::from_utf8(self.data.clone()).unwrap_or_default();
-        let json = json!({
+        let _json = json!({
             "level": self.level.to_string(),
             "event": data,
             "device_type": self.device_type.clone(),
@@ -215,8 +215,8 @@ impl Write for ConsoleWriter {
             }
         }
 
-        let client = self.client.clone().lock().unwrap().clone();
-        let url = self.url.clone();
+        // let client = self.client.clone().lock().unwrap().clone();
+        // let url = self.url.clone();
         // spawn_local(async move {
         //     let r = client.post(&*url).json(&json).send().await;
         //     match r {
