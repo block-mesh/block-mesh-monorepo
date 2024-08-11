@@ -4,6 +4,7 @@ use crate::envars::app_env_var::AppEnvVar;
 use crate::envars::env_var;
 use crate::envars::get_env_var_or_panic::get_env_var_or_panic;
 use crate::middlewares::authentication::{authentication_layer, Backend};
+use crate::routes::twitter::context::Oauth2Ctx;
 use crate::startup::routers::api_router::get_api_router;
 use crate::startup::routers::leptos_router::get_leptos_router;
 use crate::startup::routers::static_auth_router::get_static_auth_router;
@@ -24,11 +25,13 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio::sync::mpsc::UnboundedSender;
+use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
 use tower_http::timeout::TimeoutLayer;
+use twitter_v2::authorization::Oauth2Client;
 
 pub struct Application {
     app: Router,
@@ -109,6 +112,19 @@ impl Application {
 
         let leptos_router = get_leptos_router();
 
+        let oauth_ctx = Oauth2Ctx {
+            client: Oauth2Client::new(
+                std::env::var("TWITTER_CLIENT_ID").expect("could not find CLIENT_ID"),
+                std::env::var("TWITTER_CLIENT_SECRET").expect("could not find CLIENT_SECRET"),
+                format!("https://distinct-bison-merely.ngrok-free.app/twitter/callback")
+                    .parse()
+                    .unwrap(),
+            ),
+            verifier: None,
+            state: None,
+            token: None,
+        };
+
         let application_base_url = ApplicationBaseUrl(settings.application.base_url.clone());
         let backend = Router::new()
             .nest("/", auth_router)
@@ -133,6 +149,7 @@ impl Application {
             .nest("/", leptos_router)
             .nest("/", backend)
             .nest("/", leptos_pkg)
+            .layer(Extension(Arc::new(Mutex::new(oauth_ctx))))
             .layer(auth_layer);
 
         let listener = TcpListener::bind(settings.application.address())

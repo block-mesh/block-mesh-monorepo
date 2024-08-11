@@ -217,13 +217,13 @@ impl Write for ConsoleWriter {
 
         let client = self.client.clone().lock().unwrap().clone();
         let url = self.url.clone();
-        spawn_local(async move {
-            let r = client.post(&*url).json(&json).send().await;
-            match r {
-                Ok(_) => {}
-                Err(e) => log_error!("Error sending logs: {:?}", e),
-            }
-        });
+        // spawn_local(async move {
+        //     let r = client.post(&*url).json(&json).send().await;
+        //     match r {
+        //         Ok(_) => {}
+        //         Err(e) => log_error!("Error sending logs: {:?}", e),
+        //     }
+        // });
         Ok(())
     }
 }

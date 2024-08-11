@@ -4,6 +4,7 @@ use std::fmt::{Display, Formatter};
 use std::sync::OnceLock;
 
 pub const DEV_ENV: [&str; 3] = ["dev", "development", "local"];
+pub const BLOCKMESH_TWITTER_USER_ID: u64 = 1766124448778784768;
 
 pub fn env_url() -> String {
     static APP_ENVIRONMENT: OnceLock<String> = OnceLock::new();
