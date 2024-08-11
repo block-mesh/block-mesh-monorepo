@@ -45,24 +45,29 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
   useEffect(() => {
     (async () => {
       const run_lib = await getData(RUN_LIB)
+      console.log('run_lib', run_lib)
       if (run_lib) {
         setRunLibInternal(run_lib)
       }
       const e = await getData(EMAIL)
+      console.log('email', e)
       if (e) {
         setEmailInternal(e)
       }
       const token = await getData(API_TOKEN)
+      console.log('token', token)
       if (token) {
         setApiTokenInternal(token)
       }
       const url = await getData(BLOCKMESH_URL)
+      console.log('url', url)
       if (url) {
         setUrlInternal(url)
       }
       const password = await getData(PASSWORD)
-      if (url) {
-        setPasswordInternal(url)
+      console.log('password', password)
+      if (password) {
+        setPasswordInternal(password)
       }
     })()
   }, [])

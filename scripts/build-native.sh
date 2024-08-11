@@ -40,6 +40,9 @@ if [ "${BUILD_IOS}" == "true" ]; then
   && cbindgen --only-target-dependencies --lang c --crate blockmesh-cli --output "${ROOT}/libs/react-native-app/headers/blockmesh-cli.h" \
   && cd "${_PWD}" || exit 1
 
+  ensure cp "${ROOT}/target/aarch64-apple-ios/release/${LIB_NAME}.a" "${ROOT}/libs/react-native-app/modules/my-rust-module/ios/rust"
+  ensure cp "${ROOT}/libs/react-native-app/headers/blockmesh-cli.h" "${ROOT}/libs/react-native-app/modules/my-rust-module/ios/rust"
+
   ensure cd "${ROOT}/libs/react-native-app" \
   && ensure rm -fr "${ROOT}/libs/react-native-app/blockmesh-cli.xcframework" \
   && ensure xcodebuild -create-xcframework \
