@@ -1,4 +1,3 @@
-use crate::login_mode::login_mode;
 use chrono::Utc;
 use std::os::raw::c_char;
 use std::sync::{Arc, Mutex};
@@ -50,8 +49,8 @@ pub unsafe extern "C" fn Java_expo_modules_myrustmodule_MyRustModule_runLib(
 ) -> jint {
     // let runtime = create_current_thread_runtime();
     let url: String = jstring_to_str!(&url, env, "url");
-    let email: String = jstring_to_str!(&email, env, "email");
-    let password: String = jstring_to_str!(&password, env, "password");
+    let _email: String = jstring_to_str!(&email, env, "email");
+    let _password: String = jstring_to_str!(&password, env, "password");
     // runtime.block_on(async {
     //     let _ = login_mode(&url, &email, &password).await;
     // });
