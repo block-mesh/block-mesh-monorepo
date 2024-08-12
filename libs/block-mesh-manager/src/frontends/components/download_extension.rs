@@ -17,8 +17,8 @@ pub fn DownloadExtension() -> impl IntoView {
     let logged_in = WebAppContext::is_logged_in();
     let extension_installed = create_rw_signal(false);
 
-    create_effect(move |_| match async_data.get() {
-        Some(Some(response)) => {
+    create_effect(move |_| {
+        if let Some(Some(response)) = async_data.get() {
             if response
                 .calls_to_action
                 .iter()
@@ -27,7 +27,6 @@ pub fn DownloadExtension() -> impl IntoView {
                 extension_installed.set(true);
             }
         }
-        _ => {}
     });
     let submit = create_action(move |input: &String| {
         let input = input.clone();
