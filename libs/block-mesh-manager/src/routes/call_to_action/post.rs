@@ -26,7 +26,8 @@ pub async fn handler(
     .await
     .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;
-    Ok(Redirect::to(
-        RoutesEnum::Static_Auth_Dashboard.to_string().as_str(),
-    ))
+    Ok(Redirect::to(&format!(
+        "/ui{}",
+        RoutesEnum::Static_Auth_Dashboard.to_string().as_str()
+    )))
 }

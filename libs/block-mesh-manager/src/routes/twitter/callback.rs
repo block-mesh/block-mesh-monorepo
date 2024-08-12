@@ -124,14 +124,14 @@ pub async fn callback(
             Ok(NotificationRedirect::redirect(
                 "Success",
                 "Twitter perk added",
-                RoutesEnum::Static_Auth_Dashboard.to_string().as_str(),
+                &format!("/ui{}", RoutesEnum::Static_Auth_Dashboard),
             ))
         } else {
             Ok(Error::redirect(
                 500,
                 "Failed verify Twitter account",
                 "Failed verify Twitter account, please contact support",
-                RoutesEnum::Static_Auth_Dashboard.to_string().as_str(),
+                &format!("/ui{}", RoutesEnum::Static_Auth_Dashboard),
             ))
         }
     } else {
@@ -139,7 +139,7 @@ pub async fn callback(
             500,
             "ERROR",
             "Failed verify Twitter account, please contact support",
-            RoutesEnum::Static_Auth_Dashboard.to_string().as_str(),
+            &format!("/ui{}", RoutesEnum::Static_Auth_Dashboard),
         ))
     }
 }
