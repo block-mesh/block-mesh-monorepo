@@ -4,10 +4,11 @@ use tracing::Level;
 use uuid::Uuid;
 
 use block_mesh_common::interfaces::server_api::{
-    DailyStatForDashboard, DashboardResponse, PerkUI, Referral,
+    CallToActionUI, DailyStatForDashboard, DashboardResponse, PerkUI, Referral,
 };
 
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
+use crate::database::call_to_action::get_user_calls_to_action::get_user_call_to_action;
 use crate::database::daily_stat::get_daily_stats_by_user_id::get_daily_stats_by_user_id;
 use crate::database::invite_code::get_number_of_users_invited::get_number_of_users_invited;
 use crate::database::invite_code::get_user_latest_invite_code::get_user_latest_invite_code;
@@ -64,6 +65,7 @@ pub async fn dashboard_data_extractor(
     } else {
         false
     };
+    let calls_to_action = get_user_call_to_action(&mut transaction, user_id).await?;
     let perks = get_user_perks(&mut transaction, user_id).await?;
     let daily_stats = get_daily_stats_by_user_id(&mut transaction, &user_id)
         .await?
@@ -103,6 +105,14 @@ pub async fn dashboard_data_extractor(
 
     transaction.commit().await.map_err(Error::from)?;
     Ok(DashboardResponse {
+        calls_to_action: calls_to_action
+            .into_iter()
+            .map(|i| CallToActionUI {
+                id: i.id,
+                name: i.name.to_string(),
+                status: i.status,
+            })
+            .collect(),
         verified_email: user.verified_email,
         referrals: referrals
             .into_iter()

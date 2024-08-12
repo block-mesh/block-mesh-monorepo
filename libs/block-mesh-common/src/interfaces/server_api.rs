@@ -204,6 +204,7 @@ pub struct DashboardResponse {
     pub connected: bool,
     pub daily_stats: Vec<DailyStatForDashboard>,
     pub perks: Vec<PerkUI>,
+    pub calls_to_action: Vec<CallToActionUI>,
     pub referrals: Vec<Referral>,
     pub verified_email: bool,
 }
@@ -213,6 +214,13 @@ pub struct PerkUI {
     pub id: Uuid,
     pub name: String,
     pub multiplier: f64,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
+pub struct CallToActionUI {
+    pub id: Uuid,
+    pub name: String,
+    pub status: bool,
 }
 
 #[derive(Default, Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -259,4 +267,10 @@ pub struct Referral {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EditInviteCodeForm {
     pub new_invite_code: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CallToActionForm {
+    pub name: String,
+    pub status: bool,
 }

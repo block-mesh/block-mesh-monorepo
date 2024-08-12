@@ -28,7 +28,7 @@ pub fn EditInviteCode() -> impl IntoView {
         let origin = window().origin();
         let client = Client::new();
         let response = client
-            .post(format!("{}/edit_invite_code", origin))
+            .post(format!("{}{}", origin, RoutesEnum::Static_Auth_Edit_Invite))
             .form(&EditInviteCodeForm {
                 new_invite_code: new_invite_code.get_untracked(),
             })
