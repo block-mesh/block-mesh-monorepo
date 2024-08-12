@@ -117,7 +117,7 @@ pub async fn callback(
                 user_id.unwrap(),
                 PerkName::Twitter,
                 1.0,
-                1_000.0,
+                500.0,
             )
             .await?;
             transaction.commit().await.map_err(Error::from)?;
