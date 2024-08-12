@@ -3,7 +3,9 @@ use sqlx::PgPool;
 use tracing::Level;
 use uuid::Uuid;
 
-use block_mesh_common::interfaces::server_api::{DailyStatForDashboard, DashboardResponse, PerkUI};
+use block_mesh_common::interfaces::server_api::{
+    DailyStatForDashboard, DashboardResponse, PerkUI, Referral,
+};
 
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
 use crate::database::daily_stat::get_daily_stats_by_user_id::get_daily_stats_by_user_id;
@@ -16,6 +18,7 @@ use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::utils::points::calc_points;
+use regex::Regex;
 
 pub async fn dashboard_data_extractor(
     pool: &PgPool,
@@ -101,7 +104,19 @@ pub async fn dashboard_data_extractor(
     transaction.commit().await.map_err(Error::from)?;
     Ok(DashboardResponse {
         verified_email: user.verified_email,
-        referrals,
+        referrals: referrals
+            .into_iter()
+            .map(|i| Referral {
+                created_at: i.created_at,
+                verified_email: i.verified_email,
+                email: {
+                    let s: Vec<&str> = i.email.split("@").collect();
+                    let re = Regex::new(r"[A-Za-z]").unwrap();
+                    let result = re.replace_all(s[0], "x");
+                    format!("{}@{}", result, s[1])
+                },
+            })
+            .collect(),
         upload: upload.value.as_f64().unwrap_or_default(),
         download: download.value.as_f64().unwrap_or_default(),
         latency: latency.value.as_f64().unwrap_or_default(),

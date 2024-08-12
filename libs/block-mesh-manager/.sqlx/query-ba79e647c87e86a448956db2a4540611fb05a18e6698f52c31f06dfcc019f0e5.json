@@ -1,0 +1,24 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        WITH\n            extant AS (\n                SELECT id FROM users_ip WHERE user_id = $2 AND ip_id = $3\n            ),\n            inserted AS (\n                INSERT INTO users_ip (id, user_id, ip_id)\n                SELECT $1, $2, $3\n                WHERE NOT EXISTS (SELECT FROM extant)\n                RETURNING id\n            )\n        SELECT id FROM inserted\n        UNION ALL\n        SELECT id FROM extant\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "ba79e647c87e86a448956db2a4540611fb05a18e6698f52c31f06dfcc019f0e5"
+}

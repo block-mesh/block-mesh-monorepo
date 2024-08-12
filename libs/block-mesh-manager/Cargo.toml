@@ -8,6 +8,7 @@ authors.workspace = true
 
 [dependencies]
 twitter-v2 = { workspace = true, optional = true }
+regex = { workspace = true }
 redis = { workspace = true, optional = true, features = ["tokio-comp", "tokio-rustls-comp", "tls-rustls-insecure"] }
 tower_governor = { workspace = true, optional = true }
 aws-config = { workspace = true, optional = true }
