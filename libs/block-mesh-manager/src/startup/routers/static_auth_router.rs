@@ -13,6 +13,10 @@ pub fn get_static_auth_router() -> Router<Arc<AppState>> {
             get(routes::logout::get::handler),
         )
         .route(
+            RoutesEnum::Static_Auth_Twitter_Login.to_string().as_str(),
+            get(routes::twitter::login::login),
+        )
+        .route(
             RoutesEnum::Static_Auth_Dashboard.to_string().as_str(),
             post(routes::dashboard::post::handler),
         );

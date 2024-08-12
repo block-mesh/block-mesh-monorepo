@@ -8,6 +8,7 @@ use sqlx::PgPool;
 
 use crate::database::perks::add_perk_to_user::add_perk_to_user;
 use crate::database::user::update_user_wallet::update_user_wallet;
+use crate::domain::perk::PerkName;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use block_mesh_common::interfaces::server_api::{ConnectWalletRequest, ConnectWalletResponse};
@@ -26,7 +27,7 @@ pub async fn handler(
     let message = body.message.as_bytes();
     match signature.verify(pubkey.as_ref(), message) {
         true => {
-            add_perk_to_user(&mut transaction, user.id).await?;
+            add_perk_to_user(&mut transaction, user.id, PerkName::Backpack, 1.1, 0.0).await?;
             update_user_wallet(&mut transaction, user.id, body.pubkey).await?
         }
         false => return Err(Error::SignatureMismatch),

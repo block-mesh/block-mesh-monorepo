@@ -65,12 +65,11 @@ pub async fn dashboard_data_extractor(
         false
     };
     let perks = get_user_perks(&mut transaction, user_id).await?;
-    let perks_multipliers = perks.iter().map(|i| i.multiplier.clone()).collect();
     let daily_stats = get_daily_stats_by_user_id(&mut transaction, &user_id)
         .await?
         .into_iter()
         .map(|i| {
-            let points = calc_points(i.uptime, i.tasks_count, &perks_multipliers);
+            let points = calc_points(i.uptime, i.tasks_count, &perks);
             DailyStatForDashboard {
                 tasks_count: i.tasks_count,
                 uptime: i.uptime,
@@ -80,7 +79,7 @@ pub async fn dashboard_data_extractor(
         })
         .rev()
         .collect();
-    let points = calc_points(overall_uptime, overall_task_count, &perks_multipliers);
+    let points = calc_points(overall_uptime, overall_task_count, &perks);
     let download = get_or_create_aggregate_by_user_and_name_no_transaction(
         &mut transaction,
         AggregateName::Download,
