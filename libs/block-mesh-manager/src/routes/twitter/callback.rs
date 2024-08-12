@@ -97,6 +97,9 @@ pub async fn callback(
     }
 
     let mut ctx = ctx.lock().await;
+    if ctx.user_id.is_none() || ctx.user_nonce.is_none() {
+        return Err(Error::InternalServer);
+    }
     let user_id = ctx.user_id;
     ctx.state = None;
     ctx.user_id = None;
