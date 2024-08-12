@@ -114,15 +114,18 @@ impl Application {
 
         let oauth_ctx = Oauth2Ctx {
             client: Oauth2Client::new(
-                std::env::var("TWITTER_CLIENT_ID").expect("could not find CLIENT_ID"),
-                std::env::var("TWITTER_CLIENT_SECRET").expect("could not find CLIENT_SECRET"),
-                format!("https://distinct-bison-merely.ngrok-free.app/twitter/callback")
+                env::var("TWITTER_CLIENT_ID").expect("could not find CLIENT_ID"),
+                env::var("TWITTER_CLIENT_SECRET").expect("could not find CLIENT_SECRET"),
+                env::var("TWITTER_CALLBACK_URL")
+                    .expect("could not find TWITTER_CALLBACK_URL")
                     .parse()
                     .unwrap(),
             ),
             verifier: None,
             state: None,
             token: None,
+            user_id: None,
+            user_nonce: None,
         };
 
         let application_base_url = ApplicationBaseUrl(settings.application.base_url.clone());

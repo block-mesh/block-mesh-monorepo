@@ -13,21 +13,25 @@ use uuid::Uuid;
 pub(crate) async fn add_perk_to_user(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,
+    name: PerkName,
+    multiplier: f64,
+    one_time_bonus: f64,
 ) -> anyhow::Result<()> {
     let now = Utc::now();
     let id = Uuid::new_v4();
     let _ = sqlx::query!(
         r#"
         INSERT INTO perks
-        (id, user_id, created_at, name, multiplier)
+        (id, user_id, created_at, name, multiplier, one_time_bonus)
         VALUES
-        ($1, $2, $3, $4, $5)
+        ($1, $2, $3, $4, $5, $6)
         "#,
         id,
         user_id,
         now,
-        PerkName::Backpack.to_string(),
-        1.1
+        name.to_string(),
+        multiplier,
+        one_time_bonus
     )
     .execute(&mut **transaction)
     .await?;

@@ -14,7 +14,6 @@ pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Json(body): Json<DashboardRequest>,
 ) -> Result<Json<DashboardResponse>, Error> {
-    tracing::info!("HEREHREHREH");
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let api_token = find_token(&mut transaction, &body.api_token)
         .await?

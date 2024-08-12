@@ -70,26 +70,10 @@ pub fn get_static_un_auth_router() -> Router<Arc<AppState>> {
                 .post(routes::register::register_post::handler),
         )
         .route(
-            RoutesEnum::Static_UnAuth_Twitter_Login.to_string().as_str(),
-            get(routes::twitter::login::login),
-        )
-        .route(
             RoutesEnum::Static_UnAuth_Twitter_Callback
                 .to_string()
                 .as_str(),
             get(routes::twitter::callback::callback),
-        )
-        .route(
-            RoutesEnum::Static_UnAuth_Twitter_Tweets
-                .to_string()
-                .as_str(),
-            get(routes::twitter::tweets::tweets),
-        )
-        .route(
-            RoutesEnum::Static_UnAuth_Twitter_Following
-                .to_string()
-                .as_str(),
-            get(routes::twitter::following::following),
         )
         .route(
             RoutesEnum::Static_UnAuth_HealthCheck.to_string().as_str(),
