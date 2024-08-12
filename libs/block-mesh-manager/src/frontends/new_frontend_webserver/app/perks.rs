@@ -41,7 +41,6 @@ pub fn Perks() -> impl IntoView {
         }
     });
     let click_button = move || {
-        // https://chromewebstore.google.com/detail/backpack/aflkmfhebedbjioipglgcbcmnbpgliof
         spawn_local(async move {
             if !button_enable.get_untracked() {
                 notifications.set_error("Backpack already connected");
