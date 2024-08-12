@@ -22,17 +22,16 @@ pub fn NewDashboard() -> impl IntoView {
     let async_data = WebAppContext::get_dashboard_data();
     let show_download_extension = create_rw_signal(true);
 
-    create_effect(move |_| match async_data.get() {
-        Some(Some(response)) => {
+    create_effect(move |_| {
+        if let Some(Some(response)) = async_data.get() {
             if response
                 .calls_to_action
                 .iter()
-                .any(|i| i.name == "install_extension" && i.status == true)
+                .any(|i| i.name == "install_extension" && i.status)
             {
                 show_download_extension.set(false);
             }
         }
-        _ => {}
     });
 
     let verified_email = Signal::derive(move || {
