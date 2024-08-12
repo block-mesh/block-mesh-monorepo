@@ -94,7 +94,7 @@ pub fn Perks() -> impl IntoView {
                 >
                     <TwitterIcon/>
                     {move || {
-                        if perks.get().iter().find(|i| i.name == "twitter").is_some() { "Twitter Connected" } else { "Connect Twitter" }
+                        if perks.get().iter().any(|i| i.name == "twitter") { "Twitter Connected" } else { "Connect Twitter" }
                     }}
                 </a>
             </div>
