@@ -148,6 +148,14 @@ pub fn NewDashboard() -> impl IntoView {
         };
         format!("{:.1}", v)
     });
+    let user_ips = Signal::derive(move || {
+        if let Some(Some(data)) = async_data.get() {
+            data.user_ips.clone()
+        } else {
+            Vec::new()
+        }
+    });
+    
 
     view! {
         <ApplicationLayout>
@@ -230,6 +238,31 @@ pub fn NewDashboard() -> impl IntoView {
                         value_scale="ms"
                     />
                 </div>
+                <Subheading>Networks</Subheading>
+                <div class="grid gap-8 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
+                    {move || user_ips.get().iter().map(|ip_info| {
+                        view! {
+                            <div class="bg-gray-100 p-4 rounded-lg shadow flex items-center gap-4">
+                                {if let Some(country) = ip_info.country.clone() {
+                                    if country != "unknown" {
+                                        view! {
+                                            <img class="rounded-full" 
+                                                src=format!("https://flagsapi.com/{}/shiny/32.png", country) 
+                                                alt=format!("{} flag", country)
+                                            />
+                                        }
+                                    } else {
+                                        view! { <></> }
+                                    }
+                                } else {
+                                    view! { <></> }
+                                }}
+                                <p class="text-lg font-medium">{ip_info.ip.clone()}</p>
+                            </div>
+                        }
+                    }).collect::<Vec<_>>()}
+                </div>
+            
                 <Subheading>Daily points earnings</Subheading>
                 <BarChart/>
             </Suspense>

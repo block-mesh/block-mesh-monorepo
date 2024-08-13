@@ -207,6 +207,7 @@ pub struct DashboardResponse {
     pub calls_to_action: Vec<CallToActionUI>,
     pub referrals: Vec<Referral>,
     pub verified_email: bool,
+    pub user_ips: Vec<UserIpInfo>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]

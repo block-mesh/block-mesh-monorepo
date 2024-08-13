@@ -16,6 +16,7 @@ use crate::database::invite_code::get_user_referrals::get_user_referrals;
 use crate::database::perks::get_user_perks::get_user_perks;
 use crate::database::uptime_report::get_user_uptimes::get_user_uptimes;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
+use crate::database::users_ip::get_user_ips::get_user_ips;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::utils::points::calc_points;
@@ -103,6 +104,12 @@ pub async fn dashboard_data_extractor(
     )
     .await?;
 
+    let user_ips = get_user_ips(
+        &mut transaction, 
+        &user_id
+    )
+    .await?;
+
     transaction.commit().await.map_err(Error::from)?;
     Ok(DashboardResponse {
         calls_to_action: calls_to_action
@@ -145,5 +152,6 @@ pub async fn dashboard_data_extractor(
                 multiplier: i.multiplier,
             })
             .collect(),
+        user_ips,    
     })
 }
