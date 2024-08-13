@@ -218,7 +218,10 @@ pub async fn submit_task(
         colo: Option::from(metadata.colo.clone()),
         response_time: Option::from(response_time),
     };
-    let response = reqwest::Client::new()
+    let response = ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .build()
+        .unwrap_or_default()
         .post(format!("{}/api/submit_task", base_url))
         .query(&query)
         .body(response_raw)

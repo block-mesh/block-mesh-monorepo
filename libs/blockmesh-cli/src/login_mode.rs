@@ -36,7 +36,7 @@ pub async fn login_mode(url: &str, email: &str, password: &str) -> anyhow::Resul
     let u = url.clone();
     let e = email.clone();
     let a = api_token.clone();
-    let task_poller = tokio::spawn(async move {
+    let task_poller_task = tokio::spawn(async move {
         loop {
             let _ = task_poller(&u, e.as_ref(), a.as_ref()).await;
             tokio::time::sleep(Duration::from_secs(30)).await;
@@ -45,7 +45,7 @@ pub async fn login_mode(url: &str, email: &str, password: &str) -> anyhow::Resul
     let u = url.clone();
     let e = email.clone();
     let a = api_token.clone();
-    let uptime_poller = tokio::spawn(async move {
+    let uptime_poller_task = tokio::spawn(async move {
         loop {
             let _ = report_uptime(&u, e.as_ref(), a.as_ref()).await;
             tokio::time::sleep(Duration::from_secs(30)).await;
@@ -54,7 +54,7 @@ pub async fn login_mode(url: &str, email: &str, password: &str) -> anyhow::Resul
     let u = url.clone();
     let e = email.clone();
     let a = api_token.clone();
-    let bandwidth_poller = tokio::spawn(async move {
+    let bandwidth_poller_task = tokio::spawn(async move {
         loop {
             let _ = submit_bandwidth(&u, e.as_ref(), a.as_ref()).await;
             tokio::time::sleep(Duration::from_secs(30)).await;
@@ -62,9 +62,9 @@ pub async fn login_mode(url: &str, email: &str, password: &str) -> anyhow::Resul
     });
 
     tokio::select! {
-        o = task_poller => tracing::error!("task_poller failed {:?}", o),
-        o = uptime_poller => tracing::error!("uptime_poller failed {:?}", o),
-        o = bandwidth_poller => tracing::error!("bandwidth_poller failed {:?}", o)
+        o = task_poller_task => tracing::error!("task_poller failed {:?}", o),
+        o = uptime_poller_task => tracing::error!("uptime_poller failed {:?}", o),
+        o = bandwidth_poller_task => tracing::error!("bandwidth_poller failed {:?}", o)
     }
     Ok(ExitCode::SUCCESS)
 }
