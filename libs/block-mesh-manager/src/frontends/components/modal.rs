@@ -1,7 +1,7 @@
 use leptos::*;
 
 #[component]
-pub fn Modal(show: RwSignal<bool>, children: Children) -> impl IntoView {
+pub fn Modal(show: RwSignal<bool>, children: Children, show_close_button: bool) -> impl IntoView {
     let classes_1 = Signal::derive(move || {
         if show.get() {
             "ease-out duration-300 opacity-100"
@@ -45,16 +45,18 @@ pub fn Modal(show: RwSignal<bool>, children: Children) -> impl IntoView {
                     }>
                         <div>{children()}</div>
                         <div class="mt-5 sm:mt-6">
-                            <button
-                                type="button"
-                                on:click=move |_| {
-                                    show.set(false);
-                                }
+                            <Show when=move || show_close_button>
+                                <button
+                                    type="button"
+                                    on:click=move |_| {
+                                        show.set(false);
+                                    }
 
-                                class="border border-orange inline-flex w-full justify-center rounded-md  px-3 py-2 text-sm font-semibold text-off-white shadow-sm hover:bg-orange focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
-                            >
-                                Close
-                            </button>
+                                    class="border border-orange inline-flex w-full justify-center rounded-md  px-3 py-2 text-sm font-semibold text-off-white shadow-sm hover:bg-orange focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-orange"
+                                >
+                                    Close
+                                </button>
+                            </Show>
                         </div>
                     </div>
                 </div>

@@ -56,7 +56,7 @@ pub fn Referrals() -> impl IntoView {
 
     view! {
         <ApplicationLayout>
-            <Modal show=show_invite_code>
+            <Modal show=show_invite_code show_close_button=true>
                 <EditInviteCode/>
             </Modal>
             <div class="flex items-start justify-start gap-4">
