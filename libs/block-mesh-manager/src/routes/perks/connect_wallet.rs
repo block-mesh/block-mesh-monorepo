@@ -27,7 +27,15 @@ pub async fn handler(
     let message = body.message.as_bytes();
     match signature.verify(pubkey.as_ref(), message) {
         true => {
-            add_perk_to_user(&mut transaction, user.id, PerkName::Backpack, 1.1, 0.0).await?;
+            add_perk_to_user(
+                &mut transaction,
+                user.id,
+                PerkName::Backpack,
+                1.1,
+                0.0,
+                serde_json::from_str("{}").unwrap(),
+            )
+            .await?;
             update_user_wallet(&mut transaction, user.id, body.pubkey).await?
         }
         false => return Err(Error::SignatureMismatch),

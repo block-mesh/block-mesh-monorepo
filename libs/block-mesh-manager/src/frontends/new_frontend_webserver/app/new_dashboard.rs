@@ -151,8 +151,8 @@ pub fn NewDashboard() -> impl IntoView {
 
     view! {
         <ApplicationLayout>
-            <Modal show=show_download_extension>
-                <DownloadExtension/>
+            <Modal show=show_download_extension show_close_button=false>
+                <DownloadExtension show=show_download_extension/>
             </Modal>
             <Suspense fallback=move || view! {}>
                 <div class="flex items-start justify-start gap-4">

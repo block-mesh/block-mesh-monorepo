@@ -11,7 +11,7 @@ use leptos::*;
 use reqwest::Client;
 
 #[component]
-pub fn DownloadExtension() -> impl IntoView {
+pub fn DownloadExtension(show: RwSignal<bool>) -> impl IntoView {
     let notifications = expect_context::<NotificationContext>();
     let async_data = WebAppContext::get_dashboard_data();
     let logged_in = WebAppContext::is_logged_in();
@@ -57,6 +57,7 @@ pub fn DownloadExtension() -> impl IntoView {
                 }
                 Err(_) => notifications.set_error("Failed to install status updated"),
             }
+            show.set(false);
         }
     });
 
@@ -105,6 +106,7 @@ pub fn DownloadExtension() -> impl IntoView {
                                         submit.dispatch("download".parse().unwrap())
                                     }
                                 >
+
                                     <ChromeIcon/>
                                     Download Chrome extension and start earning
                                 </button>
@@ -117,6 +119,7 @@ pub fn DownloadExtension() -> impl IntoView {
                                         submit.dispatch("dismiss".parse().unwrap())
                                     }
                                 >
+
                                     Already installed the extension
                                 </button>
                             </div>

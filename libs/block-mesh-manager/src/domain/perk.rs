@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
@@ -74,4 +75,5 @@ pub struct Perk {
     pub multiplier: f64,
     pub one_time_bonus: f64,
     pub name: PerkName,
+    pub data: Value,
 }
