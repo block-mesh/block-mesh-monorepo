@@ -18,7 +18,7 @@ use crate::database::uptime_report::get_user_uptimes::get_user_uptimes;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
-use crate::utils::points::{calc_points, calc_points_daily, calc_total_points};
+use crate::utils::points::{calc_points_daily, calc_total_points};
 use regex::Regex;
 
 pub async fn dashboard_data_extractor(
