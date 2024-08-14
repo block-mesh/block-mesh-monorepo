@@ -18,7 +18,7 @@ use crate::database::uptime_report::get_user_uptimes::get_user_uptimes;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
-use crate::utils::points::calc_points;
+use crate::utils::points::{calc_points, calc_points_daily, calc_total_points};
 use regex::Regex;
 
 pub async fn dashboard_data_extractor(
@@ -71,7 +71,7 @@ pub async fn dashboard_data_extractor(
         .await?
         .into_iter()
         .map(|i| {
-            let points = calc_points(i.uptime, i.tasks_count, &perks);
+            let points = calc_points_daily(i.uptime, i.tasks_count, &perks);
             DailyStatForDashboard {
                 tasks_count: i.tasks_count,
                 uptime: i.uptime,
@@ -81,7 +81,7 @@ pub async fn dashboard_data_extractor(
         })
         .rev()
         .collect();
-    let points = calc_points(overall_uptime, overall_task_count, &perks);
+    let points = calc_total_points(overall_uptime, overall_task_count, &perks);
     let download = get_or_create_aggregate_by_user_and_name_no_transaction(
         &mut transaction,
         AggregateName::Download,
