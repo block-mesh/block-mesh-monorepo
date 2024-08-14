@@ -4,6 +4,7 @@ tmp_ext/firefox
 .wrangler
 tailwind.css
 .env
+.env.local
 .idea
 .dev.vars
 .vscode

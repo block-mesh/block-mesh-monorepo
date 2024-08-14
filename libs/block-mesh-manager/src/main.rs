@@ -4,40 +4,44 @@
 
 use cfg_if::cfg_if;
 
-cfg_if! { if #[cfg(feature = "ssr")] {
-    use std::env;
-    use block_mesh_manager::worker::db_agg::{db_agg, UpdateBulkMessage};
-    use logger_general::tracing::setup_tracing_stdout_only;
-    use std::time::Duration;
-    use reqwest::ClientBuilder;
-    use block_mesh_manager::worker::db_cleaner_cron::{db_cleaner_cron, EnrichIp};
-    use block_mesh_manager::worker::finalize_daily_cron::finalize_daily_cron;
-    use block_mesh_common::feature_flag_client::get_all_flags;
-    use tokio::task::JoinHandle;
-    use block_mesh_manager::worker::joiner::joiner_loop;
-    #[cfg(not(target_env = "msvc"))]
-    use tikv_jemallocator::Jemalloc;
-    #[cfg(not(target_env = "msvc"))]
-    #[global_allocator]
-    static GLOBAL: Jemalloc = Jemalloc;
-    use block_mesh_manager::configuration::get_configuration::get_configuration;
-    use block_mesh_manager::database::migrate::migrate;
-    use block_mesh_manager::emails::email_client::EmailClient;
-    use block_mesh_manager::envars::app_env_var::AppEnvVar;
-    use block_mesh_manager::envars::env_var::EnvVar;
-    use block_mesh_manager::envars::get_env_var_or_panic::get_env_var_or_panic;
-    use block_mesh_manager::envars::load_dotenv::load_dotenv;
-    use block_mesh_manager::startup::application::{AppState, Application};
-    use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
-    use block_mesh_manager::startup::report_exit::report_exit;
-    use block_mesh_manager::worker::rpc_cron::rpc_worker_loop;
-    use secret::Secret;
-    use std::sync::Arc;
-}}
+cfg_if! {
+    if #[cfg(feature = "ssr")] {
+        use std::env;
+        use block_mesh_manager::worker::db_agg::{ db_agg, UpdateBulkMessage };
+        use logger_general::tracing::setup_tracing_stdout_only;
+        use std::time::Duration;
+        use reqwest::ClientBuilder;
+        use block_mesh_manager::worker::db_cleaner_cron::{ db_cleaner_cron, EnrichIp };
+        use block_mesh_manager::worker::finalize_daily_cron::finalize_daily_cron;
+        use block_mesh_common::feature_flag_client::get_all_flags;
+        use tokio::task::JoinHandle;
+        use block_mesh_manager::worker::joiner::joiner_loop;
+        #[cfg(not(target_env = "msvc"))]
+        use tikv_jemallocator::Jemalloc;
+        #[cfg(not(target_env = "msvc"))]
+        #[global_allocator]
+        static GLOBAL: Jemalloc = Jemalloc;
+        use block_mesh_manager::configuration::get_configuration::get_configuration;
+        use block_mesh_manager::database::migrate::migrate;
+        use block_mesh_manager::emails::email_client::EmailClient;
+        use block_mesh_manager::envars::app_env_var::AppEnvVar;
+        use block_mesh_manager::envars::env_var::EnvVar;
+        use block_mesh_manager::envars::get_env_var_or_panic::get_env_var_or_panic;
+        use block_mesh_manager::envars::load_dotenv::load_dotenv;
+        use block_mesh_manager::startup::application::{ AppState, Application };
+        use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
+        use block_mesh_manager::startup::report_exit::report_exit;
+        use block_mesh_manager::worker::rpc_cron::rpc_worker_loop;
+        use block_mesh_manager::utils::ws::serve_ws;
+        use secret::Secret;
+        use std::sync::Arc;
+    }
+}
 
 #[cfg(feature = "ssr")]
 fn main() {
-    let _ = tokio::runtime::Builder::new_multi_thread()
+    let _ = tokio::runtime::Builder
+        ::new_multi_thread()
         .enable_all()
         .build()
         .unwrap()
@@ -60,17 +64,11 @@ async fn run() -> anyhow::Result<()> {
     let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(500);
     let (tx_sql_agg, rx_sql_agg) = tokio::sync::mpsc::channel::<UpdateBulkMessage>(500);
     let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::unbounded_channel::<EnrichIp>();
-    let client = ClientBuilder::new()
-        .timeout(Duration::from_secs(3))
-        .build()
-        .unwrap_or_default();
+    let client = ClientBuilder::new().timeout(Duration::from_secs(3)).build().unwrap_or_default();
 
     let flags = get_all_flags(&client).await?;
     let redis_client = redis::Client::open(env::var("REDIS_URL").unwrap()).unwrap();
-    let redis = redis_client
-        .get_multiplexed_async_connection()
-        .await
-        .unwrap();
+    let redis = redis_client.get_multiplexed_async_connection().await.unwrap();
 
     let app_state = Arc::new(AppState {
         email_client,
@@ -89,15 +87,16 @@ async fn run() -> anyhow::Result<()> {
     let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
     let db_cleaner_task = tokio::spawn(db_cleaner_cron(db_pool.clone(), cleaner_rx));
     let db_agg_task = tokio::spawn(db_agg(db_pool.clone(), rx_sql_agg));
-
+    let ws_task = tokio::spawn(serve_ws());
     tokio::select! {
         o = application_task => report_exit("API", o),
         o = rpc_worker_task =>  report_exit("RPC Background worker failed", o),
         o = joiner_task => report_exit("Joiner task failed", o),
         o = finalize_daily_stats_task => report_exit("Finalize daily task failed", o),
         o = db_cleaner_task => report_exit("DB cleaner task failed", o),
-        o = db_agg_task => report_exit("DB aggregator", o)
-    };
+        o = db_agg_task => report_exit("DB aggregator", o),
+        o = ws_task => report_exit("Ws server crashed", o)
+    }
     Ok(())
 }
 

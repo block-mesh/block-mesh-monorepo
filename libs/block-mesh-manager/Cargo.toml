@@ -75,6 +75,9 @@ console_error_panic_hook = { workspace = true }
 console_log = { workspace = true }
 log = { workspace = true }
 tailwind_fuse = { version = "0.3", features = ["variant"] }
+headers = { workspace = true }
+axum-extra = { workspace = true, features = ["typed-header"] }
+futures = { workspace = true }
 
 [dependencies.rand]
 workspace = true
