@@ -169,11 +169,7 @@ serde = { version = "1.0.164", features = ["derive"] }
 anyhow = { version = "1.0.71" }
 thiserror = { version = "1.0.40" }
 dotenv = { version = "0.15.0" }
-reqwest = { version = "0.12.5", default-features = false, features = [
-  "json",
-  "rustls-tls",
-  "cookies"
-] }
+reqwest = { version = "0.12.5", default-features = false }
 bytes = { version = "1.5.0" }
 argon2 = { version = "0.5.0", features = ["std"] }
 validator = { version = "0.16" }
