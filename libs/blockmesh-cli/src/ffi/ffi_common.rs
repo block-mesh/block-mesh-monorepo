@@ -36,6 +36,7 @@ pub fn create_current_thread_runtime() -> Arc<Runtime> {
 pub async fn debug_stop(url: &str) {
     let res = ClientBuilder::new()
         .use_rustls_tls()
+        .no_hickory_dns()
         .build()
         .unwrap()
         .get(format!(
@@ -49,6 +50,7 @@ pub async fn debug_stop(url: &str) {
 
     let _ = ClientBuilder::new()
         .use_rustls_tls()
+        .no_hickory_dns()
         .build()
         .unwrap()
         .get(format!(
