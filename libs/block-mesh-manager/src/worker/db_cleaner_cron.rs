@@ -13,7 +13,7 @@ use reqwest::{Client, ClientBuilder};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::time::Duration;
-use tokio::sync::mpsc::UnboundedReceiver;
+use tokio::sync::mpsc::Receiver;
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -25,7 +25,7 @@ pub struct EnrichIp {
 
 pub async fn db_cleaner_cron(
     pool: PgPool,
-    mut rx: UnboundedReceiver<EnrichIp>,
+    mut rx: Receiver<EnrichIp>,
 ) -> Result<(), anyhow::Error> {
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))

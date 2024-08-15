@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct GetTaskResponse {
     pub id: Uuid,
     pub url: String,
@@ -18,7 +18,7 @@ pub struct GetTaskRequest {
     pub api_token: Uuid,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct SubmitTaskRequest {
     pub email: String,
     pub api_token: Uuid,
@@ -36,7 +36,7 @@ pub struct ConfirmEmailRequest {
     pub token: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct ReportUptimeRequest {
     pub email: String,
     pub api_token: Uuid,
@@ -172,7 +172,7 @@ pub struct GetLatestInviteCodeResponse {
     pub invite_code: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ReportBandwidthRequest {
     pub email: String,
     pub api_token: Uuid,

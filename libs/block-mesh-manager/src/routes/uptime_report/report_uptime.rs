@@ -78,24 +78,18 @@ pub async fn handler(
             transaction.commit().await.map_err(Error::from)?;
 
             if daily_stat_opt.is_some() {
-                let _ = state
-                    .tx_sql_agg
-                    .send(UpdateBulkMessage {
-                        id: daily_stat_opt.unwrap().id,
-                        value: serde_json::Value::from(diff.num_seconds() as f64),
-                        table: Table::DailyStat,
-                    })
-                    .await;
+                let _ = state.tx_sql_agg.send(UpdateBulkMessage {
+                    id: daily_stat_opt.unwrap().id,
+                    value: serde_json::Value::from(diff.num_seconds() as f64),
+                    table: Table::DailyStat,
+                });
             }
             let sum = aggregate.value.as_f64().unwrap_or_default() + diff.num_seconds() as f64;
-            let _ = state
-                .tx_sql_agg
-                .send(UpdateBulkMessage {
-                    id: aggregate.id.0.unwrap_or_default(),
-                    value: serde_json::Value::from(sum),
-                    table: Table::Aggregate,
-                })
-                .await;
+            let _ = state.tx_sql_agg.send(UpdateBulkMessage {
+                id: aggregate.id.0.unwrap_or_default(),
+                value: serde_json::Value::from(sum),
+                table: Table::Aggregate,
+            });
         }
     }
 
