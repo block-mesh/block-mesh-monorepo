@@ -1,5 +1,6 @@
 use once_cell::sync::OnceCell;
-use reqwest::Client;
+use reqwest::ClientBuilder;
+use std::process;
 use std::sync::{Arc, Mutex};
 use tokio::runtime::{Builder, Runtime};
 
@@ -33,7 +34,11 @@ pub fn create_current_thread_runtime() -> Arc<Runtime> {
 }
 
 pub async fn debug_stop(url: &str) {
-    let _ = Client::new()
+    let res = ClientBuilder::new()
+        .use_rustls_tls()
+        .hickory_dns(true)
+        .build()
+        .unwrap()
         .get(format!(
             "{}/health_check?RUNNING={}&url={}",
             url,
@@ -42,4 +47,36 @@ pub async fn debug_stop(url: &str) {
         ))
         .send()
         .await;
+
+    let _ = ClientBuilder::new()
+        .use_rustls_tls()
+        .hickory_dns(true)
+        .build()
+        .unwrap()
+        .get(format!(
+            "{}/health_check?url={}pid={}&res={:?}",
+            LOCALHOST_2,
+            url,
+            process::id(),
+            res,
+        ))
+        .send()
+        .await;
+
+    // let res = ureq::get(&format!(
+    //     "{}/health_check?RUNNING={}&url={}",
+    //     url,
+    //     get_status(),
+    //     url
+    // ))
+    // .query_pairs(vec![("url", url)])
+    // .call();
+    // let _ = ureq::get(&format!(
+    //     "{}/health_check?RUNNING={}&url={}",
+    //     LOCALHOST_2,
+    //     get_status(),
+    //     url
+    // ))
+    // .query_pairs(vec![("url", url), ("res", &format!("{:?}", res))])
+    // .call();
 }

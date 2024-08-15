@@ -40,9 +40,10 @@ class MyRustModule : Module() {
     }
 
     AsyncFunction("stop_lib") {
-        CoroutineScope(Dispatchers.IO).launch {
-            stopLib()
-        }
+        stopLib()
+        // CoroutineScope(Dispatchers.IO).launch {
+        // stopLib()
+        // }
         1
     }
 

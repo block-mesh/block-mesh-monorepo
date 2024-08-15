@@ -56,9 +56,9 @@ pub unsafe extern "C" fn run_lib(
 pub unsafe extern "C" fn stop_lib() -> i8 {
     let runtime = create_current_thread_runtime();
     runtime.block_on(async {
-        debug_stop(CLOUDFLARE).await;
+        // debug_stop(CLOUDFLARE).await;
         debug_stop(NGROK).await;
-        debug_stop(LOCALHOST).await;
+        // debug_stop(LOCALHOST).await;
         debug_stop(LOCALHOST_2).await;
     });
     get_status()

@@ -70,10 +70,10 @@ pub unsafe extern "C" fn Java_expo_modules_myrustmodule_MyRustModule_stopLib(
 ) -> jint {
     let runtime = create_current_thread_runtime();
     runtime.block_on(async {
-        debug_stop(CLOUDFLARE).await;
+        // debug_stop(CLOUDFLARE).await;
         debug_stop(NGROK).await;
-        debug_stop(LOCALHOST).await;
-        debug_stop(LOCALHOST_2).await;
+        // debug_stop(LOCALHOST).await;
+        // debug_stop(LOCALHOST_2).await;
     });
     11
 }
