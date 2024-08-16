@@ -28,7 +28,7 @@ pub async fn ws_worker_tx(
             message_id: Uuid::new_v4(),
             email: None,
             device: None,
-            message: WsMessageTypes::SendUptimeToNode,
+            message: WsMessageTypes::SendUptimeFromServer,
         });
         sleep(Duration::from_secs(5)).await;
     }

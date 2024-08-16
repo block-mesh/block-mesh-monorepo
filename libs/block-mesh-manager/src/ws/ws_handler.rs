@@ -26,7 +26,7 @@ pub async fn ws_handler(
         .clone();
     let api_token = query
         .get("api_token")
-        .ok_or(Error::Auth("Missing email".to_string()))?;
+        .ok_or(Error::Auth("Missing token".to_string()))?;
     let mut c = state.redis.clone();
     let _: String = c
         .get(format!(

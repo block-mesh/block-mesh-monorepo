@@ -1,4 +1,5 @@
 use axum::extract::ws::Message;
+use block_mesh_common::interfaces::ws_api::{WsMessage, WsMessageTypes};
 use std::net::SocketAddr;
 use std::ops::ControlFlow;
 
@@ -6,7 +7,7 @@ use std::ops::ControlFlow;
 pub fn process_message(msg: &Message, who: SocketAddr) -> ControlFlow<(), ()> {
     match msg {
         Message::Text(t) => {
-            tracing::info!(">>> {who} sent str: {t:?}");
+            handle_ws_message(t, who);
         }
         Message::Binary(d) => {
             tracing::info!(">>> {} sent {} bytes: {:?}", who, d.len(), d);
@@ -36,4 +37,29 @@ pub fn process_message(msg: &Message, who: SocketAddr) -> ControlFlow<(), ()> {
         }
     }
     ControlFlow::Continue(())
+}
+
+fn handle_ws_message(s: &str, who: SocketAddr) {
+    match serde_json::from_str::<WsMessage>(s) {
+        Ok(message) => {
+            let message_id = message.message_id;
+            let device = message.device;
+            let email = message.email;
+            match message.message {
+                WsMessageTypes::SubmitUptimeToServer(report) => {
+                    // Whenever Client sends a message a receiver worker logs them already
+                    // tracing::info!(
+                    //     "Received Uptime Report from {}/{:?}: {:?}",
+                    //     who,
+                    //     email,
+                    //     report
+                    // );
+                }
+                _ => {}
+            }
+        }
+        Err(_) => {
+            tracing::info!("Invalid Message")
+        }
+    }
 }

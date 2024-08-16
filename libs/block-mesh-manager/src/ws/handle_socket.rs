@@ -1,9 +1,8 @@
 use crate::startup::application::AppState;
 use crate::ws::process_message::process_message;
-use axum::extract::ws::{CloseFrame, Message, WebSocket};
+use axum::extract::ws::{Message, WebSocket};
 use block_mesh_common::interfaces::ws_api::WsMessage;
 use futures::{SinkExt, StreamExt};
-use std::borrow::Cow;
 use std::net::SocketAddr;
 use std::sync::Arc;
 
@@ -63,13 +62,19 @@ pub async fn handle_socket(
     let rx_task = tokio::spawn(async move {
         while let Ok(msg) = rx.recv().await {
             if msg.email.is_some() && msg.email.clone().unwrap() == *email {
-                let _ = sender.send(Message::Text(serde_json::to_string(&msg).unwrap()));
+                if let Err(err) = sender
+                    .send(Message::Text(serde_json::to_string(&msg).unwrap()))
+                    .await
+                {
+                    tracing::error!("Couldn't send message to node");
+                }
             }
         }
     });
 
     tokio::select! {
-        o = recv_task => tracing::error!("Recv task dead")
+        o = recv_task => tracing::error!("Recv task dead"),
+        // o = rx_task => tracing::error!("Not Sending uptime requests")
     }
     // returning from the handler closes the websocket connection
     tracing::info!("Websocket context {who} destroyed");

@@ -15,10 +15,10 @@ pub struct WsMessage {
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub enum WsMessageTypes {
-    SendTaskToNode(GetTaskResponse),
-    SubmitTaskFromNode(SubmitTaskRequest),
-    SendBandwidthReportToNode,
-    SubmitForBandwidthReportFromNode(ReportBandwidthRequest),
-    SendUptimeToNode,
-    SubmitUptimeFromNode(ReportUptimeRequest),
+    SendTaskFromServer(GetTaskResponse),
+    SubmitTaskToServer(SubmitTaskRequest),
+    SendBandwidthReportFromServer,
+    SubmitForBandwidthReportToServer(ReportBandwidthRequest),
+    SendUptimeFromServer,
+    SubmitUptimeToServer(ReportUptimeRequest),
 }

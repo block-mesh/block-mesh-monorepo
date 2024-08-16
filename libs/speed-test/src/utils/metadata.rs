@@ -37,6 +37,21 @@ pub async fn fetch_metadata() -> anyhow::Result<Metadata> {
     })
 }
 
+pub fn fetch_metadata_blocking() -> anyhow::Result<Metadata> {
+    let url = &format!("{}/{}{}", BASE_URL, DOWNLOAD_URL, 0);
+    let headers = reqwest::blocking::get(url)
+        .map_err(|e| anyhow!("failed to get response - {}", e))?
+        .headers()
+        .to_owned();
+    Ok(Metadata {
+        city: extract_header_value(&headers, "cf-meta-city", "City N/A"),
+        country: extract_header_value(&headers, "cf-meta-country", "Country N/A"),
+        ip: extract_header_value(&headers, "cf-meta-ip", "IP N/A"),
+        asn: extract_header_value(&headers, "cf-meta-asn", "ASN N/A"),
+        colo: extract_header_value(&headers, "cf-meta-colo", "Colo N/A"),
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
