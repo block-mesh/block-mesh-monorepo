@@ -1,0 +1,161 @@
+.header-triangle {
+    position: absolute;
+    right: -50vw;
+    top: 48vh;
+    animation: slideTriangle 3s forwards 1.5s ease-out;
+}
+
+.header-triangle img {
+    position: relative;
+    scale: 1;
+}
+
+@keyframes slideTriangle {
+    0% {
+        right: -50vw;
+    }
+
+    40% {
+        right: 45vw;
+    }
+
+    80% {
+        right: 30vw;
+    }
+
+    100% {
+        right: 31vw;
+    }
+}
+
+@keyframes triangleFirstPart {
+    0% {
+        top: 148vh;
+        right: 55vw;  
+        rotate: 180deg;     
+    }
+
+    15% {
+        right: 61vw;  
+        rotate: 0;  
+    }
+
+    100% {
+        top: 48vh;
+        right: 31vw;
+    }
+}
+
+@keyframes triangleSecondPart {
+    0% {
+        top: 48vh;
+        right: 31vw;    
+    }
+
+    60% {
+        right: 61vw;  
+    }
+
+    75% {
+        right: 61vw;  
+        rotate: 180deg;  
+    }
+
+    90% {
+        top: 148vh;
+        right: 57vw;  
+        rotate: 180deg;  
+    }
+
+    100% {
+        top: 148vh;
+        right: 55vw;  
+        rotate: 180deg;  
+    }
+}
+
+@keyframes triangleSecondPartReverse {
+    0% {
+        top: 232vh;
+        right: 52vw;  
+        rotate: 180deg;  
+    }
+
+    10% {
+        right: 57vw;  
+        rotate: 180deg;  
+    }
+
+    60% {
+        right: 61vw;  
+    }
+
+    75% {
+        right: 61vw;  
+        rotate: 180deg;  
+    }
+
+    100% {
+        top: 148vh;
+        right: 55vw;  
+        rotate: 180deg;  
+    }
+}
+
+@keyframes triangleThirdPart {
+    0% {
+        top: 148vh;
+        right: 55vw;  
+        rotate: 180deg;  
+    }
+
+    100% {
+        top: 275vh;
+        right: 4vw;  
+        rotate: 90deg;
+    }
+}
+
+@keyframes triangleThirdPartReverse {
+    0% {
+        top: 332vh;
+        right: 52vw;  
+        rotate: 180deg; 
+    }
+
+    100% {
+        top: 275vh;
+        right: 4vw;  
+        rotate: 90deg;
+    }
+}
+
+@keyframes triangleFourthPart {
+    0% {
+        top: 275vh;
+        right: 4vw;  
+        rotate: 90deg;
+    }
+
+
+    100% {
+        top: 332vh;
+        right: 52vw;  
+        rotate: 180deg;  
+    }
+}
+
+
+@keyframes triangleFourthPartReverse {
+    0% {
+        top: 332vh;
+        right: 52vw;  
+        rotate: 180deg;  
+    }
+
+    100% {
+        top: 332vh;
+        right: 52vw;  
+        rotate: 180deg;  
+    }
+}

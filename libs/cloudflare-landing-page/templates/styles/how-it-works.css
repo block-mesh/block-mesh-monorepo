@@ -1,0 +1,420 @@
+.how-it-works-content {
+    display: flex;
+    justify-content: space-between;
+}
+
+.how-it-works-image {
+    position: relative;
+    left: 10%;
+    width: 50%;
+}
+
+.how-it-works-text {
+    position: relative;
+    opacity: 0;
+    left: -10%;
+    width: 50%;
+    position: relative;
+    z-index: 2;
+}
+
+.how-it-works-line {
+    position: absolute;
+    width: 20%;
+    opacity: 0;
+}
+
+.how-it-works-text img {
+    margin-top: 15%;
+}
+
+.how-it-works-line-1 {
+    rotate: 90deg;
+    left: 10%;
+    top: 16%;
+}
+
+.how-it-works-line-2 {
+    rotate: 30deg;
+    left: 38%;
+    top: 16%;
+}
+
+.how-it-works-line-3 {
+    rotate: 210deg;
+    left: 10%;
+}
+
+.how-it-works-line-4 {
+    rotate: 90deg;
+    left: 38%;
+}
+
+.how-it-works-line-5 {
+    rotate: 90deg;
+    left: 10%;
+    top: 21%;
+}
+
+.how-it-works-line-6 {
+    rotate: 30deg;
+    left: 38%;
+    top: 21%;
+}
+
+.how-it-works-line-7 {
+    rotate: 210deg;
+    left: 10%;
+    top: 5%;
+}
+
+.how-it-works-line-8 {
+    rotate: 90deg;
+    left: 38%;
+    top: 5%;
+}
+
+.how-it-works-line-9 {
+    rotate: 90deg;
+    left: 10%;
+    top: 26%;
+}
+
+.how-it-works-line-10 {
+    rotate: 30deg;
+    left: 38%;
+    top: 26%;
+}
+
+.how-it-works-line-11 {
+    rotate: 210deg;
+    left: 10%;
+    top: 10%;
+}
+
+.how-it-works-line-12 {
+    rotate: 90deg;
+    left: 38%;
+    top: 10%;
+}
+
+.how-it-works-line-13 {
+    rotate: 90deg;
+    left: 10%;
+    top: 31%;
+}
+
+.how-it-works-line-14 {
+    rotate: 30deg;
+    left: 38%;
+    top: 31%;
+}
+
+.how-it-works-line-15 {
+    rotate: 210deg;
+    left: 10%;
+    top: 15%;
+}
+
+.how-it-works-line-16 {
+    rotate: 90deg;
+    left: 38%;
+    top: 15%;
+}
+
+.how-it-works-line-17 {
+    rotate: 90deg;
+    left: 10%;
+    top: 36%;
+}
+
+.how-it-works-line-18 {
+    rotate: 30deg;
+    left: 38%;
+    top: 36%;
+}
+
+.how-it-works-line-19 {
+    rotate: 210deg;
+    left: 10%;
+    top: 20%;
+}
+
+.how-it-works-line-20 {
+    rotate: 90deg;
+    left: 38%;
+    top: 20%;
+}
+
+.how-it-works-background {
+    position: absolute;
+    top: 30%;
+    right: -30%;
+    height: 100vh;
+    z-index: 1;
+    transform: rotate(270deg);
+}
+
+@keyframes HowItWorksText {
+    0% {
+        left: -10%;
+        opacity: 0;
+    }
+
+    100% {
+        left: 0%;
+        opacity: 1;
+    }
+}
+
+
+/* ****** */
+/* LARGE SCREEN */
+/* ****** */
+
+@media only screen and (max-width: 1800px) {
+    .header-text {
+      width: 70%;
+      left: 10%;
+    }
+  }
+  
+  /* ****** */
+  /* MEDIUM SCREEN */
+  /* ****** */
+  
+  @media only screen and (max-width: 1024px) {
+  }
+  
+  /* ****** */
+  /* MOBILE */
+  /* ****** */
+  
+  @media only screen and (max-width: 768px) {
+        
+    .how-it-works-content {
+        display: block;
+    }
+
+    .how-it-works-background {
+        top: 18%;
+        right: -100%;
+        height: 65vh;
+    }
+
+    .how-it-works-text {
+        width: 100%;
+    }
+
+    .how-it-works-image {
+        height: 100%;
+    }
+
+    .how-it-works-text img {
+        margin-top: 5%;
+    }
+
+    .how-it-works-line {
+        width: 35%;
+    }
+
+    .how-it-works-line-1 {
+        left: 39%;
+        top: 7%;
+    }
+    
+    .how-it-works-line-2 {
+        left: 88%;
+        top: 7%;
+    }
+    
+    .how-it-works-line-3 {
+        left: 39%;
+        top: 0%;
+    }
+    
+    .how-it-works-line-4 {
+        left: 88%;
+        top: 0%;
+    }
+    
+    .how-it-works-line-5 {
+        left: 39%;
+        top: 10%;
+    }
+    
+    .how-it-works-line-6 {
+        left: 88%;
+        top: 10%;
+    }
+    
+    .how-it-works-line-7 {
+        left: 39%;
+        top: 3%;
+    }
+    
+    .how-it-works-line-8 {
+        left: 88%;
+        top: 3%;
+    }
+    
+    .how-it-works-line-9 {
+        left: 39%;
+        top: 13%;
+    }
+    
+    .how-it-works-line-10 {
+        left: 88%;
+        top: 13%;
+    }
+    
+    .how-it-works-line-11 {
+        left: 39%;
+        top: 6%;
+    }
+    
+    .how-it-works-line-12 {
+        left: 88%;
+        top: 6%;
+    }
+    
+    .how-it-works-line-13 {
+        left: 39%;
+        top: 16%;
+    }
+    
+    .how-it-works-line-14 {
+        left: 88%;
+        top: 16%;
+    }
+    
+    .how-it-works-line-15 {
+        left: 39%;
+        top: 9%;
+    }
+    
+    .how-it-works-line-16 {
+        left: 88%;
+        top: 9%;
+    }
+    
+    .how-it-works-line-17 {
+        left: 39%;
+        top: 19%;
+    }
+    
+    .how-it-works-line-18 {
+        left: 88%;
+        top: 19%;
+    }
+    
+    .how-it-works-line-19 {
+        left: 39%;
+        top: 12%;
+    }
+    
+    .how-it-works-line-20 {
+        left: 88%;
+        top: 12%;
+    }
+/* 
+    .how-it-works-line-1 {
+        left: 55%;
+        top: 5%;
+    }
+    
+    .how-it-works-line-2 {
+        left: 84%;
+        top: 5%;
+    }
+    
+    .how-it-works-line-3 {
+        left: 55%;
+        top: 1%;
+    }
+    
+    .how-it-works-line-4 {
+        left: 84%;
+        top: 1%;
+    }
+    
+    .how-it-works-line-5 {
+        left: 55%;
+        top: 8%;
+    }
+    
+    .how-it-works-line-6 {
+        left: 84%;
+        top: 8%;
+    }
+    
+    .how-it-works-line-7 {
+        left: 55%;
+        top: 4%;
+    }
+    
+    .how-it-works-line-8 {
+        left: 84%;
+        top: 4%;
+    }
+    
+    .how-it-works-line-9 {
+        left: 55%;
+        top: 11%;
+    }
+    
+    .how-it-works-line-10 {
+        left: 84%;
+        top: 11%;
+    }
+    
+    .how-it-works-line-11 {
+        left: 55%;
+        top: 7%;
+    }
+    
+    .how-it-works-line-12 {
+        left: 84%;
+        top: 7%;
+    }
+    
+    .how-it-works-line-13 {
+        left: 55%;
+        top: 14%;
+    }
+    
+    .how-it-works-line-14 {
+        left: 84%;
+        top: 14%;
+    }
+    
+    .how-it-works-line-15 {
+        left: 55%;
+        top: 10%;
+    }
+    
+    .how-it-works-line-16 {
+        left: 84%;
+        top: 10%;
+    }
+    
+    .how-it-works-line-17 {
+        left: 55%;
+        top: 17%;
+    }
+    
+    .how-it-works-line-18 {
+        left: 84%;
+        top: 17%;
+    }
+    
+    .how-it-works-line-19 {
+        left: 55%;
+        top: 13%;
+    }
+    
+    .how-it-works-line-20 {
+        left: 84%;
+        top: 13%;
+    } */
+}

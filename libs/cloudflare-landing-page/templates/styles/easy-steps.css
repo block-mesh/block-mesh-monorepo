@@ -1,0 +1,173 @@
+.easy-steps-content {
+    display: flex;
+    justify-content: center;
+    margin-top: 5%;
+    position: relative;
+}
+
+.easy-steps-content-card {
+    height: 30vh;
+    width: calc(22% - 40px);
+    border: 1px solid #EDEDED55;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    padding: 20px;
+    color: var(--white);
+    position: relative;
+    background-color: #FF7E0711;
+    box-shadow: 0 10px 10px 5px #111,
+                inset 0 5px 2px 0px var(--white);
+}
+
+.easy-steps-content-card h4 {
+    font-weight: lighter;
+    font-size: 2em;
+}
+
+#easy-steps h3 {
+    text-align: center;
+}
+
+.easy-steps-content-card:nth-child(2) {
+    margin: 0 5%;
+}
+
+.easy-steps-content-card svg {
+    position: absolute;
+    top: 15px;
+    left: 15px;
+}
+
+#easy-steps img {
+    position: absolute;
+    margin: auto;
+    left: 0;
+    right: 0;
+    top: 0;
+}
+
+@keyframes EasyStepsDownload {
+    0% {
+        left: -30%;
+        transform: rotate3d(1, 1, 1, 0);
+        opacity: 0;
+    }
+
+    55% {
+        transform: rotate3d(1, 1, 1, 370deg);
+        opacity: 1;
+    }
+
+    80% {
+        transform: rotate3d(1, 1, 1, 355deg);
+        opacity: 1;
+    }
+
+    100% {
+        left: 0%;
+        transform: rotate3d(1, 1, 1, 360deg);
+        opacity: 1;
+    }
+}
+
+@keyframes EasyStepsSignup {
+    0% {
+        top: -20vh;
+        transform: rotate3d(1, 1, 1, 0);
+        opacity: 0;
+    }
+
+    55% {
+        transform: rotate3d(1, 1, 1, 370deg);
+    }
+
+    80% {
+        transform: rotate3d(1, 1, 1, 355deg);
+    }
+
+    100% {
+        top: 0vh;
+        transform: rotate3d(1, 1, 1, 360deg);
+        opacity: 1;
+    }
+}
+
+@keyframes EasyStepsRewards {
+    0% {
+        right: -30%;
+        transform: rotate3d(1, 1, 1, 0);
+        opacity: 0;
+    }
+
+    55% {
+        transform: rotate3d(1, 1, 1, 370deg);
+        opacity: 1;
+    }
+
+    80% {
+        transform: rotate3d(1, 1, 1, 355deg);
+        opacity: 1;
+    }
+
+    100% {
+        right: 0%;
+        transform: rotate3d(1, 1, 1, 360deg);
+        opacity: 1;
+    }
+}
+
+
+/* ****** */
+/* LARGE SCREEN */
+/* ****** */
+
+@media only screen and (max-width: 1800px) {
+ 
+}
+
+/* ****** */
+/* MEDIUM SCREEN */
+/* ****** */
+
+@media only screen and (max-width: 1024px) {
+}
+
+/* ****** */
+/* MOBILE */
+/* ****** */
+
+@media only screen and (max-width: 768px) {
+    .easy-steps-content-card:nth-child(2) {
+        margin: 10% 0;
+    }
+
+    .easy-steps-content-card {
+        height: fit-content;
+        width: calc(100% - 40px);
+        padding: 40px 20px;
+    }
+
+    .easy-steps-content {
+        flex-direction: column;
+    }
+
+    .easy-steps-content-card > div {
+        height: 7vh;
+    }
+
+    .easy-steps-content svg {
+        top: 33%;
+    }
+
+    .easy-steps-content h4 {
+        position: absolute;
+        left: 25%;
+    }
+    
+    .easy-steps-content p {
+        position: absolute;
+        left: 25%;
+        top: 55%;
+    }
+}
