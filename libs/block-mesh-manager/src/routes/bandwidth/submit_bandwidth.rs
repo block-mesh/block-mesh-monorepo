@@ -8,6 +8,7 @@ use crate::startup::application::AppState;
 use crate::worker::db_agg::{Table, UpdateBulkMessage};
 use axum::extract::State;
 use axum::{Extension, Json};
+use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
 use http::StatusCode;
 use sqlx::PgPool;
@@ -96,9 +97,9 @@ pub async fn handler(
     let flag = state
         .flags
         .get("submit_bandwidth_run_background")
-        .unwrap_or(&false);
-
-    if *flag {
+        .unwrap_or(&FlagValue::Boolean(false));
+    let flag: bool = <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
+    if flag {
         let handle: JoinHandle<()> = tokio::spawn(async move {
             let mut transaction = pool.begin().await.map_err(Error::from).unwrap();
             delete_bandwidth_reports_by_time(&mut transaction, user.id, 60 * 60)
