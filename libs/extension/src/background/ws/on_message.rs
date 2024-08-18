@@ -87,6 +87,7 @@ pub fn on_close_handler(ws: web_sys::WebSocket) -> Closure<dyn FnMut(CloseEvent)
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
+#[allow(clippy::upper_case_acronyms)]
 pub enum WebSocketReadyState {
     CONNECTING,
     OPEN,
