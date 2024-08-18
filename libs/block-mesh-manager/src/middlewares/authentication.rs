@@ -39,6 +39,17 @@ impl Backend {
     pub fn new(db: PgPool, con: MultiplexedConnection) -> Self {
         Self { db, con }
     }
+
+    pub fn authenticate_key_with_password(email: &str, password: &Secret<String>) -> String {
+        format!("{}-{}", email, password.expose_secret())
+    }
+    pub fn authenticate_key_with_api_token(email: &str, api_token: &str) -> String {
+        format!("{}-{}", email, api_token)
+    }
+
+    pub fn authenticate_key_with_user_id(uuid: &Uuid) -> String {
+        uuid.to_string()
+    }
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -59,8 +70,8 @@ impl AuthnBackend for Backend {
         &self,
         creds: Self::Credentials,
     ) -> Result<Option<Self::User>, Self::Error> {
+        let key = Backend::authenticate_key_with_password(&creds.email, &creds.password);
         let mut c = self.con.clone();
-        let key = format!("{}-{}", creds.email.clone(), creds.nonce.clone());
         let redis_user: RedisResult<String> = c.get(key.clone()).await;
         match redis_user {
             Ok(redis_user) => {
@@ -77,8 +88,7 @@ impl AuthnBackend for Backend {
         let user = match get_user_opt_by_email(&mut transaction, &creds.email).await {
             Ok(u) => u,
             Err(e) => {
-                let _: RedisResult<()> = c.set(key.clone(), "{}").await;
-                let _: RedisResult<()> = c.expire(key, 60 * 60 * 24).await;
+                let _: RedisResult<()> = c.del(&key).await;
                 return Err(Error::Auth(e.to_string()));
             }
         };
@@ -86,8 +96,7 @@ impl AuthnBackend for Backend {
         let user = match user {
             Some(u) => u,
             None => {
-                let _: RedisResult<()> = c.set(key.clone(), "{}").await;
-                let _: RedisResult<()> = c.expire(key.clone(), 60 * 60 * 24).await;
+                let _: RedisResult<()> = c.del(&key).await;
                 return Err(Error::Auth("User not found".to_string()));
             }
         };
@@ -100,7 +109,7 @@ impl AuthnBackend for Backend {
             email: user.email,
         };
         let _: RedisResult<()> = c
-            .set(key, serde_json::to_string(&session_user).unwrap())
+            .set(&key, serde_json::to_string(&session_user).unwrap())
             .await;
         let _: RedisResult<()> = c.expire(creds.email, 60 * 60 * 24).await;
         transaction.commit().await.map_err(Error::from)?;
@@ -109,6 +118,7 @@ impl AuthnBackend for Backend {
 
     #[tracing::instrument(name = "get_user", err, ret, level = "trace")]
     async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {
+        let key = Backend::authenticate_key_with_user_id(&user_id);
         let mut c = self.con.clone();
         let redis_user: RedisResult<String> = c.get(user_id.to_string()).await;
         match redis_user {
@@ -126,8 +136,7 @@ impl AuthnBackend for Backend {
         let user = match get_user_opt_by_id(&mut transaction, &user_id).await {
             Ok(u) => u,
             Err(e) => {
-                let _: RedisResult<()> = c.set(user_id.to_string(), "{}").await;
-                let _: RedisResult<()> = c.expire(user_id.to_string(), 60 * 60 * 24).await;
+                let _: RedisResult<()> = c.del(&key).await;
                 return Err(Error::Auth(e.to_string()));
             }
         };
@@ -135,8 +144,7 @@ impl AuthnBackend for Backend {
         let user = match user {
             Some(u) => u,
             None => {
-                let _: RedisResult<()> = c.set(user_id.to_string(), "{}").await;
-                let _: RedisResult<()> = c.expire(user_id.to_string(), 60 * 60 * 24).await;
+                let _: RedisResult<()> = c.del(&key).await;
                 return Err(Error::Auth("User not found".to_string()));
             }
         };
@@ -154,10 +162,7 @@ impl AuthnBackend for Backend {
             nonce: nonce.nonce.as_ref().to_string(),
         };
         let _: RedisResult<()> = c
-            .set(
-                user.email.clone(),
-                serde_json::to_string(&session_user).unwrap(),
-            )
+            .set(&key, serde_json::to_string(&session_user).unwrap())
             .await;
         let _: RedisResult<()> = c.expire(user.email, 60 * 60 * 24).await;
         Ok(Option::from(session_user))
@@ -208,11 +213,11 @@ pub async fn get_user_from_redis(
     let redis_user: RedisResult<String> = c.get(email.to_string()).await;
     match redis_user {
         Ok(redis_user) => {
-            return if let Ok(value) = serde_json::from_str::<SessionUser>(&redis_user) {
+            if let Ok(value) = serde_json::from_str::<SessionUser>(&redis_user) {
                 Ok(value)
             } else {
                 Err(anyhow!("Cant deserialize user from redis".to_string()))
-            };
+            }
         }
         Err(_) => Err(anyhow!("User not found".to_string())),
     }
