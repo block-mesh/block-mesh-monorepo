@@ -110,8 +110,8 @@ impl AuthnBackend for Backend {
         };
         if let Ok(session_user) = serde_json::to_string(&session_user) {
             let _: RedisResult<()> = c.set(&key, session_user).await;
+            let _: RedisResult<()> = c.expire(&key, 60 * 60 * 24).await;
         }
-        let _: RedisResult<()> = c.expire(creds.email, 60 * 60 * 24).await;
         transaction.commit().await.map_err(Error::from)?;
         Ok(Option::from(session_user))
     }
@@ -161,10 +161,10 @@ impl AuthnBackend for Backend {
             email: user.email.clone(),
             nonce: nonce.nonce.as_ref().to_string(),
         };
-        let _: RedisResult<()> = c
-            .set(&key, serde_json::to_string(&session_user).unwrap())
-            .await;
-        let _: RedisResult<()> = c.expire(user.email, 60 * 60 * 24).await;
+        if let Ok(session_user) = serde_json::to_string(&session_user) {
+            let _: RedisResult<()> = c.set(&key, &session_user).await;
+            let _: RedisResult<()> = c.expire(&key, 60 * 60 * 24).await;
+        }
         Ok(Option::from(session_user))
     }
 }
