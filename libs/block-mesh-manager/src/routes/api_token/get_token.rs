@@ -24,7 +24,6 @@ pub async fn handler(
     Extension(mut auth): Extension<AuthSession<Backend>>,
     Json(body): Json<GetTokenRequest>,
 ) -> Result<Json<GetTokenResponse>, Error> {
-    tracing::info!("WTF HERE");
     let key = Backend::authenticate_key_with_password(
         &body.email.to_ascii_lowercase(),
         &Secret::from(body.password.clone()),
