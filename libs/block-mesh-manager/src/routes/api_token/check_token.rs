@@ -2,6 +2,7 @@ use crate::database::api_token::get_api_token_by_user_id_and_status::get_api_tok
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::domain::api_token::ApiTokenStatus;
 use crate::errors::error::Error;
+use crate::middlewares::authentication::Backend;
 use crate::startup::application::AppState;
 use axum::extract::State;
 use axum::{Extension, Json};
@@ -16,14 +17,12 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Json(body): Json<CheckTokenRequest>,
 ) -> Result<Json<GetTokenResponse>, Error> {
+    let key = Backend::authenticate_key_with_api_token(
+        &body.email.to_ascii_lowercase(),
+        &body.api_token.to_string(),
+    );
     let mut c = state.redis.clone();
-    let token: RedisResult<String> = c
-        .get(format!(
-            "{}-{}",
-            body.email.clone().to_ascii_lowercase(),
-            body.api_token.to_string()
-        ))
-        .await;
+    let token: RedisResult<String> = c.get(&key).await;
     if let Ok(token) = token {
         return Ok(Json(GetTokenResponse {
             api_token: Some(token.parse().unwrap()),
@@ -45,26 +44,8 @@ pub async fn handler(
     }
     transaction.commit().await.map_err(Error::from)?;
 
-    let _: RedisResult<()> = c
-        .set(
-            format!(
-                "{}-{}",
-                body.email.clone().to_ascii_lowercase(),
-                body.api_token.to_string()
-            ),
-            body.api_token.to_string(),
-        )
-        .await;
-    let _: RedisResult<()> = c
-        .expire(
-            format!(
-                "{}-{}",
-                body.email.clone().to_ascii_lowercase(),
-                body.api_token.to_string()
-            ),
-            60 * 60 * 24,
-        )
-        .await;
+    let _: RedisResult<()> = c.set(&key, body.api_token.to_string()).await;
+    let _: RedisResult<()> = c.expire(&key, 60 * 60 * 24).await;
 
     Ok(Json(GetTokenResponse {
         api_token: Some(*api_token.token.as_ref()),

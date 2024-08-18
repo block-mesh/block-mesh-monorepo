@@ -22,14 +22,12 @@ pub async fn handler(
     Extension(mut auth): Extension<AuthSession<Backend>>,
     Json(body): Json<GetTokenRequest>,
 ) -> Result<Json<GetTokenResponse>, Error> {
+    let key = Backend::authenticate_key_with_password(
+        &body.email.to_ascii_lowercase(),
+        &Secret::from(body.password.clone()),
+    );
     let mut c = state.redis.clone();
-    let token: RedisResult<String> = c
-        .get(format!(
-            "{}-{}",
-            body.email.clone().to_ascii_lowercase(),
-            body.password.clone()
-        ))
-        .await;
+    let token: RedisResult<String> = c.get(&key).await;
     if let Ok(token) = token {
         return Ok(Json(GetTokenResponse {
             api_token: Some(token.parse().unwrap()),
@@ -65,25 +63,9 @@ pub async fn handler(
     transaction.commit().await.map_err(Error::from)?;
 
     let _: RedisResult<()> = c
-        .set(
-            format!(
-                "{}-{}",
-                body.email.clone().to_ascii_lowercase(),
-                body.password
-            ),
-            api_token.token.expose_secret().to_string(),
-        )
+        .set(&key, api_token.token.expose_secret().to_string())
         .await;
-    let _: RedisResult<()> = c
-        .expire(
-            format!(
-                "{}-{}",
-                body.email.clone().to_ascii_lowercase(),
-                body.password
-            ),
-            60 * 60 * 24,
-        )
-        .await;
+    let _: RedisResult<()> = c.expire(&key, 60 * 60 * 24).await;
 
     Ok(Json(GetTokenResponse {
         api_token: Some(*api_token.token.as_ref()),
