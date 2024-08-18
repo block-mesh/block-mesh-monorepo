@@ -9,13 +9,13 @@ use wasm_bindgen::prelude::*;
 use web_sys::{CloseEvent, ErrorEvent, MessageEvent};
 
 pub fn on_message_handler(
-    ws: web_sys::WebSocket,
+    _ws: web_sys::WebSocket,
     app_state: ExtensionWrapperState,
 ) -> Closure<dyn FnMut(MessageEvent)> {
     Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
         log!("on_message_handle => {:#?}", e);
-        let email = app_state.email.get_untracked();
-        let api_token = app_state.api_token.get_untracked();
+        let _email = app_state.email.get_untracked();
+        let _api_token = app_state.api_token.get_untracked();
         // let metadata = fetch_metadata_blocking().unwrap_or_default();
         if let Ok(txt) = e.data().dyn_into::<js_sys::JsString>() {
             match serde_json::from_str::<WsMessage>(
