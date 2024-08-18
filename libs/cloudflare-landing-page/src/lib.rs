@@ -25,6 +25,7 @@ fn start() {
 }
 
 #[derive(Template)]
+#[allow(dead_code)]
 #[template(path = "home.html")]
 struct Home {
     pub chrome_extension_link: String,
