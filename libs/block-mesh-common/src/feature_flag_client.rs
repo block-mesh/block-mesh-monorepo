@@ -131,6 +131,6 @@ mod tests {
             .timeout(Duration::from_secs(3))
             .build()
             .unwrap_or_default();
-        let values = get_all_flags(&client).await.unwrap();
+        let _values = get_all_flags(&client).await.unwrap();
     }
 }
