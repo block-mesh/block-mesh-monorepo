@@ -12,6 +12,7 @@ use crate::worker::db_agg::{Table, UpdateBulkMessage};
 use crate::worker::db_cleaner_cron::EnrichIp;
 use axum::extract::{ConnectInfo, Query, State};
 use axum::{Extension, Json};
+use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_common::interfaces::server_api::{ReportUptimeRequest, ReportUptimeResponse};
 use chrono::Utc;
 use http::{HeaderMap, HeaderValue, StatusCode};
@@ -64,9 +65,16 @@ pub async fn handler(
     let uptimes = get_user_uptimes(&mut transaction, user.id, 2).await?;
     transaction.commit().await.map_err(Error::from)?;
 
+    let interval = state
+        .flags
+        .get("polling_interval")
+        .unwrap_or(&FlagValue::Number(120_000.0));
+    let interval: f64 =
+        <FlagValue as TryInto<f64>>::try_into(interval.to_owned()).unwrap_or_default();
+
     if uptimes.len() == 2 {
         let diff = uptimes[0].created_at - uptimes[1].created_at;
-        if diff.num_seconds() < 60 {
+        if diff.num_seconds() < (interval * 2.0) as i64 {
             let mut transaction = pool.begin().await.map_err(Error::from)?;
             let aggregate = get_or_create_aggregate_by_user_and_name_no_transaction(
                 &mut transaction,
@@ -99,8 +107,12 @@ pub async fn handler(
         }
     }
 
-    let flag = state.flags.get("send_cleanup_to_rayon").unwrap_or(&false);
-    if *flag {
+    let flag = state
+        .flags
+        .get("send_cleanup_to_rayon")
+        .unwrap_or(&FlagValue::Boolean(false));
+    let flag: bool = <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
+    if flag {
         let _ = state.cleaner_tx.send(EnrichIp {
             uptime_id,
             user_id: user.id,
