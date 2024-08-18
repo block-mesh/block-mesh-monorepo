@@ -73,17 +73,11 @@ impl AuthnBackend for Backend {
         let key = Backend::authenticate_key_with_password(&creds.email, &creds.password);
         let mut c = self.con.clone();
         let redis_user: RedisResult<String> = c.get(key.clone()).await;
-        match redis_user {
-            Ok(redis_user) => {
-                return if let Ok(value) = serde_json::from_str::<SessionUser>(&redis_user) {
-                    Ok(Option::from(value))
-                } else {
-                    Err(Error::Auth("Wrong creds".to_string()))
-                };
+        if let Ok(redis_user) = redis_user {
+            if let Ok(value) = serde_json::from_str::<SessionUser>(&redis_user) {
+                return Ok(Option::from(value));
             }
-            Err(_) => {}
         }
-
         let mut transaction = self.db.begin().await.map_err(Error::from)?;
         let user = match get_user_opt_by_email(&mut transaction, &creds.email).await {
             Ok(u) => u,
