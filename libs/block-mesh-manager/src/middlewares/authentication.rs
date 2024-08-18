@@ -108,9 +108,9 @@ impl AuthnBackend for Backend {
             nonce: creds.nonce,
             email: user.email,
         };
-        let _: RedisResult<()> = c
-            .set(&key, serde_json::to_string(&session_user).unwrap())
-            .await;
+        if let Ok(session_user) = serde_json::to_string(&session_user) {
+            let _: RedisResult<()> = c.set(&key, session_user).await;
+        }
         let _: RedisResult<()> = c.expire(creds.email, 60 * 60 * 24).await;
         transaction.commit().await.map_err(Error::from)?;
         Ok(Option::from(session_user))

@@ -13,7 +13,9 @@ use block_mesh_common::interfaces::server_api::{GetTokenRequest, GetTokenRespons
 use redis::{AsyncCommands, RedisResult};
 use secret::Secret;
 use sqlx::PgPool;
+use std::str::FromStr;
 use std::sync::Arc;
+use uuid::Uuid;
 
 #[tracing::instrument(name = "get_token", skip(body, auth, state), fields(email = body.email))]
 pub async fn handler(
@@ -22,6 +24,7 @@ pub async fn handler(
     Extension(mut auth): Extension<AuthSession<Backend>>,
     Json(body): Json<GetTokenRequest>,
 ) -> Result<Json<GetTokenResponse>, Error> {
+    tracing::info!("WTF HERE");
     let key = Backend::authenticate_key_with_password(
         &body.email.to_ascii_lowercase(),
         &Secret::from(body.password.clone()),
@@ -29,10 +32,12 @@ pub async fn handler(
     let mut c = state.redis.clone();
     let token: RedisResult<String> = c.get(&key).await;
     if let Ok(token) = token {
-        return Ok(Json(GetTokenResponse {
-            api_token: Some(token.parse().unwrap()),
-            message: None,
-        }));
+        if let Ok(token) = Uuid::from_str(&token) {
+            return Ok(Json(GetTokenResponse {
+                api_token: Some(token),
+                message: None,
+            }));
+        }
     }
 
     let mut transaction = pool.begin().await.map_err(Error::from)?;
