@@ -27,6 +27,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio;
 use tokio::task::JoinHandle;
+use tokio::time::sleep;
 use uuid::Uuid;
 
 pub struct TestApp {
@@ -95,6 +96,8 @@ pub async fn spawn_app() -> TestApp {
     let _db_cleaner_task = tokio::spawn(db_cleaner_cron(db_pool.clone(), cleaner_rx));
     let _db_agg_task = tokio::spawn(db_agg(db_pool.clone(), rx_sql_agg));
 
+    sleep(Duration::from_secs(1)).await;
+
     TestApp {
         address,
         port,
@@ -107,7 +110,7 @@ pub async fn spawn_app() -> TestApp {
 }
 
 impl TestApp {
-    pub async fn register_post(&self, form: &RegisterForm) -> RegisterResponse {
+    pub async fn register_post(&self, form: &RegisterForm) -> anyhow::Result<()> {
         let response = self
             .client
             .post(format!(
@@ -117,12 +120,8 @@ impl TestApp {
             ))
             .form(&form)
             .send()
-            .await
-            .expect("Failed register post HTTP");
-        let response: RegisterResponse = response
-            .json::<RegisterResponse>()
-            .await
-            .expect("Failed to deserialize RegisterResponse");
-        response
+            .await?;
+        assert_eq!(200, response.status());
+        Ok(())
     }
 }
