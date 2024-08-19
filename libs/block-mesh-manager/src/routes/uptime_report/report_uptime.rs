@@ -3,7 +3,6 @@ use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
 use crate::database::uptime_report::create_uptime_report::create_uptime_report;
-use crate::database::uptime_report::get_user_uptimes::get_user_uptimes;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
@@ -62,8 +61,6 @@ pub async fn handler(
     }
     let uptime_id =
         create_uptime_report(&mut transaction, &user.id, &Option::from(ip.clone())).await?;
-    let uptimes = get_user_uptimes(&mut transaction, user.id, 2).await?;
-    transaction.commit().await.map_err(Error::from)?;
 
     let interval = state
         .flags
@@ -72,39 +69,47 @@ pub async fn handler(
     let interval: f64 =
         <FlagValue as TryInto<f64>>::try_into(interval.to_owned()).unwrap_or_default();
 
-    if uptimes.len() == 2 {
-        let diff = uptimes[0].created_at - uptimes[1].created_at;
-        if diff.num_seconds() < (interval * 2.0) as i64 {
-            let mut transaction = pool.begin().await.map_err(Error::from)?;
-            let aggregate = get_or_create_aggregate_by_user_and_name_no_transaction(
-                &mut transaction,
-                AggregateName::Uptime,
-                user.id,
-            )
-            .await
-            .map_err(Error::from)?;
-            transaction.commit().await.map_err(Error::from)?;
+    let aggregate = get_or_create_aggregate_by_user_and_name_no_transaction(
+        &mut transaction,
+        AggregateName::Uptime,
+        user.id,
+    )
+    .await
+    .map_err(Error::from)?;
+    transaction.commit().await.map_err(Error::from)?;
 
-            if daily_stat_opt.is_some() {
-                let _ = state
-                    .tx_sql_agg
-                    .send(UpdateBulkMessage {
-                        id: daily_stat_opt.unwrap().id,
-                        value: serde_json::Value::from(diff.num_seconds() as f64),
-                        table: Table::DailyStat,
-                    })
-                    .await;
-            }
-            let sum = aggregate.value.as_f64().unwrap_or_default() + diff.num_seconds() as f64;
+    let now = Utc::now();
+    let diff = now - aggregate.updated_at.unwrap_or(now);
+
+    if diff.num_seconds() < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240) {
+        if daily_stat_opt.is_some() {
             let _ = state
                 .tx_sql_agg
                 .send(UpdateBulkMessage {
-                    id: aggregate.id.0.unwrap_or_default(),
-                    value: serde_json::Value::from(sum),
-                    table: Table::Aggregate,
+                    id: daily_stat_opt.unwrap().id,
+                    value: serde_json::Value::from(diff.num_seconds() as f64),
+                    table: Table::DailyStat,
                 })
                 .await;
         }
+        let sum = aggregate.value.as_f64().unwrap_or_default() + diff.num_seconds() as f64;
+        let _ = state
+            .tx_sql_agg
+            .send(UpdateBulkMessage {
+                id: aggregate.id.0.unwrap_or_default(),
+                value: serde_json::Value::from(sum),
+                table: Table::Aggregate,
+            })
+            .await;
+    } else {
+        let _ = state
+            .tx_sql_agg
+            .send(UpdateBulkMessage {
+                id: aggregate.id.0.unwrap_or_default(),
+                value: serde_json::Value::from(aggregate.value.as_f64().unwrap_or_default()),
+                table: Table::Aggregate,
+            })
+            .await;
     }
 
     let flag = state
