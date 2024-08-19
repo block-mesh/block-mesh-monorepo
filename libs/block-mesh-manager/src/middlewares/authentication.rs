@@ -17,6 +17,7 @@ use redis::{AsyncCommands, RedisResult};
 use secret::Secret;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
+use std::env;
 use tower_sessions_sqlx_store::PostgresStore;
 use uuid::Uuid;
 
@@ -36,6 +37,12 @@ pub struct Backend {
 }
 
 impl Backend {
+    pub fn get_expire() -> i64 {
+        env::var("REDIS_EXPIRE")
+            .unwrap_or("86400".to_string())
+            .parse()
+            .unwrap_or(86400)
+    }
     pub fn new(db: PgPool, con: MultiplexedConnection) -> Self {
         Self { db, con }
     }
@@ -104,7 +111,7 @@ impl AuthnBackend for Backend {
         };
         if let Ok(session_user) = serde_json::to_string(&session_user) {
             let _: RedisResult<()> = c.set(&key, session_user).await;
-            let _: RedisResult<()> = c.expire(&key, 60 * 60 * 24).await;
+            let _: RedisResult<()> = c.expire(&key, Backend::get_expire()).await;
         }
         transaction.commit().await.map_err(Error::from)?;
         Ok(Option::from(session_user))
@@ -157,7 +164,7 @@ impl AuthnBackend for Backend {
         };
         if let Ok(session_user) = serde_json::to_string(&session_user) {
             let _: RedisResult<()> = c.set(&key, &session_user).await;
-            let _: RedisResult<()> = c.expire(&key, 60 * 60 * 24).await;
+            let _: RedisResult<()> = c.expire(&key, Backend::get_expire()).await;
         }
         Ok(Option::from(session_user))
     }

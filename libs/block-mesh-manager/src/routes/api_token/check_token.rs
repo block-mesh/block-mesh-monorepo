@@ -49,7 +49,7 @@ pub async fn handler(
     transaction.commit().await.map_err(Error::from)?;
 
     let _: RedisResult<()> = c.set(&key, body.api_token.to_string()).await;
-    let _: RedisResult<()> = c.expire(&key, 60 * 60 * 24).await;
+    let _: RedisResult<()> = c.expire(&key, Backend::get_expire()).await;
 
     Ok(Json(GetTokenResponse {
         api_token: Some(*api_token.token.as_ref()),
