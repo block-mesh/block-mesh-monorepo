@@ -17,6 +17,7 @@ use block_mesh_manager::worker::finalize_daily_cron::finalize_daily_cron;
 use block_mesh_manager::worker::joiner::joiner_loop;
 use block_mesh_manager::worker::rpc_cron::rpc_worker_loop;
 use logger_general::tracing::setup_tracing_stdout_only;
+use redis;
 use redis::aio::MultiplexedConnection;
 use reqwest::ClientBuilder;
 use secret::Secret;
@@ -24,6 +25,7 @@ use sqlx::PgPool;
 use std::env;
 use std::sync::Arc;
 use std::time::Duration;
+use tokio;
 use tokio::task::JoinHandle;
 use uuid::Uuid;
 
