@@ -69,7 +69,7 @@ pub async fn handler(
     let _: RedisResult<()> = c
         .set(&key, api_token.token.expose_secret().to_string())
         .await;
-    let _: RedisResult<()> = c.expire(&key, 60 * 60 * 24).await;
+    let _: RedisResult<()> = c.expire(&key, Backend::get_expire()).await;
 
     Ok(Json(GetTokenResponse {
         api_token: Some(*api_token.token.as_ref()),
