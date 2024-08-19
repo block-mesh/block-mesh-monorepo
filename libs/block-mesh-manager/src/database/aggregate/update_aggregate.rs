@@ -1,3 +1,4 @@
+use chrono::Utc;
 use serde_json::Value;
 use sqlx::{Execute, Postgres, QueryBuilder, Transaction};
 use std::collections::HashMap;
@@ -15,9 +16,11 @@ pub(crate) async fn update_aggregate(
     id: &Uuid,
     value: &Value,
 ) -> anyhow::Result<Uuid> {
+    let now = Utc::now();
     sqlx::query!(
-        r#"UPDATE aggregates SET value = $1 WHERE id = $2"#,
+        r#"UPDATE aggregates SET value = $1 , updated_at = $2  WHERE id = $3"#,
         value,
+        now,
         id,
     )
     .execute(&mut **transaction)
