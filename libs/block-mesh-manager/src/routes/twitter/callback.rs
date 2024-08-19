@@ -111,13 +111,14 @@ pub async fn callback(
         let mut transaction = pool.begin().await.map_err(Error::from)?;
         let data = user.into_data().unwrap();
         let follow_data = get_following(data.id.as_u64()).await?;
-        if follow_data.following && user_id.is_some() {
+        if follow_data.following {
             add_perk_to_user(
                 &mut transaction,
                 user_id.unwrap(),
                 PerkName::Twitter,
                 1.0,
                 500.0,
+                serde_json::to_value(&follow_data).unwrap(),
             )
             .await?;
             transaction.commit().await.map_err(Error::from)?;
@@ -129,8 +130,8 @@ pub async fn callback(
         } else {
             Ok(Error::redirect(
                 500,
-                "Failed verify Twitter account",
-                "Failed verify Twitter account, please contact support",
+                "ERROR",
+                "You're not following @blockmesh_xyz",
                 &format!("/ui{}", RoutesEnum::Static_Auth_Dashboard),
             ))
         }

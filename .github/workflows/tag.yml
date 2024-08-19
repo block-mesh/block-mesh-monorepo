@@ -6,9 +6,9 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-env:
-  SCCACHE_GHA_ENABLED: "true"
-  RUSTC_WRAPPER: "sccache"
+#env:
+#  SCCACHE_GHA_ENABLED: "true"
+#  RUSTC_WRAPPER: "sccache"
 jobs:
   create-tag:
     name: "Create tag"
@@ -22,8 +22,8 @@ jobs:
         with:
           key: tag
           cache-all-crates: true
-      - name: Sccache Action
-        uses: Mozilla-Actions/sccache-action@v0.0.5
+      #      - name: Sccache Action
+      #        uses: Mozilla-Actions/sccache-action@v0.0.5
       - name: "Get tag"
         id: "get-tag"
         shell: "bash"

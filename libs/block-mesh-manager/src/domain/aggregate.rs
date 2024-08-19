@@ -12,6 +12,7 @@ pub struct Aggregate {
     pub name: AggregateName,
     pub value: serde_json::Value,
     pub created_at: Option<DateTime<Utc>>,
+    pub updated_at: Option<DateTime<Utc>>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone)]

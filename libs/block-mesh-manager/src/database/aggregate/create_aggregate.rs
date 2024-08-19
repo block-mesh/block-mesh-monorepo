@@ -13,12 +13,16 @@ pub(crate) async fn create_aggregate(
     let now = Utc::now();
     let id = Uuid::new_v4();
     sqlx::query!(
-        r#"INSERT INTO aggregates (id, created_at, user_id, name, value) VALUES ($1, $2, $3, $4, $5)"#,
+        r#"
+        INSERT
+        INTO aggregates (id, created_at, user_id, name, value, updated_at)
+        VALUES ($1, $2, $3, $4, $5, $6)"#,
         id,
-        now,
+        now.clone(),
         user_id,
         name.to_string(),
-        value
+        value,
+        now
     )
     .execute(&mut **transaction)
     .await?;

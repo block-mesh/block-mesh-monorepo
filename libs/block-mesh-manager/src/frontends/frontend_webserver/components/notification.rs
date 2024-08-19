@@ -4,7 +4,7 @@ use leptos_router::A;
 #[component]
 pub fn NotificationComponent(summary: String, detailed: String, go_to: String) -> impl IntoView {
     view! {
-        <div class="bg-dark-blue flex justify-center items-center h-screen">
+        <div class="bg-dark-blue flex justify-center items-center h-screen w-screen">
             <div class="bg-dark-blue border-off-white border-solid border-2 p-8 rounded-lg shadow-md m-2">
                 <div class="text-center">
                     <h1 class="font-bebas-neue mt-4 text-3xl font-bold tracking-tight text-off-white sm:text-5xl">

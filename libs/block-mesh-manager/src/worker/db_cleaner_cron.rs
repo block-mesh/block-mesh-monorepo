@@ -55,10 +55,10 @@ pub async fn enrich_ip_and_cleanup(
 ) -> anyhow::Result<()> {
     let pool = pool.clone();
     let mut transaction = pool.begin().await.map_err(Error::from)?;
-    delete_uptime_report_by_time_for_all(&mut transaction, 60 * 60)
+    delete_uptime_report_by_time_for_all(&mut transaction, 60 * 60 * 60)
         .await
         .map_err(Error::from)?;
-    delete_bandwidth_reports_by_time_for_all(&mut transaction, 60 * 60)
+    delete_bandwidth_reports_by_time_for_all(&mut transaction, 60 * 60 * 60)
         .await
         .map_err(Error::from)?;
     let ip_address = match get_opt_ip_address(&mut transaction, &job.ip)

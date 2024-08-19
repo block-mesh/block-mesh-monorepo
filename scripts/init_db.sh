@@ -31,7 +31,7 @@ fi
 DB_USER="${POSTGRES_USER:=postgres}"
 DB_PASSWORD="${POSTGRES_PASSWORD:=password}"
 DB_NAME="${POSTGRES_DB:=block-mesh}"
-DB_PORT="${POSTGRES_PORT:=5555}"
+DB_PORT="${POSTGRES_PORT:=5559}"
 
 if [ "${SKIP_DOCKER}" != "yes" ]
 then
@@ -45,7 +45,7 @@ then
     -e POSTGRES_PASSWORD=${DB_PASSWORD} \
     -e POSTGRES_DB=${DB_NAME} \
     -e POSTGRES_PORT=${DB_PORT} \
-    -p "${DB_PORT}":5555 \
+    -p "${DB_PORT}":5559 \
     -d postgres:15.3-alpine3.18 \
     postgres -p ${DB_PORT} -N 1000
 
