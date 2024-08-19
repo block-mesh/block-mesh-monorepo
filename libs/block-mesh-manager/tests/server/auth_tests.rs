@@ -1,5 +1,5 @@
 use crate::server::test_app::spawn_app;
-use block_mesh_common::interfaces::server_api::{RegisterForm, RegisterResponse};
+use block_mesh_common::interfaces::server_api::RegisterForm;
 use fake::faker::internet::raw::*;
 use fake::locales::EN;
 use fake::Fake;

@@ -17,4 +17,5 @@ if [ -f "${ROOT}/.env" ] ; then
   source "${ROOT}/.env"
 fi
 #cargo nextest run create_game --features my-test
-ensure cargo test -p block-mesh-manager --features ssr -- --nocapture | bunyan
+#ensure cargo test -p block-mesh-manager --features ssr -- --nocapture | bunyan
+ensure cargo test -p block-mesh-manager --features ssr | bunyan

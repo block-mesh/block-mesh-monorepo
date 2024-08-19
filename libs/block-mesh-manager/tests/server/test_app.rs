@@ -1,5 +1,5 @@
 use block_mesh_common::feature_flag_client::get_all_flags;
-use block_mesh_common::interfaces::server_api::{RegisterForm, RegisterResponse};
+use block_mesh_common::interfaces::server_api::RegisterForm;
 use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager::configuration::get_configuration::get_configuration;
 use block_mesh_manager::configuration::settings::Settings;
