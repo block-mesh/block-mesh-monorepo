@@ -2,7 +2,6 @@ use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_tran
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
-use crate::database::uptime_report::create_uptime_report::create_uptime_report;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
@@ -59,8 +58,6 @@ pub async fn handler(
     if daily_stat_opt.is_none() {
         create_daily_stat(&mut transaction, user.id).await?;
     }
-    let uptime_id =
-        create_uptime_report(&mut transaction, &user.id, &Option::from(ip.clone())).await?;
 
     let interval = state
         .flags
@@ -119,7 +116,6 @@ pub async fn handler(
     let flag: bool = <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
     if flag {
         let _ = state.cleaner_tx.send(EnrichIp {
-            uptime_id,
             user_id: user.id,
             ip: ip.clone(),
         });

@@ -6,6 +6,7 @@ source "${ROOT}/scripts/setup.sh"
 cd "${ROOT}/libs/block-mesh-manager" || exit
 set +x
 export APP_ENVIRONMENT=local
+export AGG_SIZE=1
 export LEPTOS_OUTPUT_NAME=block-mesh-manager
 cargo install cargo-nextest --locked
 #export TEST_LOG=1

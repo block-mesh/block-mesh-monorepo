@@ -4,6 +4,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::PgPool;
 use std::collections::HashMap;
+use std::env;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -26,10 +27,15 @@ pub async fn db_agg(
     let mut queries: Vec<String> = Vec::with_capacity(100);
     let mut calls: HashMap<Uuid, Value> = HashMap::new();
     let mut count = 0;
+    let agg_size = env::var("AGG_SIZE")
+        .unwrap_or("100".to_string())
+        .parse()
+        .unwrap_or(100);
+
     while let Some(query) = rx.recv().await {
         calls.insert(query.id, query.value);
         count += 1;
-        if count == 100 {
+        if count == agg_size {
             if let Ok(mut transaction) = pool.begin().await {
                 match query.table {
                     Table::Aggregate => {
