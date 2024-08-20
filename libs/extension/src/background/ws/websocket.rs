@@ -1,19 +1,13 @@
 use super::{
     on_close_handler, on_error_handler, on_message_handler, on_open_handler, WebSocketReadyState,
 };
-use crate::utils::connectors::sleep_js;
 use crate::utils::log::log;
-use crate::utils::sleep::sleep;
 use crate::utils::{connectors::set_panic_hook, extension_wrapper_state::ExtensionWrapperState};
 use block_mesh_common::constants::DeviceType;
-use leptos::{set_interval_with_handle, SignalGetUntracked};
+use leptos::SignalGetUntracked;
 use logger_leptos::leptos_tracing::setup_leptos_tracing;
 use once_cell::sync::OnceCell;
-use std::cell::RefCell;
-use std::mem;
-use std::rc::Rc;
 use std::sync::{Arc, Mutex};
-use std::time::Duration;
 use wasm_bindgen::prelude::*;
 use web_sys::WebSocket;
 
