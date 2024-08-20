@@ -39,6 +39,7 @@ pub async fn handle_socket(
     let tx_ws = state.tx_ws.clone();
     let mut recv_task = tokio::spawn(async move {
         while let Some(Ok(msg)) = receiver.next().await {
+            tracing::info!("RECEIVER msg => {:#?}", msg);
             // print message and break if instructed to do so
             if process_message(&msg, who).is_break() {
                 break;
@@ -73,8 +74,8 @@ pub async fn handle_socket(
     });
 
     tokio::select! {
-        o = recv_task => tracing::error!("Recv task dead"),
-        // o = rx_task => tracing::error!("Not Sending uptime requests")
+        o = recv_task => tracing::error!("recv_task task dead"),
+        o = rx_task => tracing::error!("rx_task dead")
     }
     // returning from the handler closes the websocket connection
     tracing::info!("Websocket context {who} destroyed");

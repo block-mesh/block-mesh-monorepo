@@ -1,18 +1,23 @@
 use super::{
     on_close_handler, on_error_handler, on_message_handler, on_open_handler, WebSocketReadyState,
 };
+use crate::utils::connectors::sleep_js;
 use crate::utils::log::log;
+use crate::utils::sleep::sleep;
 use crate::utils::{connectors::set_panic_hook, extension_wrapper_state::ExtensionWrapperState};
 use block_mesh_common::constants::DeviceType;
-use leptos::SignalGetUntracked;
+use leptos::{set_interval_with_handle, SignalGetUntracked};
 use logger_leptos::leptos_tracing::setup_leptos_tracing;
 use once_cell::sync::OnceCell;
+use std::cell::RefCell;
+use std::mem;
+use std::rc::Rc;
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 use wasm_bindgen::prelude::*;
 use web_sys::WebSocket;
 
 pub static WEB_SOCKET_STATUS: OnceCell<Arc<Mutex<WebSocketReadyState>>> = OnceCell::new();
-
 pub fn get_ws_status() -> WebSocketReadyState {
     let ws_status =
         WEB_SOCKET_STATUS.get_or_init(|| Arc::new(Mutex::new(WebSocketReadyState::CLOSED)));
@@ -43,8 +48,7 @@ pub async fn start_websocket() -> Result<(), JsValue> {
         .replace("http://", "ws://")
         .replace("https://", "wss://");
     let api_token = api_token.to_string();
-    let ws = get_ws_status();
-    match ws {
+    match get_ws_status() {
         WebSocketReadyState::CLOSED => {}
         WebSocketReadyState::CLOSING => {}
         WebSocketReadyState::OPEN => return Ok(()),
@@ -75,5 +79,16 @@ pub async fn start_websocket() -> Result<(), JsValue> {
     ws.set_onclose(Some(onclose_callback.as_ref().unchecked_ref()));
     onclose_callback.forget();
 
+    // let _ = ws.send_with_str("ping");
+    let _ = ws.send_with_str("hello");
+    //
+    // let arc = Arc::new(ws);
+    // let cloned_arc = arc.clone();
+    // mem::forget(arc);
+    //
+    // // log!("pre sleep");
+
+    // sleep_js(3000).await;
+    log!("after hello");
     Ok(())
 }

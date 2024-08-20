@@ -5,6 +5,7 @@ use std::ops::ControlFlow;
 
 /// helper to print contents of messages to stdout. Has special treatment for Close.
 pub fn process_message(msg: &Message, who: SocketAddr) -> ControlFlow<(), ()> {
+    tracing::info!("PROCESS_MESSAGE msg = {:#?}", msg);
     match msg {
         Message::Text(t) => {
             handle_ws_message(t, who);
@@ -59,7 +60,7 @@ fn handle_ws_message(s: &str, who: SocketAddr) {
             }
         }
         Err(_) => {
-            tracing::info!("Invalid Message")
+            tracing::info!("Invalid Message => {}", s)
         }
     }
 }

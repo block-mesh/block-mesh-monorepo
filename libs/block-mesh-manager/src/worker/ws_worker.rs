@@ -30,7 +30,7 @@ pub async fn ws_worker_tx(
             device: None,
             message: WsMessageTypes::SendUptimeFromServer,
         });
-        sleep(Duration::from_secs(5)).await;
+        sleep(Duration::from_secs(15)).await;
     }
     Ok(())
 }
