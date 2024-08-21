@@ -2490,6 +2490,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "cloudflare-worker-cron"
+version = "0.0.197"
+dependencies = [
+ "anyhow",
+ "block-mesh-common",
+ "reqwest 0.11.27",
+ "serde",
+ "serde_json",
+ "time",
+ "tracing",
+ "tracing-subscriber",
+ "tracing-web",
+ "uuid",
+ "worker",
+]
+
+[[package]]
 name = "cloudflare-worker-echo-debug"
 version = "0.0.197"
 dependencies = [
