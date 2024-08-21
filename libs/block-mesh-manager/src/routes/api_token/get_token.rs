@@ -13,7 +13,9 @@ use block_mesh_common::interfaces::server_api::{GetTokenRequest, GetTokenRespons
 use redis::{AsyncCommands, RedisResult};
 use secret::Secret;
 use sqlx::PgPool;
+use std::str::FromStr;
 use std::sync::Arc;
+use uuid::Uuid;
 
 #[tracing::instrument(name = "get_token", skip(body, auth, state), fields(email = body.email))]
 pub async fn handler(
@@ -29,10 +31,12 @@ pub async fn handler(
     let mut c = state.redis.clone();
     let token: RedisResult<String> = c.get(&key).await;
     if let Ok(token) = token {
-        return Ok(Json(GetTokenResponse {
-            api_token: Some(token.parse().unwrap()),
-            message: None,
-        }));
+        if let Ok(token) = Uuid::from_str(&token) {
+            return Ok(Json(GetTokenResponse {
+                api_token: Some(token),
+                message: None,
+            }));
+        }
     }
 
     let mut transaction = pool.begin().await.map_err(Error::from)?;
@@ -65,7 +69,7 @@ pub async fn handler(
     let _: RedisResult<()> = c
         .set(&key, api_token.token.expose_secret().to_string())
         .await;
-    let _: RedisResult<()> = c.expire(&key, 60 * 60 * 24).await;
+    let _: RedisResult<()> = c.expire(&key, Backend::get_expire()).await;
 
     Ok(Json(GetTokenResponse {
         api_token: Some(*api_token.token.as_ref()),

@@ -13,6 +13,7 @@ use crate::worker::db_agg::UpdateBulkMessage;
 use crate::worker::db_cleaner_cron::EnrichIp;
 use axum::{Extension, Router};
 use axum_login::login_required;
+use block_mesh_common::feature_flag_client::FlagValue;
 use leptos::leptos_config::get_config_from_env;
 use redis::aio::MultiplexedConnection;
 use reqwest::Client;
@@ -44,7 +45,7 @@ pub struct AppState {
     pub client: Client,
     pub tx: tokio::sync::mpsc::Sender<JoinHandle<()>>,
     pub tx_sql_agg: tokio::sync::mpsc::Sender<UpdateBulkMessage>,
-    pub flags: HashMap<String, bool>,
+    pub flags: HashMap<String, FlagValue>,
     pub cleaner_tx: UnboundedSender<EnrichIp>,
     pub redis: MultiplexedConnection,
 }

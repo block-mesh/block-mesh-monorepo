@@ -17,6 +17,7 @@ use redis::{AsyncCommands, RedisResult};
 use secret::Secret;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
+use std::env;
 use tower_sessions_sqlx_store::PostgresStore;
 use uuid::Uuid;
 
@@ -36,6 +37,12 @@ pub struct Backend {
 }
 
 impl Backend {
+    pub fn get_expire() -> i64 {
+        env::var("REDIS_EXPIRE")
+            .unwrap_or("86400".to_string())
+            .parse()
+            .unwrap_or(86400)
+    }
     pub fn new(db: PgPool, con: MultiplexedConnection) -> Self {
         Self { db, con }
     }
@@ -73,17 +80,11 @@ impl AuthnBackend for Backend {
         let key = Backend::authenticate_key_with_password(&creds.email, &creds.password);
         let mut c = self.con.clone();
         let redis_user: RedisResult<String> = c.get(key.clone()).await;
-        match redis_user {
-            Ok(redis_user) => {
-                return if let Ok(value) = serde_json::from_str::<SessionUser>(&redis_user) {
-                    Ok(Option::from(value))
-                } else {
-                    Err(Error::Auth("Wrong creds".to_string()))
-                };
+        if let Ok(redis_user) = redis_user {
+            if let Ok(value) = serde_json::from_str::<SessionUser>(&redis_user) {
+                return Ok(Option::from(value));
             }
-            Err(_) => {}
         }
-
         let mut transaction = self.db.begin().await.map_err(Error::from)?;
         let user = match get_user_opt_by_email(&mut transaction, &creds.email).await {
             Ok(u) => u,
@@ -108,10 +109,10 @@ impl AuthnBackend for Backend {
             nonce: creds.nonce,
             email: user.email,
         };
-        let _: RedisResult<()> = c
-            .set(&key, serde_json::to_string(&session_user).unwrap())
-            .await;
-        let _: RedisResult<()> = c.expire(creds.email, 60 * 60 * 24).await;
+        if let Ok(session_user) = serde_json::to_string(&session_user) {
+            let _: RedisResult<()> = c.set(&key, session_user).await;
+            let _: RedisResult<()> = c.expire(&key, Backend::get_expire()).await;
+        }
         transaction.commit().await.map_err(Error::from)?;
         Ok(Option::from(session_user))
     }
@@ -161,10 +162,10 @@ impl AuthnBackend for Backend {
             email: user.email.clone(),
             nonce: nonce.nonce.as_ref().to_string(),
         };
-        let _: RedisResult<()> = c
-            .set(&key, serde_json::to_string(&session_user).unwrap())
-            .await;
-        let _: RedisResult<()> = c.expire(user.email, 60 * 60 * 24).await;
+        if let Ok(session_user) = serde_json::to_string(&session_user) {
+            let _: RedisResult<()> = c.set(&key, &session_user).await;
+            let _: RedisResult<()> = c.expire(&key, Backend::get_expire()).await;
+        }
         Ok(Option::from(session_user))
     }
 }

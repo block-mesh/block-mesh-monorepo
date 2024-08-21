@@ -11,9 +11,9 @@ on:
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
-env:
-  SCCACHE_GHA_ENABLED: "true"
-  RUSTC_WRAPPER: "sccache"
+#env:
+#  SCCACHE_GHA_ENABLED: "true"
+#  RUSTC_WRAPPER: "sccache"
 jobs:
   fmt:
     name: Rustfmt
@@ -28,7 +28,7 @@ jobs:
         with:
           key: rustfmt-sqlx-${{ vars.SQLX_VERSION }}
           cache-all-crates: true
-      - name: Sccache Action
-        uses: Mozilla-Actions/sccache-action@v0.0.5
+      #      - name: Sccache Action
+      #        uses: Mozilla-Actions/sccache-action@v0.0.5
       - name: Enforce formatting
         run: cargo fmt --all -- --check
