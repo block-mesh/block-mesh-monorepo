@@ -48,5 +48,7 @@ async fn scheduled(event: ScheduledEvent, env: Env, _ctx: ScheduleContext) {
         .delete(url)
         .header("Content-Type", "application/json")
         .header("Accept", "application/vnd.heroku+json; version=3")
-        .header("Authorization", format!("Bearer {}", token));
+        .header("Authorization", format!("Bearer {}", token))
+        .send()
+        .await;
 }
