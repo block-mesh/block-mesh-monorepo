@@ -40,7 +40,8 @@ struct Home {
 }
 
 #[event(fetch)]
-async fn main(_req: Request, _env: Env, _ctx: Context) -> Result<Response> {
+async fn main(_req: Request, _env: Env, ctx: Context) -> Result<Response> {
+    // let counter = ctx.kv("ab_testing")
     let response = Home {
         chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
         app_server: BLOCK_MESH_APP_SERVER.to_string(),

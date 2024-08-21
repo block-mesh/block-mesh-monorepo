@@ -1,6 +1,9 @@
 name = "cloudflare-landing-page"
 main = "build/worker/shim.mjs"
 compatibility_date = "2023-12-01"
+kv_namespaces = [
+  { binding = "ab_testing", id = "2f02ce21b93b4693a7bf784ac0405e20" }
+]
 
 [build]
 command = "cargo install -q worker-build && worker-build --release"
