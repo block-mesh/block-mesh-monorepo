@@ -9,6 +9,9 @@ use clap::Parser;
 use logger_general::tracing::setup_tracing;
 use uuid::Uuid;
 
+#[macro_use]
+pub extern crate tracing;
+
 mod helpers;
 
 #[tokio::main]

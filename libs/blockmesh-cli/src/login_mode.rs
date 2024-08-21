@@ -10,7 +10,7 @@ use uuid::Uuid;
 pub async fn login_mode(url: &str, email: &str, password: &str) -> anyhow::Result<ExitCode> {
     let url = url.to_string();
     let url = Arc::new(url.to_string());
-    println!("CLI running with url {}", url);
+    info!("CLI running with url {}", url);
     let api_token = match login(
         &url,
         LoginForm {
@@ -29,10 +29,10 @@ pub async fn login_mode(url: &str, email: &str, password: &str) -> anyhow::Resul
     };
     setup_tracing(api_token, DeviceType::Cli);
 
-    tracing::info!("Login successful");
+    info!("Login successful");
     let email = Arc::new(email.to_string());
     let api_token = Arc::new(api_token.to_string());
-    tracing::info!("CLI starting");
+    info!("CLI starting");
     let u = url.clone();
     let e = email.clone();
     let a = api_token.clone();
@@ -62,9 +62,9 @@ pub async fn login_mode(url: &str, email: &str, password: &str) -> anyhow::Resul
     });
 
     tokio::select! {
-        o = task_poller => tracing::error!("task_poller failed {:?}", o),
-        o = uptime_poller => tracing::error!("uptime_poller failed {:?}", o),
-        o = bandwidth_poller => tracing::error!("bandwidth_poller failed {:?}", o)
+        o = task_poller => error!("task_poller failed {:?}", o),
+        o = uptime_poller => error!("uptime_poller failed {:?}", o),
+        o = bandwidth_poller => error!("bandwidth_poller failed {:?}", o)
     }
     Ok(ExitCode::SUCCESS)
 }
