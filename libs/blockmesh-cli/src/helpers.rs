@@ -62,7 +62,7 @@ pub async fn register(url: &str, credentials: &RegisterForm) -> anyhow::Result<(
 }
 
 #[allow(dead_code)]
-pub async fn login(url: &str, login_form: LoginForm) -> anyhow::Result<Uuid> {
+pub async fn login_to_network(url: &str, login_form: LoginForm) -> anyhow::Result<Uuid> {
     let url = format!("{}/api{}", url, RoutesEnum::Api_GetToken);
     let client = http_client();
     let response: GetTokenResponse = client
@@ -188,18 +188,25 @@ pub async fn submit_task(
     task_id: &Uuid,
     response_code: i32,
     response_raw: String,
-    metadata: &Metadata,
+    metadata: Metadata,
     response_time: f64,
 ) -> anyhow::Result<SubmitTaskResponse> {
+    let Metadata {
+        ip,
+        country,
+        asn,
+        colo,
+        city,
+    } = metadata;
     let query: SubmitTaskRequest = SubmitTaskRequest {
         email: email.to_string(),
         api_token: *api_token,
         task_id: *task_id,
         response_code: Some(response_code),
-        country: Option::from(metadata.country.clone()),
-        ip: Option::from(metadata.ip.clone()),
-        asn: Option::from(metadata.asn.clone()),
-        colo: Option::from(metadata.colo.clone()),
+        country: Option::from(country),
+        ip: Option::from(ip),
+        asn: Option::from(asn),
+        colo: Option::from(colo),
         response_time: Option::from(response_time),
     };
     let response = reqwest::Client::new()
@@ -233,7 +240,7 @@ pub async fn task_poller(url: &str, email: &str, api_token: &str) -> anyhow::Res
                 &task.id,
                 520,
                 "".to_string(),
-                &metadata,
+                metadata.clone(),
                 response_time,
             )
             .await
@@ -257,7 +264,7 @@ pub async fn task_poller(url: &str, email: &str, api_token: &str) -> anyhow::Res
         &task.id,
         finished_task.status,
         finished_task.raw,
-        &metadata,
+        metadata,
         response_time,
     )
     .await

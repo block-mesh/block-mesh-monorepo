@@ -1,4 +1,4 @@
-use crate::helpers::{login, report_uptime, submit_bandwidth, task_poller};
+use crate::helpers::{login_to_network, report_uptime, submit_bandwidth, task_poller};
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::LoginForm;
 use logger_general::tracing::setup_tracing;
@@ -11,7 +11,7 @@ pub async fn login_mode(url: &str, email: &str, password: &str) -> anyhow::Resul
     let url = url.to_string();
     let url = Arc::new(url.to_string());
     info!("CLI running with url {}", url);
-    let api_token = match login(
+    let api_token = match login_to_network(
         &url,
         LoginForm {
             email: email.to_string(),
