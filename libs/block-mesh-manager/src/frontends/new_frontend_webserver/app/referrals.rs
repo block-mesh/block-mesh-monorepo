@@ -94,47 +94,47 @@ pub fn Referrals() -> impl IntoView {
                 <div>
                     <Subheading class="mt-14">Ranking</Subheading>
                     <nav class="mt-4 mx-auto max-w-7xl" aria-label="Progress">
-                        <ol role="list" class="rounded-md lg:flex lg:rounded-none ">
+                        <ol role="list" class="rounded-md xl:flex xl:rounded-none ">
                             <RefererRank
                                 title="Novice"
-                                description="100,000 points or 15 invites"
+                                description="100,000 points and 25 invites"
                                 step=1
                                 is_complete=false
                             />
                             <RefererRank
                                 title="Apprentice"
-                                description="500,000 points or 25 invites"
+                                description="500,000 points and 50 invites"
                                 step=2
                                 is_complete=false
                             />
                             <RefererRank
                                 title="Journeyman"
-                                description="1,000,000 points or 50 invites"
+                                description="1,000,000 points and 100 invites"
                                 step=3
                                 is_complete=false
                             />
                             <RefererRank
                                 title="Expert"
-                                description="2,500,000 points or 100 invites"
+                                description="2,500,000 points and 200 invites"
                                 step=4
                                 is_complete=false
                             />
                             <RefererRank
                                 title="Master"
-                                description="5,000,000 points or 125 invites"
+                                description="5,000,000 points and 500 invites"
                                 step=5
                                 is_complete=false
                             />
                             <RefererRank
                                 title="Grandmaster"
-                                description="10,000,000 points or 175 invites"
+                                description="10,000,000 points and 750 invites"
                                 step=5
                                 is_complete=false
                             />
                             <RefererRank
                                 title="Legend"
-                                description="25,000,000 points or 200 invites"
-                                step=5
+                                description="25,000,000 points and 1,000 invites"
+                                step=6
                                 is_complete=false
                             />
                         </ol>
