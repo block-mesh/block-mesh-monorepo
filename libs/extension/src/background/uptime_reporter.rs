@@ -36,6 +36,7 @@ pub async fn report_uptime() {
         } else {
             Some(metadata.ip)
         },
+        metadata: None,
     };
 
     if let Ok(response) = reqwest::Client::new()

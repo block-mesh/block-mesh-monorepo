@@ -47,6 +47,15 @@ pub async fn handler(
     let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
+    if let Some(metadata) = query.metadata {
+        println!("Inserting analytics");
+        tracing::trace!("Inserting analytics");
+        sqlx::query!(r#"
+        INSERT INTO analytics (user_id, depin_aggregator, device_type, created_at, updated_at)
+        VALUES ($1, $2, $3, $4, $4)
+        ON CONFLICT (user_id, depin_aggregator) DO UPDATE SET updated_at = $4
+        "#, user.id, metadata.depin_aggregator, metadata.device_type.to_string(), Utc::now()).execute(&pool).await?;
+    }
     if user.email.to_ascii_lowercase() != query.email.to_ascii_lowercase() {
         return Err(Error::UserNotFound);
     }
@@ -58,6 +67,7 @@ pub async fn handler(
     if daily_stat_opt.is_none() {
         create_daily_stat(&mut transaction, user.id).await?;
     }
+
 
     let interval = state
         .flags

@@ -2,6 +2,7 @@ use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use uuid::Uuid;
+use crate::constants::DeviceType;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetTaskResponse {
@@ -36,11 +37,18 @@ pub struct ConfirmEmailRequest {
     pub token: String,
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct Metadata {
+    pub depin_aggregator: Option<String>,
+    pub device_type: DeviceType
+}
+
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ReportUptimeRequest {
     pub email: String,
     pub api_token: Uuid,
     pub ip: Option<String>,
+    pub metadata: Option<Metadata>
 }
 
 #[derive(Serialize, Deserialize, Debug)]

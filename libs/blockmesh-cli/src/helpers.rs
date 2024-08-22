@@ -86,24 +86,33 @@ pub async fn login_to_network(url: &str, login_form: LoginForm) -> anyhow::Resul
 }
 
 #[tracing::instrument(name = "report_uptime", skip(api_token), err)]
-pub async fn report_uptime(url: &str, email: &str, api_token: &str) -> anyhow::Result<()> {
+pub async fn report_uptime(url: &str, email: &str, api_token: &str, session_metadata: block_mesh_common::interfaces::server_api::Metadata) -> anyhow::Result<()> {
     let api_token = Uuid::from_str(api_token).context("Failed to parse UUID")?;
-    let metadata = fetch_metadata().await.unwrap_or_default();
+    let cloudflare_metadata = fetch_metadata().await.unwrap_or_default();
 
     let query = ReportUptimeRequest {
         email: email.to_string(),
         api_token,
-        ip: Some(metadata.ip).filter(|ip| !ip.is_empty()),
+        ip: Some(cloudflare_metadata.ip).filter(|ip| !ip.is_empty()),
+        metadata: Some(session_metadata)
     };
 
+    let url = format!("{}/api/report_uptime", url);
+    info!("Reporting uptime on {}", &url);
     if let Ok(response) = http_client()
-        .post(format!("{}/api/report_uptime", url))
-        .query(&query)
+        .post(url)
+        .query(&[Some(("email", query.email)), Some(("api_token", query.api_token.to_string())), query.ip.map(|ip| ("ip", ip))])
         .send()
-        .await
+        .await.inspect_err(|error| info!("Error occured while reporting uptime: {error}"))
     {
-        let _ = response.json::<ReportUptimeResponse>().await;
+        info!("{}", response.status());
+        let json = response.json::<ReportUptimeResponse>().await.unwrap();
+        info!("Uptime response: {json:?}");
+    } else {
+        info!("Reporting failed");
     }
+
+
     Ok(())
 }
 

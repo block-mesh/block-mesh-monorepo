@@ -230,6 +230,9 @@ pub struct CliOpts {
     pub url: String,
     #[arg(long, default_value = "blockmesh-cli")]
     pub invite_code: String,
+    /// DePIN aggregator name
+    #[arg(long)]
+    pub depin_aggregator: Option<String>
 }
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, ValueEnum, PartialEq, Default)]
