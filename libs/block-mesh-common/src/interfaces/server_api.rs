@@ -1,6 +1,7 @@
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::cmp::Ordering;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -274,3 +275,41 @@ pub struct CallToActionForm {
     pub name: String,
     pub status: bool,
 }
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct DailyLeaderboard {
+    pub day: NaiveDate,
+    pub leaderboard_users: Vec<LeaderBoardUser>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct LeaderBoardUser {
+    pub email: String,
+    pub points: f64,
+}
+
+impl PartialEq<Self> for LeaderBoardUser {
+    fn eq(&self, other: &Self) -> bool {
+        self.points == other.points
+    }
+}
+
+impl PartialOrd<Self> for LeaderBoardUser {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        if self.points == other.points {
+            Some(Ordering::Equal)
+        } else if self.points > other.points {
+            Some(Ordering::Greater)
+        } else {
+            Some(Ordering::Less)
+        }
+    }
+}
+
+impl Ord for LeaderBoardUser {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+
+impl Eq for LeaderBoardUser {}
