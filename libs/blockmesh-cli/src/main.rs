@@ -1,6 +1,6 @@
 use std::process::ExitCode;
 
-use block_mesh_common::cli::{CliOptMode, CliOpts};
+use block_mesh_common::cli::{CliOptMod, CliOpts};
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{DashboardRequest, LoginForm, RegisterForm};
 use blockmesh_cli::helpers::{dashboard, login_to_network, register};
@@ -18,10 +18,10 @@ mod helpers;
 pub async fn main() -> anyhow::Result<ExitCode> {
     let args = CliOpts::parse();
     match args.mode {
-        CliOptMode::Login => {
+        CliOptMod::Login => {
             login_mode(&args.url.clone(), &args.email, &args.password).await?;
         }
-        CliOptMode::Register => {
+        CliOptMod::Register => {
             setup_tracing(Uuid::default(), DeviceType::Cli);
             register(
                 &args.url,
@@ -34,7 +34,7 @@ pub async fn main() -> anyhow::Result<ExitCode> {
             )
             .await?;
         }
-        CliOptMode::Dashboard => {
+        CliOptMod::Dashboard => {
             setup_tracing(Uuid::default(), DeviceType::Cli);
             let api_token = login_to_network(
                 &args.url,
