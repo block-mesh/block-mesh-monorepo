@@ -1,6 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+  {% include "hotjar.html" %}
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <meta name="description"
@@ -24,16 +25,15 @@
   <meta name="twitter:image" content=https://r2-landing-page.blockmesh.xyz/logo.png" />
 
   <title>BlockMesh Network</title>
-
-  <link rel="stylesheet" href="https://r2-landing-page.blockmesh.xyz/style.css" />
-  <link rel="stylesheet" href="https://r2-landing-page.blockmesh.xyz/header.css" />
-  <link rel="stylesheet" href="https://r2-landing-page.blockmesh.xyz/header-triangle.css" />
-  <link rel="stylesheet" href="https://r2-landing-page.blockmesh.xyz/how-it-works.css" />
-  <link rel="stylesheet" href="https://r2-landing-page.blockmesh.xyz/about-us.css" />
-  <link rel="stylesheet" href="https://r2-landing-page.blockmesh.xyz/easy-steps.css" />
-  <link rel="stylesheet" href="https://r2-landing-page.blockmesh.xyz/faq.css" />
-  <link rel="stylesheet" href="https://r2-landing-page.blockmesh.xyz/footer.css" />
-  <link rel="stylesheet" href="https://r2-landing-page.blockmesh.xyz/team.css" />
+  {% include "style_css.html" %}
+  {% include "header_css.html" %}
+  {% include "header-triangle_css.html" %}
+  {% include "how-it-works_css.html" %}
+  {% include "about-us_css.html" %}
+  {% include "easy-steps_css.html" %}
+  {% include "faq_css.html" %}
+  {% include "footer_css.html" %}
+  {% include "team_css.html" %}
 </head>
 <body>
 <header id="header" class="header">
@@ -88,7 +88,7 @@
       <div class="header-menu-item" sectionId="header">
         <div class="header-menu-thumb"></div>
         <img class="header-menu-cube" src="https://r2-landing-page.blockmesh.xyz/cube.png" alt="Header Icon" />
-        <span>Header</span>
+        <span>Welcome</span>
       </div>
       <div class="header-menu-item" sectionId="how-it-works">
         <div class="header-menu-thumb"></div>
@@ -120,27 +120,34 @@
              alt="FAQ Icon" />
         <span>FAQ</span>
       </div>
-      <div class="header-menu-item" sectionId="footer" style="display: none">
+      <div class="header-menu-item" sectionId="footer">
         <div class="header-menu-thumb"></div>
         <img class="header-menu-cube" style="opacity: 0" src="https://r2-landing-page.blockmesh.xyz/cube.png"
              alt="Footer Icon" />
-        <span>Footer</span>
+        <span>About Us</span>
       </div>
     </div>
     <img class="header-hexagon" src="https://r2-landing-page.blockmesh.xyz/hexagon-lg.png" alt="Header Hexagon" />
     <div class="header-text">
+
       <h1>
         Turn Bandwidth
         <br />
         Into Profit
       </h1>
       <h2>
-        Participate in the AI paradigm shift
+        {% if counter % 4 == 0 %}
+        Earn from the expansion of the AI market
+        {% else if counter % 4 == 1 %}
+        Earn seamlessly from your idle internet
+        {% else if counter % 4 == 2 %}
+        Transform your Internet into profit
+        {% else if counter % 4 == 3 %}
+        Profit off AI demand for data
+        {% endif %}
       </h2>
-      <button class="header-button">
-        <a href="https://app.blockmesh.xyz/register" target="_blank">
+      <button class="header-top-button" onclick="window.open('https://app.blockmesh.xyz/register?invite_code=landingpage', '_blank')">
           Join Now
-        </a>
       </button>
       <div class="header-actions-social">
         <a target="_blank" href="https://x.com/blockmesh_xyz">
@@ -208,13 +215,22 @@
     <div class="how-it-works-text">
       <h3>What is BlockMesh Network?</h3>
       <p>
-        BlockMesh Network is a decentralized, open-source data network where you can easily monetize your idle bandwidth
-        with a one-time setup
+        BlockMesh Network serves as the backbone for powering AI models.
+        By installing BlockMesh, your unused bandwidth is automatically sold to AI companies,
+        who use it to scrape the web and train their models.
+        The outcome? You benefit from the growth of AI,
+        earning a share in the network by contributing a resource you may not have realized you possessed.
         <br />
-        Connect and sell your unused internet to AI companies, enabling efficient data transfer, model sharing,
-        distributed training for AI, e-commerce, data scraping, and more.
+        You can trust us, keeping your secure and respecting your privacy.
+        We are fully open source, allowing anyone to audit our code on <a
+        href="https://github.com/block-mesh/block-mesh-monorepo" target="_blank">GitHub</a>
+        Our software is safeguarded by a global community of developers tracking our public repository who ensure it
+        remains secure and adheres to
+        strict ethical standards.
       </p>
-      <img src="https://r2-landing-page.blockmesh.xyz/logo-black-and-white.png" alt="BlockMesh Logo Black and White" />
+      <button class="header-top-button" onclick="window.open('https://app.blockmesh.xyz/register?invite_code=landingpage', '_blank')">
+          Join Now
+      </button>
     </div>
     <div class="how-it-works-image">
       <img class="how-it-works-line how-it-works-line-1" src="https://r2-landing-page.blockmesh.xyz/orange-line.png"
@@ -289,7 +305,7 @@
       </div>
       <div class="easy-steps-content-card easy-steps-content-card-signup"
            style="cursor: pointer;"
-           onclick="window.open('https://app.blockmesh.xyz/register', '_blank')"
+           onclick="window.open('https://app.blockmesh.xyz/register?invite_code=landingpage', '_blank')"
       >
         <div>
           <svg fill="#FF7E07AA" height="3em" width="3em" id="Layer_1" data-name="Layer 1"
@@ -316,7 +332,10 @@
                 </g>
               </svg>
           <h4>Get Rewards</h4>
-          <p>Anywhere, Anytime, Effortlessly</p>
+          <p>Anywhere, Anytime, Effortlessly. Refer friends and earn together.</p>
+          <button class="header-top-button" onclick="window.open('https://app.blockmesh.xyz/register?invite_code=landingpage', '_blank')">
+              Join Now
+          </button>
         </div>
       </div>
     </div>
@@ -409,11 +428,10 @@
           </summary>
           <div class="accordion-content">
             <p>
-              BlockMesh is open-source and can be audited by anyone at any time,
-              ensuring that any code added to handle data in unexpected ways will be visible and flagged.
-              Moreover, BlockMesh aims to empower both clients and providers;
-              selling your data without consent is a net negative.
-              We're focused on long-term value, not short-term gains
+              Your Personal Data is Protected: BlockMesh is solely a network for contributing bandwidth,
+              with no access granted to your personal data or online activity.
+              Our open-source platform ensures total security and privacy, backed by transparent,
+              community-driven oversight that guarantees your protection
             </p>
           </div>
         </details>
@@ -455,7 +473,8 @@
   </div>
 </section>
 
-<footer class="section" id="footer">
+<<section class="section" id="footer">
+<section class="section">
   <img class="footer-top-image" src="https://r2-landing-page.blockmesh.xyz/hexagon.png"
        alt="Footer Top Background Image" />
   <img class="footer-bottom-image" src="https://r2-landing-page.blockmesh.xyz/hexagon.png"
@@ -503,8 +522,8 @@
     <h3>Start Earning With Us Now</h3>
     <p>Free use, no payments requires</p>
     <button
-      onclick="window.open('https://app.blockmesh.xyz/register', '_blank')"
-      class="header-button">Join Now
+      onclick="window.open('https://app.blockmesh.xyz/register?invite_code=landingpage', '_blank')"
+      class="header-top-button">Join Now
     </button>
     <br />
     <br />
@@ -623,7 +642,7 @@
     </div>
     <br />
   </div>
-</footer>
+</section>
 
 <script src="https://r2-landing-page.blockmesh.xyz/script.js"></script>
 </body>

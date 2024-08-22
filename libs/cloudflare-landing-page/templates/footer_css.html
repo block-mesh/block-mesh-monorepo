@@ -1,0 +1,275 @@
+<style>
+    footer {
+        height: 100vh;
+        width: 100vw;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .footer-content {
+        text-align: center;
+    }
+
+    .footer-content h3 {
+        margin-top: 5%;
+    }
+
+    .footer-content svg {
+        width: 50px;
+        height: 50px;
+        animation: footerLogo 8s linear infinite;
+        animation: name duration timing-function delay iteration-count direction fill-mode;
+    }
+
+    .footer-bottom {
+        position: absolute;
+        bottom: 15%;
+        left: 0;
+        right: 0;
+        margin: auto;
+        display: flex;
+        justify-content: center;
+    }
+
+    .footer-content span {
+        font-size: 0.8em;
+        font-family: "Open Sans";
+        font-style: normal;
+        font-weight: 400;
+        line-height: 141%;
+        color: var(--white);
+        opacity: 0.6;
+        letter-spacing: 1px;
+    }
+
+    #footer {
+        position: relative;
+    }
+
+    .footer-top-image {
+        opacity: 0.5;
+        position: absolute;
+        top: -27%;
+        left: -7%;
+        z-index: 0;
+    }
+
+    .footer-bottom-image {
+        opacity: 0.5;
+        position: absolute;
+        bottom: -27%;
+        right: -7%;
+    }
+
+    .footer-background-rain-item {
+        position: absolute;
+        opacity: 0;
+    }
+
+    @keyframes footerLogo {
+        0% {
+            rotate: 0;
+        }
+
+        100% {
+            rotate: 360deg;
+        }
+    }
+
+    @keyframes footerBackgroundCube1 {
+        0% {
+            opacity: 0;
+            top: 11%;
+            left: 44%;
+            height: 16%;
+        }
+
+        100% {
+            opacity: 1;
+            top: 17%;
+            left: 41%;
+            height: 16%;
+        }
+    }
+
+    @keyframes footerBackgroundCube2 {
+        0% {
+            opacity: 0;
+            top: 29%;
+            left: 73%;
+            width: 6%;
+        }
+
+        100% {
+            opacity: 1;
+            top: 35%;
+            left: 70%;
+            width: 6%;
+        }
+    }
+
+    @keyframes footerBackgroundCube3 {
+        0% {
+            opacity: 0;
+            top: 68%;
+            left: 13%;
+            width: 5%;
+        }
+
+        100% {
+            opacity: 1;
+            top: 75%;
+            left: 10%;
+            width: 5%;
+        }
+    }
+
+    @keyframes footerBackgroundLine1 {
+        0% {
+            opacity: 0;
+            top: 8%;
+            left: 33%;
+            width: 5%;
+        }
+
+        100% {
+            opacity: 1;
+            top: 15%;
+            left: 30%;
+            width: 5%;
+        }
+    }
+
+    @keyframes footerBackgroundLine2 {
+        0% {
+            opacity: 0;
+            top: 52%;
+            left: 69%;
+            height: 13%;
+        }
+
+        100% {
+            opacity: 1;
+            top: 60%;
+            left: 65%;
+            height: 13%;
+        }
+    }
+
+    @keyframes footerBackgroundLine3 {
+        0% {
+            opacity: 0;
+            top: 47%;
+            left: 29%;
+            height: 14%;
+        }
+
+        100% {
+            opacity: 1;
+            top: 55%;
+            left: 25%;
+            height: 14%;
+        }
+    }
+
+    @keyframes footerBackgroundLine4 {
+        0% {
+            opacity: 0;
+            top: 4%;
+            left: 66%;
+            height: 13%;
+        }
+
+        100% {
+            opacity: 1;
+            top: 12%;
+            left: 62%;
+            height: 13%;
+        }
+    }
+
+    /* ****** */
+    /* LARGE SCREEN */
+    /* ****** */
+
+    @media only screen and (max-width: 1800px) {
+    }
+
+    /* ****** */
+    /* MEDIUM SCREEN */
+    /* ****** */
+
+    @media only screen and (max-width: 1024px) {
+    }
+
+    /* ****** */
+    /* MOBILE */
+    /* ****** */
+
+    @media only screen and (max-width: 768px) {
+        .section#footer > div {
+            top: 15%;
+        }
+
+        .footer-top-image {
+            top: -27%;
+            left: 30%;
+            height: 50%;
+        }
+
+        .footer-bottom {
+            position: static;
+        }
+
+        .footer-bottom-image {
+            bottom: -27%;
+            right: 30%;
+            height: 50%;
+        }
+
+        .footer-policies {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 26%;
+        }
+
+        .footer-copyrights {
+            position: absolute;
+            bottom: 8%;
+            left: 0;
+            right: 0;
+        }
+
+        @keyframes footerBackgroundCube1 {
+            0% {
+                opacity: 0;
+                top: 2%;
+                left: 46%;
+                height: 12%;
+            }
+
+            100% {
+                opacity: 1;
+                top: 8%;
+                left: 41%;
+                height: 12%;
+            }
+        }
+
+        @keyframes footerBackgroundCube2 {
+            0% {
+                opacity: 0;
+                top: 29%;
+                left: 83%;
+                height: 3%;
+            }
+
+            100% {
+                opacity: 1;
+                top: 35%;
+                left: 80%;
+                height: 3%;
+            }
+        }
+    }
+</style>
