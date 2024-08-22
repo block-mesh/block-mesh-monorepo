@@ -296,13 +296,7 @@ impl PartialEq<Self> for LeaderBoardUser {
 
 impl PartialOrd<Self> for LeaderBoardUser {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        if self.points == other.points {
-            Some(Ordering::Equal)
-        } else if self.points > other.points {
-            Some(Ordering::Greater)
-        } else {
-            Some(Ordering::Less)
-        }
+        Some(self.cmp(other))
     }
 }
 
