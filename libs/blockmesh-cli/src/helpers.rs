@@ -24,6 +24,7 @@ use uuid::Uuid;
 fn http_client() -> Client {
     ClientBuilder::new()
         .timeout(Duration::from_secs(3))
+        .no_hickory_dns()
         .build()
         .unwrap_or_default()
 }
@@ -236,7 +237,7 @@ pub async fn task_poller(url: &str, email: &str, api_token: &str) -> anyhow::Res
                 &metadata,
                 response_time,
             )
-                .await
+            .await
             {
                 Ok(_) => {
                     tracing::info!("successfully submitted failed task");
@@ -260,7 +261,7 @@ pub async fn task_poller(url: &str, email: &str, api_token: &str) -> anyhow::Res
         &metadata,
         response_time,
     )
-        .await
+    .await
     {
         Ok(_) => {
             tracing::info!("successfully submitted task");
