@@ -128,13 +128,13 @@ pub fn Referrals() -> impl IntoView {
                             <RefererRank
                                 title="Grandmaster"
                                 description="10,000,000 points and 750 invites"
-                                step=5
+                                step=6
                                 is_complete=false
                             />
                             <RefererRank
                                 title="Legend"
                                 description="25,000,000 points and 1,000 invites"
-                                step=6
+                                step=7
                                 is_complete=false
                             />
                         </ol>
