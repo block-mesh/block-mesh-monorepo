@@ -1,5 +1,6 @@
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
@@ -8,6 +9,7 @@ use uuid::Uuid;
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum PerkName {
     Backpack,
+    Twitter,
     Invalid,
 }
 
@@ -15,6 +17,7 @@ impl Display for PerkName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             PerkName::Backpack => write!(f, "backpack"),
+            PerkName::Twitter => write!(f, "twitter"),
             PerkName::Invalid => write!(f, "invalid"),
         }
     }
@@ -24,6 +27,7 @@ impl From<String> for PerkName {
     fn from(s: String) -> Self {
         match s.as_str() {
             "backpack" => PerkName::Backpack,
+            "twitter" => PerkName::Twitter,
             _ => PerkName::Invalid,
         }
     }
@@ -69,5 +73,7 @@ pub struct Perk {
     pub user_id: Uuid,
     pub created_at: DateTime<Utc>,
     pub multiplier: f64,
+    pub one_time_bonus: f64,
     pub name: PerkName,
+    pub data: Value,
 }

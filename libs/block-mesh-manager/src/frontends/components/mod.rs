@@ -3,6 +3,7 @@ pub mod bandwidth_card;
 pub mod bar_chart;
 pub mod conditionals;
 pub mod divider;
+pub mod download_extension;
 pub mod edit_invite_code;
 pub mod extension_button;
 pub mod extension_input;

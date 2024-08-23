@@ -1,0 +1,104 @@
+<style>
+    .about-us-content {
+        display: flex;
+        justify-content: space-between;
+    }
+
+    .about-us-image {
+        position: relative;
+        height: 25vw;
+        width: 60%;
+    }
+
+    .about-us-image-grid {
+        display: grid;
+        grid-template-columns: repeat(10, 1fr); /* Creates a 10x10 grid, adjust as needed */
+        position: absolute;
+        top: 0;
+        left: 0;
+        z-index: 2;
+    }
+
+    .about-us-image-cube {
+        background-color: black;
+        width: 100%;
+        height: 100%;
+        opacity: 1;
+        transition: opacity 1s ease;
+    }
+
+    .about-us-image img {
+        width: 100%;
+        height: 100%;
+        box-shadow: 0px 0px 50px #01FEFC33;
+        z-index: 1;
+        object-fit: cover;
+        border: 2px solid #000;
+        border-radius: 8px;
+    }
+
+    .about-us-text {
+        width: 35%;
+        position: relative;
+        opacity: 0;
+        right: -10%;
+    }
+
+    .about-us-text img {
+        width: 10%;
+    }
+
+    @keyframes AboutUsText {
+        0% {
+            right: -10%;
+            opacity: 0;
+        }
+
+        100% {
+            right: 0%;
+            opacity: 1;
+        }
+    }
+
+
+    /* ****** */
+    /* LARGE SCREEN */
+    /* ****** */
+
+    @media only screen and (max-width: 1800px) {
+
+    }
+
+    /* ****** */
+    /* MEDIUM SCREEN */
+    /* ****** */
+
+    @media only screen and (max-width: 1024px) {
+    }
+
+    /* ****** */
+    /* MOBILE */
+    /* ****** */
+
+    @media only screen and (max-width: 768px) {
+        section#about-us > div {
+            flex-direction: column-reverse;
+            align-items: center;
+            height: 75%;
+            justify-content: space-around;
+        }
+
+        .about-us-text {
+            width: 100%;
+            position: relative;
+            opacity: 0;
+            right: -10%;
+        }
+
+        .about-us-image {
+            position: relative;
+            height: 48vw;
+            width: 100%;
+        }
+    }
+</style>

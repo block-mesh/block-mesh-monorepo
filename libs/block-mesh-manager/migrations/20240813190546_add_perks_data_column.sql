@@ -1,0 +1,1 @@
+ALTER TABLE perks ADD COLUMN data jsonb DEFAULT '{}';

@@ -1,6 +1,7 @@
 pub mod aggregate;
 pub mod api_token;
 pub mod bandwidth;
+pub mod call_to_action;
 pub mod daily_stat;
 pub mod invite_code;
 pub mod ip_address;

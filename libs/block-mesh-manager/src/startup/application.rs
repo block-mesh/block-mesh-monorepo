@@ -4,6 +4,7 @@ use crate::envars::app_env_var::AppEnvVar;
 use crate::envars::env_var;
 use crate::envars::get_env_var_or_panic::get_env_var_or_panic;
 use crate::middlewares::authentication::{authentication_layer, Backend};
+use crate::routes::twitter::context::Oauth2Ctx;
 use crate::startup::routers::api_router::get_api_router;
 use crate::startup::routers::leptos_router::get_leptos_router;
 use crate::startup::routers::static_auth_router::get_static_auth_router;
@@ -12,6 +13,7 @@ use crate::worker::db_agg::UpdateBulkMessage;
 use crate::worker::db_cleaner_cron::EnrichIp;
 use axum::{Extension, Router};
 use axum_login::login_required;
+use block_mesh_common::feature_flag_client::FlagValue;
 use leptos::leptos_config::get_config_from_env;
 use redis::aio::MultiplexedConnection;
 use reqwest::Client;
@@ -24,11 +26,13 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio::sync::mpsc::UnboundedSender;
+use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
 use tower_http::timeout::TimeoutLayer;
+use twitter_v2::authorization::Oauth2Client;
 
 pub struct Application {
     app: Router,
@@ -41,7 +45,7 @@ pub struct AppState {
     pub client: Client,
     pub tx: tokio::sync::mpsc::Sender<JoinHandle<()>>,
     pub tx_sql_agg: tokio::sync::mpsc::Sender<UpdateBulkMessage>,
-    pub flags: HashMap<String, bool>,
+    pub flags: HashMap<String, FlagValue>,
     pub cleaner_tx: UnboundedSender<EnrichIp>,
     pub redis: MultiplexedConnection,
 }
@@ -109,6 +113,22 @@ impl Application {
 
         let leptos_router = get_leptos_router();
 
+        let oauth_ctx = Oauth2Ctx {
+            client: Oauth2Client::new(
+                env::var("TWITTER_CLIENT_ID").expect("could not find CLIENT_ID"),
+                env::var("TWITTER_CLIENT_SECRET").expect("could not find CLIENT_SECRET"),
+                env::var("TWITTER_CALLBACK_URL")
+                    .expect("could not find TWITTER_CALLBACK_URL")
+                    .parse()
+                    .unwrap(),
+            ),
+            verifier: None,
+            state: None,
+            token: None,
+            user_id: None,
+            user_nonce: None,
+        };
+
         let application_base_url = ApplicationBaseUrl(settings.application.base_url.clone());
         let backend = Router::new()
             .nest("/", auth_router)
@@ -133,6 +153,7 @@ impl Application {
             .nest("/", leptos_router)
             .nest("/", backend)
             .nest("/", leptos_pkg)
+            .layer(Extension(Arc::new(Mutex::new(oauth_ctx))))
             .layer(auth_layer);
 
         let listener = TcpListener::bind(settings.application.address())

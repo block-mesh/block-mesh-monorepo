@@ -17,8 +17,12 @@ pub enum RoutesEnum {
     Static_UnAuth_Register,
     Static_UnAuth_Login,
     Static_UnAuth_HealthCheck,
+    Static_Auth_Twitter_Login,
+    Static_Auth_Edit_Invite,
+    Static_Auth_Call_To_Action,
     Static_Auth_Logout,
     Static_Auth_Dashboard,
+    Static_UnAuth_Twitter_Callback,
     Api_ConnectWallet,
     Api_ReportUptime,
     Api_SubmitBandwidth,
@@ -36,7 +40,9 @@ pub enum RoutesEnum {
 impl Display for RoutesEnum {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match &self {
+            RoutesEnum::Static_Auth_Twitter_Login => write!(f, "/twitter/login"),
             RoutesEnum::Static_UnAuth_Map => write!(f, "/map"),
+            RoutesEnum::Static_UnAuth_Twitter_Callback => write!(f, "/twitter/callback"),
             RoutesEnum::Static_UnAuth_AuthStatus => write!(f, "/auth_status"),
             RoutesEnum::Static_UnAuth_RpcDashboard => write!(f, "/rpc_dashboard"),
             RoutesEnum::Static_UnAuth_RpcApi => write!(f, "/rpc_api"),
@@ -55,6 +61,8 @@ impl Display for RoutesEnum {
             RoutesEnum::Static_UnAuth_HealthCheck => write!(f, "/health_check"),
             RoutesEnum::Static_Auth_Logout => write!(f, "/logout"),
             RoutesEnum::Static_Auth_Dashboard => write!(f, "/dashboard"),
+            RoutesEnum::Static_Auth_Edit_Invite => write!(f, "/edit_invite_code"),
+            RoutesEnum::Static_Auth_Call_To_Action => write!(f, "/call_to_action"),
             RoutesEnum::Api_ConnectWallet => write!(f, "/connect_wallet"),
             RoutesEnum::Api_ReportUptime => write!(f, "/report_uptime"),
             RoutesEnum::Api_SubmitBandwidth => write!(f, "/submit_bandwidth"),

@@ -1,0 +1,149 @@
+<style>
+    .accordion-container {
+        min-width: 100%;
+    }
+
+    details {
+        font-size: 1.5em;
+        margin: 0 auto;
+        width: 100%;
+        position: relative;
+        transition: all 0.3s ease-in-out;
+        overflow: hidden;
+    }
+
+    details.expanding,
+    details.closing {
+        overflow: hidden;
+    }
+
+    .details:hover {
+        opacity: 1;
+    }
+
+    summary {
+        user-select: none;
+        cursor: pointer;
+        list-style: none;
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background-color: transparent;
+        border-radius: 8px;
+    }
+
+    summary:hover {
+        background-color: #fff1;
+    }
+
+    summary:hover .accordion-icon {
+        opacity: 1;
+    }
+
+    .accordion-title {
+        color: #fff;
+        width: 90%;
+        font-weight: 500;
+        transition: all 250ms ease-in-out;
+    }
+
+    .accordion-icon {
+        opacity: 0.5;
+        pointer-events: none;
+        position: absolute;
+        right: 1rem;
+        transition: all 150ms ease-out;
+        margin-top: 2px;
+    }
+
+    .accordion-icon img {
+        width: 1.1em;
+        height: 1.1em;
+        transition: transform 0.3s ease-in-out;
+    }
+
+    .accordion-content {
+        padding: 5px 15px;
+        font-size: 1em;
+        opacity: 1;
+        font-weight: 400;
+        line-height: 1.65;
+    }
+
+    .accordion-content p {
+        color: #fff;
+        opacity: 1;
+    }
+
+    /** Remove Marker */
+    summary::-webkit-details-marker {
+        display: none;
+    }
+
+    /** Rotate Icon */
+    details[open] .accordion-icon img {
+        transform: rotate(180deg);
+    }
+
+    /** Rotate Icon */
+    details[open] .accordion-icon {
+        opacity: 1;
+    }
+
+    details[open] .accordion-content {
+        opacity: 1;
+    }
+
+    .faq-content-background {
+        position: absolute;
+        bottom: 0;
+        left: -10%;
+        height: 85vh;
+        z-index: 1;
+    }
+
+    .faq-content {
+        display: flex;
+        justify-content: center;
+        z-index: 2;
+    }
+
+    .faq-content h3 {
+        text-align: center;
+        margin-bottom: 5%;
+    }
+
+    .faq-content > div {
+        width: 70%;
+    }
+
+
+    /* ****** */
+    /* LARGE SCREEN */
+    /* ****** */
+
+    @media only screen and (max-width: 1800px) {
+
+    }
+
+    /* ****** */
+    /* MEDIUM SCREEN */
+    /* ****** */
+
+    @media only screen and (max-width: 1024px) {
+    }
+
+    /* ****** */
+    /* MOBILE */
+    /* ****** */
+
+    @media only screen and (max-width: 768px) {
+        section#faq > div {
+            width: 100%;
+        }
+
+        .faq-content > div {
+            width: 90%;
+        }
+    }
+</style>

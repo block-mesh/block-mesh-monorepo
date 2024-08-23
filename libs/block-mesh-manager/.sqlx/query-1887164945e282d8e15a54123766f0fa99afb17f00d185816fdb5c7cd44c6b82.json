@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT\n        id, user_id, name, created_at, multiplier\n        FROM perks\n        WHERE user_id = $1\n        ",
+  "query": "\n        SELECT\n        id, user_id, name, created_at, multiplier, one_time_bonus, data\n        FROM perks\n        WHERE user_id = $1\n        ",
   "describe": {
     "columns": [
       {
@@ -27,6 +27,16 @@
         "ordinal": 4,
         "name": "multiplier",
         "type_info": "Float8"
+      },
+      {
+        "ordinal": 5,
+        "name": "one_time_bonus",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 6,
+        "name": "data",
+        "type_info": "Jsonb"
       }
     ],
     "parameters": {
@@ -37,10 +47,12 @@
     "nullable": [
       false,
       false,
-      true,
       false,
-      false
+      false,
+      false,
+      false,
+      true
     ]
   },
-  "hash": "868c94f3634f8467f6a995d027ce316e6a58579949d205ee5545f6b35e63204c"
+  "hash": "1887164945e282d8e15a54123766f0fa99afb17f00d185816fdb5c7cd44c6b82"
 }
