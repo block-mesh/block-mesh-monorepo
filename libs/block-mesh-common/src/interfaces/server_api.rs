@@ -48,7 +48,11 @@ pub struct ReportUptimeRequest {
     pub email: String,
     pub api_token: Uuid,
     pub ip: Option<String>,
-    pub metadata: Option<Metadata>
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ReportUptimeJsonRequest {
+     pub metadata: Option<Metadata>    
 }
 
 #[derive(Serialize, Deserialize, Debug)]

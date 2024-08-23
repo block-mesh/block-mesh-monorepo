@@ -28,7 +28,6 @@ pub async fn report_uptime(email: String, api_token: String) -> anyhow::Result<(
         } else {
             Some(metadata.ip)
         },
-        metadata: None
     };
 
     if let Ok(response) = ClientBuilder::new()

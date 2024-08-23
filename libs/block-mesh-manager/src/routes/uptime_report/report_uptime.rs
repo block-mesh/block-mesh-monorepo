@@ -11,7 +11,7 @@ use crate::worker::db_cleaner_cron::EnrichIp;
 use axum::extract::{ConnectInfo, Query, State};
 use axum::{Extension, Json};
 use block_mesh_common::feature_flag_client::FlagValue;
-use block_mesh_common::interfaces::server_api::{ReportUptimeRequest, ReportUptimeResponse};
+use block_mesh_common::interfaces::server_api::{ReportUptimeJsonRequest, ReportUptimeRequest, ReportUptimeResponse};
 use chrono::Utc;
 use http::{HeaderMap, HeaderValue, StatusCode};
 use sqlx::PgPool;
@@ -39,6 +39,7 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     Query(query): Query<ReportUptimeRequest>,
+    body: Option<Json<ReportUptimeJsonRequest>>,
 ) -> Result<Json<ReportUptimeResponse>, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let api_token = find_token(&mut transaction, &query.api_token)
@@ -47,15 +48,18 @@ pub async fn handler(
     let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    if let Some(metadata) = query.metadata {
-        println!("Inserting analytics");
-        tracing::trace!("Inserting analytics");
-        sqlx::query!(r#"
-        INSERT INTO analytics (user_id, depin_aggregator, device_type, created_at, updated_at)
-        VALUES ($1, $2, $3, $4, $4)
-        ON CONFLICT (user_id, depin_aggregator) DO UPDATE SET updated_at = $4
-        "#, user.id, metadata.depin_aggregator, metadata.device_type.to_string(), Utc::now()).execute(&pool).await?;
+
+    if let Some(Json(body)) = body {
+        if let Some(metadata) = body.metadata {
+            tracing::trace!("Inserting client analytics");
+            sqlx::query!(r#"
+            INSERT INTO analytics (user_id, depin_aggregator, device_type, created_at, updated_at)
+            VALUES ($1, $2, $3, $4, $4)
+            ON CONFLICT (user_id, depin_aggregator) DO UPDATE SET updated_at = $4
+            "#, user.id, metadata.depin_aggregator, metadata.device_type.to_string(), Utc::now()).execute(&pool).await?;
+        }
     }
+
     if user.email.to_ascii_lowercase() != query.email.to_ascii_lowercase() {
         return Err(Error::UserNotFound);
     }
@@ -81,8 +85,8 @@ pub async fn handler(
         AggregateName::Uptime,
         user.id,
     )
-    .await
-    .map_err(Error::from)?;
+        .await
+        .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;
 
     let now = Utc::now();

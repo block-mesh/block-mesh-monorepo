@@ -1,10 +1,6 @@
 use anyhow::{anyhow, Context};
 use block_mesh_common::constants::BLOCK_MESH_APP_SERVER;
-use block_mesh_common::interfaces::server_api::{
-    DashboardRequest, DashboardResponse, GetTaskRequest, GetTaskResponse, RegisterForm,
-    RegisterResponse, ReportBandwidthRequest, ReportBandwidthResponse, ReportUptimeRequest,
-    ReportUptimeResponse, RunTaskResponse, SubmitTaskRequest, SubmitTaskResponse,
-};
+use block_mesh_common::interfaces::server_api::{DashboardRequest, DashboardResponse, GetTaskRequest, GetTaskResponse, RegisterForm, RegisterResponse, ReportBandwidthRequest, ReportBandwidthResponse, ReportUptimeJsonRequest, ReportUptimeRequest, ReportUptimeResponse, RunTaskResponse, SubmitTaskRequest, SubmitTaskResponse};
 use block_mesh_common::interfaces::server_api::{GetTokenResponse, LoginForm};
 use block_mesh_common::routes_enum::RoutesEnum;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, CONTENT_TYPE};
@@ -94,24 +90,22 @@ pub async fn report_uptime(url: &str, email: &str, api_token: &str, session_meta
         email: email.to_string(),
         api_token,
         ip: Some(cloudflare_metadata.ip).filter(|ip| !ip.is_empty()),
-        metadata: Some(session_metadata)
     };
 
     let url = format!("{}/api/report_uptime", url);
     info!("Reporting uptime on {}", &url);
     if let Ok(response) = http_client()
         .post(url)
-        .query(&[Some(("email", query.email)), Some(("api_token", query.api_token.to_string())), query.ip.map(|ip| ("ip", ip))])
+        .query(&query)
+        .json(&ReportUptimeJsonRequest { metadata: Some(session_metadata) })
         .send()
         .await.inspect_err(|error| info!("Error occured while reporting uptime: {error}"))
     {
-        info!("{}", response.status());
         let json = response.json::<ReportUptimeResponse>().await.unwrap();
-        info!("Uptime response: {json:?}");
+        debug!("Uptime response: {json:?}");
     } else {
-        info!("Reporting failed");
+        error!("Reporting uptime failed");
     }
-
 
     Ok(())
 }
