@@ -4,7 +4,6 @@ use crate::frontends::context::auth_context::AuthContext;
 use crate::frontends::context::extension_state::ExtensionContext;
 use crate::frontends::context::notification_context::NotificationContext;
 use crate::frontends::context::size_context::SizeContext;
-use crate::frontends::context::webapp_context::WebAppContext;
 use crate::frontends::frontend_extension::components::navigator::ExtensionNavigator;
 use crate::frontends::frontend_extension::extension_header::ExtensionServerHeader;
 use crate::frontends::frontend_extension::pages::loading::ExtensionLoading;
@@ -32,62 +31,39 @@ pub fn App() -> impl IntoView {
     provide_context(AuthContext::default());
     provide_context(NotificationContext::default());
     provide_context(ExtensionContext::default());
-    provide_context(WebAppContext::default());
     provide_context(SizeContext::default());
 
-    let none_resource: Option<Resource<(), ()>> = None;
-    let _notification = use_context::<NotificationContext>().unwrap();
     let extension_state = use_context::<ExtensionContext>().unwrap();
     let auth_state = use_context::<AuthContext>().unwrap();
     let extension_resource = ExtensionContext::init_resource(extension_state);
     let none_extension_resource = None::<Resource<(), ExtensionContext>>;
     let auth_state = AuthContext::init_as_resource(auth_state);
-    let new_server_class =
-        "text-zinc-950 antialiased lg:bg-zinc-100 bg-zinc-900 text-off-white lg:bg-zinc-950";
 
     view! {
-        <CommonHeader/>
+        <CommonHeader />
         <Router fallback=|| { view! { <p>Error</p> }.into_view() }>
             <Routes>
                 <Route
                     path="/ui"
                     view=move || {
                         view! {
-                            <WebServerHeader/>
-                            <NotificationPopup/>
-                            <Outlet/>
+                            <WebServerHeader />
+                            <NotificationPopup />
+                            <Outlet />
                         }
                     }
                 >
-
-                    <Route path="/dashboard" view=NewDashboard/>
-                    <Route path="/referrals" view=Referrals/>
-                    <Route path="/perks" view=Perks/>
-                    <Route
-                        path="/new_dashboard"
-
-                        view=move || {
-                            view! {
-                                <Wrapper
-                                    resource=none_resource
-                                    auth=none_resource
-                                    loading=|| view! { <p>Loading</p> }
-                                    class=new_server_class
-                                >
-                                    <NewDashboard/>
-                                </Wrapper>
-                            }
-                        }
-                    />
-
+                    <Route path="/dashboard" view=NewDashboard />
+                    <Route path="/referrals" view=Referrals />
+                    <Route path="/perks" view=Perks />
                 </Route>
                 <Route
                     path="/tauri"
                     view=move || {
                         view! {
-                            <TauriHeader/>
-                            <NotificationPopup/>
-                            <Outlet/>
+                            <TauriHeader />
+                            <NotificationPopup />
+                            <Outlet />
                         }
                     }
                 >
@@ -99,11 +75,11 @@ pub fn App() -> impl IntoView {
                                 <Wrapper
                                     resource=none_extension_resource
                                     auth=Some(auth_state)
-                                    loading=|| view! { <TauriLoading/> }
+                                    loading=|| view! { <TauriLoading /> }
                                     class=""
                                 >
-                                    <TauriNavigator/>
-                                    <TauriLogin/>
+                                    <TauriNavigator />
+                                    <TauriLogin />
                                 </Wrapper>
                             }
                         }
@@ -116,11 +92,11 @@ pub fn App() -> impl IntoView {
                                 <Wrapper
                                     resource=none_extension_resource
                                     auth=Some(auth_state)
-                                    loading=|| view! { <TauriLoading/> }
+                                    loading=|| view! { <TauriLoading /> }
                                     class=""
                                 >
-                                    <TauriNavigator/>
-                                    <TauriRegister/>
+                                    <TauriNavigator />
+                                    <TauriRegister />
                                 </Wrapper>
                             }
                         }
@@ -133,11 +109,11 @@ pub fn App() -> impl IntoView {
                                 <Wrapper
                                     resource=none_extension_resource
                                     auth=Some(auth_state)
-                                    loading=|| view! { <TauriLoading/> }
+                                    loading=|| view! { <TauriLoading /> }
                                     class=""
                                 >
-                                    <TauriNavigator/>
-                                    <TauriLoggedIn/>
+                                    <TauriNavigator />
+                                    <TauriLoggedIn />
                                 </Wrapper>
                             }
                         }
@@ -148,8 +124,8 @@ pub fn App() -> impl IntoView {
                     path="/ext"
                     view=move || {
                         view! {
-                            <ExtensionServerHeader/>
-                            <Outlet/>
+                            <ExtensionServerHeader />
+                            <Outlet />
                         }
                     }
                 >
@@ -162,11 +138,11 @@ pub fn App() -> impl IntoView {
                                     resource=Some(extension_resource)
                                     auth=Some(auth_state)
                                     class=""
-                                    loading=|| view! { <ExtensionLoading/> }
+                                    loading=|| view! { <ExtensionLoading /> }
                                 >
-                                    <NotificationPopup/>
-                                    <ExtensionNavigator/>
-                                    <ExtensionLogin/>
+                                    <NotificationPopup />
+                                    <ExtensionNavigator />
+                                    <ExtensionLogin />
                                 </Wrapper>
                             }
                         }
@@ -180,11 +156,11 @@ pub fn App() -> impl IntoView {
                                     class=""
                                     resource=Some(extension_resource)
                                     auth=Some(auth_state)
-                                    loading=|| view! { <ExtensionLoading/> }
+                                    loading=|| view! { <ExtensionLoading /> }
                                 >
-                                    <NotificationPopup/>
-                                    <ExtensionNavigator/>
-                                    <ExtensionRegister/>
+                                    <NotificationPopup />
+                                    <ExtensionNavigator />
+                                    <ExtensionRegister />
                                 </Wrapper>
                             }
                         }
@@ -198,11 +174,11 @@ pub fn App() -> impl IntoView {
                                     class=""
                                     resource=Some(extension_resource)
                                     auth=Some(auth_state)
-                                    loading=|| view! { <ExtensionLoading/> }
+                                    loading=|| view! { <ExtensionLoading /> }
                                 >
-                                    <NotificationPopup/>
-                                    <ExtensionNavigator/>
-                                    <ExtensionLoggedIn/>
+                                    <NotificationPopup />
+                                    <ExtensionNavigator />
+                                    <ExtensionLoggedIn />
                                 </Wrapper>
                             }
                         }

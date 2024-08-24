@@ -65,7 +65,7 @@ pub fn ExtensionLoggedIn() -> impl IntoView {
                 </div>
             </div>
             <div class="auth-card-body">
-                <Logo/>
+                <Logo />
                 <div class="auth-card-content">
                     <div class="pulse"></div>
                     <small class="relative text-off-white">Version: {{ BLOCKMESH_VERSION }}</small>

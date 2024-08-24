@@ -15,7 +15,7 @@ pub fn SelectApps() -> impl IntoView {
                         <div class="relative flex flex-col bg-clip-border rounded-xl text-gray-700 bg-[#FAFAFA] px-10">
                             <a href=PageRoutes::OreMiner.path()>
                                 <div class="p-6">
-                                    <OreIcon/>
+                                    <OreIcon />
                                 </div>
                             </a>
                         </div>

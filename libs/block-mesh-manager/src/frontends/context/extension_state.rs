@@ -37,23 +37,25 @@ pub struct ExtensionContext {
     pub download_speed: RwSignal<f64>,
     pub upload_speed: RwSignal<f64>,
     pub last_update: RwSignal<i64>,
+    pub wallet_address: RwSignal<Option<String>>,
 }
 
 impl Default for ExtensionContext {
     fn default() -> Self {
         Self {
-            email: create_rw_signal(String::default()),
-            api_token: create_rw_signal(Uuid::default()),
-            device_id: create_rw_signal(Uuid::default()),
-            blockmesh_url: create_rw_signal("https://app.blockmesh.xyz".to_string()),
-            status: create_rw_signal(AuthStatus::LoggedOut),
-            uptime: create_rw_signal(0.0),
-            invite_code: create_rw_signal(String::default()),
-            success: create_rw_signal(None),
-            error: create_rw_signal(None),
-            download_speed: create_rw_signal(0.0),
+            email: RwSignal::new(String::default()),
+            api_token: RwSignal::new(Uuid::default()),
+            device_id: RwSignal::new(Uuid::default()),
+            blockmesh_url: RwSignal::new("https://app.blockmesh.xyz".to_string()),
+            status: RwSignal::new(AuthStatus::LoggedOut),
+            uptime: RwSignal::new(0.0),
+            invite_code: RwSignal::new(String::default()),
+            success: RwSignal::new(None),
+            error: RwSignal::new(None),
+            download_speed: RwSignal::new(0.0),
             upload_speed: Default::default(),
-            last_update: create_rw_signal(0),
+            last_update: RwSignal::new(0),
+            wallet_address: RwSignal::new(None),
         }
     }
 }
@@ -73,6 +75,7 @@ impl Debug for ExtensionContext {
             .field("download_speed", &self.download_speed.get_untracked())
             .field("upload_speed", &self.upload_speed.get_untracked())
             .field("last_update", &self.last_update.get_untracked())
+            .field("wallet_address", &self.wallet_address.get_untracked())
             .finish()
     }
 }
@@ -125,6 +128,7 @@ impl ExtensionContext {
         self.download_speed.update(|v| *v = download_speed);
         self.upload_speed.update(|v| *v = upload_speed);
         self.last_update.update(|v| *v = now);
+        self.wallet_address.update(|v| *v = None);
         let default_value: Value = Value::String("".to_string());
 
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
@@ -192,6 +196,9 @@ impl ExtensionContext {
                                     MessageKey::LastUpdate => self
                                         .last_update
                                         .update(|v| *v = i64::from_str(&value).unwrap_or_default()),
+                                    MessageKey::WalletAddress => self.wallet_address.update(|v| {
+                                        *v = (!value.is_empty()).then_some(value);
+                                    }),
                                     MessageKey::All => {
                                         log!("GET_ALL");
                                     }

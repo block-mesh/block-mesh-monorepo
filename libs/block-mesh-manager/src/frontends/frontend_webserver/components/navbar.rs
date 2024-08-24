@@ -1,31 +1,23 @@
+use crate::frontends::context::auth_context::AuthContext;
 use crate::frontends::context::notification_context::NotificationContext;
-use crate::frontends::context::webapp_context::WebAppContext;
-use crate::frontends::utils::auth::connect_wallet;
-use crate::frontends::utils::connectors::{pubkey, sign_message};
+use crate::frontends::utils::auth::connect_wallet_in_browser;
 use block_mesh_common::constants::BLOCK_MESH_LOGO;
-use block_mesh_common::interfaces::server_api::ConnectWalletRequest;
 use block_mesh_common::routes_enum::RoutesEnum;
-use js_sys::Uint8Array;
 use leptos::*;
 use leptos_router::A;
-use uuid::Uuid;
-use wasm_bindgen::JsValue;
+use leptos_use::js;
 
 #[component]
 pub fn NavbarComponent() -> impl IntoView {
     let notifications = expect_context::<NotificationContext>();
-    let logged_in = WebAppContext::is_logged_in();
-    let wallet = Signal::derive(move || {
-        if let Some(Some(l)) = logged_in.get() {
-            l.wallet_address
-        } else {
-            None
-        }
-    });
-    let button_enable = Signal::derive(move || wallet.get().is_none());
+    let auth = expect_context::<AuthContext>();
+
+    let button_enabled = Signal::derive(move || auth.wallet_address.get().is_none());
+
     let (b1, set_b1) = create_signal("block");
     let (b2, set_b2) = create_signal("hidden");
     let (menu, set_menu) = create_signal("hidden");
+
     let click = move || {
         if b1.get() == "block" {
             set_b1.set("hidden");
@@ -40,37 +32,17 @@ pub fn NavbarComponent() -> impl IntoView {
 
     let click_button = move || {
         spawn_local(async move {
-            if !button_enable.get() {
+            if !button_enabled.get() {
                 notifications.set_error("Backpack already connected");
                 return;
             }
-            if !window().has_own_property(&JsValue::from_str("backpack")) {
+
+            if !js!("backpack" in &window()) {
                 notifications.set_error("Backpack wallet not found");
             }
-            let msg = Uuid::new_v4().to_string();
-            let key = pubkey().await;
-            let sign = sign_message(&msg).await;
-            let uint8_array = Uint8Array::new(&sign);
-            let mut vec = vec![0; uint8_array.length() as usize];
-            uint8_array.copy_to(&mut vec[..]);
-            let origin = window().origin();
-            match connect_wallet(
-                origin,
-                ConnectWalletRequest {
-                    pubkey: key.as_string().unwrap(),
-                    message: msg.to_string(),
-                    signature: vec,
-                },
-            )
-            .await
-            {
-                Ok(_) => {
-                    logged_in.refetch();
-                    notifications.set_success("Connected successfully");
-                }
-                Err(_) => notifications.set_error("Failed to connect"),
-            }
-        })
+
+            connect_wallet_in_browser().await;
+        });
     };
 
     view! {
@@ -150,7 +122,7 @@ pub fn NavbarComponent() -> impl IntoView {
                                     class="rounded-md px-3 py-2 font-bebas-neue mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:bg-gray-700 hover:text-orange"
                                 >
                                     {move || {
-                                        if button_enable.get() {
+                                        if button_enabled.get() {
                                             "Connect Wallet"
                                         } else {
                                             "Wallet Connected"

@@ -58,17 +58,40 @@ pub fn TauriLogin() -> impl IntoView {
                             send_message_channel(
                                 MessageType::SET,
                                 MessageKey::Email,
-                                Option::from(MessageValue::String(state.email.get_untracked())),
+                                Some(MessageValue::String(state.email.get_untracked())),
                             )
                             .await;
                             send_message_channel(
                                 MessageType::SET,
                                 MessageKey::ApiToken,
-                                Option::from(MessageValue::UUID(api_token)),
+                                Some(MessageValue::UUID(api_token)),
                             )
                             .await;
                         }
+
                         notifications.set_success("Successfully logged in");
+
+                        match AuthContext::load_account_data().await {
+                            Ok(account_data) => {
+                                state
+                                    .wallet_address
+                                    .update(|v| *v = account_data.wallet_address);
+                                send_message_channel(
+                                    MessageType::SET,
+                                    MessageKey::WalletAddress,
+                                    state
+                                        .wallet_address
+                                        .get_untracked()
+                                        .map(MessageValue::String),
+                                )
+                                .await;
+                            }
+                            Err(e) => {
+                                notifications
+                                    .set_error(format!("Failed to load account data : {e:?}"));
+                            }
+                        }
+
                         state.status.update(|v| *v = AuthStatus::LoggedIn);
                     }
                 }

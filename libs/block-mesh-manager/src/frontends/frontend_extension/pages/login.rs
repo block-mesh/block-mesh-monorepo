@@ -85,7 +85,7 @@ pub fn ExtensionLogin() -> impl IntoView {
             <div class="auth-card-frame"></div>
             <div class="auth-card-top"></div>
             <div class="auth-card-body">
-                <Logo/>
+                <Logo />
                 <form on:submit=|ev| ev.prevent_default()>
                     <div class="auth-card-input-container">
                         <input
@@ -132,7 +132,7 @@ pub fn ExtensionLogin() -> impl IntoView {
 
                         <label class="font-bebas-neue text-off-white">Password</label>
                     </div>
-                    <br/>
+                    <br />
                     <button
                         class="auth-card-button font-bebas-neue text-off-white"
                         on:click=move |_ev| {
@@ -146,7 +146,7 @@ pub fn ExtensionLogin() -> impl IntoView {
             </div>
             <div class="auth-card-bottom">
                 <small class="font-open-sans text-orange">Doesnt have an account yet?</small>
-                <br/>
+                <br />
                 <button on:click=move |_| { state.status.update(|v| *v = AuthStatus::Registering) }>
                     <small
                         class="text-magenta underline cursor-pointer"

@@ -18,6 +18,7 @@ pub enum MessageKey {
     DownloadSpeed,
     UploadSpeed,
     LastUpdate,
+    WalletAddress,
 }
 
 impl Serialize for MessageKey {
@@ -42,6 +43,7 @@ impl Display for MessageKey {
             MessageKey::DownloadSpeed => "download_speed".to_string(),
             MessageKey::UploadSpeed => "upload_speed".to_string(),
             MessageKey::LastUpdate => "last_update".to_string(),
+            MessageKey::WalletAddress => "wallet_address".to_string(),
         };
         write!(f, "{}", str)
     }
@@ -63,6 +65,7 @@ impl TryFrom<&str> for MessageKey {
             "download_speed" => Ok(MessageKey::DownloadSpeed),
             "upload_speed" => Ok(MessageKey::UploadSpeed),
             "last_update" => Ok(MessageKey::LastUpdate),
+            "wallet_address" => Ok(MessageKey::WalletAddress),
             _ => Err(format!("Invalid MessageKey value {}", value)),
         }
     }

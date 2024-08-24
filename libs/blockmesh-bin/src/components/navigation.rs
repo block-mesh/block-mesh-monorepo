@@ -5,7 +5,7 @@ use leptos::*;
 pub fn Navigation() -> impl IntoView {
     view! {
         <div>
-            <Sidebar/>
+            <Sidebar />
         </div>
     }
 }

@@ -5,5 +5,5 @@ use tailwind_fuse::*;
 pub fn Divider(class: &'static str) -> impl IntoView {
     let class = tw_join!(class, "w-full border-t",);
 
-    view! { <hr role="presentation" class=class/> }
+    view! { <hr role="presentation" class=class /> }
 }

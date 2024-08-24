@@ -52,7 +52,7 @@ pub fn Avatar(
             </IfLetSome>
 
             <IfLetSome opt=src let:src>
-                <img class="size-full" src=src alt=alt/>
+                <img class="size-full" src=src alt=alt />
             </IfLetSome>
         </span>
     }

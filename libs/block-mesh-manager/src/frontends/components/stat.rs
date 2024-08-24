@@ -19,7 +19,7 @@ where
 
     view! {
         <div>
-            <Divider class="border-cyan"/>
+            <Divider class="border-cyan" />
 
             <div>
                 <div class="font-bebas-neue text-off-white mt-6 text-lg/6 font-medium sm:text-sm/6">

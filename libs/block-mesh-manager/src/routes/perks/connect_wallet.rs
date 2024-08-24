@@ -21,25 +21,29 @@ pub async fn handler(
 ) -> Result<Json<ConnectWalletResponse>, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let user = auth.user.ok_or(Error::UserNotFound)?;
+
     let signature =
         Signature::try_from(body.signature.as_slice()).map_err(|_| Error::InternalServer)?;
     let pubkey = Pubkey::from_str(body.pubkey.as_str()).unwrap_or_default();
     let message = body.message.as_bytes();
-    match signature.verify(pubkey.as_ref(), message) {
-        true => {
-            add_perk_to_user(
-                &mut transaction,
-                user.id,
-                PerkName::Backpack,
-                1.1,
-                0.0,
-                serde_json::from_str("{}").unwrap(),
-            )
-            .await?;
-            update_user_wallet(&mut transaction, user.id, body.pubkey).await?
-        }
-        false => return Err(Error::SignatureMismatch),
+
+    if signature.verify(pubkey.as_ref(), message) {
+        add_perk_to_user(
+            &mut transaction,
+            user.id,
+            PerkName::Backpack,
+            1.1,
+            0.0,
+            serde_json::from_str("{}").unwrap(),
+        )
+        .await?;
+
+        update_user_wallet(&mut transaction, user.id, body.pubkey).await?
+    } else {
+        return Err(Error::SignatureMismatch);
     }
+
     transaction.commit().await.map_err(Error::from)?;
+
     Ok(Json(ConnectWalletResponse { status: 200 }))
 }

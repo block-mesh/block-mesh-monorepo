@@ -114,8 +114,8 @@ impl Application {
 
         let oauth_ctx = Oauth2Ctx {
             client: Oauth2Client::new(
-                env::var("TWITTER_CLIENT_ID").expect("could not find CLIENT_ID"),
-                env::var("TWITTER_CLIENT_SECRET").expect("could not find CLIENT_SECRET"),
+                env::var("TWITTER_CLIENT_ID").expect("could not find TWITTER_CLIENT_ID"),
+                env::var("TWITTER_CLIENT_SECRET").expect("could not find TWITTER_CLIENT_SECRET"),
                 env::var("TWITTER_CALLBACK_URL")
                     .expect("could not find TWITTER_CALLBACK_URL")
                     .parse()

@@ -19,9 +19,9 @@ pub fn SettingsWrapper() -> impl IntoView {
     view! {
         <fieldset>
             <div class="mt-4 mb-4 grid grid-cols-1 gap-y-6 sm:grid-cols-3 sm:gap-x-4">
-                <ShowCheckBox title=CommandsEnum::ClientNode/>
-                <ShowCheckBox title=CommandsEnum::ProxyMaster/>
-                <ShowCheckBox title=CommandsEnum::ProxyEndpoint/>
+                <ShowCheckBox title=CommandsEnum::ClientNode />
+                <ShowCheckBox title=CommandsEnum::ProxyMaster />
+                <ShowCheckBox title=CommandsEnum::ProxyEndpoint />
             </div>
         </fieldset>
         <Show
@@ -31,7 +31,7 @@ pub fn SettingsWrapper() -> impl IntoView {
             }
         >
 
-            <ClientNodeSettingsForm/>
+            <ClientNodeSettingsForm />
         </Show>
         <Show
             when=move || command() == CommandsEnum::ProxyMaster
@@ -40,7 +40,7 @@ pub fn SettingsWrapper() -> impl IntoView {
             }
         >
 
-            <ProxyMasterSettingsForm/>
+            <ProxyMasterSettingsForm />
         </Show>
         <Show
             when=move || command() == CommandsEnum::ProxyEndpoint
@@ -49,7 +49,7 @@ pub fn SettingsWrapper() -> impl IntoView {
             }
         >
 
-            <ProxyEndpointSettingsForm/>
+            <ProxyEndpointSettingsForm />
         </Show>
     }
 }

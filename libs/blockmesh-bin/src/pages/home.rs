@@ -23,7 +23,7 @@ pub fn Home() -> impl IntoView {
         <div>
             <Show
                 fallback=move || {
-                    view! { <Login/> }
+                    view! { <Login /> }
                 }
 
                 when=move || state.logged_in.get()

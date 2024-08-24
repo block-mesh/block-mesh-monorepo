@@ -99,7 +99,7 @@ pub fn OreWrapper() -> impl IntoView {
                 <div class="px-4 py-5 sm:px-6 bg-gray-900">
                     <h2 class="text-xl leading-6 font-medium text-white">
                         <div class="flex items-center justify-center">
-                            <OreIcon/>
+                            <OreIcon />
                         </div>
                     </h2>
                 </div>
@@ -122,8 +122,7 @@ pub fn OreWrapper() -> impl IntoView {
                             .map(|err| {
                                 view! { <p style="color:red;">{err}</p> }
                             })
-                    }}
-                    <div class="mb-4">
+                    }} <div class="mb-4">
                         <label class="block text-white text-sm font-bold mb-2">RPC URL</label>
                         <input
                             type="text"

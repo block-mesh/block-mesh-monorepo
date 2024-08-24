@@ -1,11 +1,15 @@
+use crate::frontends::context::auth_context::AuthContext;
+use crate::frontends::context::notification_context::NotificationContext;
+use crate::frontends::utils::connectors::{pubkey, sign_message};
 use anyhow::anyhow;
-use leptos::leptos_dom;
-use leptos_dom::tracing;
-
 use block_mesh_common::interfaces::server_api::{
     CheckTokenRequest, ConnectWalletRequest, ConnectWalletResponse, GetLatestInviteCodeRequest,
     GetLatestInviteCodeResponse, GetTokenResponse, LoginForm, RegisterForm, RegisterResponse,
 };
+use js_sys::Uint8Array;
+use leptos::*;
+use leptos_dom::tracing;
+use uuid::Uuid;
 
 #[tracing::instrument(name = "check_token", skip(credentials), err)]
 pub async fn check_token(
@@ -91,4 +95,41 @@ pub async fn connect_wallet(
         .json()
         .await?;
     Ok(response)
+}
+
+pub async fn connect_wallet_in_browser() {
+    let msg = Uuid::new_v4().to_string();
+
+    let key = pubkey().await;
+    let sign = sign_message(&msg).await;
+    let uint8_array = Uint8Array::new(&sign);
+    let mut signature = vec![0; uint8_array.length() as usize];
+    uint8_array.copy_to(&mut signature[..]);
+
+    let origin = window().origin();
+
+    let pubkey = key.as_string().unwrap();
+
+    let notifications = expect_context::<NotificationContext>();
+
+    match connect_wallet(
+        origin,
+        ConnectWalletRequest {
+            pubkey: pubkey.clone(),
+            message: msg.to_string(),
+            signature,
+        },
+    )
+    .await
+    {
+        Ok(_) => {
+            let auth = expect_context::<AuthContext>();
+            auth.wallet_address.set(Some(pubkey));
+
+            notifications.set_success("Connected successfully");
+        }
+        Err(_) => {
+            notifications.set_error("Failed to connect");
+        }
+    }
 }

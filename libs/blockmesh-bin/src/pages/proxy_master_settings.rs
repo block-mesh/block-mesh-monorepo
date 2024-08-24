@@ -82,8 +82,7 @@ pub fn ProxyMasterSettingsForm() -> impl IntoView {
                             .map(|err| {
                                 view! { <p style="color:red;">{err}</p> }
                             })
-                    }}
-                    <div class="mb-4">
+                    }} <div class="mb-4">
                         <label class="block text-white text-sm font-bold mb-2">Key Pair Path</label>
                         <input
                             type="text"

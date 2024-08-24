@@ -16,8 +16,8 @@ use crate::pages::settings_wrapper::SettingsWrapper;
 pub fn AppRouter() -> impl IntoView {
     view! {
         <Router>
-            <Notifications/>
-            <Navigation/>
+            <Notifications />
+            <Navigation />
             <div class="lg:pl-72">
                 <main>
                     <div class="px-4 sm:px-6 lg:px-8">
@@ -25,7 +25,7 @@ pub fn AppRouter() -> impl IntoView {
                             <Route
                                 path=PageRoutes::Home.path()
                                 view=move || {
-                                    view! { <Home/> }
+                                    view! { <Home /> }
                                 }
                             />
 
@@ -39,42 +39,42 @@ pub fn AppRouter() -> impl IntoView {
                             <Route
                                 path=PageRoutes::Settings.path()
                                 view=move || {
-                                    view! { <SettingsWrapper/> }
+                                    view! { <SettingsWrapper /> }
                                 }
                             />
 
                             <Route
                                 path=PageRoutes::OreMiner.path()
                                 view=move || {
-                                    view! { <OreWrapper/> }
+                                    view! { <OreWrapper /> }
                                 }
                             />
 
                             <Route
                                 path=PageRoutes::Apps.path()
                                 view=move || {
-                                    view! { <SelectApps/> }
+                                    view! { <SelectApps /> }
                                 }
                             />
 
                             <Route
                                 path=PageRoutes::ConfigViewer.path()
                                 view=move || {
-                                    view! { <ConfigViewer/> }
+                                    view! { <ConfigViewer /> }
                                 }
                             />
 
                             <Route
                                 path=PageRoutes::Login.path()
                                 view=move || {
-                                    view! { <Login/> }
+                                    view! { <Login /> }
                                 }
                             />
 
                             <Route
                                 path=PageRoutes::Register.path()
                                 view=move || {
-                                    view! { <Register/> }
+                                    view! { <Register /> }
                                 }
                             />
 

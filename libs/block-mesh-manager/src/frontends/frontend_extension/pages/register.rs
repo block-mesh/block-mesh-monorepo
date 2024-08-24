@@ -71,7 +71,7 @@ pub fn ExtensionRegister() -> impl IntoView {
             <div class="auth-card-frame"></div>
             <div class="auth-card-top"></div>
             <div class="auth-card-body">
-                <Logo/>
+                <Logo />
                 <form on:submit=|ev| ev.prevent_default()>
                     <div class="auth-card-input-container">
                         <input
@@ -144,7 +144,7 @@ pub fn ExtensionRegister() -> impl IntoView {
             </div>
             <div class="auth-card-bottom">
                 <small class="font-open-sans text-orange">You already have an account?</small>
-                <br/>
+                <br />
                 <button on:click=move |_| { state.status.update(|v| *v = AuthStatus::LoggedOut) }>
                     <small class="text-magenta underline cursor-pointer">Login now</small>
                 </button>

@@ -3,24 +3,26 @@ use crate::frontends::components::navbars::navbar::Navbar;
 use crate::frontends::components::navbars::navbar_section::NavbarSection;
 use crate::frontends::components::navbars::navbar_spacer::NavbarSpacer;
 // use crate::frontends::components::online_chip::OnlineChip;
+use crate::frontends::components::conditionals::if_let_some::IfLetSome;
 use crate::frontends::components::icons::home_icon::HomeIcon;
 use crate::frontends::components::icons::link_icon::LinkIcon;
 use crate::frontends::components::icons::logout_icon::LogoutIcon;
 use crate::frontends::components::icons::perk_icon::PerkIcon;
-use crate::frontends::context::webapp_context::WebAppContext;
+use crate::frontends::context::auth_context::AuthContext;
 use crate::frontends::new_frontend_webserver::components::sidebar::{
     Sidebar, SidebarBody, SidebarFooter, SidebarHeader, SidebarItem, SidebarItemLink, SidebarLabel,
     SidebarSection, SidebarSpacer,
 };
 use crate::frontends::new_frontend_webserver::components::sidebar_layout::SidebarLayout;
 use block_mesh_common::constants::BLOCK_MESH_LOGO;
+use block_mesh_common::interfaces::server_api::DashboardResponse;
 use leptos::*;
 
 #[component]
 pub fn ApplicationNavbar() -> impl IntoView {
     view! {
         <Navbar>
-            <NavbarSpacer/>
+            <NavbarSpacer />
             <NavbarSection>
                 <div></div>
             // <OnlineChip is_online=true/>
@@ -31,19 +33,15 @@ pub fn ApplicationNavbar() -> impl IntoView {
 
 #[component]
 pub fn ApplicationSidebar() -> impl IntoView {
-    let logged_in = WebAppContext::is_logged_in();
-    let email = Signal::derive(move || {
-        if let Some(Some(r)) = logged_in.get() {
-            r.email
-        } else {
-            None
-        }
-    });
+    let auth = expect_context::<AuthContext>();
+
+    let email = auth.email;
+
     view! {
         <Sidebar>
             <SidebarHeader>
                 <SidebarItem>
-                    <Avatar src=BLOCK_MESH_LOGO/>
+                    <Avatar src=BLOCK_MESH_LOGO />
                     <SidebarLabel>BlockMesh</SidebarLabel>
                 // <OnlineChip is_online=true/>
                 </SidebarItem>
@@ -52,24 +50,24 @@ pub fn ApplicationSidebar() -> impl IntoView {
             <SidebarBody>
                 <SidebarSection>
                     <SidebarItemLink href="/ui/dashboard">
-                        <HomeIcon/>
+                        <HomeIcon />
                         <SidebarLabel>Dashboard</SidebarLabel>
                     </SidebarItemLink>
                     <SidebarItemLink href="/ui/referrals">
-                        <LinkIcon/>
+                        <LinkIcon />
                         <SidebarLabel>Referrals</SidebarLabel>
                     </SidebarItemLink>
                     <SidebarItemLink href="/ui/perks">
-                        <PerkIcon/>
+                        <PerkIcon />
                         <SidebarLabel>Perks</SidebarLabel>
                     </SidebarItemLink>
                 </SidebarSection>
 
-                <SidebarSpacer/>
+                <SidebarSpacer />
 
                 <SidebarSection>
                     <SidebarItemLink href="/logout" rel="external">
-                        <LogoutIcon/>
+                        <LogoutIcon />
                         <SidebarLabel>Logout</SidebarLabel>
                     </SidebarItemLink>
                 </SidebarSection>
@@ -92,10 +90,40 @@ pub fn ApplicationSidebar() -> impl IntoView {
 }
 
 #[component]
-pub fn ApplicationLayout(children: Children) -> impl IntoView {
+pub fn ApplicationLayout(children: ChildrenFn) -> impl IntoView {
+    let resource = create_local_resource(
+        move || (),
+        move |_| async move {
+            let origin = window().origin();
+            let client = reqwest::Client::new();
+            let response = client.post(&format!("{}/dashboard", origin)).send().await;
+
+            match response {
+                Ok(response) => match response.json::<DashboardResponse>().await {
+                    Ok(json) => Some(json),
+                    Err(e) => {
+                        logging::log!("error: {}", e);
+                        None
+                    }
+                },
+                Err(e) => {
+                    logging::log!("error: {}", e);
+                    None
+                }
+            }
+        },
+    );
+
     view! {
         <SidebarLayout navbar=ApplicationNavbar sidebar=ApplicationSidebar>
-            {children()}
+            <Transition fallback=move || view! { <p>TODO: Loading...</p> }.into_view()>
+                <IfLetSome opt=Signal::derive(move || resource.get().flatten()) let:data clone:children>
+                    {
+                        provide_context(data.clone());
+                        children()
+                    }
+                </IfLetSome>
+            </Transition>
         </SidebarLayout>
     }
 }

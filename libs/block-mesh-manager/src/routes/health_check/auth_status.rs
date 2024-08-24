@@ -11,25 +11,29 @@ pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
     Extension(pool): Extension<PgPool>,
 ) -> Result<Json<AuthStatusResponse>, Error> {
-    if let Ok(user) = auth.user.ok_or(Error::UserNotFound) {
-        let mut transaction = pool.begin().await.map_err(Error::from)?;
-        let db_user = get_user_opt_by_id(&mut transaction, &user.id)
-            .await
-            .map_err(Error::from)?;
-        transaction.commit().await.map_err(Error::from)?;
-        if let Some(db_user) = db_user {
-            return Ok(Json(AuthStatusResponse {
-                email: Some(user.email.to_ascii_lowercase()),
-                status_code: 200,
-                logged_in: true,
-                wallet_address: db_user.wallet_address,
-            }));
-        }
+    let user = auth.user.ok_or(Error::UserNotFound)?;
+
+    let mut transaction = pool.begin().await.map_err(Error::from)?;
+
+    let db_user = get_user_opt_by_id(&mut transaction, &user.id)
+        .await
+        .map_err(Error::from)?;
+
+    transaction.commit().await.map_err(Error::from)?;
+
+    if let Some(db_user) = db_user {
+        return Ok(Json(AuthStatusResponse {
+            email: Some(user.email.to_ascii_lowercase()),
+            status_code: 200,
+            logged_in: true,
+            wallet_address: db_user.wallet_address,
+        }));
     }
-    return Ok(Json(AuthStatusResponse {
+
+    Ok(Json(AuthStatusResponse {
         email: None,
         status_code: 404,
         logged_in: false,
         wallet_address: None,
-    }));
+    }))
 }
