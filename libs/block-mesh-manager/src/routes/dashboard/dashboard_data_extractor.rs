@@ -1,4 +1,6 @@
+use chrono::Utc;
 use sqlx::PgPool;
+use std::sync::Arc;
 #[allow(unused_imports)]
 use tracing::Level;
 use uuid::Uuid;
@@ -14,16 +16,18 @@ use crate::database::invite_code::get_number_of_users_invited::get_number_of_use
 use crate::database::invite_code::get_user_latest_invite_code::get_user_latest_invite_code;
 use crate::database::invite_code::get_user_referrals::get_user_referrals;
 use crate::database::perks::get_user_perks::get_user_perks;
-use crate::database::uptime_report::get_user_uptimes::get_user_uptimes;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
+use crate::startup::application::AppState;
 use crate::utils::points::{calc_points_daily, calc_total_points};
+use block_mesh_common::feature_flag_client::FlagValue;
 use regex::Regex;
 
 pub async fn dashboard_data_extractor(
     pool: &PgPool,
     user_id: Uuid,
+    state: Arc<AppState>,
 ) -> anyhow::Result<DashboardResponse> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let user = get_user_opt_by_id(&mut transaction, &user_id)
@@ -54,17 +58,30 @@ pub async fn dashboard_data_extractor(
         .await
         .map_err(Error::from)?;
 
-    let uptimes = get_user_uptimes(&mut transaction, user_id, 2).await?;
-    let connected = if uptimes.len() == 2 {
-        let diff = uptimes[0].created_at - uptimes[1].created_at;
-        if diff.num_seconds() < 60 {
+    let uptime = get_or_create_aggregate_by_user_and_name_no_transaction(
+        &mut transaction,
+        AggregateName::Uptime,
+        user.id,
+    )
+    .await
+    .map_err(Error::from)?;
+
+    let interval = state
+        .flags
+        .get("polling_interval")
+        .unwrap_or(&FlagValue::Number(120_000.0));
+    let interval: f64 =
+        <FlagValue as TryInto<f64>>::try_into(interval.to_owned()).unwrap_or_default();
+
+    let now = Utc::now();
+    let diff = now - uptime.updated_at.unwrap_or(now);
+
+    let connected =
+        if diff.num_seconds() < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240) {
             true
         } else {
             false
-        }
-    } else {
-        false
-    };
+        };
     let calls_to_action = get_user_call_to_action(&mut transaction, user_id).await?;
     let perks = get_user_perks(&mut transaction, user_id).await?;
     let daily_stats = get_daily_stats_by_user_id(&mut transaction, &user_id)

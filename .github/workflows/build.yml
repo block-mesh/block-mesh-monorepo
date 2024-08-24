@@ -13,8 +13,8 @@ concurrency:
   cancel-in-progress: true
 env:
   BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
-  SCCACHE_GHA_ENABLED: "true"
-  RUSTC_WRAPPER: "sccache"
+#  SCCACHE_GHA_ENABLED: "true"
+#  RUSTC_WRAPPER: "sccache"
 jobs:
   build:
     name: Build
@@ -36,8 +36,8 @@ jobs:
         with:
           key: build-sqlx-${{ vars.SQLX_VERSION }}
           cache-all-crates: true
-      - name: Sccache Action
-        uses: Mozilla-Actions/sccache-action@v0.0.5
+      #      - name: Sccache Action
+      #        uses: Mozilla-Actions/sccache-action@v0.0.5
       - name: "Install Cargo Leptos"
         run: |
           cargo install cargo-leptos --version=${{ vars.LEPTOS_VERSION }} --locked

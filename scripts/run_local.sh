@@ -7,6 +7,7 @@ export CARGO_TARGET_DIR="${ROOT}/target/WEBSERVER"
 source "${ROOT}/scripts/setup.sh"
 #cd "${ROOT}/libs/block-mesh-manager" || exit 1
 set +x
+export AGG_SIZE=1
 source "${ROOT}/scripts/setup.sh"
 export DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
 export REDIS_URL="redis://127.0.0.1:6379"

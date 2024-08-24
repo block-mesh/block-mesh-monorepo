@@ -22,8 +22,8 @@ env:
   APP_ENVIRONMENT: production
   SENTRY: ${{ secrets.SENTRY }}
   MAPBOX: ${{ secrets.MAPBOX }}
-  SCCACHE_GHA_ENABLED: "true"
-  RUSTC_WRAPPER: "sccache"
+#  SCCACHE_GHA_ENABLED: "true"
+#  RUSTC_WRAPPER: "sccache"
 jobs:
   get-tag:
     name: "Get Tag From Package Version"
@@ -42,8 +42,8 @@ jobs:
         with:
           key: release-tag-server-arm
           cache-all-crates: true
-      - name: Sccache Action
-        uses: Mozilla-Actions/sccache-action@v0.0.5
+      #      - name: Sccache Action
+      #        uses: Mozilla-Actions/sccache-action@v0.0.5
       - name: "Get tag"
         id: "pkg-version"
         shell: "bash"
@@ -76,8 +76,8 @@ jobs:
         with:
           key: release-upload-${{ matrix.target }}-arm
           cache-all-crates: true
-      - name: Sccache Action
-        uses: Mozilla-Actions/sccache-action@v0.0.5
+      #      - name: Sccache Action
+      #        uses: Mozilla-Actions/sccache-action@v0.0.5
       - name: Setup Zig
         uses: goto-bus-stop/setup-zig@v2.2.0
       - name: Install zigbuild
