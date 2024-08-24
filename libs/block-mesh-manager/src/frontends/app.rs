@@ -24,6 +24,8 @@ use crate::frontends::wrapper::Wrapper;
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
+use crate::frontends::context::reload_context::ReloadContext;
+use crate::frontends::new_frontend_webserver::app::application_layout::ApplicationLayout;
 
 #[component]
 pub fn App() -> impl IntoView {
@@ -32,6 +34,7 @@ pub fn App() -> impl IntoView {
     provide_context(NotificationContext::default());
     provide_context(ExtensionContext::default());
     provide_context(SizeContext::default());
+    provide_context(ReloadContext::default());
 
     let extension_state = use_context::<ExtensionContext>().unwrap();
     let auth_state = use_context::<AuthContext>().unwrap();
@@ -49,7 +52,10 @@ pub fn App() -> impl IntoView {
                         view! {
                             <WebServerHeader />
                             <NotificationPopup />
-                            <Outlet />
+
+                            <ApplicationLayout>
+                                <Outlet />
+                            </ApplicationLayout>
                         }
                     }
                 >

@@ -17,3 +17,4 @@ pub mod referer_rank;
 pub mod stat;
 pub mod sub_heading;
 pub mod tables;
+pub mod reload_button;

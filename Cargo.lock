@@ -2623,9 +2623,9 @@ dependencies = [
 
 [[package]]
 name = "codee"
-version = "0.1.2"
+version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af40247be877a1e3353fb406aa27ab3ef4bd3ff18cef91e75e667bfa3fde701d"
+checksum = "5d3ad3122b0001c7f140cf4d605ef9a9e2c24d96ab0b4fb4347b76de2425f445"
 dependencies = [
  "thiserror",
 ]
@@ -5538,17 +5538,14 @@ dependencies = [
 [[package]]
 name = "leptos-use"
 version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "268b9df23d8c68ed0518c39d6f0d3b99fcbe30190a6dce4a7e5f342027ab0033"
+source = "git+https://github.com/synphonyte/leptos-use?branch=main#c9377fe1f969d88c3f9e40bd3039b3de1f379f8a"
 dependencies = [
- "async-trait",
  "cfg-if",
  "codee",
  "cookie 0.18.1",
  "default-struct-builder",
  "futures-util",
  "gloo-timers 0.3.0",
- "gloo-utils 0.2.0",
  "js-sys",
  "lazy_static",
  "leptos",

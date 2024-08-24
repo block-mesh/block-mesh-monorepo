@@ -17,6 +17,8 @@ use crate::frontends::new_frontend_webserver::components::sidebar_layout::Sideba
 use block_mesh_common::constants::BLOCK_MESH_LOGO;
 use block_mesh_common::interfaces::server_api::DashboardResponse;
 use leptos::*;
+use crate::frontends::components::reload_button::ReloadButton;
+use crate::frontends::context::reload_context::ReloadContext;
 
 #[component]
 pub fn ApplicationNavbar() -> impl IntoView {
@@ -43,6 +45,7 @@ pub fn ApplicationSidebar() -> impl IntoView {
                 <SidebarItem>
                     <Avatar src=BLOCK_MESH_LOGO />
                     <SidebarLabel>BlockMesh</SidebarLabel>
+                    <ReloadButton />
                 // <OnlineChip is_online=true/>
                 </SidebarItem>
             </SidebarHeader>
@@ -91,8 +94,10 @@ pub fn ApplicationSidebar() -> impl IntoView {
 
 #[component]
 pub fn ApplicationLayout(children: ChildrenFn) -> impl IntoView {
+    let ReloadContext { value, .. } = expect_context();
+
     let resource = create_local_resource(
-        move || (),
+        move || value.get(),
         move |_| async move {
             let origin = window().origin();
             let client = reqwest::Client::new();
@@ -116,8 +121,12 @@ pub fn ApplicationLayout(children: ChildrenFn) -> impl IntoView {
 
     view! {
         <SidebarLayout navbar=ApplicationNavbar sidebar=ApplicationSidebar>
-            <Transition fallback=move || view! { <p>TODO: Loading...</p> }.into_view()>
-                <IfLetSome opt=Signal::derive(move || resource.get().flatten()) let:data clone:children>
+            <Transition fallback=LoadingIndicator>
+                <IfLetSome
+                    opt=Signal::derive(move || resource.get().flatten())
+                    let:data
+                    clone:children
+                >
                     {
                         provide_context(data.clone());
                         children()
@@ -125,5 +134,19 @@ pub fn ApplicationLayout(children: ChildrenFn) -> impl IntoView {
                 </IfLetSome>
             </Transition>
         </SidebarLayout>
+    }
+}
+
+#[component]
+pub fn LoadingIndicator() -> impl IntoView {
+    view! {
+        <div
+            class="inline-block h-8 w-8 animate-spin rounded-full border-4 border-solid border-current border-e-transparent align-[-0.125em] text-surface motion-reduce:animate-[spin_1.5s_linear_infinite] dark:text-white"
+            role="status"
+        >
+            <span class="!absolute !-m-px !h-px !w-px !overflow-hidden !whitespace-nowrap !border-0 !p-0 ![clip:rect(0,0,0,0)]">
+                Loading...
+            </span>
+        </div>
     }
 }
