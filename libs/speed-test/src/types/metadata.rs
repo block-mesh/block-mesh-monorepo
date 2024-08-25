@@ -35,7 +35,7 @@ impl TryFrom<&HeaderMap> for Metadata {
 impl TryFrom<HeaderMap> for Metadata {
     type Error = anyhow::Error;
     fn try_from(value: HeaderMap) -> Result<Self, Self::Error> {
-        Ok(Metadata::try_from(&value)?)
+        Metadata::try_from(&value)
     }
 }
 
