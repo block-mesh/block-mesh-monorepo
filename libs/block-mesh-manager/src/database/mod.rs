@@ -1,4 +1,5 @@
 pub mod aggregate;
+pub mod analytics;
 pub mod api_token;
 pub mod bandwidth;
 pub mod call_to_action;

@@ -1,3 +1,4 @@
+use crate::constants::DeviceType;
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -34,6 +35,12 @@ pub struct SubmitTaskRequest {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConfirmEmailRequest {
     pub token: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ClientsMetadata {
+    pub depin_aggregator: Option<String>,
+    pub device_type: DeviceType,
 }
 
 #[derive(Serialize, Deserialize, Debug)]

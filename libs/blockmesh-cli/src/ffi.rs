@@ -78,7 +78,7 @@ pub unsafe extern "C" fn Java_xyz_blockmesh_runLib(
     };
 
     runtime.block_on(async {
-        let _ = login_mode(&url, &email, &password).await;
+        let _ = login_mode(&url, &email, &password, None).await;
     });
     -1
 }
