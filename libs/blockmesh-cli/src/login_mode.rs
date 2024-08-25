@@ -1,6 +1,6 @@
 use crate::helpers::{login_to_network, report_uptime, submit_bandwidth, task_poller};
 use block_mesh_common::constants::DeviceType;
-use block_mesh_common::interfaces::server_api::{LoginForm, Metadata};
+use block_mesh_common::interfaces::server_api::{ClientsMetadata, LoginForm};
 use logger_general::tracing::setup_tracing;
 use std::process::ExitCode;
 use std::sync::Arc;
@@ -50,7 +50,7 @@ pub async fn login_mode(
     let u = url.clone();
     let e = email.clone();
     let a = api_token.clone();
-    let session_metadata = Metadata {
+    let session_metadata = ClientsMetadata {
         depin_aggregator,
         device_type: DeviceType::Cli,
     };

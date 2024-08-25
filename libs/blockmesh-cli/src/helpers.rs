@@ -91,7 +91,7 @@ pub async fn report_uptime(
     url: &str,
     email: &str,
     api_token: &str,
-    session_metadata: block_mesh_common::interfaces::server_api::Metadata,
+    session_metadata: block_mesh_common::interfaces::server_api::ClientsMetadata,
 ) -> anyhow::Result<()> {
     let api_token = Uuid::from_str(api_token).context("Failed to parse UUID")?;
     let cloudflare_metadata = fetch_metadata().await.unwrap_or_default();

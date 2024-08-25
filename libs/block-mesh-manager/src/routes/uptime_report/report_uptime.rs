@@ -9,14 +9,15 @@ use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use crate::worker::db_agg::{Table, UpdateBulkMessage};
 use crate::worker::db_cleaner_cron::EnrichIp;
-use axum::extract::{ConnectInfo, Query, State};
+use axum::extract::{ConnectInfo, Query, Request, State};
 use axum::{Extension, Json};
 use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_common::interfaces::server_api::{
-    ReportUptimeJsonRequest, ReportUptimeRequest, ReportUptimeResponse,
+    ClientsMetadata, ReportUptimeRequest, ReportUptimeResponse,
 };
 use chrono::Utc;
 use http::{HeaderMap, HeaderValue, StatusCode};
+use http_body_util::BodyExt;
 use sqlx::PgPool;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -42,7 +43,7 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     Query(query): Query<ReportUptimeRequest>,
-    body: Option<Json<ReportUptimeJsonRequest>>,
+    request: Request,
 ) -> Result<Json<ReportUptimeResponse>, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let api_token = find_token(&mut transaction, &query.api_token)
@@ -51,9 +52,16 @@ pub async fn handler(
     let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
+    let (_parts, body) = request.into_parts();
 
-    if let Some(Json(body)) = body {
-        if let Some(metadata) = body.metadata {
+    let bytes = body
+        .collect()
+        .await
+        .map_err(|_| Error::FailedReadingBody)?
+        .to_bytes();
+    let body_raw = String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from(""));
+    if !body_raw.is_empty() {
+        if let Ok(metadata) = serde_json::from_str::<ClientsMetadata>(&body_raw) {
             inserting_client_analytics(
                 &mut transaction,
                 &user.id,

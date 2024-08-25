@@ -1,4 +1,3 @@
-use crate::domain::api_token::ApiTokenStatus;
 use block_mesh_common::constants::DeviceType;
 use chrono::Utc;
 use sqlx::{Postgres, Transaction};
@@ -13,7 +12,6 @@ pub(crate) async fn inserting_client_analytics(
 ) -> anyhow::Result<Uuid> {
     let now = Utc::now();
     let id = Uuid::new_v4();
-    let token = Uuid::new_v4();
     sqlx::query!(
         r#"
         INSERT

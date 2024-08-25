@@ -232,7 +232,7 @@ pub struct CliOpts {
     pub invite_code: String,
     /// DePIN aggregator name
     #[arg(long)]
-    pub depin_aggregator: Option<String>
+    pub depin_aggregator: Option<String>,
 }
 
 #[derive(Debug, Clone, Copy, Deserialize, Serialize, ValueEnum, PartialEq, Default)]
