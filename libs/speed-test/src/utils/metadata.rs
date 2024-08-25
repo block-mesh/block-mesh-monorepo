@@ -1,13 +1,15 @@
 use crate::types::metadata::Metadata;
 use crate::{BASE_URL, DOWNLOAD_URL};
 use anyhow::anyhow;
-use reqwest::header::{AsHeaderName, Entry, HeaderMap, HeaderName};
+use reqwest::header::{AsHeaderName, HeaderName};
 use reqwest::{header::HeaderValue, Client};
+use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
 static EMPTY_HEADER: HeaderValue = HeaderValue::from_static("");
 
+#[derive(Debug, Serialize, Deserialize)]
 pub enum CloudflareMetaHeader {
     Asn,
     City,
@@ -23,7 +25,8 @@ pub enum CloudflareMetaHeader {
 
 impl From<&CloudflareMetaHeader> for HeaderName {
     fn from(value: &CloudflareMetaHeader) -> Self {
-        HeaderName::from_str(value.to_string().as_str()).unwrap()
+        HeaderName::from_str(value.to_string().as_str())
+            .unwrap_or_else(|_| HeaderName::from_static("CANNOT_CONVERT_HEADER"))
     }
 }
 
