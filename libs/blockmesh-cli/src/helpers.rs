@@ -1,8 +1,8 @@
 use anyhow::{anyhow, Context};
 use block_mesh_common::constants::BLOCK_MESH_APP_SERVER;
 use block_mesh_common::interfaces::server_api::{
-    DashboardRequest, DashboardResponse, GetTaskRequest, GetTaskResponse, RegisterForm,
-    RegisterResponse, ReportBandwidthRequest, ReportBandwidthResponse, ReportUptimeJsonRequest,
+    ClientsMetadata, DashboardRequest, DashboardResponse, GetTaskRequest, GetTaskResponse,
+    RegisterForm, RegisterResponse, ReportBandwidthRequest, ReportBandwidthResponse,
     ReportUptimeRequest, ReportUptimeResponse, RunTaskResponse, SubmitTaskRequest,
     SubmitTaskResponse,
 };
@@ -91,7 +91,7 @@ pub async fn report_uptime(
     url: &str,
     email: &str,
     api_token: &str,
-    session_metadata: block_mesh_common::interfaces::server_api::ClientsMetadata,
+    session_metadata: ClientsMetadata,
 ) -> anyhow::Result<()> {
     let api_token = Uuid::from_str(api_token).context("Failed to parse UUID")?;
     let cloudflare_metadata = fetch_metadata().await.unwrap_or_default();
@@ -107,9 +107,7 @@ pub async fn report_uptime(
     if let Ok(response) = http_client()
         .post(url)
         .query(&query)
-        .json(&ReportUptimeJsonRequest {
-            metadata: Some(session_metadata),
-        })
+        .json(&session_metadata)
         .send()
         .await
         .inspect_err(|error| info!("Error occured while reporting uptime: {error}"))
