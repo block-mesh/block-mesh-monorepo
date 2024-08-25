@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO users_ip\n        (id, user_id, ip_id, created_at, updated_at)\n        VALUES\n        ($1, $2, $3, $4, $5)\n        ON CONFLICT (user_id, ip_id) DO UPDATE SET updated_at = $5\n        RETURNING id\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Uuid",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "62519e8f367738a92609b9222d244912568e9c98ac136f15f4f8155cf2b179f8"
+}

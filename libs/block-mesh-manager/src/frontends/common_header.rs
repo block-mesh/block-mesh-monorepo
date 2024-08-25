@@ -1,5 +1,5 @@
 use leptos::*;
-use leptos_meta::{Link, Meta, Script, Stylesheet, Title};
+use leptos_meta::{Link, Meta, Script, Style, Stylesheet, Title};
 
 #[component]
 pub fn CommonHeader() -> impl IntoView {
@@ -83,5 +83,14 @@ pub fn CommonHeader() -> impl IntoView {
             gtag('config', 'G-RYHLW3MDK2');
             "#
         </Script>
+        <Style>
+            r#"
+            body {
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+            text-rendering: optimizeLegibility;
+            }
+            "#
+        </Style>
     }
 }
