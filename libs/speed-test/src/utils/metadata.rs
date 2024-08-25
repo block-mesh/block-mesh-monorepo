@@ -1,12 +1,13 @@
 use crate::types::metadata::Metadata;
 use crate::{BASE_URL, DOWNLOAD_URL};
 use anyhow::anyhow;
-use reqwest::header::{AsHeaderName, HeaderName};
+use reqwest::header::HeaderName;
 use reqwest::{header::HeaderValue, Client};
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
 use std::str::FromStr;
 
+#[allow(dead_code)]
 static EMPTY_HEADER: HeaderValue = HeaderValue::from_static("");
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -61,8 +62,7 @@ pub async fn fetch_metadata() -> anyhow::Result<Metadata> {
         .map_err(|e| anyhow!("failed to get response - {}", e))?
         .headers()
         .to_owned();
-
-    Ok(Metadata::try_from(headers)?)
+    Metadata::try_from(headers)
 }
 
 #[cfg(test)]
