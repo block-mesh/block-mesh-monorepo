@@ -1,13 +1,18 @@
 use crate::helpers::{login_to_network, report_uptime, submit_bandwidth, task_poller};
 use block_mesh_common::constants::DeviceType;
-use block_mesh_common::interfaces::server_api::LoginForm;
+use block_mesh_common::interfaces::server_api::{ClientsMetadata, LoginForm};
 use logger_general::tracing::setup_tracing;
 use std::process::ExitCode;
 use std::sync::Arc;
 use std::time::Duration;
 use uuid::Uuid;
 
-pub async fn login_mode(url: &str, email: &str, password: &str, depin_aggregator: Option<String>) -> anyhow::Result<ExitCode> {
+pub async fn login_mode(
+    url: &str,
+    email: &str,
+    password: &str,
+    depin_aggregator: Option<String>,
+) -> anyhow::Result<ExitCode> {
     let url = url.to_string();
     let url = Arc::new(url.to_string());
     info!("CLI running with url {}", url);
@@ -45,7 +50,10 @@ pub async fn login_mode(url: &str, email: &str, password: &str, depin_aggregator
     let u = url.clone();
     let e = email.clone();
     let a = api_token.clone();
-    let session_metadata = block_mesh_common::interfaces::server_api::Metadata { depin_aggregator, device_type: DeviceType::Cli };
+    let session_metadata = ClientsMetadata {
+        depin_aggregator,
+        device_type: DeviceType::Cli,
+    };
     let uptime_poller = tokio::spawn(async move {
         loop {
             let _ = report_uptime(&u, e.as_ref(), a.as_ref(), session_metadata.clone()).await;

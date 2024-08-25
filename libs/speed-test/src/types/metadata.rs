@@ -35,20 +35,7 @@ impl TryFrom<&HeaderMap> for Metadata {
 impl TryFrom<HeaderMap> for Metadata {
     type Error = anyhow::Error;
     fn try_from(value: HeaderMap) -> Result<Self, Self::Error> {
-        use crate::utils::metadata::CloudflareMetaHeader as H;
-        let city = value.get_cloudflare(H::City)?;
-        let country = value.get_cloudflare(H::Country)?;
-        let ip = value.get_cloudflare(H::Ip)?;
-        let asn = value.get_cloudflare(H::Asn)?;
-        let colo = value.get_cloudflare(H::Colo)?;
-
-        Ok(Self {
-            city,
-            country,
-            ip,
-            asn,
-            colo,
-        })
+        Metadata::try_from(&value)
     }
 }
 

@@ -1,6 +1,11 @@
 use anyhow::{anyhow, Context};
 use block_mesh_common::constants::BLOCK_MESH_APP_SERVER;
-use block_mesh_common::interfaces::server_api::{DashboardRequest, DashboardResponse, GetTaskRequest, GetTaskResponse, RegisterForm, RegisterResponse, ReportBandwidthRequest, ReportBandwidthResponse, ReportUptimeJsonRequest, ReportUptimeRequest, ReportUptimeResponse, RunTaskResponse, SubmitTaskRequest, SubmitTaskResponse};
+use block_mesh_common::interfaces::server_api::{
+    ClientsMetadata, DashboardRequest, DashboardResponse, GetTaskRequest, GetTaskResponse,
+    RegisterForm, RegisterResponse, ReportBandwidthRequest, ReportBandwidthResponse,
+    ReportUptimeRequest, ReportUptimeResponse, RunTaskResponse, SubmitTaskRequest,
+    SubmitTaskResponse,
+};
 use block_mesh_common::interfaces::server_api::{GetTokenResponse, LoginForm};
 use block_mesh_common::routes_enum::RoutesEnum;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, CONTENT_TYPE};
@@ -82,7 +87,12 @@ pub async fn login_to_network(url: &str, login_form: LoginForm) -> anyhow::Resul
 }
 
 #[tracing::instrument(name = "report_uptime", skip(api_token), err)]
-pub async fn report_uptime(url: &str, email: &str, api_token: &str, session_metadata: block_mesh_common::interfaces::server_api::Metadata) -> anyhow::Result<()> {
+pub async fn report_uptime(
+    url: &str,
+    email: &str,
+    api_token: &str,
+    session_metadata: ClientsMetadata,
+) -> anyhow::Result<()> {
     let api_token = Uuid::from_str(api_token).context("Failed to parse UUID")?;
     let cloudflare_metadata = fetch_metadata().await.unwrap_or_default();
 
@@ -97,9 +107,10 @@ pub async fn report_uptime(url: &str, email: &str, api_token: &str, session_meta
     if let Ok(response) = http_client()
         .post(url)
         .query(&query)
-        .json(&ReportUptimeJsonRequest { metadata: Some(session_metadata) })
+        .json(&session_metadata)
         .send()
-        .await.inspect_err(|error| info!("Error occured while reporting uptime: {error}"))
+        .await
+        .inspect_err(|error| info!("Error occured while reporting uptime: {error}"))
     {
         let json = response.json::<ReportUptimeResponse>().await.unwrap();
         debug!("Uptime response: {json:?}");
@@ -199,7 +210,7 @@ pub async fn submit_task(
         country,
         asn,
         colo,
-        city,
+        city: _city,
     } = metadata;
     let query: SubmitTaskRequest = SubmitTaskRequest {
         email: email.to_string(),

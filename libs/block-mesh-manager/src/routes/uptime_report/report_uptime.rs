@@ -1,4 +1,5 @@
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
+use crate::database::analytics::inserting_client_analytics::inserting_client_analytics;
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
@@ -8,12 +9,15 @@ use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use crate::worker::db_agg::{Table, UpdateBulkMessage};
 use crate::worker::db_cleaner_cron::EnrichIp;
-use axum::extract::{ConnectInfo, Query, State};
+use axum::extract::{ConnectInfo, Query, Request, State};
 use axum::{Extension, Json};
 use block_mesh_common::feature_flag_client::FlagValue;
-use block_mesh_common::interfaces::server_api::{ReportUptimeJsonRequest, ReportUptimeRequest, ReportUptimeResponse};
+use block_mesh_common::interfaces::server_api::{
+    ClientsMetadata, ReportUptimeRequest, ReportUptimeResponse,
+};
 use chrono::Utc;
 use http::{HeaderMap, HeaderValue, StatusCode};
+use http_body_util::BodyExt;
 use sqlx::PgPool;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -39,7 +43,7 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     ConnectInfo(addr): ConnectInfo<SocketAddr>,
     Query(query): Query<ReportUptimeRequest>,
-    body: Option<Json<ReportUptimeJsonRequest>>,
+    request: Request,
 ) -> Result<Json<ReportUptimeResponse>, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let api_token = find_token(&mut transaction, &query.api_token)
@@ -48,15 +52,24 @@ pub async fn handler(
     let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
+    let (_parts, body) = request.into_parts();
 
-    if let Some(Json(body)) = body {
-        if let Some(metadata) = body.metadata {
-            tracing::trace!("Inserting client analytics");
-            sqlx::query!(r#"
-            INSERT INTO analytics (user_id, depin_aggregator, device_type, created_at, updated_at)
-            VALUES ($1, $2, $3, $4, $4)
-            ON CONFLICT (user_id, depin_aggregator) DO UPDATE SET updated_at = $4
-            "#, user.id, metadata.depin_aggregator, metadata.device_type.to_string(), Utc::now()).execute(&pool).await?;
+    let bytes = body
+        .collect()
+        .await
+        .map_err(|_| Error::FailedReadingBody)?
+        .to_bytes();
+    let body_raw = String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from(""));
+    if !body_raw.is_empty() {
+        if let Ok(metadata) = serde_json::from_str::<ClientsMetadata>(&body_raw) {
+            inserting_client_analytics(
+                &mut transaction,
+                &user.id,
+                &metadata.depin_aggregator.unwrap_or_default(),
+                &metadata.device_type,
+            )
+            .await
+            .map_err(Error::from)?;
         }
     }
 
@@ -72,7 +85,6 @@ pub async fn handler(
         create_daily_stat(&mut transaction, user.id).await?;
     }
 
-
     let interval = state
         .flags
         .get("polling_interval")
@@ -85,8 +97,8 @@ pub async fn handler(
         AggregateName::Uptime,
         user.id,
     )
-        .await
-        .map_err(Error::from)?;
+    .await
+    .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;
 
     let now = Utc::now();
