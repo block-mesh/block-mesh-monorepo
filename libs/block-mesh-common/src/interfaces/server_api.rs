@@ -214,6 +214,7 @@ pub struct DashboardResponse {
     pub calls_to_action: Vec<CallToActionUI>,
     pub referrals: Vec<Referral>,
     pub verified_email: bool,
+    pub user_ips: Vec<UserIpInfo>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
@@ -280,4 +281,11 @@ pub struct EditInviteCodeForm {
 pub struct CallToActionForm {
     pub name: String,
     pub status: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct UserIpInfo {
+    pub ip: String,
+    pub country: Option<String>,
+    pub updated_at: DateTime<Utc>,
 }
