@@ -19,7 +19,13 @@ pub async fn main() -> anyhow::Result<ExitCode> {
     let args = CliOpts::parse();
     match args.mode {
         CliOptMod::Login => {
-            login_mode(&args.url.clone(), &args.email, &args.password, args.depin_aggregator).await?;
+            login_mode(
+                &args.url.clone(),
+                &args.email,
+                &args.password,
+                args.depin_aggregator,
+            )
+            .await?;
         }
         CliOptMod::Register => {
             setup_tracing(Uuid::default(), DeviceType::Cli);
