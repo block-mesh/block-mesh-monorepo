@@ -1,0 +1,34 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n        ip_addresses.ip, ip_addresses.country, users_ip.updated_at\n        FROM users_ip\n        JOIN ip_addresses ON users_ip.ip_id = ip_addresses.id\n        WHERE users_ip.user_id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ip",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "country",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "47b6d8b538f8ed55b1293dfe71fa628450e559808b0cd5dec78b428fe8f98cc4"
+}

@@ -17,6 +17,7 @@ use crate::database::invite_code::get_user_latest_invite_code::get_user_latest_i
 use crate::database::invite_code::get_user_referrals::get_user_referrals;
 use crate::database::perks::get_user_perks::get_user_perks;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
+use crate::database::users_ip::get_user_ips::get_user_ips;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
@@ -76,6 +77,8 @@ pub async fn dashboard_data_extractor(
     let now = Utc::now();
     let diff = now - uptime.updated_at.unwrap_or(now);
 
+    let user_ips = get_user_ips(&mut transaction, &user_id).await?;
+
     let connected =
         if diff.num_seconds() < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240) {
             true
@@ -122,6 +125,7 @@ pub async fn dashboard_data_extractor(
 
     transaction.commit().await.map_err(Error::from)?;
     Ok(DashboardResponse {
+        user_ips,
         calls_to_action: calls_to_action
             .into_iter()
             .map(|i| CallToActionUI {

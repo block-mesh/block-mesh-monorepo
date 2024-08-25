@@ -3,15 +3,22 @@ use crate::frontends::components::bandwidth_card::BandwidthCard;
 use crate::frontends::components::bar_chart::BarChart;
 use crate::frontends::components::download_extension::DownloadExtension;
 use crate::frontends::components::heading::Heading;
+use crate::frontends::components::icons::checkmark_icon::CheckMarkIcon;
 use crate::frontends::components::icons::chrome_icon::ChromeIcon;
+use crate::frontends::components::icons::xmark_icon::XMarkIcon;
 use crate::frontends::components::modal::Modal;
 use crate::frontends::components::stat::Stat;
 use crate::frontends::components::sub_heading::Subheading;
+use crate::frontends::components::tables::table::Table;
+use crate::frontends::components::tables::table_cell::TableCell;
+use crate::frontends::components::tables::table_head::TableHead;
+use crate::frontends::components::tables::table_header::TableHeader;
 use crate::frontends::context::notification_context::NotificationContext;
 use crate::frontends::context::webapp_context::WebAppContext;
 use block_mesh_common::constants::BLOCK_MESH_CHROME_EXTENSION_LINK;
 use block_mesh_common::interfaces::server_api::ResendConfirmEmailForm;
 use block_mesh_common::routes_enum::RoutesEnum;
+use chrono::Utc;
 use leptos::*;
 use reqwest::Client;
 
@@ -149,6 +156,14 @@ pub fn NewDashboard() -> impl IntoView {
         format!("{:.1}", v)
     });
 
+    let user_ips = Signal::derive(move || {
+        if let Some(Some(data)) = async_data.get() {
+            data.user_ips
+        } else {
+            Vec::new()
+        }
+    });
+
     view! {
         <ApplicationLayout>
             <Modal show=show_download_extension show_close_button=false>
@@ -230,6 +245,43 @@ pub fn NewDashboard() -> impl IntoView {
                         value_scale="ms"
                     />
                 </div>
+                <Subheading>Networks</Subheading>
+                <Table class="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]">
+                    <TableHead>
+                        <tr>
+                            <TableHeader>IP</TableHeader>
+                            <TableHeader>Country</TableHeader>
+                            <TableHeader>Active</TableHeader>
+                        </tr>
+                    </TableHead>
+                    <tbody>
+                        <Suspense>
+                            {user_ips
+                                .get()
+                                .into_iter()
+                                .map(|ip_info| {
+                                    view! {
+                                        <tr>
+                                            <TableCell>{ip_info.ip.clone()}</TableCell>
+                                            <TableCell>{ip_info.country.clone()}</TableCell>
+                                            <TableCell>
+                                                {
+                                                    let now = Utc::now();
+                                                    let diff = now - ip_info.updated_at;
+                                                    if diff.num_seconds() > 300 {
+                                                        view! { <XMarkIcon/> }
+                                                    } else {
+                                                        view! { <CheckMarkIcon/> }
+                                                    }
+                                                }
+                                            </TableCell>
+                                        </tr>
+                                    }
+                                })
+                                .collect_view()}
+                        </Suspense>
+                    </tbody>
+                </Table>
                 <Subheading>Daily points earnings</Subheading>
                 <BarChart/>
             </Suspense>
