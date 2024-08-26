@@ -110,8 +110,9 @@ impl AuthnBackend for Backend {
             email: user.email,
         };
         if let Ok(session_user) = serde_json::to_string(&session_user) {
-            let _: RedisResult<()> = c.set(&key, session_user).await;
-            let _: RedisResult<()> = c.expire(&key, Backend::get_expire()).await;
+            let _: RedisResult<()> = c
+                .set_ex(&key, session_user, Backend::get_expire() as u64)
+                .await;
         }
         transaction.commit().await.map_err(Error::from)?;
         Ok(Option::from(session_user))
@@ -163,8 +164,9 @@ impl AuthnBackend for Backend {
             nonce: nonce.nonce.as_ref().to_string(),
         };
         if let Ok(session_user) = serde_json::to_string(&session_user) {
-            let _: RedisResult<()> = c.set(&key, &session_user).await;
-            let _: RedisResult<()> = c.expire(&key, Backend::get_expire()).await;
+            let _: RedisResult<()> = c
+                .set_ex(&key, &session_user, Backend::get_expire() as u64)
+                .await;
         }
         Ok(Option::from(session_user))
     }
@@ -200,7 +202,7 @@ pub async fn authentication_layer(
 
     let session_layer = SessionManagerLayer::new(session_store)
         .with_secure(false)
-        .with_expiry(Expiry::OnInactivity(Duration::days(1)));
+        .with_expiry(Expiry::OnInactivity(Duration::days(7)));
 
     let backend = Backend::new(pool.clone(), con.clone());
     AuthManagerLayerBuilder::new(backend, session_layer).build()
