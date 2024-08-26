@@ -30,11 +30,18 @@ pub fn EditInviteCode() -> impl IntoView {
             .await;
 
         match response {
-            Ok(_) => {
-                invite_code.set(new_invite_code.get_untracked());
-                notifications.set_success("Invite code updates");
+            Ok(res) => {
+                if res.status().as_u16() != 200 {
+                    notifications.set_error(
+                        "Failed to update invite code, dont use spaces or special chars",
+                    );
+                } else {
+                    invite_code.set(new_invite_code.get_untracked());
+                    notifications.set_success("Invite code updated");
+                }
             }
-            Err(_) => notifications.set_error("Failed to update invite code"),
+            Err(_) => notifications
+                .set_error("Failed to update invite code, dont use spaces or special chars"),
         }
     });
 
