@@ -99,7 +99,7 @@ pub fn OreWrapper() -> impl IntoView {
                 <div class="px-4 py-5 sm:px-6 bg-gray-900">
                     <h2 class="text-xl leading-6 font-medium text-white">
                         <div class="flex items-center justify-center">
-                            <OreIcon />
+                            <OreIcon/>
                         </div>
                     </h2>
                 </div>

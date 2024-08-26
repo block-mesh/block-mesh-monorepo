@@ -32,7 +32,7 @@ pub fn ExtensionCard(mode: CardMode) -> impl IntoView {
             ></div>
             <div></div>
             <div class="text-center relative z-10" style="marginBottom: 10%">
-                <img class="h-16 w-16 m-auto" src="/app/logo.png" alt="logo" />
+                <img class="h-16 w-16 m-auto" src="/app/logo.png" alt="logo"/>
                 <h1 class="text-darkOrange font-jetbrains">BlockMesh</h1>
                 {content}
             </div>
@@ -50,7 +50,7 @@ pub fn ExtensionCard(mode: CardMode) -> impl IntoView {
                                     }}
 
                                 </small>
-                                <br />
+                                <br/>
                                 <small class="font-jetbrains cursor-pointer text-orange underline">
                                     {if matches!(mode, CardMode::Register) {
                                         "Login Now"
@@ -65,8 +65,8 @@ pub fn ExtensionCard(mode: CardMode) -> impl IntoView {
                 >
 
                     <div class="flex justify-center logged-bottom" style:bottom="10%">
-                        <ExtensionButton fit=true text="Open Dashboard" />
-                        <ExtensionButton fit=true text="Refer" />
+                        <ExtensionButton fit=true text="Open Dashboard"/>
+                        <ExtensionButton fit=true text="Refer"/>
                     </div>
                 </Show>
             </div>
@@ -78,10 +78,10 @@ pub fn ExtensionCard(mode: CardMode) -> impl IntoView {
 pub fn LoginExtensionCard() -> impl IntoView {
     view! {
         <form>
-            <ExtensionInput label="Email" type_="text" />
-            <ExtensionInput label="Password" type_="password" />
-            <br />
-            <ExtensionButton text="login" />
+            <ExtensionInput label="Email" type_="text"/>
+            <ExtensionInput label="Password" type_="password"/>
+            <br/>
+            <ExtensionButton text="login"/>
         </form>
     }
 }
@@ -90,10 +90,10 @@ pub fn LoginExtensionCard() -> impl IntoView {
 pub fn RegisterExtensionCard() -> impl IntoView {
     view! {
         <div>
-            <ExtensionInput label="Email" type_="text" />
-            <ExtensionInput label="Password" type_="password" />
-            <ExtensionInput label="Referer Code" type_="text" />
-            <ExtensionButton text="Register" />
+            <ExtensionInput label="Email" type_="text"/>
+            <ExtensionInput label="Password" type_="password"/>
+            <ExtensionInput label="Referer Code" type_="text"/>
+            <ExtensionButton text="Register"/>
         </div>
     }
 }
@@ -102,14 +102,14 @@ pub fn RegisterExtensionCard() -> impl IntoView {
 pub fn LoggedInExtensionCard() -> impl IntoView {
     view! {
         <div class="auth-card-content">
-            <br />
-            <br />
+            <br/>
+            <br/>
             <div
                 class="pulse h-24 w-48 overflow-hidden absolute top-0 bottom-0 left-0 right-0 m-auto"
                 style:scale="0.4"
             ></div>
-            <br />
-            <br />
+            <br/>
+            <br/>
             <small class="relative" style="color: #fff8; top: -30px;">
                 version: 0.0.27
             </small>
@@ -128,13 +128,13 @@ pub fn Extension() -> impl IntoView {
     view! {
         <ApplicationLayout>
             <p>Login</p>
-            <ExtensionCard mode=CardMode::Login />
-            <br />
+            <ExtensionCard mode=CardMode::Login/>
+            <br/>
             <p>Register</p>
-            <ExtensionCard mode=CardMode::Register />
-            <br />
+            <ExtensionCard mode=CardMode::Register/>
+            <br/>
             <p>Logged In</p>
-            <ExtensionCard mode=CardMode::LoggedIn />
+            <ExtensionCard mode=CardMode::LoggedIn/>
         </ApplicationLayout>
     }
 }

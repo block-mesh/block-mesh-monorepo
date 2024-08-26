@@ -4,7 +4,7 @@ use leptos_meta::{Link, Meta, Script, Stylesheet, Title};
 #[component]
 pub fn CommonHeader() -> impl IntoView {
     view! {
-        <Script src="https://cdn.jsdelivr.net/npm/eruda" />
+        <Script src="https://cdn.jsdelivr.net/npm/eruda"/>
         <script>
             r#"
             if (window?.origin.includes("localhost")) {
@@ -12,27 +12,27 @@ pub fn CommonHeader() -> impl IntoView {
             }
             "#
         </script>
-        <Title text="BlockMesh Network" />
-        <Meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <Meta charset="UTF-8" />
-        <Link rel="preconnect" href="https://fonts.googleapis.com" />
-        <Link rel="preconnect" href="https://fonts.gstatic.com" />
+        <Title text="BlockMesh Network"/>
+        <Meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+        <Meta charset="UTF-8"/>
+        <Link rel="preconnect" href="https://fonts.googleapis.com"/>
+        <Link rel="preconnect" href="https://fonts.gstatic.com"/>
         <Link
             href="https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap"
             rel="stylesheet"
         />
 
-        <Link rel="preconnect" href="https://rsms.me/" />
-        <Link rel="stylesheet" href="https://rsms.me/inter/inter.css" />
+        <Link rel="preconnect" href="https://rsms.me/"/>
+        <Link rel="stylesheet" href="https://rsms.me/inter/inter.css"/>
         <Link
             rel="stylesheet"
             href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,400,0,0"
         />
-        <Meta http_equiv="cache-control" content="no-cache" />
-        <Meta http_equiv="expires" content="0" />
-        <Meta http_equiv="pragma" content="no-cache" />
-        <Stylesheet href="https://r2-assets.blockmesh.xyz/tailwind.css" />
-        <Stylesheet id="leptos" href="/pkg/block-mesh-manager.css" />
+        <Meta http_equiv="cache-control" content="no-cache"/>
+        <Meta http_equiv="expires" content="0"/>
+        <Meta http_equiv="pragma" content="no-cache"/>
+        <Stylesheet href="https://r2-assets.blockmesh.xyz/tailwind.css"/>
+        <Stylesheet id="leptos" href="/pkg/block-mesh-manager.css"/>
 
         <Link
             href="https://fonts.googleapis.com/css2?family=Agbalumo&family=Varela+Round&family=Playfair+Display:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,500;1,600;1,700;1,800;1,900&display=swap"
@@ -70,9 +70,9 @@ pub fn CommonHeader() -> impl IntoView {
             }
             "#
         </Script>
-        <Script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js" />
-        <Script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js" />
-        <Script src="https://www.googletagmanager.com/gtag/js?id=G-RYHLW3MDK2" />
+        <Script src="https://cdn.jsdelivr.net/npm/echarts@5.4.2/dist/echarts.min.js"/>
+        <Script src="https://cdn.jsdelivr.net/npm/echarts-gl@2.0.9/dist/echarts-gl.min.js"/>
+        <Script src="https://www.googletagmanager.com/gtag/js?id=G-RYHLW3MDK2"/>
         <Script>
             r#"
             window.dataLayer = window.dataLayer || [];

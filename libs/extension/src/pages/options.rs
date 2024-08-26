@@ -51,7 +51,7 @@ pub fn ExtensionOptionsPage() -> impl IntoView {
     });
 
     view! {
-        <ExtensionWrapperNotifications />
+        <ExtensionWrapperNotifications/>
         <form on:submit=|ev| ev.prevent_default()>
             <div class="bg-gray-700 flex justify-center items-center">
                 <div class="bg-gray-800 p-8 shadow-md w-full">

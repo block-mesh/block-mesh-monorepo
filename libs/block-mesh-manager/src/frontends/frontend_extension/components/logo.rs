@@ -5,7 +5,7 @@ use leptos::*;
 pub fn Logo() -> impl IntoView {
     view! {
         <div class="flex justify-center">
-            <img class="h-16 m-auto" src=BLOCK_MESH_LOGO alt="logo" />
+            <img class="h-16 m-auto" src=BLOCK_MESH_LOGO alt="logo"/>
         </div>
     }
 }

@@ -10,8 +10,11 @@ pub fn ReloadButton() -> impl IntoView {
     };
 
     view! {
-        <div on:click=on_click class="hover:text-orange text-off-white cursor-pointer focus:outline-none flex-grow text-end opacity-50 hover:opacity-100">
-             <span class="material-symbols-outlined">refresh</span>
+        <div
+            on:click=on_click
+            class="hover:text-orange text-off-white cursor-pointer focus:outline-none flex-grow text-end opacity-50 hover:opacity-100"
+        >
+            <span class="material-symbols-outlined">refresh</span>
         </div>
     }
 }

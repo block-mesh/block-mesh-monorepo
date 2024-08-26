@@ -24,7 +24,7 @@ use leptos::*;
 pub fn ApplicationNavbar() -> impl IntoView {
     view! {
         <Navbar>
-            <NavbarSpacer />
+            <NavbarSpacer/>
             <NavbarSection>
                 <div></div>
             // <OnlineChip is_online=true/>
@@ -43,9 +43,9 @@ pub fn ApplicationSidebar() -> impl IntoView {
         <Sidebar>
             <SidebarHeader>
                 <SidebarItem>
-                    <Avatar src=BLOCK_MESH_LOGO />
+                    <Avatar src=BLOCK_MESH_LOGO/>
                     <SidebarLabel>BlockMesh</SidebarLabel>
-                    <ReloadButton />
+                    <ReloadButton/>
                 // <OnlineChip is_online=true/>
                 </SidebarItem>
             </SidebarHeader>
@@ -53,24 +53,24 @@ pub fn ApplicationSidebar() -> impl IntoView {
             <SidebarBody>
                 <SidebarSection>
                     <SidebarItemLink href="/ui/dashboard">
-                        <HomeIcon />
+                        <HomeIcon/>
                         <SidebarLabel>Dashboard</SidebarLabel>
                     </SidebarItemLink>
                     <SidebarItemLink href="/ui/referrals">
-                        <LinkIcon />
+                        <LinkIcon/>
                         <SidebarLabel>Referrals</SidebarLabel>
                     </SidebarItemLink>
                     <SidebarItemLink href="/ui/perks">
-                        <PerkIcon />
+                        <PerkIcon/>
                         <SidebarLabel>Perks</SidebarLabel>
                     </SidebarItemLink>
                 </SidebarSection>
 
-                <SidebarSpacer />
+                <SidebarSpacer/>
 
                 <SidebarSection>
                     <SidebarItemLink href="/logout" rel="external">
-                        <LogoutIcon />
+                        <LogoutIcon/>
                         <SidebarLabel>Logout</SidebarLabel>
                     </SidebarItemLink>
                 </SidebarSection>
@@ -127,10 +127,12 @@ pub fn ApplicationLayout(children: ChildrenFn) -> impl IntoView {
                     let:data
                     clone:children
                 >
+
                     {
                         provide_context(data.clone());
                         children()
                     }
+
                 </IfLetSome>
             </Transition>
         </SidebarLayout>

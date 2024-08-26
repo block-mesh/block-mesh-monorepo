@@ -13,7 +13,7 @@ pub fn ExtensionLoading() -> impl IntoView {
             <div class="auth-card-frame"></div>
             <div class="auth-card-top"></div>
             <div class="auth-card-body">
-                <Logo />
+                <Logo/>
                 <h1>BlockMesh</h1>
                 <div class="auth-card-content">
                     <div class="pulse"></div>

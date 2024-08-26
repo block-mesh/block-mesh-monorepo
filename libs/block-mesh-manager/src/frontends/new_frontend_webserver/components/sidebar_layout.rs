@@ -50,13 +50,14 @@ where
                     let on_close = on_close.clone();
                     move |_| on_close()
                 }
-            ></div>
+            >
+            </div>
             <div class="fixed inset-y-0 w-full max-w-80 p-2 transition duration-300 ease-in-out data-[closed]:-translate-x-full z-10">
 
                 <div class="flex h-full flex-col rounded-lg bg-white shadow-sm ring-1 ring-zinc-950/5 bg-zinc-900 ring-white/10">
                     <div class="-mb-3 px-4 pt-3">
                         <NavbarItem on_click=on_close aria_label="Close navigation">
-                            <CloseMenuIcon />
+                            <CloseMenuIcon/>
                         </NavbarItem>
                     </div>
 
@@ -98,7 +99,7 @@ where
                         on_click=move || set_show_sidebar.set(true)
                         aria_label="Open navigation"
                     >
-                        <OpenMenuIcon />
+                        <OpenMenuIcon/>
                     </NavbarItem>
                 </div>
                 <div class="min-w-0 flex-1">{navbar}</div>

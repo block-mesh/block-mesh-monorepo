@@ -63,7 +63,7 @@ pub fn DownloadExtension(show: RwSignal<bool>) -> impl IntoView {
                             type="submit"
                             on:click=move |_| { submit.dispatch("download".parse().unwrap()) }
                         >
-                            <ChromeIcon />
+                            <ChromeIcon/>
                             Download Chrome extension and start earning
                         </button>
                     </div>
