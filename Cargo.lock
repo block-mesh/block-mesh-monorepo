@@ -1728,27 +1728,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "blockmesh-leptos"
-version = "0.0.210"
-dependencies = [
- "anyhow",
- "block-mesh-common",
- "console_error_panic_hook",
- "js-sys",
- "leptos",
- "leptos-use",
- "leptos_router",
- "logger-leptos",
- "serde",
- "serde-wasm-bindgen 0.6.5",
- "serde_json",
- "solana-sdk",
- "tracing-wasm",
- "wasm-bindgen",
- "wasm-bindgen-futures",
-]
-
-[[package]]
 name = "blockmesh-program"
 version = "0.0.210"
 dependencies = [
