@@ -3,6 +3,7 @@ use crate::frontends::components::notification_popup::NotificationPopup;
 use crate::frontends::context::auth_context::AuthContext;
 use crate::frontends::context::extension_state::ExtensionContext;
 use crate::frontends::context::notification_context::NotificationContext;
+use crate::frontends::context::reload_context::ReloadContext;
 use crate::frontends::context::size_context::SizeContext;
 use crate::frontends::frontend_extension::components::navigator::ExtensionNavigator;
 use crate::frontends::frontend_extension::extension_header::ExtensionServerHeader;
@@ -17,6 +18,7 @@ use crate::frontends::frontend_tauri::pages::login::TauriLogin;
 use crate::frontends::frontend_tauri::pages::register::TauriRegister;
 use crate::frontends::frontend_tauri::tauri_header::TauriHeader;
 use crate::frontends::frontend_webserver::webserver_header::WebServerHeader;
+use crate::frontends::new_frontend_webserver::app::application_layout::ApplicationLayout;
 use crate::frontends::new_frontend_webserver::app::new_dashboard::NewDashboard;
 use crate::frontends::new_frontend_webserver::app::perks::Perks;
 use crate::frontends::new_frontend_webserver::app::referrals::Referrals;
@@ -24,8 +26,6 @@ use crate::frontends::wrapper::Wrapper;
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
-use crate::frontends::context::reload_context::ReloadContext;
-use crate::frontends::new_frontend_webserver::app::application_layout::ApplicationLayout;
 
 #[component]
 pub fn App() -> impl IntoView {

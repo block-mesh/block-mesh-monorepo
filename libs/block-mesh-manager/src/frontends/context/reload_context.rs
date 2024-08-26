@@ -1,6 +1,6 @@
-use std::rc::Rc;
 use leptos::*;
 use leptos_use::{use_toggle, UseToggleReturn};
+use std::rc::Rc;
 
 #[derive(Clone)]
 pub struct ReloadContext {
@@ -17,6 +17,9 @@ impl ReloadContext {
 impl Default for ReloadContext {
     fn default() -> Self {
         let UseToggleReturn { value, toggle, .. } = use_toggle(false);
-        Self { toggle: Rc::new(toggle), value }
+        Self {
+            toggle: Rc::new(toggle),
+            value,
+        }
     }
 }

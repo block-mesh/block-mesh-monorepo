@@ -28,8 +28,8 @@ pub fn Referrals() -> impl IntoView {
     let copy_to_clipboard = move |_| {
         #[cfg(all(web_sys_unstable_apis, feature = "hydrate"))]
         {
-            use leptos_use::{use_clipboard, UseClipboardReturn};
             use crate::frontends::context::notification_context::NotificationContext;
+            use leptos_use::{use_clipboard, UseClipboardReturn};
 
             let notifications = expect_context::<NotificationContext>();
             let UseClipboardReturn { copy, .. } = use_clipboard();

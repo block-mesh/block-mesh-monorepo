@@ -8,7 +8,9 @@ use crate::frontends::components::icons::home_icon::HomeIcon;
 use crate::frontends::components::icons::link_icon::LinkIcon;
 use crate::frontends::components::icons::logout_icon::LogoutIcon;
 use crate::frontends::components::icons::perk_icon::PerkIcon;
+use crate::frontends::components::reload_button::ReloadButton;
 use crate::frontends::context::auth_context::AuthContext;
+use crate::frontends::context::reload_context::ReloadContext;
 use crate::frontends::new_frontend_webserver::components::sidebar::{
     Sidebar, SidebarBody, SidebarFooter, SidebarHeader, SidebarItem, SidebarItemLink, SidebarLabel,
     SidebarSection, SidebarSpacer,
@@ -17,8 +19,6 @@ use crate::frontends::new_frontend_webserver::components::sidebar_layout::Sideba
 use block_mesh_common::constants::BLOCK_MESH_LOGO;
 use block_mesh_common::interfaces::server_api::DashboardResponse;
 use leptos::*;
-use crate::frontends::components::reload_button::ReloadButton;
-use crate::frontends::context::reload_context::ReloadContext;
 
 #[component]
 pub fn ApplicationNavbar() -> impl IntoView {
