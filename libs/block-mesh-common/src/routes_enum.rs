@@ -22,6 +22,7 @@ pub enum RoutesEnum {
     Static_Auth_Call_To_Action,
     Static_Auth_Logout,
     Static_Auth_Dashboard,
+    Static_Auth_Daily_Leaderboard,
     Static_UnAuth_Twitter_Callback,
     Api_ConnectWallet,
     Api_ReportUptime,
@@ -47,6 +48,7 @@ impl Display for RoutesEnum {
             RoutesEnum::Static_UnAuth_RpcDashboard => write!(f, "/rpc_dashboard"),
             RoutesEnum::Static_UnAuth_RpcApi => write!(f, "/rpc_api"),
             RoutesEnum::Static_UnAuth_Notification => write!(f, "/notification"),
+            RoutesEnum::Static_Auth_Daily_Leaderboard => write!(f, "/daily_leaderboard"),
             RoutesEnum::Static_UnAuth_EmailConfirm => write!(f, "/email_confirm"),
             RoutesEnum::Static_UnAuth_ResetPassword => write!(f, "/reset_password"),
             RoutesEnum::Static_UnAuth_ResendConfirmationEmail => {

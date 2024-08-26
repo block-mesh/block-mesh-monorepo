@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT\n                city,\n                country,\n                MIN(latitude) AS latitude,\n                MIN(longitude) AS longitude,\n                count(*) AS count\n            FROM\n            \tuptime_reports\n            WHERE\n            \tcity IS NOT NULL\n            \tAND city != ''\n            \tAND country != ''\n            \tAND country IS NOT NULL\n            \tAND latitude IS NOT NULL\n            \tAND longitude IS NOT NULL\n            GROUP BY\n            \tcity,\n            \tcountry\n        ",
+  "query": "\n            SELECT\n                city,\n                country,\n                MIN(latitude) AS latitude,\n                MIN(longitude) AS longitude,\n                count(*) AS count\n            FROM\n            \tip_addresses\n            WHERE\n            \tcity IS NOT NULL\n            \tAND city != ''\n            \tAND country != ''\n            \tAND country IS NOT NULL\n            \tAND latitude IS NOT NULL\n            \tAND longitude IS NOT NULL\n            GROUP BY\n            \tcity,\n            \tcountry\n        ",
   "describe": {
     "columns": [
       {
@@ -40,5 +40,5 @@
       null
     ]
   },
-  "hash": "3180eb9ce3ea7586bba5fb67d1795dd1fa41a8ac0db1909b63283b8ec1d843ab"
+  "hash": "c8dc57f7c28916677d4940bd7f992d87da0cde093e1c43090e5c2bb67daf892f"
 }
