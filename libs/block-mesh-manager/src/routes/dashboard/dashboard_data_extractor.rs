@@ -76,8 +76,9 @@ pub async fn dashboard_data_extractor(
 
     let now = Utc::now();
     let diff = now - uptime.updated_at.unwrap_or(now);
+    let limit = 300;
 
-    let user_ips = get_user_ips(&mut transaction, &user_id).await?;
+    let user_ips = get_user_ips(&mut transaction, &user_id, limit).await?;
 
     let connected =
         if diff.num_seconds() < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240) {

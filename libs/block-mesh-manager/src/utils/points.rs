@@ -1,7 +1,10 @@
 use crate::domain::perk::Perk;
 
+pub const UPTIME_FACTOR: f64 = 100.0 / (24.0 * 60.0 * 60.0);
+pub const TASKS_FACTOR: f64 = 10.0;
+
 pub fn raw_points(uptime: f64, tasks_count: i64) -> f64 {
-    (uptime / (24 * 60 * 60) as f64) * 100.0 + (tasks_count as f64 * 10.0)
+    uptime * UPTIME_FACTOR + tasks_count as f64 * TASKS_FACTOR
 }
 
 pub fn calc_points_daily(uptime: f64, tasks_count: i64, perks: &Vec<Perk>) -> f64 {

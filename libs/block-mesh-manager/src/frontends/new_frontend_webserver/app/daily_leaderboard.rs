@@ -51,7 +51,7 @@ pub fn DailyLeaderboardDashboard() -> impl IntoView {
                                         <TableCell>{index + 1}</TableCell>
                                         <TableCell>{user.email.clone()}</TableCell>
                                         <TableCell class="text-right">
-                                            {format!("{:.1}", user.points)}
+                                            {format!("{:.1}", user.points.unwrap_or_default())}
                                         </TableCell>
                                     </tr>
                                 }

@@ -293,7 +293,7 @@ pub struct DailyLeaderboard {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LeaderBoardUser {
     pub email: String,
-    pub points: f64,
+    pub points: Option<f64>,
 }
 
 impl PartialEq<Self> for LeaderBoardUser {
