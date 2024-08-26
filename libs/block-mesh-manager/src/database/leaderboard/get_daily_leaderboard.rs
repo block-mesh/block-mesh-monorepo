@@ -2,6 +2,7 @@ use crate::domain::daily_stat::DailyStat;
 use chrono::{Duration, Utc};
 use sqlx::{Postgres, Transaction};
 
+#[allow(dead_code)]
 pub(crate) async fn get_daily_leaderboard(
     transaction: &mut Transaction<'_, Postgres>,
 ) -> anyhow::Result<Vec<DailyStat>> {
