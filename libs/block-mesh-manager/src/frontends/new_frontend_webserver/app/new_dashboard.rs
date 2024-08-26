@@ -68,13 +68,7 @@ pub fn NewDashboard() -> impl IntoView {
         }
     });
 
-    let user_ips = Signal::derive(move || {
-        if let Some(Some(data)) = async_data.get() {
-            data.user_ips
-        } else {
-            Vec::new()
-        }
-    });
+    let user_ips = Signal::derive(move || async_data.user_ips.clone());
 
     view! {
         <Modal show=show_download_extension show_close_button=false>
@@ -163,90 +157,46 @@ pub fn NewDashboard() -> impl IntoView {
                 value_scale="ms"
             />
         </div>
+        <Subheading>Networks</Subheading>
+        <Table class="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]">
+            <TableHead>
+                <tr>
+                    <TableHeader>IP</TableHeader>
+                    <TableHeader>Country</TableHeader>
+                    <TableHeader>Active</TableHeader>
+                </tr>
+            </TableHead>
+            <tbody>
+                <Suspense>
+                    {user_ips
+                        .get()
+                        .into_iter()
+                        .map(|ip_info| {
+                            view! {
+                                <tr>
+                                    <TableCell>{ip_info.ip.clone()}</TableCell>
+                                    <TableCell>{ip_info.country.clone()}</TableCell>
+                                    <TableCell>
+
+                                        {
+                                            let now = Utc::now();
+                                            let diff = now - ip_info.updated_at;
+                                            if diff.num_seconds() > 300 {
+                                                view! { <XMarkIcon/> }
+                                            } else {
+                                                view! { <CheckMarkIcon/> }
+                                            }
+                                        }
+
+                                    </TableCell>
+                                </tr>
+                            }
+                        })
+                        .collect_view()}
+                </Suspense>
+            </tbody>
+        </Table>
         <Subheading>Daily points earnings</Subheading>
         <BarChart/>
-                    </button>
-                </div>
-                <div class="mt-10 grid gap-8 sm:grid-cols-2 xl:grid-cols-5">
-                    <Stat
-                        title="Connection Status"
-                        value=move || connected_status.get()
-                        icon="wifi"
-                    />
-                    // subtext="seconds"
-                    <Stat title="Uptime" value=move || uptime.get() icon="trending_up"/>
-                    // subtext="seconds"
-                    <Stat
-                        title="# Invites"
-                        value=move || invites.get()
-                        icon="notification_multiple"
-                    />
-                    <Stat title="# Tasks" value=move || tasks.get() icon="task_alt"/>
-                    <Stat title="Points" value=move || points.get() icon="my_location"/>
-                </div>
-                <br/>
-                <br/>
-                <Subheading>Bandwidth Statistics</Subheading>
-                <div class="mt-10 grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
-                    <BandwidthCard
-                        title="Download Speed"
-                        value=move || download.get()
-                        icon="download"
-                        value_scale="Mbps"
-                    />
-                    <BandwidthCard
-                        title="Upload Speed"
-                        value=move || upload.get()
-                        icon="upload"
-                        value_scale="Mbps"
-                    />
-                    <BandwidthCard
-                        title="Latency"
-                        value=move || latency.get()
-                        icon="network_check"
-                        value_scale="ms"
-                    />
-                </div>
-                <Subheading>Networks</Subheading>
-                <Table class="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]">
-                    <TableHead>
-                        <tr>
-                            <TableHeader>IP</TableHeader>
-                            <TableHeader>Country</TableHeader>
-                            <TableHeader>Active</TableHeader>
-                        </tr>
-                    </TableHead>
-                    <tbody>
-                        <Suspense>
-                            {user_ips
-                                .get()
-                                .into_iter()
-                                .map(|ip_info| {
-                                    view! {
-                                        <tr>
-                                            <TableCell>{ip_info.ip.clone()}</TableCell>
-                                            <TableCell>{ip_info.country.clone()}</TableCell>
-                                            <TableCell>
-                                                {
-                                                    let now = Utc::now();
-                                                    let diff = now - ip_info.updated_at;
-                                                    if diff.num_seconds() > 300 {
-                                                        view! { <XMarkIcon/> }
-                                                    } else {
-                                                        view! { <CheckMarkIcon/> }
-                                                    }
-                                                }
-                                            </TableCell>
-                                        </tr>
-                                    }
-                                })
-                                .collect_view()}
-                        </Suspense>
-                    </tbody>
-                </Table>
-                <Subheading>Daily points earnings</Subheading>
-                <BarChart/>
-            </Suspense>
-        </ApplicationLayout>
     }
 }
