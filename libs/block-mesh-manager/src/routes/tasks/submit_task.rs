@@ -96,7 +96,7 @@ pub async fn handler(
         let _ = state
             .tx_sql_agg
             .send(UpdateBulkMessage {
-                id: tasks.id,
+                id: tasks.id.unwrap_or_default(),
                 value: serde_json::Value::from(tasks.value.as_i64().unwrap_or_default() + 1),
                 table: Table::Aggregate,
             })

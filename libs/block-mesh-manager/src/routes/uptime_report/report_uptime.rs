@@ -125,7 +125,7 @@ pub async fn handler(
         let _ = state
             .tx_sql_agg
             .send(UpdateBulkMessage {
-                id: aggregate.id,
+                id: aggregate.id.0.unwrap_or_default(),
                 value: serde_json::Value::from(sum),
                 table: Table::Aggregate,
             })
@@ -134,7 +134,7 @@ pub async fn handler(
         let _ = state
             .tx_sql_agg
             .send(UpdateBulkMessage {
-                id: aggregate.id,
+                id: aggregate.id.0.unwrap_or_default(),
                 value: serde_json::Value::from(aggregate.value.as_f64().unwrap_or_default()),
                 table: Table::Aggregate,
             })
