@@ -60,7 +60,7 @@ pub async fn handler(
     let _ = state
         .tx_sql_agg
         .send(UpdateBulkMessage {
-            id: download.id,
+            id: download.id.unwrap_or_default(),
             value: serde_json::Value::from(
                 (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
             ),
@@ -70,7 +70,7 @@ pub async fn handler(
     let _ = state
         .tx_sql_agg
         .send(UpdateBulkMessage {
-            id: upload.id,
+            id: upload.id.unwrap_or_default(),
             value: serde_json::Value::from(
                 (upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0,
             ),
@@ -80,7 +80,7 @@ pub async fn handler(
     let _ = state
         .tx_sql_agg
         .send(UpdateBulkMessage {
-            id: latency.id,
+            id: latency.id.unwrap_or_default(),
             value: serde_json::Value::from(
                 (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,
             ),
