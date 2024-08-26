@@ -1,4 +1,4 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::database::api_token::find_token::find_token;
 use crate::database::bandwidth::delete_bandwidth_reports_by_time::delete_bandwidth_reports_by_time;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
@@ -42,31 +42,25 @@ pub async fn handler(
         .as_f64()
         .unwrap_or_default();
 
-    let download = get_or_create_aggregate_by_user_and_name_no_transaction(
+    let download = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
         AggregateName::Download,
         user.id,
     )
     .await?;
-    let upload = get_or_create_aggregate_by_user_and_name_no_transaction(
-        &mut transaction,
-        AggregateName::Upload,
-        user.id,
-    )
-    .await?;
+    let upload =
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Upload, user.id)
+            .await?;
 
-    let latency = get_or_create_aggregate_by_user_and_name_no_transaction(
-        &mut transaction,
-        AggregateName::Latency,
-        user.id,
-    )
-    .await?;
+    let latency =
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Latency, user.id)
+            .await?;
     transaction.commit().await.map_err(Error::from)?;
 
     let _ = state
         .tx_sql_agg
         .send(UpdateBulkMessage {
-            id: download.id.unwrap_or_default(),
+            id: download.id,
             value: serde_json::Value::from(
                 (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
             ),
@@ -76,7 +70,7 @@ pub async fn handler(
     let _ = state
         .tx_sql_agg
         .send(UpdateBulkMessage {
-            id: upload.id.unwrap_or_default(),
+            id: upload.id,
             value: serde_json::Value::from(
                 (upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0,
             ),
@@ -86,7 +80,7 @@ pub async fn handler(
     let _ = state
         .tx_sql_agg
         .send(UpdateBulkMessage {
-            id: latency.id.unwrap_or_default(),
+            id: latency.id,
             value: serde_json::Value::from(
                 (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,
             ),

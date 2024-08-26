@@ -5,6 +5,8 @@ use url::Url;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    #[error("Not allowed rate limit")]
+    NotAllowedRateLimit,
     #[error("Internal server error")]
     InternalServer,
     #[error("Authentication error: {0}")]
@@ -67,6 +69,9 @@ impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         tracing::error!("Error occurred: {}", self);
         match self {
+            Error::NotAllowedRateLimit => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+            }
             Error::SignatureMismatch => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
             }
@@ -132,6 +137,7 @@ impl From<Error> for StatusCode {
     fn from(error: Error) -> Self {
         tracing::error!("Error occurred: {}", error);
         match error {
+            Error::NotAllowedRateLimit => StatusCode::INTERNAL_SERVER_ERROR,
             Error::SignatureMismatch => StatusCode::INTERNAL_SERVER_ERROR,
             Error::TokenMismatch => StatusCode::INTERNAL_SERVER_ERROR,
             Error::NotYourTask => StatusCode::INTERNAL_SERVER_ERROR,

@@ -1,14 +1,14 @@
-use crate::domain::option_uuid::OptionUuid;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
+use uuid::Uuid;
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
 pub struct Aggregate {
-    pub id: OptionUuid,
-    pub user_id: OptionUuid,
+    pub id: Uuid,
+    pub user_id: Uuid,
     pub name: AggregateName,
     pub value: serde_json::Value,
     pub created_at: Option<DateTime<Utc>>,
