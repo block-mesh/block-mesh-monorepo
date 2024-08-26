@@ -38,16 +38,15 @@ pub fn Referrals() -> impl IntoView {
         {
             use crate::frontends::context::notification_context::NotificationContext;
             let notifications = expect_context::<NotificationContext>();
-            if let Some(clipboard) = web_sys::window().unwrap().navigator().clipboard() {
-                if let Some(invite_url_string) = get_invite_code() {
-                    let _ = clipboard.write_text(&format!(
-                        "https://app.blockmesh.xyz/register?invite_code={}",
-                        invite_url_string
-                    ));
-                    notifications.set_success("Successfully Copied");
-                } else {
-                    notifications.set_error("Failed to copy invite code");
-                }
+            let clipboard = web_sys::window().unwrap().navigator().clipboard();
+            if let Some(invite_url_string) = get_invite_code() {
+                let _ = clipboard.write_text(&format!(
+                    "https://app.blockmesh.xyz/register?invite_code={}",
+                    invite_url_string
+                ));
+                notifications.set_success("Successfully Copied");
+            } else {
+                notifications.set_error("Failed to copy invite code");
             }
         }
         #[cfg(not(web_sys_unstable_apis))]

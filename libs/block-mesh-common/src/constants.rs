@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 use std::env;
 use std::fmt::{Display, Formatter};
 use std::sync::OnceLock;
@@ -52,7 +52,7 @@ pub static BLOCKMESH_SERVER_UUID_ENVAR: &str = "BLOCKMESH_SERVER_UUID";
 
 pub static BLOCKMESH_VERSION: &str = env!("CARGO_PKG_VERSION");
 
-#[derive(Debug, Clone, Copy, Deserialize, Serialize, PartialEq)]
+#[derive(Debug, Clone, Copy, Serialize, Deserialize, PartialEq)]
 pub enum DeviceType {
     Extension,
     Desktop,
@@ -78,5 +78,28 @@ impl Display for DeviceType {
             DeviceType::AppServer => write!(f, "app-server"),
             DeviceType::Cli => write!(f, "cli"),
         }
+    }
+}
+
+impl From<&str> for DeviceType {
+    fn from(value: &str) -> Self {
+        match value {
+            "extension" => DeviceType::Extension,
+            "desktop" => DeviceType::Desktop,
+            "mobile" => DeviceType::Mobile,
+            "tablet" => DeviceType::Tablet,
+            "unknown" => DeviceType::Unknown,
+            "test-proxy-master" => DeviceType::TestProxyMaster,
+            "test-proxy-endpoint" => DeviceType::TestProxyEndpoint,
+            "app-server" => DeviceType::AppServer,
+            "cli" => DeviceType::Cli,
+            _ => DeviceType::Unknown,
+        }
+    }
+}
+
+impl From<String> for DeviceType {
+    fn from(value: String) -> Self {
+        DeviceType::from(value.as_str())
     }
 }

@@ -1,3 +1,5 @@
+use crate::database::analytics::inserting_client_analytics::inserting_client_analytics;
+use crate::worker::analytics_agg::AnalyticsMessage;
 use chrono::Utc;
 use serde_json::Value;
 use sqlx::{Execute, Postgres, QueryBuilder, Transaction};
@@ -34,6 +36,24 @@ pub async fn update_aggregate_bulk(
 ) -> anyhow::Result<()> {
     for pair in calls.iter() {
         let _ = update_aggregate(&mut transaction, pair.0, pair.1).await;
+    }
+    Ok(())
+}
+
+pub async fn inserting_client_analytics_bulk(
+    mut transaction: &mut Transaction<'_, Postgres>,
+    calls: &mut HashMap<Uuid, AnalyticsMessage>,
+) -> anyhow::Result<()> {
+    for pair in calls.iter() {
+        let user_id = pair.0;
+        let value = pair.1;
+        let _ = inserting_client_analytics(
+            &mut transaction,
+            user_id,
+            &value.depin_aggregator,
+            &value.device_type,
+        )
+        .await;
     }
     Ok(())
 }

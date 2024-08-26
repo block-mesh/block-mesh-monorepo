@@ -9,6 +9,7 @@ use crate::startup::routers::api_router::get_api_router;
 use crate::startup::routers::leptos_router::get_leptos_router;
 use crate::startup::routers::static_auth_router::get_static_auth_router;
 use crate::startup::routers::static_un_auth_router::get_static_un_auth_router;
+use crate::worker::analytics_agg::AnalyticsMessage;
 use crate::worker::db_agg::UpdateBulkMessage;
 use crate::worker::db_cleaner_cron::EnrichIp;
 use axum::{Extension, Router};
@@ -45,6 +46,7 @@ pub struct AppState {
     pub client: Client,
     pub tx: tokio::sync::mpsc::Sender<JoinHandle<()>>,
     pub tx_sql_agg: tokio::sync::mpsc::Sender<UpdateBulkMessage>,
+    pub tx_analytics_agg: tokio::sync::mpsc::Sender<AnalyticsMessage>,
     pub flags: HashMap<String, FlagValue>,
     pub cleaner_tx: UnboundedSender<EnrichIp>,
     pub redis: MultiplexedConnection,

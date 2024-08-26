@@ -2,6 +2,7 @@
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unreachable_pub)]
 
+use block_mesh_manager::worker::analytics_agg::{analytics_agg, AnalyticsMessage};
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
@@ -59,6 +60,7 @@ async fn run() -> anyhow::Result<()> {
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
     let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(500);
     let (tx_sql_agg, rx_sql_agg) = tokio::sync::mpsc::channel::<UpdateBulkMessage>(500);
+    let (tx_analytics_agg, rx_analytics_agg) = tokio::sync::mpsc::channel::<AnalyticsMessage>(500);
     let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::unbounded_channel::<EnrichIp>();
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
@@ -78,6 +80,7 @@ async fn run() -> anyhow::Result<()> {
         client,
         tx,
         tx_sql_agg,
+        tx_analytics_agg,
         flags,
         cleaner_tx,
         redis,
@@ -89,6 +92,7 @@ async fn run() -> anyhow::Result<()> {
     let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
     let db_cleaner_task = tokio::spawn(db_cleaner_cron(db_pool.clone(), cleaner_rx));
     let db_agg_task = tokio::spawn(db_agg(db_pool.clone(), rx_sql_agg));
+    let db_analytics_task = tokio::spawn(analytics_agg(db_pool.clone(), rx_analytics_agg));
 
     tokio::select! {
         o = application_task => report_exit("API", o),
@@ -96,7 +100,8 @@ async fn run() -> anyhow::Result<()> {
         o = joiner_task => report_exit("Joiner task failed", o),
         o = finalize_daily_stats_task => report_exit("Finalize daily task failed", o),
         o = db_cleaner_task => report_exit("DB cleaner task failed", o),
-        o = db_agg_task => report_exit("DB aggregator", o)
+        o = db_agg_task => report_exit("DB aggregator", o),
+        o = db_analytics_task => report_exit("DB analytics aggregator", o)
     };
     Ok(())
 }

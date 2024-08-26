@@ -1,5 +1,4 @@
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
-use crate::database::analytics::inserting_client_analytics::inserting_client_analytics;
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
@@ -7,6 +6,7 @@ use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
+use crate::worker::analytics_agg::AnalyticsMessage;
 use crate::worker::db_agg::{Table, UpdateBulkMessage};
 use crate::worker::db_cleaner_cron::EnrichIp;
 use axum::extract::{ConnectInfo, Query, Request, State};
@@ -62,14 +62,14 @@ pub async fn handler(
     let body_raw = String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from(""));
     if !body_raw.is_empty() {
         if let Ok(metadata) = serde_json::from_str::<ClientsMetadata>(&body_raw) {
-            inserting_client_analytics(
-                &mut transaction,
-                &user.id,
-                &metadata.depin_aggregator.unwrap_or_default(),
-                &metadata.device_type,
-            )
-            .await
-            .map_err(Error::from)?;
+            let _ = state
+                .tx_analytics_agg
+                .send(AnalyticsMessage {
+                    user_id: user.id,
+                    depin_aggregator: metadata.depin_aggregator.unwrap_or_default(),
+                    device_type: metadata.device_type,
+                })
+                .await;
         }
     }
 
