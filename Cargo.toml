@@ -9,8 +9,8 @@ incremental = false
 #codegen-units = 1
 
 [workspace]
-members = ["libs/*", "programs/*", "libs/blockmesh-bin/src-tauri"]
-exclude = ["libs/installers", "libs/md-book", "libs/react-native-app"]
+members = ["libs/*", "programs/*"]
+exclude = ["libs/installers", "libs/md-book", "libs/react-native-app", "libs/blockmesh-bin", "libs/blockmesh-bin/src-tauri"]
 resolver = "2"
 
 [workspace.lints.rust]
@@ -39,7 +39,7 @@ dead_code = "forbid"
 
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.209"
+version = "0.0.210"
 
 [patch.crates-io]
 ## aes-gcm-siv 0.10.3 and curve25519-dalek 3.x pin zeroize to <1.4
@@ -72,7 +72,7 @@ charming = { version = "0.3.1", features = ["wasm"] }
 borsh = { version = "1.5.1" }
 sysinfo = { version = "0.30.12" }
 tikv-jemallocator = { version = "0.5" }
-leptos_axum = { version = "0.6.12" }
+leptos_axum = { version = "0.6.14" }
 leptos-chartistry = { version = "0.1.6" }
 leptos-use = { git = "https://github.com/synphonyte/leptos-use", branch = "main" }
 leptos_meta = { version = "0.6.12" }
@@ -91,8 +91,9 @@ form_urlencoded = { version = "1.2.1" }
 auto-launch = { version = "0.5.0" }
 whoami = { version = "1.5.1" }
 url = { version = "2.5.0" }
-leptos = { version = "0.6.11", features = ["tracing"] }
-leptos_router = { version = "0.6.11" }
+leptos = { version = "0.6.14", features = ["tracing"] }
+server_fn = "0.6.14"
+leptos_router = { version = "0.6.14" }
 wasm-bindgen = { version = "=0.2.93" }
 js-sys = { version = "0.3" }
 wasm-bindgen-futures = { version = "=0.4.42" }
