@@ -28,6 +28,10 @@ pub fn get_key(key: &str) -> String {
     format!("rate-limit-{}", key)
 }
 
+pub fn user_ip_key(user_id: &Uuid, ip: &str) -> String {
+    format!("{}-{}", user_id.to_string(), ip)
+}
+
 pub async fn get_value_from_redis(
     con: &mut MultiplexedConnection,
     key: &str,
@@ -49,7 +53,7 @@ pub async fn touch_redis_value(con: &mut MultiplexedConnection, user_id: &Uuid, 
     if let Ok(redis_user) = serde_json::to_string(&redis_user) {
         let _: RedisResult<()> = con
             .set_ex(
-                &get_key(&user_id.to_string()),
+                &get_key(&user_ip_key(user_id, ip)),
                 redis_user.clone(),
                 Backend::get_expire() as u64,
             )
@@ -73,7 +77,8 @@ pub async fn filter_request(
         .unwrap_or(2500);
     let diff = now - Duration::milliseconds(limit);
     let fallback = RateLimitUser::new(user_id, ip);
-    let by_user: RateLimitUser = get_value_from_redis(con, &user_id.to_string(), &fallback).await?;
+    let by_user: RateLimitUser =
+        get_value_from_redis(con, &user_ip_key(&user_id, &ip), &fallback).await?;
     let by_ip: RateLimitUser = get_value_from_redis(con, &ip, &fallback).await?;
     touch_redis_value(con, user_id, ip).await;
     Ok(max(by_user.update_at, by_ip.update_at) < diff)
