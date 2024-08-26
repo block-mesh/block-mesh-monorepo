@@ -89,7 +89,7 @@ pub fn Perks() -> impl IntoView {
                 {perks
                     .with_value(|perks| {
                         perks
-                            .into_iter()
+                            .iter()
                             .cloned()
                             .map(|referral| {
                                 view! {

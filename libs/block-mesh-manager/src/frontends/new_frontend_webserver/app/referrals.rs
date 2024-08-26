@@ -145,7 +145,7 @@ pub fn Referrals() -> impl IntoView {
                 {referrals
                     .with_value(|referrals| {
                         referrals
-                            .into_iter()
+                            .iter()
                             .cloned()
                             .map(|referral| {
                                 view! {

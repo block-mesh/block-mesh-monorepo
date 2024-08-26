@@ -37,7 +37,7 @@ pub fn NewDashboard() -> impl IntoView {
     let verified_email = async_data.verified_email;
 
     let resend_verification = create_action({
-        let email = auth.email.clone();
+        let email = auth.email;
 
         move |_: &()| async move {
             if verified_email || email.get_untracked().is_empty() {
