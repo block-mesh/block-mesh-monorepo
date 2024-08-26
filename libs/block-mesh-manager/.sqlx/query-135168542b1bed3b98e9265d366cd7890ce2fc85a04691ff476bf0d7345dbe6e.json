@@ -1,0 +1,31 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n        \tusers.email AS email,\n        \t(uptime * $1 + CAST(tasks_count as DOUBLE PRECISION) * $2) AS points\n        FROM\n        \tdaily_stats\n      \t\tJOIN users ON users.id = daily_stats.user_id\n        WHERE\n            day = $3\n        ORDER BY\n        \tpoints DESC\n        \tLIMIT $4\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "email",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "points",
+        "type_info": "Float8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Float8",
+        "Float8",
+        "Date",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      null
+    ]
+  },
+  "hash": "135168542b1bed3b98e9265d366cd7890ce2fc85a04691ff476bf0d7345dbe6e"
+}
