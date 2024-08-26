@@ -1,4 +1,4 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::database::analytics::inserting_client_analytics::inserting_client_analytics;
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
@@ -92,13 +92,10 @@ pub async fn handler(
     let interval: f64 =
         <FlagValue as TryInto<f64>>::try_into(interval.to_owned()).unwrap_or_default();
 
-    let aggregate = get_or_create_aggregate_by_user_and_name_no_transaction(
-        &mut transaction,
-        AggregateName::Uptime,
-        user.id,
-    )
-    .await
-    .map_err(Error::from)?;
+    let aggregate =
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, user.id)
+            .await
+            .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;
 
     let now = Utc::now();
@@ -119,7 +116,7 @@ pub async fn handler(
         let _ = state
             .tx_sql_agg
             .send(UpdateBulkMessage {
-                id: aggregate.id.0.unwrap_or_default(),
+                id: aggregate.id,
                 value: serde_json::Value::from(sum),
                 table: Table::Aggregate,
             })
@@ -128,7 +125,7 @@ pub async fn handler(
         let _ = state
             .tx_sql_agg
             .send(UpdateBulkMessage {
-                id: aggregate.id.0.unwrap_or_default(),
+                id: aggregate.id,
                 value: serde_json::Value::from(aggregate.value.as_f64().unwrap_or_default()),
                 table: Table::Aggregate,
             })
