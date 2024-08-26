@@ -54,22 +54,31 @@ pub async fn handler(
         .ok_or_else(|| Error::UserNotFound)?;
     let (_parts, body) = request.into_parts();
 
-    let bytes = body
-        .collect()
-        .await
-        .map_err(|_| Error::FailedReadingBody)?
-        .to_bytes();
-    let body_raw = String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from(""));
-    if !body_raw.is_empty() {
-        if let Ok(metadata) = serde_json::from_str::<ClientsMetadata>(&body_raw) {
-            let _ = state
-                .tx_analytics_agg
-                .send(AnalyticsMessage {
-                    user_id: user.id,
-                    depin_aggregator: metadata.depin_aggregator.unwrap_or_default(),
-                    device_type: metadata.device_type,
-                })
-                .await;
+    let tx_analytics_agg = state
+        .flags
+        .get("tx_analytics_agg")
+        .unwrap_or(&FlagValue::Boolean(false));
+    let tx_analytics_agg: bool =
+        <FlagValue as TryInto<bool>>::try_into(tx_analytics_agg.to_owned()).unwrap_or_default();
+
+    if tx_analytics_agg {
+        let bytes = body
+            .collect()
+            .await
+            .map_err(|_| Error::FailedReadingBody)?
+            .to_bytes();
+        let body_raw = String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from(""));
+        if !body_raw.is_empty() {
+            if let Ok(metadata) = serde_json::from_str::<ClientsMetadata>(&body_raw) {
+                let _ = state
+                    .tx_analytics_agg
+                    .send(AnalyticsMessage {
+                        user_id: user.id,
+                        depin_aggregator: metadata.depin_aggregator.unwrap_or_default(),
+                        device_type: metadata.device_type,
+                    })
+                    .await;
+            }
         }
     }
 
