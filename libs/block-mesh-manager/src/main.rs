@@ -2,10 +2,10 @@
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unreachable_pub)]
 
-use block_mesh_manager::worker::analytics_agg::{analytics_agg, AnalyticsMessage};
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use block_mesh_manager::worker::analytics_agg::{analytics_agg, AnalyticsMessage};
     use std::env;
     use block_mesh_manager::worker::db_agg::{db_agg, UpdateBulkMessage};
     use logger_general::tracing::setup_tracing_stdout_only;
