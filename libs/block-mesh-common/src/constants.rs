@@ -1,4 +1,4 @@
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use std::env;
 use std::fmt::{Display, Formatter};
 use std::sync::OnceLock;
