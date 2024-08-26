@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n        ip_addresses.ip, ip_addresses.country, users_ip.updated_at\n        FROM users_ip\n        JOIN ip_addresses ON users_ip.ip_id = ip_addresses.id\n        WHERE users_ip.user_id = $1 AND users_ip.updated_at > $2\n        ORDER BY users_ip.updated_at\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "ip",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "country",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "7e2211077bfc98dff7378754268d5959055396bb7575c9a0e041bbeaf8013b53"
+}

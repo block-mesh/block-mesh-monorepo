@@ -9,7 +9,7 @@ use block_mesh_common::interfaces::server_api::{
     CallToActionUI, DailyStatForDashboard, DashboardResponse, PerkUI, Referral,
 };
 
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::database::call_to_action::get_user_calls_to_action::get_user_call_to_action;
 use crate::database::daily_stat::get_daily_stats_by_user_id::get_daily_stats_by_user_id;
 use crate::database::invite_code::get_number_of_users_invited::get_number_of_users_invited;
@@ -17,6 +17,7 @@ use crate::database::invite_code::get_user_latest_invite_code::get_user_latest_i
 use crate::database::invite_code::get_user_referrals::get_user_referrals;
 use crate::database::perks::get_user_perks::get_user_perks;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
+use crate::database::users_ip::get_user_ips::get_user_ips;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
@@ -33,23 +34,17 @@ pub async fn dashboard_data_extractor(
     let user = get_user_opt_by_id(&mut transaction, &user_id)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    let tasks = get_or_create_aggregate_by_user_and_name_no_transaction(
-        &mut transaction,
-        AggregateName::Tasks,
-        user_id,
-    )
-    .await?;
+    let tasks =
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Tasks, user_id)
+            .await?;
     let overall_task_count = tasks.value.as_i64().unwrap_or_default();
     let number_of_users_invited = get_number_of_users_invited(&mut transaction, user_id)
         .await
         .map_err(Error::from)?;
-    let uptime_aggregate = get_or_create_aggregate_by_user_and_name_no_transaction(
-        &mut transaction,
-        AggregateName::Uptime,
-        user_id,
-    )
-    .await
-    .map_err(Error::from)?;
+    let uptime_aggregate =
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, user_id)
+            .await
+            .map_err(Error::from)?;
     let referrals = get_user_referrals(&mut transaction, user_id)
         .await
         .map_err(Error::from)?;
@@ -58,13 +53,10 @@ pub async fn dashboard_data_extractor(
         .await
         .map_err(Error::from)?;
 
-    let uptime = get_or_create_aggregate_by_user_and_name_no_transaction(
-        &mut transaction,
-        AggregateName::Uptime,
-        user.id,
-    )
-    .await
-    .map_err(Error::from)?;
+    let uptime =
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, user.id)
+            .await
+            .map_err(Error::from)?;
 
     let interval = state
         .flags
@@ -75,6 +67,9 @@ pub async fn dashboard_data_extractor(
 
     let now = Utc::now();
     let diff = now - uptime.updated_at.unwrap_or(now);
+    let limit = 300;
+
+    let user_ips = get_user_ips(&mut transaction, &user_id, limit).await?;
 
     let connected =
         if diff.num_seconds() < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240) {
@@ -99,29 +94,24 @@ pub async fn dashboard_data_extractor(
         .rev()
         .collect();
     let points = calc_total_points(overall_uptime, overall_task_count, &perks);
-    let download = get_or_create_aggregate_by_user_and_name_no_transaction(
+    let download = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
         AggregateName::Download,
         user_id,
     )
     .await?;
 
-    let upload = get_or_create_aggregate_by_user_and_name_no_transaction(
-        &mut transaction,
-        AggregateName::Upload,
-        user_id,
-    )
-    .await?;
+    let upload =
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Upload, user_id)
+            .await?;
 
-    let latency = get_or_create_aggregate_by_user_and_name_no_transaction(
-        &mut transaction,
-        AggregateName::Latency,
-        user_id,
-    )
-    .await?;
+    let latency =
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Latency, user_id)
+            .await?;
 
     transaction.commit().await.map_err(Error::from)?;
     Ok(DashboardResponse {
+        user_ips,
         calls_to_action: calls_to_action
             .into_iter()
             .map(|i| CallToActionUI {

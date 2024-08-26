@@ -1,17 +1,22 @@
-use crate::helpers::{login, report_uptime, submit_bandwidth, task_poller};
+use crate::helpers::{login_to_network, report_uptime, submit_bandwidth, task_poller};
 use block_mesh_common::constants::DeviceType;
-use block_mesh_common::interfaces::server_api::LoginForm;
+use block_mesh_common::interfaces::server_api::{ClientsMetadata, LoginForm};
 use logger_general::tracing::setup_tracing;
 use std::process::ExitCode;
 use std::sync::Arc;
 use std::time::Duration;
 use uuid::Uuid;
 
-pub async fn login_mode(url: &str, email: &str, password: &str) -> anyhow::Result<ExitCode> {
+pub async fn login_mode(
+    url: &str,
+    email: &str,
+    password: &str,
+    depin_aggregator: Option<String>,
+) -> anyhow::Result<ExitCode> {
     let url = url.to_string();
     let url = Arc::new(url.to_string());
-    println!("CLI running with url {}", url);
-    let api_token = match login(
+    info!("CLI running with url {}", url);
+    let api_token = match login_to_network(
         &url,
         LoginForm {
             email: email.to_string(),
@@ -29,10 +34,10 @@ pub async fn login_mode(url: &str, email: &str, password: &str) -> anyhow::Resul
     };
     setup_tracing(api_token, DeviceType::Cli);
 
-    tracing::info!("Login successful");
+    info!("Login successful");
     let email = Arc::new(email.to_string());
     let api_token = Arc::new(api_token.to_string());
-    tracing::info!("CLI starting");
+    info!("CLI starting");
     let u = url.clone();
     let e = email.clone();
     let a = api_token.clone();
@@ -45,9 +50,13 @@ pub async fn login_mode(url: &str, email: &str, password: &str) -> anyhow::Resul
     let u = url.clone();
     let e = email.clone();
     let a = api_token.clone();
+    let session_metadata = ClientsMetadata {
+        depin_aggregator,
+        device_type: DeviceType::Cli,
+    };
     let uptime_poller = tokio::spawn(async move {
         loop {
-            let _ = report_uptime(&u, e.as_ref(), a.as_ref()).await;
+            let _ = report_uptime(&u, e.as_ref(), a.as_ref(), session_metadata.clone()).await;
             tokio::time::sleep(Duration::from_secs(30)).await;
         }
     });
@@ -62,9 +71,9 @@ pub async fn login_mode(url: &str, email: &str, password: &str) -> anyhow::Resul
     });
 
     tokio::select! {
-        o = task_poller => tracing::error!("task_poller failed {:?}", o),
-        o = uptime_poller => tracing::error!("uptime_poller failed {:?}", o),
-        o = bandwidth_poller => tracing::error!("bandwidth_poller failed {:?}", o)
+        o = task_poller => error!("task_poller failed {:?}", o),
+        o = uptime_poller => error!("uptime_poller failed {:?}", o),
+        o = bandwidth_poller => error!("bandwidth_poller failed {:?}", o)
     }
     Ok(ExitCode::SUCCESS)
 }

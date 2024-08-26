@@ -13,11 +13,12 @@ block-mesh-common = { path = "../block-mesh-common", features = ["http", "cli", 
 tokio = { workspace = true, features = ["full"] }
 serde = { workspace = true, features = ['derive'] }
 serde_json = { workspace = true }
-reqwest = { workspace = true, features = [
+reqwest = { workspace = true, default-features = false, features = [
   "blocking",
   "json",
-  "hickory-dns"
+  "rustls-tls",
 ] }
+ureq = "2.10.1"
 tracing = { workspace = true }
 anyhow = { workspace = true }
 uuid = { workspace = true, features = ["v4", "fast-rng", "macro-diagnostics", "serde", "js"] }

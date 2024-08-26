@@ -1,6 +1,8 @@
+use crate::constants::DeviceType;
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::cmp::Ordering;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -34,6 +36,12 @@ pub struct SubmitTaskRequest {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConfirmEmailRequest {
     pub token: String,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ClientsMetadata {
+    pub depin_aggregator: Option<String>,
+    pub device_type: DeviceType,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -207,6 +215,7 @@ pub struct DashboardResponse {
     pub calls_to_action: Vec<CallToActionUI>,
     pub referrals: Vec<Referral>,
     pub verified_email: bool,
+    pub user_ips: Vec<UserIpInfo>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
@@ -273,4 +282,43 @@ pub struct EditInviteCodeForm {
 pub struct CallToActionForm {
     pub name: String,
     pub status: bool,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct DailyLeaderboard {
+    pub day: NaiveDate,
+    pub leaderboard_users: Vec<LeaderBoardUser>,
+}
+
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct LeaderBoardUser {
+    pub email: String,
+    pub points: Option<f64>,
+}
+
+impl PartialEq<Self> for LeaderBoardUser {
+    fn eq(&self, other: &Self) -> bool {
+        self.points == other.points
+    }
+}
+
+impl PartialOrd<Self> for LeaderBoardUser {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.cmp(other))
+    }
+}
+
+impl Ord for LeaderBoardUser {
+    fn cmp(&self, other: &Self) -> Ordering {
+        self.partial_cmp(other).unwrap()
+    }
+}
+
+impl Eq for LeaderBoardUser {}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct UserIpInfo {
+    pub ip: String,
+    pub country: Option<String>,
+    pub updated_at: DateTime<Utc>,
 }
