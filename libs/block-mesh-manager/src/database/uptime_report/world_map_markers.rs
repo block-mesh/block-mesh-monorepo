@@ -24,7 +24,7 @@ pub(crate) async fn world_map_markers(
                 MIN(longitude) AS longitude,
                 count(*) AS count
             FROM
-            	uptime_reports
+            	ip_addresses
             WHERE
             	city IS NOT NULL
             	AND city != ''

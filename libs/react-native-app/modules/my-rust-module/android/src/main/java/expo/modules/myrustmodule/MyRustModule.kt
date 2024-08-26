@@ -1,9 +1,18 @@
 package expo.modules.myrustmodule
 
+import kotlinx.coroutines.*
 import expo.modules.kotlin.modules.Module
 import expo.modules.kotlin.modules.ModuleDefinition
 
 class MyRustModule : Module() {
+    companion object {
+        init {
+            System.loadLibrary("blockmesh_cli")
+        }
+    }
+
+    external fun runLib(url: String, email: String, password: String): Int
+    external fun stopLib(): Int
   // Each module class must implement the definition function. The definition consists of components
   // that describes the module's functionality and behavior.
   // See https://docs.expo.dev/modules/module-api for more details about available components.
@@ -24,6 +33,18 @@ class MyRustModule : Module() {
     // Defines a JavaScript synchronous function that runs the native code on the JavaScript thread.
     Function("hello") {
       "Hello world! 👋"
+    }
+
+    AsyncFunction("run_lib") { url: String, email: String, password: String ->
+        runLib(url, email, password)
+    }
+
+    AsyncFunction("stop_lib") {
+        stopLib()
+        // CoroutineScope(Dispatchers.IO).launch {
+        // stopLib()
+        // }
+        1
     }
 
     // Defines a JavaScript function that always returns a Promise and whose native code

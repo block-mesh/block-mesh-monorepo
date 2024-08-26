@@ -25,6 +25,12 @@ pub fn get_static_auth_router() -> Router<Arc<AppState>> {
             post(routes::call_to_action::post::handler),
         )
         .route(
+            RoutesEnum::Static_Auth_Daily_Leaderboard
+                .to_string()
+                .as_str(),
+            post(routes::leaderboard::daily_leaderboard::handler),
+        )
+        .route(
             RoutesEnum::Static_Auth_Dashboard.to_string().as_str(),
             post(routes::dashboard::post::handler),
         );
