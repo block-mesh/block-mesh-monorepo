@@ -1543,7 +1543,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-common"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anyhow",
  "borsh 1.5.1",
@@ -1570,7 +1570,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anyhow",
  "askama",
@@ -1645,7 +1645,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-solana-client"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -1698,7 +1698,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-cli"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -1722,7 +1722,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-leptos"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -1743,7 +1743,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-program"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -1752,7 +1752,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh_tauri"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anyhow",
  "auto-launch",
@@ -2382,7 +2382,7 @@ checksum = "4b82cf0babdbd58558212896d1a4272303a57bdb245c2bf1147185fb45640e70"
 
 [[package]]
 name = "client-node"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -2410,7 +2410,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-affiliate-plan-page"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2426,7 +2426,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-feature-flags"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2442,7 +2442,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-images-gallery-page"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anyhow",
  "askama",
@@ -2460,7 +2460,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-landing-page"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2476,7 +2476,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-privacy-page"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2492,7 +2492,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-cron"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -2509,7 +2509,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-echo-debug"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -2528,7 +2528,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-ip-data"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "block-mesh-common",
  "rustc-hash 1.1.0",
@@ -2543,7 +2543,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-logger-proxy"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -2560,7 +2560,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-logs-queue"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2580,7 +2580,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-solana-relay"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "rustc-hash 1.1.0",
  "serde",
@@ -2596,7 +2596,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-tauri-releases"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anyhow",
  "reqwest 0.12.7",
@@ -2638,6 +2638,15 @@ dependencies = [
  "core-graphics-types",
  "libc",
  "objc",
+]
+
+[[package]]
+name = "codee"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5d3ad3122b0001c7f140cf4d605ef9a9e2c24d96ab0b4fb4347b76de2425f445"
+dependencies = [
+ "thiserror",
 ]
 
 [[package]]
@@ -3160,7 +3169,7 @@ checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 
 [[package]]
 name = "debug-area"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "tokio",
 ]
@@ -3761,7 +3770,7 @@ dependencies = [
 
 [[package]]
 name = "extension"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -5458,9 +5467,9 @@ dependencies = [
 
 [[package]]
 name = "js-sys"
-version = "0.3.69"
+version = "0.3.70"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "29c15563dc2726973df627357ce0c9ddddbea194836909d655df6a75d2cf296d"
+checksum = "1868808506b929d7b0cfa8f75951347aa71bb21144b7791bae35d9bccfcfe37a"
 dependencies = [
  "wasm-bindgen",
 ]
@@ -5566,23 +5575,22 @@ dependencies = [
 
 [[package]]
 name = "leptos-use"
-version = "0.10.10"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "3272d90b77cdbb99e9060f90eb6f5738e56128b2f912db57a50efb006a26e262"
+version = "0.12.0"
+source = "git+https://github.com/synphonyte/leptos-use?branch=main#26938f8e52c65197e0f802e668df733c52722ecd"
 dependencies = [
- "async-trait",
  "cfg-if",
+ "codee",
  "cookie",
  "default-struct-builder",
  "futures-util",
  "gloo-timers 0.3.0",
- "gloo-utils 0.2.0",
  "js-sys",
  "lazy_static",
  "leptos",
  "num 0.4.3",
  "paste",
  "thiserror",
+ "unic-langid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
@@ -5968,7 +5976,7 @@ checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
 name = "logger-general"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -5988,7 +5996,7 @@ dependencies = [
 
 [[package]]
 name = "logger-leptos"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -7605,7 +7613,7 @@ dependencies = [
 
 [[package]]
 name = "proxy-endpoint"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -7634,7 +7642,7 @@ dependencies = [
 
 [[package]]
 name = "proxy-master"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -8609,7 +8617,7 @@ dependencies = [
 
 [[package]]
 name = "secret"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "serde",
  "sqlx",
@@ -9882,7 +9890,7 @@ dependencies = [
 
 [[package]]
 name = "solana-tiny-client"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anyhow",
  "bincode",
@@ -10075,7 +10083,7 @@ dependencies = [
 
 [[package]]
 name = "speed-test"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anyhow",
  "chrono",
@@ -11379,7 +11387,7 @@ dependencies = [
 
 [[package]]
 name = "test-proxy-endpoint"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "block-mesh-common",
  "bytes",
@@ -11398,7 +11406,7 @@ dependencies = [
 
 [[package]]
 name = "test-proxy-master"
-version = "0.0.205"
+version = "0.0.206"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -11546,6 +11554,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2c9d3793400a45f954c52e73d068316d76b6f4e36977e3fcebb13a2721e80237"
 dependencies = [
  "crunchy",
+]
+
+[[package]]
+name = "tinystr"
+version = "0.7.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9117f5d4db391c1cf6927e7bea3db74b9a1c1add8f7eda9ffd5364f40f57b82f"
+dependencies = [
+ "displaydoc",
 ]
 
 [[package]]
@@ -12242,6 +12259,24 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "80d7ff825a6a654ee85a63e80f92f054f904f21e7d12da4e22f9834a4aaa35bc"
 
 [[package]]
+name = "unic-langid"
+version = "0.9.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "23dd9d1e72a73b25e07123a80776aae3e7b0ec461ef94f9151eed6ec88005a44"
+dependencies = [
+ "unic-langid-impl",
+]
+
+[[package]]
+name = "unic-langid-impl"
+version = "0.9.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0a5422c1f65949306c99240b81de9f3f15929f5a8bfe05bb44b034cc8bf593e5"
+dependencies = [
+ "tinystr",
+]
+
+[[package]]
 name = "unic-ucd-ident"
 version = "0.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -12568,19 +12603,20 @@ checksum = "b8dad83b4f25e74f184f64c43b150b91efe7647395b42289f38e50566d82855b"
 
 [[package]]
 name = "wasm-bindgen"
-version = "0.2.92"
+version = "0.2.93"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4be2531df63900aeb2bca0daaaddec08491ee64ceecbee5076636a3b026795a8"
+checksum = "a82edfc16a6c469f5f44dc7b571814045d60404b55a0ee849f9bcfa2e63dd9b5"
 dependencies = [
  "cfg-if",
+ "once_cell",
  "wasm-bindgen-macro",
 ]
 
 [[package]]
 name = "wasm-bindgen-backend"
-version = "0.2.92"
+version = "0.2.93"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "614d787b966d3989fa7bb98a654e369c762374fd3213d212cfc0251257e747da"
+checksum = "9de396da306523044d3302746f1208fa71d7532227f15e347e2d93e4145dd77b"
 dependencies = [
  "bumpalo",
  "log",
@@ -12605,9 +12641,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-macro"
-version = "0.2.92"
+version = "0.2.93"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a1f8823de937b71b9460c0c34e25f3da88250760bec0ebac694b49997550d726"
+checksum = "585c4c91a46b072c92e908d99cb1dcdf95c5218eeb6f3bf1efa991ee7a68cccf"
 dependencies = [
  "quote",
  "wasm-bindgen-macro-support",
@@ -12615,9 +12651,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-macro-support"
-version = "0.2.92"
+version = "0.2.93"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e94f17b526d0a461a191c78ea52bbce64071ed5c04c9ffe424dcb38f74171bb7"
+checksum = "afc340c74d9005395cf9dd098506f7f44e38f2b4a21c6aaacf9a105ea5e1e836"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -12628,9 +12664,9 @@ dependencies = [
 
 [[package]]
 name = "wasm-bindgen-shared"
-version = "0.2.92"
+version = "0.2.93"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af190c94f2773fdb3729c55b007a722abb5384da03bc0986df4c289bf5567e96"
+checksum = "c62a0a307cb4a311d3a07867860911ca130c3494e8c2719593806c08bc5d0484"
 
 [[package]]
 name = "wasm-bindgen-test"
@@ -12672,9 +12708,9 @@ dependencies = [
 
 [[package]]
 name = "web-sys"
-version = "0.3.69"
+version = "0.3.70"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "77afa9a11836342370f4817622a2f0f418b134426d91a82dfb48f532d2ec13ef"
+checksum = "26fdeaafd9bd129f65e7c031593c24d62186301e0c72c8978fa1678be7d532c0"
 dependencies = [
  "js-sys",
  "wasm-bindgen",
@@ -13219,9 +13255,9 @@ dependencies = [
 
 [[package]]
 name = "worker"
-version = "0.3.0"
+version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d58b567e8b518469c73c8d7e4798d5abcd7db76a1b33121fffd36ac6fa62da05"
+checksum = "c3bd73bd2ea409ae91df99293cbed8b892d39c4c0df5039b646be7586df62c6b"
 dependencies = [
  "async-trait",
  "bytes",
@@ -13265,9 +13301,9 @@ dependencies = [
 
 [[package]]
 name = "worker-macros"
-version = "0.3.0"
+version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "15db63b1b56564beca160a5265169730a109fc85c21e858f184bb9e39afbfe44"
+checksum = "0bbf47d65e77652febb28abedac18b317d8dfe4e57f0d8d9998c4e991fca8e23"
 dependencies = [
  "async-trait",
  "proc-macro2",
@@ -13281,9 +13317,9 @@ dependencies = [
 
 [[package]]
 name = "worker-sys"
-version = "0.3.0"
+version = "0.3.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5c1082d3b324dd37fe9b25b1aa61a938e343d035650708986bf9d0aa9a020c84"
+checksum = "a4fbb72a85a6509e5ac5dcd1361543468be089ff5ea5c932043b6d0aeac7b6a5"
 dependencies = [
  "cfg-if",
  "js-sys",
