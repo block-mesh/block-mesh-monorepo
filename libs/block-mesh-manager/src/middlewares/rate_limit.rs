@@ -1,3 +1,4 @@
+use crate::middlewares::authentication::Backend;
 use chrono::{DateTime, Duration, Utc};
 use redis::aio::MultiplexedConnection;
 use redis::{AsyncCommands, RedisResult};
@@ -23,12 +24,16 @@ impl RateLimitUser {
     }
 }
 
+pub fn get_key(key: &str) -> String {
+    format!("rate-limit-{}", key)
+}
+
 pub async fn get_value_from_redis(
     con: &mut MultiplexedConnection,
     key: &str,
     fallback: &RateLimitUser,
 ) -> anyhow::Result<RateLimitUser> {
-    let redis_user: String = match con.get(key.to_string()).await {
+    let redis_user: String = match con.get(get_key(key)).await {
         Ok(u) => u,
         Err(_) => return Ok(fallback.clone()),
     };
@@ -42,8 +47,16 @@ pub async fn get_value_from_redis(
 pub async fn touch_redis_value(con: &mut MultiplexedConnection, user_id: &Uuid, ip: &str) {
     let redis_user = RateLimitUser::new(user_id, ip);
     if let Ok(redis_user) = serde_json::to_string(&redis_user) {
-        let _: RedisResult<()> = con.set(&user_id.to_string(), redis_user.clone()).await;
-        let _: RedisResult<()> = con.set(&ip, redis_user).await;
+        let _: RedisResult<()> = con
+            .set_ex(
+                &get_key(&user_id.to_string()),
+                redis_user.clone(),
+                Backend::get_expire() as u64,
+            )
+            .await;
+        let _: RedisResult<()> = con
+            .set_ex(get_key(ip), redis_user, Backend::get_expire() as u64)
+            .await;
     }
 }
 
