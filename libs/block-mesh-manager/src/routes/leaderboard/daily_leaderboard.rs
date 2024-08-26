@@ -14,33 +14,33 @@ pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<Json<DailyLeaderboard>, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
-    let day = Utc::now().date_naive() - Duration::days(1);
-    let user = auth.user.ok_or(Error::UserNotFound)?;
-    let mut daily_stats: Vec<LeaderBoardUser> = get_daily_leaderboard(&mut transaction)
-        .await?
-        .into_iter()
-        .map(|i| {
-            if user.id == i.user_id {
-                LeaderBoardUser {
-                    email: user.email.clone(),
-                    points: raw_points(i.uptime, i.tasks_count),
-                }
-            } else {
-                LeaderBoardUser {
-                    email: "***@***".to_string(),
-                    points: raw_points(i.uptime, i.tasks_count),
-                }
-            }
-        })
-        .collect();
-
-    daily_stats.sort_by(|a, b| b.cmp(a));
-    let daily_stats = if daily_stats.len() > 5 {
-        let (daily_stats_top_5, _) = daily_stats.split_at(5);
-        daily_stats_top_5.to_owned()
-    } else {
-        daily_stats
-    };
+    // let day = Utc::now().date_naive() - Duration::days(1);
+    // let user = auth.user.ok_or(Error::UserNotFound)?;
+    // let mut daily_stats: Vec<LeaderBoardUser> = get_daily_leaderboard(&mut transaction)
+    //     .await?
+    //     .into_iter()
+    //     .map(|i| {
+    //         if user.id == i.user_id {
+    //             LeaderBoardUser {
+    //                 email: user.email.clone(),
+    //                 points: raw_points(i.uptime, i.tasks_count),
+    //             }
+    //         } else {
+    //             LeaderBoardUser {
+    //                 email: "***@***".to_string(),
+    //                 points: raw_points(i.uptime, i.tasks_count),
+    //             }
+    //         }
+    //     })
+    //     .collect();
+    //
+    // daily_stats.sort_by(|a, b| b.cmp(a));
+    // let daily_stats = if daily_stats.len() > 5 {
+    //     let (daily_stats_top_5, _) = daily_stats.split_at(5);
+    //     daily_stats_top_5.to_owned()
+    // } else {
+    //     daily_stats
+    // };
 
     // let your_rank = daily_stats
     //     .iter()
@@ -50,7 +50,7 @@ pub async fn handler(
 
     transaction.commit().await.map_err(Error::from)?;
     Ok(Json(DailyLeaderboard {
-        leaderboard_users: daily_stats,
+        leaderboard_users: vec![],
         day,
     }))
 }
