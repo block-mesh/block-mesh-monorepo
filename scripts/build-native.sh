@@ -26,8 +26,11 @@ elif [ "${BUILD_TYPE}" == "--android" ]; then
 elif [ "${BUILD_TYPE}" == "--both" ]; then
   export BUILD_ANDROID="true"
   export BUILD_IOS="true"
+elif [ "${BUILD_TYPE}" == "" ]; then
+  echo "Missing build flag: --ios --android or --both"
+  exit 1
 else
-  echo "Invalid argument: ${BUILD_TYPE}"
+  echo "Invalid build flag: ${BUILD_TYPE} use --ios --android or --both"
   exit 1
 fi
 
