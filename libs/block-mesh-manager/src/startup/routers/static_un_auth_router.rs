@@ -8,10 +8,6 @@ use std::sync::Arc;
 pub fn get_static_un_auth_router() -> Router<Arc<AppState>> {
     let un_auth_router = Router::new()
         .route(
-            RoutesEnum::Static_UnAuth_Map.to_string().as_str(),
-            get(routes::map::world_map::handler),
-        )
-        .route(
             RoutesEnum::Static_UnAuth_AuthStatus.to_string().as_str(),
             get(routes::health_check::auth_status::handler),
         )
