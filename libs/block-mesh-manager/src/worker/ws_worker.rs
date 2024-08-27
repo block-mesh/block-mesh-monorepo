@@ -1,5 +1,4 @@
 use block_mesh_common::interfaces::ws_api::{WsMessage, WsMessageTypes};
-use futures::future::join_all;
 use sqlx::PgPool;
 use std::time::Duration;
 use tokio::sync::broadcast::{Receiver, Sender};

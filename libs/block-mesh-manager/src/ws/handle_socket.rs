@@ -74,8 +74,8 @@ pub async fn handle_socket(
     });
 
     tokio::select! {
-        o = recv_task => tracing::error!("recv_task task dead"),
-        o = rx_task => tracing::error!("rx_task dead")
+        o = recv_task => tracing::error!("recv_task task dead {:?}", o),
+        o = rx_task => tracing::error!("rx_task dead {:?}", o)
     }
     // returning from the handler closes the websocket connection
     tracing::info!("Websocket context {who} destroyed");

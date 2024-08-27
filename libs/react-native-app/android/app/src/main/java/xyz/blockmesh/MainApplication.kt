@@ -21,11 +21,9 @@ class MainApplication : Application(), ReactApplication {
         this,
         object : DefaultReactNativeHost(this) {
           override fun getPackages(): List<ReactPackage> {
-            List<ReactPackage> packages = new PackageList(this).getPackages();
-            packages.add(new RustModulePackage());
             // Packages that cannot be autolinked yet can be added manually here, for example:
             // packages.add(new MyReactNativePackage());
-            return packages;
+            return PackageList(this).packages
           }
 
           override fun getJSMainModuleName(): String = ".expo/.virtual-metro-entry"

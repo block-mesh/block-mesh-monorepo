@@ -1,4 +1,4 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::database::api_token::find_token::find_token;
 use crate::database::bandwidth::delete_bandwidth_reports_by_time::delete_bandwidth_reports_by_time;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
@@ -8,6 +8,7 @@ use crate::startup::application::AppState;
 use crate::worker::db_agg::{Table, UpdateBulkMessage};
 use axum::extract::State;
 use axum::{Extension, Json};
+use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
 use http::StatusCode;
 use sqlx::PgPool;
@@ -41,25 +42,19 @@ pub async fn handler(
         .as_f64()
         .unwrap_or_default();
 
-    let download = get_or_create_aggregate_by_user_and_name_no_transaction(
+    let download = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
         AggregateName::Download,
         user.id,
     )
     .await?;
-    let upload = get_or_create_aggregate_by_user_and_name_no_transaction(
-        &mut transaction,
-        AggregateName::Upload,
-        user.id,
-    )
-    .await?;
+    let upload =
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Upload, user.id)
+            .await?;
 
-    let latency = get_or_create_aggregate_by_user_and_name_no_transaction(
-        &mut transaction,
-        AggregateName::Latency,
-        user.id,
-    )
-    .await?;
+    let latency =
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Latency, user.id)
+            .await?;
     transaction.commit().await.map_err(Error::from)?;
 
     let _ = state.tx_sql_agg.send(UpdateBulkMessage {
@@ -87,9 +82,9 @@ pub async fn handler(
     let flag = state
         .flags
         .get("submit_bandwidth_run_background")
-        .unwrap_or(&false);
-
-    if *flag {
+        .unwrap_or(&FlagValue::Boolean(false));
+    let flag: bool = <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
+    if flag {
         let handle: JoinHandle<()> = tokio::spawn(async move {
             let mut transaction = pool.begin().await.map_err(Error::from).unwrap();
             delete_bandwidth_reports_by_time(&mut transaction, user.id, 60 * 60)

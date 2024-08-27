@@ -61,3 +61,59 @@ export TWITTER_API_TOKEN_TOKEN=""
 export TWITTER_CLIENT_ID=""
 export TWITTER_CLIENT_SECRET=""
 ```
+
+Install the following:
+
+* `cargo install cargo-leptos --version=0.2.17`
+* `cargo install sqlx-cli --verison=0.7.3`
+* `cargo install wasm-pack --version=0.12.1`
+* `rustup target add wasm32-unknown-unknown`
+* `cargo install bunyan`
+* [Install psql](https://www.timescale.com/blog/how-to-install-psql-on-mac-ubuntu-debian-windows/)
+* [Install Docker](https://docs.docker.com/engine/install/)
+
+Run `./scripts/run_local.sh`
+
+## Git Hooks
+
+Add `.git/hooks/pre-commit`:
+
+```shell
+#!/bin/sh
+set -e
+export _PWD="$(pwd)"
+export ROOT="$(git rev-parse --show-toplevel)"
+source "${ROOT}/scripts/setup.sh"
+export CARGO_TARGET_DIR="${ROOT}/target/PRE-COMMIT"
+current_branch=$(git branch --show-current)
+if [ $current_branch == "master" ] ; then
+        echo "Cannot commit to master"
+        exit 1
+fi
+echo '+cargo fmt --all -- --check'
+cargo fmt --all -- --check
+```
+
+Add `.git/hooks/pre-push`:
+
+```shell
+#!/bin/sh
+set -e
+export _PWD="$(pwd)"
+export ROOT="$(git rev-parse --show-toplevel)"
+source "${ROOT}/scripts/setup.sh"
+export CARGO_TARGET_DIR="${ROOT}/target/PRE-PUSH"
+current_branch=$(git branch --show-current)
+if [ $current_branch == "master" ] ; then
+        echo "Cannot commit to master"
+        exit 1
+fi
+
+echo '+cargo test --all'
+cargo test --all
+echo '+cargo clippy --all -- -D warnings'
+cargo clippy --all -- -D warnings
+echo '+cargo fmt --all -- --check'
+cargo fmt --all -- --check
+```
+

@@ -6,6 +6,7 @@ use crate::frontends::components::navbars::navbar_spacer::NavbarSpacer;
 use crate::frontends::components::icons::home_icon::HomeIcon;
 use crate::frontends::components::icons::link_icon::LinkIcon;
 use crate::frontends::components::icons::logout_icon::LogoutIcon;
+use crate::frontends::components::icons::medal_icon::MedalIcon;
 use crate::frontends::components::icons::perk_icon::PerkIcon;
 use crate::frontends::context::webapp_context::WebAppContext;
 use crate::frontends::new_frontend_webserver::components::sidebar::{
@@ -62,6 +63,10 @@ pub fn ApplicationSidebar() -> impl IntoView {
                     <SidebarItemLink href="/ui/perks">
                         <PerkIcon/>
                         <SidebarLabel>Perks</SidebarLabel>
+                    </SidebarItemLink>
+                    <SidebarItemLink href="/ui/daily_leaderboard">
+                        <MedalIcon/>
+                        <SidebarLabel>Daily Leaderboard</SidebarLabel>
                     </SidebarItemLink>
                 </SidebarSection>
 

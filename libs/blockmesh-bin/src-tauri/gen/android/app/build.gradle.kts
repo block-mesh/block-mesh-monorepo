@@ -17,7 +17,7 @@ android {
     compileSdk = 34
     namespace = "xyz.blockmesh"
     defaultConfig {
-        manifestPlaceholders["usesCleartextTraffic"] = "false"
+        manifestPlaceholders["usesCleartextTraffic"] = "true"
         applicationId = "xyz.blockmesh"
         minSdk = 24
         targetSdk = 34

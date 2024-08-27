@@ -6,14 +6,22 @@ use crate::database::task::update_task_assigned::update_task_assigned;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
+use crate::middlewares::rate_limit::filter_request;
+use crate::startup::application::AppState;
+use anyhow::Context;
+use axum::extract::State;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{GetTaskRequest, GetTaskResponse};
 use chrono::Utc;
+use http::HeaderMap;
 use sqlx::PgPool;
+use std::sync::Arc;
 
-#[tracing::instrument(name = "get_task", skip(body, pool), fields(email = body.email), level = "trace")]
+#[tracing::instrument(name = "get_task", skip(body, pool, headers, state), fields(email = body.email), level = "trace")]
 pub async fn handler(
+    headers: HeaderMap,
     Extension(pool): Extension<PgPool>,
+    State(state): State<Arc<AppState>>,
     Json(body): Json<GetTaskRequest>,
 ) -> Result<Json<Option<GetTaskResponse>>, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
@@ -23,6 +31,20 @@ pub async fn handler(
     let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
+    let ip = headers
+        .get("cf-connecting-ip")
+        .context("Missing CF-CONNECTING-IP")?
+        .to_str()
+        .context("Unable to STR CF-CONNECTING-IP")?;
+
+    let mut redis = state.redis.clone();
+    if !filter_request(&mut redis, &user.id, ip)
+        .await
+        .context("Rate limit")?
+    {
+        return Err(Error::NotAllowedRateLimit.into());
+    }
+
     if user.email.to_ascii_lowercase() != body.email.to_ascii_lowercase() {
         return Err(Error::UserNotFound);
     }

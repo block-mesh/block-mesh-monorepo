@@ -1,4 +1,4 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name_no_transaction::get_or_create_aggregate_by_user_and_name_no_transaction;
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
@@ -86,7 +86,7 @@ pub async fn handler(
 
     if query.response_code.unwrap_or(520) == 200 {
         let mut transaction = pool.begin().await.map_err(Error::from)?;
-        let tasks = get_or_create_aggregate_by_user_and_name_no_transaction(
+        let tasks = get_or_create_aggregate_by_user_and_name(
             &mut transaction,
             AggregateName::Tasks,
             user.id,

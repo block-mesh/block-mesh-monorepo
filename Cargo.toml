@@ -9,8 +9,8 @@ incremental = false
 #codegen-units = 1
 
 [workspace]
-members = ["libs/*", "programs/*", "libs/blockmesh-bin/src-tauri"]
-exclude = ["libs/installers", "libs/md-book", "libs/react-native-app"]
+members = ["libs/*", "programs/*"]
+exclude = ["libs/installers", "libs/md-book", "libs/react-native-app", "libs/blockmesh-bin", "libs/blockmesh-bin/src-tauri"]
 resolver = "2"
 
 [workspace.lints.rust]
@@ -39,7 +39,7 @@ dead_code = "forbid"
 
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.187"
+version = "0.0.213"
 
 [patch.crates-io]
 ## aes-gcm-siv 0.10.3 and curve25519-dalek 3.x pin zeroize to <1.4
@@ -58,6 +58,7 @@ aes-gcm-siv = { git = 'https://github.com/block-mesh/AEADs', branch = 'rustls-de
 curve25519-dalek = { git = "https://github.com/block-mesh/curve25519-dalek", branch = "rustls-dep-hell-1-18" }
 
 [workspace.dependencies]
+fake = { version = "2.9.2", features = ["derive"] }
 flume = { version = "0.11.0", default-features = false, features = ["async", "select"] }
 twitter-v2 = "0.1.8"
 jni = "0.21.1"
@@ -72,9 +73,9 @@ charming = { version = "0.3.1", features = ["wasm"] }
 borsh = { version = "1.5.1" }
 sysinfo = { version = "0.30.12" }
 tikv-jemallocator = { version = "0.5" }
-leptos_axum = { version = "0.6.12" }
+leptos_axum = { version = "0.6.14" }
 leptos-chartistry = { version = "0.1.6" }
-leptos-use = { version = "0.10.10" }
+leptos-use = { git = "https://github.com/synphonyte/leptos-use", branch = "main" }
 leptos_meta = { version = "0.6.12" }
 gloo-utils = { version = "0.2.0" }
 tracing-subscriber-wasm = { version = "0.1.0" }
@@ -91,9 +92,10 @@ form_urlencoded = { version = "1.2.1" }
 auto-launch = { version = "0.5.0" }
 whoami = { version = "1.5.1" }
 url = { version = "2.5.0" }
-leptos = { version = "0.6.11", features = ["tracing"] }
-leptos_router = { version = "0.6.11" }
-wasm-bindgen = { version = "=0.2.92" }
+leptos = { version = "0.6.14", features = ["tracing"] }
+server_fn = "0.6.14"
+leptos_router = { version = "0.6.14" }
+wasm-bindgen = { version = "=0.2.93" }
 js-sys = { version = "0.3" }
 wasm-bindgen-futures = { version = "=0.4.42" }
 serde-wasm-bindgen = { version = "0.6" }
@@ -171,11 +173,7 @@ serde = { version = "1.0.164", features = ["derive"] }
 anyhow = { version = "1.0.71" }
 thiserror = { version = "1.0.40" }
 dotenv = { version = "0.15.0" }
-reqwest = { version = "0.11.18", default-features = false, features = [
-  "json",
-  "rustls-tls",
-  "cookies"
-] }
+reqwest = { version = "0.12.5", default-features = false }
 bytes = { version = "1.5.0" }
 argon2 = { version = "0.5.0", features = ["std"] }
 validator = { version = "0.16" }
@@ -187,7 +185,7 @@ enum-iterator = { version = "2.0.0" }
 once_cell = { version = "1.18.0" }
 log = { version = "0.4.21" }
 rustc-hash = { version = "1.1.0" }
-worker = { version = "0.3.0" }
+worker = { version = "0.3.4" }
 tracing-web = { version = "0.1" }
 time = { version = "0.3", features = ['wasm-bindgen'] }
 ipgeolocate = { version = "0.3.5" }

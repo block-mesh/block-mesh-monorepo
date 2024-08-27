@@ -1,0 +1,212 @@
+<style>
+    :root {
+        --dark-blue: #0c1120;
+        --blue: #01fefc;
+        --orange: #ff7e07;
+        --pink: #da00db;
+        --mid-pink: #e426e6;
+        --dark-pink: #670068;
+        --white: #ededed;
+    }
+
+    @font-face {
+        font-family: "baseFont";
+        src: url("https://r2-landing-page.blockmesh.xyz/BebasNeue-Regular"); /* IE9 Compat Modes */
+        src: url("https://r2-landing-page.blockmesh.xyz/BebasNeue-Regular.ttf") format("truetype"); /* Safari, Android, iOS */
+    }
+
+    * {
+        margin: 0;
+        padding: 0;
+        font-family: baseFont;
+    }
+
+    html {
+        overflow-x: hidden;
+    }
+
+    img {
+        user-select: none;
+    }
+
+    body {
+        background-color: var(--dark-blue);
+        overflow-x: hidden;
+    }
+
+    ::-webkit-scrollbar {
+        width: 5px;
+    }
+
+    ::-webkit-scrollbar-track {
+        background: #f1f1f1;
+    }
+
+    ::-webkit-scrollbar-thumb {
+        background: var(--orange);
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+        background: #555;
+    }
+
+    section {
+        height: 100vh;
+        width: 100vw;
+        position: relative;
+    }
+
+    .section > div {
+        position: relative;
+        width: 75%;
+        height: 80%;
+        margin: auto;
+        top: 20%;
+    }
+
+    .section h3 {
+        color: #fff;
+        font-size: 3.5em;
+        font-weight: lighter;
+        cursor: default;
+    }
+
+    .section p {
+        font-family: "Open Sans";
+        font-style: normal;
+        font-weight: 400;
+        line-height: 141%;
+        color: var(--white);
+        opacity: 1;
+        letter-spacing: 1px;
+        cursor: default;
+        font-size: 1em;
+    }
+
+    .section h4 {
+        cursor: default;
+    }
+
+    .section a {
+        text-decoration: none;
+    }
+
+    .tiltable {
+        transition: transform 0.1s;
+        transform-origin: center;
+    }
+
+    .hide {
+        display: none !important;
+    }
+
+    .show {
+        display: block !important;
+    }
+
+    @keyframes visible {
+        0% {
+            opacity: 0;
+        }
+
+        100% {
+            opacity: 1;
+        }
+    }
+
+    @keyframes float {
+        0%,
+        100% {
+            transform: translateY(1px);
+        }
+        50% {
+            transform: translateY(-1px);
+        }
+    }
+
+    /* ****** */
+    /* LARGE SCREEN */
+    /* ****** */
+
+    @media only screen and (max-width: 1800px) {
+        .hide-lg-and-down {
+            display: none !important;
+        }
+
+        .show-lg-and-down {
+            display: block !important;
+        }
+    }
+
+    @media only screen and (min-width: 1800px) {
+        .hide-lg-and-up {
+            display: none !important;
+        }
+
+        .show-lg-and-up {
+            display: block !important;
+        }
+    }
+
+    /* ****** */
+    /* MEDIUM SCREEN */
+    /* ****** */
+
+    @media only screen and (max-width: 1024px) {
+        .hide-md-and-down {
+            display: none !important;
+        }
+
+        .show-md-and-down {
+            display: block !important;
+        }
+    }
+
+    @media only screen and (min-width: 1024px) {
+        .hide-md-and-up {
+            display: none !important;
+        }
+
+        .show-md-and-up {
+            display: block !important;
+        }
+    }
+
+    /* ****** */
+    /* MOBILE */
+    /* ****** */
+
+    @media only screen and (max-width: 768px) {
+        .section > div {
+            width: 85%;
+            top: 12%;
+        }
+
+        .section p {
+            font-size: 1em;
+            opacity: 1;
+        }
+
+        .hide-sm-and-down {
+            display: none !important;
+        }
+
+        .show-sm-and-down {
+            display: block !important;
+        }
+
+        .section h3 {
+            font-size: 3em;
+        }
+    }
+
+    @media only screen and (min-width: 768px) {
+        .hide-sm-and-up {
+            display: none !important;
+        }
+
+        .show-sm-and-up {
+            display: block !important;
+        }
+    }
+</style>

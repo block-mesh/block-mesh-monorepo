@@ -7,7 +7,7 @@ export _PWD="$(pwd)"
 export ROOT="$(git rev-parse --show-toplevel)"
 source "${ROOT}/scripts/setup.sh"
 export RUST_MODULE_DIR="${ROOT}/libs/blockmesh-cli"
-export REACT_NATIVE_ANDROID_DIR="${ROOT}/libs/react-native-app/android/app/src/main"
+export REACT_NATIVE_ANDROID_DIR="${ROOT}/libs/react-native-app/modules/my-rust-module/android/src/main/"
 export LIB_NAME="libblockmesh_cli"
 cd "${ROOT}/libs/react-native-app" || exit 1
 mkdir -p headers
@@ -26,8 +26,11 @@ elif [ "${BUILD_TYPE}" == "--android" ]; then
 elif [ "${BUILD_TYPE}" == "--both" ]; then
   export BUILD_ANDROID="true"
   export BUILD_IOS="true"
+elif [ "${BUILD_TYPE}" == "" ]; then
+  echo "Missing build flag: --ios --android or --both"
+  exit 1
 else
-  echo "Invalid argument: ${BUILD_TYPE}"
+  echo "Invalid build flag: ${BUILD_TYPE} use --ios --android or --both"
   exit 1
 fi
 
@@ -55,10 +58,10 @@ if [ "${BUILD_IOS}" == "true" ]; then
 fi
 
 if [ "${BUILD_ANDROID}" == "true" ] ; then
-  cargo ndk --target aarch64-linux-android    --platform 21 -- build --release
-  cargo ndk --target armv7-linux-androideabi  --platform 21 -- build --release
-  cargo ndk --target i686-linux-android       --platform 21 -- build --release
-  cargo ndk --target x86_64-linux-android     --platform 21 -- build --release
+  ensure cd "${ROOT}/libs/blockmesh-cli" && cargo ndk --target aarch64-linux-android    --platform 31 -- build --release && cd "${_PWD}" || exit 1
+  ensure cd "${ROOT}/libs/blockmesh-cli" && cargo ndk --target armv7-linux-androideabi  --platform 31 -- build --release && cd "${_PWD}" || exit 1
+  ensure cd "${ROOT}/libs/blockmesh-cli" && cargo ndk --target i686-linux-android       --platform 31 -- build --release && cd "${_PWD}" || exit 1
+  ensure cd "${ROOT}/libs/blockmesh-cli" && cargo ndk --target x86_64-linux-android     --platform 31 -- build --release && cd "${_PWD}" || exit 1
   mkdir -p "${REACT_NATIVE_ANDROID_DIR}/jniLibs/arm64-v8a"
   mkdir -p "${REACT_NATIVE_ANDROID_DIR}/jniLibs/armeabi-v7a"
   mkdir -p "${REACT_NATIVE_ANDROID_DIR}/jniLibs/x86"

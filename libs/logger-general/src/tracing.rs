@@ -1,6 +1,4 @@
-use block_mesh_common::constants::{
-    DeviceType, BLOCKMESH_LOG_ENV, BLOCKMESH_VERSION, BLOCK_MESH_LOGGER,
-};
+use block_mesh_common::constants::{DeviceType, BLOCKMESH_VERSION};
 use reqwest::{Client, ClientBuilder};
 use serde_json::{json, Value};
 use std::option::Option;
@@ -71,12 +69,12 @@ pub fn setup_tracing_stdout_only() {
     });
 }
 
-pub fn setup_tracing(user_id: Uuid, device_type: DeviceType) {
+pub fn setup_tracing(_user_id: Uuid, _device_type: DeviceType) {
     static SET_HOOK: Once = Once::new();
     SET_HOOK.call_once(|| {
-        let log_env = std::env::var(BLOCKMESH_LOG_ENV).unwrap_or_else(|_| "prod".to_string());
-        let log_layer =
-            HttpLogLayer::new(BLOCK_MESH_LOGGER.to_string(), log_env, user_id, device_type);
+        // let log_env = std::env::var(BLOCKMESH_LOG_ENV).unwrap_or_else(|_| "prod".to_string());
+        // let log_layer =
+        //     HttpLogLayer::new(BLOCK_MESH_LOGGER.to_string(), log_env, user_id, device_type);
         let sub = tracing_subscriber::registry()
             .with(
                 tracing_subscriber::EnvFilter::try_from_default_env()
@@ -84,8 +82,8 @@ pub fn setup_tracing(user_id: Uuid, device_type: DeviceType) {
             )
             .with(
                 tracing_subscriber::fmt::layer().with_ansi(false), // .with_span_events(FmtSpan::CLOSE),
-            )
-            .with(log_layer);
+            );
+        // .with(log_layer);
         sub.init();
     });
 }
@@ -101,6 +99,7 @@ struct HttpLogLayer {
 }
 
 impl HttpLogLayer {
+    #[allow(dead_code)]
     fn new(url: String, env: String, user_id: Uuid, device_type: DeviceType) -> Self {
         let init_buffer: Arc<Mutex<Vec<Value>>> = Arc::new(Mutex::new(Vec::new()));
         let init_client = ClientBuilder::new()

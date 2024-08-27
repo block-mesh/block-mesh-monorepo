@@ -1,3 +1,4 @@
+use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
@@ -14,25 +15,21 @@ pub(crate) async fn get_or_create_users_ip(
     ip_id: &Uuid,
 ) -> anyhow::Result<Uuid> {
     let id = Uuid::new_v4();
+    let now = Utc::now();
     sqlx::query!(
         r#"
-        WITH
-            extant AS (
-                SELECT id FROM users_ip WHERE user_id = $2 AND ip_id = $3
-            ),
-            inserted AS (
-                INSERT INTO users_ip (id, user_id, ip_id)
-                SELECT $1, $2, $3
-                WHERE NOT EXISTS (SELECT FROM extant)
-                RETURNING id
-            )
-        SELECT id FROM inserted
-        UNION ALL
-        SELECT id FROM extant
+        INSERT INTO users_ip
+        (id, user_id, ip_id, created_at, updated_at)
+        VALUES
+        ($1, $2, $3, $4, $5)
+        ON CONFLICT (user_id, ip_id) DO UPDATE SET updated_at = $5
+        RETURNING id
         "#,
         id,
         user_id,
-        ip_id
+        ip_id,
+        now.clone(),
+        now
     )
     .fetch_one(&mut **transaction)
     .await?;

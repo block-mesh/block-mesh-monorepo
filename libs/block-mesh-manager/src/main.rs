@@ -8,6 +8,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_common::interfaces::ws_api::WsMessage;
     use block_mesh_manager::worker::ws_worker::{ws_worker_rx, ws_worker_tx};
     use tokio::sync::broadcast;
+    use block_mesh_manager::worker::analytics_agg::{analytics_agg, AnalyticsMessage};
     use std::env;
     use block_mesh_manager::worker::db_agg::{db_agg, UpdateBulkMessage};
     use logger_general::tracing::setup_tracing_stdout_only;
@@ -63,6 +64,8 @@ async fn run() -> anyhow::Result<()> {
     let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(500);
     let (tx_ws, rx_ws) = broadcast::channel::<WsMessage>(500);
     let (tx_sql_agg, rx_sql_agg) = tokio::sync::mpsc::channel::<UpdateBulkMessage>(500);
+    let (tx_analytics_agg, rx_analytics_agg) = tokio::sync::mpsc::channel::<AnalyticsMessage>(500);
+    let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::unbounded_channel::<EnrichIp>();
     let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::channel::<EnrichIp>(500);
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
@@ -84,6 +87,7 @@ async fn run() -> anyhow::Result<()> {
         tx_ws: tx_ws.clone(),
         rx_ws: rx_ws.resubscribe(),
         tx_sql_agg,
+        tx_analytics_agg,
         flags,
         cleaner_tx,
         redis,
@@ -101,6 +105,7 @@ async fn run() -> anyhow::Result<()> {
         tx_ws.clone(),
     ));
     let ws_task_tx = tokio::spawn(ws_worker_tx(db_pool.clone(), rx_ws, tx_ws));
+    let db_analytics_task = tokio::spawn(analytics_agg(db_pool.clone(), rx_analytics_agg));
 
     tokio::select! {
         o = application_task => report_exit("API", o),
@@ -109,6 +114,7 @@ async fn run() -> anyhow::Result<()> {
         o = finalize_daily_stats_task => report_exit("Finalize daily task failed", o),
         o = db_cleaner_task => report_exit("DB cleaner task failed", o),
         o = db_agg_task => report_exit("DB aggregator", o),
+        o = db_analytics_task => report_exit("DB analytics aggregator", o),
         o = ws_task_rx => report_exit("WS RX task failed", o),
         o = ws_task_tx => report_exit("WS TX task failed", o)
     };

@@ -9,15 +9,15 @@ version.workspace = true
 [dependencies]
 jni = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
-block-mesh-common = { path = "../block-mesh-common", features = ["http", "cli", "app-config"] }
+block-mesh-common = { path = "../block-mesh-common", features = ["http", "cli", "app-config", "feature-flag"] }
 tokio = { workspace = true, features = ["full"] }
 serde = { workspace = true, features = ['derive'] }
 serde_json = { workspace = true }
-reqwest = { workspace = true, features = [
-  "blocking",
+reqwest = { workspace = true, default-features = false, features = [
   "json",
-  "hickory-dns"
+  "rustls-tls",
 ] }
+ureq = "2.10.1"
 tracing = { workspace = true }
 anyhow = { workspace = true }
 uuid = { workspace = true, features = ["v4", "fast-rng", "macro-diagnostics", "serde", "js"] }
