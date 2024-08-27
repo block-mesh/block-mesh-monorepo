@@ -1,23 +1,45 @@
+use crate::helpers::http_client;
+use chrono::Utc;
 use once_cell::sync::OnceCell;
-use reqwest::ClientBuilder;
-use std::process;
+use reqwest::Client;
+use serde::{Deserialize, Serialize};
+use std::fmt::{Display, Formatter};
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 use tokio::runtime::{Builder, Runtime};
+use tokio::time::sleep;
 
-pub static STATUS: OnceCell<Arc<Mutex<i8>>> = OnceCell::new();
+pub static STATUS: OnceCell<Arc<Mutex<FFIStatus>>> = OnceCell::new();
 
 pub static CLOUDFLARE: &str = "https://cloudflare-worker-echo-debug.blockmesh.workers.dev";
 pub static NGROK: &str = "https://distinct-bison-merely.ngrok-free.app";
 pub static LOCALHOST: &str = "http://localhost:8000";
 pub static LOCALHOST_2: &str = "http://10.0.2.2:8000";
 
-pub fn get_status() -> i8 {
-    let value = STATUS.get_or_init(|| Arc::new(Mutex::new(0)));
+#[derive(Clone, Copy, Serialize, Deserialize, PartialEq)]
+pub enum FFIStatus {
+    WAITING,
+    RUNNING,
+    STOP,
+}
+
+impl Display for FFIStatus {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            FFIStatus::WAITING => write!(f, "waiting"),
+            FFIStatus::RUNNING => write!(f, "running"),
+            FFIStatus::STOP => write!(f, "stop"),
+        }
+    }
+}
+
+pub fn get_status() -> FFIStatus {
+    let value = STATUS.get_or_init(|| Arc::new(Mutex::new(FFIStatus::WAITING)));
     *value.lock().unwrap()
 }
 
-pub fn set_status(status: i8) {
-    let value = STATUS.get_or_init(|| Arc::new(Mutex::new(0)));
+pub fn set_status(status: FFIStatus) {
+    let value = STATUS.get_or_init(|| Arc::new(Mutex::new(FFIStatus::WAITING)));
     let mut val = value.lock().unwrap();
     *val = status;
 }
@@ -33,50 +55,44 @@ pub fn create_current_thread_runtime() -> Arc<Runtime> {
     runtime
 }
 
-pub async fn debug_stop(url: &str) {
-    let res = ClientBuilder::new()
-        .use_rustls_tls()
-        .no_hickory_dns()
-        .build()
-        .unwrap()
-        .get(format!(
-            "{}/health_check?RUNNING={}&url={}",
-            url,
-            get_status(),
-            url
-        ))
-        .send()
-        .await;
+pub fn debug_stop(url: &str) {
+    let runtime = create_current_thread_runtime();
+    set_status(FFIStatus::STOP);
+    runtime.block_on(async {
+        let _ = http_client()
+            .get(format!(
+                "{}/health_check?status={}&url={}",
+                url,
+                get_status(),
+                url
+            ))
+            .send()
+            .await;
+    });
+    set_status(FFIStatus::WAITING);
+}
 
-    let _ = ClientBuilder::new()
-        .use_rustls_tls()
-        .no_hickory_dns()
-        .build()
-        .unwrap()
-        .get(format!(
-            "{}/health_check?url={}pid={}&res={:?}",
-            LOCALHOST_2,
-            url,
-            process::id(),
-            res,
-        ))
-        .send()
-        .await;
-
-    // let res = ureq::get(&format!(
-    //     "{}/health_check?RUNNING={}&url={}",
-    //     url,
-    //     get_status(),
-    //     url
-    // ))
-    // .query_pairs(vec![("url", url)])
-    // .call();
-    // let _ = ureq::get(&format!(
-    //     "{}/health_check?RUNNING={}&url={}",
-    //     LOCALHOST_2,
-    //     get_status(),
-    //     url
-    // ))
-    // .query_pairs(vec![("url", url), ("res", &format!("{:?}", res))])
-    // .call();
+pub fn debug_running(url: &str) {
+    let runtime = create_current_thread_runtime();
+    runtime.block_on(async {
+        set_status(FFIStatus::RUNNING);
+        loop {
+            if get_status() != FFIStatus::RUNNING {
+                break;
+            }
+            let now = Utc::now();
+            let _ = Client::new()
+                .get(format!(
+                    "{}/health_check?time={}&status={}",
+                    url,
+                    now,
+                    get_status()
+                ))
+                .send()
+                .await;
+            sleep(Duration::from_secs(5)).await
+        }
+        // let _ = login_mode(url, email, password).await;
+    });
+    set_status(FFIStatus::WAITING);
 }

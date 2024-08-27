@@ -5,7 +5,7 @@ import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { useStorage } from '@/hooks/useStorage'
 import React, { useEffect, useRef, useState } from 'react'
-import BackgroundService from 'react-native-background-actions'
+// import BackgroundService from 'react-native-background-actions'
 import MyRustModule from '@/modules/my-rust-module/src/MyRustModule'
 
 async function sleep(time: number): Promise<void> {
@@ -64,16 +64,19 @@ export default function HomeScreen() {
         }
       ])
     } else {
-      await BackgroundService.start(run_lib, options)
+      // await BackgroundService.start(run_lib, options)
+      MyRustModule.run_lib(url, email, password).then(() => {
+          console.log('run_lib finished')
+        },
+        () => {
+          console.log('run_lib error')
+        })
     }
   }
 
   async function stop() {
     console.log('start stop 0')
-    const r = await fetch('https://distinct-bison-merely.ngrok-free.app/health_check?hello=https&from=ui').then(() => {
-      console.log('success')
-    }, (e) => console.log('error', e))
-    await BackgroundService.stop()
+    // await BackgroundService.stop()
     console.log('hello', MyRustModule.hello())
     const x = await MyRustModule.stop_lib()
     console.log('x = ', x)
