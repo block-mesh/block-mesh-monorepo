@@ -54,6 +54,7 @@ pub struct AppState {
     pub flags: HashMap<String, FlagValue>,
     pub cleaner_tx: tokio::sync::mpsc::Sender<EnrichIp>,
     pub redis: MultiplexedConnection,
+    pub ws_connection_manager: crate::ws::connection_manager::ConnectionManager,
 }
 
 #[derive(Clone)]

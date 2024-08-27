@@ -1,10 +1,12 @@
 use crate::startup::application::AppState;
+use crate::ws::connection_manager::ConnectionManager;
 use crate::ws::process_message::process_message;
 use axum::extract::ws::{Message, WebSocket};
 use block_mesh_common::interfaces::ws_api::WsMessage;
 use futures::{SinkExt, StreamExt};
 use std::net::SocketAddr;
 use std::sync::Arc;
+use uuid::Uuid;
 
 /// Actual websocket statemachine (one will be spawned per connection)
 pub async fn handle_socket(
@@ -12,6 +14,7 @@ pub async fn handle_socket(
     who: SocketAddr,
     state: Arc<AppState>,
     email: String,
+    connection_manager: ConnectionManager,
 ) {
     let org_email = Arc::new(email);
     // let (tx, mut rx) = tokio::sync::mpsc::channel::<WsMessage>(50);

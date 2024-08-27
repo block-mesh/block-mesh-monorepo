@@ -28,17 +28,21 @@ pub async fn ws_handler(
         .get("api_token")
         .ok_or(Error::Auth("Missing token".to_string()))?;
     let mut c = state.redis.clone();
-    let _: String = c
-        .get(format!(
-            "{}-{}",
-            email.clone().to_ascii_lowercase(),
-            api_token.to_string()
-        ))
-        .await
-        .map_err(|_| Error::Auth("Can't find token".to_string()))?;
 
+    // Checks for key that does not exist after logging in?
+    // let _: String = c
+    //     .get(format!(
+    //         "{}-{}",
+    //         email.clone().to_ascii_lowercase(),
+    //         api_token.to_string()
+    //     ))
+    //     .await
+    //     .map_err(|_| Error::Auth("Can't find token".to_string()))?;
+
+    let ws_connection_manager = state.ws_connection_manager.clone();
     tracing::info!("ws_handle => connected {:#?}", query);
     // finalize the upgrade process by returning upgrade callback.
     // we can customize the callback by sending additional info such as address.
-    Ok(ws.on_upgrade(move |socket| handle_socket(socket, addr, state, email)))
+    Ok(ws
+        .on_upgrade(move |socket| handle_socket(socket, addr, state, email, ws_connection_manager)))
 }

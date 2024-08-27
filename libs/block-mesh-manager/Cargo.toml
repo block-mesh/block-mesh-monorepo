@@ -27,6 +27,7 @@ wasm-bindgen-futures = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
 solana-sdk = { workspace = true, optional = true }
 clap = { workspace = true, features = ["derive"] }
+dashmap = "6.0.1"
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = { workspace = true, optional = true }
 logger-leptos = { path = "../logger-leptos", optional = true }
