@@ -2,9 +2,11 @@
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unreachable_pub)]
 
+use block_mesh_manager::ws::connection_manager::ConnectionManager;
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use block_mesh_manager::ws;
     use block_mesh_common::interfaces::ws_api::WsMessage;
     use block_mesh_manager::worker::ws_worker::{ws_worker_rx, ws_worker_tx};
     use tokio::sync::broadcast;
@@ -79,7 +81,7 @@ async fn run() -> anyhow::Result<()> {
         .await
         .unwrap();
 
-    let ws_connection_manager = crate::ws::connection_manager::ConnectionManager;
+    let ws_connection_manager = ConnectionManager::new();
     let app_state = Arc::new(AppState {
         email_client,
         pool: db_pool.clone(),
