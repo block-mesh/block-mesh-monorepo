@@ -1,5 +1,5 @@
 use anyhow::{anyhow, Context};
-use block_mesh_common::constants::BLOCK_MESH_APP_SERVER;
+use block_mesh_common::feature_flag_client::get_flag_value;
 use block_mesh_common::interfaces::server_api::{
     ClientsMetadata, DashboardRequest, DashboardResponse, GetTaskRequest, GetTaskResponse,
     RegisterForm, RegisterResponse, ReportBandwidthRequest, ReportBandwidthResponse,
@@ -19,12 +19,14 @@ use speed_test::Metadata;
 use std::cmp;
 use std::str::FromStr;
 use std::time::Duration;
+use tracing::Level;
 use uuid::Uuid;
 
-fn http_client() -> Client {
+pub fn http_client() -> Client {
     ClientBuilder::new()
         .timeout(Duration::from_secs(3))
         .no_hickory_dns()
+        .use_rustls_tls()
         .build()
         .unwrap_or_default()
 }
@@ -35,7 +37,7 @@ pub async fn dashboard(url: &str, credentials: &DashboardRequest) -> anyhow::Res
     let client = http_client();
     let response = client.post(&url).json(credentials).send().await?;
     let response: DashboardResponse = response.json().await?;
-    tracing::info!("Dashboard data:");
+    info!("Dashboard data:");
     println!(
         "{}",
         serde_json::to_string_pretty(&response).unwrap_or_default()
@@ -51,10 +53,10 @@ pub async fn register(url: &str, credentials: &RegisterForm) -> anyhow::Result<(
     let response: RegisterResponse = response.json().await?;
 
     if response.status_code == 200 {
-        tracing::info!("Successfully registered");
+        info!("Successfully registered");
         Ok(())
     } else {
-        tracing::error!(
+        error!(
             "Failed to registered with error : {}",
             response.error.unwrap_or_default()
         );
@@ -86,7 +88,7 @@ pub async fn login_to_network(url: &str, login_form: LoginForm) -> anyhow::Resul
     }
 }
 
-#[tracing::instrument(name = "report_uptime", skip(api_token), err)]
+#[tracing::instrument(name = "report_uptime", skip(api_token), err(level = Level::TRACE))]
 pub async fn report_uptime(
     url: &str,
     email: &str,
@@ -110,18 +112,19 @@ pub async fn report_uptime(
         .json(&session_metadata)
         .send()
         .await
-        .inspect_err(|error| info!("Error occured while reporting uptime: {error}"))
+        .inspect_err(|error| debug!("Error occurred while reporting uptime: {error}"))
     {
-        let json = response.json::<ReportUptimeResponse>().await.unwrap();
+        let json = response.json::<ReportUptimeResponse>().await?;
         debug!("Uptime response: {json:?}");
+        info!("Successfully submitted uptime report");
     } else {
-        error!("Reporting uptime failed");
+        debug!("Reporting uptime failed");
     }
 
     Ok(())
 }
 
-#[tracing::instrument(name = "get_task", level = "trace", skip(api_token), err)]
+#[tracing::instrument(name = "get_task", level = "trace", skip(api_token),err(level = Level::TRACE))]
 pub async fn get_task(
     base_url: &str,
     email: &str,
@@ -142,7 +145,7 @@ pub async fn get_task(
     Ok(response)
 }
 
-#[tracing::instrument(name = "run_task", err)]
+#[tracing::instrument(name = "run_task", err(level = Level::TRACE))]
 pub async fn run_task(
     url: &str,
     method: &str,
@@ -157,14 +160,12 @@ pub async fn run_task(
             None => client.post(url),
         },
         method => {
-            tracing::error!("Unsupported method: {}", method);
             return Err(anyhow!("Unsupported method: {}", method));
         }
     };
 
-    if headers.is_some() {
+    if let Some(headers) = headers {
         let mut headers_map = HeaderMap::new();
-        let headers = headers.unwrap();
         if headers.is_object() {
             headers.as_object().unwrap().into_iter().for_each(|(k, v)| {
                 let header_name = HeaderName::from_str(k).unwrap();
@@ -186,15 +187,12 @@ pub async fn run_task(
                 raw,
             })
         }
-        Err(e) => {
-            tracing::error!("run_task error: {e}");
-            Err(anyhow!("run_task error: {e}"))
-        }
+        Err(e) => Err(anyhow!("run_task error: {e}")),
     }
 }
 
 #[allow(clippy::too_many_arguments)]
-#[tracing::instrument(name = "submit_task", skip(api_token, response_raw), err)]
+#[tracing::instrument(name = "submit_task", skip(api_token, response_raw), err(level = Level::TRACE))]
 pub async fn submit_task(
     base_url: &str,
     email: &str,
@@ -223,7 +221,7 @@ pub async fn submit_task(
         colo: Option::from(colo),
         response_time: Option::from(response_time),
     };
-    let response = reqwest::Client::new()
+    let response = http_client()
         .post(format!("{}/api/submit_task", base_url))
         .query(&query)
         .body(response_raw)
@@ -237,7 +235,7 @@ pub async fn task_poller(url: &str, email: &str, api_token: &str) -> anyhow::Res
     let api_token = Uuid::from_str(api_token).context("Failed to parse UUID")?;
     let task = get_task(url, email, &api_token)
         .await
-        .inspect_err(|error| error!("get_task error: {error}"))?;
+        .inspect_err(|error| debug!("get_task error: {error}"))?;
     let metadata = fetch_metadata().await.unwrap_or_default();
     let task = task.context("Task not found")?;
 
@@ -245,25 +243,24 @@ pub async fn task_poller(url: &str, email: &str, api_token: &str) -> anyhow::Res
     let finished_task = match run_task(&task.url, &task.method, task.headers, task.body).await {
         Ok(v) => v,
         Err(e) => {
-            tracing::error!("finished_task: error: {e}");
             let response_time = cmp::max(task_start.elapsed().as_millis(), 1) as f64;
             match submit_task(
-                BLOCK_MESH_APP_SERVER,
+                &url,
                 email,
                 &api_token,
                 &task.id,
                 520,
-                "".to_string(),
+                e.to_string(),
                 metadata.clone(),
                 response_time,
             )
             .await
             {
                 Ok(_) => {
-                    tracing::info!("successfully submitted failed task");
+                    info!("successfully submitted failed task");
                 }
                 Err(e) => {
-                    tracing::error!("submit_task: error: {e}");
+                    debug!("submit_task: error: {e}");
                 }
             }
             return Err(anyhow!("submit_task errored"));
@@ -272,7 +269,7 @@ pub async fn task_poller(url: &str, email: &str, api_token: &str) -> anyhow::Res
     let response_time = cmp::max(task_start.elapsed().as_millis(), 1) as f64;
 
     match submit_task(
-        BLOCK_MESH_APP_SERVER,
+        &url,
         email,
         &api_token,
         &task.id,
@@ -284,16 +281,16 @@ pub async fn task_poller(url: &str, email: &str, api_token: &str) -> anyhow::Res
     .await
     {
         Ok(_) => {
-            tracing::info!("successfully submitted task");
+            info!("successfully submitted task");
         }
         Err(e) => {
-            tracing::error!("submit_task: error: {e}");
+            debug!("submit_task: error: {e}");
         }
     };
     Ok(())
 }
 
-#[tracing::instrument(name = "submit_bandwidth", err)]
+#[tracing::instrument(name = "submit_bandwidth", err(level = Level::TRACE))]
 pub async fn submit_bandwidth(
     url: &str,
     email: &str,
@@ -325,6 +322,23 @@ pub async fn submit_bandwidth(
         .await?;
     let response: ReportBandwidthResponse = response.json().await?;
     Ok(response)
+}
+
+#[allow(dead_code)]
+pub async fn get_polling_interval() -> f64 {
+    match get_flag_value("polling_interval", &http_client())
+        .await
+        .unwrap_or(Some(Value::from(30.0)))
+    {
+        Some(polling_interval) => {
+            if polling_interval.is_number() {
+                polling_interval.as_f64().unwrap() / 1000.0
+            } else {
+                30.0
+            }
+        }
+        None => 30.0,
+    }
 }
 
 #[test]
