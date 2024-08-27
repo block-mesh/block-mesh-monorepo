@@ -22,6 +22,7 @@ pub async fn handle_socket(
     // this will likely be the Pong for our Ping or a hello message from client.
     // waiting for message from a client will block this task, but will not block other client's
     // connections.
+
     if let Some(msg) = socket.recv().await {
         if let Ok(msg) = msg {
             if process_message(&msg, who).is_break() {
@@ -36,7 +37,10 @@ pub async fn handle_socket(
     // By splitting socket we can send and receive at the same time. In this example we will send
     // unsolicited messages to client based on some sort of server's internal event (i.e .timer).
     let (mut sender, mut receiver) = socket.split();
-
+    sender
+        .send(Message::Text(String::from("Hello")))
+        .await
+        .unwrap();
     let email = org_email.clone();
     // This second task will receive messages from client and print them on server console
     let tx_ws = state.tx_ws.clone();
