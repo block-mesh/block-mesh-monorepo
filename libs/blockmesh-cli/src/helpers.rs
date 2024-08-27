@@ -245,7 +245,7 @@ pub async fn task_poller(url: &str, email: &str, api_token: &str) -> anyhow::Res
         Err(e) => {
             let response_time = cmp::max(task_start.elapsed().as_millis(), 1) as f64;
             match submit_task(
-                &url,
+                url,
                 email,
                 &api_token,
                 &task.id,
@@ -269,7 +269,7 @@ pub async fn task_poller(url: &str, email: &str, api_token: &str) -> anyhow::Res
     let response_time = cmp::max(task_start.elapsed().as_millis(), 1) as f64;
 
     match submit_task(
-        &url,
+        url,
         email,
         &api_token,
         &task.id,
