@@ -31,19 +31,19 @@ pub async fn handler(
     let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    // let ip = headers
-    //     .get("cf-connecting-ip")
-    //     .context("Missing CF-CONNECTING-IP")?
-    //     .to_str()
-    //     .context("Unable to STR CF-CONNECTING-IP")?;
-    //
-    // let mut redis = state.redis.clone();
-    // if !filter_request(&mut redis, &user.id, ip)
-    //     .await
-    //     .context("Rate limit")?
-    // {
-    //     return Err(Error::NotAllowedRateLimit.into());
-    // }
+    let ip = headers
+        .get("cf-connecting-ip")
+        .context("Missing CF-CONNECTING-IP")?
+        .to_str()
+        .context("Unable to STR CF-CONNECTING-IP")?;
+
+    let mut redis = state.redis.clone();
+    if !filter_request(&mut redis, &user.id, ip)
+        .await
+        .context("Rate limit")?
+    {
+        return Err(Error::NotAllowedRateLimit.into());
+    }
 
     if user.email.to_ascii_lowercase() != body.email.to_ascii_lowercase() {
         return Err(Error::UserNotFound);
