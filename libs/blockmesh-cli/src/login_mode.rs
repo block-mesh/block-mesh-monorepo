@@ -1,4 +1,6 @@
-use crate::helpers::{login_to_network, report_uptime, submit_bandwidth, task_poller};
+use crate::helpers::{
+    get_polling_interval, login_to_network, report_uptime, submit_bandwidth, task_poller,
+};
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{ClientsMetadata, LoginForm};
 use logger_general::tracing::setup_tracing;
@@ -44,7 +46,8 @@ pub async fn login_mode(
     let task_poller = tokio::spawn(async move {
         loop {
             let _ = task_poller(&u, e.as_ref(), a.as_ref()).await;
-            tokio::time::sleep(Duration::from_secs(30)).await;
+            let polling_interval = get_polling_interval().await;
+            tokio::time::sleep(Duration::from_secs(polling_interval as u64)).await;
         }
     });
     let u = url.clone();
@@ -57,7 +60,8 @@ pub async fn login_mode(
     let uptime_poller = tokio::spawn(async move {
         loop {
             let _ = report_uptime(&u, e.as_ref(), a.as_ref(), session_metadata.clone()).await;
-            tokio::time::sleep(Duration::from_secs(30)).await;
+            let polling_interval = get_polling_interval().await;
+            tokio::time::sleep(Duration::from_secs(polling_interval as u64)).await;
         }
     });
     let u = url.clone();
@@ -66,7 +70,8 @@ pub async fn login_mode(
     let bandwidth_poller = tokio::spawn(async move {
         loop {
             let _ = submit_bandwidth(&u, e.as_ref(), a.as_ref()).await;
-            tokio::time::sleep(Duration::from_secs(30)).await;
+            let polling_interval = get_polling_interval().await;
+            tokio::time::sleep(Duration::from_secs(polling_interval as u64)).await;
         }
     });
 
