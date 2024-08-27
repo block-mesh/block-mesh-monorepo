@@ -9,6 +9,7 @@ import {
 import { getData, storeData } from '@/utils/storage'
 import { API_TOKEN, BLOCKMESH_URL, EMAIL, PASSWORD, RUN_LIB } from '@/utils/constants'
 
+export type Nav = 'login' | 'register' | 'dashboard'
 
 export interface StorageType {
   email: string;
@@ -16,11 +17,13 @@ export interface StorageType {
   password: string;
   url: string;
   run_lib: string;
+  nav: Nav;
   setEmail: (email: string) => void;
   setApiToken: (api_token: string) => void;
   setUrl: (url: string) => void;
   setPassword: (password: string) => void;
   setRunLib: (run_lib: string) => void;
+  setNav: (nav: Nav) => void;
 }
 
 export const Context = createContext<StorageType>(
@@ -41,6 +44,7 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
   const [url, setUrlInternal] = useState('')
   const [password, setPasswordInternal] = useState('')
   const [run_lib, setRunLibInternal] = useState('')
+  const [nav, setNav] = useState('login')
 
   useEffect(() => {
     (async () => {
@@ -137,6 +141,7 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
     <Context.Provider
       value={{
         email,
+        nav,
         api_token,
         url,
         run_lib,
@@ -145,7 +150,8 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
         setApiToken,
         setUrl,
         setPassword,
-        setRunLib
+        setRunLib,
+        setNav
       }}
     >
       {children}
