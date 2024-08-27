@@ -163,6 +163,7 @@ impl From<Error> for StatusCode {
             Error::InternalServer => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Auth(_) => StatusCode::UNAUTHORIZED,
             Error::Sql(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::Redis(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Anyhow(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

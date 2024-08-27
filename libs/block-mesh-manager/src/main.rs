@@ -2,7 +2,11 @@
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unreachable_pub)]
 
+use block_mesh_manager::ws::connection_manager::ConnectionManager;
 use cfg_if::cfg_if;
+
+#[macro_use]
+extern crate tracing;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_common::interfaces::ws_api::WsMessage;
@@ -79,6 +83,7 @@ async fn run() -> anyhow::Result<()> {
         .await
         .unwrap();
 
+    let ws_connection_manager = ConnectionManager::new();
     let app_state = Arc::new(AppState {
         email_client,
         pool: db_pool.clone(),
@@ -91,6 +96,7 @@ async fn run() -> anyhow::Result<()> {
         flags,
         cleaner_tx,
         redis,
+        ws_connection_manager,
     });
     let application = Application::build(configuration, app_state, db_pool.clone()).await;
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));

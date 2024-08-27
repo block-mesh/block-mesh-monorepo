@@ -2,23 +2,6 @@ use cfg_if::cfg_if;
 
 pub mod frontends;
 
-cfg_if! { if #[cfg(feature = "ssr")] {
-    pub mod ws;
-    pub mod utils;
-    pub mod configuration;
-    pub mod database;
-    pub mod domain;
-    pub mod envars;
-    pub mod errors;
-    pub mod emails;
-    pub mod middlewares;
-    pub mod notification;
-    pub mod routes;
-    pub mod startup;
-    pub mod telemetry;
-    pub mod worker;
-}}
-
 cfg_if! { if #[cfg(feature = "hydrate")] {
     use leptos::*;
     use wasm_bindgen::prelude::wasm_bindgen;
@@ -33,4 +16,23 @@ cfg_if! { if #[cfg(feature = "hydrate")] {
         // setup_leptos_tracing(None, DeviceType::AppServer);
         mount_to_body(App);
     }
+}}
+cfg_if! { if #[cfg(feature = "ssr")] {
+    // order matters! - only crates below would ses this global macro use
+    #[macro_use]
+    extern crate tracing;
+    pub mod ws;
+    pub mod utils;
+    pub mod configuration;
+    pub mod database;
+    pub mod domain;
+    pub mod envars;
+    pub mod errors;
+    pub mod emails;
+    pub mod middlewares;
+    pub mod notification;
+    pub mod routes;
+    pub mod startup;
+    pub mod telemetry;
+    pub mod worker;
 }}
