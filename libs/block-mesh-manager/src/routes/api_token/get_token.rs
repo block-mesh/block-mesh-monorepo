@@ -10,12 +10,10 @@ use axum::extract::State;
 use axum::{Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::{GetTokenRequest, GetTokenResponse};
-use redis::{AsyncCommands, RedisResult};
+use redis::AsyncCommands;
 use secret::Secret;
 use sqlx::PgPool;
-use std::str::FromStr;
 use std::sync::Arc;
-use uuid::Uuid;
 
 #[tracing::instrument(name = "get_token", skip(body, auth, state), fields(email = body.email))]
 pub async fn handler(
@@ -29,17 +27,14 @@ pub async fn handler(
         &Secret::from(body.password.clone()),
     );
     let mut c = state.redis.clone();
-    let token: RedisResult<String> = c.get(&key).await;
-    if let Ok(token) = token {
-        if let Ok(token) = Uuid::from_str(&token) {
-            return Ok(Json(GetTokenResponse {
-                api_token: Some(token),
-                message: None,
-            }));
-        }
+    if let Ok(token) = c.get(&key).await {
+        return Ok(Json(GetTokenResponse {
+            api_token: Some(token),
+            message: None,
+        }));
     }
 
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let mut transaction = pool.begin().await?;
     let email = body.email.clone().to_ascii_lowercase();
     let user = get_user_opt_by_email(&mut transaction, &email)
         .await?
@@ -64,12 +59,14 @@ pub async fn handler(
         get_api_token_by_usr_and_status(&mut transaction, &user.id, ApiTokenStatus::Active)
             .await?
             .ok_or(Error::ApiTokenNotFound)?;
-    transaction.commit().await.map_err(Error::from)?;
+    transaction.commit().await?;
 
-    let _: RedisResult<()> = c
-        .set(&key, api_token.token.expose_secret().to_string())
-        .await;
-    let _: RedisResult<()> = c.expire(&key, Backend::get_expire()).await;
+    c.set_ex(
+        &key,
+        api_token.token.expose_secret().to_string(),
+        Backend::get_expire() as u64,
+    )
+    .await?;
 
     Ok(Json(GetTokenResponse {
         api_token: Some(*api_token.token.as_ref()),
