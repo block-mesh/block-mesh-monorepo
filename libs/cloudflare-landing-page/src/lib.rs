@@ -25,6 +25,12 @@ fn start() {
         .init();
 }
 
+pub struct UseCase {
+    pub title: String,
+    pub icon: String,
+    pub href: String,
+}
+
 #[derive(Template)]
 #[allow(dead_code)]
 #[template(path = "home.html")]
@@ -39,11 +45,13 @@ struct Home {
     // pub image: String,
     pub support: String,
     pub chat: String,
+    pub use_cases: Vec<UseCase>,
 }
 
 #[event(fetch)]
 async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
     let router = Router::new();
+
     router
         .get_async("/", |_req, ctx| async move {
             let counter = ctx.kv("ab_testing")?.get("counter").json::<Value>().await?;
@@ -63,6 +71,48 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
                     .await?;
                 c + 1
             };
+            let mut use_cases: Vec<UseCase> = Vec::with_capacity(50);
+            use_cases.push(UseCase {
+                icon: "vpn_key".to_string(),
+                title: "VPN".to_string(),
+                href: "#".to_string(),
+            });
+
+            use_cases.push(UseCase {
+                icon: "shield".to_string(),
+                title: "Brand Protection".to_string(),
+                href: "#".to_string(),
+            });
+
+            use_cases.push(UseCase {
+                icon: "flight_takeoff".to_string(),
+                title: "Travel Aggregation".to_string(),
+                href: "#".to_string(),
+            });
+
+            use_cases.push(UseCase {
+                icon: "campaign".to_string(),
+                title: "Ad Verification".to_string(),
+                href: "#".to_string(),
+            });
+
+            use_cases.push(UseCase {
+                icon: "manage_search".to_string(),
+                title: "SEO Monitoring".to_string(),
+                href: "#".to_string(),
+            });
+
+            use_cases.push(UseCase {
+                icon: "monitoring".to_string(),
+                title: "Market Research".to_string(),
+                href: "#".to_string(),
+            });
+
+            use_cases.push(UseCase {
+                icon: "shopping_cart".to_string(),
+                title: "e-Commerce".to_string(),
+                href: "#".to_string(),
+            });
 
             console_log!("counter = {:?}", counter);
             let response = Home {
@@ -76,6 +126,7 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
                 // image: BLOCK_MESH_LANDING_PAGE_IMAGE.to_string(),
                 support: BLOCK_MESH_SUPPORT_EMAIL.to_string(),
                 chat: BLOCK_MESH_SUPPORT_CHAT.to_string(),
+                use_cases,
             }
             .render()
             .unwrap();
