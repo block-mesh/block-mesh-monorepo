@@ -1,5 +1,6 @@
 use block_mesh_common::feature_flag_client::get_all_flags;
 use block_mesh_common::interfaces::server_api::RegisterForm;
+use block_mesh_common::interfaces::ws_api::WsMessage;
 use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager::configuration::get_configuration::get_configuration;
 use block_mesh_manager::configuration::settings::Settings;
@@ -11,11 +12,13 @@ use block_mesh_manager::envars::get_env_var_or_panic::get_env_var_or_panic;
 use block_mesh_manager::envars::load_dotenv::load_dotenv;
 use block_mesh_manager::startup::application::{AppState, Application};
 use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
+use block_mesh_manager::worker::analytics_agg::AnalyticsMessage;
 use block_mesh_manager::worker::db_agg::{db_agg, UpdateBulkMessage};
 use block_mesh_manager::worker::db_cleaner_cron::{db_cleaner_cron, EnrichIp};
 use block_mesh_manager::worker::finalize_daily_cron::finalize_daily_cron;
 use block_mesh_manager::worker::joiner::joiner_loop;
 use block_mesh_manager::worker::rpc_cron::rpc_worker_loop;
+use block_mesh_manager::ws::connection_manager::ConnectionManager;
 use logger_general::tracing::setup_tracing_stdout_only;
 use redis;
 use redis::aio::MultiplexedConnection;
@@ -26,6 +29,7 @@ use std::env;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio;
+use tokio::sync::broadcast;
 use tokio::task::JoinHandle;
 use tokio::time::sleep;
 use uuid::Uuid;
@@ -75,15 +79,25 @@ pub async fn spawn_app() -> TestApp {
         .await
         .unwrap();
 
+    let (tx_ws, rx_ws) = broadcast::channel::<WsMessage>(500);
+    let (tx_sql_agg, rx_sql_agg) = tokio::sync::mpsc::channel::<UpdateBulkMessage>(500);
+    let (tx_analytics_agg, rx_analytics_agg) = tokio::sync::mpsc::channel::<AnalyticsMessage>(500);
+    let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::channel::<EnrichIp>(500);
+
+    let ws_connection_manager = ConnectionManager::new();
     let app_state = Arc::new(AppState {
         email_client,
         pool: db_pool.clone(),
         client: client.clone(),
         tx,
+        tx_ws: tx_ws.clone(),
+        rx_ws: rx_ws.resubscribe(),
         tx_sql_agg,
+        tx_analytics_agg,
         flags,
         cleaner_tx,
         redis: redis.clone(),
+        ws_connection_manager,
     });
     let application =
         Application::build(configuration.clone(), app_state.clone(), db_pool.clone()).await;

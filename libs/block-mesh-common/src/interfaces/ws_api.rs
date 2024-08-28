@@ -7,6 +7,7 @@ use uuid::Uuid;
 
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct WsMessage {
+    // only for requests from client
     pub message_id: Uuid,
     pub email: Option<String>,
     pub device: Option<DeviceType>,
@@ -22,3 +23,17 @@ pub enum WsMessageTypes {
     SendUptimeFromServer,
     SubmitUptimeToServer(ReportUptimeRequest),
 }
+//
+// #[derive(Debug)]
+// pub enum WsClientRequest {
+//     ReportBandwith,
+//     ReportUptime,
+//
+// }
+//
+// #[derive(Debug)]
+// pub enum WsServerRequest {
+//     ExecuteTask,
+//
+//
+// }
