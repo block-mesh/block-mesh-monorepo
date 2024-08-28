@@ -9,6 +9,7 @@ use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::ptr::read;
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::sync::{mpsc, oneshot, Mutex, RwLock};
 use tokio::task::JoinHandle;
 use uuid::Uuid;
@@ -24,7 +25,7 @@ impl<T> TaskManager<T>
 where
     T: Debug + Send + 'static,
 {
-    fn new() -> Self {
+    pub fn new() -> Self {
         let (task_sender, mut task_receiver) = mpsc::channel(50);
         let (session_sender, mut session_receiver) = mpsc::channel::<NodeController<T>>(1000);
         let scheduler_handle = tokio::spawn(async move {
@@ -42,14 +43,14 @@ where
         }
     }
 
-    async fn add_session(&self) -> oneshot::Receiver<T> {
+    pub async fn add_session(&self) -> oneshot::Receiver<T> {
         let (task_sender, task_receiver) = oneshot::channel();
         let controller = NodeController::new(task_sender);
         self.session_sender.send(controller).await.unwrap();
         task_receiver
     }
 
-    async fn add_task(&self, http_task: T) {
+    pub async fn add_task(&self, http_task: T) {
         self.task_sender.send(http_task).await.unwrap();
     }
 }
@@ -70,25 +71,29 @@ impl<T> NodeController<T> {
     }
 }
 
-#[sqlx::test]
-async fn node_workers(pool: PgPool) {
+#[tokio::test]
+async fn node_workers() {
     let manager = Arc::new(TaskManager::new());
     let m = manager.clone();
-    tokio::spawn(async move {
+    let h1 = tokio::spawn(async move {
         let m = m;
         loop {
             let task_receiver = m.add_session().await;
             let task = task_receiver.await.unwrap();
+            tokio::time::sleep(Duration::from_secs(2)).await;
+            println!("Task received A");
             // process task on the client side
         }
     });
 
     let m = manager.clone();
-    tokio::spawn(async move {
+    let h2 = tokio::spawn(async move {
         let m = m;
         loop {
             let task_receiver = m.add_session().await;
             let task = task_receiver.await.unwrap();
+            tokio::time::sleep(Duration::from_secs(2)).await;
+            println!("Task received B");
             // process the task
         }
     });
@@ -107,5 +112,6 @@ async fn node_workers(pool: PgPool) {
             .unwrap();
     }
 
+    tokio::time::sleep(Duration::from_secs(12)).await;
     println!("Assigning task");
 }
