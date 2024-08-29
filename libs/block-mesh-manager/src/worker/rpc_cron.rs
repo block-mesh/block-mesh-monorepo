@@ -21,10 +21,13 @@ pub async fn create_rpc_tasks(pool: PgPool) -> anyhow::Result<()> {
 
 #[tracing::instrument(name = "rpc_worker_loop", skip(pool))]
 pub async fn rpc_worker_loop(pool: PgPool) -> Result<(), anyhow::Error> {
+    let interval = env::var("RPC_CRON_INTERVAL")
+        .unwrap_or("30000".to_string())
+        .parse()
+        .unwrap_or(30_000);
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     create_server_user(&mut transaction).await?;
     transaction.commit().await.map_err(Error::from)?;
-
     loop {
         match create_rpc_tasks(pool.clone()).await {
             Ok(_) => {}
@@ -32,12 +35,6 @@ pub async fn rpc_worker_loop(pool: PgPool) -> Result<(), anyhow::Error> {
                 tracing::error!("worker_loop: create_rpc_tasks: error: {}", e);
             }
         }
-        tokio::time::sleep(Duration::from_millis(
-            env::var("RPC_CRON_INTERVAL")
-                .unwrap_or("30000".to_string())
-                .parse()
-                .unwrap_or(30_000),
-        ))
-        .await;
+        tokio::time::sleep(Duration::from_millis(interval)).await;
     }
 }
