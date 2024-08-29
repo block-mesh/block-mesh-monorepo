@@ -12,6 +12,7 @@ pub async fn get_ip_address(
                 id,
                 ip,
                 created_at,
+                updated_at,
                 latitude,
                 longitude,
                 country,
