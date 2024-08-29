@@ -18,5 +18,6 @@ web-build/
 
 expo-env.d.ts
 # @end expo-cli
-blockmesh-cli.xcframework/
+blockmesh-cli.xcframework/ios-arm64/
+blockmesh-cli.xcframework/ios-arm64-simulator/
 headers/
