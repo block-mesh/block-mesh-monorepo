@@ -4,20 +4,16 @@ import { colors, styles } from '@/utils/theme'
 import { Button, TextInput, View } from 'react-native'
 import { ThemedView } from '@/components/ThemedView'
 import { ThemedText } from '@/components/ThemedText'
+import CustomButton from '@/components/CustomButton'
+import { get_token, login } from '@/utils/auth'
 
 export default function LoginScreen() {
   const emailRef = useRef()
   const passwordRef = useRef()
   const urlRef = useRef()
   const storage = useStorage()
-  const [email, setEmail] = useState(storage.email)
-  const [password, setPassword] = useState(storage.password)
-  const [url, setUrl] = useState(storage.url)
-
+  //
   useEffect(() => {
-    setEmail(storage.email)
-    setPassword(storage.password)
-    setUrl(storage.url)
   }, [storage.email, storage.url, storage.password, storage.api_token, storage.nav])
 
   return (
@@ -26,8 +22,8 @@ export default function LoginScreen() {
       <TextInput
         ref={emailRef as any}
         style={styles.input}
-        onChangeText={setEmail}
-        value={email}
+        onChangeText={storage.setEmail}
+        value={storage.email}
         placeholder="Fill email"
         placeholderTextColor={colors['off-white']}
         autoCapitalize={'none'}
@@ -37,8 +33,8 @@ export default function LoginScreen() {
         secureTextEntry={true}
         ref={passwordRef as any}
         style={styles.input}
-        onChangeText={setPassword}
-        value={password}
+        onChangeText={storage.setPassword}
+        value={storage.password}
         placeholder="Fill password"
         placeholderTextColor={colors['off-white']}
         autoCapitalize={'none'}
@@ -47,25 +43,37 @@ export default function LoginScreen() {
       <TextInput
         ref={urlRef as any}
         style={styles.input}
-        onChangeText={setUrl}
-        value={url}
+        onChangeText={storage.setUrl}
+        value={storage.url}
         placeholder="Fill URL"
         placeholderTextColor={colors['off-white']}
         autoCapitalize={'none'}
       />
       <View style={styles.buttonContainer}>
-        <Button
-          title="Register"
-          color="#f194ff"
+        <CustomButton
+          title={'Register'}
+          buttonStyles={styles.button}
+          buttonText={styles.buttonText}
           onPress={() => {
             storage.setNav('register')
           }}
         />
-        <Button
-          title="Login"
-          color="#f194ff"
-          onPress={() => {
-            // stop()
+        <CustomButton
+          title={'Login'}
+          buttonStyles={styles.button}
+          buttonText={styles.buttonText}
+          onPress={async () => {
+            const r = await get_token(
+              storage.url + '/api/get_token',
+              {
+                email: storage.email,
+                password: storage.password
+              })
+            console.log('r = ', r)
+            if (r.isOk) {
+              storage.setApiToken(r.value.api_token)
+              storage.setNav('dashboard')
+            }
           }}
         />
       </View>

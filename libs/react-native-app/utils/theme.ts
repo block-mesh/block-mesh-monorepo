@@ -21,8 +21,9 @@ export const colors = {
 export const styles = StyleSheet.create({
   buttonContainer: {
     flexDirection: 'row',  // Places buttons side by side
-    justifyContent: 'space-between',  // Adjusts the space between the buttons
-    width: '80%'  // Adjust the width of the container as needed
+    // justifyContent: 'space-between',  // Adjusts the space between the buttons
+    width: '80%', // Adjust the width of the container as needed
+    justifyContent: 'center'
   },
   titleContainer: {
     flexDirection: 'row',
@@ -49,6 +50,25 @@ export const styles = StyleSheet.create({
     margin: 12,
     borderWidth: 1,
     padding: 10
+  },
+  button: {
+    margin: 2,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 32,
+    borderRadius: 10,
+    elevation: 3,
+    // backgroundColor: colors['orange']
+    borderColor: colors['orange'],
+    borderWidth: 2
+  },
+  buttonText: {
+    fontSize: 16,
+    lineHeight: 21,
+    fontWeight: 'bold',
+    letterSpacing: 0.25,
+    color: colors['magenta']
   }
 })
 

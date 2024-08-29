@@ -17,6 +17,7 @@ bytes = { workspace = true, optional = true }
 thiserror = { workspace = true }
 bs58 = { workspace = true }
 hyper = { workspace = true, features = ["full"], optional = true }
+typeshare = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 clap = { workspace = true, features = ["derive"], optional = true }
@@ -26,7 +27,6 @@ anyhow = { workspace = true }
 once_cell = { workspace = true }
 reqwest = { workspace = true, optional = true, default-features = false, features = [
   "json",
-  "hickory-dns"
 ] }
 ipgeolocate = { workspace = true, optional = true }
 
