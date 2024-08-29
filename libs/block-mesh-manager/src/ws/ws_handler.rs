@@ -39,9 +39,8 @@ pub async fn ws_handler(
     //     .await
     //     .map_err(|_| Error::Auth("Can't find token".to_string()))?;
 
-    let ws_task_manager = state.ws_task_manager.clone();
     tracing::info!("ws_handle => connected {:#?}", query);
     // finalize the upgrade process by returning upgrade callback.
     // we can customize the callback by sending additional info such as address.
-    Ok(ws.on_upgrade(move |socket| handle_socket(socket, addr, state, email, ws_task_manager)))
+    Ok(ws.on_upgrade(move |socket| handle_socket(socket, addr, state, email)))
 }

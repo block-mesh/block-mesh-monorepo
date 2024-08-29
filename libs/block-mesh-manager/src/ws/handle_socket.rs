@@ -1,3 +1,5 @@
+use crate::database::task::update_task_assigned::update_task_assigned;
+use crate::domain::task::TaskStatus;
 use crate::startup::application::AppState;
 use crate::ws::connection_manager::ConnectionManager;
 use crate::ws::process_message::process_message;
@@ -7,6 +9,7 @@ use block_mesh_common::interfaces::server_api::GetTaskResponse;
 use block_mesh_common::interfaces::ws_api::{WsMessage, WsMessageTypes};
 use futures::{SinkExt, StreamExt};
 use leptos::ev::message;
+use redis::transaction;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::sync::Notify;
@@ -18,10 +21,10 @@ pub async fn handle_socket(
     who: SocketAddr,
     state: Arc<AppState>,
     email: String,
-    task_manager: Arc<TaskManager<GetTaskResponse>>,
 ) {
+    let ws_task_manager = state.ws_task_manager.clone();
     for i in 0..10 {
-        task_manager
+        ws_task_manager
             .add_task(GetTaskResponse {
                 id: Uuid::new_v4(),
                 url: String::from(format!("https://example.com?={i}")),
@@ -36,6 +39,7 @@ pub async fn handle_socket(
     let notify = Arc::new(Notify::new());
     let notify_r = notify.clone();
     let (mut sender, mut receiver) = socket.split();
+    let pool = state.pool.clone();
     let recv_task = tokio::spawn(async move {
         while let Some(Ok(msg)) = receiver.next().await {
             match msg {
@@ -43,20 +47,26 @@ pub async fn handle_socket(
                     tracing::trace!("WS Text: {text}");
                     notify_r.notify_one(); // only for demo
                     match serde_json::from_str::<WsMessage>(&text) {
-                        Ok(ws_message) => {
-                            match ws_message.message {
-                                WsMessageTypes::SendTaskFromServer(_) => {}
-                                WsMessageTypes::SubmitTaskToServer(task) => {
-                                    tokio::time::sleep(std::time::Duration::from_secs(2)).await;
-                                    // TODO: Register this task in DB as Completed
-                                    notify_r.notify_one();
-                                }
-                                WsMessageTypes::SendBandwidthReportFromServer => {}
-                                WsMessageTypes::SubmitForBandwidthReportToServer(_) => {}
-                                WsMessageTypes::SendUptimeFromServer => {}
-                                WsMessageTypes::SubmitUptimeToServer(_) => {}
+                        Ok(ws_message) => match ws_message.message {
+                            WsMessageTypes::SendTaskFromServer(_) => {}
+                            WsMessageTypes::SubmitTaskToServer(task) => {
+                                let mut transaction = pool.begin().await.unwrap();
+                                update_task_assigned(
+                                    &mut transaction,
+                                    task.task_id,
+                                    Uuid::new_v4(),
+                                    TaskStatus::Completed,
+                                )
+                                .await
+                                .unwrap();
+                                transaction.commit().await.unwrap();
+                                notify_r.notify_one();
                             }
-                        }
+                            WsMessageTypes::SendBandwidthReportFromServer => {}
+                            WsMessageTypes::SubmitForBandwidthReportToServer(_) => {}
+                            WsMessageTypes::SendUptimeFromServer => {}
+                            WsMessageTypes::SubmitUptimeToServer(_) => {}
+                        },
                         Err(_) => {
                             tracing::error!("Unsupported WS message");
                         }
@@ -69,9 +79,10 @@ pub async fn handle_socket(
             }
         }
     });
+    let ws_task_manager = state.ws_task_manager.clone();
     let send_task = tokio::spawn(async move {
         loop {
-            let task_receiver = task_manager.add_session().await;
+            let task_receiver = ws_task_manager.add_session().await;
             let task = task_receiver.await.unwrap(); // waits for new task
             let ws_message = WsMessage {
                 message_id: Uuid::new_v4(),
