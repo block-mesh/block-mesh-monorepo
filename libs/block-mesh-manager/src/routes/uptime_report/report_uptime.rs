@@ -2,9 +2,7 @@ use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
-use crate::database::ip_address::get_or_create_ip_address::get_or_create_ip_address;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
-use crate::database::users_ip::get_or_create_users_ip::get_or_create_users_ip;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
@@ -89,15 +87,19 @@ pub async fn handler(
     }
     let header_ip = headers.get("cf-connecting-ip");
     let ip = resolve_ip(&query.ip, &header_ip, addr.ip().to_string());
-    let ip_address = get_or_create_ip_address(&mut transaction, &ip)
-        .await
-        .map_err(Error::from)?;
-    get_or_create_users_ip(&mut transaction, &user.id, &ip_address.id)
-        .await
-        .map_err(Error::from)?;
     let daily_stat_opt =
         get_daily_stat_by_user_id_and_day(&mut transaction, user.id, Utc::now().date_naive())
             .await?;
+
+    let _ = state
+        .tx_sql_agg
+        .send(UpdateBulkMessage {
+            id: user.id,
+            value: serde_json::Value::from(ip.clone()),
+            table: Table::UserIp,
+        })
+        .await;
+
     if daily_stat_opt.is_none() {
         create_daily_stat(&mut transaction, user.id).await?;
     }
