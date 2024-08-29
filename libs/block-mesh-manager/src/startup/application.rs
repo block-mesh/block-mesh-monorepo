@@ -14,11 +14,9 @@ use crate::worker::analytics_agg::AnalyticsMessage;
 use crate::worker::db_agg::UpdateBulkMessage;
 use crate::worker::db_cleaner_cron::EnrichIp;
 use crate::ws::connection_manager::ConnectionManager;
-use crate::ws::task_manager::TaskManager;
 use axum::{Extension, Router};
 use axum_login::login_required;
 use block_mesh_common::feature_flag_client::FlagValue;
-use block_mesh_common::interfaces::server_api::GetTaskResponse;
 use block_mesh_common::interfaces::ws_api::WsMessage;
 use leptos::leptos_config::get_config_from_env;
 use redis::aio::MultiplexedConnection;
@@ -57,7 +55,7 @@ pub struct AppState {
     pub flags: HashMap<String, FlagValue>,
     pub cleaner_tx: tokio::sync::mpsc::Sender<EnrichIp>,
     pub redis: MultiplexedConnection,
-    pub ws_task_manager: Arc<TaskManager<GetTaskResponse>>,
+    pub ws_connection_manager: ConnectionManager,
 }
 
 #[derive(Clone)]

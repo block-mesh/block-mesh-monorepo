@@ -1,4 +1,4 @@
-use crate::ws::task_manager::TaskManager;
+use crate::ws::task_scheduler::TaskScheduler;
 use axum::extract::ws::Message;
 use block_mesh_common::interfaces::server_api::GetTaskResponse;
 use block_mesh_common::interfaces::ws_api::{WsMessage, WsMessageTypes};

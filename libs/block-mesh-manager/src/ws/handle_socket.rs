@@ -3,15 +3,18 @@ use crate::domain::task::TaskStatus;
 use crate::startup::application::AppState;
 use crate::ws::connection_manager::ConnectionManager;
 use crate::ws::process_message::process_message;
-use crate::ws::task_manager::TaskManager;
+use crate::ws::task_scheduler::TaskScheduler;
+use aws_sdk_sesv2::config::IntoShared;
 use axum::extract::ws::{Message, WebSocket};
 use block_mesh_common::interfaces::server_api::GetTaskResponse;
 use block_mesh_common::interfaces::ws_api::{WsMessage, WsMessageTypes};
+use futures::stream::SplitSink;
 use futures::{SinkExt, StreamExt};
 use leptos::ev::message;
 use redis::transaction;
 use std::net::SocketAddr;
-use std::sync::Arc;
+use std::ops::{Deref, DerefMut};
+use std::sync::{Arc, Mutex};
 use tokio::sync::Notify;
 use uuid::Uuid;
 
@@ -22,9 +25,19 @@ pub async fn handle_socket(
     state: Arc<AppState>,
     email: String,
 ) {
-    let ws_task_manager = state.ws_task_manager.clone();
+    let ws_connection_manager = state.ws_connection_manager.clone();
+    let task_scheduler = ws_connection_manager.task_scheduler.clone();
+    let broadcaster = ws_connection_manager.broadcaster.clone();
+    let user_id = Uuid::new_v4();
+    let mut broadcast_receiver = broadcaster.subscribe(user_id.clone()); // FIXME
+
+    tokio::task::spawn(async move {
+        while let Ok(msg) = broadcast_receiver.recv().await {
+            // handle broadcast
+        }
+    });
     for i in 0..10 {
-        ws_task_manager
+        task_scheduler
             .add_task(GetTaskResponse {
                 id: Uuid::new_v4(),
                 url: String::from(format!("https://example.com?={i}")),
@@ -39,6 +52,7 @@ pub async fn handle_socket(
     let notify = Arc::new(Notify::new());
     let notify_r = notify.clone();
     let (mut sender, mut receiver) = socket.split();
+
     let pool = state.pool.clone();
     let recv_task = tokio::spawn(async move {
         while let Some(Ok(msg)) = receiver.next().await {
@@ -79,10 +93,9 @@ pub async fn handle_socket(
             }
         }
     });
-    let ws_task_manager = state.ws_task_manager.clone();
     let send_task = tokio::spawn(async move {
         loop {
-            let task_receiver = ws_task_manager.add_session().await;
+            let task_receiver = task_scheduler.add_session().await;
             let task = task_receiver.await.unwrap(); // waits for new task
             let ws_message = WsMessage {
                 message_id: Uuid::new_v4(),
@@ -104,5 +117,20 @@ pub async fn handle_socket(
         o = send_task => tracing::error!("send_task dead {:?}", o)
     }
 
+    broadcaster.unsubscribe(&user_id);
     tracing::info!("Websocket context {who} destroyed");
+}
+
+struct Messager(Arc<Mutex<SplitSink<WebSocket, WsMessage>>>);
+
+impl Messager {
+    fn new(sender: SplitSink<WebSocket, WsMessage>) -> Self {
+        Self(Arc::new(Mutex::new(sender)))
+    }
+
+    // fn send(&self) {
+    //     let mut guard = self.0.lock().unwrap().deref_mut();
+    //     guard.send()
+    //     // forbidden FIXME, read more on pinning
+    // }
 }

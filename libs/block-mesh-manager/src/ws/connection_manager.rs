@@ -1,56 +1,67 @@
+use crate::ws::task_scheduler::TaskScheduler;
 use axum::extract::ws::{Message, WebSocket};
-use dashmap::DashMap;
+use axum_login::tower_sessions::Session;
+use block_mesh_common::interfaces::server_api::GetTaskResponse;
+use dashmap::{DashMap, DashSet};
 use futures::stream::SplitSink;
 use futures::{Sink, SinkExt};
+use rayon::broadcast;
 use std::fmt::{Display, Formatter};
 use std::sync::Arc;
+use std::time::Duration;
+use tokio::sync::broadcast;
+use tokio::sync::broadcast::error::SendError;
 use tracing::{error, trace, warn};
 use uuid::Uuid;
 
 #[derive(Debug, Clone)]
-pub struct ConnectionManager(Arc<DashMap<Uuid, Session>>);
+pub struct ConnectionManager {
+    pub broadcaster: Broadcaster,
+    pub task_scheduler: TaskScheduler<GetTaskResponse>,
+}
 
 impl ConnectionManager {
     pub fn new() -> Self {
-        Self(Arc::new(DashMap::new()))
-    }
-    pub fn register(&self, user_id: Uuid, transmitter: SplitSink<WebSocket, Message>) {
-        if let Some(old_value) = self.0.insert(user_id, Session::new(transmitter)) {
-            error!("Registered already existing session for {user_id}");
-        }
-    }
-    pub async fn close_session(&self, session_id: &Uuid) {
-        if let Some((_, mut session)) = self.0.remove(session_id) {
-            trace!("Sending closing message to session {session_id}");
-            session.close().await.unwrap();
-            trace!("Session {session_id} was successfully closed (by order)")
-        } else {
-            warn!("Session {session_id} ordered to be closed is missing from connection manager (perhaps it could be closed already)")
+        Self {
+            broadcaster: Broadcaster::new(),
+            task_scheduler: TaskScheduler::new(),
         }
     }
 }
-
-impl Display for ConnectionManager {
-    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let dump: Vec<String> = self.0.iter().map(|entry| entry.key().to_string()).collect();
-        write!(f, "Online sessions ({}): {}", dump.len(), dump.join(", "))
-    }
+#[derive(Debug, Clone)]
+pub struct Broadcaster {
+    transmitter: broadcast::Sender<String>,
+    users: Arc<DashSet<Uuid>>,
 }
 
-#[derive(Debug)]
-pub struct Session {
-    transmitter: SplitSink<WebSocket, Message>,
-}
-
-impl Session {
-    fn new(transmitter: SplitSink<WebSocket, Message>) -> Self {
-        Self { transmitter }
+impl Broadcaster {
+    fn new() -> Self {
+        let (transmitter, _) = broadcast::channel(10000);
+        let tx = transmitter.clone();
+        tokio::spawn(async move {
+            loop {
+                tx.send(String::from("Task")).unwrap();
+                tokio::time::sleep(Duration::from_secs(1)).await;
+            }
+        });
+        Self {
+            transmitter,
+            users: Arc::new(DashSet::new()),
+        }
     }
-    async fn close(&mut self) -> Result<(), axum::Error> {
-        self.transmitter
-            .send(Message::Text(format!("close")))
-            .await?;
-        let close = self.transmitter.close().await.unwrap(); // waits for the sink to close
-        Ok(())
+
+    pub fn broadcast(&self, message: String) -> Result<usize, SendError<String>> {
+        let subscribers = self.transmitter.send(message.clone())?;
+        tracing::info!("Send {message} to {subscribers} subscribers");
+        Ok(subscribers)
+    }
+    pub fn subscribe(&self, user_id: Uuid) -> broadcast::Receiver<String> {
+        let is_new = self.users.insert(user_id);
+        debug_assert!(is_new);
+        self.transmitter.subscribe()
+    }
+
+    pub fn unsubscribe(&self, user_id: &Uuid) {
+        self.users.remove(user_id);
     }
 }

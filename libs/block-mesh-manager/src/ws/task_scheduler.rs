@@ -16,12 +16,12 @@ use uuid::Uuid;
 
 type HttpTask = GetTaskResponse;
 
-pub struct TaskManager<T: Debug> {
+#[derive(Debug, Clone)]
+pub struct TaskScheduler<T: Debug> {
     task_sender: mpsc::Sender<T>,
     session_sender: mpsc::Sender<NodeController<T>>,
-    scheduler_handle: JoinHandle<()>,
 }
-impl<T> TaskManager<T>
+impl<T> TaskScheduler<T>
 where
     T: Debug + Send + 'static,
 {
@@ -39,7 +39,6 @@ where
         Self {
             task_sender,
             session_sender,
-            scheduler_handle,
         }
     }
 
@@ -55,12 +54,6 @@ where
     }
 }
 
-impl<T: Debug> Drop for TaskManager<T> {
-    fn drop(&mut self) {
-        self.scheduler_handle.abort()
-    }
-}
-
 struct NodeController<T> {
     task_sender: oneshot::Sender<T>,
 }
@@ -73,7 +66,7 @@ impl<T> NodeController<T> {
 
 #[tokio::test]
 async fn node_workers() {
-    let manager = Arc::new(TaskManager::new());
+    let manager = Arc::new(TaskScheduler::new());
     let m = manager.clone();
     let h1 = tokio::spawn(async move {
         let m = m;

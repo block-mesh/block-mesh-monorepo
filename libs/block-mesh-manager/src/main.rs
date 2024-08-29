@@ -6,7 +6,7 @@ use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_common::interfaces::server_api::GetTaskResponse;
-    use block_mesh_manager::ws::task_manager::TaskManager;
+    use block_mesh_manager::ws::connection_manager::ConnectionManager;
     use block_mesh_common::interfaces::ws_api::WsMessage;
     use block_mesh_manager::worker::ws_worker::{ws_worker_rx, ws_worker_tx};
     use tokio::sync::broadcast;
@@ -81,7 +81,7 @@ async fn run() -> anyhow::Result<()> {
         .await
         .unwrap();
 
-    let ws_task_manager = Arc::new(TaskManager::<GetTaskResponse>::new());
+    let ws_connection_manager = ConnectionManager::new();
     let app_state = Arc::new(AppState {
         email_client,
         pool: db_pool.clone(),
@@ -94,7 +94,7 @@ async fn run() -> anyhow::Result<()> {
         flags,
         cleaner_tx,
         redis,
-        ws_task_manager,
+        ws_connection_manager,
     });
     let application = Application::build(configuration, app_state, db_pool.clone()).await;
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
