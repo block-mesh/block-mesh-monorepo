@@ -91,14 +91,21 @@ pub async fn handler(
         get_daily_stat_by_user_id_and_day(&mut transaction, user.id, Utc::now().date_naive())
             .await?;
 
-    let _ = state
-        .tx_sql_agg
-        .send(UpdateBulkMessage {
-            id: user.id,
-            value: serde_json::Value::from(ip.clone()),
-            table: Table::UserIp,
-        })
-        .await;
+    let flag = state
+        .flags
+        .get("touch_users_ip")
+        .unwrap_or(&FlagValue::Boolean(false));
+    let flag: bool = <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
+    if flag {
+        let _ = state
+            .tx_sql_agg
+            .send(UpdateBulkMessage {
+                id: user.id,
+                value: serde_json::Value::from(ip.clone()),
+                table: Table::UserIp,
+            })
+            .await;
+    }
 
     if daily_stat_opt.is_none() {
         create_daily_stat(&mut transaction, user.id).await?;
