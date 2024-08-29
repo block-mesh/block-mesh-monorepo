@@ -268,7 +268,7 @@ pub fn NewDashboard() -> impl IntoView {
                                                 {
                                                     let now = Utc::now();
                                                     let diff = now - ip_info.updated_at;
-                                                    if diff.num_seconds() > 300 {
+                                                    if diff.num_seconds() > 3600 {
                                                         view! { <XMarkIcon/> }
                                                     } else {
                                                         view! { <CheckMarkIcon/> }
