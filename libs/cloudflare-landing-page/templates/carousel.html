@@ -1,0 +1,265 @@
+<script>
+  addEventListener('load', () => {
+    // in px/s
+    const SCROLL_SPEED = 32
+    /** @type Set<HTMLElement>  */
+    const scrollingColumns = new Set()
+
+    const query = window.matchMedia('(max-width: 768px)')
+    let direction = query.matches ? 'horizontal' : 'vertical'
+
+    /** @param {HTMLElement} column  */
+    function scroll(column) {
+      scrollingColumns.add(column)
+
+      const screenPositionProp = direction == 'horizontal' ? 'x' : 'y'
+      const translateFunction = direction == 'horizontal' ? 'translateX' : 'translateY'
+
+      const padding = parseInt(getComputedStyle(column).getPropertyValue('--offset'))
+
+      const firstPanel = column.firstElementChild
+      const secondPanel = firstPanel.nextElementSibling
+      const scrollHeight =
+        secondPanel.getBoundingClientRect()[screenPositionProp] -
+        firstPanel.getBoundingClientRect()[screenPositionProp]
+
+      column.animate(
+        [
+          {
+            transform: `${translateFunction}(-${padding}px)`
+          },
+          {
+            transform: `${translateFunction}(-${scrollHeight + padding}px)`
+          }
+        ],
+        (scrollHeight / SCROLL_SPEED) * 1000
+      ).onfinish = () => {
+        firstPanel.remove()
+        column.appendChild(firstPanel)
+        scroll(column)
+      }
+    }
+
+    /** @param {boolean | undefined} newMatches */
+    function recomputeAnimations(newMatches) {
+      if (newMatches != undefined) {
+        direction = newMatches ? 'horizontal' : 'vertical'
+      }
+
+      scrollingColumns.forEach((column) => {
+        column.getAnimations().forEach((anim) => anim.cancel())
+      })
+      scrollingColumns.clear()
+
+      document.querySelectorAll('.carousel-group').forEach((column) => {
+        scroll(column)
+      })
+    }
+
+    query.addEventListener('change', (event) => recomputeAnimations(event.matches))
+    recomputeAnimations()
+  })
+
+</script>
+
+<style>
+    .carousel-group {
+        /* this value controls how offset the column is (but all columns should have some offset, as it also serves as padding */
+        --offset: 16px;
+
+        gap: 8px;
+    }
+
+    .carousel-group.offset {
+        --offset: 64px;
+    }
+
+    .carousel {
+        display: flex;
+        gap: 8px;
+        position: relative;
+    }
+
+    .carousel::before,
+    .carousel::after {
+        content: "";
+        display: block;
+        position: absolute;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    @media (min-width: 769px) {
+        .carousel {
+            height: 300px;
+            overflow-y: clip;
+            flex-flow: row nowrap;
+        }
+
+        .carousel::before,
+        .carousel::after {
+            width: 100%;
+            height: 4rem;
+        }
+
+        .carousel::before {
+            top: 0;
+            /* swap out colors for the background here: first is alpha = 0xff, second is alpha = 0x00 */
+            background: linear-gradient(#0c1120ff, #0c112000);
+        }
+
+        .carousel::after {
+            bottom: 0;
+            /* same as above, but order is swapped */
+            background: linear-gradient(#0c112000, #0c1120ff);
+        }
+
+        .carousel-group {
+            height: max-content;
+            display: flex;
+            flex-flow: column nowrap;
+
+            transform: translateY(calc(-1 * var(--offset)));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .carousel {
+            width: 100%;
+            overflow-x: clip;
+            flex-flow: column nowrap;
+        }
+
+        .carousel::before,
+        .carousel::after {
+            width: 4rem;
+            height: 100%;
+        }
+
+        .carousel::before {
+            left: 0;
+            /* swap out colors for the background here: first is alpha = 0xff, second is alpha = 0x00 */
+            background: linear-gradient(90deg, #0c1120ff, #0c112000);
+        }
+
+        .carousel::after {
+            right: 0;
+            /* same as above, but order is swapped */
+            background: linear-gradient(90deg, #0c112000, #0c1120ff);
+        }
+
+        .carousel-group {
+            width: max-content;
+            display: flex;
+            flex-flow: row nowrap;
+
+            transform: translateX(calc(-1 * var(--offset)));
+        }
+    }
+
+    /* this is completely placeholder styling. the panels just need to have a constant width and height in each group */
+    .panel {
+        width: 200px;
+        border: 2px solid whitesmoke;
+        border-radius: 8px;
+        padding: 0.5rem;
+
+        display: flex;
+        flex-flow: column nowrap;
+        /* there may be extra space in horizontal mode */
+        justify-content: space-between;
+        gap: 0.5rem;
+
+        &:hover {
+            background-color: #fff1;
+            box-shadow: 0px 4px 1px 0px #fff1, 0px -4px 1px 0px #fff1;
+        }
+
+        .label {
+            font-family: "Bebas Neue", sans-serif;
+            font-size: 1.5rem;
+            margin-left: 0.25rem;
+        }
+    }
+</style>
+
+<div class="carousel">
+  <div class="carousel-group">
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">1a</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">2a</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">3a</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">4a</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">5a</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">6a</div>
+    </div>
+  </div>
+  <div class="carousel-group offset">
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">1b</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">2b</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">This label is too big to fit on one line!</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">4b</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">5b</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">6b</div>
+    </div>
+  </div>
+  <div class="carousel-group">
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">1c</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">2c</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">3c</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">4c</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">5c</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined">star</span>
+      <div class="label">6c</div>
+    </div>
+  </div>
+</div>
