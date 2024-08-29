@@ -101,45 +101,44 @@ pub async fn handler(
     let interval: f64 =
         <FlagValue as TryInto<f64>>::try_into(interval.to_owned()).unwrap_or_default();
 
-    let aggregate =
+    let uptime =
         get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, user.id)
             .await
             .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;
 
     let now = Utc::now();
-    let diff = now - aggregate.updated_at.unwrap_or(now);
+    let diff = now - uptime.updated_at.unwrap_or(now);
 
-    if diff.num_seconds() < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240) {
-        if daily_stat_opt.is_some() {
-            let _ = state
-                .tx_sql_agg
-                .send(UpdateBulkMessage {
-                    id: daily_stat_opt.unwrap().id,
-                    value: serde_json::Value::from(diff.num_seconds() as f64),
-                    table: Table::DailyStat,
-                })
-                .await;
-        }
-        let sum = aggregate.value.as_f64().unwrap_or_default() + diff.num_seconds() as f64;
+    let (extra, abs) =
+        if diff.num_seconds() < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240) {
+            (
+                diff.num_seconds() as f64,
+                uptime.value.as_f64().unwrap_or_default() + diff.num_seconds() as f64,
+            )
+        } else {
+            (0.0, uptime.value.as_f64().unwrap_or_default())
+        };
+
+    if daily_stat_opt.is_some() && extra > 0.0 {
         let _ = state
             .tx_sql_agg
             .send(UpdateBulkMessage {
-                id: aggregate.id.0.unwrap_or_default(),
-                value: serde_json::Value::from(sum),
-                table: Table::Aggregate,
-            })
-            .await;
-    } else {
-        let _ = state
-            .tx_sql_agg
-            .send(UpdateBulkMessage {
-                id: aggregate.id.0.unwrap_or_default(),
-                value: serde_json::Value::from(aggregate.value.as_f64().unwrap_or_default()),
-                table: Table::Aggregate,
+                id: daily_stat_opt.unwrap().id,
+                value: serde_json::Value::from(extra),
+                table: Table::DailyStat,
             })
             .await;
     }
+
+    let _ = state
+        .tx_sql_agg
+        .send(UpdateBulkMessage {
+            id: uptime.id.0.unwrap_or_default(),
+            value: serde_json::Value::from(abs),
+            table: Table::Aggregate,
+        })
+        .await;
 
     let flag = state
         .flags
