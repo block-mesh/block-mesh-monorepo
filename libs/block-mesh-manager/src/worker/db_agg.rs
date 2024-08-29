@@ -1,5 +1,7 @@
 use crate::database::aggregate::update_aggregate::update_aggregate_bulk;
-use crate::database::daily_stat::increment_uptime::update_daily_stat_uptime_bulk;
+use crate::database::daily_stat::increment_uptime::{
+    update_daily_stat_uptime_bulk, update_users_ip_bulk,
+};
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -19,6 +21,7 @@ pub struct UpdateBulkMessage {
 pub enum Table {
     DailyStat,
     Aggregate,
+    UserIp,
 }
 
 pub async fn db_agg(
@@ -29,12 +32,17 @@ pub async fn db_agg(
         .unwrap_or("100".to_string())
         .parse()
         .unwrap_or(100);
-    let mut queries: Vec<String> = Vec::with_capacity(agg_size * 3);
-    let mut calls: HashMap<Uuid, Value> = HashMap::new();
+    let mut agg_calls: HashMap<Uuid, Value> = HashMap::new();
+    let mut daily_calls: HashMap<Uuid, Value> = HashMap::new();
+    let mut uptime_calls: HashMap<Uuid, Value> = HashMap::new();
     let mut count = 0;
     let mut prev = Utc::now();
     while let Some(query) = rx.recv().await {
-        calls.insert(query.id, query.value);
+        match query.table {
+            Table::Aggregate => agg_calls.insert(query.id, query.value),
+            Table::DailyStat => daily_calls.insert(query.id, query.value),
+            Table::UserIp => uptime_calls.insert(query.id, query.value),
+        };
         count += 1;
         let now = Utc::now();
         let diff = now - prev;
@@ -44,15 +52,23 @@ pub async fn db_agg(
             if let Ok(mut transaction) = pool.begin().await {
                 match query.table {
                     Table::Aggregate => {
-                        match update_aggregate_bulk(&mut transaction, &mut calls).await {
+                        match update_aggregate_bulk(&mut transaction, &mut agg_calls).await {
                             Ok(_) => {}
                             Err(e) => tracing::error!("ERROR update_aggregate_bulk {}", e),
                         }
                     }
                     Table::DailyStat => {
-                        match update_daily_stat_uptime_bulk(&mut transaction, &mut calls).await {
+                        match update_daily_stat_uptime_bulk(&mut transaction, &mut daily_calls)
+                            .await
+                        {
                             Ok(_) => {}
                             Err(e) => tracing::error!("ERROR update_daily_stat_uptime_bulk {}", e),
+                        }
+                    }
+                    Table::UserIp => {
+                        match update_users_ip_bulk(&mut transaction, &mut uptime_calls).await {
+                            Ok(_) => {}
+                            Err(e) => tracing::error!("ERROR update_users_ip_bulk {}", e),
                         }
                     }
                 }
@@ -60,8 +76,9 @@ pub async fn db_agg(
                     Ok(_) => {}
                     Err(e) => tracing::error!("ERROR update_aggregate_bulk commit {}", e),
                 }
-                calls.clear();
-                queries.clear();
+                agg_calls.clear();
+                daily_calls.clear();
+                uptime_calls.clear();
                 count = 0;
             }
         }
