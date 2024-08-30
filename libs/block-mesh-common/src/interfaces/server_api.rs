@@ -296,6 +296,7 @@ pub struct DailyStatForDashboard {
     #[typeshare(serialized_as = "number")]
     pub tasks_count: i64,
     pub uptime: f64,
+    #[typeshare(serialized_as = "Date")]
     pub day: NaiveDate,
     pub points: f64,
 }
@@ -334,6 +335,7 @@ pub struct ConnectWalletResponse {
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Referral {
     pub email: String,
+    #[typeshare(serialized_as = "Date")]
     pub created_at: DateTime<Utc>,
     pub verified_email: bool,
 }
@@ -354,6 +356,7 @@ pub struct CallToActionForm {
 #[typeshare]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DailyLeaderboard {
+    #[typeshare(serialized_as = "Date")]
     pub day: NaiveDate,
     pub leaderboard_users: Vec<LeaderBoardUser>,
 }
@@ -390,5 +393,6 @@ impl Eq for LeaderBoardUser {}
 pub struct UserIpInfo {
     pub ip: String,
     pub country: Option<String>,
+    #[typeshare(serialized_as = "Date")]
     pub updated_at: DateTime<Utc>,
 }

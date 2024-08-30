@@ -51,7 +51,7 @@ export default function LoginScreen() {
       />
       <View style={styles.buttonContainer}>
         <CustomButton
-          title={'Register'}
+          title={'Go to Register'}
           buttonStyles={styles.button}
           buttonText={styles.buttonText}
           onPress={() => {
@@ -69,7 +69,6 @@ export default function LoginScreen() {
                 email: storage.email,
                 password: storage.password
               })
-            console.log('r = ', r)
             if (r.isOk) {
               storage.setApiToken(r.value.api_token)
               storage.setNav('dashboard')

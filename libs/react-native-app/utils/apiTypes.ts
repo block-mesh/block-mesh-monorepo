@@ -170,7 +170,7 @@ export interface ReportBandwidthResponse {
 export interface DailyStatForDashboard {
 	tasks_count: number;
 	uptime: number;
-	day: NaiveDate;
+	day: Date;
 	points: number;
 }
 
@@ -188,14 +188,14 @@ export interface CallToActionUI {
 
 export interface Referral {
 	email: string;
-	created_at: DateTime<Utc>;
+	created_at: Date;
 	verified_email: boolean;
 }
 
 export interface UserIpInfo {
 	ip: string;
 	country?: string;
-	updated_at: DateTime<Utc>;
+	updated_at: Date;
 }
 
 export interface DashboardResponse {
@@ -253,7 +253,7 @@ export interface LeaderBoardUser {
 }
 
 export interface DailyLeaderboard {
-	day: NaiveDate;
+	day: Date;
 	leaderboard_users: LeaderBoardUser[];
 }
 

@@ -1,10 +1,19 @@
 import { Result } from '@badrap/result'
 import axios from 'axios'
-import { GetTokenRequest, GetTokenResponse, LoginForm, RegisterForm, RegisterResponse } from '@/utils/apiTypes'
+import {
+  DashboardRequest,
+  DashboardResponse,
+  GetTokenRequest,
+  GetTokenResponse,
+  LoginForm,
+  RegisterForm,
+  RegisterResponse
+} from '@/utils/apiTypes'
 
 export async function register(url: string, form: RegisterForm): Promise<Result<RegisterResponse, Error>> {
   try {
     const response = await axios.post(url, form, {
+      maxRedirects: 0,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
@@ -21,6 +30,7 @@ export async function login(url: string,
                             form: LoginForm): Promise<Result<null, Error>> {
   try {
     const response = await axios.post(url, form, {
+      maxRedirects: 0,
       headers: {
         'Content-Type': 'application/x-www-form-urlencoded'
       },
@@ -42,6 +52,7 @@ export async function get_token(url: string, body: GetTokenRequest):
   Promise<Result<GetTokenResponse, Error>> {
   try {
     const response = await axios.post(url, body, {
+      maxRedirects: 0,
       headers: {
         'Content-Type': 'application/json'
       },
@@ -50,6 +61,22 @@ export async function get_token(url: string, body: GetTokenRequest):
     return Result.ok(response)
   } catch (e: any) {
     console.error('GetToken error', e)
+    return Result.err(e)
+  }
+}
+
+export async function dashboard(url: string, body: DashboardRequest): Promise<Result<DashboardResponse, Error>> {
+  try {
+    const response = await axios.post(url, body, {
+      maxRedirects: 0,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      withCredentials: true
+    }).then((res: { data: any }) => res.data)
+    return Result.ok(response)
+  } catch (e: any) {
+    console.error('Dashboard error', e)
     return Result.err(e)
   }
 }

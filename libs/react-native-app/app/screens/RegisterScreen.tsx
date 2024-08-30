@@ -125,7 +125,7 @@ export default function RegisterScreen() {
               )
               return
             }
-            const r = await register(storage.url + '/register', {
+            const r = await register(storage.url + '/register_api', {
               email: storage.email,
               password: storage.password,
               password_confirm: passwordConfirm,
@@ -142,11 +142,10 @@ export default function RegisterScreen() {
               )
               storage.setNav('login')
             }
-
           }}
         />
         <CustomButton
-          title={'Login'}
+          title={'Go to Login'}
           buttonStyles={styles.button}
           buttonText={styles.buttonText}
           onPress={() => {
