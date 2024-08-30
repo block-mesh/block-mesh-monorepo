@@ -26,23 +26,44 @@ pub async fn handle_socket(
     state: Arc<AppState>,
     email: String,
 ) {
-    let (mut sender, mut receiver) = socket.split();
+    let (mut ws_sink, mut ws_stream) = socket.split();
+    let (sink_tx, mut sink_rx) = tokio::sync::mpsc::channel::<WsMessage>(10);
+
+    let sink_task = tokio::spawn(async move {
+        while let Some(ws_message) = sink_rx.recv().await {
+            ws_sink
+                .send(Message::Text(serde_json::to_string(&ws_message).unwrap()))
+                .await
+                .unwrap();
+        }
+    });
 
     let ws_connection_manager = state.ws_connection_manager.clone();
-    let task_scheduler = ws_connection_manager.task_scheduler.clone();
-    let broadcaster = ws_connection_manager.broadcaster.clone();
-    let user_id = Uuid::new_v4();
-    let mut broadcast_receiver = broadcaster.subscribe(user_id.clone()); // FIXME
+    let task_scheduler = ws_connection_manager.task_scheduler;
+    let broadcaster = ws_connection_manager.broadcaster;
 
-    broadcaster.broadcast(String::from("BROADCAST")).unwrap();
+    let user_id = Uuid::new_v4();
+    let mut broadcast_receiver = broadcaster.subscribe(user_id.clone(), sink_tx.clone()); // FIXME
+
+    for i in 0..10 {
+        task_scheduler
+            .add_task(GetTaskResponse {
+                id: Uuid::new_v4(),
+                url: String::from("https://example.com"),
+                headers: None,
+                body: None,
+                method: String::from("GET"),
+            })
+            .await;
+    }
+    // broadcaster.broadcast(String::from("BROADCAST")).unwrap();
 
     let org_email = Arc::new(email);
     let notify = Arc::new(Notify::new());
     let notify_r = notify.clone();
-    let (sink_tx, mut sink_rx) = tokio::sync::mpsc::channel::<WsMessage>(10);
     let pool = state.pool.clone();
     let recv_task = tokio::spawn(async move {
-        while let Some(Ok(msg)) = receiver.next().await {
+        while let Some(Ok(msg)) = ws_stream.next().await {
             match msg {
                 Message::Text(text) => {
                     tracing::trace!("WS Text: {text}");
@@ -61,7 +82,7 @@ pub async fn handle_socket(
                                 .await
                                 .unwrap();
                                 transaction.commit().await.unwrap();
-                                notify_r.notify_one();
+                                notify_r.notify_one(); //
                             }
                             WsMessageTypes::SendBandwidthReportFromServer => {}
                             WsMessageTypes::SubmitForBandwidthReportToServer(_) => {}
@@ -91,8 +112,8 @@ pub async fn handle_socket(
                 device: None,
                 message: WsMessageTypes::SendTaskFromServer(task),
             };
-            task_sink_tx.send(ws_message).await.unwrap();
-            notify.notified().await;
+            task_sink_tx.send(ws_message).await.unwrap(); // send through WS sink
+            notify.notified().await; // wait for task to complete on the client side
         }
     });
 
@@ -107,15 +128,6 @@ pub async fn handle_socket(
                     device: Some(DeviceType::Unknown),
                     message: WsMessageTypes::SendUptimeFromServer,
                 })
-                .await
-                .unwrap();
-        }
-    });
-
-    let sink_task = tokio::spawn(async move {
-        while let Some(ws_message) = sink_rx.recv().await {
-            sender
-                .send(Message::Text(serde_json::to_string(&ws_message).unwrap()))
                 .await
                 .unwrap();
         }

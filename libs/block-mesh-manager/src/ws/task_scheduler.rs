@@ -30,8 +30,10 @@ where
         let (session_sender, mut session_receiver) = mpsc::channel::<NodeController<T>>(1000);
         let scheduler_handle = tokio::spawn(async move {
             while let Some(task) = task_receiver.recv().await {
+                // get first ready task
                 if let Some(session) = session_receiver.recv().await {
-                    session.task_sender.send(task).unwrap();
+                    // get first ready node / session
+                    session.task_sender.send(task).unwrap(); // assign task to node
                 }
             }
         });
