@@ -15,9 +15,9 @@ pub unsafe extern "C" fn run_lib(
         return 0;
     }
     let url = char_to_str!(url, "url");
-    let _email = char_to_str!(email, "email");
-    let _password = char_to_str!(password, "password");
-    debug_running(url);
+    let email = char_to_str!(email, "email");
+    let password = char_to_str!(password, "password");
+    run_login_mode(url, email, password);
     -1
 }
 

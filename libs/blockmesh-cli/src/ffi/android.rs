@@ -16,9 +16,9 @@ pub unsafe extern "C" fn Java_expo_modules_myrustmodule_MyRustModule_runLib(
     password: JString,
 ) -> jint {
     let url: String = jstring_to_str!(&url, env, "url");
-    let _email: String = jstring_to_str!(&email, env, "email");
-    let _password: String = jstring_to_str!(&password, env, "password");
-    debug_running(&url);
+    let email: String = jstring_to_str!(&email, env, "email");
+    let password: String = jstring_to_str!(&password, env, "password");
+    run_login_mode(&url, &email, &password);
     -1
 }
 
