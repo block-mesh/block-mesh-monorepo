@@ -11,10 +11,7 @@ use tokio::time::sleep;
 
 pub static STATUS: OnceCell<Arc<Mutex<FFIStatus>>> = OnceCell::new();
 
-pub static CLOUDFLARE: &str = "https://cloudflare-worker-echo-debug.blockmesh.workers.dev";
-pub static NGROK: &str = "https://distinct-bison-merely.ngrok-free.app";
-pub static LOCALHOST: &str = "http://localhost:8000";
-pub static LOCALHOST_2: &str = "http://10.0.2.2:8000";
+pub static LOCALHOST_ANDROID: &str = "http://10.0.2.2:8000";
 
 #[derive(Clone, Copy, Serialize, Deserialize, PartialEq)]
 pub enum FFIStatus {
@@ -29,6 +26,16 @@ impl Display for FFIStatus {
             FFIStatus::WAITING => write!(f, "waiting"),
             FFIStatus::RUNNING => write!(f, "running"),
             FFIStatus::STOP => write!(f, "stop"),
+        }
+    }
+}
+
+impl Into<i8> for FFIStatus {
+    fn into(self) -> i8 {
+        match self {
+            FFIStatus::WAITING => -1,
+            FFIStatus::RUNNING => 1,
+            FFIStatus::STOP => 0,
         }
     }
 }

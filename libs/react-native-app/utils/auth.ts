@@ -1,6 +1,7 @@
 import { Result } from '@badrap/result'
 import axios from 'axios'
 import {
+  CheckTokenRequest,
   DashboardRequest,
   DashboardResponse,
   GetTokenRequest,
@@ -76,7 +77,23 @@ export async function dashboard(url: string, body: DashboardRequest): Promise<Re
     }).then((res: { data: any }) => res.data)
     return Result.ok(response)
   } catch (e: any) {
-    console.error('Dashboard error', e)
+    console.error('Dashboard error', url, e)
+    return Result.err(e)
+  }
+}
+
+export async function check_token(url: string, body: CheckTokenRequest): Promise<Result<GetTokenResponse>> {
+  try {
+    const response = await axios.post(url, body, {
+      maxRedirects: 0,
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      withCredentials: true
+    }).then((res: { data: any }) => res.data)
+    return Result.ok(response)
+  } catch (e: any) {
+    console.error('check_token error', url, e)
     return Result.err(e)
   }
 }

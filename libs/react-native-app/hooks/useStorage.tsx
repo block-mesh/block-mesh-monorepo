@@ -1,4 +1,5 @@
 import * as React from 'react'
+
 import {
   createContext,
   FC,
@@ -23,24 +24,37 @@ export interface StorageType {
   setUrl: (url: string) => void;
   setPassword: (password: string) => void;
   setNav: (nav: Nav) => void;
+  clear: () => void;
 }
 
 export const Context = createContext<StorageType>(
   {} as StorageType
 )
 
+function initUrl(): string {
+  const APP_ENVIRONMENT = process.env.APP_ENVIRONMENT
+  if (APP_ENVIRONMENT === undefined || APP_ENVIRONMENT !== 'local') {
+    const url = 'https://app.blockmesh.xyz'
+    console.log('initUrl', url)
+    return url
+  } else {
+    const url = 'http://localhost:8000'
+    console.log('initUrl', url)
+    return url
+  }
+}
+
 export const useStorage =
   (): StorageType => {
     return useContext(Context)
   }
-
 
 export const StorageProvider: FC<PropsWithChildren<any>> = ({
                                                               children
                                                             }) => {
   const [email, setEmailInternal] = useState('')
   const [api_token, setApiTokenInternal] = useState('')
-  const [url, setUrlInternal] = useState('')
+  const [url, setUrlInternal] = useState(initUrl())
   const [password, setPasswordInternal] = useState('')
   const [run_lib, setRunLibInternal] = useState('')
   const [nav, setNav] = useState('login' as Nav)
@@ -74,6 +88,17 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
       }
     })()
   }, [])
+
+  function clear() {
+    try {
+      setEmail('')
+      setPassword('')
+      setApiToken('')
+    } catch (e: any) {
+      console.error(`clear error`, e)
+    }
+  }
+
 
   function setEmail(email: string) {
     try {
@@ -137,7 +162,8 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
         setApiToken,
         setUrl,
         setPassword,
-        setNav
+        setNav,
+        clear
       }}
     >
       {children}

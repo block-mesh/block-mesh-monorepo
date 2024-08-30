@@ -19,6 +19,10 @@ export function run_lib({ url, email, password }: RunLibInputs) {
     })
 }
 
-export function stop_lib() {
-  MyRustModule.stop_lib()
+export function stop_lib(url: string): string {
+  return MyRustModule.stop_lib(url)
+}
+
+export function get_lib_status(): number {
+  return MyRustModule.get_lib_status()
 }

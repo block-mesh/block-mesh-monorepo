@@ -12,8 +12,8 @@ import { register } from '@/utils/auth'
 export default function RegisterScreen() {
   const emailRef = useRef()
   const passwordRef = useRef()
+  const inviteRef = useRef()
   const passworConfirmdRef = useRef()
-  const urlRef = useRef()
   const storage = useStorage()
   const [invite_code, setInviteCode] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
@@ -57,21 +57,11 @@ export default function RegisterScreen() {
       />
       <ThemedText type="subtitle">Invite Code</ThemedText>
       <TextInput
-        ref={urlRef as any}
+        ref={inviteRef as any}
         style={styles.input}
         onChangeText={setInviteCode}
         value={invite_code}
         placeholder="Invite Code"
-        placeholderTextColor={colors['off-white']}
-        autoCapitalize={'none'}
-      />
-      <ThemedText type="subtitle">URL</ThemedText>
-      <TextInput
-        ref={urlRef as any}
-        style={styles.input}
-        onChangeText={storage.setUrl}
-        value={storage.url}
-        placeholder="Fill URL"
         placeholderTextColor={colors['off-white']}
         autoCapitalize={'none'}
       />

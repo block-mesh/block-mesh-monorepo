@@ -25,7 +25,16 @@ pub unsafe extern "C" fn run_lib(
 /// This method should be called by any external program that want to use BlockMesh Network CLI
 #[no_mangle]
 #[allow(improper_ctypes_definitions)]
-pub unsafe extern "C" fn stop_lib() -> i8 {
-    debug_stop(NGROK);
+pub unsafe extern "C" fn stop_lib(url: *const c_char) -> i8 {
+    let url = char_to_str!(url, "url");
+    debug_stop(url);
     0
+}
+
+/// # Safety
+/// This method give insight into current status of lib
+#[no_mangle]
+#[allow(improper_ctypes_definitions)]
+pub unsafe extern "C" fn get_lib_status() -> i8 {
+    get_status().into()
 }

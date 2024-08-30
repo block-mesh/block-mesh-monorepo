@@ -27,9 +27,23 @@ pub unsafe extern "C" fn Java_expo_modules_myrustmodule_MyRustModule_runLib(
 /// cbindgen:ignore
 #[no_mangle]
 pub unsafe extern "C" fn Java_expo_modules_myrustmodule_MyRustModule_stopLib(
+    mut env: JNIEnv,
+    _class: JClass,
+    url: JString,
+) -> jint {
+    let url: String = jstring_to_str!(&url, env, "url");
+    debug_stop(&url);
+    0
+}
+
+/// # Safety
+/// This method give insight into current status of lib
+/// cbindgen:ignore
+#[no_mangle]
+pub unsafe extern "C" fn Java_expo_modules_myrustmodule_MyRustModule_getLibStatus(
     _env: JNIEnv,
     _class: JClass,
 ) -> jint {
-    debug_stop(NGROK);
-    0
+    let i: i8 = get_status().into();
+    i as jint
 }
