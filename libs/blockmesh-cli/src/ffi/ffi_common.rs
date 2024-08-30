@@ -47,9 +47,9 @@ impl Display for FFIStatus {
     }
 }
 
-impl Into<i8> for FFIStatus {
-    fn into(self) -> i8 {
-        match self {
+impl From<FFIStatus> for i8 {
+    fn from(val: FFIStatus) -> i8 {
+        match val {
             FFIStatus::WAITING => -1,
             FFIStatus::RUNNING => 1,
             FFIStatus::STOP => 0,
