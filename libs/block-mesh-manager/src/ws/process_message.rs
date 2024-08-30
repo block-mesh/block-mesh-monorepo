@@ -1,22 +1,30 @@
 use crate::ws::task_scheduler::TaskScheduler;
 use axum::extract::ws::Message;
 use block_mesh_common::interfaces::server_api::GetTaskResponse;
-use block_mesh_common::interfaces::ws_api::{WsMessage, WsMessageTypes};
+use block_mesh_common::interfaces::ws_api::{
+    WsClientMessage, WsMessage, WsMessageTypes, WsServerMessage,
+};
 use std::net::SocketAddr;
 use std::ops::ControlFlow;
+use std::sync::Arc;
+use tokio::sync::Notify;
 
 /// helper to print contents of messages to stdout. Has special treatment for Close.
-pub fn process_message(msg: &Message, who: SocketAddr) -> ControlFlow<(), ()> {
+pub fn process_message(
+    msg: Message,
+    who: SocketAddr,
+    task_scheduler_notifier: Arc<Notify>,
+) -> ControlFlow<(), ()> {
     tracing::info!("PROCESS_MESSAGE msg = {:#?}", msg);
     match msg {
-        Message::Text(t) => {
-            handle_ws_message(t, who);
+        Message::Text(text) => {
+            process_client_message(&text, who, task_scheduler_notifier);
         }
-        Message::Binary(d) => {
-            tracing::info!(">>> {} sent {} bytes: {:?}", who, d.len(), d);
+        Message::Binary(bytes) => {
+            tracing::info!(">>> {} sent {} bytes: {:?}", who, bytes.len(), bytes);
         }
-        Message::Close(c) => {
-            if let Some(cf) = c {
+        Message::Close(frame) => {
+            if let Some(cf) = frame {
                 tracing::info!(
                     ">>> {} sent close with code {} and reason `{}`",
                     who,
@@ -29,40 +37,33 @@ pub fn process_message(msg: &Message, who: SocketAddr) -> ControlFlow<(), ()> {
             return ControlFlow::Break(());
         }
 
-        Message::Pong(v) => {
-            tracing::info!(">>> {who} sent pong with {v:?}");
+        Message::Pong(bytes) => {
+            tracing::info!(">>> {who} sent pong with {bytes:?}");
         }
         // You should never need to manually handle Message::Ping, as axum's websocket library
         // will do so for you automagically by replying with Pong and copying the v according to
         // spec. But if you need the contents of the pings you can see them here.
-        Message::Ping(v) => {
-            tracing::info!(">>> {who} sent ping with {v:?}");
+        Message::Ping(bytes) => {
+            tracing::info!(">>> {who} sent ping with {bytes:?}");
         }
     }
     ControlFlow::Continue(())
 }
 
-fn handle_ws_message(s: &str, who: SocketAddr) {
-    match serde_json::from_str::<WsMessage>(s) {
+fn process_client_message(text: &str, who: SocketAddr, task_scheduler_notifier: Arc<Notify>) {
+    match serde_json::from_str::<WsClientMessage>(text) {
         Ok(message) => {
-            let message_id = message.message_id;
-            let device = message.device;
-            let email = message.email;
-            match message.message {
-                WsMessageTypes::SubmitUptimeToServer(report) => {
-                    // Whenever Client sends a message a receiver worker logs them already
-                    // tracing::info!(
-                    //     "Received Uptime Report from {}/{:?}: {:?}",
-                    //     who,
-                    //     email,
-                    //     report
-                    // );
+            match message {
+                WsClientMessage::CompleteTask(task) => {
+                    // TODO: Sync DB row
+                    task_scheduler_notifier.notify_one(); //
                 }
-                _ => {}
+                WsClientMessage::ReportBandwidth => {}
+                WsClientMessage::ReportUptime => {}
             }
         }
         Err(_) => {
-            tracing::info!("Invalid Message => {}", s)
+            tracing::info!("Invalid Message => {}", text)
         }
     }
 }

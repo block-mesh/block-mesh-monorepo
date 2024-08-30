@@ -33,7 +33,10 @@ where
                 // get first ready task
                 if let Some(session) = session_receiver.recv().await {
                     // get first ready node / session
-                    session.task_sender.send(task).unwrap(); // assign task to node
+                    if let Err(error) = session.task_sender.send(task) {
+                        tracing::error!("Assigned node left early");
+                        // TODO consider returning this task to the pool at the front
+                    }
                 }
             }
         });
@@ -44,15 +47,19 @@ where
         }
     }
 
-    pub async fn add_session(&self) -> oneshot::Receiver<T> {
+    pub async fn add_session(&self) -> Option<oneshot::Receiver<T>> {
         let (task_sender, task_receiver) = oneshot::channel();
         let controller = NodeController::new(task_sender);
-        self.session_sender.send(controller).await.unwrap();
-        task_receiver
+        if let Err(error) = self.session_sender.send(controller).await {
+            tracing::error!("Failed to add new session to scheduler");
+        }
+        Some(task_receiver)
     }
 
     pub async fn add_task(&self, http_task: T) {
-        self.task_sender.send(http_task).await.unwrap();
+        if let Err(error) = self.task_sender.send(http_task).await {
+            tracing::error!("Failed to add new task to scheduler");
+        }
     }
 }
 
@@ -64,49 +71,4 @@ impl<T> NodeController<T> {
     fn new(task_sender: oneshot::Sender<T>) -> Self {
         Self { task_sender }
     }
-}
-
-#[tokio::test]
-async fn node_workers() {
-    let manager = Arc::new(TaskScheduler::new());
-    let m = manager.clone();
-    let h1 = tokio::spawn(async move {
-        let m = m;
-        loop {
-            let task_receiver = m.add_session().await;
-            let task = task_receiver.await.unwrap();
-            tokio::time::sleep(Duration::from_secs(2)).await;
-            println!("Task received A");
-            // process task on the client side
-        }
-    });
-
-    let m = manager.clone();
-    let h2 = tokio::spawn(async move {
-        let m = m;
-        loop {
-            let task_receiver = m.add_session().await;
-            let task = task_receiver.await.unwrap();
-            tokio::time::sleep(Duration::from_secs(2)).await;
-            println!("Task received B");
-            // process the task
-        }
-    });
-
-    for i in 0..10 {
-        manager
-            .task_sender
-            .send(HttpTask {
-                id: Uuid::new_v4(),
-                method: String::from("GET"),
-                url: String::from("google.com"),
-                headers: None,
-                body: None,
-            })
-            .await
-            .unwrap();
-    }
-
-    tokio::time::sleep(Duration::from_secs(12)).await;
-    println!("Assigning task");
 }

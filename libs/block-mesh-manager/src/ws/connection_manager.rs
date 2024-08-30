@@ -39,6 +39,7 @@ impl Broadcaster {
     fn new() -> Self {
         let (transmitter, _) = broadcast::channel(10000);
         let tx = transmitter.clone();
+        // demo
         let broadcast_handle = tokio::spawn(async move {
             loop {
                 tracing::info!("Sending demo broadcast");
@@ -55,7 +56,7 @@ impl Broadcaster {
         }
     }
     pub fn broadcast(&self, message: WsServerMessage) -> Result<usize, SendError<WsServerMessage>> {
-        let subscribers = self.transmitter.send(message)?;
+        let subscribers = self.transmitter.send(message.clone())?;
         tracing::info!("Sent {message:?} to {subscribers} subscribers");
         Ok(subscribers)
     }
@@ -66,7 +67,9 @@ impl Broadcaster {
                 let sink_tx = entry.value().clone();
                 let msg = message.clone();
                 let future = async move {
-                    sink_tx.send(msg).await.unwrap();
+                    if let Err(error) = sink_tx.send(msg).await {
+                        tracing::error!("Batch broadcast failed");
+                    }
                 };
                 Some(future)
             } else {
