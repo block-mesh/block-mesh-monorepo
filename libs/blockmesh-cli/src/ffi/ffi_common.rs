@@ -63,19 +63,19 @@ pub fn get_status() -> FFIStatus {
 }
 
 pub fn cancel() {
-    let value = STATUS.get_or_init(|| LibState::new());
+    let value = STATUS.get_or_init(LibState::new);
     let value = value.lock().unwrap();
     value.notify.notify_waiters();
 }
 
 pub fn set_status(status: FFIStatus) {
-    let value = STATUS.get_or_init(|| LibState::new());
+    let value = STATUS.get_or_init(LibState::new);
     let mut val = value.lock().unwrap();
     val.status = status;
 }
 
 pub fn get_notify() -> Arc<Notify> {
-    let value = STATUS.get_or_init(|| LibState::new());
+    let value = STATUS.get_or_init(LibState::new);
     let val = value.lock().unwrap();
     val.notify.clone()
 }
