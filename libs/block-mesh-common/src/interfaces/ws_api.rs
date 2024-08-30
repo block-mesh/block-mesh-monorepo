@@ -23,17 +23,17 @@ pub enum WsMessageTypes {
     SendUptimeFromServer,
     SubmitUptimeToServer(ReportUptimeRequest),
 }
-//
-// #[derive(Debug)]
-// pub enum WsClientRequest {
-//     ReportBandwith,
-//     ReportUptime,
-//
-// }
-//
-// #[derive(Debug)]
-// pub enum WsServerRequest {
-//     ExecuteTask,
-//
-//
-// }
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum WsServerMessage {
+    AsignTask(GetTaskResponse),
+    RequestBandwidthReport,
+    RequestUptimeReport,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum WsClientMessage {
+    CompleteTask(SubmitTaskRequest),
+    ReportBandwidth,
+    ReportUptime,
+}

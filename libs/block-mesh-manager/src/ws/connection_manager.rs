@@ -1,7 +1,7 @@
 use crate::ws::task_scheduler::TaskScheduler;
 use axum::extract::ws::{Message, WebSocket};
 use block_mesh_common::interfaces::server_api::GetTaskResponse;
-use block_mesh_common::interfaces::ws_api::WsMessage;
+use block_mesh_common::interfaces::ws_api::{WsMessage, WsServerMessage};
 use dashmap::{DashMap, DashSet};
 use futures::future::join_all;
 use futures::task::SpawnExt;
@@ -31,8 +31,8 @@ impl ConnectionManager {
 }
 #[derive(Debug, Clone)]
 pub struct Broadcaster {
-    transmitter: broadcast::Sender<String>,
-    users: Arc<DashMap<Uuid, tokio::sync::mpsc::Sender<WsMessage>>>, // Arc<RwLock<HasSet<T>>> DashMap<Uuid, tokio::sync::mpsc::Sender<WsMessage>
+    transmitter: broadcast::Sender<WsServerMessage>,
+    sockets: Arc<DashMap<Uuid, tokio::sync::mpsc::Sender<WsServerMessage>>>,
 }
 
 impl Broadcaster {
@@ -43,7 +43,7 @@ impl Broadcaster {
             loop {
                 tracing::info!("Sending demo broadcast");
                 println!("Sending demo broadcast");
-                if tx.send(String::from("Task")).is_err() {
+                if tx.send(WsServerMessage::RequestBandwidthReport).is_err() {
                     tokio::time::sleep(Duration::from_secs(10)).await;
                 }
                 tokio::time::sleep(Duration::from_secs(1)).await;
@@ -51,18 +51,18 @@ impl Broadcaster {
         });
         Self {
             transmitter,
-            users: Arc::new(DashMap::new()),
+            sockets: Arc::new(DashMap::new()),
         }
     }
-    pub fn broadcast(&self, message: String) -> Result<usize, SendError<String>> {
-        let subscribers = self.transmitter.send(message.clone())?;
-        tracing::info!("Send {message} to {subscribers} subscribers");
+    pub fn broadcast(&self, message: WsServerMessage) -> Result<usize, SendError<WsServerMessage>> {
+        let subscribers = self.transmitter.send(message)?;
+        tracing::info!("Sent {message:?} to {subscribers} subscribers");
         Ok(subscribers)
     }
 
-    pub async fn batch(&self, message: WsMessage, targets: &[Uuid]) {
+    pub async fn batch(&self, message: WsServerMessage, targets: &[Uuid]) {
         join_all(targets.iter().filter_map(|target| {
-            if let Some(entry) = self.users.get(target) {
+            if let Some(entry) = self.sockets.get(target) {
                 let sink_tx = entry.value().clone();
                 let msg = message.clone();
                 let future = async move {
@@ -79,14 +79,14 @@ impl Broadcaster {
     pub fn subscribe(
         &self,
         user_id: Uuid,
-        sink_sender: tokio::sync::mpsc::Sender<WsMessage>,
-    ) -> broadcast::Receiver<String> {
-        let old_value = self.users.insert(user_id, sink_sender);
+        sink_sender: tokio::sync::mpsc::Sender<WsServerMessage>,
+    ) -> broadcast::Receiver<WsServerMessage> {
+        let old_value = self.sockets.insert(user_id, sink_sender);
         debug_assert!(old_value.is_none());
         self.transmitter.subscribe()
     }
 
     pub fn unsubscribe(&self, user_id: &Uuid) {
-        self.users.remove(user_id);
+        self.sockets.remove(user_id);
     }
 }

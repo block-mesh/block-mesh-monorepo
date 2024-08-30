@@ -27,8 +27,9 @@ pub async fn ws_handler(
     let api_token = query
         .get("api_token")
         .ok_or(Error::Auth("Missing token".to_string()))?;
-    let mut c = state.redis.clone();
 
+    // Bypassing authorization
+    // let mut c = state.redis.clone();
     // Checks for key that does not exist after logging in?
     // let _: String = c
     //     .get(format!(
@@ -39,8 +40,21 @@ pub async fn ws_handler(
     //     .await
     //     .map_err(|_| Error::Auth("Can't find token".to_string()))?;
 
+    let user_id = sqlx::query!(
+        r#"
+    SELECT id
+    FROM users
+    WHERE email = $1
+    "#,
+        email
+    )
+    .fetch_optional(&state.pool)
+    .await?
+    .map(|record| record.id)
+    .ok_or(Error::Auth(String::from("User email is not present in DB")))?;
+
     tracing::info!("ws_handle => connected {:#?}", query);
     // finalize the upgrade process by returning upgrade callback.
     // we can customize the callback by sending additional info such as address.
-    Ok(ws.on_upgrade(move |socket| handle_socket(socket, addr, state, email)))
+    Ok(ws.on_upgrade(move |socket| handle_socket(socket, addr, state, email, user_id)))
 }
