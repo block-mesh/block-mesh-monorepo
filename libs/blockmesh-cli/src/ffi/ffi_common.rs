@@ -58,7 +58,7 @@ impl Into<i8> for FFIStatus {
 }
 
 pub fn get_status() -> FFIStatus {
-    let value = STATUS.get_or_init(|| LibState::new());
+    let value = STATUS.get_or_init(LibState::new);
     value.lock().unwrap().status
 }
 
