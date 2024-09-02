@@ -2,10 +2,13 @@ use crate::ws::task_scheduler::TaskScheduler;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use dashmap::DashMap;
 use futures::future::join_all;
+use std::cmp::min;
+use std::collections::VecDeque;
 use std::fmt::Debug;
-use std::sync::Arc;
+use std::sync::{Arc, Mutex};
 use tokio::sync::broadcast;
 use tokio::sync::broadcast::error::SendError;
+use tokio::sync::mpsc;
 use uuid::Uuid;
 
 #[derive(Debug, Clone)]
@@ -31,7 +34,8 @@ impl ConnectionManager {
 #[derive(Debug, Clone)]
 pub struct Broadcaster {
     transmitter: broadcast::Sender<WsServerMessage>,
-    sockets: Arc<DashMap<Uuid, tokio::sync::mpsc::Sender<WsServerMessage>>>,
+    sockets: Arc<DashMap<Uuid, mpsc::Sender<WsServerMessage>>>,
+    queue: Arc<Mutex<VecDeque<Uuid>>>,
 }
 
 impl Broadcaster {
@@ -40,6 +44,7 @@ impl Broadcaster {
         Self {
             transmitter,
             sockets: Arc::new(DashMap::new()),
+            queue: Arc::new(Mutex::new(VecDeque::new())),
         }
     }
     pub fn broadcast(&self, message: WsServerMessage) -> Result<usize, SendError<WsServerMessage>> {
@@ -66,17 +71,38 @@ impl Broadcaster {
         .await;
     }
 
+    pub async fn queue(&self, message: WsServerMessage, count: usize) {
+        let drained: Vec<Uuid> = {
+            let queue = &mut self.queue.lock().unwrap();
+            let drained: Vec<Uuid> = queue.drain(0..count).collect();
+            queue.extend(drained.iter());
+            drained
+        };
+        join_all(drained.into_iter().map(|user_id| {
+            let entry = self.sockets.get(&user_id).unwrap();
+            let tx = entry.value().clone();
+            let msg = message.clone();
+            async move { tx.send(msg).await }
+        }))
+        .await;
+    }
+
     pub fn subscribe(
         &self,
         user_id: Uuid,
         sink_sender: tokio::sync::mpsc::Sender<WsServerMessage>,
     ) -> broadcast::Receiver<WsServerMessage> {
-        let old_value = self.sockets.insert(user_id, sink_sender);
+        let old_value = self.sockets.insert(user_id, sink_sender.clone());
+        let queue = &mut self.queue.lock().unwrap();
+        queue.push_back(user_id);
         debug_assert!(old_value.is_none());
         self.transmitter.subscribe()
     }
 
     pub fn unsubscribe(&self, user_id: &Uuid) {
         self.sockets.remove(user_id);
+        let queue = &mut self.queue.lock().unwrap();
+        let pos = queue.iter().position(|x| x == user_id).unwrap();
+        queue.remove(pos);
     }
 }
