@@ -163,10 +163,13 @@ pub async fn handler(
         .unwrap_or(&FlagValue::Boolean(false));
     let flag: bool = <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
     if flag {
-        let _ = state.cleaner_tx.send(EnrichIp {
-            user_id: user.id,
-            ip: ip.clone(),
-        });
+        let _ = state
+            .cleaner_tx
+            .send(EnrichIp {
+                user_id: user.id,
+                ip: ip.clone(),
+            })
+            .await;
     }
 
     Ok(Json(ReportUptimeResponse {

@@ -27,7 +27,7 @@ pub(crate) async fn get_user_ips(
     .await?
     .iter()
     .map(|row| UserIpInfo {
-        updated_at: row.updated_at.clone(),
+        updated_at: row.updated_at,
         ip: row.ip.clone(),
         country: row.country.clone(),
     })

@@ -9,9 +9,11 @@ use crate::startup::routers::api_router::get_api_router;
 use crate::startup::routers::leptos_router::get_leptos_router;
 use crate::startup::routers::static_auth_router::get_static_auth_router;
 use crate::startup::routers::static_un_auth_router::get_static_un_auth_router;
+use crate::startup::routers::ws_router::get_ws_router;
 use crate::worker::analytics_agg::AnalyticsMessage;
 use crate::worker::db_agg::UpdateBulkMessage;
 use crate::worker::db_cleaner_cron::EnrichIp;
+use crate::ws::connection_manager::ConnectionManager;
 use axum::{Extension, Router};
 use axum_login::login_required;
 use block_mesh_common::feature_flag_client::FlagValue;
@@ -26,7 +28,7 @@ use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::net::TcpListener;
-use tokio::sync::mpsc::UnboundedSender;
+
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
@@ -48,8 +50,9 @@ pub struct AppState {
     pub tx_sql_agg: tokio::sync::mpsc::Sender<UpdateBulkMessage>,
     pub tx_analytics_agg: tokio::sync::mpsc::Sender<AnalyticsMessage>,
     pub flags: HashMap<String, FlagValue>,
-    pub cleaner_tx: UnboundedSender<EnrichIp>,
+    pub cleaner_tx: tokio::sync::mpsc::Sender<EnrichIp>,
     pub redis: MultiplexedConnection,
+    pub ws_connection_manager: ConnectionManager,
 }
 
 #[derive(Clone)]
@@ -98,10 +101,10 @@ impl Application {
             _ => CorsLayer::permissive(),
         };
 
+        let ws_router = get_ws_router();
         let auth_router = get_static_auth_router();
         let api_router = get_api_router();
         let un_auth_router = get_static_un_auth_router();
-
         let leptos_config = get_config_from_env().unwrap();
         let leptos_options = leptos_config.leptos_options;
 
@@ -135,6 +138,7 @@ impl Application {
         let backend = Router::new()
             .nest("/", auth_router)
             .route_layer(login_required!(Backend, login_url = "/login"))
+            .nest("/", ws_router)
             .nest("/api", api_router)
             .nest("/", un_auth_router)
             .layer(Extension(application_base_url))

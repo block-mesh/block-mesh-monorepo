@@ -9,6 +9,11 @@ authors.workspace = true
 fake = { workspace = true, features = ["derive"] }
 
 [dependencies]
+reqwest-websocket = { workspace = true }
+flume = { workspace = true, default-features = false, features = ["async", "select"] }
+headers = { workspace = true }
+axum-extra = { workspace = true, features = ["typed-header"] }
+futures = { workspace = true }
 twitter-v2 = { workspace = true, optional = true }
 regex = { workspace = true }
 redis = { workspace = true, optional = true, features = ["tokio-comp", "tokio-rustls-comp", "tls-rustls-insecure"] }
@@ -23,6 +28,7 @@ wasm-bindgen-futures = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
 solana-sdk = { workspace = true, optional = true }
 clap = { workspace = true, features = ["derive"] }
+dashmap = "6.0.1"
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = { workspace = true, optional = true }
 logger-leptos = { path = "../logger-leptos", optional = true }

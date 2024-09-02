@@ -14,6 +14,8 @@ pub enum Error {
     #[error(transparent)]
     Sql(#[from] sqlx::Error),
     #[error(transparent)]
+    Redis(#[from] redis::RedisError),
+    #[error(transparent)]
     Anyhow(#[from] AnyhowError),
     #[error("User already exists")]
     UserAlreadyExists,
@@ -126,6 +128,9 @@ impl IntoResponse for Error {
             Error::Sql(_) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
             }
+            Error::Redis(_error) => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+            }
             Error::Anyhow(_) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
             }
@@ -158,6 +163,7 @@ impl From<Error> for StatusCode {
             Error::InternalServer => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Auth(_) => StatusCode::UNAUTHORIZED,
             Error::Sql(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::Redis(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Anyhow(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }

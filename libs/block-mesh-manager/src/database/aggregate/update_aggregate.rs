@@ -31,24 +31,24 @@ pub(crate) async fn update_aggregate(
 }
 
 pub async fn update_aggregate_bulk(
-    mut transaction: &mut Transaction<'_, Postgres>,
+    transaction: &mut Transaction<'_, Postgres>,
     calls: &mut HashMap<Uuid, Value>,
 ) -> anyhow::Result<()> {
     for pair in calls.iter() {
-        let _ = update_aggregate(&mut transaction, pair.0, pair.1).await;
+        let _ = update_aggregate(transaction, pair.0, pair.1).await;
     }
     Ok(())
 }
 
 pub async fn inserting_client_analytics_bulk(
-    mut transaction: &mut Transaction<'_, Postgres>,
+    transaction: &mut Transaction<'_, Postgres>,
     calls: &mut HashMap<Uuid, AnalyticsMessage>,
 ) -> anyhow::Result<()> {
     for pair in calls.iter() {
         let user_id = pair.0;
         let value = pair.1;
         let _ = inserting_client_analytics(
-            &mut transaction,
+            transaction,
             user_id,
             &value.depin_aggregator,
             &value.device_type,

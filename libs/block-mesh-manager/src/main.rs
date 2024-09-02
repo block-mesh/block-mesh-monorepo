@@ -5,6 +5,7 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use block_mesh_manager::ws::connection_manager::ConnectionManager;
     use block_mesh_manager::worker::analytics_agg::{analytics_agg, AnalyticsMessage};
     use std::env;
     use block_mesh_manager::worker::db_agg::{db_agg, UpdateBulkMessage};
@@ -61,19 +62,17 @@ async fn run() -> anyhow::Result<()> {
     let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(500);
     let (tx_sql_agg, rx_sql_agg) = tokio::sync::mpsc::channel::<UpdateBulkMessage>(500);
     let (tx_analytics_agg, rx_analytics_agg) = tokio::sync::mpsc::channel::<AnalyticsMessage>(500);
-    let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::unbounded_channel::<EnrichIp>();
+    let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::channel::<EnrichIp>(500);
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
         .build()
         .unwrap_or_default();
 
     let flags = get_all_flags(&client).await?;
-    let redis_client = redis::Client::open(env::var("REDIS_URL").unwrap()).unwrap();
-    let redis = redis_client
-        .get_multiplexed_async_connection()
-        .await
-        .unwrap();
+    let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
+    let redis = redis_client.get_multiplexed_async_connection().await?;
 
+    let ws_connection_manager = ConnectionManager::new();
     let app_state = Arc::new(AppState {
         email_client,
         pool: db_pool.clone(),
@@ -84,6 +83,7 @@ async fn run() -> anyhow::Result<()> {
         flags,
         cleaner_tx,
         redis,
+        ws_connection_manager,
     });
     let application = Application::build(configuration, app_state, db_pool.clone()).await;
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
@@ -101,7 +101,7 @@ async fn run() -> anyhow::Result<()> {
         o = finalize_daily_stats_task => report_exit("Finalize daily task failed", o),
         o = db_cleaner_task => report_exit("DB cleaner task failed", o),
         o = db_agg_task => report_exit("DB aggregator", o),
-        o = db_analytics_task => report_exit("DB analytics aggregator", o)
+        o = db_analytics_task => report_exit("DB analytics aggregator", o),
     };
     Ok(())
 }
