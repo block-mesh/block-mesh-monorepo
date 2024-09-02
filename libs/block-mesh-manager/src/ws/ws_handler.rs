@@ -1,11 +1,16 @@
+use crate::database::api_token::find_token::find_token;
+use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use crate::ws::handle_socket::handle_socket;
+use anyhow::Context;
 use axum::extract::{ConnectInfo, Query, State, WebSocketUpgrade};
 use axum::response::IntoResponse;
 use std::collections::HashMap;
 use std::net::SocketAddr;
+use std::str::FromStr;
 use std::sync::Arc;
+use uuid::Uuid;
 
 /// The handler for the HTTP request (this gets called when the HTTP GET lands at the start
 /// of websocket negotiation). After this completes, the actual switching from HTTP to
@@ -23,37 +28,20 @@ pub async fn ws_handler(
         .get("email")
         .ok_or(Error::Auth("Missing email".to_string()))?
         .clone();
-    let _api_token = query
+    let api_token = query
         .get("api_token")
         .ok_or(Error::Auth("Missing token".to_string()))?;
-
-    // Bypassing authorization
-    // let mut c = state.redis.clone();
-    // Checks for key that does not exist after logging in?
-    // let _: String = c
-    //     .get(format!(
-    //         "{}-{}",
-    //         email.clone().to_ascii_lowercase(),
-    //         api_token.to_string()
-    //     ))
-    //     .await
-    //     .map_err(|_| Error::Auth("Can't find token".to_string()))?;
-
-    let user_id = sqlx::query!(
-        r#"
-    SELECT id
-    FROM users
-    WHERE email = $1
-    "#,
-        email
-    )
-    .fetch_optional(&state.pool)
-    .await?
-    .map(|record| record.id)
-    .ok_or(Error::Auth(String::from("User email is not present in DB")))?;
-
+    let api_token = Uuid::from_str(&api_token).context("Cannot deserialize UUID")?;
+    let mut transaction = state.pool.begin().await.map_err(Error::from)?;
+    let user = get_user_opt_by_email(&mut transaction, &email)
+        .await?
+        .ok_or(Error::Auth(String::from("User email is not present in DB")))?;
+    let api_token = find_token(&mut transaction, &api_token)
+        .await?
+        .ok_or(Error::ApiTokenNotFound)?;
+    if user.id != api_token.user_id {
+        return Err(Error::UserNotFound);
+    }
     tracing::info!("ws_handle => connected {:#?}", query);
-    // finalize the upgrade process by returning upgrade callback.
-    // we can customize the callback by sending additional info such as address.
-    Ok(ws.on_upgrade(move |socket| handle_socket(socket, addr, state, email, user_id)))
+    Ok(ws.on_upgrade(move |socket| handle_socket(socket, addr, state, email, user.id)))
 }

@@ -78,25 +78,7 @@ pub async fn handle_socket(
     let ws_connection_manager = state.ws_connection_manager.clone();
     let task_scheduler = ws_connection_manager.task_scheduler;
     let broadcaster = ws_connection_manager.broadcaster;
-
     let mut broadcast_receiver = broadcaster.subscribe(user_id, sink_tx.clone()); // FIXME
-
-    // demo
-    // FIXME
-    broadcaster
-        .batch(WsServerMessage::RequestUptimeReport, &[user_id])
-        .await;
-    // for _i in 0..10 {
-    //     task_scheduler
-    //         .add_task(GetTaskResponse {
-    //             id: Uuid::new_v4(),
-    //             url: String::from("https://example.com"),
-    //             headers: None,
-    //             body: None,
-    //             method: String::from("GET"),
-    //         })
-    //         .await;
-    // }
 
     // Using notify to process one task at a time
     let notify = Arc::new(Notify::new());
@@ -142,6 +124,10 @@ pub async fn handle_socket(
             }
         }
     });
+
+    broadcaster
+        .batch(WsServerMessage::RequestUptimeReport, &[user_id])
+        .await;
 
     tokio::select! {
         o = recv_task => tracing::error!("recv_task dead {:?}", o),

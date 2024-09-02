@@ -37,19 +37,6 @@ pub struct Broadcaster {
 impl Broadcaster {
     fn new() -> Self {
         let (transmitter, _) = broadcast::channel(10000);
-        // let tx = transmitter.clone();
-        // FIXME
-        // demo
-        // let _broadcast_handle = tokio::spawn(async move {
-        //     loop {
-        //         tracing::info!("Sending demo broadcast");
-        //         println!("Sending demo broadcast");
-        //         if tx.send(WsServerMessage::RequestBandwidthReport).is_err() {
-        //             tokio::time::sleep(Duration::from_secs(10)).await;
-        //         }
-        //         tokio::time::sleep(Duration::from_secs(1)).await;
-        //     }
-        // });
         Self {
             transmitter,
             sockets: Arc::new(DashMap::new()),

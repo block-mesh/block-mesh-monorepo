@@ -1,6 +1,5 @@
 use block_mesh_common::feature_flag_client::get_all_flags;
 use block_mesh_common::interfaces::server_api::{GetTokenRequest, GetTokenResponse, RegisterForm};
-use block_mesh_common::interfaces::ws_api::WsMessage;
 use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager::configuration::get_configuration::get_configuration;
 use block_mesh_manager::configuration::settings::Settings;
@@ -29,7 +28,6 @@ use std::env;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio;
-use tokio::sync::broadcast;
 use tokio::task::JoinHandle;
 use tokio::time::sleep;
 use uuid::Uuid;
@@ -76,8 +74,6 @@ pub async fn spawn_app() -> TestApp {
         .get_multiplexed_async_connection()
         .await
         .unwrap();
-
-    let (tx_ws, rx_ws) = broadcast::channel::<WsMessage>(500);
     let (tx_sql_agg, rx_sql_agg) = tokio::sync::mpsc::channel::<UpdateBulkMessage>(500);
     let (tx_analytics_agg, rx_analytics_agg) = tokio::sync::mpsc::channel::<AnalyticsMessage>(500);
     let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::channel::<EnrichIp>(500);
@@ -88,8 +84,6 @@ pub async fn spawn_app() -> TestApp {
         pool: db_pool.clone(),
         client: client.clone(),
         tx,
-        tx_ws: tx_ws.clone(),
-        rx_ws: rx_ws.resubscribe(),
         tx_sql_agg,
         tx_analytics_agg,
         flags,

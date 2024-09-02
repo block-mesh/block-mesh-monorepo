@@ -1,7 +1,7 @@
 use crate::background::ws::websocket::set_ws_status;
 use crate::utils::extension_wrapper_state::ExtensionWrapperState;
 use crate::utils::log::{log, log_error};
-use block_mesh_common::interfaces::ws_api::WsClientMessage;
+use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use leptos::SignalGetUntracked;
 use serde::{Deserialize, Serialize};
 use std::cmp::PartialEq;
@@ -18,42 +18,14 @@ pub fn on_message_handler(
         let _api_token = app_state.api_token.get_untracked();
         // let metadata = fetch_metadata_blocking().unwrap_or_default();
         if let Ok(txt) = e.data().dyn_into::<js_sys::JsString>() {
-            match serde_json::from_str::<WsClientMessage>(
+            match serde_json::from_str::<WsServerMessage>(
                 &txt.as_string()
                     .unwrap_or("Couldn't covert Js String to String".to_string()),
             ) {
-                Ok(_msg) => {}
-                Err(_error) => {} // Ok(message) => match message.message {
-                                  //     WsServerMessage => {
-                                  //         log!("Server asked for an uptime request");
-                                  //         // let query = ReportUptimeRequest {
-                                  //         //     email: email.clone(),
-                                  //         //     api_token,
-                                  //         //     ip: if metadata.ip.is_empty() {
-                                  //         //         None
-                                  //         //     } else {
-                                  //         //         Some(metadata.ip)
-                                  //         //     },
-                                  //         // };
-                                  //         // let submit_uptime = WsMessageTypes::SubmitUptimeToServer(query);
-                                  //         // let ws_message = WsMessage {
-                                  //         //     device: Some(DeviceType::Extension),
-                                  //         //     email: Some(email),
-                                  //         //     message: submit_uptime,
-                                  //         //     message_id: uuid::Uuid::new_v4(),
-                                  //         // };
-                                  //         // match ws.send_with_str(
-                                  //         //     &serde_json::to_string::<WsMessage>(&ws_message).unwrap(),
-                                  //         // ) {
-                                  //         //     Err(err) => log!("Couldn't send back uptime. {:#?} \n", err),
-                                  //         //     Ok(_) => log_error!("Sent uptime to server successfully.\n"),
-                                  //         // }
-                                  //     }
-                                  //     _ => {
-                                  //         log!("Recieved Message from server : {:#?}", message);
-                                  //     }
-                                  // },
-                                  // Err(err) => log_error!("Error parsing message {err}"),
+                Ok(msg) => {
+                    log!("msg => {:#?}", msg);
+                }
+                Err(_error) => {}
             }
         } else {
             log_error!("message event, received Unknown: {:?}", e.data());
