@@ -12,7 +12,7 @@ use block_mesh_manager::envars::get_env_var_or_panic::get_env_var_or_panic;
 use block_mesh_manager::envars::load_dotenv::load_dotenv;
 use block_mesh_manager::startup::application::{AppState, Application};
 use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
-use block_mesh_manager::worker::analytics_agg::AnalyticsMessage;
+use block_mesh_manager::worker::analytics_agg::{analytics_agg, AnalyticsMessage};
 use block_mesh_manager::worker::db_agg::{db_agg, UpdateBulkMessage};
 use block_mesh_manager::worker::db_cleaner_cron::{db_cleaner_cron, EnrichIp};
 use block_mesh_manager::worker::finalize_daily_cron::finalize_daily_cron;
@@ -65,8 +65,6 @@ pub async fn spawn_app() -> TestApp {
     migrate(&db_pool).await.expect("Failed to migrate database");
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
     let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(500);
-    let (tx_sql_agg, rx_sql_agg) = tokio::sync::mpsc::channel::<UpdateBulkMessage>(500);
-    let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::unbounded_channel::<EnrichIp>();
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
         .build()
@@ -109,6 +107,7 @@ pub async fn spawn_app() -> TestApp {
     let _finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
     let _db_cleaner_task = tokio::spawn(db_cleaner_cron(db_pool.clone(), cleaner_rx));
     let _db_agg_task = tokio::spawn(db_agg(db_pool.clone(), rx_sql_agg));
+    let _db_analytics_task = tokio::spawn(analytics_agg(db_pool.clone(), rx_analytics_agg));
 
     sleep(Duration::from_secs(1)).await;
 

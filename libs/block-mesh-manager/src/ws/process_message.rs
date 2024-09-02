@@ -1,8 +1,8 @@
-use crate::ws::task_scheduler::TaskScheduler;
+
 use axum::extract::ws::Message;
-use block_mesh_common::interfaces::server_api::GetTaskResponse;
+
 use block_mesh_common::interfaces::ws_api::{
-    WsClientMessage, WsMessage, WsMessageTypes, WsServerMessage,
+    WsClientMessage,
 };
 use std::net::SocketAddr;
 use std::ops::ControlFlow;
@@ -50,11 +50,11 @@ pub fn process_message(
     ControlFlow::Continue(())
 }
 
-fn process_client_message(text: &str, who: SocketAddr, task_scheduler_notifier: Arc<Notify>) {
+fn process_client_message(text: &str, _who: SocketAddr, task_scheduler_notifier: Arc<Notify>) {
     match serde_json::from_str::<WsClientMessage>(text) {
         Ok(message) => {
             match message {
-                WsClientMessage::CompleteTask(task) => {
+                WsClientMessage::CompleteTask(_task) => {
                     // TODO: Sync DB row
                     task_scheduler_notifier.notify_one(); //
                 }

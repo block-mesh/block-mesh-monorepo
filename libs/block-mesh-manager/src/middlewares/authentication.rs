@@ -120,7 +120,7 @@ impl AuthnBackend for Backend {
 
     #[tracing::instrument(name = "get_user", err, ret, level = "trace")]
     async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {
-        let key = Backend::authenticate_key_with_user_id(&user_id);
+        let key = Backend::authenticate_key_with_user_id(user_id);
         let mut c = self.con.clone();
         let redis_user: RedisResult<String> = c.get(user_id.to_string()).await;
         match redis_user {

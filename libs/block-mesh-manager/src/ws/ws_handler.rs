@@ -24,7 +24,7 @@ pub async fn ws_handler(
         .get("email")
         .ok_or(Error::Auth("Missing email".to_string()))?
         .clone();
-    let api_token = query
+    let _api_token = query
         .get("api_token")
         .ok_or(Error::Auth("Missing token".to_string()))?;
 

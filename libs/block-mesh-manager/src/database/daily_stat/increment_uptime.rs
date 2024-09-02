@@ -26,12 +26,12 @@ pub(crate) async fn increment_uptime(
 }
 
 pub async fn update_daily_stat_uptime_bulk(
-    mut transaction: &mut Transaction<'_, Postgres>,
+    transaction: &mut Transaction<'_, Postgres>,
     calls: &mut HashMap<Uuid, Value>,
 ) -> anyhow::Result<()> {
     for pair in calls.iter() {
         let _ = increment_uptime(
-            &mut transaction,
+            transaction,
             pair.0,
             pair.1.as_f64().unwrap_or_default(),
         )

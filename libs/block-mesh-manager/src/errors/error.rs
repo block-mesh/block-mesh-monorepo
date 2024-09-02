@@ -128,7 +128,7 @@ impl IntoResponse for Error {
             Error::Sql(_) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
             }
-            Error::Redis(error) => {
+            Error::Redis(_error) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
             }
             Error::Anyhow(_) => {

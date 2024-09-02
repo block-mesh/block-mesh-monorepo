@@ -17,6 +17,12 @@ pub struct ConnectionManager {
     pub task_scheduler: TaskScheduler<GetTaskResponse>,
 }
 
+impl Default for ConnectionManager {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl ConnectionManager {
     pub fn new() -> Self {
         Self {
@@ -36,7 +42,7 @@ impl Broadcaster {
         let (transmitter, _) = broadcast::channel(10000);
         let tx = transmitter.clone();
         // demo
-        let broadcast_handle = tokio::spawn(async move {
+        let _broadcast_handle = tokio::spawn(async move {
             loop {
                 tracing::info!("Sending demo broadcast");
                 println!("Sending demo broadcast");
@@ -63,7 +69,7 @@ impl Broadcaster {
                 let sink_tx = entry.value().clone();
                 let msg = message.clone();
                 let future = async move {
-                    if let Err(error) = sink_tx.send(msg).await {
+                    if let Err(_error) = sink_tx.send(msg).await {
                         tracing::error!("Batch broadcast failed");
                     }
                 };

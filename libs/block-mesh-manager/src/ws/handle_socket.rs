@@ -1,20 +1,20 @@
 use crate::startup::application::AppState;
 use crate::ws::process_message::process_message;
 use axum::extract::ws::{Message, WebSocket};
-use block_mesh_common::constants::DeviceType;
+
 use block_mesh_common::interfaces::server_api::GetTaskResponse;
 use block_mesh_common::interfaces::ws_api::{
-    WsClientMessage, WsMessage, WsMessageTypes, WsServerMessage,
+    WsServerMessage,
 };
-use futures::stream::SplitSink;
+
 use futures::{SinkExt, StreamExt};
-use leptos::ev::message;
-use redis::transaction;
+
+
 use std::net::SocketAddr;
-use std::ops::{ControlFlow, Deref, DerefMut};
+use std::ops::{ControlFlow};
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex};
-use tokio::sync::oneshot::error::RecvError;
+use std::sync::{Arc};
+
 use tokio::sync::Notify;
 use uuid::Uuid;
 
@@ -23,7 +23,7 @@ pub async fn handle_socket(
     socket: WebSocket,
     who: SocketAddr,
     state: Arc<AppState>,
-    email: String,
+    _email: String,
     user_id: Uuid,
 ) {
     let is_closing = Arc::new(AtomicBool::new(false));
@@ -51,13 +51,13 @@ pub async fn handle_socket(
     let task_scheduler = ws_connection_manager.task_scheduler;
     let broadcaster = ws_connection_manager.broadcaster;
 
-    let mut broadcast_receiver = broadcaster.subscribe(user_id.clone(), sink_tx.clone()); // FIXME
+    let mut broadcast_receiver = broadcaster.subscribe(user_id, sink_tx.clone()); // FIXME
 
     // demo
     broadcaster
-        .batch(WsServerMessage::RequestUptimeReport, &[user_id.clone()])
+        .batch(WsServerMessage::RequestUptimeReport, &[user_id])
         .await;
-    for i in 0..10 {
+    for _i in 0..10 {
         task_scheduler
             .add_task(GetTaskResponse {
                 id: Uuid::new_v4(),
@@ -103,7 +103,7 @@ pub async fn handle_socket(
                     return;
                 }
             }; // waits for new task
-            if let Err(error) = task_sink_tx.send(WsServerMessage::AsignTask(task)).await {
+            if let Err(_error) = task_sink_tx.send(WsServerMessage::AsignTask(task)).await {
                 if is_cls.load(Ordering::Relaxed) {
                     return;
                 }
@@ -118,7 +118,7 @@ pub async fn handle_socket(
     let broadcast_task = tokio::spawn(async move {
         while let Ok(broadcast_message) = broadcast_receiver.recv().await {
             tracing::info!("Broadcast received {broadcast_message:?}");
-            if let Err(error) = task_sink_tx.send(broadcast_message).await {
+            if let Err(_error) = task_sink_tx.send(broadcast_message).await {
                 if is_cls.load(Ordering::Relaxed) {
                     return;
                 }

@@ -6,9 +6,9 @@ use tokio::time::sleep;
 use uuid::Uuid;
 
 pub async fn ws_worker_rx(
-    pool: PgPool,
+    _pool: PgPool,
     mut rx: Receiver<WsMessage>,
-    tx: Sender<WsMessage>,
+    _tx: Sender<WsMessage>,
 ) -> Result<(), anyhow::Error> {
     while let Ok(msg) = rx.recv().await {
         tracing::info!("RX msg => {:#?}", msg);
@@ -17,8 +17,8 @@ pub async fn ws_worker_rx(
 }
 
 pub async fn ws_worker_tx(
-    pool: PgPool,
-    mut rx: Receiver<WsMessage>,
+    _pool: PgPool,
+    _rx: Receiver<WsMessage>,
     tx: Sender<WsMessage>,
 ) -> Result<(), anyhow::Error> {
     loop {
