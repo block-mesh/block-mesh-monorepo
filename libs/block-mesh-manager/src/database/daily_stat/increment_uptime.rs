@@ -38,7 +38,7 @@ pub async fn update_daily_stat_uptime_bulk(
 }
 
 pub async fn update_users_ip_bulk(
-    mut transaction: &mut Transaction<'_, Postgres>,
+    transaction: &mut Transaction<'_, Postgres>,
     calls: &mut HashMap<Uuid, Value>,
 ) -> anyhow::Result<()> {
     for pair in calls.iter() {
