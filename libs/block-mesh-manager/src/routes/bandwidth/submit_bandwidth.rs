@@ -57,27 +57,36 @@ pub async fn handler(
             .await?;
     transaction.commit().await.map_err(Error::from)?;
 
-    let _ = state.tx_sql_agg.send(UpdateBulkMessage {
-        id: download.id.unwrap_or_default(),
-        value: serde_json::Value::from(
-            (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
-        ),
-        table: Table::Aggregate,
-    });
-    let _ = state.tx_sql_agg.send(UpdateBulkMessage {
-        id: upload.id.unwrap_or_default(),
-        value: serde_json::Value::from(
-            (upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0,
-        ),
-        table: Table::Aggregate,
-    });
-    let _ = state.tx_sql_agg.send(UpdateBulkMessage {
-        id: latency.id.unwrap_or_default(),
-        value: serde_json::Value::from(
-            (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,
-        ),
-        table: Table::Aggregate,
-    });
+    let _ = state
+        .tx_sql_agg
+        .send(UpdateBulkMessage {
+            id: download.id.unwrap_or_default(),
+            value: serde_json::Value::from(
+                (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
+            ),
+            table: Table::Aggregate,
+        })
+        .await;
+    let _ = state
+        .tx_sql_agg
+        .send(UpdateBulkMessage {
+            id: upload.id.unwrap_or_default(),
+            value: serde_json::Value::from(
+                (upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0,
+            ),
+            table: Table::Aggregate,
+        })
+        .await;
+    let _ = state
+        .tx_sql_agg
+        .send(UpdateBulkMessage {
+            id: latency.id.unwrap_or_default(),
+            value: serde_json::Value::from(
+                (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,
+            ),
+            table: Table::Aggregate,
+        })
+        .await;
 
     let flag = state
         .flags
@@ -93,7 +102,7 @@ pub async fn handler(
                 .unwrap();
             transaction.commit().await.map_err(Error::from).unwrap();
         });
-        let _ = state.tx.send(handle);
+        let _ = state.tx.send(handle).await;
     }
 
     Ok(Json(ReportBandwidthResponse {

@@ -1,18 +1,14 @@
 use crate::ws::task_scheduler::TaskScheduler;
-use axum::extract::ws::{Message, WebSocket};
 use block_mesh_common::interfaces::server_api::GetTaskResponse;
-use block_mesh_common::interfaces::ws_api::{WsMessage, WsServerMessage};
-use dashmap::{DashMap, DashSet};
+use block_mesh_common::interfaces::ws_api::WsServerMessage;
+use dashmap::DashMap;
 use futures::future::join_all;
-use futures::task::SpawnExt;
 use futures::SinkExt;
-use std::fmt::{Debug, Formatter};
+use std::fmt::Debug;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::broadcast;
 use tokio::sync::broadcast::error::SendError;
-use tokio::task::{JoinHandle, JoinSet};
-use tracing::{error, trace, warn};
 use uuid::Uuid;
 
 #[derive(Debug, Clone)]

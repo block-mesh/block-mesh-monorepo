@@ -42,7 +42,7 @@ pub async fn handler(
         .await
         .context("Rate limit")?
     {
-        return Err(Error::NotAllowedRateLimit.into());
+        return Err(Error::NotAllowedRateLimit);
     }
 
     if user.email.to_ascii_lowercase() != body.email.to_ascii_lowercase() {

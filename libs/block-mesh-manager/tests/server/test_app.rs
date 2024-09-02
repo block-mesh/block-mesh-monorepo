@@ -1,5 +1,5 @@
 use block_mesh_common::feature_flag_client::get_all_flags;
-use block_mesh_common::interfaces::server_api::RegisterForm;
+use block_mesh_common::interfaces::server_api::{GetTokenRequest, GetTokenResponse, RegisterForm};
 use block_mesh_common::interfaces::ws_api::WsMessage;
 use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager::configuration::get_configuration::get_configuration;
@@ -124,6 +124,16 @@ pub async fn spawn_app() -> TestApp {
 }
 
 impl TestApp {
+    pub fn ws_address(&self) -> String {
+        let s = self.address.replace("http", "ws");
+        format!("{}/ws", s)
+    }
+
+    pub fn ws_address_with_auth(&self, email: &str, api_token: &Uuid) -> String {
+        let base = self.ws_address();
+        format!("{base}?email={email}&api_token={api_token}")
+    }
+
     pub async fn register_post(&self, form: &RegisterForm) -> anyhow::Result<()> {
         let response = self
             .client
@@ -137,5 +147,17 @@ impl TestApp {
             .await?;
         assert_eq!(200, response.status());
         Ok(())
+    }
+
+    pub async fn get_api_token(&self, body: &GetTokenRequest) -> anyhow::Result<GetTokenResponse> {
+        let response = self
+            .client
+            .post(format!("{}/api{}", &self.address, RoutesEnum::Api_GetToken))
+            .json(&body)
+            .send()
+            .await?;
+        assert_eq!(200, response.status());
+        let response: GetTokenResponse = response.json::<GetTokenResponse>().await?;
+        Ok(response)
     }
 }

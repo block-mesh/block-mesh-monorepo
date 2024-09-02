@@ -5,6 +5,5 @@ use axum::Router;
 use std::sync::Arc;
 
 pub fn get_ws_router() -> Router<Arc<AppState>> {
-    let router = Router::new().route("/ws", get(ws_handler));
-    router
+    Router::new().route("/ws", get(ws_handler))
 }

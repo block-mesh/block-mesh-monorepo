@@ -34,5 +34,5 @@ pub async fn login(
     ctx.user_id = Some(user.id);
     ctx.user_nonce = Some(user.nonce);
     // redirect user
-    Ok(Redirect::to(&url.to_string()))
+    Ok(Redirect::to(url.as_ref()))
 }

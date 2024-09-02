@@ -1,10 +1,5 @@
-use crate::database::task::update_task_assigned::update_task_assigned;
-use crate::domain::task::TaskStatus;
 use crate::startup::application::AppState;
-use crate::ws::connection_manager::ConnectionManager;
 use crate::ws::process_message::process_message;
-use crate::ws::task_scheduler::TaskScheduler;
-use aws_sdk_sesv2::config::IntoShared;
 use axum::extract::ws::{Message, WebSocket};
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::GetTaskResponse;

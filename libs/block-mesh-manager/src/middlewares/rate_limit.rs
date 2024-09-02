@@ -78,8 +78,8 @@ pub async fn filter_request(
     let diff = now - Duration::milliseconds(limit);
     let fallback = RateLimitUser::new(user_id, ip);
     let by_user: RateLimitUser =
-        get_value_from_redis(con, &user_ip_key(&user_id, &ip), &fallback).await?;
-    let by_ip: RateLimitUser = get_value_from_redis(con, &ip, &fallback).await?;
+        get_value_from_redis(con, &user_ip_key(user_id, ip), &fallback).await?;
+    let by_ip: RateLimitUser = get_value_from_redis(con, ip, &fallback).await?;
     touch_redis_value(con, user_id, ip).await;
     Ok(max(by_user.update_at, by_ip.update_at) < diff)
 }

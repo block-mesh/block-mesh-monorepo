@@ -5,7 +5,6 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
-    use block_mesh_common::interfaces::server_api::GetTaskResponse;
     use block_mesh_manager::ws::connection_manager::ConnectionManager;
     use block_mesh_common::interfaces::ws_api::WsMessage;
     use block_mesh_manager::worker::ws_worker::{ws_worker_rx, ws_worker_tx};
@@ -67,7 +66,6 @@ async fn run() -> anyhow::Result<()> {
     let (tx_ws, rx_ws) = broadcast::channel::<WsMessage>(500);
     let (tx_sql_agg, rx_sql_agg) = tokio::sync::mpsc::channel::<UpdateBulkMessage>(500);
     let (tx_analytics_agg, rx_analytics_agg) = tokio::sync::mpsc::channel::<AnalyticsMessage>(500);
-    let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::unbounded_channel::<EnrichIp>();
     let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::channel::<EnrichIp>(500);
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
@@ -75,11 +73,8 @@ async fn run() -> anyhow::Result<()> {
         .unwrap_or_default();
 
     let flags = get_all_flags(&client).await?;
-    let redis_client = redis::Client::open(env::var("REDIS_URL").unwrap()).unwrap();
-    let redis = redis_client
-        .get_multiplexed_async_connection()
-        .await
-        .unwrap();
+    let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
+    let redis = redis_client.get_multiplexed_async_connection().await?;
 
     let ws_connection_manager = ConnectionManager::new();
     let app_state = Arc::new(AppState {
