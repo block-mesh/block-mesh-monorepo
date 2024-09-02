@@ -105,7 +105,7 @@ pub async fn handle_socket(
     let send_task = tokio::spawn(async move {
         loop {
             let Some(task_receiver) = task_scheduler.add_session().await else {
-                if is_closing.load(Ordering::Relaxed) {
+                if is_cls.load(Ordering::Relaxed) {
                     return;
                 }
                 continue;

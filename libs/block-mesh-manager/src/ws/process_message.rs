@@ -2,8 +2,6 @@ use axum::extract::ws::Message;
 use block_mesh_common::interfaces::ws_api::WsClientMessage;
 use std::net::SocketAddr;
 use std::ops::ControlFlow;
-use std::sync::Arc;
-use tokio::sync::Notify;
 
 /// helper to print contents of messages to stdout. Has special treatment for Close.
 pub fn process_message(msg: Message, who: SocketAddr) -> ControlFlow<(), Option<WsClientMessage>> {
