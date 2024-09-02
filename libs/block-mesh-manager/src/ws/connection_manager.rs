@@ -70,19 +70,33 @@ impl Broadcaster {
         }))
         .await;
     }
-
+    pub fn move_queue(&self, count: usize) -> Vec<Uuid> {
+        let queue = &mut self.queue.lock().unwrap();
+        let count = count.min(queue.len());
+        let drained: Vec<Uuid> = queue.drain(0..count).collect();
+        queue.extend(drained.iter());
+        drained
+    }
     pub async fn queue(&self, message: WsServerMessage, count: usize) {
-        let drained: Vec<Uuid> = {
-            let queue = &mut self.queue.lock().unwrap();
-            let drained: Vec<Uuid> = queue.drain(0..count).collect();
-            queue.extend(drained.iter());
-            drained
-        };
+        let drained = self.move_queue(count);
         join_all(drained.into_iter().map(|user_id| {
             let entry = self.sockets.get(&user_id).unwrap();
             let tx = entry.value().clone();
             let msg = message.clone();
             async move { tx.send(msg).await }
+        }))
+        .await;
+    }
+    pub async fn queue_multiple(&self, messages: &[WsServerMessage], count: usize) {
+        let drained = self.move_queue(count);
+        join_all(drained.into_iter().map(|user_id| {
+            let entry = self.sockets.get(&user_id).unwrap();
+            let tx = entry.value().clone();
+            async move {
+                for msg in messages {
+                    tx.send(msg.clone()).await.unwrap(); // FIXME concurrency
+                }
+            }
         }))
         .await;
     }
