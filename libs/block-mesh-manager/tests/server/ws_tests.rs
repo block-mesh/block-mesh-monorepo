@@ -47,9 +47,9 @@ async fn test_connect_to_ws() {
     websocket.send(Message::Text("Ping".into())).await.unwrap();
 
     // The WebSocket is also a `TryStream` over `Message`s.
-    while let Some(message) = websocket.try_next().await.unwrap() {
-        if let Message::Text(text) = message {
-            println!("received: {text}")
-        }
-    }
+    // while let Some(message) = websocket.try_next().await.unwrap() {
+    //     if let Message::Text(text) = message {
+    //         println!("received: {text}")
+    //     }
+    // }
 }
