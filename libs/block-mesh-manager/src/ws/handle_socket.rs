@@ -12,23 +12,24 @@ use tokio::sync::Notify;
 use tokio::task::JoinHandle;
 use uuid::Uuid;
 
+/// Actual websocket statemachine (one will be spawned per connection)
 fn messenger(
     mut ws_sink: SplitSink<WebSocket, Message>,
     is_cls: Arc<AtomicBool>,
 ) -> (JoinHandle<()>, tokio::sync::mpsc::Sender<WsServerMessage>) {
     let (sink_tx, mut sink_rx) = tokio::sync::mpsc::channel::<WsServerMessage>(10);
     let sink_task = tokio::spawn(async move {
+        // Any message coming from the sync channel rx, is sent to ws tx/sink
         while let Some(server_message) = sink_rx.recv().await {
-            let Ok(serialized_server_message) = serde_json::to_string(&server_message) else {
-                tracing::error!("Failed to serialize message {server_message:?}");
-                continue;
-            };
-
-            if let Err(error) = ws_sink.send(Message::Text(serialized_server_message)).await {
-                if is_cls.load(Ordering::Relaxed) {
-                    return;
+            if let Ok(serialized_server_message) = serde_json::to_string(&server_message) {
+                if let Err(error) = ws_sink.send(Message::Text(serialized_server_message)).await {
+                    if is_cls.load(Ordering::Relaxed) {
+                        return;
+                    }
+                    tracing::error!("Sink task error: {error}");
                 }
-                tracing::error!("Sink task error: {error}");
+            } else {
+                tracing::error!("Failed to serialize message {server_message:?}");
             }
         }
     });
@@ -69,7 +70,7 @@ pub async fn handle_socket(
     user_id: Uuid,
 ) {
     let is_closing = Arc::new(AtomicBool::new(false));
-    let (ws_sink, mut ws_stream) = socket.split();
+    let (ws_sink, ws_stream) = socket.split();
     let (sink_task, sink_tx) = messenger(ws_sink, is_closing.clone());
     let notify = Arc::new(Notify::new());
     let recv_task = receiver(ws_stream, is_closing.clone(), who, notify.clone());
@@ -97,12 +98,14 @@ pub async fn handle_socket(
     //         .await;
     // }
 
+    // Using notify to process one task at a time
+    let notify = Arc::new(Notify::new());
     let _task_sink_tx = sink_tx.clone();
     let is_cls = is_closing.clone();
     let send_task = tokio::spawn(async move {
         loop {
             let Some(task_receiver) = task_scheduler.add_session().await else {
-                if is_cls.load(Ordering::Relaxed) {
+                if is_closing.load(Ordering::Relaxed) {
                     return;
                 }
                 continue;
