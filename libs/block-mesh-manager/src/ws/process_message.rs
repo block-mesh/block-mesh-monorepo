@@ -6,15 +6,12 @@ use std::sync::Arc;
 use tokio::sync::Notify;
 
 /// helper to print contents of messages to stdout. Has special treatment for Close.
-pub fn process_message(
-    msg: Message,
-    who: SocketAddr,
-    task_scheduler_notifier: Arc<Notify>,
-) -> ControlFlow<(), ()> {
+pub fn process_message(msg: Message, who: SocketAddr) -> ControlFlow<(), Option<WsClientMessage>> {
     tracing::info!("PROCESS_MESSAGE msg = {:#?}", msg);
     match msg {
         Message::Text(text) => {
-            process_client_message(&text, who, task_scheduler_notifier);
+            let ws_client_message = process_client_message(&text, who);
+            return ControlFlow::Continue(ws_client_message);
         }
         Message::Binary(bytes) => {
             tracing::info!(">>> {} sent {} bytes: {:?}", who, bytes.len(), bytes);
@@ -43,23 +40,24 @@ pub fn process_message(
             tracing::info!(">>> {who} sent ping with {bytes:?}");
         }
     }
-    ControlFlow::Continue(())
+    ControlFlow::Continue(None)
 }
 
-fn process_client_message(text: &str, _who: SocketAddr, task_scheduler_notifier: Arc<Notify>) {
+fn process_client_message(text: &str, _who: SocketAddr) -> Option<WsClientMessage> {
     match serde_json::from_str::<WsClientMessage>(text) {
         Ok(message) => {
             match message {
                 WsClientMessage::CompleteTask(_task) => {
                     // TODO: Sync DB row
-                    task_scheduler_notifier.notify_one(); //
                 }
                 WsClientMessage::ReportBandwidth => {}
                 WsClientMessage::ReportUptime => {}
             }
+            return Some(message);
         }
         Err(_) => {
             tracing::info!("Invalid Message => {}", text)
         }
     }
+    None
 }

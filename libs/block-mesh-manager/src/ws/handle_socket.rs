@@ -43,9 +43,14 @@ fn receiver(
 ) -> JoinHandle<()> {
     tokio::spawn(async move {
         while let Some(Ok(msg)) = ws_stream.next().await {
-            let control_flow = process_message(msg, who, task_scheduler_notifier.clone());
-            match control_flow {
-                ControlFlow::Continue(_) => {}
+            match process_message(msg, who) {
+                ControlFlow::Continue(ws_client_message) => {
+                    if let Some(ws_client_message) = ws_client_message {
+                        if matches!(ws_client_message, WsClientMessage::CompleteTask(_)) {
+                            task_scheduler_notifier.notify_one();
+                        }
+                    }
+                }
                 ControlFlow::Break(_) => {
                     is_cls.store(true, Ordering::Relaxed);
                     return;
