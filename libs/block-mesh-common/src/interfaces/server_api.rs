@@ -7,7 +7,7 @@ use typeshare::typeshare;
 use uuid::Uuid;
 
 #[typeshare]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct GetTaskResponse {
     #[typeshare(serialized_as = "string")]
     pub id: Uuid,
@@ -28,7 +28,7 @@ pub struct GetTaskRequest {
 }
 
 #[typeshare]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SubmitTaskRequest {
     pub email: String,
     #[typeshare(serialized_as = "string")]
