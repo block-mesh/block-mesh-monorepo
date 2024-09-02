@@ -23,6 +23,14 @@
   <meta name="twitter:description"
         content="Drive the AI industry and earn seamlessly by selling your unused internet bandwidth through the BlockMesh network." />
   <meta name="twitter:image" content=https://r2-landing-page.blockmesh.xyz/logo.png" />
+  <link
+    rel="stylesheet"
+    href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
+  />
+  <link
+    href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap"
+    rel="stylesheet"
+  />
 
   <title>BlockMesh Network</title>
   {% include "style_css.html" %}
@@ -34,6 +42,26 @@
   {% include "faq_css.html" %}
   {% include "footer_css.html" %}
   {% include "team_css.html" %}
+  <link href="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.css" rel="stylesheet" />
+  <script src="https://cdn.jsdelivr.net/npm/flowbite@2.5.1/dist/flowbite.min.js"></script>
+  <link rel="stylesheet"
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
+  <style>
+      .material-symbols-outlined {
+          font-variation-settings: 'FILL' 0,
+          'wght' 400,
+          'GRAD' 0,
+          'opsz' 24
+      }
+  </style>
+  <script>
+    setInterval(() => {
+      const button = document.getElementById('next-button')
+      if (button) {
+        button.click()
+      }
+    }, 2000)
+  </script>
 </head>
 <body>
 <header id="header" class="header">
@@ -120,6 +148,12 @@
              alt="FAQ Icon" />
         <span>FAQ</span>
       </div>
+      <div class="header-menu-item" sectionId="use-cases">
+        <div class="header-menu-thumb"></div>
+        <img class="header-menu-cube" style="opacity: 0" src="https://r2-landing-page.blockmesh.xyz/cube.png"
+             alt="Use cases Icon" />
+        <span>Use Cases</span>
+      </div>
       <div class="header-menu-item" sectionId="footer">
         <div class="header-menu-thumb"></div>
         <img class="header-menu-cube" style="opacity: 0" src="https://r2-landing-page.blockmesh.xyz/cube.png"
@@ -146,8 +180,9 @@
         Profit off AI demand for data
         {% endif %}
       </h2>
-      <button class="header-top-button" onclick="window.open('https://app.blockmesh.xyz/register?invite_code=landingpage', '_blank')">
-          Join Now
+      <button class="header-top-button"
+              onclick="window.open('https://app.blockmesh.xyz/register?invite_code=landingpage', '_blank')">
+        Join Now
       </button>
       <div class="header-actions-social">
         <a target="_blank" href="https://x.com/blockmesh_xyz">
@@ -223,13 +258,15 @@
         <br />
         You can trust us, keeping your secure and respecting your privacy.
         We are fully open source, allowing anyone to audit our code on <a style="color: #01FEFC"
-        href="https://github.com/block-mesh/block-mesh-monorepo" target="_blank">GitHub</a>
+                                                                          href="https://github.com/block-mesh/block-mesh-monorepo"
+                                                                          target="_blank">GitHub</a>
         Our software is safeguarded by a global community of developers tracking our public repository who ensure it
         remains secure and adheres to
         strict ethical standards.
       </p>
-      <button class="header-top-button" onclick="window.open('https://app.blockmesh.xyz/register?invite_code=landingpage', '_blank')">
-          Join Now
+      <button class="header-top-button"
+              onclick="window.open('https://app.blockmesh.xyz/register?invite_code=landingpage', '_blank')">
+        Join Now
       </button>
     </div>
     <div class="how-it-works-image">
@@ -289,7 +326,8 @@
         <div>
           <svg fill="#FF7E07AA" height="3em" width="3em" version="1.1" id="Layer_1" xmlns="http://www.w3.org/2000/svg"
                xmlns:xlink="http://www.w3.org/1999/xlink" x="0px" y="0px" viewBox="0 0 122.88 120.54"
-               style="cursor: pointer; enable-background: new 0 0 122.88 120.54" xml:space="preserve" alt="Download Icon">
+               style="cursor: pointer; enable-background: new 0 0 122.88 120.54" xml:space="preserve"
+               alt="Download Icon">
                 <g>
                   <path
                     class="st0"
@@ -336,8 +374,9 @@
               </svg>
           <h4 style="cursor: pointer">Get Rewards</h4>
           <p style="cursor: pointer">Refer friends and earn more together</p>
-          <button class="header-top-button" onclick="window.open('https://app.blockmesh.xyz/register?invite_code=landingpage', '_blank')">
-              Join Now
+          <button class="header-top-button"
+                  onclick="window.open('https://app.blockmesh.xyz/register?invite_code=landingpage', '_blank')">
+            Join Now
           </button>
         </div>
       </div>
@@ -476,8 +515,11 @@
   </div>
 </section>
 
-<<section class="section" id="footer">
-<section class="section">
+<section class="section" id="use-cases">
+  {% include "use-cases.html" %}
+</section>
+
+<section class="section" id="footer">
   <img class="footer-top-image" src="https://r2-landing-page.blockmesh.xyz/hexagon.png"
        alt="Footer Top Background Image" />
   <img class="footer-bottom-image" src="https://r2-landing-page.blockmesh.xyz/hexagon.png"
@@ -640,7 +682,7 @@
         </a>
       </div>
       <div class="footer-copyrights">
-        <span> © 2024 Copyright by BlockMesh </span>
+        <span> © 2024 Copyright by BlockMesh Network</span>
       </div>
     </div>
     <br />

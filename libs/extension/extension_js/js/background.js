@@ -1,6 +1,12 @@
 // A static import is required in b/g scripts because they are executed in their own env
 // not connected to the content scripts where wasm is loaded automatically
-import initWasmModule, { task_poller, report_uptime, uptime_fetcher, measure_bandwidth } from './wasm/blockmesh_ext.js'
+import initWasmModule, {
+  task_poller,
+  report_uptime,
+  uptime_fetcher,
+  measure_bandwidth,
+  start_websocket
+} from './wasm/blockmesh_ext.js'
 
 console.log('Background script started')
 
@@ -110,7 +116,25 @@ async function init_background() {
       recreate_intervals()
     }
   }, 300000)
+  setInterval(async () => {
+    start_websocket().then(onSuccess, onError)
+  }, 5000)
 }
+
+// async function restart_websocket() {
+//   try {
+//     await start_websocket()
+//     console.log('after start_websocket')
+//   } catch (e) {
+//     setTimeout(async () => {
+//       await restart_websocket()
+//     }, 10_000)
+//   } finally {
+//     setTimeout(async () => {
+//       await restart_websocket()
+//     }, 10_000)
+//   }
+// }
 
 init_background().then(onSuccess, onError)
 

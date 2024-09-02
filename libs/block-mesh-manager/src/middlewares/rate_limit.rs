@@ -17,7 +17,7 @@ pub struct RateLimitUser {
 impl RateLimitUser {
     pub fn new(user_id: &Uuid, ip: &str) -> Self {
         Self {
-            user_id: user_id.clone(),
+            user_id: *user_id,
             ip: ip.to_string(),
             update_at: Utc::now(),
         }
@@ -29,7 +29,7 @@ pub fn get_key(key: &str) -> String {
 }
 
 pub fn user_ip_key(user_id: &Uuid, ip: &str) -> String {
-    format!("{}-{}", user_id.to_string(), ip)
+    format!("{}-{}", user_id, ip)
 }
 
 pub async fn get_value_from_redis(
@@ -78,8 +78,8 @@ pub async fn filter_request(
     let diff = now - Duration::milliseconds(limit);
     let fallback = RateLimitUser::new(user_id, ip);
     let by_user: RateLimitUser =
-        get_value_from_redis(con, &user_ip_key(&user_id, &ip), &fallback).await?;
-    let by_ip: RateLimitUser = get_value_from_redis(con, &ip, &fallback).await?;
+        get_value_from_redis(con, &user_ip_key(user_id, ip), &fallback).await?;
+    let by_ip: RateLimitUser = get_value_from_redis(con, ip, &fallback).await?;
     touch_redis_value(con, user_id, ip).await;
     Ok(max(by_user.update_at, by_ip.update_at) < diff)
 }

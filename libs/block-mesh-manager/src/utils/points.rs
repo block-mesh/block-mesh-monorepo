@@ -10,7 +10,7 @@ pub fn raw_points(uptime: f64, tasks_count: i64) -> f64 {
 pub fn calc_points_daily(uptime: f64, tasks_count: i64, perks: &Vec<Perk>) -> f64 {
     let mut points = raw_points(uptime, tasks_count);
     for perk in perks {
-        points = perk.multiplier * points;
+        points *= perk.multiplier;
     }
     points
 }
@@ -18,10 +18,10 @@ pub fn calc_points_daily(uptime: f64, tasks_count: i64, perks: &Vec<Perk>) -> f6
 pub fn calc_total_points(uptime: f64, tasks_count: i64, perks: &Vec<Perk>) -> f64 {
     let mut points = raw_points(uptime, tasks_count);
     for perk in perks {
-        points = perk.multiplier * points;
+        points *= perk.multiplier;
     }
     for perk in perks {
-        points = perk.one_time_bonus + points;
+        points += perk.one_time_bonus;
     }
     points
 }

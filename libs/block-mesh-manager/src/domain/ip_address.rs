@@ -6,6 +6,7 @@ use uuid::Uuid;
 pub struct IpAddress {
     pub id: Uuid,
     pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
     pub ip: String,
     pub latitude: Option<f64>,
     pub longitude: Option<f64>,

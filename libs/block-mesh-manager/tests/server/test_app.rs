@@ -1,5 +1,5 @@
 use block_mesh_common::feature_flag_client::get_all_flags;
-use block_mesh_common::interfaces::server_api::RegisterForm;
+use block_mesh_common::interfaces::server_api::{GetTokenRequest, GetTokenResponse, RegisterForm};
 use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager::configuration::get_configuration::get_configuration;
 use block_mesh_manager::configuration::settings::Settings;
@@ -11,11 +11,13 @@ use block_mesh_manager::envars::get_env_var_or_panic::get_env_var_or_panic;
 use block_mesh_manager::envars::load_dotenv::load_dotenv;
 use block_mesh_manager::startup::application::{AppState, Application};
 use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
+use block_mesh_manager::worker::analytics_agg::{analytics_agg, AnalyticsMessage};
 use block_mesh_manager::worker::db_agg::{db_agg, UpdateBulkMessage};
 use block_mesh_manager::worker::db_cleaner_cron::{db_cleaner_cron, EnrichIp};
 use block_mesh_manager::worker::finalize_daily_cron::finalize_daily_cron;
 use block_mesh_manager::worker::joiner::joiner_loop;
 use block_mesh_manager::worker::rpc_cron::rpc_worker_loop;
+use block_mesh_manager::ws::connection_manager::ConnectionManager;
 use logger_general::tracing::setup_tracing_stdout_only;
 use redis;
 use redis::aio::MultiplexedConnection;
@@ -61,8 +63,6 @@ pub async fn spawn_app() -> TestApp {
     migrate(&db_pool).await.expect("Failed to migrate database");
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
     let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(500);
-    let (tx_sql_agg, rx_sql_agg) = tokio::sync::mpsc::channel::<UpdateBulkMessage>(500);
-    let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::unbounded_channel::<EnrichIp>();
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
         .build()
@@ -74,16 +74,22 @@ pub async fn spawn_app() -> TestApp {
         .get_multiplexed_async_connection()
         .await
         .unwrap();
+    let (tx_sql_agg, rx_sql_agg) = tokio::sync::mpsc::channel::<UpdateBulkMessage>(500);
+    let (tx_analytics_agg, rx_analytics_agg) = tokio::sync::mpsc::channel::<AnalyticsMessage>(500);
+    let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::channel::<EnrichIp>(500);
 
+    let ws_connection_manager = ConnectionManager::new();
     let app_state = Arc::new(AppState {
         email_client,
         pool: db_pool.clone(),
         client: client.clone(),
         tx,
         tx_sql_agg,
+        tx_analytics_agg,
         flags,
         cleaner_tx,
         redis: redis.clone(),
+        ws_connection_manager,
     });
     let application =
         Application::build(configuration.clone(), app_state.clone(), db_pool.clone()).await;
@@ -95,6 +101,7 @@ pub async fn spawn_app() -> TestApp {
     let _finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
     let _db_cleaner_task = tokio::spawn(db_cleaner_cron(db_pool.clone(), cleaner_rx));
     let _db_agg_task = tokio::spawn(db_agg(db_pool.clone(), rx_sql_agg));
+    let _db_analytics_task = tokio::spawn(analytics_agg(db_pool.clone(), rx_analytics_agg));
 
     sleep(Duration::from_secs(1)).await;
 
@@ -110,6 +117,16 @@ pub async fn spawn_app() -> TestApp {
 }
 
 impl TestApp {
+    pub fn ws_address(&self) -> String {
+        let s = self.address.replace("http", "ws");
+        format!("{}/ws", s)
+    }
+
+    pub fn ws_address_with_auth(&self, email: &str, api_token: &Uuid) -> String {
+        let base = self.ws_address();
+        format!("{base}?email={email}&api_token={api_token}")
+    }
+
     pub async fn register_post(&self, form: &RegisterForm) -> anyhow::Result<()> {
         let response = self
             .client
@@ -123,5 +140,17 @@ impl TestApp {
             .await?;
         assert_eq!(200, response.status());
         Ok(())
+    }
+
+    pub async fn get_api_token(&self, body: &GetTokenRequest) -> anyhow::Result<GetTokenResponse> {
+        let response = self
+            .client
+            .post(format!("{}/api{}", &self.address, RoutesEnum::Api_GetToken))
+            .json(&body)
+            .send()
+            .await?;
+        assert_eq!(200, response.status());
+        let response: GetTokenResponse = response.json::<GetTokenResponse>().await?;
+        Ok(response)
     }
 }

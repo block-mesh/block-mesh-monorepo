@@ -72,11 +72,7 @@ pub async fn dashboard_data_extractor(
     let user_ips = get_user_ips(&mut transaction, &user_id, limit).await?;
 
     let connected =
-        if diff.num_seconds() < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240) {
-            true
-        } else {
-            false
-        };
+        diff.num_seconds() < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240);
     let calls_to_action = get_user_call_to_action(&mut transaction, user_id).await?;
     let perks = get_user_perks(&mut transaction, user_id).await?;
     let daily_stats = get_daily_stats_by_user_id(&mut transaction, &user_id)
@@ -127,7 +123,7 @@ pub async fn dashboard_data_extractor(
                 created_at: i.created_at,
                 verified_email: i.verified_email,
                 email: {
-                    let s: Vec<&str> = i.email.split("@").collect();
+                    let s: Vec<&str> = i.email.split('@').collect();
                     let re = Regex::new(r"[A-Za-z]").unwrap();
                     let result = re.replace_all(s[0], "x");
                     format!("{}@{}", result, s[1])
