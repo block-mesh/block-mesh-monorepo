@@ -1,9 +1,5 @@
-
 use axum::extract::ws::Message;
-
-use block_mesh_common::interfaces::ws_api::{
-    WsClientMessage,
-};
+use block_mesh_common::interfaces::ws_api::WsClientMessage;
 use std::net::SocketAddr;
 use std::ops::ControlFlow;
 use std::sync::Arc;

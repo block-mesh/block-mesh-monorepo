@@ -1,18 +1,8 @@
-
-
-
-use block_mesh_common::interfaces::server_api::{
-    GetTaskResponse,
-};
-
+use block_mesh_common::interfaces::server_api::GetTaskResponse;
 
 use std::fmt::Debug;
 
-
-
 use tokio::sync::{mpsc, oneshot};
-
-
 
 type HttpTask = GetTaskResponse;
 
@@ -24,7 +14,7 @@ pub struct TaskScheduler<T: Debug> {
 impl<T> Default for TaskScheduler<T>
 where
     T: Debug + Send + 'static,
- {
+{
     fn default() -> Self {
         Self::new()
     }

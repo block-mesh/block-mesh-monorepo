@@ -1,20 +1,13 @@
 use crate::startup::application::AppState;
 use crate::ws::process_message::process_message;
 use axum::extract::ws::{Message, WebSocket};
-
 use block_mesh_common::interfaces::server_api::GetTaskResponse;
-use block_mesh_common::interfaces::ws_api::{
-    WsServerMessage,
-};
-
+use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use futures::{SinkExt, StreamExt};
-
-
 use std::net::SocketAddr;
-use std::ops::{ControlFlow};
+use std::ops::ControlFlow;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc};
-
+use std::sync::Arc;
 use tokio::sync::Notify;
 use uuid::Uuid;
 

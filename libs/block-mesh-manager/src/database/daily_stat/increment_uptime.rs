@@ -30,12 +30,7 @@ pub async fn update_daily_stat_uptime_bulk(
     calls: &mut HashMap<Uuid, Value>,
 ) -> anyhow::Result<()> {
     for pair in calls.iter() {
-        let _ = increment_uptime(
-            transaction,
-            pair.0,
-            pair.1.as_f64().unwrap_or_default(),
-        )
-        .await;
+        let _ = increment_uptime(transaction, pair.0, pair.1.as_f64().unwrap_or_default()).await;
     }
     Ok(())
 }
