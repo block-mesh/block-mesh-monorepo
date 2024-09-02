@@ -44,7 +44,7 @@ pub fn process_message(msg: Message, who: SocketAddr) -> ControlFlow<(), Option<
 fn process_client_message(text: &str, _who: SocketAddr) -> Option<WsClientMessage> {
     match serde_json::from_str::<WsClientMessage>(text) {
         Ok(message) => {
-            match message {
+            match &message {
                 WsClientMessage::CompleteTask(_task) => {
                     // TODO: Sync DB row
                 }
