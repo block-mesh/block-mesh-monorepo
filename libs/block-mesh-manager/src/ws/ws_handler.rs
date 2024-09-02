@@ -31,7 +31,7 @@ pub async fn ws_handler(
     let api_token = query
         .get("api_token")
         .ok_or(Error::Auth("Missing token".to_string()))?;
-    let api_token = Uuid::from_str(&api_token).context("Cannot deserialize UUID")?;
+    let api_token = Uuid::from_str(api_token).context("Cannot deserialize UUID")?;
     let mut transaction = state.pool.begin().await.map_err(Error::from)?;
     let user = get_user_opt_by_email(&mut transaction, &email)
         .await?
