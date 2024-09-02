@@ -17,7 +17,6 @@ use crate::ws::connection_manager::ConnectionManager;
 use axum::{Extension, Router};
 use axum_login::login_required;
 use block_mesh_common::feature_flag_client::FlagValue;
-use block_mesh_common::interfaces::ws_api::WsMessage;
 use leptos::leptos_config::get_config_from_env;
 use redis::aio::MultiplexedConnection;
 use reqwest::Client;
@@ -47,8 +46,6 @@ pub struct AppState {
     pub pool: PgPool,
     pub email_client: Arc<EmailClient>,
     pub client: Client,
-    pub tx_ws: tokio::sync::broadcast::Sender<WsMessage>,
-    pub rx_ws: tokio::sync::broadcast::Receiver<WsMessage>,
     pub tx: tokio::sync::mpsc::Sender<JoinHandle<()>>,
     pub tx_sql_agg: tokio::sync::mpsc::Sender<UpdateBulkMessage>,
     pub tx_analytics_agg: tokio::sync::mpsc::Sender<AnalyticsMessage>,

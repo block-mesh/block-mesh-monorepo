@@ -1,7 +1,6 @@
 use crate::startup::application::AppState;
 use crate::ws::process_message::process_message;
 use axum::extract::ws::{Message, WebSocket};
-use block_mesh_common::interfaces::server_api::GetTaskResponse;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use futures::{SinkExt, StreamExt};
 use std::net::SocketAddr;
@@ -47,20 +46,21 @@ pub async fn handle_socket(
     let mut broadcast_receiver = broadcaster.subscribe(user_id, sink_tx.clone()); // FIXME
 
     // demo
+    // FIXME
     broadcaster
         .batch(WsServerMessage::RequestUptimeReport, &[user_id])
         .await;
-    for _i in 0..10 {
-        task_scheduler
-            .add_task(GetTaskResponse {
-                id: Uuid::new_v4(),
-                url: String::from("https://example.com"),
-                headers: None,
-                body: None,
-                method: String::from("GET"),
-            })
-            .await;
-    }
+    // for _i in 0..10 {
+    //     task_scheduler
+    //         .add_task(GetTaskResponse {
+    //             id: Uuid::new_v4(),
+    //             url: String::from("https://example.com"),
+    //             headers: None,
+    //             body: None,
+    //             method: String::from("GET"),
+    //         })
+    //         .await;
+    // }
 
     let notify = Arc::new(Notify::new());
 
@@ -79,7 +79,7 @@ pub async fn handle_socket(
         }
     });
 
-    let task_sink_tx = sink_tx.clone();
+    let _task_sink_tx = sink_tx.clone();
     let is_cls = is_closing.clone();
     let send_task = tokio::spawn(async move {
         loop {
@@ -89,19 +89,20 @@ pub async fn handle_socket(
                 }
                 continue;
             };
-            let task = match task_receiver.await {
+            let _task = match task_receiver.await {
                 Ok(task) => task,
                 Err(_) => {
                     tracing::info!("Task scheduler was dropper");
                     return;
                 }
             }; // waits for new task
-            if let Err(_error) = task_sink_tx.send(WsServerMessage::AsignTask(task)).await {
-                if is_cls.load(Ordering::Relaxed) {
-                    return;
-                }
-                tracing::error!("Task scheduler was dropped");
-            }
+               // FIXME
+               // if let Err(_error) = task_sink_tx.send(WsServerMessage::AssignTask(task)).await {
+               //     if is_cls.load(Ordering::Relaxed) {
+               //         return;
+               //     }
+               //     tracing::error!("Task scheduler was dropped");
+               // }
             notify.notified().await; // wait for task to complete on the client side
         }
     });

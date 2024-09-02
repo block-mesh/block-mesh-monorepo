@@ -6,9 +6,6 @@ use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_manager::ws::connection_manager::ConnectionManager;
-    use block_mesh_common::interfaces::ws_api::WsMessage;
-    use block_mesh_manager::worker::ws_worker::{ws_worker_rx, ws_worker_tx};
-    use tokio::sync::broadcast;
     use block_mesh_manager::worker::analytics_agg::{analytics_agg, AnalyticsMessage};
     use std::env;
     use block_mesh_manager::worker::db_agg::{db_agg, UpdateBulkMessage};
@@ -63,7 +60,6 @@ async fn run() -> anyhow::Result<()> {
     migrate(&db_pool).await.expect("Failed to migrate database");
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
     let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(500);
-    let (tx_ws, rx_ws) = broadcast::channel::<WsMessage>(500);
     let (tx_sql_agg, rx_sql_agg) = tokio::sync::mpsc::channel::<UpdateBulkMessage>(500);
     let (tx_analytics_agg, rx_analytics_agg) = tokio::sync::mpsc::channel::<AnalyticsMessage>(500);
     let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::channel::<EnrichIp>(500);
@@ -82,8 +78,6 @@ async fn run() -> anyhow::Result<()> {
         pool: db_pool.clone(),
         client,
         tx,
-        tx_ws: tx_ws.clone(),
-        rx_ws: rx_ws.resubscribe(),
         tx_sql_agg,
         tx_analytics_agg,
         flags,
@@ -98,12 +92,6 @@ async fn run() -> anyhow::Result<()> {
     let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
     let db_cleaner_task = tokio::spawn(db_cleaner_cron(db_pool.clone(), cleaner_rx));
     let db_agg_task = tokio::spawn(db_agg(db_pool.clone(), rx_sql_agg));
-    let ws_task_rx = tokio::spawn(ws_worker_rx(
-        db_pool.clone(),
-        rx_ws.resubscribe(),
-        tx_ws.clone(),
-    ));
-    let ws_task_tx = tokio::spawn(ws_worker_tx(db_pool.clone(), rx_ws, tx_ws));
     let db_analytics_task = tokio::spawn(analytics_agg(db_pool.clone(), rx_analytics_agg));
 
     tokio::select! {
@@ -114,8 +102,6 @@ async fn run() -> anyhow::Result<()> {
         o = db_cleaner_task => report_exit("DB cleaner task failed", o),
         o = db_agg_task => report_exit("DB aggregator", o),
         o = db_analytics_task => report_exit("DB analytics aggregator", o),
-        o = ws_task_rx => report_exit("WS RX task failed", o),
-        o = ws_task_tx => report_exit("WS TX task failed", o)
     };
     Ok(())
 }

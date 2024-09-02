@@ -1,32 +1,9 @@
-use crate::constants::DeviceType;
-use crate::interfaces::server_api::{
-    GetTaskResponse, ReportBandwidthRequest, ReportUptimeRequest, SubmitTaskRequest,
-};
+use crate::interfaces::server_api::{GetTaskResponse, SubmitTaskRequest};
 use serde::{Deserialize, Serialize};
-use uuid::Uuid;
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub struct WsMessage {
-    // only for requests from client
-    pub message_id: Uuid,
-    pub email: Option<String>,
-    pub device: Option<DeviceType>,
-    pub message: WsMessageTypes,
-}
-
-#[derive(Clone, Debug, Serialize, Deserialize)]
-pub enum WsMessageTypes {
-    SendTaskFromServer(GetTaskResponse),
-    SubmitTaskToServer(SubmitTaskRequest),
-    SendBandwidthReportFromServer,
-    SubmitForBandwidthReportToServer(ReportBandwidthRequest),
-    SendUptimeFromServer,
-    SubmitUptimeToServer(ReportUptimeRequest),
-}
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum WsServerMessage {
-    AsignTask(GetTaskResponse),
+    AssignTask(GetTaskResponse),
     RequestBandwidthReport,
     RequestUptimeReport,
 }

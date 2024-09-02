@@ -1,11 +1,9 @@
 use crate::ws::task_scheduler::TaskScheduler;
-use block_mesh_common::interfaces::server_api::GetTaskResponse;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use dashmap::DashMap;
 use futures::future::join_all;
 use std::fmt::Debug;
 use std::sync::Arc;
-use std::time::Duration;
 use tokio::sync::broadcast;
 use tokio::sync::broadcast::error::SendError;
 use uuid::Uuid;
@@ -13,7 +11,7 @@ use uuid::Uuid;
 #[derive(Debug, Clone)]
 pub struct ConnectionManager {
     pub broadcaster: Broadcaster,
-    pub task_scheduler: TaskScheduler<GetTaskResponse>,
+    pub task_scheduler: TaskScheduler<WsServerMessage>,
 }
 
 impl Default for ConnectionManager {
@@ -39,18 +37,19 @@ pub struct Broadcaster {
 impl Broadcaster {
     fn new() -> Self {
         let (transmitter, _) = broadcast::channel(10000);
-        let tx = transmitter.clone();
+        // let tx = transmitter.clone();
+        // FIXME
         // demo
-        let _broadcast_handle = tokio::spawn(async move {
-            loop {
-                tracing::info!("Sending demo broadcast");
-                println!("Sending demo broadcast");
-                if tx.send(WsServerMessage::RequestBandwidthReport).is_err() {
-                    tokio::time::sleep(Duration::from_secs(10)).await;
-                }
-                tokio::time::sleep(Duration::from_secs(1)).await;
-            }
-        });
+        // let _broadcast_handle = tokio::spawn(async move {
+        //     loop {
+        //         tracing::info!("Sending demo broadcast");
+        //         println!("Sending demo broadcast");
+        //         if tx.send(WsServerMessage::RequestBandwidthReport).is_err() {
+        //             tokio::time::sleep(Duration::from_secs(10)).await;
+        //         }
+        //         tokio::time::sleep(Duration::from_secs(1)).await;
+        //     }
+        // });
         Self {
             transmitter,
             sockets: Arc::new(DashMap::new()),
