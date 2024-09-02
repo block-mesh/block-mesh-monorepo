@@ -1,11 +1,11 @@
-import React, { useEffect, useRef, useState } from 'react'
-import { Nav, useStorage } from '@/hooks/useStorage'
+import React, { useEffect, useRef } from 'react'
+import { useStorage } from '@/hooks/useStorage'
 import { colors, styles } from '@/utils/theme'
-import { Alert, Button, TextInput, View } from 'react-native'
+import { Alert, TextInput } from 'react-native'
 import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
 import CustomButton from '@/components/CustomButton'
-import { get_token, login } from '@/utils/auth'
+import { get_token } from '@/utils/auth'
+import VerticalContainer from '@/components/VerticalContainer'
 
 export default function LoginScreen() {
   const emailRef = useRef()
@@ -16,7 +16,6 @@ export default function LoginScreen() {
 
   return (
     <ThemedView style={styles.stepContainer}>
-      <ThemedText type="subtitle">Email</ThemedText>
       <TextInput
         ref={emailRef as any}
         style={styles.input}
@@ -26,7 +25,6 @@ export default function LoginScreen() {
         placeholderTextColor={colors['off-white']}
         autoCapitalize={'none'}
       />
-      <ThemedText type="subtitle">Password</ThemedText>
       <TextInput
         secureTextEntry={true}
         ref={passwordRef as any}
@@ -37,17 +35,10 @@ export default function LoginScreen() {
         placeholderTextColor={colors['off-white']}
         autoCapitalize={'none'}
       />
-      <View style={styles.buttonContainer}>
+      <VerticalContainer>
+
         <CustomButton
-          title={'Go to Register'}
-          buttonStyles={styles.button}
-          buttonText={styles.buttonText}
-          onPress={() => {
-            storage.setNav('register')
-          }}
-        />
-        <CustomButton
-          title={'Login'}
+          title={'Submit'}
           buttonStyles={styles.button}
           buttonText={styles.buttonText}
           onPress={async () => {
@@ -94,7 +85,15 @@ export default function LoginScreen() {
             }
           }}
         />
-      </View>
+        <CustomButton
+          title={'Go to Register'}
+          buttonStyles={styles.button}
+          buttonText={styles.buttonText}
+          onPress={() => {
+            storage.setNav('register')
+          }}
+        />
+      </VerticalContainer>
     </ThemedView>
   )
 }

@@ -1,19 +1,18 @@
 import React, { useEffect, useRef, useState } from 'react'
-import { Nav, useStorage } from '@/hooks/useStorage'
+import { useStorage } from '@/hooks/useStorage'
 import { colors, styles } from '@/utils/theme'
-import { View } from 'react-native'
 import { Alert } from 'react-native'
-import { Button, TextInput } from 'react-native'
+import { TextInput } from 'react-native'
 import { ThemedView } from '@/components/ThemedView'
-import { ThemedText } from '@/components/ThemedText'
 import CustomButton from '@/components/CustomButton'
 import { register } from '@/utils/auth'
+import VerticalContainer from '@/components/VerticalContainer'
 
 export default function RegisterScreen() {
   const emailRef = useRef()
   const passwordRef = useRef()
   const inviteRef = useRef()
-  const passworConfirmdRef = useRef()
+  const passwordConfirmed = useRef()
   const storage = useStorage()
   const [invite_code, setInviteCode] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
@@ -23,7 +22,6 @@ export default function RegisterScreen() {
 
   return (
     <ThemedView style={styles.stepContainer}>
-      <ThemedText type="subtitle">Email</ThemedText>
       <TextInput
         ref={emailRef as any}
         style={styles.input}
@@ -33,7 +31,6 @@ export default function RegisterScreen() {
         placeholderTextColor={colors['off-white']}
         autoCapitalize={'none'}
       />
-      <ThemedText type="subtitle">Password</ThemedText>
       <TextInput
         ref={passwordRef as any}
         secureTextEntry={true}
@@ -44,9 +41,8 @@ export default function RegisterScreen() {
         placeholderTextColor={colors['off-white']}
         autoCapitalize={'none'}
       />
-      <ThemedText type="subtitle">Password Confirm</ThemedText>
       <TextInput
-        ref={passworConfirmdRef as any}
+        ref={passwordConfirmed as any}
         secureTextEntry={true}
         style={styles.input}
         onChangeText={setPasswordConfirm}
@@ -55,7 +51,6 @@ export default function RegisterScreen() {
         placeholderTextColor={colors['off-white']}
         autoCapitalize={'none'}
       />
-      <ThemedText type="subtitle">Invite Code</ThemedText>
       <TextInput
         ref={inviteRef as any}
         style={styles.input}
@@ -65,12 +60,23 @@ export default function RegisterScreen() {
         placeholderTextColor={colors['off-white']}
         autoCapitalize={'none'}
       />
-      <View style={styles.buttonContainer}>
+      <VerticalContainer>
         <CustomButton
-          title={'Register'}
+          title={'Submit'}
           buttonStyles={styles.button}
           buttonText={styles.buttonText}
           onPress={async () => {
+            if (invite_code.match(/^\s*$/)) {
+              Alert.alert(
+                'Error',
+                'Please fill invite code',
+                [
+                  { text: 'OK', onPress: () => console.log('OK Pressed') }
+                ],
+                { cancelable: false }
+              )
+              return
+            }
             if (storage.email.match(/^\s*$/)) {
               Alert.alert(
                 'Error',
@@ -143,7 +149,7 @@ export default function RegisterScreen() {
           }}
         />
 
-      </View>
+      </VerticalContainer>
     </ThemedView>
   )
 }
