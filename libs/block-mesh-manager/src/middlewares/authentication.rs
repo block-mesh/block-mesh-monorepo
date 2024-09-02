@@ -135,7 +135,7 @@ impl AuthnBackend for Backend {
         }
 
         let mut transaction = self.db.begin().await.map_err(Error::from)?;
-        let user = match get_user_opt_by_id(&mut transaction, &user_id).await {
+        let user = match get_user_opt_by_id(&mut transaction, user_id).await {
             Ok(u) => u,
             Err(e) => {
                 let _: RedisResult<()> = c.del(&key).await;

@@ -58,7 +58,7 @@ aes-gcm-siv = { git = 'https://github.com/block-mesh/AEADs', branch = 'rustls-de
 curve25519-dalek = { git = "https://github.com/block-mesh/curve25519-dalek", branch = "rustls-dep-hell-1-18" }
 
 [workspace.dependencies]
-reqwest-websocket = { workspace = true }
+reqwest-websocket = { version = "0.4.2" }
 fake = { version = "2.9.2", features = ["derive"] }
 flume = { version = "0.11.0", default-features = false, features = ["async", "select"] }
 twitter-v2 = "0.1.8"

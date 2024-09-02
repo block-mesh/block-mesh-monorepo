@@ -17,7 +17,7 @@ pub struct RateLimitUser {
 impl RateLimitUser {
     pub fn new(user_id: &Uuid, ip: &str) -> Self {
         Self {
-            user_id: user_id.clone(),
+            user_id: *user_id,
             ip: ip.to_string(),
             update_at: Utc::now(),
         }
@@ -29,7 +29,7 @@ pub fn get_key(key: &str) -> String {
 }
 
 pub fn user_ip_key(user_id: &Uuid, ip: &str) -> String {
-    format!("{}-{}", user_id.to_string(), ip)
+    format!("{}-{}", user_id, ip)
 }
 
 pub async fn get_value_from_redis(
