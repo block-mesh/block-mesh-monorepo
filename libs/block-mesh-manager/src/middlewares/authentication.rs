@@ -122,16 +122,13 @@ impl AuthnBackend for Backend {
     async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {
         let key = Backend::authenticate_key_with_user_id(user_id);
         let mut c = self.con.clone();
-        let redis_user: RedisResult<String> = c.get(user_id.to_string()).await;
-        match redis_user {
-            Ok(redis_user) => {
-                return if let Ok(value) = serde_json::from_str::<SessionUser>(&redis_user) {
-                    Ok(Option::from(value))
-                } else {
-                    Err(Error::Auth("Wrong creds".to_string()))
-                };
-            }
-            Err(_) => {}
+        if let Ok(redis_user) = c.get(user_id.to_string()).await {
+            let redis_user: String = redis_user;
+            return if let Ok(value) = serde_json::from_str::<SessionUser>(&redis_user) {
+                Ok(Option::from(value))
+            } else {
+                Err(Error::Auth("Wrong creds".to_string()))
+            };
         }
 
         let mut transaction = self.db.begin().await.map_err(Error::from)?;

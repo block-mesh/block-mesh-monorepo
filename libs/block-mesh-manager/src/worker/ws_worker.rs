@@ -31,5 +31,4 @@ pub async fn ws_worker_tx(
         });
         sleep(Duration::from_secs(15)).await;
     }
-    Ok(())
 }

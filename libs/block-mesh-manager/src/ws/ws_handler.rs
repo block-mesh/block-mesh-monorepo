@@ -3,7 +3,6 @@ use crate::startup::application::AppState;
 use crate::ws::handle_socket::handle_socket;
 use axum::extract::{ConnectInfo, Query, State, WebSocketUpgrade};
 use axum::response::IntoResponse;
-use redis::AsyncCommands;
 use std::collections::HashMap;
 use std::net::SocketAddr;
 use std::sync::Arc;

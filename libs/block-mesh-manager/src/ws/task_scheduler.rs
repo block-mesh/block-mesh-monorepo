@@ -1,10 +1,6 @@
-use block_mesh_common::interfaces::server_api::GetTaskResponse;
-
 use std::fmt::Debug;
 
 use tokio::sync::{mpsc, oneshot};
-
-type HttpTask = GetTaskResponse;
 
 #[derive(Debug, Clone)]
 pub struct TaskScheduler<T: Debug> {

@@ -3,7 +3,6 @@ use block_mesh_common::interfaces::server_api::GetTaskResponse;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use dashmap::DashMap;
 use futures::future::join_all;
-use futures::SinkExt;
 use std::fmt::Debug;
 use std::sync::Arc;
 use std::time::Duration;
