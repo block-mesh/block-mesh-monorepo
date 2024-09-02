@@ -73,6 +73,7 @@ async fn run() -> anyhow::Result<()> {
     let redis = redis_client.get_multiplexed_async_connection().await?;
 
     let ws_connection_manager = ConnectionManager::new();
+    let _reports_cron_task = ws_connection_manager.cron_reports(Duration::from_secs(60)); // FIXME
     let app_state = Arc::new(AppState {
         email_client,
         pool: db_pool.clone(),
@@ -93,7 +94,6 @@ async fn run() -> anyhow::Result<()> {
     let db_cleaner_task = tokio::spawn(db_cleaner_cron(db_pool.clone(), cleaner_rx));
     let db_agg_task = tokio::spawn(db_agg(db_pool.clone(), rx_sql_agg));
     let db_analytics_task = tokio::spawn(analytics_agg(db_pool.clone(), rx_analytics_agg));
-
     tokio::select! {
         o = application_task => report_exit("API", o),
         o = rpc_worker_task =>  report_exit("RPC Background worker failed", o),

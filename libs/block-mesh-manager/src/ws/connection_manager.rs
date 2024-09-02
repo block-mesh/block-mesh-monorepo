@@ -7,9 +7,11 @@ use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 use tokio::sync::broadcast;
 use tokio::sync::broadcast::error::SendError;
 use tokio::sync::mpsc;
+use tokio::task::JoinHandle;
 use uuid::Uuid;
 
 #[derive(Debug, Clone)]
@@ -30,6 +32,24 @@ impl ConnectionManager {
             broadcaster: Broadcaster::new(),
             task_scheduler: TaskScheduler::new(),
         }
+    }
+
+    pub fn cron_reports(&self, period: Duration) -> JoinHandle<()> {
+        let broadcaster = self.broadcaster.clone();
+        tokio::spawn(async move {
+            loop {
+                broadcaster
+                    .queue_multiple(
+                        &[
+                            WsServerMessage::RequestUptimeReport,
+                            WsServerMessage::RequestBandwidthReport,
+                        ],
+                        100,
+                    )
+                    .await;
+                tokio::time::sleep(period).await;
+            }
+        })
     }
 }
 #[derive(Debug, Clone)]
