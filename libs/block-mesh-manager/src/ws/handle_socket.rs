@@ -78,7 +78,7 @@ pub async fn handle_socket(
     let ws_connection_manager = state.ws_connection_manager.clone();
     let task_scheduler = ws_connection_manager.task_scheduler;
     let broadcaster = ws_connection_manager.broadcaster;
-    let mut broadcast_receiver = broadcaster.subscribe(user_id, sink_tx.clone()); // FIXME
+    let mut broadcast_receiver = broadcaster.subscribe(user_id, who, sink_tx.clone()); // FIXME
 
     // Using notify to process one task at a time
     let notify = Arc::new(Notify::new());
@@ -126,7 +126,7 @@ pub async fn handle_socket(
     });
 
     broadcaster
-        .batch(WsServerMessage::RequestUptimeReport, &[user_id])
+        .batch(WsServerMessage::RequestUptimeReport, &[(user_id, who)])
         .await;
 
     tokio::select! {
@@ -136,6 +136,6 @@ pub async fn handle_socket(
         o = broadcast_task => tracing::error!("broadcast_task dead {:?}", o)
     }
 
-    broadcaster.unsubscribe(&user_id);
+    broadcaster.unsubscribe(user_id, who);
     tracing::info!("Websocket context {who} destroyed");
 }
