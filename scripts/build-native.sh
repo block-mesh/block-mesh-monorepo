@@ -36,6 +36,9 @@ fi
 
 
 if [ "${BUILD_IOS}" == "true" ]; then
+  ensure rm -f "${ROOT}/target/aarch64-apple-ios/release/${LIB_NAME}.a"
+  ensure rm -fr "${ROOT}/libs/react-native-app/headers/blockmesh-cli.h"
+
   ensure cargo build -p blockmesh-cli --release --target aarch64-apple-ios
   ensure cargo build -p blockmesh-cli --release --target aarch64-apple-ios-sim
 
@@ -43,11 +46,14 @@ if [ "${BUILD_IOS}" == "true" ]; then
   && cbindgen --only-target-dependencies --lang c --crate blockmesh-cli --output "${ROOT}/libs/react-native-app/headers/blockmesh-cli.h" \
   && cd "${_PWD}" || exit 1
 
+
   ensure cp "${ROOT}/target/aarch64-apple-ios/release/${LIB_NAME}.a" "${ROOT}/libs/react-native-app/modules/my-rust-module/ios/rust"
   ensure cp "${ROOT}/libs/react-native-app/headers/blockmesh-cli.h" "${ROOT}/libs/react-native-app/modules/my-rust-module/ios/rust"
+  ensure mkdir -p "${ROOT}/libs/react-native-app/blockmesh-cli.xcframework"
+  ensure rm -fr "${ROOT}/libs/react-native-app/blockmesh-cli.xcframework/ios-arm64"
+  ensure rm -fr "${ROOT}/libs/react-native-app/blockmesh-cli.xcframework/ios-arm64-simulator"
 
   ensure cd "${ROOT}/libs/react-native-app" \
-  && ensure rm -fr "${ROOT}/libs/react-native-app/blockmesh-cli.xcframework" \
   && ensure xcodebuild -create-xcframework \
   -library "${ROOT}/target/aarch64-apple-ios/release/${LIB_NAME}.a" \
   -headers ./headers \
