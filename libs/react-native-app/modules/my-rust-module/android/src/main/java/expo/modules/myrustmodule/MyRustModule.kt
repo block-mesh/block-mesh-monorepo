@@ -40,12 +40,12 @@ class MyRustModule : Module() {
         runLib(url, email, password)
     }
 
-    AsyncFunction("stop_lib") {url: string ->
+    AsyncFunction("stop_lib") {url: String ->
         stopLib(url)
     }
 
     Function("get_lib_status") {
-        return getLibStatus()
+        getLibStatus()
     }
 
     // Defines a JavaScript function that always returns a Promise and whose native code

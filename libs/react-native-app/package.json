@@ -1,5 +1,5 @@
 {
-  "name": "react-native-app",
+  "name": "blockmesh-network",
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
@@ -9,7 +9,10 @@
     "ios": "expo run:ios",
     "web": "expo start --web",
     "test": "jest --watchAll",
-    "lint": "expo lint"
+    "lint": "expo lint",
+    "build-android-local": "npx eas build --platform android --local",
+    "build-ios-local": "npx eas build --platform ios --local",
+    "build-remote": "npx eas build --platform all"
   },
   "jest": {
     "preset": "jest-expo"
@@ -18,15 +21,15 @@
     "@badrap/result": "^0.2.13",
     "@bounceapp/iframe": "^0.3.0",
     "@expo/vector-icons": "^14.0.2",
-    "@react-native-async-storage/async-storage": "^1.24.0",
+    "@react-native-async-storage/async-storage": "1.23.1",
     "@react-navigation/native": "^6.0.2",
     "axios": "^1.7.5",
-    "expo": "~51.0.21",
+    "expo": "~51.0.31",
     "expo-build-properties": "~0.12.5",
     "expo-constants": "~16.0.2",
     "expo-font": "~12.0.9",
     "expo-linking": "~6.3.1",
-    "expo-router": "~3.5.18",
+    "expo-router": "~3.5.23",
     "expo-splash-screen": "~0.27.5",
     "expo-status-bar": "~1.12.1",
     "expo-system-ui": "~3.0.7",
@@ -34,7 +37,7 @@
     "react": "18.2.0",
     "react-dom": "18.2.0",
     "react-if": "^4.1.5",
-    "react-native": "0.74.3",
+    "react-native": "0.74.5",
     "react-native-background-actions": "^4.0.1",
     "react-native-dotenv": "^3.4.11",
     "react-native-gesture-handler": "~2.16.1",
@@ -51,7 +54,7 @@
     "@types/react": "~18.2.45",
     "@types/react-test-renderer": "^18.0.7",
     "jest": "^29.2.1",
-    "jest-expo": "~51.0.3",
+    "jest-expo": "~51.0.4",
     "react-devtools": "^5.3.1",
     "react-test-renderer": "18.2.0",
     "typescript": "~5.3.3"

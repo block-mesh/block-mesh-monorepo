@@ -21,3 +21,5 @@ expo-env.d.ts
 blockmesh-cli.xcframework/ios-arm64/
 blockmesh-cli.xcframework/ios-arm64-simulator/
 headers/
+build-*.ipa
+build-*.aab
