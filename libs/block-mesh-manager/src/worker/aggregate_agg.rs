@@ -1,5 +1,6 @@
 use crate::database::aggregate::update_aggregate_bulk::update_aggregate_bulk;
 use chrono::Utc;
+use flume::Receiver;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::PgPool;
@@ -15,7 +16,7 @@ pub struct AggregateMessage {
 
 pub async fn aggregate_agg(
     pool: PgPool,
-    mut rx: tokio::sync::mpsc::Receiver<AggregateMessage>,
+    rx: Receiver<AggregateMessage>,
 ) -> Result<(), anyhow::Error> {
     let agg_size = env::var("AGGREGATE_AGG_SIZE")
         .unwrap_or("300".to_string())
@@ -24,7 +25,7 @@ pub async fn aggregate_agg(
     let mut calls: HashMap<Uuid, Value> = HashMap::new();
     let mut count = 0;
     let mut prev = Utc::now();
-    while let Some(message) = rx.recv().await {
+    while let Ok(message) = rx.recv_async().await {
         calls.insert(message.id, message.value);
         count += 1;
         let now = Utc::now();

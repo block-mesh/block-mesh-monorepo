@@ -6,11 +6,11 @@ use crate::database::users_ip::get_or_create_users_ip::get_or_create_users_ip;
 use crate::errors::error::Error;
 use block_mesh_common::constants::BLOCK_MESH_IP_WORKER;
 use block_mesh_common::interfaces::ip_data::{IPData, IpDataPostRequest};
+use flume::Receiver;
 use reqwest::{Client, ClientBuilder};
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::time::Duration;
-use tokio::sync::mpsc::Receiver;
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -19,17 +19,14 @@ pub struct EnrichIp {
     pub ip: String,
 }
 
-pub async fn db_cleaner_cron(
-    pool: PgPool,
-    mut rx: Receiver<EnrichIp>,
-) -> Result<(), anyhow::Error> {
+pub async fn db_cleaner_cron(pool: PgPool, rx: Receiver<EnrichIp>) -> Result<(), anyhow::Error> {
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
         .build()
         .unwrap_or_default();
     let thread_pool = rayon::ThreadPoolBuilder::new().num_threads(16).build()?;
 
-    while let Some(job) = rx.recv().await {
+    while let Ok(job) = rx.recv_async().await {
         let pool = pool.clone();
         let client = client.clone();
         thread_pool

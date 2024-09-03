@@ -1,5 +1,6 @@
 use crate::database::users_ip::update_users_ip_bulk::update_users_ip_bulk;
 use chrono::Utc;
+use flume::Receiver;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::collections::HashMap;
@@ -12,10 +13,7 @@ pub struct UsersIpMessage {
     pub ip: String,
 }
 
-pub async fn users_ip_agg(
-    pool: PgPool,
-    mut rx: tokio::sync::mpsc::Receiver<UsersIpMessage>,
-) -> Result<(), anyhow::Error> {
+pub async fn users_ip_agg(pool: PgPool, rx: Receiver<UsersIpMessage>) -> Result<(), anyhow::Error> {
     let agg_size = env::var("USERS_IP_AGG_SIZE")
         .unwrap_or("300".to_string())
         .parse()
@@ -23,7 +21,7 @@ pub async fn users_ip_agg(
     let mut calls: HashMap<(Uuid, String), String> = HashMap::new();
     let mut count = 0;
     let mut prev = Utc::now();
-    while let Some(message) = rx.recv().await {
+    while let Ok(message) = rx.recv_async().await {
         calls.insert((message.id, message.ip.clone()), message.ip);
         count += 1;
         let now = Utc::now();

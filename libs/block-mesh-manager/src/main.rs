@@ -62,13 +62,12 @@ async fn run() -> anyhow::Result<()> {
     let db_pool = get_connection_pool(&configuration.database, Option::from(database_url)).await?;
     migrate(&db_pool).await.expect("Failed to migrate database");
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
-    let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(500);
-    let (tx_daily_stat_agg, rx_daily_stat_agg) =
-        tokio::sync::mpsc::channel::<DailyStatMessage>(500);
-    let (tx_analytics_agg, rx_analytics_agg) = tokio::sync::mpsc::channel::<AnalyticsMessage>(500);
-    let (tx_users_ip_agg, rx_users_ip_agg) = tokio::sync::mpsc::channel::<UsersIpMessage>(500);
-    let (tx_aggregate_agg, rx_aggregate_agg) = tokio::sync::mpsc::channel::<AggregateMessage>(500);
-    let (cleaner_tx, cleaner_rx) = tokio::sync::mpsc::channel::<EnrichIp>(500);
+    let (tx, rx) = flume::bounded::<JoinHandle<()>>(500);
+    let (tx_daily_stat_agg, rx_daily_stat_agg) = flume::bounded::<DailyStatMessage>(500);
+    let (tx_analytics_agg, rx_analytics_agg) = flume::bounded::<AnalyticsMessage>(500);
+    let (tx_users_ip_agg, rx_users_ip_agg) = flume::bounded::<UsersIpMessage>(500);
+    let (tx_aggregate_agg, rx_aggregate_agg) = flume::bounded::<AggregateMessage>(500);
+    let (cleaner_tx, cleaner_rx) = flume::bounded::<EnrichIp>(500);
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
         .build()

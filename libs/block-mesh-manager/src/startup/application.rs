@@ -31,6 +31,7 @@ use tokio::net::TcpListener;
 use crate::worker::aggregate_agg::AggregateMessage;
 use crate::worker::daily_stat_agg::DailyStatMessage;
 use crate::worker::users_ip_agg::UsersIpMessage;
+use flume::Sender;
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
@@ -48,15 +49,15 @@ pub struct AppState {
     pub pool: PgPool,
     pub email_client: Arc<EmailClient>,
     pub client: Client,
-    pub tx: tokio::sync::mpsc::Sender<JoinHandle<()>>,
-    pub tx_daily_stat_agg: tokio::sync::mpsc::Sender<DailyStatMessage>,
-    pub tx_analytics_agg: tokio::sync::mpsc::Sender<AnalyticsMessage>,
+    pub tx: Sender<JoinHandle<()>>,
+    pub tx_daily_stat_agg: Sender<DailyStatMessage>,
+    pub tx_analytics_agg: Sender<AnalyticsMessage>,
     pub flags: HashMap<String, FlagValue>,
-    pub cleaner_tx: tokio::sync::mpsc::Sender<EnrichIp>,
+    pub cleaner_tx: Sender<EnrichIp>,
     pub redis: MultiplexedConnection,
     pub ws_connection_manager: ConnectionManager,
-    pub tx_users_ip_agg: tokio::sync::mpsc::Sender<UsersIpMessage>,
-    pub tx_aggregate_agg: tokio::sync::mpsc::Sender<AggregateMessage>,
+    pub tx_users_ip_agg: Sender<UsersIpMessage>,
+    pub tx_aggregate_agg: Sender<AggregateMessage>,
 }
 
 #[derive(Clone)]
