@@ -1,4 +1,5 @@
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_pool;
+use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::api_token::find_token::find_token_pool;
 use crate::database::bandwidth::delete_bandwidth_reports_by_time::delete_bandwidth_reports_by_time;
 use crate::database::user::get_user_by_id::get_user_opt_by_id_pool;
@@ -51,34 +52,68 @@ pub async fn handler(
     let latency =
         get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Latency, user.id)
             .await?;
+    let flag = state
+        .flags
+        .get("submit_bandwidth_via_channel")
+        .unwrap_or(&FlagValue::Boolean(false));
+    let flag: bool = <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
 
-    let _ = state
-        .tx_aggregate_agg
-        .send_async(AggregateMessage {
-            id: download.id.unwrap_or_default(),
-            value: serde_json::Value::from(
-                (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
-            ),
-        })
-        .await;
-    let _ = state
-        .tx_aggregate_agg
-        .send_async(AggregateMessage {
-            id: upload.id.unwrap_or_default(),
-            value: serde_json::Value::from(
-                (upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0,
-            ),
-        })
-        .await;
-    let _ = state
-        .tx_aggregate_agg
-        .send_async(AggregateMessage {
-            id: latency.id.unwrap_or_default(),
-            value: serde_json::Value::from(
+    if flag {
+        let _ = state
+            .tx_aggregate_agg
+            .send_async(AggregateMessage {
+                id: download.id.unwrap_or_default(),
+                value: serde_json::Value::from(
+                    (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
+                ),
+            })
+            .await;
+        let _ = state
+            .tx_aggregate_agg
+            .send_async(AggregateMessage {
+                id: upload.id.unwrap_or_default(),
+                value: serde_json::Value::from(
+                    (upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0,
+                ),
+            })
+            .await;
+        let _ = state
+            .tx_aggregate_agg
+            .send_async(AggregateMessage {
+                id: latency.id.unwrap_or_default(),
+                value: serde_json::Value::from(
+                    (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,
+                ),
+            })
+            .await;
+    } else {
+        let mut transaction = pool.begin().await?;
+        let _ = update_aggregate(
+            &mut transaction,
+            &latency.id.unwrap_or_default(),
+            &serde_json::Value::from(
                 (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,
             ),
-        })
+        )
         .await;
+        let _ = update_aggregate(
+            &mut transaction,
+            &upload.id.unwrap_or_default(),
+            &serde_json::Value::from(
+                (upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0,
+            ),
+        )
+        .await;
+        let _ = update_aggregate(
+            &mut transaction,
+            &download.id.unwrap_or_default(),
+            &serde_json::Value::from(
+                (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
+            ),
+        )
+        .await;
+        transaction.commit().await?;
+    }
 
     let flag = state
         .flags
