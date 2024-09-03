@@ -71,7 +71,6 @@ pub async fn handle_socket(
     _email: String,
     _user_id: Uuid,
 ) {
-    return;
     /*
     let is_closing = Arc::new(AtomicBool::new(false));
     let (ws_sink, ws_stream) = socket.split();
