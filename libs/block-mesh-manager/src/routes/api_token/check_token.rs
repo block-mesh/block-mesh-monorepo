@@ -3,37 +3,20 @@ use crate::database::user::get_user_by_email::get_user_opt_by_email_pool;
 use crate::domain::api_token::ApiTokenStatus;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
-use crate::middlewares::rate_limit::filter_request;
 use crate::startup::application::AppState;
-use anyhow::Context;
 use axum::extract::State;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetTokenResponse};
-use http::HeaderMap;
 use redis::AsyncCommands;
 use sqlx::PgPool;
 use std::sync::Arc;
 
 #[tracing::instrument(name = "check_token", skip_all, level = "trace", fields(email=body.email))]
 pub async fn handler(
-    headers: HeaderMap,
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,
     Json(body): Json<CheckTokenRequest>,
 ) -> Result<Json<GetTokenResponse>, Error> {
-    let ip = headers
-        .get("cf-connecting-ip")
-        .context("Missing CF-CONNECTING-IP")?
-        .to_str()
-        .context("Unable to STR CF-CONNECTING-IP")?;
-    let mut redis = state.redis.clone();
-    if !filter_request(&mut redis, &body.api_token, ip)
-        .await
-        .context("Rate limit")?
-    {
-        return Err(Error::NotAllowedRateLimit);
-    }
-
     let key = Backend::authenticate_key_with_api_token(
         &body.email.to_ascii_lowercase(),
         &body.api_token.to_string(),
