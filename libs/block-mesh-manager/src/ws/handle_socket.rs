@@ -13,6 +13,7 @@ use tokio::task::JoinHandle;
 use uuid::Uuid;
 
 /// Actual websocket statemachine (one will be spawned per connection)
+#[allow(dead_code)]
 fn messenger(
     mut ws_sink: SplitSink<WebSocket, Message>,
     is_cls: Arc<AtomicBool>,
@@ -36,6 +37,7 @@ fn messenger(
     (sink_task, sink_tx)
 }
 
+#[allow(dead_code)]
 fn receiver(
     mut ws_stream: SplitStream<WebSocket>,
     is_cls: Arc<AtomicBool>,
@@ -63,12 +65,14 @@ fn receiver(
 
 /// Actual websocket statemachine (one will be spawned per connection)
 pub async fn handle_socket(
-    socket: WebSocket,
-    who: SocketAddr,
-    state: Arc<AppState>,
+    _socket: WebSocket,
+    _who: SocketAddr,
+    _state: Arc<AppState>,
     _email: String,
-    user_id: Uuid,
+    _user_id: Uuid,
 ) {
+    return;
+    /*
     let is_closing = Arc::new(AtomicBool::new(false));
     let (ws_sink, ws_stream) = socket.split();
     let (sink_task, sink_tx) = messenger(ws_sink, is_closing.clone());
@@ -138,4 +142,5 @@ pub async fn handle_socket(
 
     broadcaster.unsubscribe(&user_id);
     tracing::info!("Websocket context {who} destroyed");
+     */
 }

@@ -8,7 +8,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_manager::worker::aggregate_agg::{aggregate_agg, AggregateMessage};
     use block_mesh_manager::worker::daily_stat_agg::DailyStatMessage;
     use block_mesh_manager::worker::users_ip_agg::{users_ip_agg, UsersIpMessage};
-    use block_mesh_manager::ws::connection_manager::ConnectionManager;
+    // use block_mesh_manager::ws::connection_manager::ConnectionManager;
     use block_mesh_manager::worker::analytics_agg::{analytics_agg, AnalyticsMessage};
     use std::env;
     use block_mesh_manager::worker::daily_stat_agg::{daily_stat_agg};
@@ -77,7 +77,7 @@ async fn run() -> anyhow::Result<()> {
     let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
     let redis = redis_client.get_multiplexed_async_connection().await?;
 
-    let ws_connection_manager = ConnectionManager::new();
+    // let ws_connection_manager = ConnectionManager::new();
     let app_state = Arc::new(AppState {
         email_client,
         pool: db_pool.clone(),
@@ -88,7 +88,7 @@ async fn run() -> anyhow::Result<()> {
         flags,
         cleaner_tx,
         redis,
-        ws_connection_manager,
+        // ws_connection_manager,
         tx_users_ip_agg,
         tx_aggregate_agg,
     });
