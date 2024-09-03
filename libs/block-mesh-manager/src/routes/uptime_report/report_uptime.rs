@@ -6,9 +6,11 @@ use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
+use crate::worker::aggregate_agg::AggregateMessage;
 use crate::worker::analytics_agg::AnalyticsMessage;
-use crate::worker::db_agg::{Table, UpdateBulkMessage};
+use crate::worker::daily_stat_agg::DailyStatMessage;
 use crate::worker::db_cleaner_cron::EnrichIp;
+use crate::worker::users_ip_agg::UsersIpMessage;
 use axum::extract::{ConnectInfo, Query, Request, State};
 use axum::{Extension, Json};
 use block_mesh_common::feature_flag_client::FlagValue;
@@ -98,11 +100,10 @@ pub async fn handler(
     let flag: bool = <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
     if flag {
         let _ = state
-            .tx_sql_agg
-            .send(UpdateBulkMessage {
+            .tx_users_ip_agg
+            .send(UsersIpMessage {
                 id: user.id,
-                value: serde_json::Value::from(ip.clone()),
-                table: Table::UserIp,
+                ip: ip.clone(),
             })
             .await;
     }
@@ -139,21 +140,19 @@ pub async fn handler(
 
     if daily_stat_opt.is_some() && extra > 0.0 {
         let _ = state
-            .tx_sql_agg
-            .send(UpdateBulkMessage {
+            .tx_daily_stat_agg
+            .send(DailyStatMessage {
                 id: daily_stat_opt.unwrap().id,
-                value: serde_json::Value::from(extra),
-                table: Table::DailyStat,
+                uptime: extra,
             })
             .await;
     }
 
     let _ = state
-        .tx_sql_agg
-        .send(UpdateBulkMessage {
+        .tx_aggregate_agg
+        .send(AggregateMessage {
             id: uptime.id.0.unwrap_or_default(),
             value: serde_json::Value::from(abs),
-            table: Table::Aggregate,
         })
         .await;
 

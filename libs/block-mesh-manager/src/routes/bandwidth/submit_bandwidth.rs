@@ -5,7 +5,7 @@ use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
-use crate::worker::db_agg::{Table, UpdateBulkMessage};
+use crate::worker::aggregate_agg::AggregateMessage;
 use axum::extract::State;
 use axum::{Extension, Json};
 use block_mesh_common::feature_flag_client::FlagValue;
@@ -58,33 +58,30 @@ pub async fn handler(
     transaction.commit().await.map_err(Error::from)?;
 
     let _ = state
-        .tx_sql_agg
-        .send(UpdateBulkMessage {
+        .tx_aggregate_agg
+        .send(AggregateMessage {
             id: download.id.unwrap_or_default(),
             value: serde_json::Value::from(
                 (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
             ),
-            table: Table::Aggregate,
         })
         .await;
     let _ = state
-        .tx_sql_agg
-        .send(UpdateBulkMessage {
+        .tx_aggregate_agg
+        .send(AggregateMessage {
             id: upload.id.unwrap_or_default(),
             value: serde_json::Value::from(
                 (upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0,
             ),
-            table: Table::Aggregate,
         })
         .await;
     let _ = state
-        .tx_sql_agg
-        .send(UpdateBulkMessage {
+        .tx_aggregate_agg
+        .send(AggregateMessage {
             id: latency.id.unwrap_or_default(),
             value: serde_json::Value::from(
                 (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,
             ),
-            table: Table::Aggregate,
         })
         .await;
 

@@ -10,7 +10,7 @@ use crate::domain::aggregate::AggregateName;
 use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
-use crate::worker::db_agg::{Table, UpdateBulkMessage};
+use crate::worker::aggregate_agg::AggregateMessage;
 use axum::extract::{Query, Request, State};
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{SubmitTaskRequest, SubmitTaskResponse};
@@ -94,11 +94,10 @@ pub async fn handler(
         .await?;
         transaction.commit().await.map_err(Error::from)?;
         let _ = state
-            .tx_sql_agg
-            .send(UpdateBulkMessage {
+            .tx_aggregate_agg
+            .send(AggregateMessage {
                 id: tasks.id.unwrap_or_default(),
                 value: serde_json::Value::from(tasks.value.as_i64().unwrap_or_default() + 1),
-                table: Table::Aggregate,
             })
             .await;
     }
