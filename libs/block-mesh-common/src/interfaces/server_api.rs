@@ -366,6 +366,7 @@ pub struct DailyLeaderboard {
 pub struct LeaderBoardUser {
     pub email: String,
     pub points: Option<f64>,
+    pub ips: Option<i64>,
 }
 
 impl PartialEq<Self> for LeaderBoardUser {

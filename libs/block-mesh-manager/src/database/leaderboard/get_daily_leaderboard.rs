@@ -14,12 +14,17 @@ pub(crate) async fn get_daily_leaderboard(
         r#"
         SELECT
         	users.email AS email,
-        	(uptime * $1 + CAST(tasks_count as DOUBLE PRECISION) * $2) AS points
+        	(uptime * $1 + CAST(tasks_count as DOUBLE PRECISION) * $2) AS points,
+        	COUNT(users_ip.id) AS ips
         FROM
         	daily_stats
       		JOIN users ON users.id = daily_stats.user_id
+      		JOIN users_ip ON users.id = users_ip.user_id
         WHERE
             day = $3
+        GROUP BY
+	        users.email,
+	        points
         ORDER BY
         	points DESC
         	LIMIT $4
