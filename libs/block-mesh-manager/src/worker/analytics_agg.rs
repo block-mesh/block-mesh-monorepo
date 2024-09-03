@@ -1,6 +1,7 @@
 use crate::database::analytics::inserting_client_analytics_bulk::inserting_client_analytics_bulk;
 use block_mesh_common::constants::DeviceType;
 use chrono::Utc;
+use flume::Receiver;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::collections::HashMap;
@@ -16,7 +17,7 @@ pub struct AnalyticsMessage {
 
 pub async fn analytics_agg(
     pool: PgPool,
-    mut rx: tokio::sync::mpsc::Receiver<AnalyticsMessage>,
+    rx: Receiver<AnalyticsMessage>,
 ) -> Result<(), anyhow::Error> {
     let agg_size = env::var("ANALYTICS_AGG_AGG_SIZE")
         .unwrap_or("300".to_string())
@@ -25,7 +26,7 @@ pub async fn analytics_agg(
     let mut calls: HashMap<Uuid, AnalyticsMessage> = HashMap::new();
     let mut count = 0;
     let mut prev = Utc::now();
-    while let Some(query) = rx.recv().await {
+    while let Ok(query) = rx.recv_async().await {
         calls.insert(query.user_id, query.clone());
         count += 1;
         let now = Utc::now();

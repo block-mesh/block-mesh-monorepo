@@ -1,5 +1,6 @@
 use crate::database::daily_stat::update_daily_stat_uptime_bulk::update_daily_stat_uptime_bulk;
 use chrono::Utc;
+use flume::Receiver;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::collections::HashMap;
@@ -14,7 +15,7 @@ pub struct DailyStatMessage {
 
 pub async fn daily_stat_agg(
     pool: PgPool,
-    mut rx: tokio::sync::mpsc::Receiver<DailyStatMessage>,
+    rx: Receiver<DailyStatMessage>,
 ) -> Result<(), anyhow::Error> {
     let agg_size = env::var("DAILY_STAT_AGG_SIZE")
         .unwrap_or("300".to_string())
@@ -23,7 +24,7 @@ pub async fn daily_stat_agg(
     let mut calls: HashMap<Uuid, f64> = HashMap::new();
     let mut count = 0;
     let mut prev = Utc::now();
-    while let Some(message) = rx.recv().await {
+    while let Ok(message) = rx.recv_async().await {
         calls.insert(message.id, message.uptime);
         count += 1;
         let now = Utc::now();

@@ -93,13 +93,10 @@ pub async fn handler(
         )
         .await?;
         transaction.commit().await.map_err(Error::from)?;
-        let _ = state
-            .tx_aggregate_agg
-            .send(AggregateMessage {
-                id: tasks.id.unwrap_or_default(),
-                value: serde_json::Value::from(tasks.value.as_i64().unwrap_or_default() + 1),
-            })
-            .await;
+        let _ = state.tx_aggregate_agg.try_send(AggregateMessage {
+            id: tasks.id.unwrap_or_default(),
+            value: serde_json::Value::from(tasks.value.as_i64().unwrap_or_default() + 1),
+        });
     }
 
     Ok(Json(SubmitTaskResponse {

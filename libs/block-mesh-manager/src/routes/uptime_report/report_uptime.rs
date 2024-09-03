@@ -72,14 +72,11 @@ pub async fn handler(
         let body_raw = String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from(""));
         if !body_raw.is_empty() {
             if let Ok(metadata) = serde_json::from_str::<ClientsMetadata>(&body_raw) {
-                let _ = state
-                    .tx_analytics_agg
-                    .send(AnalyticsMessage {
-                        user_id: user.id,
-                        depin_aggregator: metadata.depin_aggregator.unwrap_or_default(),
-                        device_type: metadata.device_type,
-                    })
-                    .await;
+                let _ = state.tx_analytics_agg.try_send(AnalyticsMessage {
+                    user_id: user.id,
+                    depin_aggregator: metadata.depin_aggregator.unwrap_or_default(),
+                    device_type: metadata.device_type,
+                });
             }
         }
     }
@@ -99,13 +96,10 @@ pub async fn handler(
         .unwrap_or(&FlagValue::Boolean(false));
     let flag: bool = <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
     if flag {
-        let _ = state
-            .tx_users_ip_agg
-            .send(UsersIpMessage {
-                id: user.id,
-                ip: ip.clone(),
-            })
-            .await;
+        let _ = state.tx_users_ip_agg.try_send(UsersIpMessage {
+            id: user.id,
+            ip: ip.clone(),
+        });
     }
 
     if daily_stat_opt.is_none() {
@@ -139,22 +133,16 @@ pub async fn handler(
         };
 
     if daily_stat_opt.is_some() && extra > 0.0 {
-        let _ = state
-            .tx_daily_stat_agg
-            .send(DailyStatMessage {
-                id: daily_stat_opt.unwrap().id,
-                uptime: extra,
-            })
-            .await;
+        let _ = state.tx_daily_stat_agg.try_send(DailyStatMessage {
+            id: daily_stat_opt.unwrap().id,
+            uptime: extra,
+        });
     }
 
-    let _ = state
-        .tx_aggregate_agg
-        .send(AggregateMessage {
-            id: uptime.id.0.unwrap_or_default(),
-            value: serde_json::Value::from(abs),
-        })
-        .await;
+    let _ = state.tx_aggregate_agg.try_send(AggregateMessage {
+        id: uptime.id.0.unwrap_or_default(),
+        value: serde_json::Value::from(abs),
+    });
 
     let flag = state
         .flags
@@ -162,13 +150,10 @@ pub async fn handler(
         .unwrap_or(&FlagValue::Boolean(false));
     let flag: bool = <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
     if flag {
-        let _ = state
-            .cleaner_tx
-            .send(EnrichIp {
-                user_id: user.id,
-                ip: ip.clone(),
-            })
-            .await;
+        let _ = state.cleaner_tx.try_send(EnrichIp {
+            user_id: user.id,
+            ip: ip.clone(),
+        });
     }
 
     Ok(Json(ReportUptimeResponse {
