@@ -99,7 +99,7 @@ async fn run() -> anyhow::Result<()> {
     let joiner_task = tokio::spawn(joiner_loop(rx));
     let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
     let db_cleaner_task = tokio::spawn(db_cleaner_cron(db_pool.clone(), cleaner_rx));
-    let db_agg_task = tokio::spawn(daily_stat_agg(db_pool.clone(), rx_daily_stat_agg));
+    let db_daily_stat_task = tokio::spawn(daily_stat_agg(db_pool.clone(), rx_daily_stat_agg));
     let db_analytics_task = tokio::spawn(analytics_agg(db_pool.clone(), rx_analytics_agg));
     let db_users_ip_task = tokio::spawn(users_ip_agg(db_pool.clone(), rx_users_ip_agg));
     let db_aggregate_task = tokio::spawn(aggregate_agg(db_pool.clone(), rx_aggregate_agg));
@@ -110,7 +110,7 @@ async fn run() -> anyhow::Result<()> {
         o = joiner_task => report_exit("Joiner task failed", o),
         o = finalize_daily_stats_task => report_exit("Finalize daily task failed", o),
         o = db_cleaner_task => report_exit("DB cleaner task failed", o),
-        o = db_agg_task => report_exit("DB aggregator", o),
+        o = db_daily_stat_task => report_exit("DB daily_stat aggregator", o),
         o = db_analytics_task => report_exit("DB analytics aggregator", o),
         o = db_users_ip_task => report_exit("DB users_ip aggregator", o),
         o = db_aggregate_task => report_exit("DB aggregate aggregator", o)
