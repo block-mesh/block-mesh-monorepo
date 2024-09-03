@@ -18,6 +18,8 @@ ensure "${ROOT}/scripts/init_db.sh"
 #ensure "${ROOT}/scripts/build.sh"
 #"${ROOT}/target/debug/block-mesh-manager" &
 export LEPTOS_HASH_FILES=false
+export RUST_LOG=sqlx=trace
+export AGGREGATE_AGG_SIZE=1
 cargo leptos watch --project block-mesh-manager | bunyan &
 export backend=$!
 function cleanup()
