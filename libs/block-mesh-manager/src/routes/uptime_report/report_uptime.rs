@@ -5,12 +5,14 @@ use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_st
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
+use crate::middlewares::rate_limit::filter_request;
 use crate::startup::application::AppState;
 use crate::worker::aggregate_agg::AggregateMessage;
 use crate::worker::analytics_agg::AnalyticsMessage;
 use crate::worker::daily_stat_agg::DailyStatMessage;
 use crate::worker::db_cleaner_cron::EnrichIp;
 use crate::worker::users_ip_agg::UsersIpMessage;
+use anyhow::Context;
 use axum::extract::{ConnectInfo, Query, Request, State};
 use axum::{Extension, Json};
 use block_mesh_common::feature_flag_client::FlagValue;
@@ -47,6 +49,19 @@ pub async fn handler(
     Query(query): Query<ReportUptimeRequest>,
     request: Request,
 ) -> Result<Json<ReportUptimeResponse>, Error> {
+    let ip = headers
+        .get("cf-connecting-ip")
+        .context("Missing CF-CONNECTING-IP")?
+        .to_str()
+        .context("Unable to STR CF-CONNECTING-IP")?;
+    let mut redis = state.redis.clone();
+    if !filter_request(&mut redis, &query.api_token, ip)
+        .await
+        .context("Rate limit")?
+    {
+        return Err(Error::NotAllowedRateLimit);
+    }
+
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let api_token = find_token(&mut transaction, &query.api_token)
         .await?

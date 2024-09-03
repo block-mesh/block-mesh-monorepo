@@ -15,7 +15,7 @@ use secret::Secret;
 use sqlx::PgPool;
 use std::sync::Arc;
 
-#[tracing::instrument(name = "get_token", skip(body, auth, state), fields(email = body.email))]
+#[tracing::instrument(name = "get_token", skip_all, fields(email = body.email))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,

@@ -20,12 +20,7 @@ use http_body_util::BodyExt;
 use sqlx::PgPool;
 use std::sync::Arc;
 
-#[tracing::instrument(
-    name = "submit_task",
-    skip(pool, request, query, state),
-    level = "trace",
-    ret
-)]
+#[tracing::instrument(name = "submit_task", skip_all, level = "trace", ret)]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,
