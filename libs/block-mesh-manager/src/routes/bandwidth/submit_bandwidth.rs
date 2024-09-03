@@ -4,39 +4,23 @@ use crate::database::bandwidth::delete_bandwidth_reports_by_time::delete_bandwid
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
-use crate::middlewares::rate_limit::filter_request;
 use crate::startup::application::AppState;
 use crate::worker::aggregate_agg::AggregateMessage;
-use anyhow::Context;
 use axum::extract::State;
 use axum::{Extension, Json};
 use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
-use http::{HeaderMap, StatusCode};
+use http::StatusCode;
 use sqlx::PgPool;
 use std::sync::Arc;
 use tokio::task::JoinHandle;
 
 #[tracing::instrument(name = "submit_bandwidth", skip(pool, body, state), level = "trace", fields(email = body.email), ret)]
 pub async fn handler(
-    headers: HeaderMap,
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,
     Json(body): Json<ReportBandwidthRequest>,
 ) -> Result<Json<ReportBandwidthResponse>, Error> {
-    let ip = headers
-        .get("cf-connecting-ip")
-        .context("Missing CF-CONNECTING-IP")?
-        .to_str()
-        .context("Unable to STR CF-CONNECTING-IP")?;
-    let mut redis = state.redis.clone();
-    if !filter_request(&mut redis, &body.api_token, ip)
-        .await
-        .context("Rate limit")?
-    {
-        return Err(Error::NotAllowedRateLimit);
-    }
-
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let api_token = find_token(&mut transaction, &body.api_token)
         .await?
@@ -73,24 +57,33 @@ pub async fn handler(
             .await?;
     transaction.commit().await.map_err(Error::from)?;
 
-    let _ = state.tx_aggregate_agg.try_send(AggregateMessage {
-        id: download.id.unwrap_or_default(),
-        value: serde_json::Value::from(
-            (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
-        ),
-    });
-    let _ = state.tx_aggregate_agg.try_send(AggregateMessage {
-        id: upload.id.unwrap_or_default(),
-        value: serde_json::Value::from(
-            (upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0,
-        ),
-    });
-    let _ = state.tx_aggregate_agg.try_send(AggregateMessage {
-        id: latency.id.unwrap_or_default(),
-        value: serde_json::Value::from(
-            (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,
-        ),
-    });
+    let _ = state
+        .tx_aggregate_agg
+        .send_async(AggregateMessage {
+            id: download.id.unwrap_or_default(),
+            value: serde_json::Value::from(
+                (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
+            ),
+        })
+        .await;
+    let _ = state
+        .tx_aggregate_agg
+        .send_async(AggregateMessage {
+            id: upload.id.unwrap_or_default(),
+            value: serde_json::Value::from(
+                (upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0,
+            ),
+        })
+        .await;
+    let _ = state
+        .tx_aggregate_agg
+        .send_async(AggregateMessage {
+            id: latency.id.unwrap_or_default(),
+            value: serde_json::Value::from(
+                (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,
+            ),
+        })
+        .await;
 
     let flag = state
         .flags
@@ -106,7 +99,7 @@ pub async fn handler(
                 .unwrap();
             transaction.commit().await.map_err(Error::from).unwrap();
         });
-        let _ = state.tx.try_send(handle);
+        let _ = state.tx.send_async(handle).await;
     }
 
     Ok(Json(ReportBandwidthResponse {
