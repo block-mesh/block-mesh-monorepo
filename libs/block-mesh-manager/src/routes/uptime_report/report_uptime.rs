@@ -2,6 +2,7 @@ use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
+use crate::database::daily_stat::increment_uptime::increment_uptime;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
@@ -139,13 +140,26 @@ pub async fn handler(
         };
 
     if daily_stat_opt.is_some() && extra > 0.0 {
-        let _ = state
-            .tx_daily_stat_agg
-            .send_async(DailyStatMessage {
-                id: daily_stat_opt.unwrap().id,
-                uptime: extra,
-            })
-            .await;
+        let flag = state
+            .flags
+            .get("report_uptime_daily_stats_via_channel")
+            .unwrap_or(&FlagValue::Boolean(false));
+        let flag: bool =
+            <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
+
+        if flag {
+            let _ = state
+                .tx_daily_stat_agg
+                .send_async(DailyStatMessage {
+                    id: daily_stat_opt.unwrap().id,
+                    uptime: extra,
+                })
+                .await;
+        } else {
+            let mut transaction = pool.begin().await.map_err(Error::from)?;
+            let _ = increment_uptime(&mut transaction, &daily_stat_opt.unwrap().id, extra).await;
+            transaction.commit().await?;
+        }
     }
 
     let _ = state
