@@ -1,9 +1,9 @@
-use crate::database::api_token::find_token::find_token;
+use crate::database::api_token::find_token::find_token_pool;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
 use crate::database::task::find_task_by_status::find_task_by_status;
 use crate::database::task::update_task_assigned::update_task_assigned;
-use crate::database::user::get_user_by_id::get_user_opt_by_id;
+use crate::database::user::get_user_by_id::get_user_opt_by_id_pool;
 use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
 use crate::middlewares::rate_limit::filter_request;
@@ -24,11 +24,10 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Json(body): Json<GetTaskRequest>,
 ) -> Result<Json<Option<GetTaskResponse>>, Error> {
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
-    let api_token = find_token(&mut transaction, &body.api_token)
+    let api_token = find_token_pool(&pool, &body.api_token)
         .await?
         .ok_or(Error::ApiTokenNotFound)?;
-    let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
+    let user = get_user_opt_by_id_pool(&pool, &api_token.user_id)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     let ip = headers
@@ -48,6 +47,7 @@ pub async fn handler(
     if user.email.to_ascii_lowercase() != body.email.to_ascii_lowercase() {
         return Err(Error::UserNotFound);
     }
+    let mut transaction = pool.begin().await.map_err(Error::from)?;
     let task = find_task_by_status(&mut transaction, TaskStatus::Pending).await?;
     let task = match task {
         Some(v) => v,

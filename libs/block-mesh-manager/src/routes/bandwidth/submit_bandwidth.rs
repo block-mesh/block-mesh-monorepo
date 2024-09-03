@@ -4,23 +4,39 @@ use crate::database::bandwidth::delete_bandwidth_reports_by_time::delete_bandwid
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
+use crate::middlewares::rate_limit::filter_request;
 use crate::startup::application::AppState;
 use crate::worker::aggregate_agg::AggregateMessage;
+use anyhow::Context;
 use axum::extract::State;
 use axum::{Extension, Json};
 use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
-use http::StatusCode;
+use http::{HeaderMap, StatusCode};
 use sqlx::PgPool;
 use std::sync::Arc;
 use tokio::task::JoinHandle;
 
 #[tracing::instrument(name = "submit_bandwidth", skip(pool, body, state), level = "trace", fields(email = body.email), ret)]
 pub async fn handler(
+    headers: HeaderMap,
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,
     Json(body): Json<ReportBandwidthRequest>,
 ) -> Result<Json<ReportBandwidthResponse>, Error> {
+    let ip = headers
+        .get("cf-connecting-ip")
+        .context("Missing CF-CONNECTING-IP")?
+        .to_str()
+        .context("Unable to STR CF-CONNECTING-IP")?;
+    let mut redis = state.redis.clone();
+    if !filter_request(&mut redis, &body.api_token, ip)
+        .await
+        .context("Rate limit")?
+    {
+        return Err(Error::NotAllowedRateLimit);
+    }
+
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let api_token = find_token(&mut transaction, &body.api_token)
         .await?
