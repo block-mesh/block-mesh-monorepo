@@ -52,6 +52,6 @@ pub(crate) async fn get_user_opt_by_email_pool(
         FROM users WHERE email = $1 LIMIT 1"#,
         email
     )
-    .fetch_optional(&*pool)
+    .fetch_optional(pool)
     .await?)
 }

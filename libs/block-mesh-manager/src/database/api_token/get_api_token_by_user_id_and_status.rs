@@ -55,6 +55,6 @@ pub(crate) async fn get_api_token_by_usr_and_status_pool(
         user_id,
         status.to_string()
     )
-    .fetch_optional(&*pool)
+    .fetch_optional(pool)
     .await?)
 }
