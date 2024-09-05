@@ -1,0 +1,25 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                INSERT\n                INTO ip_addresses\n                (id, ip, created_at, enriched)\n                VALUES\n                ($1, $2, $3, $4)\n                ON CONFLICT (ip) DO UPDATE SET updated_at = $3\n                RETURNING\n                id\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Timestamptz",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "1b7565523fdd55badbfde4cb89aa37e4e97c8d8366a9585392e5a86764266878"
+}
