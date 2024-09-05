@@ -1,12 +1,12 @@
-use crate::db_calls::touch_users_ip::touch_users_ip;
-use block_mesh_common::interfaces::db_messages::UsersIpMessage;
+use crate::db_calls::update_aggregate::update_aggregate;
+use block_mesh_common::interfaces::db_messages::{AggregateMessage, UsersIpMessage};
 use chrono::Utc;
 use flume::Receiver;
 use serde_json::Value;
 use sqlx::PgPool;
 use std::collections::HashMap;
 
-pub async fn users_ip_aggregator(
+pub async fn aggregates_aggregator(
     pool: PgPool,
     rx: Receiver<Value>,
     agg_size: i32,
@@ -17,9 +17,9 @@ pub async fn users_ip_aggregator(
     let mut prev = Utc::now();
     while let Ok(message) = rx.recv_async().await {
         tracing::info!("(1) users_ip_aggregator incoming message {:#?}", message);
-        if let Ok(message) = serde_json::from_value::<UsersIpMessage>(message) {
+        if let Ok(message) = serde_json::from_value::<AggregateMessage>(message) {
             tracing::info!("(2) users_ip_aggregator incoming message {:#?}", message);
-            calls.insert(message.id, message.ip);
+            calls.insert(message.id, message.value);
             count += 1;
             let now = Utc::now();
             let diff = now - prev;
@@ -30,7 +30,7 @@ pub async fn users_ip_aggregator(
                 calls.clear();
                 if let Ok(mut transaction) = pool.begin().await {
                     for pair in calls.iter() {
-                        let _ = touch_users_ip(&mut transaction, pair.0, pair.1).await;
+                        let _ = update_aggregate(&mut transaction, pair.0, pair.1).await;
                     }
                     let _ = transaction.commit().await;
                 }

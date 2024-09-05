@@ -1,19 +1,11 @@
 use crate::database::analytics::inserting_client_analytics_bulk::inserting_client_analytics_bulk;
-use block_mesh_common::constants::DeviceType;
+use block_mesh_common::interfaces::db_messages::AnalyticsMessage;
 use chrono::Utc;
 use flume::Receiver;
-use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::collections::HashMap;
 use std::env;
 use uuid::Uuid;
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct AnalyticsMessage {
-    pub user_id: Uuid,
-    pub depin_aggregator: String,
-    pub device_type: DeviceType,
-}
 
 pub async fn analytics_agg(
     pool: PgPool,

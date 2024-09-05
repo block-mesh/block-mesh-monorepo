@@ -1,18 +1,12 @@
 use crate::database::aggregate::update_aggregate_bulk::update_aggregate_bulk;
+use block_mesh_common::interfaces::db_messages::AggregateMessage;
 use chrono::Utc;
 use flume::Receiver;
-use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::PgPool;
 use std::collections::HashMap;
 use std::env;
 use uuid::Uuid;
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct AggregateMessage {
-    pub id: Uuid,
-    pub value: Value,
-}
 
 pub async fn aggregate_agg(
     pool: PgPool,

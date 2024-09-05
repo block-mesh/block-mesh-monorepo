@@ -1,17 +1,11 @@
 use crate::database::daily_stat::update_daily_stat_uptime_bulk::update_daily_stat_uptime_bulk;
+use block_mesh_common::interfaces::db_messages::DailyStatMessage;
 use chrono::Utc;
 use flume::Receiver;
-use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::collections::HashMap;
 use std::env;
 use uuid::Uuid;
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct DailyStatMessage {
-    pub id: Uuid,
-    pub uptime: f64,
-}
 
 pub async fn daily_stat_agg(
     pool: PgPool,
