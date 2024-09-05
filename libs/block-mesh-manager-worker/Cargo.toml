@@ -1,0 +1,54 @@
+[package]
+name = "block-mesh-manager-worker"
+version = { workspace = true }
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+serde = { workspace = true, features = ["derive"] }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+flume = { workspace = true, default-features = false, features = ["async", "select"] }
+futures = { workspace = true }
+redis = { workspace = true, features = ["tokio-comp", "tokio-rustls-comp", "tls-rustls-insecure"] }
+reqwest = { workspace = true, default-features = false, features = [
+  "multipart",
+  "json",
+] }
+logger-general = { path = "../logger-general", features = ["sentry"] }
+url = { workspace = true }
+tracing = { workspace = true }
+chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }
+block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag"] }
+serde_json = { workspace = true, features = ["raw_value"] }
+
+[dependencies.rand]
+workspace = true
+features = ["min_const_gen"]
+
+[dependencies.sqlx]
+workspace = true
+default-features = false
+features = [
+  "any",
+  "runtime-tokio-rustls",
+  "macros",
+  "postgres",
+  "uuid",
+  "chrono",
+  "migrate",
+  "json",
+  "bigdecimal",
+]
+
+[dependencies.uuid]
+workspace = true
+features = [
+  "v4", # Lets you generate random UUIDs
+  "fast-rng", # Use a faster (but still sufficiently random) RNG
+  "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
+  "serde", # Enable serialization/deserialization of UUIDs
+  "js"
+]

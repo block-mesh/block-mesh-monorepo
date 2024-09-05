@@ -1523,6 +1523,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "block-mesh-manager-worker"
+version = "0.0.230"
+dependencies = [
+ "anyhow",
+ "block-mesh-common",
+ "chrono",
+ "flume",
+ "futures",
+ "logger-general",
+ "rand 0.8.5",
+ "redis",
+ "reqwest 0.12.7",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "url",
+ "uuid",
+]
+
+[[package]]
 name = "block-mesh-solana-client"
 version = "0.0.230"
 dependencies = [
