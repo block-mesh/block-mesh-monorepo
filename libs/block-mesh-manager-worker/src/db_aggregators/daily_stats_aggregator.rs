@@ -1,7 +1,5 @@
 use crate::db_calls::increment_uptime::increment_uptime;
-use block_mesh_common::interfaces::db_messages::{
-    AggregateMessage, AnalyticsMessage, DailyStatMessage, UsersIpMessage,
-};
+use block_mesh_common::interfaces::db_messages::DailyStatMessage;
 use chrono::Utc;
 use flume::Receiver;
 use serde_json::Value;

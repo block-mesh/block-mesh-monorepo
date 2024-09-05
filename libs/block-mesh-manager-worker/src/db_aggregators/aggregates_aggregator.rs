@@ -1,5 +1,5 @@
 use crate::db_calls::update_aggregate::update_aggregate;
-use block_mesh_common::interfaces::db_messages::{AggregateMessage, UsersIpMessage};
+use block_mesh_common::interfaces::db_messages::AggregateMessage;
 use chrono::Utc;
 use flume::Receiver;
 use serde_json::Value;

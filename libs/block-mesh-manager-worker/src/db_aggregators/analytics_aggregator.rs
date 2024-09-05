@@ -1,7 +1,5 @@
 use crate::db_calls::get_or_create_analytics::get_or_create_analytics;
-use block_mesh_common::interfaces::db_messages::{
-    AggregateMessage, AnalyticsMessage, UsersIpMessage,
-};
+use block_mesh_common::interfaces::db_messages::AnalyticsMessage;
 use chrono::Utc;
 use flume::Receiver;
 use serde_json::Value;
