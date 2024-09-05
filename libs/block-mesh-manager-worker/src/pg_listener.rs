@@ -1,4 +1,3 @@
-use flume::Sender;
 use serde::de::DeserializeOwned;
 use serde_json::Value;
 use sqlx::error::Error;
@@ -8,6 +7,7 @@ use sqlx::Postgres;
 use std::fmt::Debug;
 use std::future::Future;
 use std::sync::Arc;
+use tokio::sync::broadcast::Sender;
 use tracing::error;
 
 #[allow(dead_code)]

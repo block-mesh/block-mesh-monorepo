@@ -6,10 +6,10 @@ use crate::database::user::get_user_by_id::get_user_opt_by_id_pool;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
-use crate::worker::aggregate_agg::AggregateMessage;
 use axum::extract::State;
 use axum::{Extension, Json};
 use block_mesh_common::feature_flag_client::FlagValue;
+use block_mesh_common::interfaces::db_messages::{AggregateMessage, DBMessageTypes};
 use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
 use http::StatusCode;
 use sqlx::PgPool;
@@ -62,7 +62,8 @@ pub async fn handler(
         let _ = state
             .tx_aggregate_agg
             .send_async(AggregateMessage {
-                id: download.id.unwrap_or_default(),
+                msg_type: DBMessageTypes::AggregateMessage,
+                id: download.id,
                 value: serde_json::Value::from(
                     (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
                 ),
@@ -71,7 +72,8 @@ pub async fn handler(
         let _ = state
             .tx_aggregate_agg
             .send_async(AggregateMessage {
-                id: upload.id.unwrap_or_default(),
+                msg_type: DBMessageTypes::AggregateMessage,
+                id: upload.id,
                 value: serde_json::Value::from(
                     (upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0,
                 ),
@@ -80,7 +82,8 @@ pub async fn handler(
         let _ = state
             .tx_aggregate_agg
             .send_async(AggregateMessage {
-                id: latency.id.unwrap_or_default(),
+                msg_type: DBMessageTypes::AggregateMessage,
+                id: latency.id,
                 value: serde_json::Value::from(
                     (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,
                 ),
@@ -90,7 +93,7 @@ pub async fn handler(
         let mut transaction = pool.begin().await?;
         let _ = update_aggregate(
             &mut transaction,
-            &latency.id.unwrap_or_default(),
+            &latency.id,
             &serde_json::Value::from(
                 (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,
             ),
@@ -98,7 +101,7 @@ pub async fn handler(
         .await;
         let _ = update_aggregate(
             &mut transaction,
-            &upload.id.unwrap_or_default(),
+            &upload.id,
             &serde_json::Value::from(
                 (upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0,
             ),
@@ -106,7 +109,7 @@ pub async fn handler(
         .await;
         let _ = update_aggregate(
             &mut transaction,
-            &download.id.unwrap_or_default(),
+            &download.id,
             &serde_json::Value::from(
                 (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
             ),

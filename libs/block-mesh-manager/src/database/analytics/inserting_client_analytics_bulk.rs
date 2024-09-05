@@ -1,5 +1,5 @@
 use crate::database::analytics::inserting_client_analytics::inserting_client_analytics;
-use crate::worker::analytics_agg::AnalyticsMessage;
+use block_mesh_common::interfaces::db_messages::AnalyticsMessage;
 use sqlx::{Postgres, Transaction};
 use std::collections::HashMap;
 use uuid::Uuid;

@@ -1,22 +1,21 @@
 use crate::database::aggregate::update_aggregate_bulk::update_aggregate_bulk;
+use crate::database::notify::notify_worker::notify_worker;
+use crate::startup::application::AppState;
+use block_mesh_common::feature_flag_client::FlagValue;
+use block_mesh_common::interfaces::db_messages::AggregateMessage;
 use chrono::Utc;
 use flume::Receiver;
-use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::PgPool;
 use std::collections::HashMap;
 use std::env;
+use std::sync::Arc;
 use uuid::Uuid;
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct AggregateMessage {
-    pub id: Uuid,
-    pub value: Value,
-}
 
 pub async fn aggregate_agg(
     pool: PgPool,
     rx: Receiver<AggregateMessage>,
+    state: Arc<AppState>,
 ) -> Result<(), anyhow::Error> {
     let agg_size = env::var("AGGREGATE_AGG_SIZE")
         .unwrap_or("300".to_string())
@@ -26,16 +25,26 @@ pub async fn aggregate_agg(
     let mut count = 0;
     let mut prev = Utc::now();
     while let Ok(message) = rx.recv_async().await {
-        calls.insert(message.id, message.value);
-        count += 1;
-        let now = Utc::now();
-        let diff = now - prev;
-        let run = diff.num_seconds() > 5 || count >= agg_size;
-        prev = Utc::now();
-        if run {
-            let _ = aggregate_submit_to_db(&pool, &mut calls).await;
-            count = 0;
-            calls.clear();
+        let flag = state
+            .flags
+            .get("send_to_worker")
+            .unwrap_or(&FlagValue::Boolean(false));
+        let flag: bool =
+            <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
+        if flag {
+            let _ = notify_worker(&pool, message.clone()).await;
+        } else {
+            calls.insert(message.id, message.value);
+            count += 1;
+            let now = Utc::now();
+            let diff = now - prev;
+            let run = diff.num_seconds() > 5 || count >= agg_size;
+            prev = Utc::now();
+            if run {
+                let _ = aggregate_submit_to_db(&pool, &mut calls).await;
+                count = 0;
+                calls.clear();
+            }
         }
     }
     Ok(())

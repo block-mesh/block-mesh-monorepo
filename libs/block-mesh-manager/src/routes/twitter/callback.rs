@@ -59,7 +59,7 @@ pub async fn callback(
             .map_err(|_| Error::InternalServer)?;
         // // check state returned to see if it matches, otherwise throw an error
         if state.secret() != saved_state.secret() {
-            update_aggregate_pool(&pool, &twitter_agg.id.0.unwrap(), &Value::Null).await?;
+            update_aggregate_pool(&pool, &twitter_agg.id, &Value::Null).await?;
             return Err(Error::InternalServer);
         }
         // // get verifier from ctx
@@ -86,7 +86,7 @@ pub async fn callback(
     // ctx.lock().await.token = Some(token);
 
     let user_id = pg.user_id;
-    update_aggregate_pool(&pool, &twitter_agg.id.0.unwrap(), &Value::Null).await?;
+    update_aggregate_pool(&pool, &twitter_agg.id, &Value::Null).await?;
 
     let api = TwitterApi::new(oauth_token);
     if let Ok(user) = api.get_users_me().send().await {
