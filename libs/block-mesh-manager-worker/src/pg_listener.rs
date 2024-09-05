@@ -9,9 +9,11 @@ use sqlx::Pool;
 use sqlx::Postgres;
 use tracing::error;
 
+#[allow(dead_code)]
 #[derive(Deserialize, Debug)]
 pub struct Payload(pub Value);
 
+#[allow(dead_code)]
 pub async fn start_listening<T: DeserializeOwned + Sized + Debug>(
     pool: Pool<Postgres>,
     channels: Vec<&str>,
