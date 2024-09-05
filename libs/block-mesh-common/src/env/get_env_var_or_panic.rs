@@ -1,5 +1,5 @@
-use crate::envars::app_env_var::AppEnvVar;
-use crate::envars::env_var::EnvVar;
+use crate::env::app_env_var::AppEnvVar;
+use crate::env::env_var::EnvVar;
 use secret::Secret;
 
 pub fn get_env_var_or_panic(key: AppEnvVar) -> EnvVar {

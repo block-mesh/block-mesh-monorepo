@@ -1,4 +1,4 @@
-use crate::envars::app_env_var::AppEnvVar;
+use crate::env::app_env_var::AppEnvVar;
 use enum_iterator::all;
 
 pub fn load_dotenv() {

@@ -5,6 +5,10 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use block_mesh_common::env::app_env_var::AppEnvVar;
+    use block_mesh_common::env::env_var::EnvVar;
+    use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
+    use block_mesh_common::env::load_dotenv::load_dotenv;
     use block_mesh_manager::worker::aggregate_agg::{aggregate_agg, AggregateMessage};
     use block_mesh_manager::worker::daily_stat_agg::DailyStatMessage;
     use block_mesh_manager::worker::users_ip_agg::{users_ip_agg, UsersIpMessage};
@@ -28,10 +32,6 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_manager::configuration::get_configuration::get_configuration;
     use block_mesh_manager::database::migrate::migrate;
     use block_mesh_manager::emails::email_client::EmailClient;
-    use block_mesh_manager::envars::app_env_var::AppEnvVar;
-    use block_mesh_manager::envars::env_var::EnvVar;
-    use block_mesh_manager::envars::get_env_var_or_panic::get_env_var_or_panic;
-    use block_mesh_manager::envars::load_dotenv::load_dotenv;
     use block_mesh_manager::startup::application::{AppState, Application};
     use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
     use block_mesh_manager::startup::report_exit::report_exit;

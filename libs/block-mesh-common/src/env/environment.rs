@@ -1,4 +1,4 @@
-use crate::envars::env_var::EnvVar;
+use crate::env::env_var::EnvVar;
 use std::str::FromStr;
 
 pub enum Environment {

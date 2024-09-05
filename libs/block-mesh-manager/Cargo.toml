@@ -56,7 +56,7 @@ serde-aux = { workspace = true }
 config = { workspace = true }
 dotenv = { workspace = true }
 enum-iterator = { workspace = true }
-block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag"] }
+block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env"] }
 tokio = { workspace = true, features = ["full"], optional = true }
 axum-login = { workspace = true, optional = true }
 tower-sessions-sqlx-store = { workspace = true, features = ["postgres"], optional = true }
