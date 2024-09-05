@@ -1,12 +1,16 @@
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_pool;
+use crate::database::aggregate::update_aggregate::update_aggregate_pool;
 use crate::database::perks::add_perk_to_user::add_perk_to_user;
+use crate::domain::aggregate::AggregateName;
 use crate::domain::perk::PerkName;
 use crate::errors::error::Error;
 use crate::notification::notification_redirect::NotificationRedirect;
-use crate::routes::twitter::context::Oauth2Ctx;
+use crate::routes::twitter::context::{Oauth2Ctx, Oauth2CtxPg};
+use anyhow::Context;
 use axum::extract::Query;
 use axum::response::Redirect;
 use axum::Extension;
-use block_mesh_common::constants::BLOCKMESH_TWITTER_USER_ID;
+use block_mesh_common::constants::{BLOCKMESH_SERVER_UUID_ENVAR, BLOCKMESH_TWITTER_USER_ID};
 use block_mesh_common::routes_enum::RoutesEnum;
 use http::StatusCode;
 use reqwest::ClientBuilder;
@@ -20,6 +24,7 @@ use std::time::Duration;
 use tokio::sync::Mutex;
 use twitter_v2::oauth2::{AuthorizationCode, CsrfToken};
 use twitter_v2::TwitterApi;
+use uuid::Uuid;
 
 #[derive(Deserialize)]
 pub struct CallbackParams {
@@ -32,10 +37,17 @@ pub async fn callback(
     Extension(pool): Extension<PgPool>,
     Query(CallbackParams { code, state }): Query<CallbackParams>,
 ) -> Result<Redirect, Error> {
+    let id = Uuid::parse_str(env::var(BLOCKMESH_SERVER_UUID_ENVAR).unwrap().as_str()).unwrap();
+    let twitter_agg =
+        get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Twitter, id).await?;
+
+    let mut pg =
+        serde_json::from_value::<Oauth2CtxPg>(twitter_agg.value).context("Cannot deserialize")?;
+
     let (client, verifier) = {
-        let mut ctx = ctx.lock().await;
+        let ctx = ctx.lock().await;
         // get previous state from ctx (see login)
-        let saved_state = ctx
+        let saved_state = pg
             .state
             .take()
             .ok_or_else(|| {
@@ -47,13 +59,11 @@ pub async fn callback(
             .map_err(|_| Error::InternalServer)?;
         // // check state returned to see if it matches, otherwise throw an error
         if state.secret() != saved_state.secret() {
-            ctx.state = None;
-            ctx.user_id = None;
-            ctx.user_nonce = None;
+            update_aggregate_pool(&pool, &twitter_agg.id.0.unwrap(), &Value::Null).await?;
             return Err(Error::InternalServer);
         }
         // // get verifier from ctx
-        let verifier = ctx
+        let verifier = pg
             .verifier
             .take()
             .ok_or_else(|| {
@@ -68,43 +78,15 @@ pub async fn callback(
     };
 
     // request oauth2 token
-    let token = client
+    let oauth_token = client
         .request_token(code.clone(), verifier)
         .await
         .map_err(|_| Error::InternalServer)?;
     // set context for use with twitter API
-    ctx.lock().await.token = Some(token);
+    // ctx.lock().await.token = Some(token);
 
-    let (mut oauth_token, oauth_client) = {
-        let ctx = ctx.lock().await;
-        let token = ctx
-            .token
-            .as_ref()
-            .ok_or_else(|| (StatusCode::UNAUTHORIZED, "User not logged in!".to_string()))
-            .map_err(|_| Error::InternalServer)?
-            .clone();
-        let client = ctx.client.clone();
-        (token, client)
-    };
-    // refresh oauth token if expired
-    if oauth_client
-        .refresh_token_if_expired(&mut oauth_token)
-        .await
-        .map_err(|_| Error::InternalServer)?
-    {
-        // save oauth token if refreshed
-        ctx.lock().await.token = Some(oauth_token.clone());
-    }
-
-    let mut ctx = ctx.lock().await;
-    if ctx.user_id.is_none() || ctx.user_nonce.is_none() {
-        return Err(Error::InternalServer);
-    }
-    let user_id = ctx.user_id;
-    ctx.state = None;
-    ctx.user_id = None;
-    ctx.user_nonce = None;
-    ctx.token = None;
+    let user_id = pg.user_id;
+    update_aggregate_pool(&pool, &twitter_agg.id.0.unwrap(), &Value::Null).await?;
 
     let api = TwitterApi::new(oauth_token);
     if let Ok(user) = api.get_users_me().send().await {
