@@ -26,10 +26,10 @@ use tokio::net::TcpListener;
 
 use crate::worker::aggregate_agg::AggregateMessage;
 use crate::worker::daily_stat_agg::DailyStatMessage;
-use crate::worker::users_ip_agg::UsersIpMessage;
 use block_mesh_common::env::app_env_var::AppEnvVar;
 use block_mesh_common::env::env_var;
 use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
+use block_mesh_common::interfaces::db_messages::UsersIpMessage;
 use flume::Sender;
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
