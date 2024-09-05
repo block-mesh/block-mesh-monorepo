@@ -12,7 +12,7 @@ use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use axum::extract::{Query, Request, State};
 use axum::{Extension, Json};
-use block_mesh_common::interfaces::db_messages::AggregateMessage;
+use block_mesh_common::interfaces::db_messages::{AggregateMessage, DBMessageTypes};
 use block_mesh_common::interfaces::server_api::{SubmitTaskRequest, SubmitTaskResponse};
 use chrono::Utc;
 use http::StatusCode;
@@ -91,7 +91,8 @@ pub async fn handler(
         let _ = state
             .tx_aggregate_agg
             .send_async(AggregateMessage {
-                id: tasks.id.unwrap_or_default(),
+                msg_type: DBMessageTypes::AggregateMessage,
+                id: tasks.id,
                 value: serde_json::Value::from(tasks.value.as_i64().unwrap_or_default() + 1),
             })
             .await;

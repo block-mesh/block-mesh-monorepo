@@ -95,16 +95,32 @@ async fn run() -> anyhow::Result<()> {
         tx_users_ip_agg,
         tx_aggregate_agg,
     });
-    let application = Application::build(configuration, app_state, db_pool.clone()).await;
+    let application = Application::build(configuration, app_state.clone(), db_pool.clone()).await;
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
     let application_task = tokio::spawn(application.run());
     let joiner_task = tokio::spawn(joiner_loop(rx));
     let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
     let db_cleaner_task = tokio::spawn(db_cleaner_cron(db_pool.clone(), cleaner_rx));
-    let db_daily_stat_task = tokio::spawn(daily_stat_agg(db_pool.clone(), rx_daily_stat_agg));
-    let db_analytics_task = tokio::spawn(analytics_agg(db_pool.clone(), rx_analytics_agg));
-    let db_users_ip_task = tokio::spawn(users_ip_agg(db_pool.clone(), rx_users_ip_agg));
-    let db_aggregate_task = tokio::spawn(aggregate_agg(db_pool.clone(), rx_aggregate_agg));
+    let db_daily_stat_task = tokio::spawn(daily_stat_agg(
+        db_pool.clone(),
+        rx_daily_stat_agg,
+        app_state.clone(),
+    ));
+    let db_analytics_task = tokio::spawn(analytics_agg(
+        db_pool.clone(),
+        rx_analytics_agg,
+        app_state.clone(),
+    ));
+    let db_users_ip_task = tokio::spawn(users_ip_agg(
+        db_pool.clone(),
+        rx_users_ip_agg,
+        app_state.clone(),
+    ));
+    let db_aggregate_task = tokio::spawn(aggregate_agg(
+        db_pool.clone(),
+        rx_aggregate_agg,
+        app_state.clone(),
+    ));
 
     tokio::select! {
         o = application_task => report_exit("API", o),

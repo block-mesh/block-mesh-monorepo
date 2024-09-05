@@ -46,11 +46,6 @@ pub async fn login(
         user_id: Some(user.id),
     };
 
-    update_aggregate_pool(
-        &pool,
-        &twitter_agg.id.0.unwrap(),
-        &serde_json::to_value(&pg).unwrap(),
-    )
-    .await?;
+    update_aggregate_pool(&pool, &twitter_agg.id, &serde_json::to_value(&pg).unwrap()).await?;
     Ok(Redirect::to(url.as_ref()))
 }

@@ -25,7 +25,7 @@ async fn main() -> anyhow::Result<()> {
     let db_pool = sqlx::PgPool::connect(&env::var("DATABASE_URL")?).await?;
     let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
     let _redis = redis_client.get_multiplexed_async_connection().await?;
-    let (tx, rx) = flume::bounded::<Value>(5000);
+    let (tx, _rx) = tokio::sync::broadcast::channel::<Value>(5000);
 
     let db_listen_task = tokio::spawn(start_listening(
         db_pool.clone(),
@@ -34,13 +34,25 @@ async fn main() -> anyhow::Result<()> {
         send_to_rx,
     ));
     let db_aggregator_users_ip_task =
-        tokio::spawn(users_ip_aggregator(db_pool.clone(), rx.clone(), 100, 5));
-    let db_aggregates_aggregator_task =
-        tokio::spawn(aggregates_aggregator(db_pool.clone(), rx.clone(), 100, 5));
-    let db_analytics_aggregator_task =
-        tokio::spawn(analytics_aggregator(db_pool.clone(), rx.clone(), 100, 5));
-    let db_daily_stats_aggregator_task =
-        tokio::spawn(daily_stats_aggregator(db_pool.clone(), rx.clone(), 100, 5));
+        tokio::spawn(users_ip_aggregator(db_pool.clone(), tx.subscribe(), 100, 5));
+    let db_aggregates_aggregator_task = tokio::spawn(aggregates_aggregator(
+        db_pool.clone(),
+        tx.subscribe(),
+        100,
+        5,
+    ));
+    let db_analytics_aggregator_task = tokio::spawn(analytics_aggregator(
+        db_pool.clone(),
+        tx.subscribe(),
+        100,
+        5,
+    ));
+    let db_daily_stats_aggregator_task = tokio::spawn(daily_stats_aggregator(
+        db_pool.clone(),
+        tx.subscribe(),
+        100,
+        5,
+    ));
 
     tokio::select! {
         o = db_listen_task => eprintln!("db_listen_task exit {:?}", o),

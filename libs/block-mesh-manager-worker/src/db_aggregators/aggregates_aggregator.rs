@@ -1,21 +1,21 @@
 use crate::db_calls::update_aggregate::update_aggregate;
 use block_mesh_common::interfaces::db_messages::AggregateMessage;
 use chrono::Utc;
-use flume::Receiver;
 use serde_json::Value;
 use sqlx::PgPool;
 use std::collections::HashMap;
+use tokio::sync::broadcast::Receiver;
 
 pub async fn aggregates_aggregator(
     pool: PgPool,
-    rx: Receiver<Value>,
+    mut rx: Receiver<Value>,
     agg_size: i32,
     time_limit: i64,
 ) -> Result<(), anyhow::Error> {
     let mut calls: HashMap<_, _> = HashMap::new();
     let mut count = 0;
     let mut prev = Utc::now();
-    while let Ok(message) = rx.recv_async().await {
+    while let Ok(message) = rx.recv().await {
         tracing::info!("(1) users_ip_aggregator incoming message {:#?}", message);
         if let Ok(message) = serde_json::from_value::<AggregateMessage>(message) {
             tracing::info!("(2) users_ip_aggregator incoming message {:#?}", message);

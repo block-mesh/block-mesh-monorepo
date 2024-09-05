@@ -12,5 +12,5 @@ export REDIS_URL="redis://127.0.0.1:6379"
 if [ -f "${ROOT}/.env" ] ; then
   source "${ROOT}/.env"
 fi
-ensure "${ROOT}/scripts/init_db.sh"
+#ensure "${ROOT}/scripts/init_db.sh"
 cargo run -p block-mesh-manager-worker | bunyan

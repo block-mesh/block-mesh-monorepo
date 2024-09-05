@@ -12,7 +12,7 @@ use axum::extract::{ConnectInfo, Query, Request, State};
 use axum::{Extension, Json};
 use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_common::interfaces::db_messages::{
-    AggregateMessage, AnalyticsMessage, DailyStatMessage, UsersIpMessage,
+    AggregateMessage, AnalyticsMessage, DBMessageTypes, DailyStatMessage, UsersIpMessage,
 };
 use block_mesh_common::interfaces::server_api::{
     ClientsMetadata, ReportUptimeRequest, ReportUptimeResponse,
@@ -75,6 +75,7 @@ pub async fn handler(
                 let _ = state
                     .tx_analytics_agg
                     .send_async(AnalyticsMessage {
+                        msg_type: DBMessageTypes::AnalyticsMessage,
                         user_id: user.id,
                         depin_aggregator: metadata.depin_aggregator.unwrap_or_default(),
                         device_type: metadata.device_type,
@@ -102,6 +103,7 @@ pub async fn handler(
         let _ = state
             .tx_users_ip_agg
             .send_async(UsersIpMessage {
+                msg_type: DBMessageTypes::UsersIpMessage,
                 id: user.id,
                 ip: ip.clone(),
             })
@@ -150,6 +152,7 @@ pub async fn handler(
             let _ = state
                 .tx_daily_stat_agg
                 .send_async(DailyStatMessage {
+                    msg_type: DBMessageTypes::DailyStatMessage,
                     id: daily_stat_opt.unwrap().id,
                     uptime: extra,
                 })
@@ -164,7 +167,8 @@ pub async fn handler(
     let _ = state
         .tx_aggregate_agg
         .send_async(AggregateMessage {
-            id: uptime.id.0.unwrap_or_default(),
+            msg_type: DBMessageTypes::AggregateMessage,
+            id: uptime.id,
             value: serde_json::Value::from(abs),
         })
         .await;

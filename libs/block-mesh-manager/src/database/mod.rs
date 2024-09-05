@@ -9,6 +9,7 @@ pub mod ip_address;
 pub mod leaderboard;
 pub mod migrate;
 pub mod nonce;
+pub mod notify;
 pub mod perks;
 pub mod proxy_master;
 pub mod rpc;
