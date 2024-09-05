@@ -88,7 +88,9 @@ jobs:
           cargo zigbuild -p blockmesh-cli --release --target ${{ matrix.target }}
           tar acf blockmesh-cli-${{ matrix.target }}.tar.gz target/${{ matrix.target }}/release/blockmesh-cli
       - name: "Build Worker"
-        run: cargo build -p block-mesh-manager-worker --release
+        run: |
+          cargo build -p block-mesh-manager-worker --release
+          tar acf block-mesh-manager-worker-${{ matrix.target }}.tar.gz target/release/block-mesh-manager-worker
       - name: Release
         uses: softprops/action-gh-release@v2
         #if: startsWith(github.ref, 'refs/tags/')
