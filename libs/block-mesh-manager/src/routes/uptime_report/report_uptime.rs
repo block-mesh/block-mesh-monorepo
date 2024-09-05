@@ -11,10 +11,10 @@ use crate::worker::aggregate_agg::AggregateMessage;
 use crate::worker::analytics_agg::AnalyticsMessage;
 use crate::worker::daily_stat_agg::DailyStatMessage;
 use crate::worker::db_cleaner_cron::EnrichIp;
-use crate::worker::users_ip_agg::UsersIpMessage;
 use axum::extract::{ConnectInfo, Query, Request, State};
 use axum::{Extension, Json};
 use block_mesh_common::feature_flag_client::FlagValue;
+use block_mesh_common::interfaces::db_messages::UsersIpMessage;
 use block_mesh_common::interfaces::server_api::{
     ClientsMetadata, ReportUptimeRequest, ReportUptimeResponse,
 };

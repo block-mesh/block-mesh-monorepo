@@ -1,17 +1,11 @@
 use crate::database::users_ip::update_users_ip_bulk::update_users_ip_bulk;
+use block_mesh_common::interfaces::db_messages::UsersIpMessage;
 use chrono::Utc;
 use flume::Receiver;
-use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::collections::HashMap;
 use std::env;
 use uuid::Uuid;
-
-#[derive(Serialize, Deserialize, Clone, Debug)]
-pub struct UsersIpMessage {
-    pub id: Uuid,
-    pub ip: String,
-}
 
 pub async fn users_ip_agg(pool: PgPool, rx: Receiver<UsersIpMessage>) -> Result<(), anyhow::Error> {
     let agg_size = env::var("USERS_IP_AGG_SIZE")
