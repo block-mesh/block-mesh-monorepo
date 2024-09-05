@@ -1,9 +1,14 @@
+use serde::{Deserialize, Serialize};
 use twitter_v2::authorization::{Oauth2Client, Oauth2Token};
 use twitter_v2::oauth2::{CsrfToken, PkceCodeVerifier};
 use uuid::Uuid;
 
 pub struct Oauth2Ctx {
     pub client: Oauth2Client,
+}
+
+#[derive(Debug, Serialize, Deserialize)]
+pub struct Oauth2CtxPg {
     pub verifier: Option<PkceCodeVerifier>,
     pub state: Option<CsrfToken>,
     pub token: Option<Oauth2Token>,

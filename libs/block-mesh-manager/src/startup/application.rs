@@ -131,11 +131,6 @@ impl Application {
                     .parse()
                     .unwrap(),
             ),
-            verifier: None,
-            state: None,
-            token: None,
-            user_id: None,
-            user_nonce: None,
         };
 
         let application_base_url = ApplicationBaseUrl(settings.application.base_url.clone());
