@@ -37,11 +37,12 @@ pub async fn handler(
         .context("Unable to STR CF-CONNECTING-IP")?;
 
     let mut redis = state.redis.clone();
-    if !filter_request(&mut redis, &user.id, ip)
-        .await
-        .context("Rate limit")?
-    {
-        return Err(Error::NotAllowedRateLimit);
+    let filter = filter_request(&mut redis, &user.id, ip).await;
+    if filter.is_err() {
+        return Ok(Json(None));
+    }
+    if !filter.unwrap() {
+        return Ok(Json(None));
     }
 
     if user.email.to_ascii_lowercase() != body.email.to_ascii_lowercase() {
