@@ -1,5 +1,4 @@
-use crate::database::task::create_task::create_task;
-use crate::domain::task::TaskMethod;
+use crate::db_calls::create_task::create_task;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
@@ -24,6 +23,7 @@ pub enum RpcName {
 }
 
 impl RpcName {
+    #[allow(dead_code)]
     pub fn from_url(url: &str) -> Self {
         if url.starts_with("https://mainnet.helius-rpc.com") {
             RpcName::Helius
@@ -137,7 +137,7 @@ impl Rpc {
                 format!("{}/{}", self.host, self.token)
             }
         };
-        let method = TaskMethod::POST;
+        let method = "POST".to_string();
         let headers = json!(
             {
             "Content-Type": "application/json"

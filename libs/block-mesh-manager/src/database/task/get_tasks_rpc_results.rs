@@ -1,4 +1,3 @@
-use crate::domain::rpc::RpcName;
 use crate::domain::task::TaskStatus;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
@@ -66,9 +65,9 @@ pub async fn get_tasks_rpc_results(
                 response_code: i.response_code.unwrap_or_default(),
                 latency: i.latency.unwrap_or_default(),
                 count: i.count.unwrap_or_default(),
-                provider: RpcName::from_url(&i.url.clone().unwrap_or_default()).to_string(),
+                provider: "N/A".to_string(), // RpcName::from_url(&i.url.clone().unwrap_or_default()).to_string(),
             };
-            if rpc_results.provider == RpcName::Invalid.to_string()
+            if rpc_results.provider == *"Invalid" // RpcName::Invalid.to_string()
                 || rpc_results.provider.is_empty()
             {
                 None
