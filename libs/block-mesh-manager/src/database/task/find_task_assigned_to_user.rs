@@ -1,17 +1,18 @@
 use crate::domain::task::GetTask;
 use crate::domain::task::TaskStatus;
 use sqlx::{Postgres, Transaction};
+use uuid::Uuid;
 
 #[tracing::instrument(
-    name = "Find task status",
+    name = "Find task assigned to user",
     skip(transaction),
     ret,
     err,
     level = "trace"
 )]
-pub(crate) async fn find_task_by_status(
+pub(crate) async fn find_task_assigned_to_user(
     transaction: &mut Transaction<'_, Postgres>,
-    status: TaskStatus,
+    user_id: &Uuid,
 ) -> anyhow::Result<Option<GetTask>> {
     let task = sqlx::query_as!(
         GetTask,
@@ -23,10 +24,11 @@ pub(crate) async fn find_task_by_status(
         headers,
         body
         FROM tasks
-        WHERE status = $1
+        WHERE status = $1 AND assigned_user_id = $2
         LIMIT 1
         "#,
-        status.to_string()
+        TaskStatus::Assigned.to_string(),
+        user_id
     )
     .fetch_optional(&mut **transaction)
     .await?;
