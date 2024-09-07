@@ -11,7 +11,7 @@ export MINOR=$(echo $VERSION | cut -d '.' -f 3)
 export NEWMINOR=$(expr $MINOR + 1)
 export NEWVERSION=$(echo $VERSION | sed -e "s/$MINOR/$NEWMINOR/")
 sed -i -e "s/$VERSION/$NEWVERSION/" Cargo.toml
-git checkout -b "release-${NEWVERSION}"
+git checkout -B "release-${NEWVERSION}"
 cargo clippy --all --features ssr,hydrate -- -D warnings
 #git branch --set-upstream-to=origin/release release
 #git pull
