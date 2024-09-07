@@ -28,15 +28,8 @@ where
     loop {
         while let Some(notification) = listener.try_recv().await? {
             let tx = tx.clone();
-            tracing::info!(
-                "Getting notification with payload: {:?} from channel {:?}",
-                notification.payload(),
-                notification.channel()
-            );
-
             let string = notification.payload().to_owned();
             if let Ok(payload) = serde_json::from_str::<T>(&string) {
-                tracing::info!("des payload is {:?}", payload);
                 call_back(payload, tx).await;
             } else {
                 error!("Failed to deserialize {:?}", string);
