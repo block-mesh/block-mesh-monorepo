@@ -1,6 +1,18 @@
-use crate::domain::task::Task;
+use crate::domain::task::TaskMethod;
 use crate::domain::task::TaskStatus;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use sqlx::{Postgres, Transaction};
+use uuid::Uuid;
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetTask {
+    pub id: Uuid,
+    pub url: String,
+    pub method: TaskMethod,
+    pub headers: Option<Value>,
+    pub body: Option<Value>,
+}
 
 #[tracing::instrument(
     name = "Find task status",
@@ -12,28 +24,16 @@ use sqlx::{Postgres, Transaction};
 pub(crate) async fn find_task_by_status(
     transaction: &mut Transaction<'_, Postgres>,
     status: TaskStatus,
-) -> anyhow::Result<Option<Task>> {
+) -> anyhow::Result<Option<GetTask>> {
     let task = sqlx::query_as!(
-        Task,
+        GetTask,
         r#"
         SELECT
         id,
-        user_id,
         url,
         method,
         headers,
-        body,
-        assigned_user_id,
-        status,
-        response_code,
-        response_raw,
-        created_at,
-        retries_count,
-        country,
-        ip,
-        asn,
-        colo,
-        response_time
+        body
         FROM tasks
         WHERE status = $1
         LIMIT 1
