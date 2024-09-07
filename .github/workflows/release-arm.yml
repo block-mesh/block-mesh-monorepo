@@ -127,7 +127,7 @@ jobs:
           context: .
           file: blockmesh-cli.Dockerfile
           push: true
-          tags: blockmesh/blockmesh-cli:latest,blockmesh/blockmesh-cli:v${{ needs.get-tag.outputs.pkg-version }}
+          tags: blockmesh/blockmesh-cli:latest-arm64,blockmesh/blockmesh-cli:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: "Build and push Docker image for worker"
         uses: "docker/build-push-action@v5"
@@ -135,6 +135,6 @@ jobs:
           context: .
           file: block-mesh-manager-worker.Dockerfile
           push: true
-          tags: blockmesh/block-mesh-manager-worker:latest,blockmesh/block-mesh-manager-worker:v${{ needs.get-tag.outputs.pkg-version }}
+          tags: blockmesh/block-mesh-manager-worker-arm64:latest,blockmesh/block-mesh-manager-worker:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
 # https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/
