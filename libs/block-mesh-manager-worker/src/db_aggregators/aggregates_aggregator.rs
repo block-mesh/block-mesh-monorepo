@@ -16,9 +16,7 @@ pub async fn aggregates_aggregator(
     let mut count = 0;
     let mut prev = Utc::now();
     while let Ok(message) = rx.recv().await {
-        tracing::info!("(1) users_ip_aggregator incoming message {:#?}", message);
         if let Ok(message) = serde_json::from_value::<AggregateMessage>(message) {
-            tracing::info!("(2) users_ip_aggregator incoming message {:#?}", message);
             calls.insert(message.id, message.value);
             count += 1;
             let now = Utc::now();
