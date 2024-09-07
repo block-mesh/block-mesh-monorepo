@@ -38,7 +38,6 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_manager::startup::application::{AppState, Application};
     use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
     use block_mesh_manager::startup::report_exit::report_exit;
-    use block_mesh_manager::worker::rpc_cron::rpc_worker_loop;
     use secret::Secret;
     use std::sync::Arc;
 }}
@@ -96,7 +95,6 @@ async fn run() -> anyhow::Result<()> {
         tx_aggregate_agg,
     });
     let application = Application::build(configuration, app_state.clone(), db_pool.clone()).await;
-    let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
     let application_task = tokio::spawn(application.run());
     let joiner_task = tokio::spawn(joiner_loop(rx));
     let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
@@ -124,7 +122,6 @@ async fn run() -> anyhow::Result<()> {
 
     tokio::select! {
         o = application_task => report_exit("API", o),
-        o = rpc_worker_task =>  report_exit("RPC Background worker failed", o),
         o = joiner_task => report_exit("Joiner task failed", o),
         o = finalize_daily_stats_task => report_exit("Finalize daily task failed", o),
         o = db_cleaner_task => report_exit("DB cleaner task failed", o),

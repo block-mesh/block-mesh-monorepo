@@ -41,7 +41,7 @@ pub(crate) async fn create_server_user(
         email,
         password
     )
-    .fetch_one(&mut **transaction)
-    .await?;
+        .fetch_one(&mut **transaction)
+        .await?;
     Ok(id)
 }

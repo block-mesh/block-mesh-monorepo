@@ -12,7 +12,6 @@ pub mod nonce;
 pub mod notify;
 pub mod perks;
 pub mod proxy_master;
-pub mod rpc;
 pub mod task;
 pub mod uptime_report;
 pub mod user;
