@@ -6,7 +6,7 @@ set -eo pipefail
 git checkout master
 git pull
 git checkout -b release
-git branch --set-upstream-to=origin/release release
+#git branch --set-upstream-to=origin/release release
 git pull
 git merge master
 git rebase master -Xtheirs
