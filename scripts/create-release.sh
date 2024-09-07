@@ -4,6 +4,7 @@ export ROOT="$(git rev-parse --show-toplevel)"
 export CARGO_TARGET_DIR="${ROOT}/target/PRE-PUSH"
 git branch -D release
 git branch -d release
+git pull -Xtheirs
 set -eo pipefail
 export ROOT="$(git rev-parse --show-toplevel)"
 export CARGO_TARGET_DIR="${ROOT}/target/PRE-PUSH"
