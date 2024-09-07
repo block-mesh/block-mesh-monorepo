@@ -3,7 +3,7 @@ name: Deploy Worker
 on:
   push:
     branches:
-      - master
+      - release
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
