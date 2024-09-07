@@ -20,7 +20,7 @@ pub async fn bulk_finalize(transaction: &mut Transaction<'_, Postgres>) -> anyho
         )
         "#,
         DailyStatStatus::Finalized.to_string(),
-        DailyStatStatus::OnGoing.to_string()
+        DailyStatStatus::OnGoing.to_string(),
         day
     )
     .execute(&mut **transaction)
