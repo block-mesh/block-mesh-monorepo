@@ -23,7 +23,6 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use std::time::Duration;
     use reqwest::ClientBuilder;
     use block_mesh_manager::worker::db_cleaner_cron::{db_cleaner_cron, EnrichIp};
-    use block_mesh_manager::worker::finalize_daily_cron::finalize_daily_cron;
     use block_mesh_common::feature_flag_client::get_all_flags;
     use tokio::task::JoinHandle;
     use block_mesh_manager::worker::joiner::joiner_loop;
@@ -97,7 +96,6 @@ async fn run() -> anyhow::Result<()> {
     let application = Application::build(configuration, app_state.clone(), db_pool.clone()).await;
     let application_task = tokio::spawn(application.run());
     let joiner_task = tokio::spawn(joiner_loop(rx));
-    let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
     let db_cleaner_task = tokio::spawn(db_cleaner_cron(db_pool.clone(), cleaner_rx));
     let db_daily_stat_task = tokio::spawn(daily_stat_agg(
         db_pool.clone(),
@@ -123,7 +121,6 @@ async fn run() -> anyhow::Result<()> {
     tokio::select! {
         o = application_task => report_exit("API", o),
         o = joiner_task => report_exit("Joiner task failed", o),
-        o = finalize_daily_stats_task => report_exit("Finalize daily task failed", o),
         o = db_cleaner_task => report_exit("DB cleaner task failed", o),
         o = db_daily_stat_task => report_exit("DB daily_stat aggregator", o),
         o = db_analytics_task => report_exit("DB analytics aggregator", o),

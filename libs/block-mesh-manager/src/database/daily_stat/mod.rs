@@ -1,4 +1,3 @@
-pub mod bulk_finalize;
 pub mod create_daily_stat;
 pub mod finalize_daily_stat;
 pub mod get_all_daily_stats_to_finalize;
