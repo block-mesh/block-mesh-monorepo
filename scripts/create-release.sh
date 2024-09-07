@@ -10,7 +10,7 @@ export CARGO_TARGET_DIR="${ROOT}/target/PRE-PUSH"
 git checkout master
 git pull
 git checkout -b release
-git merge master
+git merge master -Xtheirs
 git rebase master -Xtheirs
 export VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g')
 export MINOR=$(echo $VERSION | cut -d '.' -f 3)
