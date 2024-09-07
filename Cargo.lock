@@ -1530,6 +1530,7 @@ name = "block-mesh-manager-worker"
 version = "0.0.239"
 dependencies = [
  "anyhow",
+ "bcrypt",
  "block-mesh-common",
  "chrono",
  "flume",
