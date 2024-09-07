@@ -1,15 +1,17 @@
 #!/usr/bin/env bash
 set -x
+set -eo pipefail
 export ROOT="$(git rev-parse --show-toplevel)"
 export CARGO_TARGET_DIR="${ROOT}/target/PRE-PUSH"
-git branch -D release
-git branch -d release
-git pull -Xtheirs
-set -eo pipefail
 git checkout master
 git pull
-git checkout -b release
+git checkout release
+git pull -Xtheirs
 git merge master -Xtheirs
+git checkout release
+git pull -Xtheirs
+#git branch --set-upstream-to=origin/release release
+git merge master
 git rebase master -Xtheirs
 export VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g')
 export MINOR=$(echo $VERSION | cut -d '.' -f 3)
