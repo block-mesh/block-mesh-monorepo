@@ -16,9 +16,7 @@ pub async fn daily_stats_aggregator(
     let mut count = 0;
     let mut prev = Utc::now();
     while let Ok(message) = rx.recv().await {
-        tracing::info!("(1) daily_stats_aggregator incoming message {:#?}", message);
         if let Ok(message) = serde_json::from_value::<DailyStatMessage>(message) {
-            tracing::info!("(2) daily_stats_aggregator incoming message {:#?}", message);
             calls.insert(message.id, message.uptime);
             count += 1;
             let now = Utc::now();

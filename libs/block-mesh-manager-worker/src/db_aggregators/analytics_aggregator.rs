@@ -16,9 +16,7 @@ pub async fn analytics_aggregator(
     let mut count = 0;
     let mut prev = Utc::now();
     while let Ok(message) = rx.recv().await {
-        tracing::info!("(1) analytics_aggregator incoming message {:#?}", message);
         if let Ok(message) = serde_json::from_value::<AnalyticsMessage>(message) {
-            tracing::info!("(2) analytics_aggregator incoming message {:#?}", message);
             calls.insert(message.user_id, message.clone());
             count += 1;
             let now = Utc::now();
