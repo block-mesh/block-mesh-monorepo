@@ -11,6 +11,7 @@ git merge master -Xtheirs
 git checkout release
 git pull -Xtheirs
 #git branch --set-upstream-to=origin/release release
+git pull
 git merge master
 git rebase master -Xtheirs
 export VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g')
