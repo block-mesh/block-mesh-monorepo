@@ -15,11 +15,12 @@ pub async fn bulk_finalize(transaction: &mut Transaction<'_, Postgres>) -> anyho
             SELECT
             id
             FROM daily_stats
-            WHERE day < $2
+            WHERE day < $2 and status = $3
             LIMIT 10000
         )
         "#,
         DailyStatStatus::Finalized.to_string(),
+        DailyStatStatus::OnGoing.to_string()
         day
     )
     .execute(&mut **transaction)
