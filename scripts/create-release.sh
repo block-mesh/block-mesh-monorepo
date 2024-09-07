@@ -6,8 +6,7 @@ set -eo pipefail
 git checkout master
 git pull
 git checkout -b release
-git branch --set-upstream-to=origin/release release
-git pull
+#git branch --set-upstream-to=origin/release release
 git merge master
 git rebase master -Xtheirs
 export VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g')
