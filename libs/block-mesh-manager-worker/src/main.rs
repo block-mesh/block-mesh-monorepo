@@ -15,7 +15,6 @@ mod pg_listener;
 mod utils;
 
 use crate::call_backs::send_to_rx::send_to_rx;
-use crate::cron_jobs::finalize_daily_cron::finalize_daily_cron;
 use crate::cron_jobs::rpc_cron::rpc_worker_loop;
 use crate::db_aggregators::aggregates_aggregator::aggregates_aggregator;
 use crate::db_aggregators::analytics_aggregator::analytics_aggregator;
@@ -32,7 +31,6 @@ async fn main() -> anyhow::Result<()> {
     let (tx, _rx) = tokio::sync::broadcast::channel::<Value>(5000);
 
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
-    let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
 
     let db_listen_task = tokio::spawn(start_listening(
         db_pool.clone(),
@@ -62,7 +60,6 @@ async fn main() -> anyhow::Result<()> {
     ));
 
     tokio::select! {
-        o = finalize_daily_stats_task => eprintln!("finalize_daily_stats_task exit {:?}", o),
         o = rpc_worker_task => eprintln!("rpc_worker_task exit {:?}", o),
         o = db_listen_task => eprintln!("db_listen_task exit {:?}", o),
         o = db_aggregator_users_ip_task => eprintln!("db_aggregator_users_ip_task exit {:?}", o),
