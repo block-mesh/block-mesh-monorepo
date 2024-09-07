@@ -19,6 +19,7 @@ export NEWVERSION=$(echo $VERSION | sed -e "s/$MINOR/$NEWMINOR/")
 sed -i -e "s/$VERSION/$NEWVERSION/" Cargo.toml
 cargo clippy --all --features ssr,hydrate -- -D warnings
 git branch --set-upstream-to=origin/release release
+git pull
 git add Cargo.toml Cargo.lock
 git commit -m "New release ${NEWVERSION}"
 git push
