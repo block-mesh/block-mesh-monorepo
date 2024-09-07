@@ -1,4 +1,3 @@
-use crate::domain::daily_stat::DailyStatStatus;
 use chrono::{Duration, Utc};
 use sqlx::{Postgres, Transaction};
 
@@ -19,9 +18,9 @@ pub async fn bulk_finalize(transaction: &mut Transaction<'_, Postgres>) -> anyho
             LIMIT 10000
         )
         "#,
-        DailyStatStatus::Finalized.to_string(),
+        "Finalized".to_string(),
         day,
-        DailyStatStatus::OnGoing.to_string()
+        "OnGoing".to_string()
     )
     .execute(&mut **transaction)
     .await?;
