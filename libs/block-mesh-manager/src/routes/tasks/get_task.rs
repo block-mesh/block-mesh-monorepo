@@ -1,6 +1,7 @@
 use crate::database::api_token::find_token::find_token_pool;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
+use crate::database::task::find_task_assigned_to_user::find_task_assigned_to_user;
 use crate::database::task::find_task_by_status::find_task_by_status;
 use crate::database::task::update_task_assigned::update_task_assigned;
 use crate::database::user::get_user_by_id::get_user_opt_by_id_pool;
@@ -49,6 +50,16 @@ pub async fn handler(
         return Err(Error::UserNotFound);
     }
     let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let task = find_task_assigned_to_user(&mut transaction, &user.id).await?;
+    if let Some(task) = task {
+        return Ok(Json(Some(GetTaskResponse {
+            id: task.id,
+            url: task.url,
+            method: task.method.to_string(),
+            headers: task.headers,
+            body: task.body,
+        })));
+    }
     let task = find_task_by_status(&mut transaction, TaskStatus::Pending).await?;
     let task = match task {
         Some(v) => v,
