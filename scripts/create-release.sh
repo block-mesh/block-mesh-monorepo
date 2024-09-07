@@ -8,6 +8,7 @@ git pull
 git checkout release
 git pull -Xtheirs
 git merge master -Xtheirs
+git rebase master -Xtheirs
 #git branch --set-upstream-to=origin/release release
 export VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g')
 export MINOR=$(echo $VERSION | cut -d '.' -f 3)
