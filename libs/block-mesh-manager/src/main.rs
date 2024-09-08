@@ -2,6 +2,7 @@
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unreachable_pub)]
 
+use block_mesh_manager::ws::connection_manager::ConnectionManager;
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
@@ -78,7 +79,7 @@ async fn run() -> anyhow::Result<()> {
     let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
     let redis = redis_client.get_multiplexed_async_connection().await?;
 
-    // let ws_connection_manager = ConnectionManager::new();
+    let ws_connection_manager = ConnectionManager::new();
     let app_state = Arc::new(AppState {
         email_client,
         pool: db_pool.clone(),
@@ -89,7 +90,7 @@ async fn run() -> anyhow::Result<()> {
         flags,
         cleaner_tx,
         redis,
-        // ws_connection_manager,
+        ws_connection_manager,
         tx_users_ip_agg,
         tx_aggregate_agg,
     });

@@ -1,8 +1,7 @@
-use crate::background::ws::websocket::set_ws_status;
+use crate::background::ws::websocket::{get_tx, set_ws_status};
 use crate::utils::extension_wrapper_state::ExtensionWrapperState;
 use crate::utils::log::{log, log_error};
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
-use leptos::SignalGetUntracked;
 use serde::{Deserialize, Serialize};
 use std::cmp::PartialEq;
 use wasm_bindgen::prelude::*;
@@ -10,13 +9,10 @@ use web_sys::{CloseEvent, ErrorEvent, MessageEvent};
 
 pub fn on_message_handler(
     _ws: web_sys::WebSocket,
-    app_state: ExtensionWrapperState,
+    _app_state: ExtensionWrapperState,
 ) -> Closure<dyn FnMut(MessageEvent)> {
     Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
         log!("on_message_handle => {:#?}", e);
-        let _email = app_state.email.get_untracked();
-        let _api_token = app_state.api_token.get_untracked();
-        // let metadata = fetch_metadata_blocking().unwrap_or_default();
         if let Ok(txt) = e.data().dyn_into::<js_sys::JsString>() {
             match serde_json::from_str::<WsServerMessage>(
                 &txt.as_string()
@@ -24,6 +20,9 @@ pub fn on_message_handler(
             ) {
                 Ok(msg) => {
                     log!("msg => {:#?}", msg);
+                    if let Some(tx) = get_tx() {
+                        let _ = tx.try_send(msg);
+                    }
                 }
                 Err(_error) => {}
             }
@@ -42,12 +41,9 @@ pub fn on_error_handler(ws: web_sys::WebSocket) -> Closure<dyn FnMut(ErrorEvent)
 }
 
 pub fn on_open_handler(ws: web_sys::WebSocket) -> Closure<dyn FnMut()> {
-    Closure::<dyn FnMut()>::new(move || {
-        log!("socket opened");
-        match ws.send_with_str("ping") {
-            Ok(_) => log!("Sent a ping message."),
-            Err(err) => log_error!("error sending message: {:?}", err),
-        }
+    Closure::<dyn FnMut()>::new(move || match ws.send_with_str("ping") {
+        Ok(_) => log!("Sent a ping message."),
+        Err(err) => log_error!("error sending message: {:?}", err),
     })
 }
 

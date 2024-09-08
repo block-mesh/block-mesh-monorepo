@@ -65,13 +65,12 @@ fn receiver(
 
 /// Actual websocket statemachine (one will be spawned per connection)
 pub async fn handle_socket(
-    _socket: WebSocket,
-    _who: SocketAddr,
-    _state: Arc<AppState>,
-    _email: String,
-    _user_id: Uuid,
+    socket: WebSocket,
+    who: SocketAddr,
+    state: Arc<AppState>,
+    email: String,
+    user_id: Uuid,
 ) {
-    /*
     let is_closing = Arc::new(AtomicBool::new(false));
     let (ws_sink, ws_stream) = socket.split();
     let (sink_task, sink_tx) = messenger(ws_sink, is_closing.clone());
@@ -141,5 +140,4 @@ pub async fn handle_socket(
 
     broadcaster.unsubscribe(&user_id);
     tracing::info!("Websocket context {who} destroyed");
-     */
 }

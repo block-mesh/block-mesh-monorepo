@@ -23,6 +23,7 @@ use std::time::Duration;
 use tokio::net::TcpListener;
 
 use crate::worker::db_cleaner_cron::EnrichIp;
+use crate::ws::connection_manager::ConnectionManager;
 use block_mesh_common::env::app_env_var::AppEnvVar;
 use block_mesh_common::env::env_var;
 use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
@@ -53,7 +54,7 @@ pub struct AppState {
     pub flags: HashMap<String, FlagValue>,
     pub cleaner_tx: Sender<EnrichIp>,
     pub redis: MultiplexedConnection,
-    // pub ws_connection_manager: ConnectionManager,
+    pub ws_connection_manager: ConnectionManager,
     pub tx_users_ip_agg: Sender<UsersIpMessage>,
     pub tx_aggregate_agg: Sender<AggregateMessage>,
 }

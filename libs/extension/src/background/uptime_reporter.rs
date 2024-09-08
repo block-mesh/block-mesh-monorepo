@@ -4,6 +4,7 @@ use block_mesh_common::interfaces::server_api::{ReportUptimeRequest, ReportUptim
 use leptos::*;
 use logger_leptos::leptos_tracing::setup_leptos_tracing;
 use speed_test::metadata::fetch_metadata;
+use uuid::Uuid;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 use crate::utils::connectors::set_panic_hook;
@@ -26,11 +27,16 @@ pub async fn report_uptime() {
     let base_url = app_state.blockmesh_url.get_untracked();
     let email = app_state.email.get_untracked();
     let api_token = app_state.api_token.get_untracked();
+
+    report_uptime_inner(&base_url, &email, &api_token).await;
+}
+
+pub async fn report_uptime_inner(base_url: &str, email: &str, api_token: &Uuid) {
     let metadata = fetch_metadata().await.unwrap_or_default();
 
     let query = ReportUptimeRequest {
-        email,
-        api_token,
+        email: email.to_string(),
+        api_token: api_token.clone(),
         ip: if metadata.ip.is_empty() {
             None
         } else {
