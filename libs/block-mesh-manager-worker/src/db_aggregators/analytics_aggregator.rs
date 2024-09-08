@@ -24,8 +24,6 @@ pub async fn analytics_aggregator(
             let run = diff.num_seconds() > time_limit || count >= agg_size;
             prev = Utc::now();
             if run {
-                count = 0;
-                calls.clear();
                 if let Ok(mut transaction) = pool.begin().await {
                     for pair in calls.iter() {
                         let _ = get_or_create_analytics(
@@ -37,6 +35,8 @@ pub async fn analytics_aggregator(
                         .await;
                     }
                     let _ = transaction.commit().await;
+                    count = 0;
+                    calls.clear();
                 }
             }
         }

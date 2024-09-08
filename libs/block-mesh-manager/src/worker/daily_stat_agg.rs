@@ -16,7 +16,7 @@ pub async fn daily_stat_agg(
     rx: Receiver<DailyStatMessage>,
     state: Arc<AppState>,
 ) -> Result<(), anyhow::Error> {
-    let agg_size = env::var("DAILY_STAT_AGG_SIZE")
+    let agg_size = env::var("AGG_SIZE")
         .unwrap_or("300".to_string())
         .parse()
         .unwrap_or(300);

@@ -1,0 +1,1 @@
+ALTER TABLE aggregates ADD COLUMN dummy_updated_at timestamptz NOT NULL DEFAULT now();

@@ -17,7 +17,7 @@ pub async fn aggregate_agg(
     rx: Receiver<AggregateMessage>,
     state: Arc<AppState>,
 ) -> Result<(), anyhow::Error> {
-    let agg_size = env::var("AGGREGATE_AGG_SIZE")
+    let agg_size = env::var("AGG_SIZE")
         .unwrap_or("300".to_string())
         .parse()
         .unwrap_or(300);

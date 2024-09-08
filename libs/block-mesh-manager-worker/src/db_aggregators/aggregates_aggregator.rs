@@ -24,14 +24,14 @@ pub async fn aggregates_aggregator(
             let run = diff.num_seconds() > time_limit || count >= agg_size;
             prev = Utc::now();
             if run {
-                count = 0;
-                calls.clear();
                 if let Ok(mut transaction) = pool.begin().await {
                     for pair in calls.iter() {
                         let _ = update_aggregate(&mut transaction, pair.0, pair.1).await;
                     }
                     let _ = transaction.commit().await;
                 }
+                count = 0;
+                calls.clear();
             }
         }
     }

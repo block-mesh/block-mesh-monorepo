@@ -16,7 +16,7 @@ pub async fn users_ip_agg(
     rx: Receiver<UsersIpMessage>,
     state: Arc<AppState>,
 ) -> Result<(), anyhow::Error> {
-    let agg_size = env::var("USERS_IP_AGG_SIZE")
+    let agg_size = env::var("AGG_SIZE")
         .unwrap_or("300".to_string())
         .parse()
         .unwrap_or(300);
