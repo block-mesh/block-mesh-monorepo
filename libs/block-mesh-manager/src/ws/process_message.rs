@@ -48,8 +48,8 @@ fn process_client_message(text: &str, _who: SocketAddr) -> Option<WsClientMessag
                 WsClientMessage::CompleteTask(_task) => {
                     // TODO: Sync DB row
                 }
-                WsClientMessage::ReportBandwidth(_) => {}
-                WsClientMessage::ReportUptime(_) => {}
+                WsClientMessage::ReportBandwidth => {}
+                WsClientMessage::ReportUptime => {}
             }
             return Some(message);
         }

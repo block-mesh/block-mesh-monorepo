@@ -3,7 +3,7 @@ name: Deploy Worker
 on:
   push:
     branches:
-      - master
+      - release
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -24,7 +24,7 @@ jobs:
           "cloudflare-worker-solana-relay",
           "cloudflare-worker-tauri-releases",
           "cloudflare-worker-logger-proxy",
-          "cloudflare-feature-flags"
+          "cloudflare-feature-flags",
           "cloudflare-worker-cron"
         ]
     steps:

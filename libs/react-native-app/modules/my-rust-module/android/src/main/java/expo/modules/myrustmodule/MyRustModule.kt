@@ -12,7 +12,8 @@ class MyRustModule : Module() {
     }
 
     external fun runLib(url: String, email: String, password: String): Int
-    external fun stopLib(): Int
+    external fun stopLib(url: String): Int
+    external fun getLibStatus(): Int
   // Each module class must implement the definition function. The definition consists of components
   // that describes the module's functionality and behavior.
   // See https://docs.expo.dev/modules/module-api for more details about available components.
@@ -39,12 +40,12 @@ class MyRustModule : Module() {
         runLib(url, email, password)
     }
 
-    AsyncFunction("stop_lib") {
-        stopLib()
-        // CoroutineScope(Dispatchers.IO).launch {
-        // stopLib()
-        // }
-        1
+    AsyncFunction("stop_lib") {url: String ->
+        stopLib(url)
+    }
+
+    Function("get_lib_status") {
+        getLibStatus()
     }
 
     // Defines a JavaScript function that always returns a Promise and whose native code

@@ -199,7 +199,7 @@ pub async fn authentication_layer(
 
     let session_layer = SessionManagerLayer::new(session_store)
         .with_secure(false)
-        .with_expiry(Expiry::OnInactivity(Duration::days(7)));
+        .with_expiry(Expiry::OnInactivity(Duration::days(2)));
 
     let backend = Backend::new(pool.clone(), con.clone());
     AuthManagerLayerBuilder::new(backend, session_layer).build()

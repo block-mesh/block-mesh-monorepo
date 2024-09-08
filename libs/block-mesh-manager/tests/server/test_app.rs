@@ -12,7 +12,7 @@ use block_mesh_manager::envars::load_dotenv::load_dotenv;
 use block_mesh_manager::startup::application::{AppState, Application};
 use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
 use block_mesh_manager::worker::analytics_agg::{analytics_agg, AnalyticsMessage};
-use block_mesh_manager::worker::db_agg::{db_agg, UpdateBulkMessage};
+use block_mesh_manager::worker::daily_stat_agg::{daily_stat_agg, UpdateBulkMessage};
 use block_mesh_manager::worker::db_cleaner_cron::{db_cleaner_cron, EnrichIp};
 use block_mesh_manager::worker::finalize_daily_cron::finalize_daily_cron;
 use block_mesh_manager::worker::joiner::joiner_loop;
@@ -100,7 +100,7 @@ pub async fn spawn_app() -> TestApp {
     let _joiner_task = tokio::spawn(joiner_loop(rx));
     let _finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
     let _db_cleaner_task = tokio::spawn(db_cleaner_cron(db_pool.clone(), cleaner_rx));
-    let _db_agg_task = tokio::spawn(db_agg(db_pool.clone(), rx_sql_agg));
+    let _db_agg_task = tokio::spawn(daily_stat_agg(db_pool.clone(), rx_sql_agg));
     let _db_analytics_task = tokio::spawn(analytics_agg(db_pool.clone(), rx_analytics_agg));
 
     sleep(Duration::from_secs(1)).await;

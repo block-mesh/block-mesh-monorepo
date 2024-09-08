@@ -4,6 +4,7 @@ import initWasmModule, {
   task_poller,
   report_uptime,
   uptime_fetcher,
+  measure_bandwidth,
   start_websocket
 } from './wasm/blockmesh_ext.js'
 

@@ -1,25 +1,83 @@
+use crate::helpers::http_client;
+use crate::login_mode::login_mode;
+use chrono::Utc;
 use once_cell::sync::OnceCell;
-use reqwest::ClientBuilder;
-use std::process;
+use serde::{Deserialize, Serialize};
+use std::fmt::{Display, Formatter};
 use std::sync::{Arc, Mutex};
+use std::time::Duration;
 use tokio::runtime::{Builder, Runtime};
+use tokio::sync::Notify;
+use tokio::time::sleep;
 
-pub static STATUS: OnceCell<Arc<Mutex<i8>>> = OnceCell::new();
+pub static STATUS: OnceCell<Arc<Mutex<LibState>>> = OnceCell::new();
 
-pub static CLOUDFLARE: &str = "https://cloudflare-worker-echo-debug.blockmesh.workers.dev";
-pub static NGROK: &str = "https://distinct-bison-merely.ngrok-free.app";
-pub static LOCALHOST: &str = "http://localhost:8000";
-pub static LOCALHOST_2: &str = "http://10.0.2.2:8000";
+pub static LOCALHOST_ANDROID: &str = "http://10.0.2.2:8000";
 
-pub fn get_status() -> i8 {
-    let value = STATUS.get_or_init(|| Arc::new(Mutex::new(0)));
-    *value.lock().unwrap()
+#[derive(Clone, Copy, Serialize, Deserialize, PartialEq)]
+pub enum FFIStatus {
+    WAITING,
+    RUNNING,
+    STOP,
 }
 
-pub fn set_status(status: i8) {
-    let value = STATUS.get_or_init(|| Arc::new(Mutex::new(0)));
+#[derive(Clone)]
+pub struct LibState {
+    pub status: FFIStatus,
+    pub notify: Arc<Notify>,
+}
+
+impl LibState {
+    pub fn new() -> Arc<Mutex<Self>> {
+        let notify = Arc::new(Notify::new());
+        Arc::new(Mutex::new(Self {
+            status: FFIStatus::WAITING,
+            notify,
+        }))
+    }
+}
+
+impl Display for FFIStatus {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            FFIStatus::WAITING => write!(f, "waiting"),
+            FFIStatus::RUNNING => write!(f, "running"),
+            FFIStatus::STOP => write!(f, "stop"),
+        }
+    }
+}
+
+impl From<FFIStatus> for i8 {
+    fn from(val: FFIStatus) -> i8 {
+        match val {
+            FFIStatus::WAITING => -1,
+            FFIStatus::RUNNING => 1,
+            FFIStatus::STOP => 0,
+        }
+    }
+}
+
+pub fn get_status() -> FFIStatus {
+    let value = STATUS.get_or_init(LibState::new);
+    value.lock().unwrap().status
+}
+
+pub fn cancel() {
+    let value = STATUS.get_or_init(LibState::new);
+    let value = value.lock().unwrap();
+    value.notify.notify_waiters();
+}
+
+pub fn set_status(status: FFIStatus) {
+    let value = STATUS.get_or_init(LibState::new);
     let mut val = value.lock().unwrap();
-    *val = status;
+    val.status = status;
+}
+
+pub fn get_notify() -> Arc<Notify> {
+    let value = STATUS.get_or_init(LibState::new);
+    let val = value.lock().unwrap();
+    val.notify.clone()
 }
 
 pub fn create_current_thread_runtime() -> Arc<Runtime> {
@@ -33,50 +91,61 @@ pub fn create_current_thread_runtime() -> Arc<Runtime> {
     runtime
 }
 
-pub async fn debug_stop(url: &str) {
-    let res = ClientBuilder::new()
-        .use_rustls_tls()
-        .no_hickory_dns()
-        .build()
-        .unwrap()
-        .get(format!(
-            "{}/health_check?RUNNING={}&url={}",
-            url,
-            get_status(),
-            url
-        ))
-        .send()
-        .await;
+pub fn debug_stop(_url: &str) {
+    let runtime = create_current_thread_runtime();
+    set_status(FFIStatus::STOP);
+    runtime.block_on(async {
+        let notify = get_notify();
+        notify.notify_waiters();
+        // let _ = http_client()
+        //     .get(format!(
+        //         "{}/health_check?status={}&url={}",
+        //         url,
+        //         get_status(),
+        //         url
+        //     ))
+        //     .send()
+        //     .await;
+    });
+    set_status(FFIStatus::WAITING);
+}
 
-    let _ = ClientBuilder::new()
-        .use_rustls_tls()
-        .no_hickory_dns()
-        .build()
-        .unwrap()
-        .get(format!(
-            "{}/health_check?url={}pid={}&res={:?}",
-            LOCALHOST_2,
-            url,
-            process::id(),
-            res,
-        ))
-        .send()
-        .await;
+pub fn run_login_mode(url: &str, email: &str, password: &str) {
+    let runtime = create_current_thread_runtime();
+    let url = url.to_string();
+    let email = email.to_string();
+    let password = password.to_string();
+    runtime.block_on(async {
+        let notify = get_notify();
+        set_status(FFIStatus::RUNNING);
+        let task = tokio::spawn(async move {
+            login_mode(&url, &email, &password, Some("Mobile".to_string())).await
+        });
+        let cancel_future = tokio::spawn(async move {
+            notify.notified().await;
+            "Future canceled"
+        });
+        tokio::select! {
+            o = task => eprintln!("Task died {:?}", o),
+            o = cancel_future=> eprintln!("Cancel request {:?}", o),
+        }
+    });
+    set_status(FFIStatus::WAITING);
+}
 
-    // let res = ureq::get(&format!(
-    //     "{}/health_check?RUNNING={}&url={}",
-    //     url,
-    //     get_status(),
-    //     url
-    // ))
-    // .query_pairs(vec![("url", url)])
-    // .call();
-    // let _ = ureq::get(&format!(
-    //     "{}/health_check?RUNNING={}&url={}",
-    //     LOCALHOST_2,
-    //     get_status(),
-    //     url
-    // ))
-    // .query_pairs(vec![("url", url), ("res", &format!("{:?}", res))])
-    // .call();
+pub async fn debug_running(url: &str) {
+    set_status(FFIStatus::RUNNING);
+    loop {
+        let now = Utc::now();
+        let _ = http_client()
+            .get(format!(
+                "{}/health_check?time={}&status={}",
+                url,
+                now,
+                get_status()
+            ))
+            .send()
+            .await;
+        sleep(Duration::from_secs(5)).await
+    }
 }

@@ -71,5 +71,7 @@ export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/$
 ensure sqlx database create
 ensure sqlx migrate run --source migrations
 ensure cargo sqlx prepare -- --features ssr
+cd "${ROOT}/libs/block-mesh-manager-worker" || exit
+ensure cargo sqlx prepare
 >&2 echo "Postgres has been migrated, ready to go!"
 cd "${_PWD}"

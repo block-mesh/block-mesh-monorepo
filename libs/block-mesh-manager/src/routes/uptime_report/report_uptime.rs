@@ -2,16 +2,18 @@ use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
+use crate::database::daily_stat::increment_uptime::increment_uptime;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
-use crate::worker::analytics_agg::AnalyticsMessage;
-use crate::worker::db_agg::{Table, UpdateBulkMessage};
 use crate::worker::db_cleaner_cron::EnrichIp;
 use axum::extract::{ConnectInfo, Query, Request, State};
 use axum::{Extension, Json};
 use block_mesh_common::feature_flag_client::FlagValue;
+use block_mesh_common::interfaces::db_messages::{
+    AggregateMessage, AnalyticsMessage, DBMessageTypes, DailyStatMessage, UsersIpMessage,
+};
 use block_mesh_common::interfaces::server_api::{
     ClientsMetadata, ReportUptimeRequest, ReportUptimeResponse,
 };
@@ -72,7 +74,8 @@ pub async fn handler(
             if let Ok(metadata) = serde_json::from_str::<ClientsMetadata>(&body_raw) {
                 let _ = state
                     .tx_analytics_agg
-                    .send(AnalyticsMessage {
+                    .send_async(AnalyticsMessage {
+                        msg_type: DBMessageTypes::AnalyticsMessage,
                         user_id: user.id,
                         depin_aggregator: metadata.depin_aggregator.unwrap_or_default(),
                         device_type: metadata.device_type,
@@ -90,6 +93,23 @@ pub async fn handler(
     let daily_stat_opt =
         get_daily_stat_by_user_id_and_day(&mut transaction, user.id, Utc::now().date_naive())
             .await?;
+
+    let flag = state
+        .flags
+        .get("touch_users_ip")
+        .unwrap_or(&FlagValue::Boolean(false));
+    let flag: bool = <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
+    if flag {
+        let _ = state
+            .tx_users_ip_agg
+            .send_async(UsersIpMessage {
+                msg_type: DBMessageTypes::UsersIpMessage,
+                id: user.id,
+                ip: ip.clone(),
+            })
+            .await;
+    }
+
     if daily_stat_opt.is_none() {
         create_daily_stat(&mut transaction, user.id).await?;
     }
@@ -101,45 +121,57 @@ pub async fn handler(
     let interval: f64 =
         <FlagValue as TryInto<f64>>::try_into(interval.to_owned()).unwrap_or_default();
 
-    let aggregate =
+    let uptime =
         get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, user.id)
             .await
             .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;
 
     let now = Utc::now();
-    let diff = now - aggregate.updated_at.unwrap_or(now);
+    let diff = now - uptime.updated_at.unwrap_or(now);
 
-    if diff.num_seconds() < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240) {
-        if daily_stat_opt.is_some() {
+    let (extra, abs) =
+        if diff.num_seconds() < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240) {
+            (
+                diff.num_seconds() as f64,
+                uptime.value.as_f64().unwrap_or_default() + diff.num_seconds() as f64,
+            )
+        } else {
+            (0.0, uptime.value.as_f64().unwrap_or_default())
+        };
+
+    if daily_stat_opt.is_some() && extra > 0.0 {
+        let flag = state
+            .flags
+            .get("report_uptime_daily_stats_via_channel")
+            .unwrap_or(&FlagValue::Boolean(false));
+        let flag: bool =
+            <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
+
+        if flag {
             let _ = state
-                .tx_sql_agg
-                .send(UpdateBulkMessage {
+                .tx_daily_stat_agg
+                .send_async(DailyStatMessage {
+                    msg_type: DBMessageTypes::DailyStatMessage,
                     id: daily_stat_opt.unwrap().id,
-                    value: serde_json::Value::from(diff.num_seconds() as f64),
-                    table: Table::DailyStat,
+                    uptime: extra,
                 })
                 .await;
+        } else {
+            let mut transaction = pool.begin().await.map_err(Error::from)?;
+            let _ = increment_uptime(&mut transaction, &daily_stat_opt.unwrap().id, extra).await;
+            transaction.commit().await?;
         }
-        let sum = aggregate.value.as_f64().unwrap_or_default() + diff.num_seconds() as f64;
-        let _ = state
-            .tx_sql_agg
-            .send(UpdateBulkMessage {
-                id: aggregate.id.0.unwrap_or_default(),
-                value: serde_json::Value::from(sum),
-                table: Table::Aggregate,
-            })
-            .await;
-    } else {
-        let _ = state
-            .tx_sql_agg
-            .send(UpdateBulkMessage {
-                id: aggregate.id.0.unwrap_or_default(),
-                value: serde_json::Value::from(aggregate.value.as_f64().unwrap_or_default()),
-                table: Table::Aggregate,
-            })
-            .await;
     }
+
+    let _ = state
+        .tx_aggregate_agg
+        .send_async(AggregateMessage {
+            msg_type: DBMessageTypes::AggregateMessage,
+            id: uptime.id,
+            value: serde_json::Value::from(abs),
+        })
+        .await;
 
     let flag = state
         .flags
@@ -149,7 +181,7 @@ pub async fn handler(
     if flag {
         let _ = state
             .cleaner_tx
-            .send(EnrichIp {
+            .send_async(EnrichIp {
                 user_id: user.id,
                 ip: ip.clone(),
             })

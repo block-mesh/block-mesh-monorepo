@@ -34,8 +34,12 @@ public class MyRustModule: Module {
         }
     }
 
-    AsyncFunction("stop_lib") {
-        stop_lib();
+    AsyncFunction("stop_lib") { (url: String) in
+        stop_lib(url);
+    }
+
+    Function("get_lib_status") {
+        return get_lib_status()
     }
 
     // Defines a JavaScript function that always returns a Promise and whose native code

@@ -4,12 +4,16 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
 
-const FLAGS: [&str; 5] = [
+const FLAGS: [&str; 9] = [
     "enrich_ip_and_cleanup_in_background",
     "submit_bandwidth_run_background",
     "send_cleanup_to_rayon",
     "polling_interval",
     "tx_analytics_agg",
+    "touch_users_ip",
+    "submit_bandwidth_via_channel",
+    "report_uptime_daily_stats_via_channel",
+    "send_to_worker",
 ];
 
 #[derive(Serialize, Deserialize, Clone, Debug)]

@@ -4,11 +4,12 @@ pub mod chrome_storage;
 #[cfg(feature = "cli")]
 pub mod cli;
 pub mod constants;
+#[cfg(feature = "env")]
+pub mod env;
 #[cfg(feature = "feature-flag")]
 pub mod feature_flag_client;
 #[cfg(feature = "http")]
 pub mod http;
 pub mod interfaces;
-pub mod tauri_message_channel;
-
 pub mod routes_enum;
+pub mod tauri_message_channel;
