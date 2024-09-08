@@ -23,7 +23,7 @@ pub fn get_tx() -> Option<Arc<Mutex<Sender<WsServerMessage>>>> {
     TX.get().cloned()
 }
 
-pub fn set_rx(rx: Receiver<WsServerMessage>, ws: WebSocket) {
+pub fn set_rx(rx: Receiver<WsServerMessage>, _ws: WebSocket) {
     {
         let r = RX.get_or_init(|| Arc::new(Mutex::new(rx.clone())));
         *r.lock().unwrap() = rx.clone();
