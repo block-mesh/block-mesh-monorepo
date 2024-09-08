@@ -58,7 +58,7 @@ pub struct ClientsMetadata {
 }
 
 #[typeshare]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ReportUptimeRequest {
     pub email: String,
     #[typeshare(serialized_as = "string")]
@@ -229,7 +229,7 @@ pub struct GetLatestInviteCodeResponse {
 }
 
 #[typeshare]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ReportBandwidthRequest {
     pub email: String,
     #[typeshare(serialized_as = "string")]
