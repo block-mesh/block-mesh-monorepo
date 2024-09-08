@@ -93,7 +93,7 @@ function recreate_intervals() {
   intervals.push(
     setInterval(async () => {
       await create_alarm().then(onSuccess, onError)
-      // await measure_bandwidth().then(onSuccess, onError) // FIXME
+      // await measure_bandwidth().then(onSuccess, onError) // TODO bring back, need to release this gradually
     }, polling_interval + Math.random())
   )
 }

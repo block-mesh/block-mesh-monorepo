@@ -66,7 +66,7 @@ fn receiver(
 /// Actual websocket statemachine (one will be spawned per connection)
 pub async fn handle_socket(
     socket: WebSocket,
-    who: SocketAddr,
+    who: SocketAddr, // TODO - need to replace with CF headers
     state: Arc<AppState>,
     _email: String,
     user_id: Uuid,
