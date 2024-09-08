@@ -7,6 +7,7 @@ use crate::startup::routers::leptos_router::get_leptos_router;
 use crate::startup::routers::static_auth_router::get_static_auth_router;
 use crate::startup::routers::static_un_auth_router::get_static_un_auth_router;
 use crate::startup::routers::ws_router::get_ws_router;
+use crate::ws::connection_manager::ConnectionManager;
 use axum::{Extension, Router};
 use axum_login::login_required;
 use block_mesh_common::feature_flag_client::FlagValue;
@@ -53,6 +54,7 @@ pub struct AppState {
     pub flags: HashMap<String, FlagValue>,
     pub cleaner_tx: Sender<EnrichIp>,
     pub redis: MultiplexedConnection,
+    pub ws_connection_manager: ConnectionManager,
     // pub ws_connection_manager: ConnectionManager,
     pub tx_users_ip_agg: Sender<UsersIpMessage>,
     pub tx_aggregate_agg: Sender<AggregateMessage>,

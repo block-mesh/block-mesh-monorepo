@@ -4,7 +4,6 @@ import initWasmModule, {
   task_poller,
   report_uptime,
   uptime_fetcher,
-  measure_bandwidth,
   start_websocket
 } from './wasm/blockmesh_ext.js'
 
@@ -94,7 +93,7 @@ function recreate_intervals() {
   intervals.push(
     setInterval(async () => {
       await create_alarm().then(onSuccess, onError)
-      await measure_bandwidth().then(onSuccess, onError)
+      // await measure_bandwidth().then(onSuccess, onError) // TODO bring back, need to release this gradually
     }, polling_interval + Math.random())
   )
 }
@@ -120,21 +119,6 @@ async function init_background() {
     start_websocket().then(onSuccess, onError)
   }, 5000)
 }
-
-// async function restart_websocket() {
-//   try {
-//     await start_websocket()
-//     console.log('after start_websocket')
-//   } catch (e) {
-//     setTimeout(async () => {
-//       await restart_websocket()
-//     }, 10_000)
-//   } finally {
-//     setTimeout(async () => {
-//       await restart_websocket()
-//     }, 10_000)
-//   }
-// }
 
 init_background().then(onSuccess, onError)
 

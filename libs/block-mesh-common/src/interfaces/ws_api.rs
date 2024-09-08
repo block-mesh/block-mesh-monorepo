@@ -1,4 +1,6 @@
-use crate::interfaces::server_api::{GetTaskResponse, SubmitTaskRequest};
+use crate::interfaces::server_api::{
+    GetTaskResponse, ReportBandwidthRequest, ReportUptimeRequest, RunTaskResponse,
+};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -10,7 +12,7 @@ pub enum WsServerMessage {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum WsClientMessage {
-    CompleteTask(SubmitTaskRequest),
-    ReportBandwidth,
-    ReportUptime,
+    CompleteTask(RunTaskResponse),
+    ReportBandwidth(ReportBandwidthRequest),
+    ReportUptime(ReportUptimeRequest),
 }
