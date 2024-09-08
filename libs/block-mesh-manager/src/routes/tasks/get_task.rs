@@ -37,6 +37,7 @@ pub async fn handler(
         .to_str()
         .context("Unable to STR CF-CONNECTING-IP")?;
 
+    let mut redis = state.redis.clone();
     let filter = filter_request(&mut redis, &user.id, ip).await;
     if filter.is_err() {
         return Ok(Json(None));

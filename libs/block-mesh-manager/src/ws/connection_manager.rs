@@ -2,7 +2,6 @@ use crate::ws::task_scheduler::TaskScheduler;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use dashmap::DashMap;
 use futures::future::join_all;
-use std::cmp::min;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::net::SocketAddr;

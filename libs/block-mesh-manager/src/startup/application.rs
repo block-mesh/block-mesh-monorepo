@@ -7,7 +7,6 @@ use crate::startup::routers::leptos_router::get_leptos_router;
 use crate::startup::routers::static_auth_router::get_static_auth_router;
 use crate::startup::routers::static_un_auth_router::get_static_un_auth_router;
 use crate::startup::routers::ws_router::get_ws_router;
-use crate::worker::analytics_agg::AnalyticsMessage;
 use crate::ws::connection_manager::ConnectionManager;
 use axum::{Extension, Router};
 use axum_login::login_required;

@@ -26,7 +26,7 @@ pub async fn db_cleaner_cron(pool: PgPool, rx: Receiver<EnrichIp>) -> Result<(),
         .unwrap_or_default();
     let thread_pool = rayon::ThreadPoolBuilder::new().num_threads(16).build()?;
 
-    while let Some(job) = rx.recv().await {
+    while let Some(job) = rx.recv_async().await {
         let pool = pool.clone();
         let client = client.clone();
         thread_pool
