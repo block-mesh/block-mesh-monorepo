@@ -117,7 +117,9 @@ impl Broadcaster {
             let tx = entry.value().clone();
             async move {
                 for msg in messages {
-                    tx.send(msg.clone()).await.unwrap(); // FIXME concurrency
+                    if let Err(error) = tx.send(msg.clone()).await {
+                        tracing::error!("Error while queuing WS message: {error}");
+                    }
                 }
             }
         }))
@@ -142,10 +144,13 @@ impl Broadcaster {
     pub fn unsubscribe(&self, user_id: Uuid, socket_addr: SocketAddr) {
         self.sockets.remove(&(user_id, socket_addr));
         let queue = &mut self.queue.lock().unwrap();
-        let pos = queue
+        if let Some(pos) = queue
             .iter()
             .position(|(a, b)| a == &user_id && b == &socket_addr)
-            .unwrap();
-        queue.remove(pos);
+        {
+            queue.remove(pos);
+        } else {
+            tracing::error!("Failed to remove a socket from the queue");
+        }
     }
 }
