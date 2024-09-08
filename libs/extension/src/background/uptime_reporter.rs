@@ -9,6 +9,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use crate::utils::connectors::set_panic_hook;
 use crate::utils::extension_wrapper_state::ExtensionWrapperState;
 
+#[allow(dead_code)]
 pub async fn measure_uptime() -> Option<ReportUptimeRequest> {
     set_panic_hook();
     setup_leptos_tracing(None, DeviceType::Extension);
