@@ -248,7 +248,7 @@ pub struct AuthStatusResponse {
     pub email: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RunTaskResponse {
     pub status: i32,
     pub raw: String,

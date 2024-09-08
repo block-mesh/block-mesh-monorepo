@@ -12,22 +12,20 @@ use speed_test::types::metadata::Metadata;
 use speed_test::upload::test_upload;
 use speed_test::utils::metadata::fetch_metadata;
 use uuid::Uuid;
-use wasm_bindgen::prelude::*;
 
-#[wasm_bindgen]
-pub async fn measure_bandwidth() {
+pub async fn measure_bandwidth() -> Option<ReportBandwidthRequest> {
     set_panic_hook();
     setup_leptos_tracing(None, DeviceType::Extension);
     let app_state = ExtensionWrapperState::default();
     app_state.init_with_storage().await;
 
     if !app_state.has_api_token() {
-        return;
+        return None;
     }
     if app_state.status.get_untracked() == AuthStatus::LoggedOut {
-        return;
+        return None;
     }
-    let url = &app_state.blockmesh_url.get_untracked();
+    let _url = &app_state.blockmesh_url.get_untracked();
     let download_speed = test_download(100_000).await.unwrap_or_default();
     let upload_speed = test_upload(100_000).await.unwrap_or_default();
     let latency = test_latency().await.unwrap_or_default();
@@ -36,16 +34,18 @@ pub async fn measure_bandwidth() {
     ExtensionWrapperState::store_upload_speed(upload_speed).await;
     app_state.download_speed.set(download_speed);
     app_state.upload_speed.set(upload_speed);
-    let _ = submit_bandwidth(
-        url,
-        &app_state.email.get_untracked(),
-        &app_state.api_token.get_untracked(),
+    Some(ReportBandwidthRequest {
+        email: app_state.email.get_untracked(),
+        api_token: app_state.api_token.get_untracked(),
         download_speed,
         upload_speed,
         latency,
-        metadata,
-    )
-    .await;
+        city: metadata.city,
+        colo: metadata.colo,
+        country: metadata.country,
+        ip: metadata.ip,
+        asn: metadata.asn,
+    })
 }
 
 #[tracing::instrument(name = "submit_bandwidth", err)]

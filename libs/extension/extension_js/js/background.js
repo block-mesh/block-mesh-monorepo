@@ -4,7 +4,6 @@ import initWasmModule, {
   task_poller,
   report_uptime,
   uptime_fetcher,
-  measure_bandwidth,
   start_websocket
 } from './wasm/blockmesh_ext.js'
 
@@ -94,7 +93,7 @@ function recreate_intervals() {
   intervals.push(
     setInterval(async () => {
       await create_alarm().then(onSuccess, onError)
-      await measure_bandwidth().then(onSuccess, onError)
+      // await measure_bandwidth().then(onSuccess, onError) // FIXME
     }, polling_interval + Math.random())
   )
 }

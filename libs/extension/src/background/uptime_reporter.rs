@@ -9,6 +9,35 @@ use wasm_bindgen::prelude::wasm_bindgen;
 use crate::utils::connectors::set_panic_hook;
 use crate::utils::extension_wrapper_state::ExtensionWrapperState;
 
+pub async fn measure_uptime() -> Option<ReportUptimeRequest> {
+    set_panic_hook();
+    setup_leptos_tracing(None, DeviceType::Extension);
+    let app_state = ExtensionWrapperState::default();
+    app_state.init_with_storage().await;
+
+    if !app_state.has_api_token() {
+        return None;
+    }
+    if app_state.status.get_untracked() == AuthStatus::LoggedOut {
+        return None;
+    }
+
+    let _base_url = app_state.blockmesh_url.get_untracked();
+    let email = app_state.email.get_untracked();
+    let api_token = app_state.api_token.get_untracked();
+    let metadata = fetch_metadata().await.unwrap_or_default();
+
+    Some(ReportUptimeRequest {
+        email,
+        api_token,
+        ip: if metadata.ip.is_empty() {
+            None
+        } else {
+            Some(metadata.ip)
+        },
+    })
+}
+
 #[wasm_bindgen]
 pub async fn report_uptime() {
     set_panic_hook();
