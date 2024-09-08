@@ -36,7 +36,7 @@ pub async fn report_uptime_inner(base_url: &str, email: &str, api_token: &Uuid) 
 
     let query = ReportUptimeRequest {
         email: email.to_string(),
-        api_token: api_token.clone(),
+        api_token: *api_token,
         ip: if metadata.ip.is_empty() {
             None
         } else {

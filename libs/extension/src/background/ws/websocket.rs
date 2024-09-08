@@ -76,10 +76,7 @@ pub fn set_tx(tx: Sender<WsServerMessage>) {
 }
 
 pub fn get_tx() -> Option<Arc<Sender<WsServerMessage>>> {
-    match TX.get() {
-        None => None,
-        Some(t) => Some(t.clone()),
-    }
+    TX.get().map(|t| t.clone())
 }
 
 #[wasm_bindgen]

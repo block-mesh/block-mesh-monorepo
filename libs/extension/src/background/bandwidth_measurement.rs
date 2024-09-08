@@ -32,7 +32,7 @@ pub async fn measure_bandwidth() {
     let api_token = app_state.api_token.get_untracked();
 
     let (download_speed, upload_speed) =
-        measure_bandwidth_inner(&base_url, &email, &api_token).await;
+        measure_bandwidth_inner(base_url, &email, &api_token).await;
     app_state.download_speed.set(download_speed);
     app_state.upload_speed.set(upload_speed);
 }

@@ -68,7 +68,7 @@ pub async fn handle_socket(
     socket: WebSocket,
     who: SocketAddr,
     state: Arc<AppState>,
-    email: String,
+    _email: String,
     user_id: Uuid,
 ) {
     let is_closing = Arc::new(AtomicBool::new(false));
