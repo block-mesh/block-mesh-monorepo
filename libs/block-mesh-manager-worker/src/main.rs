@@ -40,24 +40,40 @@ async fn main() -> anyhow::Result<()> {
         tx.clone(),
         send_to_rx,
     ));
-    let db_aggregator_users_ip_task =
-        tokio::spawn(users_ip_aggregator(db_pool.clone(), tx.subscribe(), 100, 5));
+    let db_aggregator_users_ip_task = tokio::spawn(users_ip_aggregator(
+        db_pool.clone(),
+        tx.subscribe(),
+        env::var("AGG_SIZE")
+            .unwrap_or("300".to_string())
+            .parse()
+            .unwrap_or(300),
+        5,
+    ));
     let db_aggregates_aggregator_task = tokio::spawn(aggregates_aggregator(
         db_pool.clone(),
         tx.subscribe(),
-        100,
+        env::var("AGG_SIZE")
+            .unwrap_or("300".to_string())
+            .parse()
+            .unwrap_or(300),
         5,
     ));
     let db_analytics_aggregator_task = tokio::spawn(analytics_aggregator(
         db_pool.clone(),
         tx.subscribe(),
-        100,
+        env::var("AGG_SIZE")
+            .unwrap_or("300".to_string())
+            .parse()
+            .unwrap_or(300),
         5,
     ));
     let db_daily_stats_aggregator_task = tokio::spawn(daily_stats_aggregator(
         db_pool.clone(),
         tx.subscribe(),
-        100,
+        env::var("AGG_SIZE")
+            .unwrap_or("300".to_string())
+            .parse()
+            .unwrap_or(300),
         5,
     ));
 
