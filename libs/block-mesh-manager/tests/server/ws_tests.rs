@@ -43,6 +43,7 @@ async fn test_ws() -> (TestApp, reqwest_websocket::WebSocket) {
 #[tokio::test]
 async fn test_connect_to_ws() {
     let (app, mut websocket) = test_ws().await;
+    // The WebSocket implements `Sink<Message>`.
     websocket.send(Message::Text("Ping".into())).await.unwrap();
 }
 

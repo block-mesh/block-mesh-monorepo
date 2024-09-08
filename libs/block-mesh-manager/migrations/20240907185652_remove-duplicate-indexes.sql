@@ -1,0 +1,12 @@
+DROP INDEX IF EXISTS aggregates_user_id;
+DROP INDEX IF EXISTS analytics_user_id;
+DROP INDEX IF EXISTS archives_table_name;
+DROP INDEX IF EXISTS bandwidth_reports_user_id;
+DROP INDEX IF EXISTS call_to_action_user_id;
+DROP INDEX IF EXISTS daily_stats_day;
+DROP INDEX IF EXISTS ip_addresses_reports_ip;
+DROP INDEX IF EXISTS perks_user_id;
+DROP INDEX IF EXISTS provider_node_address;
+DROP INDEX IF EXISTS uptime_reports_user_id;
+DROP INDEX IF EXISTS user_email;
+DROP INDEX IF EXISTS users_ip_user_id;

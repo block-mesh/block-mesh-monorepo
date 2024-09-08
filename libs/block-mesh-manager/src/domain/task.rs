@@ -132,3 +132,12 @@ pub struct Task {
     pub colo: String,
     pub response_time: f64,
 }
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetTask {
+    pub id: Uuid,
+    pub url: String,
+    pub method: TaskMethod,
+    pub headers: Option<Value>,
+    pub body: Option<Value>,
+}

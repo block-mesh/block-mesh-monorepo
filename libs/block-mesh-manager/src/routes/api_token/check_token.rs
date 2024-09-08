@@ -1,5 +1,5 @@
-use crate::database::api_token::get_api_token_by_user_id_and_status::get_api_token_by_usr_and_status;
-use crate::database::user::get_user_by_email::get_user_opt_by_email;
+use crate::database::api_token::get_api_token_by_user_id_and_status::get_api_token_by_usr_and_status_pool;
+use crate::database::user::get_user_by_email::get_user_opt_by_email_pool;
 use crate::domain::api_token::ApiTokenStatus;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
@@ -11,7 +11,7 @@ use redis::AsyncCommands;
 use sqlx::PgPool;
 use std::sync::Arc;
 
-#[tracing::instrument(name = "check_token", skip(body, state), level = "trace", fields(email=body.email))]
+#[tracing::instrument(name = "check_token", skip_all, level = "trace", fields(email=body.email))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,
@@ -28,20 +28,16 @@ pub async fn handler(
             message: None,
         }));
     }
-
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
     let email = body.email.clone().to_ascii_lowercase();
-    let user = get_user_opt_by_email(&mut transaction, &email)
+    let user = get_user_opt_by_email_pool(&pool, &email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    let api_token =
-        get_api_token_by_usr_and_status(&mut transaction, &user.id, ApiTokenStatus::Active)
-            .await?
-            .ok_or(Error::ApiTokenNotFound)?;
+    let api_token = get_api_token_by_usr_and_status_pool(&pool, &user.id, ApiTokenStatus::Active)
+        .await?
+        .ok_or(Error::ApiTokenNotFound)?;
     if *api_token.token.as_ref() != body.api_token {
         return Err(Error::ApiTokenMismatch);
     }
-    transaction.commit().await?;
 
     c.set_ex(
         &key,
@@ -49,7 +45,6 @@ pub async fn handler(
         Backend::get_expire() as u64,
     )
     .await?;
-
     Ok(Json(GetTokenResponse {
         api_token: Some(*api_token.token.as_ref()),
         message: None,

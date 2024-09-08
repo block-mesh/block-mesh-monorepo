@@ -7,7 +7,10 @@ authors.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+secret = { path = "../secret" }
 rand = { workspace = true }
+dotenv = { workspace = true, optional = true }
+enum-iterator = { workspace = true }
 borsh = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter", "time", "json"] }
@@ -17,6 +20,7 @@ bytes = { workspace = true, optional = true }
 thiserror = { workspace = true }
 bs58 = { workspace = true }
 hyper = { workspace = true, features = ["full"], optional = true }
+typeshare = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 clap = { workspace = true, features = ["derive"], optional = true }
@@ -26,7 +30,6 @@ anyhow = { workspace = true }
 once_cell = { workspace = true }
 reqwest = { workspace = true, optional = true, default-features = false, features = [
   "json",
-  "hickory-dns"
 ] }
 ipgeolocate = { workspace = true, optional = true }
 
@@ -46,6 +49,7 @@ cli = ["dep:clap", "dep:solana-sdk"]
 app-config = ["dep:clap", "dep:solana-sdk"]
 ip-data = ["dep:ipgeolocate", "dep:reqwest"]
 feature-flag = ["dep:reqwest"]
+env = ["dep:dotenv"]
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["full"] }

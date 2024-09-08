@@ -1,8 +1,5 @@
 use crate::configuration::settings::Settings;
 use crate::emails::email_client::EmailClient;
-use crate::envars::app_env_var::AppEnvVar;
-use crate::envars::env_var;
-use crate::envars::get_env_var_or_panic::get_env_var_or_panic;
 use crate::middlewares::authentication::{authentication_layer, Backend};
 use crate::routes::twitter::context::Oauth2Ctx;
 use crate::startup::routers::api_router::get_api_router;
@@ -11,8 +8,6 @@ use crate::startup::routers::static_auth_router::get_static_auth_router;
 use crate::startup::routers::static_un_auth_router::get_static_un_auth_router;
 use crate::startup::routers::ws_router::get_ws_router;
 use crate::worker::analytics_agg::AnalyticsMessage;
-use crate::worker::db_agg::UpdateBulkMessage;
-use crate::worker::db_cleaner_cron::EnrichIp;
 use crate::ws::connection_manager::ConnectionManager;
 use axum::{Extension, Router};
 use axum_login::login_required;
@@ -29,6 +24,14 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::net::TcpListener;
 
+use crate::worker::db_cleaner_cron::EnrichIp;
+use block_mesh_common::env::app_env_var::AppEnvVar;
+use block_mesh_common::env::env_var;
+use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
+use block_mesh_common::interfaces::db_messages::{
+    AggregateMessage, AnalyticsMessage, DailyStatMessage, UsersIpMessage,
+};
+use flume::Sender;
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
@@ -46,13 +49,16 @@ pub struct AppState {
     pub pool: PgPool,
     pub email_client: Arc<EmailClient>,
     pub client: Client,
-    pub tx: tokio::sync::mpsc::Sender<JoinHandle<()>>,
-    pub tx_sql_agg: tokio::sync::mpsc::Sender<UpdateBulkMessage>,
-    pub tx_analytics_agg: tokio::sync::mpsc::Sender<AnalyticsMessage>,
+    pub tx: Sender<JoinHandle<()>>,
+    pub tx_daily_stat_agg: Sender<DailyStatMessage>,
+    pub tx_analytics_agg: Sender<AnalyticsMessage>,
     pub flags: HashMap<String, FlagValue>,
-    pub cleaner_tx: tokio::sync::mpsc::Sender<EnrichIp>,
+    pub cleaner_tx: Sender<EnrichIp>,
     pub redis: MultiplexedConnection,
     pub ws_connection_manager: ConnectionManager,
+    // pub ws_connection_manager: ConnectionManager,
+    pub tx_users_ip_agg: Sender<UsersIpMessage>,
+    pub tx_aggregate_agg: Sender<AggregateMessage>,
 }
 
 #[derive(Clone)]
@@ -127,11 +133,6 @@ impl Application {
                     .parse()
                     .unwrap(),
             ),
-            verifier: None,
-            state: None,
-            token: None,
-            user_id: None,
-            user_nonce: None,
         };
 
         let application_base_url = ApplicationBaseUrl(settings.application.base_url.clone());

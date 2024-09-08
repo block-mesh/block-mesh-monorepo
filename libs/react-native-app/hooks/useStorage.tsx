@@ -1,4 +1,5 @@
 import * as React from 'react'
+
 import {
   createContext,
   FC,
@@ -9,6 +10,7 @@ import {
 import { getData, storeData } from '@/utils/storage'
 import { API_TOKEN, BLOCKMESH_URL, EMAIL, PASSWORD, RUN_LIB } from '@/utils/constants'
 
+export type Nav = 'login' | 'register' | 'dashboard'
 
 export interface StorageType {
   email: string;
@@ -16,31 +18,46 @@ export interface StorageType {
   password: string;
   url: string;
   run_lib: string;
+  nav: Nav;
   setEmail: (email: string) => void;
   setApiToken: (api_token: string) => void;
   setUrl: (url: string) => void;
   setPassword: (password: string) => void;
-  setRunLib: (run_lib: string) => void;
+  setNav: (nav: Nav) => void;
+  clear: () => void;
 }
 
 export const Context = createContext<StorageType>(
   {} as StorageType
 )
 
+function initUrl(): string {
+  const APP_ENVIRONMENT = process.env.APP_ENVIRONMENT
+  if (APP_ENVIRONMENT === undefined || APP_ENVIRONMENT !== 'local') {
+    const url = 'https://app.blockmesh.xyz'
+    console.log('initUrl', url)
+    return url
+  } else {
+    const url = 'http://localhost:8000'
+    console.log('initUrl', url)
+    return url
+  }
+}
+
 export const useStorage =
   (): StorageType => {
     return useContext(Context)
   }
-
 
 export const StorageProvider: FC<PropsWithChildren<any>> = ({
                                                               children
                                                             }) => {
   const [email, setEmailInternal] = useState('')
   const [api_token, setApiTokenInternal] = useState('')
-  const [url, setUrlInternal] = useState('')
+  const [url, setUrlInternal] = useState(initUrl())
   const [password, setPasswordInternal] = useState('')
   const [run_lib, setRunLibInternal] = useState('')
+  const [nav, setNav] = useState('login' as Nav)
 
   useEffect(() => {
     (async () => {
@@ -72,6 +89,17 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
     })()
   }, [])
 
+  function clear() {
+    try {
+      setEmail('')
+      setPassword('')
+      setApiToken('')
+    } catch (e: any) {
+      console.error(`clear error`, e)
+    }
+  }
+
+
   function setEmail(email: string) {
     try {
       storeData(EMAIL, email.toLowerCase()).then(() => {
@@ -81,18 +109,6 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
       })
     } catch (e: any) {
       console.error(`setEmail:: email = '${email} , error = '${e}`)
-    }
-  }
-
-  function setRunLib(run_lib: string) {
-    try {
-      storeData(RUN_LIB, run_lib).then(() => {
-        setUrlInternal(run_lib)
-      }).catch((e) => {
-        console.error(`setRunLib:: run_lib = '${run_lib} , error = '${e}`)
-      })
-    } catch (e: any) {
-      console.error(`setRunLib:: run_lib = '${run_lib} , error = '${e}`)
     }
   }
 
@@ -110,7 +126,7 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
 
   function setApiToken(api_token: string) {
     try {
-      storeData(EMAIL, api_token).then(() => {
+      storeData(API_TOKEN, api_token).then(() => {
         setApiTokenInternal(api_token)
       }).catch((e) => {
         console.error(`setApiToken:: api_token = '${api_token} , error = '${e}`)
@@ -137,6 +153,7 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
     <Context.Provider
       value={{
         email,
+        nav,
         api_token,
         url,
         run_lib,
@@ -145,7 +162,8 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
         setApiToken,
         setUrl,
         setPassword,
-        setRunLib
+        setNav,
+        clear
       }}
     >
       {children}

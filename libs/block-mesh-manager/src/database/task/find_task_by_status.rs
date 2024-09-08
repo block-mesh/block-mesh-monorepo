@@ -1,4 +1,4 @@
-use crate::domain::task::Task;
+use crate::domain::task::GetTask;
 use crate::domain::task::TaskStatus;
 use sqlx::{Postgres, Transaction};
 
@@ -12,28 +12,16 @@ use sqlx::{Postgres, Transaction};
 pub(crate) async fn find_task_by_status(
     transaction: &mut Transaction<'_, Postgres>,
     status: TaskStatus,
-) -> anyhow::Result<Option<Task>> {
+) -> anyhow::Result<Option<GetTask>> {
     let task = sqlx::query_as!(
-        Task,
+        GetTask,
         r#"
         SELECT
         id,
-        user_id,
         url,
         method,
         headers,
-        body,
-        assigned_user_id,
-        status,
-        response_code,
-        response_raw,
-        created_at,
-        retries_count,
-        country,
-        ip,
-        asn,
-        colo,
-        response_time
+        body
         FROM tasks
         WHERE status = $1
         LIMIT 1

@@ -1,0 +1,14 @@
+ALTER TABLE users DROP COLUMN sid;
+ALTER TABLE perks DROP COLUMN sid;
+ALTER TABLE call_to_actions DROP COLUMN sid;
+ALTER TABLE aggregates DROP COLUMN sid;
+ALTER TABLE rpcs DROP COLUMN sid;
+ALTER TABLE archives DROP COLUMN sid;
+ALTER TABLE nonces DROP COLUMN sid;
+ALTER TABLE ip_addresses DROP COLUMN sid;
+ALTER TABLE tasks DROP COLUMN sid;
+ALTER TABLE bandwidth_reports DROP COLUMN sid;
+ALTER TABLE api_tokens DROP COLUMN sid;
+ALTER TABLE invite_codes DROP COLUMN sid;
+ALTER TABLE daily_stats DROP COLUMN sid;
+ALTER TABLE uptime_reports DROP COLUMN sid;

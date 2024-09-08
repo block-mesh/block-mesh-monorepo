@@ -1,14 +1,15 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
-use crate::database::api_token::find_token::find_token;
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_pool;
+use crate::database::aggregate::update_aggregate::update_aggregate;
+use crate::database::api_token::find_token::find_token_pool;
 use crate::database::bandwidth::delete_bandwidth_reports_by_time::delete_bandwidth_reports_by_time;
-use crate::database::user::get_user_by_id::get_user_opt_by_id;
+use crate::database::user::get_user_by_id::get_user_opt_by_id_pool;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
-use crate::worker::db_agg::{Table, UpdateBulkMessage};
 use axum::extract::State;
 use axum::{Extension, Json};
 use block_mesh_common::feature_flag_client::FlagValue;
+use block_mesh_common::interfaces::db_messages::{AggregateMessage, DBMessageTypes};
 use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
 use http::StatusCode;
 use sqlx::PgPool;
@@ -21,11 +22,10 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Json(body): Json<ReportBandwidthRequest>,
 ) -> Result<Json<ReportBandwidthResponse>, Error> {
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
-    let api_token = find_token(&mut transaction, &body.api_token)
+    let api_token = find_token_pool(&pool, &body.api_token)
         .await?
         .ok_or(Error::ApiTokenNotFound)?;
-    let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
+    let user = get_user_opt_by_id_pool(&pool, &api_token.user_id)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     if user.email.to_ascii_lowercase() != body.email.to_ascii_lowercase() {
@@ -42,51 +42,81 @@ pub async fn handler(
         .as_f64()
         .unwrap_or_default();
 
-    let download = get_or_create_aggregate_by_user_and_name(
-        &mut transaction,
-        AggregateName::Download,
-        user.id,
-    )
-    .await?;
+    let download =
+        get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Download, user.id)
+            .await?;
     let upload =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Upload, user.id)
+        get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Upload, user.id)
             .await?;
 
     let latency =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Latency, user.id)
+        get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Latency, user.id)
             .await?;
-    transaction.commit().await.map_err(Error::from)?;
+    let flag = state
+        .flags
+        .get("submit_bandwidth_via_channel")
+        .unwrap_or(&FlagValue::Boolean(false));
+    let flag: bool = <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
 
-    let _ = state
-        .tx_sql_agg
-        .send(UpdateBulkMessage {
-            id: download.id.unwrap_or_default(),
-            value: serde_json::Value::from(
-                (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
-            ),
-            table: Table::Aggregate,
-        })
-        .await;
-    let _ = state
-        .tx_sql_agg
-        .send(UpdateBulkMessage {
-            id: upload.id.unwrap_or_default(),
-            value: serde_json::Value::from(
-                (upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0,
-            ),
-            table: Table::Aggregate,
-        })
-        .await;
-    let _ = state
-        .tx_sql_agg
-        .send(UpdateBulkMessage {
-            id: latency.id.unwrap_or_default(),
-            value: serde_json::Value::from(
+    if flag {
+        let _ = state
+            .tx_aggregate_agg
+            .send_async(AggregateMessage {
+                msg_type: DBMessageTypes::AggregateMessage,
+                id: download.id,
+                value: serde_json::Value::from(
+                    (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
+                ),
+            })
+            .await;
+        let _ = state
+            .tx_aggregate_agg
+            .send_async(AggregateMessage {
+                msg_type: DBMessageTypes::AggregateMessage,
+                id: upload.id,
+                value: serde_json::Value::from(
+                    (upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0,
+                ),
+            })
+            .await;
+        let _ = state
+            .tx_aggregate_agg
+            .send_async(AggregateMessage {
+                msg_type: DBMessageTypes::AggregateMessage,
+                id: latency.id,
+                value: serde_json::Value::from(
+                    (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,
+                ),
+            })
+            .await;
+    } else {
+        let mut transaction = pool.begin().await?;
+        let _ = update_aggregate(
+            &mut transaction,
+            &latency.id,
+            &serde_json::Value::from(
                 (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,
             ),
-            table: Table::Aggregate,
-        })
+        )
         .await;
+        let _ = update_aggregate(
+            &mut transaction,
+            &upload.id,
+            &serde_json::Value::from(
+                (upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0,
+            ),
+        )
+        .await;
+        let _ = update_aggregate(
+            &mut transaction,
+            &download.id,
+            &serde_json::Value::from(
+                (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
+            ),
+        )
+        .await;
+        transaction.commit().await?;
+    }
 
     let flag = state
         .flags
@@ -102,7 +132,7 @@ pub async fn handler(
                 .unwrap();
             transaction.commit().await.map_err(Error::from).unwrap();
         });
-        let _ = state.tx.send(handle).await;
+        let _ = state.tx.send_async(handle).await;
     }
 
     Ok(Json(ReportBandwidthResponse {

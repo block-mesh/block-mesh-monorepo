@@ -13,6 +13,7 @@ use tokio::task::JoinHandle;
 use uuid::Uuid;
 
 /// Actual websocket statemachine (one will be spawned per connection)
+#[allow(dead_code)]
 fn messenger(
     mut ws_sink: SplitSink<WebSocket, Message>,
     is_cls: Arc<AtomicBool>,
@@ -36,6 +37,7 @@ fn messenger(
     (sink_task, sink_tx)
 }
 
+#[allow(dead_code)]
 fn receiver(
     mut ws_stream: SplitStream<WebSocket>,
     is_cls: Arc<AtomicBool>,
