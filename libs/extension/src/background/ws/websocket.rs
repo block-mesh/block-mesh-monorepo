@@ -12,6 +12,7 @@ use wasm_bindgen::prelude::*;
 use web_sys::WebSocket;
 
 pub static WEB_SOCKET_STATUS: OnceCell<Arc<Mutex<WebSocketReadyState>>> = OnceCell::new();
+
 pub fn get_ws_status() -> WebSocketReadyState {
     let ws_status =
         WEB_SOCKET_STATUS.get_or_init(|| Arc::new(Mutex::new(WebSocketReadyState::CLOSED)));
@@ -29,6 +30,7 @@ pub async fn start_websocket() -> Result<(), JsValue> {
     set_panic_hook();
     setup_leptos_tracing(None, DeviceType::Extension);
     log!("start_websocket");
+
     let app_state = ExtensionWrapperState::default();
     app_state.init_with_storage().await;
     if !app_state.has_api_token() {
@@ -49,11 +51,11 @@ pub async fn start_websocket() -> Result<(), JsValue> {
         WebSocketReadyState::CONNECTING => return Ok(()),
         WebSocketReadyState::INVALID => return Ok(()),
     }
-
     log!("connecting websocket ws://{blockmesh_url}/ws?email={email}&api_token={api_token}");
     let ws = WebSocket::new(&format!(
         "{blockmesh_url}/ws?email={email}&api_token={api_token}"
     ))?;
+
     let state: WebSocketReadyState = ws.ready_state().into();
     set_ws_status(&state);
 
@@ -72,17 +74,5 @@ pub async fn start_websocket() -> Result<(), JsValue> {
     let onclose_callback = on_close_handler(ws.clone());
     ws.set_onclose(Some(onclose_callback.as_ref().unchecked_ref()));
     onclose_callback.forget();
-
-    // let _ = ws.send_with_str("ping");
-    let _ = ws.send_with_str("hello");
-    //
-    // let arc = Arc::new(ws);
-    // let cloned_arc = arc.clone();
-    // mem::forget(arc);
-    //
-    // // log!("pre sleep");
-
-    // sleep_js(3000).await;
-    log!("after hello");
     Ok(())
 }

@@ -1,3 +1,4 @@
+use crate::background::operation_mode::OperationMode;
 use crate::utils::connectors::set_panic_hook;
 use crate::utils::extension_wrapper_state::ExtensionWrapperState;
 use block_mesh_common::chrome_storage::AuthStatus;
@@ -12,40 +13,69 @@ use speed_test::types::metadata::Metadata;
 use speed_test::upload::test_upload;
 use speed_test::utils::metadata::fetch_metadata;
 use uuid::Uuid;
+use wasm_bindgen::prelude::wasm_bindgen;
 
-pub async fn measure_bandwidth() -> Option<ReportBandwidthRequest> {
+#[wasm_bindgen]
+pub async fn measure_bandwidth() {
     set_panic_hook();
     setup_leptos_tracing(None, DeviceType::Extension);
     let app_state = ExtensionWrapperState::default();
     app_state.init_with_storage().await;
 
     if !app_state.has_api_token() {
-        return None;
+        return;
     }
     if app_state.status.get_untracked() == AuthStatus::LoggedOut {
-        return None;
+        return;
     }
-    let _url = &app_state.blockmesh_url.get_untracked();
+    let base_url = &app_state.blockmesh_url.get_untracked();
+    let email = app_state.email.get_untracked();
+    let api_token = app_state.api_token.get_untracked();
+    measure_bandwidth_inner(base_url, &email, &api_token, OperationMode::Http).await;
+}
+
+pub async fn measure_bandwidth_inner(
+    base_url: &str,
+    email: &str,
+    api_token: &Uuid,
+    operation_mode: OperationMode,
+) -> Option<ReportBandwidthRequest> {
     let download_speed = test_download(100_000).await.unwrap_or_default();
     let upload_speed = test_upload(100_000).await.unwrap_or_default();
     let latency = test_latency().await.unwrap_or_default();
     let metadata = fetch_metadata().await.unwrap_or_default();
     ExtensionWrapperState::store_download_speed(download_speed).await;
     ExtensionWrapperState::store_upload_speed(upload_speed).await;
-    app_state.download_speed.set(download_speed);
-    app_state.upload_speed.set(upload_speed);
-    Some(ReportBandwidthRequest {
-        email: app_state.email.get_untracked(),
-        api_token: app_state.api_token.get_untracked(),
-        download_speed,
-        upload_speed,
-        latency,
-        city: metadata.city,
-        colo: metadata.colo,
-        country: metadata.country,
-        ip: metadata.ip,
-        asn: metadata.asn,
-    })
+    match operation_mode {
+        OperationMode::Http => {
+            let _ = submit_bandwidth(
+                base_url,
+                email,
+                api_token,
+                download_speed,
+                upload_speed,
+                latency,
+                metadata,
+            )
+            .await;
+            None
+        }
+        OperationMode::WebSocket => {
+            let r = ReportBandwidthRequest {
+                email: email.to_string(),
+                api_token: *api_token,
+                download_speed,
+                upload_speed,
+                latency,
+                city: metadata.city,
+                colo: metadata.colo,
+                country: metadata.country,
+                ip: metadata.ip,
+                asn: metadata.asn,
+            };
+            Some(r)
+        }
+    }
 }
 
 #[tracing::instrument(name = "submit_bandwidth", err)]

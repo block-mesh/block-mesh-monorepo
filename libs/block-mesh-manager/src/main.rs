@@ -5,6 +5,7 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use block_mesh_manager::ws::connection_manager::ConnectionManager;
     use block_mesh_manager::worker::analytics_agg::analytics_agg;
     use block_mesh_common::interfaces::db_messages::{
         AggregateMessage, AnalyticsMessage, DailyStatMessage,
@@ -16,7 +17,6 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_common::env::env_var::EnvVar;
     use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
     use block_mesh_common::env::load_dotenv::load_dotenv;
-    use block_mesh_manager::ws::connection_manager::ConnectionManager;
     use std::env;
     use block_mesh_manager::worker::daily_stat_agg::{daily_stat_agg};
     use logger_general::tracing::setup_tracing_stdout_only;
