@@ -391,6 +391,7 @@ impl ExtensionWrapperState {
         send_storage_value_to_iframe(MessageKey::LastUpdate, MessageValue::I64(last_update));
     }
 
+    #[allow(dead_code)]
     pub async fn store_download_speed(uptime: f64) {
         set_storage_value(
             &MessageKey::DownloadSpeed.to_string(),
@@ -400,6 +401,7 @@ impl ExtensionWrapperState {
         send_storage_value_to_iframe(MessageKey::DownloadSpeed, MessageValue::F64(uptime));
     }
 
+    #[allow(dead_code)]
     pub async fn store_upload_speed(uptime: f64) {
         set_storage_value(
             &MessageKey::UploadSpeed.to_string(),

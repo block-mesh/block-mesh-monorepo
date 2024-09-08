@@ -13,6 +13,7 @@ use speed_test::upload::test_upload;
 use speed_test::utils::metadata::fetch_metadata;
 use uuid::Uuid;
 
+#[allow(dead_code)]
 pub async fn measure_bandwidth() -> Option<ReportBandwidthRequest> {
     set_panic_hook();
     setup_leptos_tracing(None, DeviceType::Extension);
