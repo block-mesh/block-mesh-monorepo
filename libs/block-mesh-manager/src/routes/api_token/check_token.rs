@@ -38,6 +38,7 @@ pub async fn handler(
     if *api_token.token.as_ref() != body.api_token {
         return Err(Error::ApiTokenMismatch);
     }
+
     c.set_ex(
         &key,
         body.api_token.to_string(),

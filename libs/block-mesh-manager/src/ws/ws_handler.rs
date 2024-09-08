@@ -43,5 +43,6 @@ pub async fn ws_handler(
         return Err(Error::UserNotFound);
     }
     tracing::info!("ws_handle => connected {:#?}", query);
-    Ok(ws.on_upgrade(move |socket| handle_socket(socket, addr, state, email, user.id)))
+    Ok(ws.on_upgrade(move |socket| handle_socket(socket, addr, state, email, Uuid::new_v4())))
+    // FIXME replace new_v4 with actual value
 }

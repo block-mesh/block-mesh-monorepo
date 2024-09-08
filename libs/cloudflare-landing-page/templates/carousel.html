@@ -1,0 +1,270 @@
+<script>
+  addEventListener('load', () => {
+    // in px/s
+    const SCROLL_SPEED = 32
+    /** @type Set<HTMLElement>  */
+    const scrollingColumns = new Set()
+
+    const query = window.matchMedia('(max-width: 768px)')
+    let direction = query.matches ? 'horizontal' : 'vertical'
+
+    /** @param {HTMLElement} column  */
+    function scroll(column) {
+      scrollingColumns.add(column)
+
+      const screenPositionProp = direction == 'horizontal' ? 'x' : 'y'
+      const translateFunction = direction == 'horizontal' ? 'translateX' : 'translateY'
+
+      const padding = parseInt(getComputedStyle(column).getPropertyValue('--offset'))
+
+      const firstPanel = column.firstElementChild
+      const secondPanel = firstPanel.nextElementSibling
+      const scrollHeight =
+        secondPanel.getBoundingClientRect()[screenPositionProp] -
+        firstPanel.getBoundingClientRect()[screenPositionProp]
+
+      column.animate(
+        [
+          {
+            transform: `${translateFunction}(-${padding}px)`
+          },
+          {
+            transform: `${translateFunction}(-${scrollHeight + padding}px)`
+          }
+        ],
+        (scrollHeight / SCROLL_SPEED) * 1000
+      ).onfinish = () => {
+        firstPanel.remove()
+        column.appendChild(firstPanel)
+        scroll(column)
+      }
+    }
+
+    /** @param {boolean | undefined} newMatches */
+    function recomputeAnimations(newMatches) {
+      if (newMatches != undefined) {
+        direction = newMatches ? 'horizontal' : 'vertical'
+      }
+
+      scrollingColumns.forEach((column) => {
+        column.getAnimations().forEach((anim) => anim.cancel())
+      })
+      scrollingColumns.clear()
+
+      document.querySelectorAll('.carousel-group').forEach((column) => {
+        scroll(column)
+      })
+    }
+
+    query.addEventListener('change', (event) => recomputeAnimations(event.matches))
+    recomputeAnimations()
+  })
+
+</script>
+
+<style>
+    .carousel-group {
+        /* this value controls how offset the column is (but all columns should have some offset, as it also serves as padding */
+        --offset: 16px;
+
+        gap: 8px;
+    }
+
+    .carousel-group.offset {
+        --offset: 64px;
+    }
+
+    .carousel {
+        display: flex;
+        gap: 8px;
+        position: relative;
+    }
+
+    .carousel::before,
+    .carousel::after {
+        content: "";
+        display: block;
+        position: absolute;
+        pointer-events: none;
+        z-index: 1;
+    }
+
+    @media (min-width: 769px) {
+        .carousel {
+            height: 300px;
+            overflow-y: clip;
+            flex-flow: row nowrap;
+        }
+
+        .carousel::before,
+        .carousel::after {
+            width: 100%;
+            height: 4rem;
+        }
+
+        .carousel::before {
+            top: 0;
+            /* swap out colors for the background here: first is alpha = 0xff, second is alpha = 0x00 */
+            background: linear-gradient(#0c1120ff, #0c112000);
+        }
+
+        .carousel::after {
+            bottom: 0;
+            /* same as above, but order is swapped */
+            background: linear-gradient(#0c112000, #0c1120ff);
+        }
+
+        .carousel-group {
+            height: max-content;
+            display: flex;
+            flex-flow: column nowrap;
+
+            transform: translateY(calc(-1 * var(--offset)));
+        }
+    }
+
+    @media (max-width: 768px) {
+        .carousel {
+            width: 100%;
+            overflow-x: clip;
+            flex-flow: column nowrap;
+        }
+
+        .carousel::before,
+        .carousel::after {
+            width: 4rem;
+            height: 100%;
+        }
+
+        .carousel::before {
+            left: 0;
+            /* swap out colors for the background here: first is alpha = 0xff, second is alpha = 0x00 */
+            background: linear-gradient(90deg, #0c1120ff, #0c112000);
+        }
+
+        .carousel::after {
+            right: 0;
+            /* same as above, but order is swapped */
+            background: linear-gradient(90deg, #0c112000, #0c1120ff);
+        }
+
+        .carousel-group {
+            width: max-content;
+            display: flex;
+            flex-flow: row nowrap;
+
+            transform: translateX(calc(-1 * var(--offset)));
+        }
+    }
+
+    /* this is completely placeholder styling. the panels just need to have a constant width and height in each group */
+    .panel {
+        width: 300px;
+        border: 2px solid whitesmoke;
+        border-radius: 8px;
+        padding: 0.5rem;
+
+        display: flex;
+        flex-flow: column nowrap;
+        /* there may be extra space in horizontal mode */
+        justify-content: space-between;
+        gap: 0.5rem;
+
+        &:hover {
+            background-color: #fff1;
+            box-shadow: 0px 4px 1px 0px #fff1, 0px -4px 1px 0px #fff1;
+        }
+
+        .label {
+            color: white;
+            font-family: "Bebas Neue", sans-serif;
+            font-size: 1.5rem;
+            margin-left: 0.25rem;
+        }
+
+        .text-white {
+            color: white;
+        }
+    }
+</style>
+
+<div class="carousel">
+  <div class="carousel-group">
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">neurology</span>
+      <div class="label">AI training</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">query_stats</span>
+      <div class="label">Competitor Intelligence</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">public</span>
+      <div class="label">Geo Blocking</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">lock</span>
+      <div class="label">Privacy Protection</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">find_in_page</span>
+      <div class="label">Web Crawling</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">campaign</span>
+      <div class="label">Affiliation Verification</div>
+    </div>
+  </div>
+  <div class="carousel-group offset">
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">do_not_disturb_off</span>
+      <div class="label">Circumventing Censorship</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">shield</span>
+      <div class="label">Brand Protection</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">globe</span>
+      <div class="label">Content Delivery</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">database</span>
+      <div class="label">Indexing</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">manage_search</span>
+      <div class="label">Web Scraping</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">verified</span>
+      <div class="label">Ad Verification</div>
+    </div>
+  </div>
+  <div class="carousel-group">
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">flight_takeoff</span>
+      <div class="label">Travel Aggregation</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">payments</span>
+      <div class="label">Price Comparison</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">vpn_lock</span>
+      <div class="label">VPN</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">stacked_bar_chart</span>
+      <div class="label">Market Research</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">search_insights</span>
+      <div class="label">Threat Intelligence</div>
+    </div>
+    <div class="panel">
+      <span class="material-symbols-outlined text-white">monitoring</span>
+      <div class="label">Website Monitoring</div>
+    </div>
+  </div>
+</div>

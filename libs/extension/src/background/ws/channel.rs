@@ -1,10 +1,11 @@
 use crate::background::bandwidth_measurement::measure_bandwidth_inner;
-use crate::background::tasks_manager::task_poller_inner;
+use crate::background::operation_mode::OperationMode;
+use crate::background::tasks::run_task;
 use crate::background::uptime_reporter::report_uptime_inner;
 use crate::utils::extension_wrapper_state::ExtensionWrapperState;
 use crate::utils::log::log;
 use block_mesh_common::chrome_storage::AuthStatus;
-use block_mesh_common::interfaces::ws_api::WsServerMessage;
+use block_mesh_common::interfaces::ws_api::{WsClientMessage, WsServerMessage};
 use flume::{Receiver, Sender};
 use leptos::{spawn_local, SignalGetUntracked};
 use once_cell::sync::OnceCell;
@@ -23,7 +24,7 @@ pub fn get_tx() -> Option<Arc<Mutex<Sender<WsServerMessage>>>> {
     TX.get().cloned()
 }
 
-pub fn set_rx(rx: Receiver<WsServerMessage>, _ws: WebSocket) {
+pub fn set_rx(rx: Receiver<WsServerMessage>, ws: WebSocket) {
     {
         let r = RX.get_or_init(|| Arc::new(Mutex::new(rx.clone())));
         *r.lock().unwrap() = rx.clone();
@@ -48,13 +49,48 @@ pub fn set_rx(rx: Receiver<WsServerMessage>, _ws: WebSocket) {
 
             match msg {
                 WsServerMessage::RequestUptimeReport => {
-                    report_uptime_inner(&base_url, &email, &api_token).await;
+                    if let Some(r) =
+                        report_uptime_inner(&base_url, &email, &api_token, OperationMode::WebSocket)
+                            .await
+                    {
+                        let _ = ws.clone().send_with_str(
+                            serde_json::to_string(&WsClientMessage::ReportUptime(r))
+                                .unwrap_or_default()
+                                .as_str(),
+                        );
+                    }
                 }
                 WsServerMessage::RequestBandwidthReport => {
-                    measure_bandwidth_inner(&base_url, &email, &api_token).await;
+                    if let Some(r) = measure_bandwidth_inner(
+                        &base_url,
+                        &email,
+                        &api_token,
+                        OperationMode::WebSocket,
+                    )
+                    .await
+                    {
+                        let _ = ws.clone().send_with_str(
+                            serde_json::to_string(&WsClientMessage::ReportBandwidth(r))
+                                .unwrap_or_default()
+                                .as_str(),
+                        );
+                    }
                 }
                 WsServerMessage::AssignTask(task) => {
-                    task_poller_inner(&base_url, &email, &api_token, &task).await;
+                    if let Ok(completed_task) = run_task(
+                        &task.url,
+                        &task.method,
+                        task.headers.clone(),
+                        task.body.clone(),
+                    )
+                    .await
+                    {
+                        let _ = ws.clone().send_with_str(
+                            serde_json::to_string(&WsClientMessage::CompleteTask(completed_task))
+                                .unwrap_or_default()
+                                .as_str(),
+                        );
+                    }
                 }
             }
         }
