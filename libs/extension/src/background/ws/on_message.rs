@@ -1,4 +1,5 @@
-use crate::background::ws::websocket::{get_tx, set_ws_status};
+use crate::background::ws::channel::{get_tx, setup_channels};
+use crate::background::ws::websocket::set_ws_status;
 use crate::utils::extension_wrapper_state::ExtensionWrapperState;
 use crate::utils::log::{log, log_error};
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
@@ -21,7 +22,9 @@ pub fn on_message_handler(
                 Ok(msg) => {
                     log!("msg => {:#?}", msg);
                     if let Some(tx) = get_tx() {
-                        let _ = tx.try_send(msg);
+                        if let Ok(tx) = tx.lock() {
+                            let _ = tx.try_send(msg);
+                        }
                     }
                 }
                 Err(_error) => {}
@@ -41,8 +44,11 @@ pub fn on_error_handler(ws: web_sys::WebSocket) -> Closure<dyn FnMut(ErrorEvent)
 }
 
 pub fn on_open_handler(ws: web_sys::WebSocket) -> Closure<dyn FnMut()> {
-    Closure::<dyn FnMut()>::new(move || match ws.send_with_str("ping") {
-        Ok(_) => log!("Sent a ping message."),
+    Closure::<dyn FnMut()>::new(move || match ws.clone().send_with_str("ping") {
+        Ok(_) => {
+            log!("Sent a ping message.");
+            setup_channels(ws.clone());
+        }
         Err(err) => log_error!("error sending message: {:?}", err),
     })
 }
