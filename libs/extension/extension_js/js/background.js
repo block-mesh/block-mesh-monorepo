@@ -120,21 +120,6 @@ async function init_background() {
   }, 5000)
 }
 
-async function restart_websocket() {
-  try {
-    await start_websocket()
-    console.log('after start_websocket')
-  } catch (e) {
-    setTimeout(async () => {
-      await restart_websocket()
-    }, 10_000)
-  } finally {
-    setTimeout(async () => {
-      await restart_websocket()
-    }, 10_000)
-  }
-}
-
 init_background().then(onSuccess, onError)
 
 
