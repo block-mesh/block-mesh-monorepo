@@ -17,9 +17,7 @@ use uuid::Uuid;
     err,
     level = "trace"
 )]
-pub async fn create_test_user(
-    mut transaction: &mut Transaction<'_, Postgres>,
-) -> anyhow::Result<()> {
+pub async fn create_test_user(transaction: &mut Transaction<'_, Postgres>) -> anyhow::Result<()> {
     let app_environment = env::var("APP_ENVIRONMENT").unwrap_or("local".to_string());
     if app_environment != "local" {
         return Ok(());
