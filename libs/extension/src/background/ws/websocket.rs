@@ -30,10 +30,7 @@ pub fn set_ws_status(status: &WebSocketReadyState) {
 #[wasm_bindgen]
 pub async fn stop_websocket() {
     if let Some(tx) = get_tx() {
-        tx.lock()
-            .unwrap()
-            .send(WsServerMessage::CloseConnection)
-            .unwrap();
+        let _ = tx.lock().unwrap().send(WsServerMessage::CloseConnection);
     }
 }
 
