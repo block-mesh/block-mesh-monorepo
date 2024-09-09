@@ -65,10 +65,8 @@ pub async fn create_test_user(
         .await?;
     let nonce = Nonce::generate_nonce(16);
     let nonce_secret = Secret::from(nonce.clone());
-
-    create_nonce(&mut transaction, &id, &nonce_secret).await?;
-    create_invite_code(&mut transaction, id, Uuid::new_v4().to_string()).await?;
-    create_uptime_report(&mut transaction, &id, &None).await?;
-
+    create_nonce(transaction, &id, &nonce_secret).await?;
+    create_invite_code(transaction, id, Uuid::new_v4().to_string()).await?;
+    create_uptime_report(transaction, &id, &None).await?;
     Ok(())
 }
