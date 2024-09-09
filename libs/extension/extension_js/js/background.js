@@ -4,7 +4,7 @@ import initWasmModule, {
     task_poller,
     report_uptime,
     uptime_fetcher,
-    start_websocket
+    start_websocket, stop_websocket
 } from './wasm/blockmesh_ext.js'
 
 console.log('Background script started')
@@ -59,29 +59,26 @@ chrome.runtime.onStartup.addListener(async function () {
 let polling_interval = 120000
 let intervals = []
 
-async function apply_websocket_flags() {
-    setInterval(async () => {
-        try {
-            const response = await fetch("https://feature-flags.blockmesh.xyz/read-flag/websocket")
+async function is_ws_feature_connection() {
+    try {
+        let response = await fetch("https://feature-flags.blockmesh.xyz/read-flag/use_websocket")
+        if (response.ok) {
+            const value = await response.text()
+            const is_enabled = Boolean(value)
+            if (!is_enabled) return false
+
+            response = await fetch("https://feature-flags.blockmesh.xyz/read-flag/use_websocket_percent")
             if (response.ok) {
                 const value = await response.text()
-                const is_enabled = Boolean(value)
-                if (!is_enabled) return
-
-                const response = await fetch("https://feature-flags.blockmesh.xyz/read-flag/websocket_percent")
-                if (response.ok) {
-                    const value = await response.text()
-                    const percentage = parseInt(value, 10)
-                    const probe = Math.random() * 100
-                    if (probe < percentage) { // && !is_ws_enabled
-                        // TODO enable websocket feature
-                    }
-                }
+                const percentage = parseInt(value, 10)
+                const probe = Math.random() * 100
+                return probe < percentage
             }
-        } catch (e) {
-            console.error(`Failed to fetch Websocket flags: ${e}`)
         }
-    }, 1000 * 60)
+    } catch (e) {
+        console.error(`Failed to fetch Websocket flags: ${e}`)
+    }
+    return false
 }
 
 async function get_polling_interval() {
@@ -132,17 +129,27 @@ async function init_background() {
     await chrome.alarms.create('stayAlive', {
         periodInMinutes: 0.55
     })
-    recreate_intervals()
-    setInterval(async () => {
-        const new_value = ((await get_polling_interval()) || polling_interval)
-        if (new_value !== polling_interval) {
-            polling_interval = new_value
-            recreate_intervals()
-        }
-    }, 300000)
-    setInterval(async () => {
-        start_websocket().then(onSuccess, onError)
-    }, 5000)
+
+    let is_ws = await is_ws_feature_connection()
+    if (is_ws) {
+        console.log("Using WebSocket")
+        setInterval(async () => {
+            start_websocket().then(onSuccess, onError)
+        }, 5000)
+    } else {
+        console.log("Using polling")
+        await stop_websocket()
+        // legacy polling
+        recreate_intervals()
+        setInterval(async () => {
+            const new_value = ((await get_polling_interval()) || polling_interval)
+            if (new_value !== polling_interval) {
+                polling_interval = new_value
+                recreate_intervals()
+            }
+        }, 300000)
+    }
+
 }
 
 init_background().then(onSuccess, onError)

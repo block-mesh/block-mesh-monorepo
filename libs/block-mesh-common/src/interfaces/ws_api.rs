@@ -8,6 +8,7 @@ pub enum WsServerMessage {
     AssignTask(GetTaskResponse),
     RequestBandwidthReport,
     RequestUptimeReport,
+    CloseConnection,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
