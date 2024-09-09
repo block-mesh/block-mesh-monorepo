@@ -34,7 +34,9 @@ pub fn set_rx(rx: Receiver<WsServerMessage>, ws: WebSocket) {
         let rx = rx.clone();
         while let Ok(msg) = rx.recv_async().await {
             if matches!(WsServerMessage::CloseConnection, _msg) {
-                let _ = ws.close();
+                if let Err(error) = ws.close() {
+                    log!("Error while closing WS: {error:?}");
+                }
                 return;
             }
             let app_state = ExtensionWrapperState::default();
@@ -97,7 +99,9 @@ pub fn set_rx(rx: Receiver<WsServerMessage>, ws: WebSocket) {
                     }
                 }
                 WsServerMessage::CloseConnection => {
-                    let _ = ws.close();
+                    if let Err(error) = ws.close() {
+                        log!("Error while closing WS: {error:?}");
+                    }
                     return;
                 }
             }
