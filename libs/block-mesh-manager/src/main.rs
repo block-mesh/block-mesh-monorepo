@@ -2,10 +2,10 @@
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unreachable_pub)]
 
-use block_mesh_manager::database::user::create_test_user::create_test_user;
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use block_mesh_manager::database::user::create_test_user::create_test_user;
     use block_mesh_manager::ws::connection_manager::ConnectionManager;
     use block_mesh_manager::worker::analytics_agg::analytics_agg;
     use block_mesh_common::interfaces::db_messages::{
