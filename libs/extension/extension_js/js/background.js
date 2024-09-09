@@ -1,10 +1,10 @@
 // A static import is required in b/g scripts because they are executed in their own env
 // not connected to the content scripts where wasm is loaded automatically
 import initWasmModule, {
-  task_poller,
-  report_uptime,
-  uptime_fetcher,
-  start_websocket
+    task_poller,
+    report_uptime,
+    uptime_fetcher,
+    start_websocket
 } from './wasm/blockmesh_ext.js'
 
 console.log('Background script started')
@@ -13,111 +13,136 @@ const PING_INTERVAL = 3 * 1000
 
 // This keeps the service worker alive
 function stayAlive() {
-  chrome.runtime.sendMessage('ping').then(
-    function mute_success() {
-    }, function mute_error() {
-    }
-  )
+    chrome.runtime.sendMessage('ping').then(
+        function mute_success() {
+        }, function mute_error() {
+        }
+    )
 }
 
 setInterval(() => {
-  stayAlive()
-  setTimeout(async () => {
-    await chrome.storage.local.set({ 'last-stay-alive': new Date().getTime() })
-  }, 1000)
+    stayAlive()
+    setTimeout(async () => {
+        await chrome.storage.local.set({'last-stay-alive': new Date().getTime()})
+    }, 1000)
 }, PING_INTERVAL)
 
 async function create_alarm() {
-  try {
-    await chrome.alarms.create('stayAlive', {
-      delayInMinutes: 0.55
-    })
-  } catch (e) {
-    console.error('Alarm error:', e)
-  }
+    try {
+        await chrome.alarms.create('stayAlive', {
+            delayInMinutes: 0.55
+        })
+    } catch (e) {
+        console.error('Alarm error:', e)
+    }
 }
 
 chrome.alarms.onAlarm.addListener((alarm) => {
-  if (alarm.name === 'stayAlive') {
-    create_alarm().then(onSuccess, onError)
-  }
+    if (alarm.name === 'stayAlive') {
+        create_alarm().then(onSuccess, onError)
+    }
 })
 
 setInterval(async () => {
-  await create_alarm().then(onSuccess, onError)
+    await create_alarm().then(onSuccess, onError)
 }, 30_000)
 
 
-chrome.runtime.onConnect.addListener(async function() {
-  console.log('onConnect')
+chrome.runtime.onConnect.addListener(async function () {
+    console.log('onConnect')
 })
 
-chrome.runtime.onStartup.addListener(async function() {
-  console.log('onStartup')
+chrome.runtime.onStartup.addListener(async function () {
+    console.log('onStartup')
 })
 
 let polling_interval = 120000
 let intervals = []
 
+async function apply_websocket_flags() {
+    setInterval(async () => {
+        try {
+            const response = await fetch("https://feature-flags.blockmesh.xyz/read-flag/websocket")
+            if (response.ok) {
+                const value = await response.text()
+                const is_enabled = Boolean(value)
+                if (!is_enabled) return
+
+                const response = await fetch("https://feature-flags.blockmesh.xyz/read-flag/websocket_percent")
+                if (response.ok) {
+                    const value = await response.text()
+                    const percentage = parseInt(value, 10)
+                    const probe = Math.random() * 100
+                    if (probe < percentage) { // && !is_ws_enabled
+                        // TODO enable websocket feature
+                    }
+                }
+            }
+        } catch (e) {
+            console.error(`Failed to fetch Websocket flags: ${e}`)
+        }
+    }, 1000 * 60)
+}
+
 async function get_polling_interval() {
-  try {
-    const response = await fetch('https://feature-flags.blockmesh.xyz/read-flag/polling_interval')
-    if (response.ok) {
-      const value = await response.text()
-      const num = parseFloat(value)
-      if (!isNaN(num)) {
-        return num
-      }
+    try {
+        const response = await fetch('https://feature-flags.blockmesh.xyz/read-flag/polling_interval')
+        if (response.ok) {
+            const value = await response.text()
+            const num = parseFloat(value)
+            if (!isNaN(num)) {
+                return num
+            }
+        }
+        return 120000
+    } catch (_) {
+        return 120000
     }
-    return 120000
-  } catch (_) {
-    return 120000
-  }
 }
 
 function recreate_intervals() {
-  console.log('Running recreate_intervals')
-  intervals.forEach(i => clearInterval(i))
-  intervals.push(
-    setInterval(async () => {
-      await create_alarm().then(onSuccess, onError)
-      await task_poller().then(onSuccess, onError)
-    }, polling_interval + Math.random())
-  )
-  intervals.push(
-    setInterval(async () => {
-      await create_alarm().then(onSuccess, onError)
-      await report_uptime().then(onSuccess, onError)
-    }, polling_interval + Math.random())
-  )
-  intervals.push(
-    setInterval(async () => {
-      await create_alarm().then(onSuccess, onError)
-      // await measure_bandwidth().then(onSuccess, onError) // TODO bring back, need to release this gradually
-    }, polling_interval + Math.random())
-  )
+    console.log('Running recreate_intervals')
+    intervals.forEach(i => clearInterval(i))
+    intervals.push(
+        setInterval(async () => {
+            await create_alarm().then(onSuccess, onError)
+            await task_poller().then(onSuccess, onError)
+        }, polling_interval + Math.random())
+    )
+    intervals.push(
+        setInterval(async () => {
+            await create_alarm().then(onSuccess, onError)
+            await report_uptime().then(onSuccess, onError)
+        }, polling_interval + Math.random())
+    )
+    intervals.push(
+        setInterval(async () => {
+            await create_alarm().then(onSuccess, onError)
+            // await measure_bandwidth().then(onSuccess, onError) // TODO bring back, need to release this gradually
+        }, polling_interval + Math.random())
+    )
 }
 
 async function init_background() {
-  console.log('init_background')
-  // run the wasm initializer before calling wasm methods
-  // the initializer is generated by wasm_pack
-  await initWasmModule()
-  await create_alarm().then(onSuccess, onError)
-  await chrome.alarms.create('stayAlive', {
-    periodInMinutes: 0.55
-  })
-  recreate_intervals()
-  setInterval(async () => {
-    const new_value = ((await get_polling_interval()) || polling_interval)
-    if (new_value !== polling_interval) {
-      polling_interval = new_value
-      recreate_intervals()
-    }
-  }, 300000)
-  setInterval(async () => {
-    start_websocket().then(onSuccess, onError)
-  }, 5000)
+    console.log('init_background')
+    // run the wasm initializer before calling wasm methods
+    // the initializer is generated by wasm_pack
+    await initWasmModule()
+    await create_alarm().then(onSuccess, onError)
+    await chrome.alarms.create('stayAlive', {
+        periodInMinutes: 0.55
+    })
+    recreate_intervals()
+    setInterval(async () => {
+        const new_value = ((await get_polling_interval()) || polling_interval)
+        if (new_value !== polling_interval) {
+            polling_interval = new_value
+            recreate_intervals()
+        }
+    }, 300000)
+    setInterval(async () => {
+        start_websocket().then(onSuccess, onError)
+    }, 5000)
 }
 
 init_background().then(onSuccess, onError)
@@ -125,23 +150,23 @@ init_background().then(onSuccess, onError)
 
 // A placeholder for OnSuccess in .then
 function onSuccess(message) {
-  // console.log(`Background::Send OK: ${JSON.stringify(message)}`);
+    // console.log(`Background::Send OK: ${JSON.stringify(message)}`);
 }
 
 // A placeholder for OnError in .then
 function onError(error) {
-  console.error(`Background::Promise error: ${error}`)
+    console.error(`Background::Promise error: ${error}`)
 }
 
 // A placeholder for OnError in .then
 function onErrorWithLog(error) {
-  console.error(`Background::Promise error: ${error}`)
+    console.error(`Background::Promise error: ${error}`)
 }
 
 // Popup button handler
 // Fetches the data from Spotify using the creds extracted earlier
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-  console.log(`Popup message received: ${JSON.stringify(request)}, ${JSON.stringify(sender)}`)
-  return true
-  // chrome.runtime.sendMessage("Missing how many tracks to add param. It's a bug.").then(onSuccess, onError);
+    console.log(`Popup message received: ${JSON.stringify(request)}, ${JSON.stringify(sender)}`)
+    return true
+    // chrome.runtime.sendMessage("Missing how many tracks to add param. It's a bug.").then(onSuccess, onError);
 })
