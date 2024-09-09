@@ -60,7 +60,7 @@ pub async fn start_websocket() -> Result<(), JsValue> {
         WebSocketReadyState::CONNECTING => return Ok(()),
         WebSocketReadyState::INVALID => return Ok(()),
     }
-    log!("connecting websocket ws://{blockmesh_url}/ws?email={email}&api_token={api_token}");
+    log!("connecting websocket {blockmesh_url}/ws?email={email}&api_token={api_token}");
     let ws = WebSocket::new(&format!(
         "{blockmesh_url}/ws?email={email}&api_token={api_token}"
     ))?;

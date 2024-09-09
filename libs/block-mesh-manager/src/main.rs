@@ -2,6 +2,7 @@
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unreachable_pub)]
 
+use block_mesh_manager::database::user::create_test_user::create_test_user;
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
@@ -77,6 +78,10 @@ async fn run() -> anyhow::Result<()> {
     let flags = get_all_flags(&client).await?;
     let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
     let redis = redis_client.get_multiplexed_async_connection().await?;
+
+    let mut transaction = db_pool.begin().await?;
+    let _ = create_test_user(&mut transaction).await;
+    transaction.commit().await?;
 
     let ws_connection_manager = ConnectionManager::new();
     let _reports_cron_task = ws_connection_manager.cron_reports(Duration::from_secs(60)); // FIXME
