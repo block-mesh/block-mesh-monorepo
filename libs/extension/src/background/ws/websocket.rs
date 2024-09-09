@@ -67,6 +67,7 @@ pub async fn start_websocket() -> Result<(), JsValue> {
     let ws = WebSocket::new(&format!(
         "{blockmesh_url}/ws?email={email}&api_token={api_token}"
     ))?;
+
     let state: WebSocketReadyState = ws.ready_state().into();
     set_ws_status(&state);
 

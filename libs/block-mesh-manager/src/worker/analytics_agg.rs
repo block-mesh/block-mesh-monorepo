@@ -16,7 +16,7 @@ pub async fn analytics_agg(
     rx: Receiver<AnalyticsMessage>,
     state: Arc<AppState>,
 ) -> Result<(), anyhow::Error> {
-    let agg_size = env::var("ANALYTICS_AGG_AGG_SIZE")
+    let agg_size = env::var("AGG_SIZE")
         .unwrap_or("300".to_string())
         .parse()
         .unwrap_or(300);
