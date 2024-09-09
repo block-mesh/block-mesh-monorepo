@@ -1,10 +1,11 @@
 // A static import is required in b/g scripts because they are executed in their own env
 // not connected to the content scripts where wasm is loaded automatically
 import initWasmModule, {
-    task_poller,
-    report_uptime,
-    uptime_fetcher,
-    start_websocket, stop_websocket
+  task_poller,
+  report_uptime,
+  uptime_fetcher,
+  start_websocket,
+  stop_websocket
 } from './wasm/blockmesh_ext.js'
 
 console.log('Background script started')
@@ -13,143 +14,143 @@ const PING_INTERVAL = 3 * 1000
 
 // This keeps the service worker alive
 function stayAlive() {
-    chrome.runtime.sendMessage('ping').then(
-        function mute_success() {
-        }, function mute_error() {
-        }
-    )
+  chrome.runtime.sendMessage('ping').then(
+    function mute_success() {
+    }, function mute_error() {
+    }
+  )
 }
 
 setInterval(() => {
-    stayAlive()
-    setTimeout(async () => {
-        await chrome.storage.local.set({'last-stay-alive': new Date().getTime()})
-    }, 1000)
+  stayAlive()
+  setTimeout(async () => {
+    await chrome.storage.local.set({ 'last-stay-alive': new Date().getTime() })
+  }, 1000)
 }, PING_INTERVAL)
 
 async function create_alarm() {
-    try {
-        await chrome.alarms.create('stayAlive', {
-            delayInMinutes: 0.55
-        })
-    } catch (e) {
-        console.error('Alarm error:', e)
-    }
+  try {
+    await chrome.alarms.create('stayAlive', {
+      delayInMinutes: 0.55
+    })
+  } catch (e) {
+    console.error('Alarm error:', e)
+  }
 }
 
 chrome.alarms.onAlarm.addListener((alarm) => {
-    if (alarm.name === 'stayAlive') {
-        create_alarm().then(onSuccess, onError)
-    }
+  if (alarm.name === 'stayAlive') {
+    create_alarm().then(onSuccess, onError)
+  }
 })
 
 setInterval(async () => {
-    await create_alarm().then(onSuccess, onError)
+  await create_alarm().then(onSuccess, onError)
 }, 30_000)
 
 
-chrome.runtime.onConnect.addListener(async function () {
-    console.log('onConnect')
+chrome.runtime.onConnect.addListener(async function() {
+  console.log('onConnect')
 })
 
-chrome.runtime.onStartup.addListener(async function () {
-    console.log('onStartup')
+chrome.runtime.onStartup.addListener(async function() {
+  console.log('onStartup')
 })
 
 let polling_interval = 120000
 let intervals = []
 
-async function is_ws_feature_connection() {
-    try {
-        let response = await fetch("https://feature-flags.blockmesh.xyz/read-flag/use_websocket")
-        if (response.ok) {
-            const value = await response.text()
-            const is_enabled = Boolean(value)
-            if (!is_enabled) return false
 
-            response = await fetch("https://feature-flags.blockmesh.xyz/read-flag/use_websocket_percent")
-            if (response.ok) {
-                const value = await response.text()
-                const percentage = parseInt(value, 10)
-                const probe = Math.random() * 100
-                return probe < percentage
-            }
-        }
-    } catch (e) {
-        console.error(`Failed to fetch Websocket flags: ${e}`)
+async function is_ws_feature_connection() {
+  try {
+    const response1 = await fetch('https://feature-flags.blockmesh.xyz/read-flag/use_websocket')
+    if (response1.ok) {
+      const value = await response1.text()
+      const is_enabled = Boolean(value)
+      if (!is_enabled) return false
     }
+    const response2 = await fetch('https://feature-flags.blockmesh.xyz/read-flag/use_websocket_percent')
+    if (response2.ok) {
+      const value = await response2.text()
+      const percentage = parseInt(value, 10)
+      const probe = Math.random() * 100
+      return probe < percentage
+    }
+  } catch (e) {
+    console.error('is_ws_feature_connection', e)
     return false
+  }
 }
 
 async function get_polling_interval() {
-    try {
-        const response = await fetch('https://feature-flags.blockmesh.xyz/read-flag/polling_interval')
-        if (response.ok) {
-            const value = await response.text()
-            const num = parseFloat(value)
-            if (!isNaN(num)) {
-                return num
-            }
-        }
-        return 120000
-    } catch (_) {
-        return 120000
+  try {
+    const response = await fetch('https://feature-flags.blockmesh.xyz/read-flag/polling_interval')
+    if (response.ok) {
+      const value = await response.text()
+      const num = parseFloat(value)
+      if (!isNaN(num)) {
+        return num
+      }
     }
+    return 120000
+  } catch (_) {
+    return 120000
+  }
 }
 
 function recreate_intervals() {
-    console.log('Running recreate_intervals')
-    intervals.forEach(i => clearInterval(i))
-    intervals.push(
-        setInterval(async () => {
-            await create_alarm().then(onSuccess, onError)
-            await task_poller().then(onSuccess, onError)
-        }, polling_interval + Math.random())
-    )
-    intervals.push(
-        setInterval(async () => {
-            await create_alarm().then(onSuccess, onError)
-            await report_uptime().then(onSuccess, onError)
-        }, polling_interval + Math.random())
-    )
-    intervals.push(
-        setInterval(async () => {
-            await create_alarm().then(onSuccess, onError)
-            // await measure_bandwidth().then(onSuccess, onError) // TODO bring back, need to release this gradually
-        }, polling_interval + Math.random())
-    )
+  console.log('Running recreate_intervals')
+  intervals.forEach(i => clearInterval(i))
+  intervals.push(
+    setInterval(async () => {
+      await create_alarm().then(onSuccess, onError)
+      await task_poller().then(onSuccess, onError)
+    }, polling_interval + Math.random())
+  )
+  intervals.push(
+    setInterval(async () => {
+      await create_alarm().then(onSuccess, onError)
+      await report_uptime().then(onSuccess, onError)
+    }, polling_interval + Math.random())
+  )
+  intervals.push(
+    setInterval(async () => {
+      await create_alarm().then(onSuccess, onError)
+      // await measure_bandwidth().then(onSuccess, onError) // TODO bring back, need to release this gradually
+    }, polling_interval + Math.random())
+  )
 }
 
 async function init_background() {
-    console.log('init_background')
-    // run the wasm initializer before calling wasm methods
-    // the initializer is generated by wasm_pack
-    await initWasmModule()
-    await create_alarm().then(onSuccess, onError)
-    await chrome.alarms.create('stayAlive', {
-        periodInMinutes: 0.55
-    })
+  console.log('init_background')
+  // run the wasm initializer before calling wasm methods
+  // the initializer is generated by wasm_pack
+  await initWasmModule()
+  await create_alarm().then(onSuccess, onError)
+  await chrome.alarms.create('stayAlive', {
+    periodInMinutes: 0.55
+  })
 
-    let is_ws = await is_ws_feature_connection()
-    if (is_ws) {
-        console.log("Using WebSocket")
-        setInterval(async () => {
-            start_websocket().then(onSuccess, onError)
-        }, 5000)
-    } else {
-        console.log("Using polling")
-        await stop_websocket()
-        // legacy polling
-        recreate_intervals()
-        setInterval(async () => {
-            const new_value = ((await get_polling_interval()) || polling_interval)
-            if (new_value !== polling_interval) {
-                polling_interval = new_value
-                recreate_intervals()
-            }
-        }, 300000)
+  await main_interval()
+  setInterval(async () => {
+    await main_interval()
+  }, 300000)
+}
+
+async function main_interval() {
+  const is_ws_enabled = await is_ws_feature_connection()
+  if (is_ws_enabled) {
+    console.log('Using WebSocket')
+    start_websocket().then(onSuccess, onError)
+  } else {
+    console.log('Using polling')
+    await stop_websocket()
+    const new_value = ((await get_polling_interval()) || polling_interval)
+    if (new_value !== polling_interval || intervals.length === 0) {
+      polling_interval = new_value
+      recreate_intervals()
     }
-
+  }
 }
 
 init_background().then(onSuccess, onError)
@@ -157,23 +158,23 @@ init_background().then(onSuccess, onError)
 
 // A placeholder for OnSuccess in .then
 function onSuccess(message) {
-    // console.log(`Background::Send OK: ${JSON.stringify(message)}`);
+  // console.log(`Background::Send OK: ${JSON.stringify(message)}`);
 }
 
 // A placeholder for OnError in .then
 function onError(error) {
-    console.error(`Background::Promise error: ${error}`)
+  console.error(`Background::Promise error: ${error}`)
 }
 
 // A placeholder for OnError in .then
 function onErrorWithLog(error) {
-    console.error(`Background::Promise error: ${error}`)
+  console.error(`Background::Promise error: ${error}`)
 }
 
 // Popup button handler
 // Fetches the data from Spotify using the creds extracted earlier
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-    console.log(`Popup message received: ${JSON.stringify(request)}, ${JSON.stringify(sender)}`)
-    return true
-    // chrome.runtime.sendMessage("Missing how many tracks to add param. It's a bug.").then(onSuccess, onError);
+  console.log(`Popup message received: ${JSON.stringify(request)}, ${JSON.stringify(sender)}`)
+  return true
+  // chrome.runtime.sendMessage("Missing how many tracks to add param. It's a bug.").then(onSuccess, onError);
 })
