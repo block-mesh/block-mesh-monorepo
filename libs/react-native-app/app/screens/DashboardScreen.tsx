@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react'
-import { View, Text, Button, TextInput, Alert } from 'react-native'
+import { Alert } from 'react-native'
 import { useStorage } from '@/hooks/useStorage'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
@@ -12,6 +12,7 @@ import { get_lib_status, run_lib, stop_lib } from '@/utils/background'
 import { ActivityIndicator } from 'react-native'
 import { Switch, Case, Default } from 'react-if'
 import VerticalContainer from '@/components/VerticalContainer'
+import * as Location from 'expo-location'
 
 export default function DashboardScreen() {
   const storage = useStorage()
@@ -20,6 +21,34 @@ export default function DashboardScreen() {
   const [status, setStatus] = useState(-1)
   const [stringStatus, setStringStatus] = useState('Click to Turn On')
   const [disableToggleButton, setDisableToggleButton] = useState(false)
+  const [location, setLocation] = useState('')
+  const [errorMsg, setErrorMsg] = useState('')
+
+
+  useEffect(() => {
+    (async () => {
+      let { status: fg_status } = await Location.requestForegroundPermissionsAsync()
+      if (fg_status !== 'granted') {
+        setErrorMsg('Permission to access location was denied')
+        return
+      }
+
+      let { status: bg_status } = await Location.requestBackgroundPermissionsAsync()
+      if (bg_status !== 'granted') {
+        setErrorMsg('Permission to access location was denied')
+        return
+      }
+
+      let location = await Location.getCurrentPositionAsync({})
+      const address = await Location.reverseGeocodeAsync(location.coords)
+      console.log('address', address)
+      if (address.length > 0) {
+        const add = address[0]
+        setLocation(`${add.city}`)
+      }
+    })()
+  }, [])
+
 
   useEffect(() => {
     if (status === 1) {
@@ -77,6 +106,7 @@ export default function DashboardScreen() {
             <ThemedText type="subtitle">Not connected</ThemedText>
           </Default>
         </Switch>
+        <ThemedText type="subtitle">{location}</ThemedText>
         <CustomButton
           disabled={disableToggleButton}
           title={`${stringStatus}`}
