@@ -84,7 +84,7 @@ async fn run() -> anyhow::Result<()> {
     let _ = create_test_user(&mut transaction).await;
     transaction.commit().await?;
 
-    let ws_connection_manager = ConnectionManager::new();
+    let mut ws_connection_manager = ConnectionManager::new();
     let _reports_cron_task = ws_connection_manager.cron_reports(
         Duration::from_secs(60),
         vec![

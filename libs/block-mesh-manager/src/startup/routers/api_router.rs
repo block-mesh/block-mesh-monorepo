@@ -1,6 +1,6 @@
 use crate::routes;
 use crate::startup::application::AppState;
-use axum::routing::post;
+use axum::routing::{get, post};
 use axum::Router;
 use block_mesh_common::routes_enum::RoutesEnum;
 use std::sync::Arc;
@@ -54,6 +54,11 @@ pub fn get_api_router() -> Router<Arc<AppState>> {
         .route(
             RoutesEnum::Api_EMailViaToken.to_string().as_str(),
             post(routes::api_token::get_email_via_token::handler),
+        )
+        .route(
+            RoutesEnum::Api_ReportsQueue.to_string().as_str(),
+            get(routes::admin::reports_queue::get_stats::handler)
+                .post(routes::admin::reports_queue::change_settings::handler),
         );
     api_router
 }

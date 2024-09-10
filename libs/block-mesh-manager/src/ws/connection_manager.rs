@@ -3,6 +3,7 @@ use aws_sdk_sesv2::config::IntoShared;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use dashmap::DashMap;
 use futures::future::join_all;
+use serde::{Deserialize, Serialize};
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::net::SocketAddr;
@@ -38,73 +39,19 @@ impl ConnectionManager {
     }
 
     pub fn cron_reports(
-        &self,
+        &mut self,
         period: Duration,
         messages: impl Into<Vec<WsServerMessage>> + Clone,
         window_size: usize,
     ) -> CronReportsController {
-        let broadcaster = self.broadcaster.clone();
-        let (settings_tx, mut settings_rx) = mpsc::channel::<CronReportSettings>(10);
-        let (stats_tx, stats_rx) = tokio::sync::watch::channel(CronReportStats::new(
-            messages.clone().into(),
-            window_size,
-            0,
-        ));
-        let period = Arc::new(Mutex::new(period));
-        let messages = Arc::new(Mutex::new(messages.into()));
-        let window_size = Arc::new(AtomicUsize::new(window_size));
-        let channel_task = {
-            let period = period.clone();
-            let window_size = window_size.clone();
-            let messages = messages.clone();
-            tokio::spawn(async move {
-                while let Some(setting) = settings_rx.recv().await {
-                    if let Some(msgs) = setting.messages {
-                        *messages.lock().unwrap() = msgs;
-                    }
-                    if let Some(window_s) = setting.window_size {
-                        window_size.store(window_s, Ordering::Relaxed);
-                    }
-                    if let Some(per) = setting.period {
-                        if !per.is_zero() {
-                            *period.lock().unwrap() = per;
-                        }
-                    }
-                }
-            })
-        };
-        let cron_task = {
-            let period = period.clone();
-            let window_size = window_size.clone();
-            let messages = messages.clone();
-            tokio::spawn(async move {
-                loop {
-                    let messages = { messages.lock().unwrap().clone() };
-                    let window_size = window_size.load(Ordering::Relaxed);
-                    let period = { period.lock().unwrap().clone() };
-                    let sent_messages_count = broadcaster
-                        .queue_multiple(messages.clone(), window_size)
-                        .await;
-                    if let Err(error) = stats_tx.send(CronReportStats::new(
-                        messages,
-                        window_size,
-                        sent_messages_count,
-                    )) {
-                        // TODO (send_if_modified, send_modify, or send_replace) can be used instead
-                        tracing::error!("Could not sent stats, no watchers: {error}");
-                    }
-                    tokio::time::sleep(period).await;
-                }
-                ()
-            })
-        };
-
-        CronReportsController::new(cron_task, channel_task, settings_tx, stats_rx)
+        self.broadcaster.cron_reports(period, messages, window_size)
     }
 }
+
+#[derive(Debug, Clone)]
 pub struct CronReportsController {
-    cron_task: JoinHandle<()>,
-    channel_task: JoinHandle<()>,
+    cron_task: Arc<JoinHandle<()>>,
+    channel_task: Arc<JoinHandle<()>>,
     settings_transmitter: mpsc::Sender<CronReportSettings>,
     stats_receiver: watch::Receiver<CronReportStats>,
 }
@@ -117,8 +64,8 @@ impl CronReportsController {
         stats_receiver: watch::Receiver<CronReportStats>,
     ) -> Self {
         Self {
-            cron_task,
-            channel_task,
+            cron_task: Arc::new(cron_task),
+            channel_task: Arc::new(channel_task),
             settings_transmitter,
             stats_receiver,
         }
@@ -134,7 +81,7 @@ impl CronReportsController {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize)]
 pub struct CronReportStats {
     messages: Vec<WsServerMessage>,
     window_size: usize,
@@ -156,6 +103,7 @@ impl Default for CronReportStats {
     }
 }
 
+#[derive(Debug, Deserialize)]
 pub struct CronReportSettings {
     period: Option<Duration>,
     messages: Option<Vec<WsServerMessage>>,
@@ -181,6 +129,7 @@ pub struct Broadcaster {
     global_transmitter: broadcast::Sender<WsServerMessage>,
     sockets: Arc<DashMap<(Uuid, SocketAddr), mpsc::Sender<WsServerMessage>>>,
     queue: Arc<Mutex<VecDeque<(Uuid, SocketAddr)>>>,
+    pub cron_reports_controller: Option<CronReportsController>,
 }
 
 impl Broadcaster {
@@ -190,6 +139,7 @@ impl Broadcaster {
             global_transmitter,
             sockets: Arc::new(DashMap::new()),
             queue: Arc::new(Mutex::new(VecDeque::new())),
+            cron_reports_controller: None,
         }
     }
     pub fn broadcast(&self, message: WsServerMessage) -> Result<usize, SendError<WsServerMessage>> {
@@ -287,11 +237,82 @@ impl Broadcaster {
             tracing::error!("Failed to remove a socket from the queue");
         }
     }
+
+    pub fn cron_reports(
+        &mut self,
+        period: Duration,
+        messages: impl Into<Vec<WsServerMessage>> + Clone,
+        window_size: usize,
+    ) -> CronReportsController {
+        if let Some(controller) = self.cron_reports_controller.clone() {
+            return controller;
+        }
+
+        let (settings_tx, mut settings_rx) = mpsc::channel::<CronReportSettings>(10);
+        let (stats_tx, stats_rx) = tokio::sync::watch::channel(CronReportStats::new(
+            messages.clone().into(),
+            window_size,
+            0,
+        ));
+        let period = Arc::new(Mutex::new(period));
+        let messages = Arc::new(Mutex::new(messages.into()));
+        let window_size = Arc::new(AtomicUsize::new(window_size));
+        let channel_task = {
+            let period = period.clone();
+            let window_size = window_size.clone();
+            let messages = messages.clone();
+            tokio::spawn(async move {
+                while let Some(setting) = settings_rx.recv().await {
+                    if let Some(msgs) = setting.messages {
+                        *messages.lock().unwrap() = msgs;
+                    }
+                    if let Some(window_s) = setting.window_size {
+                        window_size.store(window_s, Ordering::Relaxed);
+                    }
+                    if let Some(per) = setting.period {
+                        if !per.is_zero() {
+                            *period.lock().unwrap() = per;
+                        }
+                    }
+                }
+            })
+        };
+        let cron_task = {
+            let period = period.clone();
+            let window_size = window_size.clone();
+            let messages = messages.clone();
+            let broadcaster = self.clone();
+            tokio::spawn(async move {
+                loop {
+                    let messages = { messages.lock().unwrap().clone() };
+                    let window_size = window_size.load(Ordering::Relaxed);
+                    let period = { period.lock().unwrap().clone() };
+                    let sent_messages_count = broadcaster
+                        .queue_multiple(messages.clone(), window_size)
+                        .await;
+                    if let Err(error) = stats_tx.send(CronReportStats::new(
+                        messages,
+                        window_size,
+                        sent_messages_count,
+                    )) {
+                        // TODO (send_if_modified, send_modify, or send_replace) can be used instead
+                        tracing::error!("Could not sent stats, no watchers: {error}");
+                    }
+                    tokio::time::sleep(period).await;
+                }
+                ()
+            })
+        };
+
+        let controller = CronReportsController::new(cron_task, channel_task, settings_tx, stats_rx);
+        self.cron_reports_controller = Some(controller.clone());
+        controller
+    }
 }
 
 #[tokio::test]
 async fn test_cron_reports() {
-    let conn_manager = ConnectionManager::new();
+    let mut conn_manager = ConnectionManager::new();
     let (tx, mut rx) = mpsc::channel(10);
     let user_id = Uuid::new_v4();
     let addr = SocketAddr::from_str("127.0.0.1:8000").unwrap();

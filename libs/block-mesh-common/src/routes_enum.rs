@@ -36,6 +36,7 @@ pub enum RoutesEnum {
     Api_CheckToken,
     Api_EMailViaToken,
     Api_Dashboard,
+    Api_ReportsQueue,
 }
 
 impl Display for RoutesEnum {
@@ -77,6 +78,7 @@ impl Display for RoutesEnum {
             RoutesEnum::Api_CheckToken => write!(f, "/check_token"),
             RoutesEnum::Api_EMailViaToken => write!(f, "/get_email_via_token"),
             RoutesEnum::Api_Dashboard => write!(f, "/dashboard"),
+            RoutesEnum::Api_ReportsQueue => write!(f, "/admin/reports_queue"),
         }
     }
 }
