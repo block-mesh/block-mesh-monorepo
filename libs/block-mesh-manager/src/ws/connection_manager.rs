@@ -5,6 +5,7 @@ use futures::future::join_all;
 use std::collections::VecDeque;
 use std::fmt::Debug;
 use std::net::SocketAddr;
+use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::broadcast;
@@ -33,24 +34,88 @@ impl ConnectionManager {
         }
     }
 
-    pub fn cron_reports(&self, period: Duration) -> JoinHandle<()> {
+    pub fn cron_reports(
+        &self,
+        period: Duration,
+        messages: impl Into<Vec<WsServerMessage>>,
+        window_size: usize,
+    ) -> CronReportsController {
         let broadcaster = self.broadcaster.clone();
-        tokio::spawn(async move {
-            loop {
-                broadcaster
-                    .queue_multiple(
-                        &[
-                            WsServerMessage::RequestUptimeReport,
-                            WsServerMessage::RequestBandwidthReport,
-                        ],
-                        100,
-                    )
-                    .await;
-                tokio::time::sleep(period).await;
-            }
-        })
+        let (tx, mut rx) = mpsc::channel::<CronReportSettings>(10);
+        let messages = Arc::new(Mutex::new(messages.into()));
+        let window_size = Arc::new(AtomicUsize::new(window_size));
+        let channel_task = {
+            let window_size = window_size.clone();
+            let messages = messages.clone();
+            tokio::spawn(async move {
+                while let Some(setting) = rx.recv().await {
+                    if let Some(msgs) = setting.messages {
+                        *messages.lock().unwrap() = msgs;
+                    }
+                    if let Some(window_s) = setting.window_size {
+                        window_size.store(window_s, Ordering::Relaxed);
+                    }
+                }
+            })
+        };
+        let cron_task = {
+            let window_size = window_size.clone();
+            let messages = messages.clone();
+            tokio::spawn(async move {
+                loop {
+                    let messages = { messages.lock().unwrap().clone() };
+                    let window_size = window_size.load(Ordering::Relaxed);
+                    broadcaster.queue_multiple(messages, window_size).await;
+                    tokio::time::sleep(period).await;
+                }
+                ()
+            })
+        };
+
+        CronReportsController::new(cron_task, channel_task, tx)
     }
 }
+pub struct CronReportsController {
+    cron_task: JoinHandle<()>,
+    channel_task: JoinHandle<()>,
+    transmitter: mpsc::Sender<CronReportSettings>,
+}
+
+impl CronReportsController {
+    fn new(
+        cron_task: JoinHandle<()>,
+        channel_task: JoinHandle<()>,
+        transmitter: mpsc::Sender<CronReportSettings>,
+    ) -> Self {
+        Self {
+            cron_task,
+            channel_task,
+            transmitter,
+        }
+    }
+    pub async fn update(&self, settings: CronReportSettings) {
+        if let Err(error) = self.transmitter.send(settings).await {
+            tracing::error!("Could not update cron report settings: {error}");
+        }
+    }
+}
+pub struct CronReportSettings {
+    messages: Option<Vec<WsServerMessage>>,
+    window_size: Option<usize>,
+}
+
+impl CronReportSettings {
+    pub fn new(
+        messages: Option<impl Into<Vec<WsServerMessage>>>,
+        window_size: Option<usize>,
+    ) -> Self {
+        Self {
+            messages: messages.map(|m| m.into()),
+            window_size,
+        }
+    }
+}
+
 #[derive(Debug, Clone)]
 pub struct Broadcaster {
     global_transmitter: broadcast::Sender<WsServerMessage>,
@@ -110,14 +175,20 @@ impl Broadcaster {
         .await;
     }
 
-    pub async fn queue_multiple(&self, messages: &[WsServerMessage], count: usize) {
+    pub async fn queue_multiple(
+        &self,
+        messages: impl IntoIterator<Item = WsServerMessage> + Clone,
+        count: usize,
+    ) {
         let drained = self.move_queue(count);
         join_all(drained.into_iter().map(|user_id| {
             let entry = self.sockets.get(&user_id).unwrap();
             let tx = entry.value().clone();
+
+            let msgs = messages.clone();
             async move {
-                for msg in messages {
-                    if let Err(error) = tx.send(msg.clone()).await {
+                for msg in msgs {
+                    if let Err(error) = tx.send(msg).await {
                         tracing::error!("Error while queuing WS message: {error}");
                     }
                 }
@@ -153,4 +224,25 @@ impl Broadcaster {
             tracing::error!("Failed to remove a socket from the queue");
         }
     }
+}
+
+#[tokio::test]
+async fn test_cron_reports() {
+    let conn_manager = ConnectionManager::new();
+    let controller = conn_manager.cron_reports(
+        Duration::from_secs(1),
+        vec![
+            WsServerMessage::RequestUptimeReport,
+            WsServerMessage::RequestBandwidthReport,
+        ],
+        10,
+    );
+    tokio::time::sleep(Duration::from_secs(1)).await;
+    controller
+        .update(CronReportSettings {
+            messages: None,
+            window_size: Some(10),
+        })
+        .await;
+    tokio::time::sleep(Duration::from_secs(1)).await;
 }

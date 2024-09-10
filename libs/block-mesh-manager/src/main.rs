@@ -5,6 +5,7 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use block_mesh_common::interfaces::ws_api::WsServerMessage;
     use block_mesh_manager::database::user::create_test_user::create_test_user;
     use block_mesh_manager::ws::connection_manager::ConnectionManager;
     use block_mesh_manager::worker::analytics_agg::analytics_agg;
@@ -84,7 +85,14 @@ async fn run() -> anyhow::Result<()> {
     transaction.commit().await?;
 
     let ws_connection_manager = ConnectionManager::new();
-    let _reports_cron_task = ws_connection_manager.cron_reports(Duration::from_secs(60)); // FIXME
+    let _reports_cron_task = ws_connection_manager.cron_reports(
+        Duration::from_secs(60),
+        vec![
+            WsServerMessage::RequestUptimeReport,
+            WsServerMessage::RequestBandwidthReport,
+        ],
+        100,
+    );
     let app_state = Arc::new(AppState {
         email_client,
         pool: db_pool.clone(),
