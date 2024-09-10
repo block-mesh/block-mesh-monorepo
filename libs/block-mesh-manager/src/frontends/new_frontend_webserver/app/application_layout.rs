@@ -68,6 +68,10 @@ pub fn ApplicationSidebar() -> impl IntoView {
                         <MedalIcon/>
                         <SidebarLabel>Daily Leaderboard</SidebarLabel>
                     </SidebarItemLink>
+                    <SidebarItemLink href="/ui/admin_dashboard">
+                        <HomeIcon/>
+                        <SidebarLabel>Admin Dashboard</SidebarLabel>
+                    </SidebarItemLink>
                 </SidebarSection>
 
                 <SidebarSpacer/>
