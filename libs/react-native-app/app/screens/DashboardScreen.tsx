@@ -18,14 +18,14 @@ export default function DashboardScreen() {
   const [data, setData] = useState<DashboardResponse>()
   const [valid_token, setValidToken] = useState(false)
   const [status, setStatus] = useState(-1)
-  const [stringStatus, setStringStatus] = useState('Not running')
+  const [stringStatus, setStringStatus] = useState('Click to Turn On')
   const [disableToggleButton, setDisableToggleButton] = useState(false)
 
   useEffect(() => {
     if (status === 1) {
-      setStringStatus('Running')
+      setStringStatus('Click to Turn Off')
     } else {
-      setStringStatus('Not running')
+      setStringStatus('Click to Turn On')
     }
   }, [status])
 
@@ -65,8 +65,7 @@ export default function DashboardScreen() {
 
   return (
     <ThemedView style={styles.stepContainer}>
-      <ThemedText type="subtitle">Dashboard</ThemedText>
-      <View style={styles.buttonContainer}>
+      <VerticalContainer>
         <Switch>
           <Case condition={data?.connected && status === 1}>
             <VerticalContainer>
@@ -78,8 +77,6 @@ export default function DashboardScreen() {
             <ThemedText type="subtitle">Not connected</ThemedText>
           </Default>
         </Switch>
-      </View>
-      <View style={styles.buttonContainer}>
         <CustomButton
           disabled={disableToggleButton}
           title={`${stringStatus}`}
@@ -125,11 +122,12 @@ export default function DashboardScreen() {
           buttonStyles={styles.button}
           buttonText={styles.buttonText}
           onPress={async () => {
+            stop_lib(storage.url)
             storage.clear()
             storage.setNav('login')
           }}
         />
-      </View>
+      </VerticalContainer>
     </ThemedView>
   )
 }
