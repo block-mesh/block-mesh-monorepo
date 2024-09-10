@@ -1,10 +1,17 @@
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::{
+    get_or_create_aggregate_by_user_and_name, get_or_create_aggregate_by_user_and_name_pool,
+};
+use crate::domain::aggregate::AggregateName;
 use crate::ws::task_scheduler::TaskScheduler;
 use aws_sdk_sesv2::config::IntoShared;
+use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use dashmap::DashMap;
 use futures::future::join_all;
 use serde::{Deserialize, Serialize};
+use sqlx::PgPool;
 use std::collections::VecDeque;
+use std::env;
 use std::fmt::Debug;
 use std::net::SocketAddr;
 use std::ops::Deref;
@@ -41,38 +48,26 @@ impl ConnectionManager {
     pub fn cron_reports(
         &mut self,
         period: Duration,
-        messages: impl Into<Vec<WsServerMessage>> + Clone,
+        messages: impl Into<Vec<WsServerMessage>> + Clone + Send + 'static,
         window_size: usize,
+        pool: PgPool,
     ) -> CronReportsController {
-        self.broadcaster.cron_reports(period, messages, window_size)
+        self.broadcaster
+            .cron_reports(period, messages, window_size, pool)
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct CronReportsController {
     cron_task: Arc<JoinHandle<()>>,
-    channel_task: Arc<JoinHandle<()>>,
-    settings_transmitter: mpsc::Sender<CronReportSettings>,
     stats_receiver: watch::Receiver<CronReportStats>,
 }
 
 impl CronReportsController {
-    fn new(
-        cron_task: JoinHandle<()>,
-        channel_task: JoinHandle<()>,
-        settings_transmitter: mpsc::Sender<CronReportSettings>,
-        stats_receiver: watch::Receiver<CronReportStats>,
-    ) -> Self {
+    fn new(cron_task: JoinHandle<()>, stats_receiver: watch::Receiver<CronReportStats>) -> Self {
         Self {
             cron_task: Arc::new(cron_task),
-            channel_task: Arc::new(channel_task),
-            settings_transmitter,
             stats_receiver,
-        }
-    }
-    pub async fn update(&self, settings: CronReportSettings) {
-        if let Err(error) = self.settings_transmitter.send(settings).await {
-            tracing::error!("Could not update cron report settings: {error}");
         }
     }
 
@@ -103,7 +98,7 @@ impl Default for CronReportStats {
     }
 }
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct CronReportSettings {
     period: Option<Duration>,
     messages: Option<Vec<WsServerMessage>>,
@@ -241,103 +236,66 @@ impl Broadcaster {
     pub fn cron_reports(
         &mut self,
         period: Duration,
-        messages: impl Into<Vec<WsServerMessage>> + Clone,
+        messages: impl Into<Vec<WsServerMessage>> + Clone + Send + 'static,
         window_size: usize,
+        pool: PgPool,
     ) -> CronReportsController {
-        if let Some(controller) = self.cron_reports_controller.clone() {
-            return controller;
-        }
-
-        let (settings_tx, mut settings_rx) = mpsc::channel::<CronReportSettings>(10);
         let (stats_tx, stats_rx) = tokio::sync::watch::channel(CronReportStats::new(
             messages.clone().into(),
             window_size,
             0,
         ));
-        let period = Arc::new(Mutex::new(period));
-        let messages = Arc::new(Mutex::new(messages.into()));
-        let window_size = Arc::new(AtomicUsize::new(window_size));
-        let channel_task = {
-            let period = period.clone();
-            let window_size = window_size.clone();
-            let messages = messages.clone();
-            tokio::spawn(async move {
-                while let Some(setting) = settings_rx.recv().await {
-                    if let Some(msgs) = setting.messages {
-                        *messages.lock().unwrap() = msgs;
-                    }
-                    if let Some(window_s) = setting.window_size {
-                        window_size.store(window_s, Ordering::Relaxed);
-                    }
-                    if let Some(per) = setting.period {
-                        if !per.is_zero() {
-                            *period.lock().unwrap() = per;
-                        }
-                    }
-                }
-            })
-        };
+
         let cron_task = {
-            let period = period.clone();
-            let window_size = window_size.clone();
-            let messages = messages.clone();
             let broadcaster = self.clone();
+            let pool = pool.clone();
+            let user_id =
+                Uuid::parse_str(env::var(BLOCKMESH_SERVER_UUID_ENVAR).unwrap().as_str()).unwrap();
             tokio::spawn(async move {
+                let mut period = period;
+                let mut messages = messages.into();
+                let mut window_size = window_size;
                 loop {
-                    let messages = { messages.lock().unwrap().clone() };
-                    let window_size = window_size.load(Ordering::Relaxed);
-                    let period = { period.lock().unwrap().clone() };
+                    let settings = fetch_latest_cron_settings(&pool, user_id).await.unwrap();
+                    if let Some(new_period) = settings.period {
+                        period = new_period;
+                    }
+                    if let Some(new_messages) = settings.messages {
+                        messages = new_messages;
+                    }
+                    if let Some(new_window_size) = settings.window_size {
+                        window_size = new_window_size;
+                    }
                     let sent_messages_count = broadcaster
-                        .queue_multiple(messages.clone(), window_size)
+                        .queue_multiple(messages.clone(), window_size.clone())
                         .await;
                     if let Err(error) = stats_tx.send(CronReportStats::new(
-                        messages,
-                        window_size,
+                        messages.clone(),
+                        window_size.clone(),
                         sent_messages_count,
                     )) {
                         // TODO (send_if_modified, send_modify, or send_replace) can be used instead
                         tracing::error!("Could not sent stats, no watchers: {error}");
                     }
-                    tokio::time::sleep(period).await;
+                    tokio::time::sleep(period.clone()).await;
                 }
                 ()
             })
         };
 
-        let controller = CronReportsController::new(cron_task, channel_task, settings_tx, stats_rx);
+        let controller = CronReportsController::new(cron_task, stats_rx);
         self.cron_reports_controller = Some(controller.clone());
         controller
     }
 }
 
-#[tokio::test]
-async fn test_cron_reports() {
-    let mut conn_manager = ConnectionManager::new();
-    let (tx, mut rx) = mpsc::channel(10);
-    let user_id = Uuid::new_v4();
-    let addr = SocketAddr::from_str("127.0.0.1:8000").unwrap();
-    conn_manager.broadcaster.subscribe(user_id, addr, tx);
-    let mut controller = conn_manager.cron_reports(
-        Duration::from_secs(1),
-        vec![
-            WsServerMessage::RequestUptimeReport,
-            WsServerMessage::RequestBandwidthReport,
-        ],
-        10,
-    );
-    let msg = rx.recv().await.unwrap();
-    conn_manager.broadcaster.unsubscribe(user_id, addr);
-    let stats = controller.stats();
-    println!("{stats:?}");
-    tokio::time::sleep(Duration::from_secs(1)).await;
-    controller
-        .update(CronReportSettings {
-            period: None,
-            messages: None,
-            window_size: Some(10),
-        })
-        .await;
-    tokio::time::sleep(Duration::from_secs(1)).await;
-    let stats = controller.stats();
-    println!("{stats:?}");
+async fn fetch_latest_cron_settings(
+    pool: &PgPool,
+    user_id: Uuid,
+) -> anyhow::Result<CronReportSettings> {
+    let aggregate =
+        get_or_create_aggregate_by_user_and_name_pool(pool, AggregateName::CronReports, user_id)
+            .await?;
+    let settings: CronReportSettings = serde_json::from_value(aggregate.value)?;
+    Ok(settings)
 }

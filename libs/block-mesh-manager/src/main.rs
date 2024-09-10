@@ -92,6 +92,7 @@ async fn run() -> anyhow::Result<()> {
             WsServerMessage::RequestBandwidthReport,
         ],
         100,
+        db_pool.clone(),
     );
     let app_state = Arc::new(AppState {
         email_client,

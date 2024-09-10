@@ -24,6 +24,7 @@ pub enum AggregateName {
     Latency,
     Tasks,
     Invalid,
+    CronReports,
 }
 
 impl Display for AggregateName {
@@ -36,6 +37,7 @@ impl Display for AggregateName {
             AggregateName::Latency => write!(f, "Latency"),
             AggregateName::Tasks => write!(f, "Tasks"),
             AggregateName::Invalid => write!(f, "Invalid"),
+            AggregateName::CronReports => write!(f, "CronReports"),
         }
     }
 }
@@ -57,6 +59,7 @@ impl From<String> for AggregateName {
             "Upload" => AggregateName::Upload,
             "Latency" => AggregateName::Latency,
             "Tasks" => AggregateName::Tasks,
+            "CronReports" => AggregateName::CronReports,
             _ => AggregateName::Invalid,
         }
     }

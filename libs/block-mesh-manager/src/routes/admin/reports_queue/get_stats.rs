@@ -5,6 +5,7 @@ use axum::{debug_handler, Json};
 use http::StatusCode;
 use std::sync::Arc;
 
+// TODO check user role
 #[debug_handler]
 pub async fn handler(State(state): State<Arc<AppState>>) -> impl IntoResponse {
     if let Some(mut controller) = state
