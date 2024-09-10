@@ -25,6 +25,7 @@ export interface StorageType {
   setPassword: (password: string) => void;
   setNav: (nav: Nav) => void;
   clear: () => void;
+  env: () => string;
 }
 
 export const Context = createContext<StorageType>(
@@ -58,6 +59,15 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
   const [password, setPasswordInternal] = useState('')
   const [run_lib, setRunLibInternal] = useState('')
   const [nav, setNav] = useState('login' as Nav)
+
+  function env(): string {
+    const APP_ENVIRONMENT = process.env.APP_ENVIRONMENT
+    if (APP_ENVIRONMENT === undefined || APP_ENVIRONMENT !== 'local') {
+      return 'production'
+    } else {
+      return 'local'
+    }
+  }
 
   useEffect(() => {
     (async () => {
@@ -100,54 +110,53 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
   }
 
 
-  function setEmail(email: string) {
+  function setEmail(input_email: string) {
     try {
-      storeData(EMAIL, email.toLowerCase()).then(() => {
-        setEmailInternal(email.toLowerCase())
+      storeData(EMAIL, input_email.toLowerCase()).then(() => {
+        setEmailInternal(input_email.toLowerCase())
       }).catch((e) => {
-        console.error(`setEmail:: email = '${email} , error = '${e}`)
+        console.error(`setEmail:: email = '${input_email} , error = '${e}`)
       })
     } catch (e: any) {
-      console.error(`setEmail:: email = '${email} , error = '${e}`)
+      console.error(`setEmail:: email = '${input_email} , error = '${e}`)
     }
   }
 
-  function setUrl(url: string) {
+  function setUrl(input_url: string) {
     try {
-      storeData(BLOCKMESH_URL, url).then(() => {
-        setUrlInternal(url)
+      storeData(BLOCKMESH_URL, input_url).then(() => {
+        setUrlInternal(input_url)
       }).catch((e) => {
-        console.error(`setUrl:: url = '${url} , error = '${e}`)
+        console.error(`setUrl:: url = '${input_url} , error = '${e}`)
       })
     } catch (e: any) {
-      console.error(`setUrl:: url = '${url} , error = '${e}`)
+      console.error(`setUrl:: url = '${input_url} , error = '${e}`)
     }
   }
 
-  function setApiToken(api_token: string) {
+  function setApiToken(input_api_token: string) {
     try {
-      storeData(API_TOKEN, api_token).then(() => {
-        setApiTokenInternal(api_token)
+      storeData(API_TOKEN, input_api_token).then(() => {
+        setApiTokenInternal(input_api_token)
       }).catch((e) => {
-        console.error(`setApiToken:: api_token = '${api_token} , error = '${e}`)
+        console.error(`setApiToken:: api_token = '${input_api_token} , error = '${e}`)
       })
     } catch (e: any) {
-      console.error(`setApiToken:: api_token = '${api_token} , error = '${e}`)
+      console.error(`setApiToken:: api_token = '${input_api_token} , error = '${e}`)
     }
   }
 
-  function setPassword(password: string) {
+  function setPassword(input_password: string) {
     try {
-      storeData(PASSWORD, password).then(() => {
-        setPasswordInternal(password)
+      storeData(PASSWORD, input_password).then(() => {
+        setPasswordInternal(input_password)
       }).catch((e) => {
-        console.error(`setPassword:: password = '${password} , error = '${e}`)
+        console.error(`setPassword:: password = '${input_password} , error = '${e}`)
       })
     } catch (e: any) {
-      console.error(`setPassword:: password = '${password} , error = '${e}`)
+      console.error(`setPassword:: password = '${input_password} , error = '${e}`)
     }
   }
-
 
   return (
     <Context.Provider
@@ -163,7 +172,8 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
         setUrl,
         setPassword,
         setNav,
-        clear
+        clear,
+        env
       }}
     >
       {children}
