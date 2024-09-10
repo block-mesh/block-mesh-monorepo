@@ -16,6 +16,7 @@ export default function RegisterScreen() {
   const storage = useStorage()
   const [invite_code, setInviteCode] = useState('')
   const [passwordConfirm, setPasswordConfirm] = useState('')
+  const secure = storage.env() === 'production'
 
   useEffect(() => {
   }, [storage.email, storage.url, storage.password, storage.api_token])
@@ -33,7 +34,7 @@ export default function RegisterScreen() {
       />
       <TextInput
         ref={passwordRef as any}
-        secureTextEntry={true}
+        secureTextEntry={secure}
         style={styles.input}
         onChangeText={storage.setPassword}
         value={storage.password}
@@ -43,7 +44,7 @@ export default function RegisterScreen() {
       />
       <TextInput
         ref={passwordConfirmed as any}
-        secureTextEntry={true}
+        secureTextEntry={secure}
         style={styles.input}
         onChangeText={setPasswordConfirm}
         value={passwordConfirm}

@@ -13,6 +13,7 @@ export default function LoginScreen() {
   const storage = useStorage()
   useEffect(() => {
   }, [storage.email, storage.url, storage.password, storage.api_token, storage.nav])
+  const secure = storage.env() === 'production'
 
   return (
     <ThemedView style={styles.stepContainer}>
@@ -26,7 +27,7 @@ export default function LoginScreen() {
         autoCapitalize={'none'}
       />
       <TextInput
-        secureTextEntry={true}
+        secureTextEntry={secure}
         ref={passwordRef as any}
         style={styles.input}
         onChangeText={storage.setPassword}
@@ -71,7 +72,7 @@ export default function LoginScreen() {
                 password: storage.password
               })
             if (r.isOk) {
-              storage.setApiToken(r.value.api_token)
+              storage.setApiToken(r.unwrap().api_token)
               storage.setNav('dashboard')
             } else {
               Alert.alert(

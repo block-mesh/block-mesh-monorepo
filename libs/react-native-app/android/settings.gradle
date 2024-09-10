@@ -1,4 +1,4 @@
-rootProject.name = 'react-native-app'
+rootProject.name = 'BlockMesh-Network'
 
 dependencyResolutionManagement {
   versionCatalogs {
