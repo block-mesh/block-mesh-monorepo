@@ -61,7 +61,7 @@ export async function get_token(url: string, body: GetTokenRequest):
     }).then((res: { data: any }) => res.data)
     return Result.ok(response)
   } catch (e: any) {
-    console.error('GetToken error', e)
+    console.error('GetToken error', url, body, e)
     return Result.err(e)
   }
 }
@@ -93,7 +93,7 @@ export async function check_token(url: string, body: CheckTokenRequest): Promise
     }).then((res: { data: any }) => res.data)
     return Result.ok(response)
   } catch (e: any) {
-    console.error('check_token error', url, e)
+    console.error('check_token error', url, body, e)
     return Result.err(e)
   }
 }
