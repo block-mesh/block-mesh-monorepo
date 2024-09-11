@@ -1,9 +1,11 @@
 use super::{
     on_close_handler, on_error_handler, on_message_handler, on_open_handler, WebSocketReadyState,
 };
+use crate::background::ws::channel::get_tx;
 use crate::utils::log::log;
 use crate::utils::{connectors::set_panic_hook, extension_wrapper_state::ExtensionWrapperState};
 use block_mesh_common::constants::DeviceType;
+use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use leptos::SignalGetUntracked;
 use logger_leptos::leptos_tracing::setup_leptos_tracing;
 use once_cell::sync::OnceCell;
@@ -23,6 +25,13 @@ pub fn set_ws_status(status: &WebSocketReadyState) {
     let ws_status =
         WEB_SOCKET_STATUS.get_or_init(|| Arc::new(Mutex::new(WebSocketReadyState::CLOSED)));
     *ws_status.lock().unwrap() = status.clone();
+}
+
+#[wasm_bindgen]
+pub async fn stop_websocket() {
+    if let Some(tx) = get_tx() {
+        let _ = tx.lock().unwrap().send(WsServerMessage::CloseConnection);
+    }
 }
 
 #[wasm_bindgen]
@@ -51,7 +60,7 @@ pub async fn start_websocket() -> Result<(), JsValue> {
         WebSocketReadyState::CONNECTING => return Ok(()),
         WebSocketReadyState::INVALID => return Ok(()),
     }
-    log!("connecting websocket ws://{blockmesh_url}/ws?email={email}&api_token={api_token}");
+    log!("connecting websocket {blockmesh_url}/ws?email={email}&api_token={api_token}");
     let ws = WebSocket::new(&format!(
         "{blockmesh_url}/ws?email={email}&api_token={api_token}"
     ))?;
@@ -74,5 +83,6 @@ pub async fn start_websocket() -> Result<(), JsValue> {
     let onclose_callback = on_close_handler(ws.clone());
     ws.set_onclose(Some(onclose_callback.as_ref().unchecked_ref()));
     onclose_callback.forget();
+
     Ok(())
 }
