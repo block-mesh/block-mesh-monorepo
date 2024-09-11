@@ -2,9 +2,12 @@ use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::{
     get_or_create_aggregate_by_user_and_name, get_or_create_aggregate_by_user_and_name_pool,
 };
 use crate::domain::aggregate::AggregateName;
+use crate::startup::application::AppState;
 use crate::ws::task_scheduler::TaskScheduler;
+use anyhow::Context;
 use aws_sdk_sesv2::config::IntoShared;
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
+use block_mesh_common::interfaces::db_messages::{AggregateMessage, DBMessageTypes};
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use dashmap::DashMap;
 use futures::future::join_all;
@@ -14,8 +17,6 @@ use std::collections::VecDeque;
 use std::env;
 use std::fmt::Debug;
 use std::net::SocketAddr;
-use std::ops::Deref;
-use std::str::FromStr;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
@@ -50,21 +51,24 @@ impl ConnectionManager {
         period: Duration,
         messages: impl Into<Vec<WsServerMessage>> + Clone + Send + 'static,
         window_size: usize,
-        pool: PgPool,
-    ) -> CronReportsController {
+        state: Arc<AppState>,
+    ) -> anyhow::Result<CronReportsController> {
         self.broadcaster
-            .cron_reports(period, messages, window_size, pool)
+            .cron_reports(period, messages, window_size, state)
     }
 }
 
 #[derive(Debug, Clone)]
 pub struct CronReportsController {
-    cron_task: Arc<JoinHandle<()>>,
+    cron_task: Arc<JoinHandle<anyhow::Result<()>>>,
     stats_receiver: watch::Receiver<CronReportStats>,
 }
 
 impl CronReportsController {
-    fn new(cron_task: JoinHandle<()>, stats_receiver: watch::Receiver<CronReportStats>) -> Self {
+    fn new(
+        cron_task: JoinHandle<anyhow::Result<()>>,
+        stats_receiver: watch::Receiver<CronReportStats>,
+    ) -> Self {
         Self {
             cron_task: Arc::new(cron_task),
             stats_receiver,
@@ -238,8 +242,8 @@ impl Broadcaster {
         period: Duration,
         messages: impl Into<Vec<WsServerMessage>> + Clone + Send + 'static,
         window_size: usize,
-        pool: PgPool,
-    ) -> CronReportsController {
+        state: Arc<AppState>,
+    ) -> anyhow::Result<CronReportsController> {
         let (stats_tx, stats_rx) = tokio::sync::watch::channel(CronReportStats::new(
             messages.clone().into(),
             window_size,
@@ -248,10 +252,28 @@ impl Broadcaster {
 
         let cron_task = {
             let broadcaster = self.clone();
-            let pool = pool.clone();
-            let user_id =
-                Uuid::parse_str(env::var(BLOCKMESH_SERVER_UUID_ENVAR).unwrap().as_str()).unwrap();
+            let pool = state.pool.clone();
+            let user_id = Uuid::parse_str(
+                env::var(BLOCKMESH_SERVER_UUID_ENVAR)
+                    .context("Could not find SERVER_UUID env var")?
+                    .as_str(),
+            )
+            .context("SERVER_UUID evn var contains invalid UUID value")?;
+
             tokio::spawn(async move {
+                let _ = state
+                    .tx_aggregate_agg
+                    .send_async(AggregateMessage {
+                        msg_type: DBMessageTypes::AggregateMessage,
+                        id: user_id,
+                        value: serde_json::to_value(CronReportSettings::new(
+                            Some(period.clone()),
+                            Some(messages.clone().into()),
+                            Some(window_size),
+                        ))
+                        .context("Failed to serialize cron reports settings")?,
+                    })
+                    .await;
                 let mut period = period;
                 let mut messages = messages.into();
                 let mut window_size = window_size;
@@ -279,13 +301,13 @@ impl Broadcaster {
                     }
                     tokio::time::sleep(period.clone()).await;
                 }
-                ()
+                Ok(())
             })
         };
 
         let controller = CronReportsController::new(cron_task, stats_rx);
         self.cron_reports_controller = Some(controller.clone());
-        controller
+        Ok(controller)
     }
 }
 

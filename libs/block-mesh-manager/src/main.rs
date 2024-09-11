@@ -85,15 +85,6 @@ async fn run() -> anyhow::Result<()> {
     transaction.commit().await?;
 
     let mut ws_connection_manager = ConnectionManager::new();
-    let _reports_cron_task = ws_connection_manager.cron_reports(
-        Duration::from_secs(60),
-        vec![
-            WsServerMessage::RequestUptimeReport,
-            WsServerMessage::RequestBandwidthReport,
-        ],
-        100,
-        db_pool.clone(),
-    );
     let app_state = Arc::new(AppState {
         email_client,
         pool: db_pool.clone(),
@@ -104,10 +95,19 @@ async fn run() -> anyhow::Result<()> {
         flags,
         cleaner_tx,
         redis,
-        ws_connection_manager,
+        ws_connection_manager: ws_connection_manager.clone(),
         tx_users_ip_agg,
         tx_aggregate_agg,
     });
+    let _reports_cron_task = ws_connection_manager.cron_reports(
+        Duration::from_secs(60),
+        vec![
+            WsServerMessage::RequestUptimeReport,
+            WsServerMessage::RequestBandwidthReport,
+        ],
+        100,
+        app_state.clone(),
+    );
     let application = Application::build(configuration, app_state.clone(), db_pool.clone()).await;
     let application_task = tokio::spawn(application.run());
     let joiner_task = tokio::spawn(joiner_loop(rx));
