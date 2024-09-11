@@ -15,7 +15,7 @@ export default function Index() {
   const passwordRef = useRef()
   const storage = useStorage()
   useEffect(() => {
-  }, [storage.email, storage.url, storage.password, storage.api_token, storage.nav])
+  }, [storage.email, storage.url, storage.password, storage.api_token])
   const secure = storage.env() === 'production'
 
   return (
@@ -83,8 +83,7 @@ export default function Index() {
                 })
               if (r.isOk) {
                 storage.setApiToken(r.unwrap().api_token)
-                // storage.setNav('dashboard')
-                router.push('/DashboardScreen')
+                router.replace('/(tabs)/DashboardScreen')
               } else {
                 Alert.alert(
                   'Error',
@@ -95,14 +94,6 @@ export default function Index() {
                   { cancelable: false }
                 )
               }
-            }}
-          />
-          <CustomButton
-            title={'Go to Register'}
-            buttonStyles={styles.button}
-            buttonText={styles.buttonText}
-            onPress={() => {
-              storage.setNav('register')
             }}
           />
         </VerticalContainer>

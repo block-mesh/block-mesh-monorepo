@@ -10,20 +10,15 @@ import {
 import { getData, storeData } from '@/utils/storage'
 import { API_TOKEN, BLOCKMESH_URL, EMAIL, PASSWORD, RUN_LIB } from '@/utils/constants'
 
-export type Nav = 'login' | 'register' | 'dashboard'
-
 export interface StorageType {
   email: string;
   api_token: string;
   password: string;
   url: string;
   run_lib: string;
-  nav: Nav;
   setEmail: (email: string) => void;
   setApiToken: (api_token: string) => void;
-  setUrl: (url: string) => void;
   setPassword: (password: string) => void;
-  setNav: (nav: Nav) => void;
   clear: () => void;
   env: () => string;
 }
@@ -58,7 +53,6 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
   const [url, setUrlInternal] = useState(initUrl())
   const [password, setPasswordInternal] = useState('')
   const [run_lib, setRunLibInternal] = useState('')
-  const [nav, setNav] = useState('login' as Nav)
 
   function env(): string {
     const APP_ENVIRONMENT = process.env.APP_ENVIRONMENT
@@ -162,16 +156,13 @@ export const StorageProvider: FC<PropsWithChildren<any>> = ({
     <Context.Provider
       value={{
         email,
-        nav,
         api_token,
         url,
         run_lib,
         password,
         setEmail,
         setApiToken,
-        setUrl,
         setPassword,
-        setNav,
         clear,
         env
       }}

@@ -14,6 +14,7 @@ import { ActivityIndicator } from 'react-native'
 import { Switch, Case, Default } from 'react-if'
 import VerticalContainer from '@/components/VerticalContainer'
 import * as Location from 'expo-location'
+import { router } from 'expo-router'
 
 export default function DashboardScreen() {
   const storage = useStorage()
@@ -23,24 +24,19 @@ export default function DashboardScreen() {
   const [stringStatus, setStringStatus] = useState('Click to Turn On')
   const [disableToggleButton, setDisableToggleButton] = useState(false)
   const [location, setLocation] = useState('')
-  const [granted, setGranted] = useState(false)
-  const [errorMsg, setErrorMsg] = useState('')
 
 
   useEffect(() => {
     (async () => {
       let { status: fg_status } = await Location.requestForegroundPermissionsAsync()
       if (fg_status !== 'granted') {
-        setErrorMsg('Permission to access location was denied')
         return
       }
 
       let { status: bg_status } = await Location.requestBackgroundPermissionsAsync()
       if (bg_status !== 'granted') {
-        setErrorMsg('Permission to access location was denied')
         return
       }
-      setGranted(true)
 
       let location = await Location.getCurrentPositionAsync({})
       const address = await Location.reverseGeocodeAsync(location.coords)
@@ -61,6 +57,9 @@ export default function DashboardScreen() {
   }, [status])
 
   async function get_dashboard() {
+    if (!storage.url || !storage.email || !storage.api_token) {
+      return
+    }
     const response = await dashboard(storage.url + '/api/dashboard', {
       email: storage.email,
       api_token: storage.api_token
@@ -74,6 +73,9 @@ export default function DashboardScreen() {
   useEffect(
     () => {
       (async () => {
+        if (!storage.url || !storage.email || !storage.api_token) {
+          return
+        }
         setStatus(get_lib_status())
         const token_response = await check_token(storage.url + '/api/check_token', {
           email: storage.email,
@@ -164,7 +166,7 @@ export default function DashboardScreen() {
             onPress={async () => {
               stop_lib(storage.url)
               storage.clear()
-              storage.setNav('login')
+              router.replace('/(tabs)/')
             }}
           />
         </VerticalContainer>
