@@ -1,6 +1,7 @@
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::{
     get_or_create_aggregate_by_user_and_name, get_or_create_aggregate_by_user_and_name_pool,
 };
+use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::domain::aggregate::AggregateName;
 use crate::startup::application::AppState;
 use crate::ws::task_scheduler::TaskScheduler;
@@ -9,10 +10,11 @@ use aws_sdk_sesv2::config::IntoShared;
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
 use block_mesh_common::interfaces::db_messages::{AggregateMessage, DBMessageTypes};
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
+use chrono::Utc;
 use dashmap::DashMap;
 use futures::future::join_all;
 use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
+use sqlx::{query, PgPool};
 use std::collections::VecDeque;
 use std::env;
 use std::fmt::Debug;
@@ -51,10 +53,10 @@ impl ConnectionManager {
         period: Duration,
         messages: impl Into<Vec<WsServerMessage>> + Clone + Send + 'static,
         window_size: usize,
-        state: Arc<AppState>,
+        pool: PgPool,
     ) -> anyhow::Result<CronReportsController> {
         self.broadcaster
-            .cron_reports(period, messages, window_size, state)
+            .cron_reports(period, messages, window_size, pool)
     }
 }
 
@@ -242,7 +244,7 @@ impl Broadcaster {
         period: Duration,
         messages: impl Into<Vec<WsServerMessage>> + Clone + Send + 'static,
         window_size: usize,
-        state: Arc<AppState>,
+        pool: PgPool,
     ) -> anyhow::Result<CronReportsController> {
         let (stats_tx, stats_rx) = tokio::sync::watch::channel(CronReportStats::new(
             messages.clone().into(),
@@ -252,7 +254,7 @@ impl Broadcaster {
 
         let cron_task = {
             let broadcaster = self.clone();
-            let pool = state.pool.clone();
+            let pool = pool.clone();
             let user_id = Uuid::parse_str(
                 env::var(BLOCKMESH_SERVER_UUID_ENVAR)
                     .context("Could not find SERVER_UUID env var")?
@@ -260,25 +262,41 @@ impl Broadcaster {
             )
             .context("SERVER_UUID evn var contains invalid UUID value")?;
 
+            // TODO remove
             tokio::spawn(async move {
-                let _ = state
-                    .tx_aggregate_agg
-                    .send_async(AggregateMessage {
-                        msg_type: DBMessageTypes::AggregateMessage,
-                        id: user_id,
-                        value: serde_json::to_value(CronReportSettings::new(
-                            Some(period.clone()),
-                            Some(messages.clone().into()),
-                            Some(window_size),
-                        ))
-                        .context("Failed to serialize cron reports settings")?,
-                    })
-                    .await;
+                query!(
+                    r#"
+                INSERT INTO users (id, created_at, wallet_address, email, password)
+                VALUES ($1, $2, $3, $4, $5)
+                "#,
+                    user_id,
+                    Utc::now(),
+                    None as Option<String>,
+                    "server@blockmesh.xyz",
+                    "123"
+                )
+                .execute(&pool)
+                .await?;
+                let _ = fetch_latest_cron_settings(&pool, user_id)
+                    .await
+                    .inspect_err(|e| tracing::error!("DB: {e}"));
+                let mut transaction = pool.begin().await?;
+                update_aggregate(
+                    &mut transaction,
+                    &user_id,
+                    &serde_json::to_value(CronReportSettings::new(
+                        Some(period.clone()),
+                        Some(messages.clone().into()),
+                        Some(window_size.clone()),
+                    ))
+                    .context("Failed to parse cron report settings")?,
+                )
+                .await?;
                 let mut period = period;
                 let mut messages = messages.into();
                 let mut window_size = window_size;
                 loop {
-                    let settings = fetch_latest_cron_settings(&pool, user_id).await.unwrap();
+                    let settings = fetch_latest_cron_settings(&pool, user_id).await?;
                     if let Some(new_period) = settings.period {
                         period = new_period;
                     }

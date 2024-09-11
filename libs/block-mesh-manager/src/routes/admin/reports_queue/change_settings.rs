@@ -1,4 +1,7 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::{
+    get_or_create_aggregate_by_user_and_name, get_or_create_aggregate_by_user_and_name_pool,
+};
+use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
@@ -26,15 +29,19 @@ pub async fn handler(
             .as_str(),
     )
     .context("SERVER_UUID evn var contains invalid UUID value")?;
-
-    let _ = state
-        .tx_aggregate_agg
-        .send_async(AggregateMessage {
-            msg_type: DBMessageTypes::AggregateMessage,
-            id: user_id,
-            value: serde_json::to_value(body.clone())
-                .context("Failed to serialize cron reports settings")?,
-        })
-        .await;
+    let aggregate = get_or_create_aggregate_by_user_and_name_pool(
+        &state.pool,
+        AggregateName::CronReports,
+        user_id,
+    )
+    .await?;
+    let mut transaction = state.pool.begin().await?;
+    update_aggregate(
+        &mut transaction,
+        &user_id,
+        &serde_json::to_value(body).context("Failed to parse cron reports settings")?,
+    )
+    .await?;
+    transaction.commit().await?;
     Ok(StatusCode::CREATED.into_response())
 }
