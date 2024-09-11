@@ -15,16 +15,35 @@ import { Switch, Case, Default } from 'react-if'
 import VerticalContainer from '@/components/VerticalContainer'
 import * as Location from 'expo-location'
 import { router } from 'expo-router'
+import { init_background } from '@/utils/backgroundFetch'
 
 export default function DashboardScreen() {
   const storage = useStorage()
   const [data, setData] = useState<DashboardResponse>()
-  const [valid_token, setValidToken] = useState(false)
   const [status, setStatus] = useState(-1)
-  const [stringStatus, setStringStatus] = useState('Click to Turn On')
+  const [stringStatus, setStringStatus] = useState('Please login first')
   const [disableToggleButton, setDisableToggleButton] = useState(false)
   const [location, setLocation] = useState('')
+  const [bgInit, setBgInit] = useState(false)
+  const [grantedLocation, setGrantedLocation] = useState(false)
+  const [canStart, setCanStart] = useState(false)
 
+  useEffect(() => {
+    (async () => {
+      if (storage.url.length !== 0 && storage.email.length !== 0 && storage.password.length !== 0 && storage.api_token.length !== 0) {
+        let r = await check_token(storage.url + '/api/check_token', {
+          email: storage.email,
+          api_token: storage.api_token
+        })
+        if (r.isOk) {
+          setCanStart(true)
+          setStringStatus('Click to turn on')
+        }
+      } else {
+        setCanStart(false)
+      }
+    })()
+  }, [storage.url, storage.password, storage.email, storage.api_token])
 
   useEffect(() => {
     (async () => {
@@ -37,6 +56,7 @@ export default function DashboardScreen() {
       if (bg_status !== 'granted') {
         return
       }
+      setGrantedLocation(true)
 
       let location = await Location.getCurrentPositionAsync({})
       const address = await Location.reverseGeocodeAsync(location.coords)
@@ -47,51 +67,54 @@ export default function DashboardScreen() {
     })()
   }, [])
 
-
-  useEffect(() => {
-    if (status === 1) {
-      setStringStatus('Click to Turn Off')
-    } else {
-      setStringStatus('Click to Turn On')
+  useInterval(async () => {
+    if (!grantedLocation) {
+      return
     }
-  }, [status])
+    let location = await Location.getCurrentPositionAsync({})
+    const address = await Location.reverseGeocodeAsync(location.coords)
+    if (address.length > 0) {
+      const add = address[0]
+      setLocation(`${add.city}`)
+    }
+  }, 15_000)
+
+  useInterval(() => {
+    // Ping FFI for status
+    setStatus(get_lib_status())
+  }, 3_000)
 
   async function get_dashboard() {
-    if (!storage.url || !storage.email || !storage.api_token) {
+    if (storage.url.length === 0 || storage.email.length === 0 || storage.api_token.length === 0) {
       return
     }
     const response = await dashboard(storage.url + '/api/dashboard', {
       email: storage.email,
       api_token: storage.api_token
     })
-    console.log('response', response)
     if (response.isOk) {
       setData(response.unwrap())
     }
   }
 
-  useEffect(
-    () => {
-      (async () => {
-        if (!storage.url || !storage.email || !storage.api_token) {
-          return
-        }
-        setStatus(get_lib_status())
-        const token_response = await check_token(storage.url + '/api/check_token', {
+  useEffect(() => {
+    (async () => {
+      if (storage.url.length === 0 || storage.email.length === 0 || storage.api_token.length === 0) {
+        return
+      }
+      if (!bgInit) {
+        await init_background({
+          url: storage.url,
           email: storage.email,
-          api_token: storage.api_token
+          password: storage.password
         })
-        if (token_response.isOk) {
-          setValidToken(true)
-          await get_dashboard()
-        }
-      })()
-    }, [storage.url, storage.email, storage.api_token])
+        setBgInit(true)
+      }
+    })()
+  }, [storage.url, storage.email, storage.password])
 
   useInterval(async () => {
-    console.log('valid_token', valid_token)
-    setStatus(get_lib_status())
-    if (valid_token) {
+    if (canStart) {
       await get_dashboard()
     }
   }, 15_000)
@@ -126,36 +149,20 @@ export default function DashboardScreen() {
             buttonText={styles.buttonText}
             onPress={
               () => {
-                if (disableToggleButton) {
+                if (!storage.url || !storage.email || !storage.password) {
                   return
                 }
-                setDisableToggleButton(true)
-                setTimeout(() => {
-                  setDisableToggleButton(false)
-                }, 500)
-                if (status !== 1) {
-                  if (!valid_token) {
-                    Alert.alert(
-                      'Error',
-                      'Please logout and re-login',
-                      [
-                        { text: 'OK', onPress: () => console.log('OK Pressed') }
-                      ],
-                      { cancelable: false }
-                    )
-                    return
-                  }
+                if (get_lib_status() === 1) {
+                  stop_lib(storage.url)
+                } else {
+
                   run_lib({
                     url: storage.url,
                     email: storage.email,
                     password: storage.password
                   })
-                } else {
-                  stop_lib(storage.url)
+                  setStringStatus('Click to turn off')
                 }
-                setTimeout(() => {
-                  setStatus(get_lib_status())
-                }, 500)
               }
             }
           />

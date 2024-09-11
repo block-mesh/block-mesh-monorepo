@@ -14,7 +14,17 @@
     },
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "xyz.blockmesh"
+      "bundleIdentifier": "xyz.blockmesh",
+      "infoPlist": {
+        "UIBackgroundModes": [
+          "fetch",
+          "processing"
+        ],
+        "BGTaskSchedulerPermittedIdentifiers": [
+          "com.transistorsoft.fetch",
+          "com.transistorsoft.blockmesh"
+        ]
+      }
     },
     "android": {
       "adaptiveIcon": {
@@ -57,7 +67,8 @@
             "usesCleartextTraffic": true
           }
         }
-      ]
+      ],
+      "react-native-background-fetch"
     ],
     "experiments": {
       "typedRoutes": true

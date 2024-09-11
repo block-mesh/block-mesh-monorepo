@@ -11,6 +11,8 @@
     <key>BGTaskSchedulerPermittedIdentifiers</key>
     <array>
       <string>$(PRODUCT_BUNDLE_IDENTIFIER)</string>
+      <string>com.transistorsoft.fetch</string>
+      <string>com.transistorsoft.blockmesh</string>
     </array>
     <key>CADisableMinimumFrameDurationOnPhone</key>
     <true/>

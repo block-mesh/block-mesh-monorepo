@@ -14,8 +14,6 @@ export default function Index() {
   const emailRef = useRef()
   const passwordRef = useRef()
   const storage = useStorage()
-  useEffect(() => {
-  }, [storage.email, storage.url, storage.password, storage.api_token])
   const secure = storage.env() === 'production'
 
   return (
