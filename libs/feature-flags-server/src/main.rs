@@ -17,7 +17,7 @@ async fn main() -> anyhow::Result<()> {
     setup_tracing_stdout_only();
     let db_pool = sqlx::PgPool::connect(&env::var("DATABASE_URL")?).await?;
     migrate(&db_pool).await.expect("Failed to migrate database");
-    pre_populate_db(&db_pool).await.expect("Cant pre populate");
+    let _ = pre_populate_db(&db_pool).await;
     let router = get_router();
     let app = Router::new()
         .nest("/", router)
