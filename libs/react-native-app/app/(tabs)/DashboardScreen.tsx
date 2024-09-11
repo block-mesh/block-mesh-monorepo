@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react'
-import { Alert } from 'react-native'
+import ParallaxScrollView from '@/components/ParallaxScrollView'
+import { Alert, Image } from 'react-native'
 import { useStorage } from '@/hooks/useStorage'
 import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
-import { styles } from '@/utils/theme'
+import { colors, styles } from '@/utils/theme'
 import CustomButton from '@/components/CustomButton'
 import { check_token, dashboard } from '@/utils/auth'
 import { DashboardResponse } from '@/utils/apiTypes'
@@ -22,6 +23,7 @@ export default function DashboardScreen() {
   const [stringStatus, setStringStatus] = useState('Click to Turn On')
   const [disableToggleButton, setDisableToggleButton] = useState(false)
   const [location, setLocation] = useState('')
+  const [granted, setGranted] = useState(false)
   const [errorMsg, setErrorMsg] = useState('')
 
 
@@ -38,10 +40,10 @@ export default function DashboardScreen() {
         setErrorMsg('Permission to access location was denied')
         return
       }
+      setGranted(true)
 
       let location = await Location.getCurrentPositionAsync({})
       const address = await Location.reverseGeocodeAsync(location.coords)
-      console.log('address', address)
       if (address.length > 0) {
         const add = address[0]
         setLocation(`${add.city}`)
@@ -93,71 +95,81 @@ export default function DashboardScreen() {
   }, 15_000)
 
   return (
-    <ThemedView style={styles.stepContainer}>
-      <VerticalContainer>
-        <Switch>
-          <Case condition={data?.connected && status === 1}>
-            <VerticalContainer>
-              <ThemedText type="subtitle">Connected</ThemedText>
-              <ActivityIndicator size="large" color="#00ff00" />
-            </VerticalContainer>
-          </Case>
-          <Default>
-            <ThemedText type="subtitle">Not connected</ThemedText>
-          </Default>
-        </Switch>
-        <ThemedText type="subtitle">{location}</ThemedText>
-        <CustomButton
-          disabled={disableToggleButton}
-          title={`${stringStatus}`}
-          buttonStyles={styles.button}
-          buttonText={styles.buttonText}
-          onPress={
-            () => {
-              if (disableToggleButton) {
-                return
-              }
-              setDisableToggleButton(true)
-              setTimeout(() => {
-                setDisableToggleButton(false)
-              }, 500)
-              if (status !== 1) {
-                if (!valid_token) {
-                  Alert.alert(
-                    'Error',
-                    'Please logout and re-login',
-                    [
-                      { text: 'OK', onPress: () => console.log('OK Pressed') }
-                    ],
-                    { cancelable: false }
-                  )
+    <ParallaxScrollView
+      headerBackgroundColor={{ light: colors['dark-blue'], dark: colors['dark-blue'] }}
+      headerImage={
+        <Image
+          source={{ uri: 'https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/3ef1afb4-e176-4423-7bd3-3eed38102b00/public' }}
+          style={styles.logo}
+        />
+      }>
+      <ThemedView style={styles.stepContainer}>
+        <VerticalContainer>
+          <Switch>
+            <Case condition={data?.connected && status === 1}>
+              <VerticalContainer>
+                <ThemedText type="subtitle">Connected</ThemedText>
+                <ActivityIndicator size="large" color="#00ff00" />
+              </VerticalContainer>
+            </Case>
+            <Default>
+              <ThemedText type="subtitle">Not connected</ThemedText>
+            </Default>
+          </Switch>
+          <ThemedText type="subtitle">{location}</ThemedText>
+          <CustomButton
+            disabled={disableToggleButton}
+            title={`${stringStatus}`}
+            buttonStyles={styles.button}
+            buttonText={styles.buttonText}
+            onPress={
+              () => {
+                if (disableToggleButton) {
                   return
                 }
-                run_lib({
-                  url: storage.url,
-                  email: storage.email,
-                  password: storage.password
-                })
-              } else {
-                stop_lib(storage.url)
+                setDisableToggleButton(true)
+                setTimeout(() => {
+                  setDisableToggleButton(false)
+                }, 500)
+                if (status !== 1) {
+                  if (!valid_token) {
+                    Alert.alert(
+                      'Error',
+                      'Please logout and re-login',
+                      [
+                        { text: 'OK', onPress: () => console.log('OK Pressed') }
+                      ],
+                      { cancelable: false }
+                    )
+                    return
+                  }
+                  run_lib({
+                    url: storage.url,
+                    email: storage.email,
+                    password: storage.password
+                  })
+                } else {
+                  stop_lib(storage.url)
+                }
+                setTimeout(() => {
+                  setStatus(get_lib_status())
+                }, 500)
               }
-              setTimeout(() => {
-                setStatus(get_lib_status())
-              }, 500)
             }
-          }
-        />
-        <CustomButton
-          title={'Logout'}
-          buttonStyles={styles.button}
-          buttonText={styles.buttonText}
-          onPress={async () => {
-            stop_lib(storage.url)
-            storage.clear()
-            storage.setNav('login')
-          }}
-        />
-      </VerticalContainer>
-    </ThemedView>
+          />
+          <CustomButton
+            title={'Logout'}
+            buttonStyles={styles.button}
+            buttonText={styles.buttonText}
+            onPress={async () => {
+              stop_lib(storage.url)
+              storage.clear()
+              storage.setNav('login')
+            }}
+          />
+        </VerticalContainer>
+      </ThemedView>
+    </ParallaxScrollView>
+
   )
 }

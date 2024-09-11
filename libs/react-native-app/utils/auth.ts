@@ -10,6 +10,7 @@ import {
   RegisterForm,
   RegisterResponse
 } from '@/utils/apiTypes'
+import { router, Router } from 'expo-router'
 
 export async function register(url: string, form: RegisterForm): Promise<Result<RegisterResponse, Error>> {
   try {
@@ -95,5 +96,40 @@ export async function check_token(url: string, body: CheckTokenRequest): Promise
   } catch (e: any) {
     console.error('check_token error', url, body, e)
     return Result.err(e)
+  }
+}
+
+export type CheckTokenWithCallbacks = {
+  url: string;
+  email: string;
+  password: string;
+  api_token: undefined | string;
+  setApiToken: (api_token: string) => void
+}
+
+export async function check_token_with_callbacks({
+                                                   url,
+                                                   email,
+                                                   password,
+                                                   api_token,
+                                                   setApiToken
+                                                 }: CheckTokenWithCallbacks) {
+  if (api_token) {
+    const token_check = await check_token(url + '/api/check_token', { email, api_token })
+    if (token_check.isOk) {
+      router.push('/DashboardScreen')
+      return
+    }
+  }
+  const r = await get_token(
+    url + '/api/get_token',
+    {
+      email: email,
+      password: password
+    })
+  if (r.isOk) {
+    const token = r.unwrap().api_token
+    setApiToken(token)
+    router.push('/DashboardScreen')
   }
 }
