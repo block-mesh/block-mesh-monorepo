@@ -26,7 +26,7 @@ pub async fn handler(
             .as_str(),
     )
     .context("SERVER_UUID evn var contains invalid UUID value")?;
-    let aggregate = get_or_create_aggregate_by_user_and_name_pool(
+    let _ = get_or_create_aggregate_by_user_and_name_pool(
         &state.pool,
         AggregateName::CronReports,
         user_id,
