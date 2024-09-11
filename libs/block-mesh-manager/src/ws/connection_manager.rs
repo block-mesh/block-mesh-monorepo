@@ -56,19 +56,12 @@ impl ConnectionManager {
 
 #[derive(Debug, Clone)]
 pub struct CronReportsController {
-    cron_task: Arc<JoinHandle<anyhow::Result<()>>>,
     stats_receiver: watch::Receiver<CronReportStats>,
 }
 
 impl CronReportsController {
-    fn new(
-        cron_task: JoinHandle<anyhow::Result<()>>,
-        stats_receiver: watch::Receiver<CronReportStats>,
-    ) -> Self {
-        Self {
-            cron_task: Arc::new(cron_task),
-            stats_receiver,
-        }
+    fn new(stats_receiver: watch::Receiver<CronReportStats>) -> Self {
+        Self { stats_receiver }
     }
 
     pub fn stats(&mut self) -> CronReportStats {
@@ -316,7 +309,7 @@ impl Broadcaster {
             })
         };
 
-        let controller = CronReportsController::new(cron_task, stats_rx);
+        let controller = CronReportsController::new(stats_rx);
         self.cron_reports_controller = Some(controller.clone());
         Ok(controller)
     }
