@@ -1,6 +1,4 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::{
-    get_or_create_aggregate_by_user_and_name, get_or_create_aggregate_by_user_and_name_pool,
-};
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_pool;
 use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::domain::aggregate::AggregateName;
 use crate::startup::application::AppState;
@@ -287,7 +285,7 @@ impl Broadcaster {
                     &serde_json::to_value(CronReportSettings::new(
                         Some(period.clone()),
                         Some(messages.clone().into()),
-                        Some(window_size.clone()),
+                        Some(window_size),
                     ))
                     .context("Failed to parse cron report settings")?,
                 )
@@ -307,17 +305,17 @@ impl Broadcaster {
                         window_size = new_window_size;
                     }
                     let sent_messages_count = broadcaster
-                        .queue_multiple(messages.clone(), window_size.clone())
+                        .queue_multiple(messages.clone(), window_size)
                         .await;
                     if let Err(error) = stats_tx.send(CronReportStats::new(
                         messages.clone(),
-                        window_size.clone(),
+                        window_size,
                         sent_messages_count,
                     )) {
                         // TODO (send_if_modified, send_modify, or send_replace) can be used instead
                         tracing::error!("Could not sent stats, no watchers: {error}");
                     }
-                    tokio::time::sleep(period.clone()).await;
+                    tokio::time::sleep(period).await;
                 }
                 Ok(())
             })
