@@ -1,10 +1,8 @@
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_pool;
 use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::domain::aggregate::AggregateName;
-use crate::startup::application::AppState;
 use crate::ws::task_scheduler::TaskScheduler;
 use anyhow::Context;
-use aws_sdk_sesv2::config::IntoShared;
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
 use block_mesh_common::interfaces::db_messages::{AggregateMessage, DBMessageTypes};
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
@@ -17,7 +15,6 @@ use std::collections::VecDeque;
 use std::env;
 use std::fmt::Debug;
 use std::net::SocketAddr;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::broadcast::error::SendError;
@@ -283,7 +280,7 @@ impl Broadcaster {
                     &mut transaction,
                     &user_id,
                     &serde_json::to_value(CronReportSettings::new(
-                        Some(period.clone()),
+                        Some(period),
                         Some(messages.clone().into()),
                         Some(window_size),
                     ))
@@ -317,7 +314,6 @@ impl Broadcaster {
                     }
                     tokio::time::sleep(period).await;
                 }
-                Ok(())
             })
         };
 

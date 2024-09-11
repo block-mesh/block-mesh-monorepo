@@ -1,6 +1,4 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::{
-    get_or_create_aggregate_by_user_and_name, get_or_create_aggregate_by_user_and_name_pool,
-};
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_pool;
 use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
@@ -11,7 +9,6 @@ use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::{debug_handler, Json};
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
-use block_mesh_common::interfaces::db_messages::{AggregateMessage, DBMessageTypes};
 use http::StatusCode;
 use std::env;
 use std::sync::Arc;
