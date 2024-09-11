@@ -5,11 +5,10 @@ use crate::ws::task_scheduler::TaskScheduler;
 use anyhow::Context;
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
-use chrono::Utc;
 use dashmap::DashMap;
 use futures::future::join_all;
 use serde::{Deserialize, Serialize};
-use sqlx::{query, PgPool};
+use sqlx::PgPool;
 use std::collections::VecDeque;
 use std::env;
 use std::fmt::Debug;
@@ -18,8 +17,8 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::broadcast::error::SendError;
 use tokio::sync::mpsc;
+use tokio::sync::watch::Sender;
 use tokio::sync::{broadcast, watch};
-use tokio::task::JoinHandle;
 use uuid::Uuid;
 
 #[derive(Debug, Clone)]
@@ -42,7 +41,7 @@ impl ConnectionManager {
         }
     }
 
-    pub fn cron_reports(
+    pub async fn cron_reports(
         &mut self,
         period: Duration,
         messages: impl Into<Vec<WsServerMessage>> + Clone + Send + 'static,
@@ -51,6 +50,7 @@ impl ConnectionManager {
     ) -> anyhow::Result<CronReportsController> {
         self.broadcaster
             .cron_reports(period, messages, window_size, pool)
+            .await
     }
 }
 
@@ -226,7 +226,7 @@ impl Broadcaster {
         }
     }
 
-    pub fn cron_reports(
+    pub async fn cron_reports(
         &mut self,
         period: Duration,
         messages: impl Into<Vec<WsServerMessage>> + Clone + Send + 'static,
@@ -238,76 +238,27 @@ impl Broadcaster {
             window_size,
             0,
         ));
+        let broadcaster = self.clone();
+        let pool = pool.clone();
+        let user_id = Uuid::parse_str(
+            env::var(BLOCKMESH_SERVER_UUID_ENVAR)
+                .context("Could not find SERVER_UUID env var")?
+                .as_str(),
+        )
+        .context("SERVER_UUID evn var contains invalid UUID value")?;
 
-        let cron_task = {
-            let broadcaster = self.clone();
-            let pool = pool.clone();
-            let user_id = Uuid::parse_str(
-                env::var(BLOCKMESH_SERVER_UUID_ENVAR)
-                    .context("Could not find SERVER_UUID env var")?
-                    .as_str(),
+        tokio::spawn(async move {
+            let _ = settings_loop(
+                &pool,
+                &user_id,
+                period,
+                messages,
+                window_size,
+                broadcaster,
+                stats_tx,
             )
-            .context("SERVER_UUID evn var contains invalid UUID value")?;
-
-            // TODO remove
-            tokio::spawn(async move {
-                query!(
-                    r#"
-                INSERT INTO users (id, created_at, wallet_address, email, password)
-                VALUES ($1, $2, $3, $4, $5)
-                "#,
-                    user_id,
-                    Utc::now(),
-                    None as Option<String>,
-                    "server@blockmesh.xyz",
-                    "123"
-                )
-                .execute(&pool)
-                .await?;
-                let _ = fetch_latest_cron_settings(&pool, user_id)
-                    .await
-                    .inspect_err(|e| tracing::error!("DB: {e}"));
-                let mut transaction = pool.begin().await?;
-                update_aggregate(
-                    &mut transaction,
-                    &user_id,
-                    &serde_json::to_value(CronReportSettings::new(
-                        Some(period),
-                        Some(messages.clone().into()),
-                        Some(window_size),
-                    ))
-                    .context("Failed to parse cron report settings")?,
-                )
-                .await?;
-                let mut period = period;
-                let mut messages = messages.into();
-                let mut window_size = window_size;
-                loop {
-                    let settings = fetch_latest_cron_settings(&pool, user_id).await?;
-                    if let Some(new_period) = settings.period {
-                        period = new_period;
-                    }
-                    if let Some(new_messages) = settings.messages {
-                        messages = new_messages;
-                    }
-                    if let Some(new_window_size) = settings.window_size {
-                        window_size = new_window_size;
-                    }
-                    let sent_messages_count = broadcaster
-                        .queue_multiple(messages.clone(), window_size)
-                        .await;
-                    if let Err(error) = stats_tx.send(CronReportStats::new(
-                        messages.clone(),
-                        window_size,
-                        sent_messages_count,
-                    )) {
-                        // TODO (send_if_modified, send_modify, or send_replace) can be used instead
-                        tracing::error!("Could not sent stats, no watchers: {error}");
-                    }
-                    tokio::time::sleep(period).await;
-                }
-            })
-        };
+            .await;
+        });
 
         let controller = CronReportsController::new(stats_rx);
         self.cron_reports_controller = Some(controller.clone());
@@ -315,9 +266,55 @@ impl Broadcaster {
     }
 }
 
+async fn settings_loop(
+    pool: &PgPool,
+    user_id: &Uuid,
+    period: Duration,
+    messages: impl Into<Vec<WsServerMessage>> + Clone + Send + 'static,
+    window_size: usize,
+    broadcaster: Broadcaster,
+    stats_tx: Sender<CronReportStats>,
+) -> anyhow::Result<()> {
+    let _ = fetch_latest_cron_settings(pool, user_id)
+        .await
+        .inspect_err(|e| tracing::error!("DB: {e}"));
+    let mut transaction = pool.begin().await?;
+    update_aggregate(
+        &mut transaction,
+        user_id,
+        &serde_json::to_value(CronReportSettings::new(
+            Some(period),
+            Some(messages.clone().into()),
+            Some(window_size),
+        ))
+        .context("Failed to parse cron report settings")?,
+    )
+    .await?;
+    let messages = messages.into();
+    loop {
+        let messages = messages.clone();
+        let settings = fetch_latest_cron_settings(pool, user_id).await?;
+        let new_period = settings.period.unwrap_or(period);
+        let new_messages = settings.messages.unwrap_or(messages);
+        let new_window_size = settings.window_size.unwrap_or(window_size);
+        let sent_messages_count = broadcaster
+            .queue_multiple(new_messages.clone(), window_size)
+            .await;
+        if let Err(error) = stats_tx.send(CronReportStats::new(
+            new_messages,
+            new_window_size,
+            sent_messages_count,
+        )) {
+            // TODO (send_if_modified, send_modify, or send_replace) can be used instead
+            tracing::error!("Could not sent stats, no watchers: {error}");
+        }
+        tokio::time::sleep(new_period).await;
+    }
+}
+
 async fn fetch_latest_cron_settings(
     pool: &PgPool,
-    user_id: Uuid,
+    user_id: &Uuid,
 ) -> anyhow::Result<CronReportSettings> {
     let aggregate =
         get_or_create_aggregate_by_user_and_name_pool(pool, AggregateName::CronReports, user_id)

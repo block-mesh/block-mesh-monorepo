@@ -122,7 +122,7 @@ pub async fn handler(
         <FlagValue as TryInto<f64>>::try_into(interval.to_owned()).unwrap_or_default();
 
     let uptime =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, user.id)
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, &user.id)
             .await
             .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;

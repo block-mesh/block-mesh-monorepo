@@ -14,7 +14,7 @@ use crate::domain::aggregate::{Aggregate, AggregateName};
 pub(crate) async fn get_or_create_aggregate_by_user_and_name(
     transaction: &mut Transaction<'_, Postgres>,
     name: AggregateName,
-    user_id: Uuid,
+    user_id: &Uuid,
 ) -> anyhow::Result<Aggregate> {
     let now = Utc::now();
     let id = Uuid::new_v4();
@@ -50,7 +50,7 @@ pub(crate) async fn get_or_create_aggregate_by_user_and_name(
 pub(crate) async fn get_or_create_aggregate_by_user_and_name_pool(
     pool: &PgPool,
     name: AggregateName,
-    user_id: Uuid,
+    user_id: &Uuid,
 ) -> anyhow::Result<Aggregate> {
     let now = Utc::now();
     let id = Uuid::new_v4();

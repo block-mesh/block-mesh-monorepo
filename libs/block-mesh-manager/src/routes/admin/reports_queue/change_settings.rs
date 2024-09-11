@@ -29,7 +29,7 @@ pub async fn handler(
     let _ = get_or_create_aggregate_by_user_and_name_pool(
         &state.pool,
         AggregateName::CronReports,
-        user_id,
+        &user_id,
     )
     .await?;
     let mut transaction = state.pool.begin().await?;

@@ -85,15 +85,17 @@ async fn run() -> anyhow::Result<()> {
     transaction.commit().await?;
 
     let mut ws_connection_manager = ConnectionManager::new();
-    let _reports_cron_task = ws_connection_manager.cron_reports(
-        Duration::from_secs(60),
-        vec![
-            WsServerMessage::RequestUptimeReport,
-            WsServerMessage::RequestBandwidthReport,
-        ],
-        100,
-        db_pool.clone(),
-    );
+    let _reports_cron_task = ws_connection_manager
+        .cron_reports(
+            Duration::from_secs(60),
+            vec![
+                WsServerMessage::RequestUptimeReport,
+                WsServerMessage::RequestBandwidthReport,
+            ],
+            100,
+            db_pool.clone(),
+        )
+        .await;
     let app_state = Arc::new(AppState {
         email_client,
         pool: db_pool.clone(),
