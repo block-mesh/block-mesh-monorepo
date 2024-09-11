@@ -71,9 +71,9 @@ impl CronReportsController {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CronReportStats {
-    messages: Vec<WsServerMessage>,
-    window_size: usize,
-    used_window_size: usize,
+    pub messages: Vec<WsServerMessage>,
+    pub window_size: usize,
+    pub used_window_size: usize,
 }
 
 impl CronReportStats {
