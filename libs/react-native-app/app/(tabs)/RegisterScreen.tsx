@@ -146,19 +146,9 @@ export default function RegisterScreen() {
                   ],
                   { cancelable: false }
                 )
-                storage.setNav('login')
               }
             }}
           />
-          <CustomButton
-            title={'Go to Login'}
-            buttonStyles={styles.button}
-            buttonText={styles.buttonText}
-            onPress={() => {
-              storage.setNav('login')
-            }}
-          />
-
         </VerticalContainer>
       </ThemedView>
     </ParallaxScrollView>
