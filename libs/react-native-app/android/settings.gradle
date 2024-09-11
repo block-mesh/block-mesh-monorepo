@@ -1,4 +1,4 @@
-rootProject.name = 'BlockMesh-Network'
+rootProject.name = 'BlockMesh Network'
 
 dependencyResolutionManagement {
   versionCatalogs {
