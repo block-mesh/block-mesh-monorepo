@@ -19,9 +19,6 @@ export default function RegisterScreen() {
   const [passwordConfirm, setPasswordConfirm] = useState('')
   const secure = storage.env() === 'production'
 
-  useEffect(() => {
-  }, [storage.email, storage.url, storage.password, storage.api_token])
-
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: colors['dark-blue'], dark: colors['dark-blue'] }}

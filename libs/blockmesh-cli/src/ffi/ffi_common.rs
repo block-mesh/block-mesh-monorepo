@@ -97,15 +97,6 @@ pub fn debug_stop(_url: &str) {
     runtime.block_on(async {
         let notify = get_notify();
         notify.notify_waiters();
-        // let _ = http_client()
-        //     .get(format!(
-        //         "{}/health_check?status={}&url={}",
-        //         url,
-        //         get_status(),
-        //         url
-        //     ))
-        //     .send()
-        //     .await;
     });
     set_status(FFIStatus::WAITING);
 }
@@ -126,8 +117,14 @@ pub fn run_login_mode(url: &str, email: &str, password: &str) {
             "Future canceled"
         });
         tokio::select! {
-            o = task => eprintln!("Task died {:?}", o),
-            o = cancel_future=> eprintln!("Cancel request {:?}", o),
+            o = task => {
+                set_status(FFIStatus::WAITING);
+                eprintln!("Task died {:?}", o)
+            },
+            o = cancel_future=> {
+                set_status(FFIStatus::WAITING);
+                eprintln!("Cancel request {:?}", o)
+            },
         }
     });
     set_status(FFIStatus::WAITING);
