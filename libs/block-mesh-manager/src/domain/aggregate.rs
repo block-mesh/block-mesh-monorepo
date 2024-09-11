@@ -8,8 +8,7 @@ use uuid::Uuid;
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
 pub struct Aggregate {
     pub id: Uuid,
-    pub user_id: Uuid,
-    pub name: AggregateName,
+    pub name: String,
     pub value: serde_json::Value,
     pub created_at: Option<DateTime<Utc>>,
     pub updated_at: Option<DateTime<Utc>>,
