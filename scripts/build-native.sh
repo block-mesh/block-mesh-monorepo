@@ -18,6 +18,7 @@ cargo install cargo-ndk
 export BUILD_TYPE=$1
 export BUILD_IOS="false"
 export BUILD_ANDROID="false"
+export BUILD_SIM=$2
 
 if [ "${BUILD_TYPE}" == "--ios" ] ; then
   export BUILD_IOS="true"
@@ -34,6 +35,13 @@ else
   exit 1
 fi
 
+if [ "${BUILD_SIM}" == "" ] ; then
+  export BUILD_SIM="false"
+elif [ "${BUILD_SIM}" == "--sim" ] ; then
+  export BUILD_SIM="true"
+fi
+
+
 
 if [ "${BUILD_IOS}" == "true" ]; then
   ensure rm -f "${ROOT}/target/aarch64-apple-ios/release/${LIB_NAME}.a"
@@ -46,8 +54,11 @@ if [ "${BUILD_IOS}" == "true" ]; then
   && cbindgen --only-target-dependencies --lang c --crate blockmesh-cli --output "${ROOT}/libs/react-native-app/headers/blockmesh-cli.h" \
   && cd "${_PWD}" || exit 1
 
-
-  ensure cp "${ROOT}/target/aarch64-apple-ios/release/${LIB_NAME}.a" "${ROOT}/libs/react-native-app/modules/my-rust-module/ios/rust"
+  if [ "${BUILD_SIM}" == "true" ] ; then
+    ensure cp "${ROOT}/target/aarch64-apple-ios-sim/release/${LIB_NAME}.a" "${ROOT}/libs/react-native-app/modules/my-rust-module/ios/rust"
+  else
+    ensure cp "${ROOT}/target/aarch64-apple-ios/release/${LIB_NAME}.a" "${ROOT}/libs/react-native-app/modules/my-rust-module/ios/rust"
+  fi
   ensure cp "${ROOT}/libs/react-native-app/headers/blockmesh-cli.h" "${ROOT}/libs/react-native-app/modules/my-rust-module/ios/rust"
   ensure mkdir -p "${ROOT}/libs/react-native-app/blockmesh-cli.xcframework"
   ensure rm -fr "${ROOT}/libs/react-native-app/blockmesh-cli.xcframework/ios-arm64"

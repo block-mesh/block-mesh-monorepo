@@ -11,6 +11,7 @@
     "test": "jest --watchAll",
     "lint": "expo lint",
     "build-android-local": "npx eas build --platform android --local",
+    "build-android-local-apk": "npx eas build --platform android --local --profile preview",
     "build-ios-local": "npx eas build --platform ios --local",
     "build-remote": "npx eas build --platform all"
   },
