@@ -45,7 +45,7 @@ pub async fn handler(
     )
     .await?;
     let value = &serde_json::to_value(body).context("Failed to parse cron reports settings")?;
-    update_aggregate(&mut transaction, &agg.id, &value).await?;
+    update_aggregate(&mut transaction, &agg.id, value).await?;
     transaction.commit().await?;
     Ok(StatusCode::CREATED.into_response())
 }

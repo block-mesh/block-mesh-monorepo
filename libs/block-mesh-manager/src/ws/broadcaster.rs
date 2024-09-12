@@ -23,6 +23,12 @@ pub struct Broadcaster {
     pub cron_reports_controller: Option<CronReportsController>,
 }
 
+impl Default for Broadcaster {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl Broadcaster {
     pub fn new() -> Self {
         let (global_transmitter, _) = broadcast::channel(10000);
