@@ -1,6 +1,5 @@
 use crate::frontends::components::heading::Heading;
 use crate::frontends::new_frontend_webserver::app::application_layout::ApplicationLayout;
-use leptos::logging::log;
 use leptos::*;
 use reqwest::Client;
 use serde_json::{json, Value};
@@ -8,7 +7,6 @@ use std::time::Duration;
 
 #[component]
 pub fn AdminDashboard() -> impl IntoView {
-    // FIXME wasm error
     let (stats, set_stats) = create_signal(String::from(""));
     let stats_resource = create_local_resource(
         move || (),
@@ -18,16 +16,17 @@ pub fn AdminDashboard() -> impl IntoView {
                 .get(format!("{}/api/admin/reports_queue", window().origin()))
                 .send()
                 .await;
-            log!("19 response {:#?}", response);
-            let json: Value = response.unwrap().json().await.unwrap();
-            set_stats.set(format!(
-                "Messages: {:?}\nWindow size: {:?}\nUsed window size: {:?}\nQueue size: {:?}\n Period: {:?}",
+            if let Ok(response) = response {
+                let json: Value = response.json().await.unwrap_or_default();
+                set_stats.set(format!(
+                "Messages: {:?}\nWindow size: {:?}\nUsed window size: {:?}\nQueue size: {:?}\nPeriod: {:?}",
                 json.get("messages"),
                 json.get("window_size"),
                 json.get("used_window_size"),
                 json.get("queue_size"),
                 json.get("period")
             ));
+            }
         },
     );
 
@@ -38,7 +37,7 @@ pub fn AdminDashboard() -> impl IntoView {
         let client = Client::new();
         let period: Option<u64> = period.get().parse().ok();
         let window_size: Option<usize> = window_size.get().parse().ok();
-        let response = client
+        let _ = client
             .post(format!("{}/api/admin/reports_queue", window().origin(),))
             .json(&json!({
                 "period": period.map(Duration::from_secs),
@@ -48,7 +47,6 @@ pub fn AdminDashboard() -> impl IntoView {
             .send()
             .await;
         stats_resource.refetch();
-        log!("19 response {:#?}", response);
     });
     view! {
         <ApplicationLayout>

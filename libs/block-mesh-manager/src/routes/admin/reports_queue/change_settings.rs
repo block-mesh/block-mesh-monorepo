@@ -6,7 +6,7 @@ use crate::domain::user::UserRole;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use crate::startup::application::AppState;
-use crate::ws::connection_manager::CronReportSettings;
+use crate::ws::cron_reports_controller::CronReportSettings;
 use anyhow::Context;
 use axum::extract::State;
 use axum::response::IntoResponse;
@@ -32,24 +32,20 @@ pub async fn handler(
     if matches!(user.role, UserRole::User) {
         return Err(Error::Unauthorized);
     }
-    let user_id = Uuid::parse_str(
+    let server_user_id = Uuid::parse_str(
         env::var(BLOCKMESH_SERVER_UUID_ENVAR)
             .context("Could not find SERVER_UUID env var")?
             .as_str(),
     )
     .context("SERVER_UUID evn var contains invalid UUID value")?;
-    let _ = get_or_create_aggregate_by_user_and_name_pool(
+    let agg = get_or_create_aggregate_by_user_and_name_pool(
         &state.pool,
         AggregateName::CronReports,
-        &user_id,
+        &server_user_id,
     )
     .await?;
-    update_aggregate(
-        &mut transaction,
-        &user_id,
-        &serde_json::to_value(body).context("Failed to parse cron reports settings")?,
-    )
-    .await?;
+    let value = &serde_json::to_value(body).context("Failed to parse cron reports settings")?;
+    update_aggregate(&mut transaction, &agg.id, &value).await?;
     transaction.commit().await?;
     Ok(StatusCode::CREATED.into_response())
 }
