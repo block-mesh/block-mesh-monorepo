@@ -5,6 +5,7 @@ use crate::ws::task_scheduler::TaskScheduler;
 use anyhow::Context;
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
+use chrono::Utc;
 use dashmap::DashMap;
 use futures::future::join_all;
 use serde::{Deserialize, Serialize};
@@ -74,20 +75,30 @@ pub struct CronReportStats {
     pub messages: Vec<WsServerMessage>,
     pub window_size: usize,
     pub used_window_size: usize,
+    pub queue_size: usize,
+    pub period: Duration,
 }
 
 impl CronReportStats {
-    fn new(messages: Vec<WsServerMessage>, window_size: usize, used_window_size: usize) -> Self {
+    fn new(
+        messages: Vec<WsServerMessage>,
+        window_size: usize,
+        used_window_size: usize,
+        queue_size: usize,
+        period: Duration,
+    ) -> Self {
         Self {
             messages,
             window_size,
             used_window_size,
+            queue_size,
+            period,
         }
     }
 }
 impl Default for CronReportStats {
     fn default() -> Self {
-        Self::new(vec![], 0, 0)
+        Self::new(vec![], 0, 0, 0, Duration::from_secs(0))
     }
 }
 
@@ -237,6 +248,8 @@ impl Broadcaster {
             messages.clone().into(),
             window_size,
             0,
+            0,
+            Duration::from_secs(60),
         ));
         let broadcaster = self.clone();
         let pool = pool.clone();
@@ -300,10 +313,13 @@ async fn settings_loop(
         let sent_messages_count = broadcaster
             .queue_multiple(new_messages.clone(), window_size)
             .await;
+        let queue_size = broadcaster.queue.lock().unwrap().len();
         if let Err(error) = stats_tx.send(CronReportStats::new(
             new_messages,
             new_window_size,
             sent_messages_count,
+            queue_size,
+            new_period,
         )) {
             // TODO (send_if_modified, send_modify, or send_replace) can be used instead
             tracing::error!("Could not sent stats, no watchers: {error}");

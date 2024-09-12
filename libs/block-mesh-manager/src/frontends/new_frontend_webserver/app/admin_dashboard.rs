@@ -3,7 +3,8 @@ use crate::frontends::new_frontend_webserver::app::application_layout::Applicati
 use leptos::logging::log;
 use leptos::*;
 use reqwest::Client;
-use serde_json::Value;
+use serde_json::{json, Value};
+use std::time::Duration;
 
 #[component]
 pub fn AdminDashboard() -> impl IntoView {
@@ -20,30 +21,33 @@ pub fn AdminDashboard() -> impl IntoView {
             log!("19 response {:#?}", response);
             let json: Value = response.unwrap().json().await.unwrap();
             set_stats.set(format!(
-                "{:?} {:?} {:?}",
+                "Messages: {:?}\nWindow size: {:?}\nUsed window size: {:?}\nQueue size: {:?}\n Period: {:?}",
                 json.get("messages"),
                 json.get("window_size"),
-                json.get("used_window_size")
+                json.get("used_window_size"),
+                json.get("queue_size"),
+                json.get("period")
             ));
         },
     );
 
     let (window_size, windows_size_set) = create_signal(String::from(""));
-    let (_period, _period_set) = create_signal(String::from(""));
+    let (period, period_set) = create_signal(String::from(""));
 
-    let update_settings = create_action(|_input: &()| async {
+    let update_settings = create_action(move |_input: &()| async move {
         let client = Client::new();
-        // let period: u64 = period.get().parse().unwrap();
-        // let window_size: usize = window_size.get().parse().unwrap();
+        let period: Option<u64> = period.get().parse().ok();
+        let window_size: Option<usize> = window_size.get().parse().ok();
         let response = client
             .post(format!("{}/api/admin/reports_queue", window().origin(),))
-            // .json(&json!({
-            //     "period": Some(Duration::from_secs(1)),
-            //     "messages": None::<Vec<String>>,
-            //     "window_size": Some(10),
-            // }))
+            .json(&json!({
+                "period": period.map(Duration::from_secs),
+                "messages": None::<Vec<String>>,
+                "window_size": window_size
+            }))
             .send()
             .await;
+        stats_resource.refetch();
         log!("19 response {:#?}", response);
     });
     view! {
@@ -52,15 +56,19 @@ pub fn AdminDashboard() -> impl IntoView {
                 <Heading>Admin Dashboard</Heading>
             </div>
             <div class="flex flex-col justify-start gap-10">
-            <input class="text-off-white" type="number" placeholder="Window size (queue batch size)" prop:value=window_size on:input=move |ev| {
+            <label class="text-off-white">Window size</label>
+            <input type="number" placeholder="Window size (queue batch size)" prop:value=window_size on:input=move |ev| {
                     windows_size_set.set(event_target_value(&ev));
             }/>
-            <input type="number" placeholder="Period in seconds"/>
+            <label class="text-off-white">Period (seconds)</label>
+            <input type="number" placeholder="Period in seconds" prop:value=period on:input=move |ev| {
+                period_set.set(event_target_value(&ev));
+            }/>
             <button class="text-off-white" on:click=move |_| {update_settings.dispatch(())}>Update Settings</button>
             <button class="text-off-white" on:click=move |_| {stats_resource.refetch()}>Refresh Stats</button>
             </div>
             <pre class="text-off-white">
-                {stats}
+                {move || stats.get()}
             </pre>
         </ApplicationLayout>
     }
