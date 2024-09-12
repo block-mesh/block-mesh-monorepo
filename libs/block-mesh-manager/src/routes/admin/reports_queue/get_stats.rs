@@ -8,7 +8,6 @@ use axum::extract::State;
 use axum::{debug_handler, Extension, Json};
 use axum_login::AuthSession;
 use http::StatusCode;
-use redis::transaction;
 use std::sync::Arc;
 
 #[debug_handler]
