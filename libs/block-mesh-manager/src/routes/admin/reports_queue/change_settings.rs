@@ -29,7 +29,7 @@ pub async fn handler(
     let user = get_user_opt_by_id(&mut transaction, &user.id)
         .await?
         .ok_or(Error::UserNotFound)?;
-    if matches!(user.role, UserRole::User) {
+    if !matches!(user.role, UserRole::Admin) {
         return Err(Error::Unauthorized);
     }
     let server_user_id = Uuid::parse_str(
