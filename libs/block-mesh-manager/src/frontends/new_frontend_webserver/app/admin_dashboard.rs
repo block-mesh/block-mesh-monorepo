@@ -29,9 +29,9 @@ pub fn AdminDashboard() -> impl IntoView {
     );
 
     let (window_size, windows_size_set) = create_signal(String::from(""));
-    let (period, period_set) = create_signal(String::from(""));
+    let (_period, _period_set) = create_signal(String::from(""));
 
-    let update_settings = create_action(|input: &()| async {
+    let update_settings = create_action(|_input: &()| async {
         let client = Client::new();
         // let period: u64 = period.get().parse().unwrap();
         // let window_size: usize = window_size.get().parse().unwrap();
