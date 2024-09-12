@@ -7,7 +7,6 @@ use cfg_if::cfg_if;
 cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_common::interfaces::ws_api::WsServerMessage;
     use block_mesh_manager::database::user::create_test_user::create_test_user;
-    use block_mesh_manager::database::user::create_test_user::create_test_user;
     use block_mesh_manager::ws::connection_manager::ConnectionManager;
     use block_mesh_manager::worker::analytics_agg::analytics_agg;
     use block_mesh_common::interfaces::db_messages::{
