@@ -6,6 +6,7 @@ use crate::domain::user::UserRole;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use crate::startup::application::AppState;
+use crate::ws::connection_manager::fetch_latest_cron_settings;
 use crate::ws::cron_reports_controller::CronReportSettings;
 use anyhow::Context;
 use axum::extract::State;
@@ -44,8 +45,12 @@ pub async fn handler(
         &server_user_id,
     )
     .await?;
-    let value = &serde_json::to_value(body).context("Failed to parse cron reports settings")?;
-    update_aggregate(&mut transaction, &agg.id, value).await?;
+    let mut entry = fetch_latest_cron_settings(&state.pool, &server_user_id).await?;
+    entry.period = body.period.unwrap_or(entry.period);
+    entry.window_size = body.window_size.unwrap_or(entry.window_size);
+    entry.messages = body.messages.unwrap_or(entry.messages);
+    let value = serde_json::to_value(entry).context("Failed to parse cron aggregate DB entry")?;
+    update_aggregate(&mut transaction, &agg.id, &value).await?;
     transaction.commit().await?;
     Ok(StatusCode::CREATED.into_response())
 }

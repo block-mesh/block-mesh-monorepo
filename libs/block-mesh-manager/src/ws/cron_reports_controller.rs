@@ -3,58 +3,53 @@ use serde::{Deserialize, Serialize};
 use std::time::Duration;
 use tokio::sync::watch;
 
-#[derive(Debug, Clone)]
-pub struct CronReportsController {
-    stats_receiver: watch::Receiver<CronReportStats>,
-}
-
-impl CronReportsController {
-    pub fn new(stats_receiver: watch::Receiver<CronReportStats>) -> Self {
-        Self { stats_receiver }
-    }
-
-    pub fn stats(&mut self) -> CronReportStats {
-        self.stats_receiver.borrow_and_update().clone()
-    }
-}
-
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct CronReportStats {
-    pub messages: Vec<WsServerMessage>,
-    pub window_size: usize,
-    pub used_window_size: usize,
-    pub queue_size: usize,
-    pub period: Duration,
-}
-
-impl CronReportStats {
-    pub fn new(
-        messages: Vec<WsServerMessage>,
-        window_size: usize,
-        used_window_size: usize,
-        queue_size: usize,
-        period: Duration,
-    ) -> Self {
-        Self {
-            messages,
-            window_size,
-            used_window_size,
-            queue_size,
-            period,
-        }
-    }
-}
-impl Default for CronReportStats {
-    fn default() -> Self {
-        Self::new(vec![], 0, 0, 0, Duration::from_secs(0))
-    }
-}
-
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct CronReportSettings {
     pub period: Option<Duration>,
     pub messages: Option<Vec<WsServerMessage>>,
     pub window_size: Option<usize>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct CronReportAggregateEntry {
+    pub period: Duration,
+    pub messages: Vec<WsServerMessage>,
+    pub window_size: usize,
+    pub used_window_size: usize,
+    pub queue_size: usize,
+}
+
+impl Default for CronReportAggregateEntry {
+    fn default() -> Self {
+        Self::new(
+            Duration::from_secs(10),
+            vec![
+                WsServerMessage::RequestUptimeReport,
+                WsServerMessage::RequestBandwidthReport,
+            ],
+            10,
+            0,
+            0,
+        )
+    }
+}
+
+impl CronReportAggregateEntry {
+    pub fn new(
+        period: Duration,
+        messages: Vec<WsServerMessage>,
+        window_size: usize,
+        used_window_size: usize,
+        queue_size: usize,
+    ) -> Self {
+        Self {
+            period,
+            messages,
+            window_size,
+            used_window_size,
+            queue_size,
+        }
+    }
 }
 
 impl CronReportSettings {

@@ -1,14 +1,19 @@
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_pool;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::user::UserRole;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use crate::startup::application::AppState;
+use crate::ws::connection_manager::fetch_latest_cron_settings;
 use askama_axum::IntoResponse;
 use axum::extract::State;
 use axum::{debug_handler, Extension, Json};
 use axum_login::AuthSession;
+use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
 use http::StatusCode;
+use std::env;
 use std::sync::Arc;
+use uuid::Uuid;
 
 #[debug_handler]
 pub async fn handler(
@@ -24,20 +29,7 @@ pub async fn handler(
         return Err(Error::Unauthorized);
     }
     transaction.commit().await?;
-    if let Some(mut controller) = state
-        .ws_connection_manager
-        .broadcaster
-        .clone()
-        .cron_reports_controller
-    {
-        let stats = controller.stats();
-        Ok((
-            StatusCode::OK,
-            Json(Some(serde_json::to_value(stats).unwrap())),
-        )
-            .into_response())
-    } else {
-        tracing::warn!("Cron reports controller is missing");
-        Ok(StatusCode::INTERNAL_SERVER_ERROR.into_response())
-    }
+    let user_id = Uuid::parse_str(env::var(BLOCKMESH_SERVER_UUID_ENVAR).unwrap().as_str()).unwrap();
+    let entry = fetch_latest_cron_settings(&state.pool, &user_id).await?;
+    Ok(Json(entry))
 }

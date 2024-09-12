@@ -2,16 +2,13 @@ use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or
 use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::domain::aggregate::AggregateName;
 use crate::ws::broadcaster::Broadcaster;
-use crate::ws::cron_reports_controller::{
-    CronReportSettings, CronReportStats, CronReportsController,
-};
+use crate::ws::cron_reports_controller::{CronReportAggregateEntry, CronReportSettings};
 use crate::ws::task_scheduler::TaskScheduler;
 use anyhow::Context;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use sqlx::PgPool;
 use std::fmt::Debug;
 use std::time::Duration;
-use tokio::sync::watch::Sender;
 use uuid::Uuid;
 
 #[derive(Debug, Clone)]
@@ -33,14 +30,13 @@ impl ConnectionManager {
             task_scheduler: TaskScheduler::new(),
         }
     }
-
     pub async fn cron_reports(
         &mut self,
         period: Duration,
         messages: impl Into<Vec<WsServerMessage>> + Clone + Send + 'static,
         window_size: usize,
         pool: PgPool,
-    ) -> anyhow::Result<CronReportsController> {
+    ) -> anyhow::Result<()> {
         self.broadcaster
             .cron_reports(period, messages, window_size, pool)
             .await
@@ -54,7 +50,6 @@ pub async fn settings_loop(
     messages: impl Into<Vec<WsServerMessage>> + Clone + Send + 'static,
     window_size: usize,
     broadcaster: Broadcaster,
-    stats_tx: Sender<CronReportStats>,
 ) -> anyhow::Result<()> {
     let aggregate =
         get_or_create_aggregate_by_user_and_name_pool(pool, AggregateName::CronReports, user_id)
@@ -63,50 +58,56 @@ pub async fn settings_loop(
     update_aggregate(
         &mut transaction,
         &aggregate.id,
-        &serde_json::to_value(CronReportSettings::new(
-            Some(period),
-            Some(messages.clone().into()),
-            Some(window_size),
+        &serde_json::to_value(CronReportAggregateEntry::new(
+            period,
+            messages.clone().into(),
+            window_size,
+            0,
+            0,
         ))
         .context("Failed to parse cron report settings")?,
     )
     .await?;
-    let messages = messages.into();
+    transaction.commit().await?;
     loop {
-        let messages = messages.clone();
         let settings = fetch_latest_cron_settings(pool, user_id).await?;
-        let new_period = settings.period.unwrap_or(period);
-        let new_messages = settings.messages.unwrap_or(messages);
-        let new_window_size = settings.window_size.unwrap_or(window_size);
-        let sent_messages_count = broadcaster
-            .queue_multiple(new_messages.clone(), window_size)
+        let new_period = settings.period;
+        let new_messages = settings.messages;
+        let new_window_size = settings.window_size;
+        let new_used_window_size = broadcaster
+            .queue_multiple(new_messages.clone(), new_window_size)
             .await;
-        let queue_size = broadcaster.queue.lock().unwrap().len();
-        if let Err(error) = stats_tx.send(CronReportStats::new(
-            new_messages,
-            new_window_size,
-            sent_messages_count,
-            queue_size,
-            new_period,
-        )) {
-            // TODO (send_if_modified, send_modify, or send_replace) can be used instead
-            tracing::error!("Could not sent stats, no watchers: {error}");
-        }
+        let new_queue_size = broadcaster.queue.lock().unwrap().len();
+        let mut transaction = pool.begin().await?;
+        update_aggregate(
+            &mut transaction,
+            &aggregate.id,
+            &serde_json::to_value(CronReportAggregateEntry::new(
+                new_period,
+                new_messages,
+                new_window_size,
+                new_used_window_size,
+                new_queue_size,
+            ))
+            .context("Failed to parse cron report settings")?,
+        )
+        .await?;
+        transaction.commit().await?;
         tokio::time::sleep(new_period).await;
     }
 }
 
-async fn fetch_latest_cron_settings(
+pub async fn fetch_latest_cron_settings(
     pool: &PgPool,
     user_id: &Uuid,
-) -> anyhow::Result<CronReportSettings> {
+) -> anyhow::Result<CronReportAggregateEntry> {
     let aggregate =
         get_or_create_aggregate_by_user_and_name_pool(pool, AggregateName::CronReports, user_id)
             .await?;
     if aggregate.value.is_null() {
-        Ok(CronReportSettings::default())
+        Ok(CronReportAggregateEntry::default())
     } else {
-        let settings: CronReportSettings = serde_json::from_value(aggregate.value)?;
+        let settings: CronReportAggregateEntry = serde_json::from_value(aggregate.value)?;
         Ok(settings)
     }
 }

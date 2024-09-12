@@ -1,5 +1,4 @@
 use crate::ws::connection_manager::settings_loop;
-use crate::ws::cron_reports_controller::{CronReportStats, CronReportsController};
 use anyhow::Context;
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
@@ -20,7 +19,6 @@ pub struct Broadcaster {
     pub global_transmitter: broadcast::Sender<WsServerMessage>,
     pub sockets: Arc<DashMap<(Uuid, SocketAddr), mpsc::Sender<WsServerMessage>>>,
     pub queue: Arc<Mutex<VecDeque<(Uuid, SocketAddr)>>>,
-    pub cron_reports_controller: Option<CronReportsController>,
 }
 
 impl Default for Broadcaster {
@@ -36,7 +34,6 @@ impl Broadcaster {
             global_transmitter,
             sockets: Arc::new(DashMap::new()),
             queue: Arc::new(Mutex::new(VecDeque::new())),
-            cron_reports_controller: None,
         }
     }
     pub fn broadcast(&self, message: WsServerMessage) -> Result<usize, SendError<WsServerMessage>> {
@@ -141,14 +138,7 @@ impl Broadcaster {
         messages: impl Into<Vec<WsServerMessage>> + Clone + Send + 'static,
         window_size: usize,
         pool: PgPool,
-    ) -> anyhow::Result<CronReportsController> {
-        let (stats_tx, stats_rx) = tokio::sync::watch::channel(CronReportStats::new(
-            messages.clone().into(),
-            window_size,
-            0,
-            0,
-            Duration::from_secs(60),
-        ));
+    ) -> anyhow::Result<()> {
         let broadcaster = self.clone();
         let pool = pool.clone();
         let user_id = Uuid::parse_str(
@@ -158,21 +148,10 @@ impl Broadcaster {
         )
         .context("SERVER_UUID evn var contains invalid UUID value")?;
 
-        tokio::spawn(async move {
-            let _ = settings_loop(
-                &pool,
-                &user_id,
-                period,
-                messages,
-                window_size,
-                broadcaster,
-                stats_tx,
-            )
-            .await;
+        let _cron_task = tokio::spawn(async move {
+            let _ =
+                settings_loop(&pool, &user_id, period, messages, window_size, broadcaster).await;
         });
-
-        let controller = CronReportsController::new(stats_rx);
-        self.cron_reports_controller = Some(controller.clone());
-        Ok(controller)
+        Ok(())
     }
 }
