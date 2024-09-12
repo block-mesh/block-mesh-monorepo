@@ -1,6 +1,6 @@
 import MyRustModule from '@/modules/my-rust-module/src/MyRustModule'
 
-interface RunLibInputs {
+export interface RunLibInputs {
   url: string;
   email: string;
   password: string;

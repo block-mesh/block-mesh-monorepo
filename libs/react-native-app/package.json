@@ -29,6 +29,7 @@
     "expo-constants": "~16.0.2",
     "expo-font": "~12.0.9",
     "expo-linking": "~6.3.1",
+    "expo-location": "~17.0.1",
     "expo-router": "~3.5.23",
     "expo-splash-screen": "~0.27.5",
     "expo-status-bar": "~1.12.1",
@@ -39,6 +40,7 @@
     "react-if": "^4.1.5",
     "react-native": "0.74.5",
     "react-native-background-actions": "^4.0.1",
+    "react-native-background-fetch": "^4.2.5",
     "react-native-dotenv": "^3.4.11",
     "react-native-gesture-handler": "~2.16.1",
     "react-native-reanimated": "~3.10.1",
@@ -46,6 +48,7 @@
     "react-native-screens": "3.31.1",
     "react-native-web": "~0.19.10",
     "react-native-webview": "13.8.6",
+    "react-navigation-stack": "^2.10.4",
     "use-debounce": "^10.0.3"
   },
   "devDependencies": {

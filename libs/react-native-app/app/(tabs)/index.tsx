@@ -1,25 +1,20 @@
-import { Image } from 'react-native'
-import { Case, Switch } from 'react-if'
-import ParallaxScrollView from '@/components/ParallaxScrollView'
-import { ThemedView } from '@/components/ThemedView'
+import React, { useEffect, useRef } from 'react'
 import { useStorage } from '@/hooks/useStorage'
-import React, { useEffect, useState } from 'react'
-import LoginScreen from '@/app/screens/LoginScreen'
-import RegisterScreen from '@/app/screens/RegisterScreen'
-import DashboardScreen from '@/app/screens/DashboardScreen'
 import { colors, styles } from '@/utils/theme'
+import { Alert, Image, TextInput } from 'react-native'
+import { ThemedView } from '@/components/ThemedView'
+import CustomButton from '@/components/CustomButton'
+import { get_token } from '@/utils/auth'
+import VerticalContainer from '@/components/VerticalContainer'
+import { router } from 'expo-router'
+import ParallaxScrollView from '@/components/ParallaxScrollView'
 
-export default function HomeScreen() {
+
+export default function Index() {
+  const emailRef = useRef()
+  const passwordRef = useRef()
   const storage = useStorage()
-  const [_email, setEmail] = useState(storage.email)
-  const [_password, setPassword] = useState(storage.password)
-  const [_url, setUrl] = useState(storage.url)
-
-  useEffect(() => {
-    setEmail(storage.email)
-    setPassword(storage.password)
-    setUrl(storage.url)
-  }, [storage.email, storage.url, storage.password, storage.api_token, storage.nav])
+  const secure = storage.env() === 'production'
 
   return (
     <ParallaxScrollView
@@ -30,21 +25,77 @@ export default function HomeScreen() {
           style={styles.logo}
         />
       }>
-      <ThemedView style={styles.titleContainer}>
+      <ThemedView style={styles.stepContainer}>
+        <TextInput
+          ref={emailRef as any}
+          style={styles.input}
+          onChangeText={storage.setEmail}
+          value={storage.email}
+          placeholder="Fill email"
+          placeholderTextColor={colors['off-white']}
+          autoCapitalize={'none'}
+        />
+        <TextInput
+          secureTextEntry={secure}
+          ref={passwordRef as any}
+          style={styles.input}
+          onChangeText={storage.setPassword}
+          value={storage.password}
+          placeholder="Fill password"
+          placeholderTextColor={colors['off-white']}
+          autoCapitalize={'none'}
+        />
+        <VerticalContainer>
+          <CustomButton
+            title={'Submit'}
+            buttonStyles={styles.button}
+            buttonText={styles.buttonText}
+            onPress={async () => {
+              if (storage.email.match(/^\s*$/)) {
+                Alert.alert(
+                  'Error',
+                  'Please fill in email',
+                  [
+                    { text: 'OK', onPress: () => console.log('OK Pressed') }
+                  ],
+                  { cancelable: false }
+                )
+                return
+              }
+              if (storage.password.match(/^\s*$/)) {
+                Alert.alert(
+                  'Error',
+                  'Please fill password',
+                  [
+                    { text: 'OK', onPress: () => console.log('OK Pressed') }
+                  ],
+                  { cancelable: false }
+                )
+                return
+              }
+              const r = await get_token(
+                storage.url + '/api/get_token',
+                {
+                  email: storage.email,
+                  password: storage.password
+                })
+              if (r.isOk) {
+                storage.setApiToken(r.unwrap().api_token)
+                router.replace('/(tabs)/DashboardScreen')
+              } else {
+                Alert.alert(
+                  'Error',
+                  'Failed to login',
+                  [
+                    { text: 'OK', onPress: () => console.log('OK Pressed') }
+                  ],
+                  { cancelable: false }
+                )
+              }
+            }}
+          />
+        </VerticalContainer>
       </ThemedView>
-      <Switch>
-        <Case condition={storage.nav === 'login'}>
-          <LoginScreen />
-        </Case>
-        <Case condition={storage.nav === 'register'}>
-          <RegisterScreen />
-        </Case>
-        <Case condition={storage.nav === 'dashboard'}>
-          <DashboardScreen />
-        </Case>
-      </Switch>
     </ParallaxScrollView>
   )
 }
-
-

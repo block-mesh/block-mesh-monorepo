@@ -25,6 +25,9 @@ apply plugin: "com.facebook.react.rootproject"
 
 allprojects {
     repositories {
+// @generated begin react-native-background-fetch-maven - expo prebuild (DO NOT MODIFY) sync-b86324ce2eb77b03cc8b69ba206ef8275cd006ff
+	maven { url "${project(":react-native-background-fetch").projectDir}/libs" }
+// @generated end react-native-background-fetch-maven
         maven {
             // All of React Native (JS, Obj-C sources, Android binaries) is installed from npm
             url(new File(['node', '--print', "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim(), '../android'))
