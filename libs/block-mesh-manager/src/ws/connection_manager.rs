@@ -69,7 +69,7 @@ impl CronReportsController {
     }
 }
 
-#[derive(Debug, Clone, Serialize)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct CronReportStats {
     messages: Vec<WsServerMessage>,
     window_size: usize,
