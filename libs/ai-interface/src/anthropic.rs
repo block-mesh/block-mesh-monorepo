@@ -1,0 +1,169 @@
+use anyhow::anyhow;
+use dotenv::dotenv;
+use reqwest::Client;
+use serde::{Deserialize, Serialize, Serializer};
+use std::env::VarError;
+use std::fmt::{Display, Formatter};
+
+const ENV_VAR_NAME: &str = "ANTHROPIC_API_KEY";
+
+struct AnthropicClient {
+    client: Client,
+    api_key: String,
+}
+
+impl AnthropicClient {
+    fn new(client: Client, api_key: String) -> Self {
+        Self { client, api_key }
+    }
+    fn from_env(client: Client, env_var_name: &str) -> Result<Self, VarError> {
+        let api_key = std::env::var(env_var_name)?;
+        Ok(Self::new(client, api_key))
+    }
+
+    async fn chat_completion(&self, chat_request: &ChatRequest) -> anyhow::Result<ChatResponse> {
+        let url = "https://api.anthropic.com/v1/messages";
+        let response = self
+            .client
+            .post(url)
+            .header("x-api-key", &self.api_key)
+            .header("anthropic-version", "2023-06-01")
+            .json(chat_request)
+            .send()
+            .await?;
+        if response.status().is_success() {
+            return Ok(response.json().await?);
+        }
+        if response.status().is_client_error() {
+            let error: Error = response.json().await?;
+            return Err(anyhow!(error));
+        }
+        Err(anyhow!(
+            "Unexpected response status code {} for Anthorpic chat completion request",
+            response.status()
+        ))
+    }
+}
+
+#[derive(Deserialize, Debug)]
+struct Error {
+    #[serde(rename = "type")]
+    kind: String,
+    error: InnerError,
+}
+
+impl Display for Error {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:#?}", self.error)
+    }
+}
+
+#[derive(Deserialize, Debug)]
+struct InnerError {
+    #[serde(rename = "type")]
+    kind: String,
+    message: String,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "lowercase")]
+enum Role {
+    User,
+    Assistant,
+}
+
+#[derive(Serialize, Debug)]
+struct ChatRequest {
+    model: Model,
+    max_tokens: u32,
+    messages: Vec<ChatMessage>,
+}
+
+#[derive(Deserialize, Debug)]
+struct ChatResponse {
+    content: Vec<String>,
+    id: String,
+    model: String,
+    role: String,
+    stop_reason: String,
+    stop_sequence: Option<String>,
+    #[serde(rename = "type")]
+    response_type: String,
+    usage: Usage,
+}
+
+#[derive(Deserialize, Debug)]
+struct Usage {
+    input_tokens: u32,
+    output_tokens: u32,
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+struct ChatMessage {
+    role: Role,
+    content: String,
+}
+
+impl ChatMessage {
+    fn user(content: String) -> Self {
+        Self {
+            role: Role::User,
+            content,
+        }
+    }
+
+    fn assistant(content: String) -> Self {
+        Self {
+            role: Role::Assistant,
+            content,
+        }
+    }
+}
+
+#[derive(Debug)]
+enum Model {
+    /// Opus 3.0
+    Opus,
+    /// Sonnet 3.5
+    Sonnet,
+    /// Haiku 3.0
+    Haiku,
+}
+
+impl Serialize for Model {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        serializer.serialize_str(&self.to_string())
+    }
+}
+
+impl Display for Model {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                Model::Opus => "claude-3-opus-20240229",
+                Model::Sonnet => "claude-3-5-sonnet-20240620",
+                Model::Haiku => "claude-3-haiku-20240307",
+            }
+        )
+    }
+}
+
+#[ignore = "Needs valid Anthropic token"]
+#[tokio::test]
+async fn anthropic() {
+    dotenv().ok();
+    let client = AnthropicClient::from_env(Client::new(), ENV_VAR_NAME).unwrap();
+    let result = client
+        .chat_completion(&ChatRequest {
+            model: Model::Opus,
+            max_tokens: 1024,
+            messages: vec![ChatMessage::user(String::from("Introduce yourself"))],
+        })
+        .await
+        .unwrap();
+}
