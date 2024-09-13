@@ -102,6 +102,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ai-interface"
+version = "0.0.252"
+dependencies = [
+ "anyhow",
+ "dotenv",
+ "reqwest 0.12.7",
+ "serde",
+ "serde_json",
+ "tokio",
+]
+
+[[package]]
 name = "alloc-no-stdlib"
 version = "2.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
