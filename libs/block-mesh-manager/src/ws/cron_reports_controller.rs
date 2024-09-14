@@ -1,8 +1,6 @@
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use serde::{Deserialize, Serialize};
 use std::time::Duration;
-use tokio::sync::watch;
-
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct CronReportSettings {
     pub period: Option<Duration>,

@@ -155,3 +155,44 @@ impl Broadcaster {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use rand::Rng;
+    use std::collections::VecDeque;
+    use uuid::Uuid;
+
+    pub fn create_queue(size: usize) -> VecDeque<Uuid> {
+        let mut queue: VecDeque<Uuid> = VecDeque::new();
+        for _ in 0..size {
+            queue.push_back(Uuid::new_v4());
+        }
+        queue
+    }
+    #[test]
+    pub fn test_deque_perf_drain() {
+        let mut q = create_queue(50_000);
+        use std::time::Instant;
+        let now = Instant::now();
+        let count = 1_000;
+        let drained: Vec<Uuid> = q.drain(0..count).collect();
+        q.extend(drained.iter());
+        let elapsed = now.elapsed();
+        assert!(elapsed.as_micros() < 30);
+    }
+
+    #[test]
+    pub fn test_deque_perf_find() {
+        let q = create_queue(50_000);
+        let mut rng = rand::thread_rng();
+        for _ in 0..50 {
+            let random_number = rng.gen_range(0..=49_000);
+            use std::time::Instant;
+            let now = Instant::now();
+            let user_id = q[random_number].clone();
+            let _ = q.iter().position(|a| a == &user_id);
+            let elapsed = now.elapsed();
+            assert!(elapsed.as_micros() < 1_000);
+        }
+    }
+}

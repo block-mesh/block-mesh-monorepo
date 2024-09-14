@@ -2,7 +2,7 @@ use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or
 use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::domain::aggregate::AggregateName;
 use crate::ws::broadcaster::Broadcaster;
-use crate::ws::cron_reports_controller::{CronReportAggregateEntry, CronReportSettings};
+use crate::ws::cron_reports_controller::CronReportAggregateEntry;
 use crate::ws::task_scheduler::TaskScheduler;
 use anyhow::Context;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
@@ -29,17 +29,6 @@ impl ConnectionManager {
             broadcaster: Broadcaster::new(),
             task_scheduler: TaskScheduler::new(),
         }
-    }
-    pub async fn cron_reports(
-        &mut self,
-        period: Duration,
-        messages: impl Into<Vec<WsServerMessage>> + Clone + Send + 'static,
-        window_size: usize,
-        pool: PgPool,
-    ) -> anyhow::Result<()> {
-        self.broadcaster
-            .cron_reports(period, messages, window_size, pool)
-            .await
     }
 }
 

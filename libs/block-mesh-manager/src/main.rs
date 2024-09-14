@@ -85,7 +85,8 @@ async fn run() -> anyhow::Result<()> {
     transaction.commit().await?;
 
     let mut ws_connection_manager = ConnectionManager::new();
-    let _reports_cron_task = ws_connection_manager
+    let _ = ws_connection_manager
+        .broadcaster
         .cron_reports(
             Duration::from_secs(60),
             vec![

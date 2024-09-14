@@ -1,4 +1,3 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_pool;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::user::UserRole;
 use crate::errors::error::Error;
@@ -10,7 +9,6 @@ use axum::extract::State;
 use axum::{debug_handler, Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
-use http::StatusCode;
 use std::env;
 use std::sync::Arc;
 use uuid::Uuid;
