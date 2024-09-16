@@ -2,6 +2,7 @@ use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
+use crate::database::daily_stat::get_or_create_daily_stat::get_or_create_daily_stat;
 use crate::database::daily_stat::increment_tasks_count::increment_tasks_count;
 use crate::database::task::find_task_by_task_id_and_status::find_task_by_task_id_and_status;
 use crate::database::task::finish_task::finish_task;
@@ -16,7 +17,6 @@ use block_mesh_common::interfaces::db_messages::{AggregateMessage, DBMessageType
 use block_mesh_common::interfaces::server_api::{
     HandlerMode, SubmitTaskRequest, SubmitTaskResponse,
 };
-use chrono::Utc;
 use http::StatusCode;
 use http_body_util::BodyExt;
 use std::sync::Arc;
@@ -86,14 +86,8 @@ pub async fn submit_task_content(
         query.response_time.unwrap_or_default(),
     )
     .await?;
-    let daily_stat_opt =
-        get_daily_stat_by_user_id_and_day(&mut transaction, user.id, Utc::now().date_naive())
-            .await?;
-    let daily_stat_opt_id = match daily_stat_opt {
-        Some(daily_stat) => daily_stat.id,
-        None => create_daily_stat(&mut transaction, user.id).await?,
-    };
-    increment_tasks_count(&mut transaction, daily_stat_opt_id).await?;
+    let daily_stat = get_or_create_daily_stat(&mut transaction, &user.id).await?;
+    increment_tasks_count(&mut transaction, daily_stat.id).await?;
     transaction.commit().await.map_err(Error::from)?;
 
     if query.response_code.unwrap_or(520) == 200 {

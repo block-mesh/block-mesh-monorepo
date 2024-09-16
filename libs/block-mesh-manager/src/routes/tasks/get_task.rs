@@ -1,6 +1,5 @@
 use crate::database::api_token::find_token::find_token_pool;
-use crate::database::daily_stat::create_daily_stat::create_daily_stat;
-use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
+use crate::database::daily_stat::get_or_create_daily_stat::get_or_create_daily_stat;
 use crate::database::task::find_task_assigned_to_user::find_task_assigned_to_user;
 use crate::database::task::find_task_by_status::find_task_by_status;
 use crate::database::task::update_task_assigned::update_task_assigned;
@@ -13,7 +12,6 @@ use anyhow::Context;
 use axum::extract::State;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{GetTaskRequest, GetTaskResponse};
-use chrono::Utc;
 use http::HeaderMap;
 use sqlx::PgPool;
 use std::sync::Arc;
@@ -65,12 +63,7 @@ pub async fn handler(
         Some(v) => v,
         None => return Ok(Json(None)),
     };
-    let daily_stat_opt =
-        get_daily_stat_by_user_id_and_day(&mut transaction, user.id, Utc::now().date_naive())
-            .await?;
-    if daily_stat_opt.is_none() {
-        create_daily_stat(&mut transaction, user.id).await?;
-    }
+    let _ = get_or_create_daily_stat(&mut transaction, &user.id).await?;
     update_task_assigned(&mut transaction, task.id, user.id, TaskStatus::Assigned).await?;
     transaction.commit().await.map_err(Error::from)?;
     Ok(Json(Some(GetTaskResponse {
