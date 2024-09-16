@@ -1,5 +1,5 @@
 use crate::database::api_token::find_token::find_token_pool;
-use crate::database::daily_stat::get_or_create_daily_stat::get_or_create_daily_stat;
+use crate::database::daily_stat::create_daily_stat::create_daily_stat;
 use crate::database::task::find_task_assigned_to_user::find_task_assigned_to_user;
 use crate::database::task::find_task_by_status::find_task_by_status;
 use crate::database::task::update_task_assigned::update_task_assigned;
@@ -63,7 +63,7 @@ pub async fn handler(
         Some(v) => v,
         None => return Ok(Json(None)),
     };
-    let _ = get_or_create_daily_stat(&mut transaction, &user.id).await?;
+    let _ = create_daily_stat(&mut transaction, user.id).await?;
     update_task_assigned(&mut transaction, task.id, user.id, TaskStatus::Assigned).await?;
     transaction.commit().await.map_err(Error::from)?;
     Ok(Json(Some(GetTaskResponse {

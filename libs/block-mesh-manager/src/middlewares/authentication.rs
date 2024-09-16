@@ -1,7 +1,7 @@
 #![allow(clippy::blocks_in_conditions)]
 
 use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id_pool;
-use crate::database::user::get_user_by_email::get_user_opt_by_email;
+use crate::database::user::get_user_by_email::get_user_opt_by_email_pool;
 use crate::database::user::get_user_by_id::get_user_opt_by_id_pool;
 use crate::errors::error::Error;
 use anyhow::anyhow;
@@ -85,8 +85,8 @@ impl AuthnBackend for Backend {
                 return Ok(Option::from(value));
             }
         }
-        let mut transaction = self.db.begin().await.map_err(Error::from)?;
-        let user = match get_user_opt_by_email(&mut transaction, &creds.email).await {
+        let pool = self.db.clone();
+        let user = match get_user_opt_by_email_pool(&pool, &creds.email).await {
             Ok(u) => u,
             Err(e) => {
                 let _: RedisResult<()> = c.del(&key).await;
@@ -114,7 +114,6 @@ impl AuthnBackend for Backend {
                 .set_ex(&key, session_user, Backend::get_expire() as u64)
                 .await;
         }
-        transaction.commit().await.map_err(Error::from)?;
         Ok(Option::from(session_user))
     }
 

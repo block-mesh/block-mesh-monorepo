@@ -1,5 +1,5 @@
 use crate::database::api_token::get_api_token_by_user_id_and_status::get_api_token_by_usr_and_status;
-use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
+use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id_pool;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::domain::api_token::ApiTokenStatus;
 use crate::errors::error::Error;
@@ -39,7 +39,7 @@ pub async fn handler(
     let user = get_user_opt_by_email(&mut transaction, &email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
+    let nonce = get_nonce_by_user_id_pool(&pool, &user.id)
         .await?
         .ok_or_else(|| Error::NonceNotFound)?;
     let creds: Credentials = Credentials {
