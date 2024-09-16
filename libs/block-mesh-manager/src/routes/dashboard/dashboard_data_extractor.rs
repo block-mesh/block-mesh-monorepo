@@ -35,14 +35,14 @@ pub async fn dashboard_data_extractor(
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     let tasks =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Tasks, user_id)
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Tasks, &user_id)
             .await?;
     let overall_task_count = tasks.value.as_i64().unwrap_or_default();
     let number_of_users_invited = get_number_of_users_invited(&mut transaction, user_id)
         .await
         .map_err(Error::from)?;
     let uptime_aggregate =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, user_id)
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, &user_id)
             .await
             .map_err(Error::from)?;
     let referrals = get_user_referrals(&mut transaction, user_id)
@@ -54,7 +54,7 @@ pub async fn dashboard_data_extractor(
         .map_err(Error::from)?;
 
     let uptime =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, user.id)
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, &user.id)
             .await
             .map_err(Error::from)?;
 
@@ -93,17 +93,20 @@ pub async fn dashboard_data_extractor(
     let download = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
         AggregateName::Download,
-        user_id,
+        &user_id,
     )
     .await?;
 
     let upload =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Upload, user_id)
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Upload, &user_id)
             .await?;
 
-    let latency =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Latency, user_id)
-            .await?;
+    let latency = get_or_create_aggregate_by_user_and_name(
+        &mut transaction,
+        AggregateName::Latency,
+        &user_id,
+    )
+    .await?;
 
     transaction.commit().await.map_err(Error::from)?;
     Ok(DashboardResponse {

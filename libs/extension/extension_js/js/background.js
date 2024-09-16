@@ -98,9 +98,13 @@ async function get_polling_interval() {
   }
 }
 
+function clear_intervals() {
+  intervals.forEach(i => clearInterval(i))
+}
+
 function recreate_intervals() {
   console.log('Running recreate_intervals')
-  intervals.forEach(i => clearInterval(i))
+  clear_intervals()
   intervals.push(
     setInterval(async () => {
       await create_alarm().then(onSuccess, onError)
@@ -141,6 +145,7 @@ async function main_interval() {
   const is_ws_enabled = await is_ws_feature_connection()
   if (is_ws_enabled) {
     console.log('Using WebSocket')
+    clear_intervals()
     start_websocket().then(onSuccess, onError)
   } else {
     console.log('Using polling')

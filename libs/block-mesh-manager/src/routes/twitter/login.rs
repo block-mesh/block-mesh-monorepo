@@ -37,7 +37,7 @@ pub async fn login(
 
     let id = Uuid::parse_str(std::env::var(BLOCKMESH_SERVER_UUID_ENVAR).unwrap().as_str()).unwrap();
     let twitter_agg =
-        get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Twitter, id).await?;
+        get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Twitter, &id).await?;
     let pg = Oauth2CtxPg {
         verifier: Some(verifier),
         state: Some(state),

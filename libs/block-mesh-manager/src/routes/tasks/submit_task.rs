@@ -84,7 +84,7 @@ pub async fn handler(
         let tasks = get_or_create_aggregate_by_user_and_name(
             &mut transaction,
             AggregateName::Tasks,
-            user.id,
+            &user.id,
         )
         .await?;
         transaction.commit().await.map_err(Error::from)?;
