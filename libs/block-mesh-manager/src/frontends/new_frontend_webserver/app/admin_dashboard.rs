@@ -1,6 +1,5 @@
 use crate::frontends::components::heading::Heading;
 use crate::frontends::new_frontend_webserver::app::application_layout::ApplicationLayout;
-use leptos::logging::log;
 use leptos::*;
 use reqwest::Client;
 use serde_json::{json, Value};

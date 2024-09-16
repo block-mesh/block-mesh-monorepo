@@ -74,7 +74,8 @@ pub async fn handle_socket(socket: WebSocket, ip: String, state: Arc<AppState>, 
         ip.clone(),
         notify.clone(),
         state.clone(),
-    );
+    )
+    .await;
 
     let ws_connection_manager = state.ws_connection_manager.clone();
     let task_scheduler = ws_connection_manager.task_scheduler;

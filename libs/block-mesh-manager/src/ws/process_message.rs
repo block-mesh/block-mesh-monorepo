@@ -14,7 +14,6 @@ pub async fn process_message(
     ip: String,
     state: Arc<AppState>,
 ) -> ControlFlow<(), Option<WsClientMessage>> {
-    tracing::info!("PROCESS_MESSAGE msg = {:#?}", msg);
     match msg {
         Message::Text(text) => {
             let ws_client_message = process_client_message(&text, ip, state).await;
