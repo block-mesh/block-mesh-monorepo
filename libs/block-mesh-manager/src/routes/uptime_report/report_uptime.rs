@@ -1,6 +1,7 @@
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::database::api_token::find_token::find_token;
-use crate::database::daily_stat::get_or_create_daily_stat::get_or_create_daily_stat;
+use crate::database::daily_stat::create_daily_stat::create_daily_stat;
+use crate::database::daily_stat::get_daily_stat_of_user::get_daily_stat_of_user;
 use crate::database::daily_stat::increment_uptime::increment_uptime;
 use crate::database::user::get_user_by_id::get_user_opt_by_id_pool;
 use crate::domain::aggregate::AggregateName;
@@ -131,7 +132,8 @@ pub async fn report_uptime_content(
         return Err(Error::UserNotFound);
     }
 
-    let daily_stat = get_or_create_daily_stat(&mut transaction, &user.id).await?;
+    let _ = create_daily_stat(&mut transaction, user.id).await;
+    let daily_stat = get_daily_stat_of_user(&mut transaction, user.id).await?;
     let _ = send_analytics(state.clone(), request, &user.id).await;
     touch_users_ip(state.clone(), ip.clone(), &user.id).await;
 
