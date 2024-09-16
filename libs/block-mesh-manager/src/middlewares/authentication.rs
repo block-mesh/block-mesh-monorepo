@@ -1,8 +1,8 @@
 #![allow(clippy::blocks_in_conditions)]
 
-use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
+use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id_pool;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
-use crate::database::user::get_user_by_id::get_user_opt_by_id;
+use crate::database::user::get_user_by_id::get_user_opt_by_id_pool;
 use crate::errors::error::Error;
 use anyhow::anyhow;
 use async_trait::async_trait;
@@ -131,8 +131,8 @@ impl AuthnBackend for Backend {
             };
         }
 
-        let mut transaction = self.db.begin().await.map_err(Error::from)?;
-        let user = match get_user_opt_by_id(&mut transaction, user_id).await {
+        let pool = self.db.clone();
+        let user = match get_user_opt_by_id_pool(&pool, user_id).await {
             Ok(u) => u,
             Err(e) => {
                 let _: RedisResult<()> = c.del(&key).await;
@@ -148,13 +148,9 @@ impl AuthnBackend for Backend {
             }
         };
 
-        let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
+        let nonce = get_nonce_by_user_id_pool(&pool, &user.id)
             .await?
             .ok_or_else(|| Error::Auth("Nonce not found".to_string()))?;
-        transaction
-            .commit()
-            .await
-            .map_err(|e| Error::Auth(e.to_string()))?;
         let session_user = SessionUser {
             id: user.id,
             email: user.email.clone(),
