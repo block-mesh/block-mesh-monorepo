@@ -1,4 +1,6 @@
-use anyhow::anyhow;
+use crate::clients::{ChatCompletionExt, Message};
+use anyhow::{anyhow, Context};
+use async_trait::async_trait;
 use dotenv::dotenv;
 use reqwest::header::AUTHORIZATION;
 use reqwest::Client;
@@ -8,16 +10,45 @@ use std::env::VarError;
 
 const ENV_VAR_NAME: &str = "META_LLAMA_API_KEY";
 
-struct LlamaClient {
+#[async_trait]
+impl ChatCompletionExt for LlamaClient {
+    async fn completion(&self, messages: Vec<Message>) -> anyhow::Result<Message> {
+        let request = ChatRequest::new(
+            String::from("llama3.1-405b"),
+            messages
+                .into_iter()
+                .map(|msg| {
+                    if matches!(msg.role, super::Role::User) {
+                        ChatMessage::user(msg.content)
+                    } else {
+                        ChatMessage::assistant(msg.content)
+                    }
+                })
+                .collect(),
+        );
+        let mut result = self.chat_completion(&request).await?;
+        let choice = result
+            .choices
+            .pop()
+            .context("Llama returned no completion messages")?;
+        let role = match choice.message.role {
+            Role::User => super::Role::User,
+            Role::Assistant => super::Role::Assistant,
+        };
+        let content = choice.message.content;
+        Ok(Message { content, role })
+    }
+}
+pub struct LlamaClient {
     client: Client,
     api_key: String,
 }
 
 impl LlamaClient {
-    fn new(client: Client, api_key: String) -> Self {
+    pub fn new(client: Client, api_key: String) -> Self {
         Self { client, api_key }
     }
-    fn from_env(client: Client, env_var_name: &str) -> Result<Self, VarError> {
+    pub fn from_env(client: Client, env_var_name: &str) -> Result<Self, VarError> {
         let api_key = std::env::var(env_var_name)?;
         Ok(Self::new(client, api_key))
     }

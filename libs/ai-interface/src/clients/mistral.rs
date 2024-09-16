@@ -1,4 +1,6 @@
-use anyhow::anyhow;
+use crate::clients::{ChatCompletionExt, Message};
+use anyhow::{anyhow, Context};
+use async_trait::async_trait;
 use dotenv::dotenv;
 use reqwest::header::AUTHORIZATION;
 use reqwest::Client;
@@ -9,16 +11,48 @@ use std::fmt::{Display, Formatter};
 
 const ENV_VAR_NAME: &str = "MISTRAL_API_KEY";
 
-struct MistralClient {
+#[async_trait]
+impl ChatCompletionExt for MistralClient {
+    async fn completion(&self, messages: Vec<Message>) -> anyhow::Result<Message> {
+        let request = ChatRequest::new(
+            String::from("mistral-small-latest"),
+            messages
+                .into_iter()
+                .map(|msg| {
+                    if matches!(msg.role, super::Role::User) {
+                        ChatMessage::user(msg.content)
+                    } else {
+                        ChatMessage::assistant(msg.content, false)
+                    }
+                })
+                .collect(),
+        );
+        let mut result = self.chat_completion(&request).await?;
+        let message = result
+            .choices
+            .pop()
+            .context("Mistral returned no completion messages")?
+            .message;
+        let content = message
+            .content
+            .context("Mistral should have included a non-empty string in the response")?;
+        let role = match message.role {
+            Role::User => super::Role::User,
+            Role::Assistant => super::Role::Assistant,
+        };
+        Ok(Message { content, role })
+    }
+}
+pub struct MistralClient {
     client: Client,
     api_key: String,
 }
 
 impl MistralClient {
-    fn new(client: Client, api_key: String) -> Self {
+    pub fn new(client: Client, api_key: String) -> Self {
         Self { client, api_key }
     }
-    fn from_env(client: Client, env_var_name: &str) -> Result<Self, VarError> {
+    pub fn from_env(client: Client, env_var_name: &str) -> Result<Self, VarError> {
         let api_key = std::env::var(env_var_name)?;
         Ok(Self::new(client, api_key))
     }
@@ -140,6 +174,7 @@ enum Role {
     Assistant,
 }
 
+#[ignore = "Needs valid Mistral token"]
 #[tokio::test]
 async fn mistral() {
     dotenv().ok();

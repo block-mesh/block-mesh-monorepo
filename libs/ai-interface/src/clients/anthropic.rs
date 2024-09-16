@@ -1,4 +1,6 @@
-use anyhow::anyhow;
+use crate::clients::{ChatCompletionExt, Message};
+use anyhow::{anyhow, Context};
+use async_trait::async_trait;
 use dotenv::dotenv;
 use reqwest::Client;
 use serde::{Deserialize, Serialize, Serializer};
@@ -7,16 +9,46 @@ use std::fmt::{Display, Formatter};
 
 const ENV_VAR_NAME: &str = "ANTHROPIC_API_KEY";
 
-struct AnthropicClient {
+#[async_trait]
+impl ChatCompletionExt for AnthropicClient {
+    async fn completion(&self, messages: Vec<Message>) -> anyhow::Result<Message> {
+        let request = ChatRequest {
+            model: Model::Sonnet,
+            max_tokens: 1024,
+            messages: messages
+                .into_iter()
+                .map(|msg| {
+                    if matches!(msg.role, super::Role::User) {
+                        ChatMessage::user(msg.content)
+                    } else {
+                        ChatMessage::assistant(msg.content)
+                    }
+                })
+                .collect(),
+        };
+        let mut result = self.chat_completion(&request).await?;
+        let role = match result.role {
+            Role::User => super::Role::User,
+            Role::Assistant => super::Role::Assistant,
+        };
+        let content = result
+            .content
+            .pop()
+            .context("Anthropic returned no completion message")?
+            .text;
+        Ok(Message { role, content })
+    }
+}
+pub struct AnthropicClient {
     client: Client,
     api_key: String,
 }
 
 impl AnthropicClient {
-    fn new(client: Client, api_key: String) -> Self {
+    pub fn new(client: Client, api_key: String) -> Self {
         Self { client, api_key }
     }
-    fn from_env(client: Client, env_var_name: &str) -> Result<Self, VarError> {
+    pub fn from_env(client: Client, env_var_name: &str) -> Result<Self, VarError> {
         let api_key = std::env::var(env_var_name)?;
         Ok(Self::new(client, api_key))
     }
@@ -81,15 +113,22 @@ struct ChatRequest {
 
 #[derive(Deserialize, Debug)]
 struct ChatResponse {
-    content: Vec<String>,
+    content: Vec<Content>,
     id: String,
     model: String,
-    role: String,
+    role: Role,
     stop_reason: String,
     stop_sequence: Option<String>,
     #[serde(rename = "type")]
     response_type: String,
     usage: Usage,
+}
+
+#[derive(Deserialize, Debug)]
+struct Content {
+    text: String,
+    #[serde(rename = "type")]
+    kind: String,
 }
 
 #[derive(Deserialize, Debug)]

@@ -13,5 +13,6 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 dotenv = { workspace = true }
 anyhow = { workspace = true }
+async-trait = { workspace = true }
 [lints]
 workspace = true

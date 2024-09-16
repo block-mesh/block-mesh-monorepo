@@ -1,4 +1,6 @@
-use anyhow::anyhow;
+use crate::clients::{ChatCompletionExt, Message};
+use anyhow::{anyhow, Context};
+use async_trait::async_trait;
 use dotenv::dotenv;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -7,17 +9,55 @@ use std::env::VarError;
 
 const ENV_VAR_NAME: &str = "GOOGLE_GEMINI_API_KEY";
 
-struct GeminiClient {
+#[async_trait]
+impl ChatCompletionExt for GeminiClient {
+    async fn completion(&self, messages: Vec<Message>) -> anyhow::Result<Message> {
+        let request = ChatRequest::new(
+            messages
+                .into_iter()
+                .map(|msg| {
+                    if matches!(msg.role, super::Role::User) {
+                        ChatMessage::user(vec![Part::Text(msg.content)])
+                    } else {
+                        ChatMessage::model(vec![Part::Text(msg.content)])
+                    }
+                })
+                .collect(),
+        );
+        let mut result = self.chat_completion(&request).await?;
+        let part = result
+            .candidates
+            .pop()
+            .context("Gemini returned no completion candidates")?
+            .content
+            .pop()
+            .context("Gemini returned no completion content")?
+            .parts
+            .pop()
+            .context("Gemini returned no completion messages")?;
+        let content = match part {
+            Part::Text(text) => text,
+            Part::InlineData { mime_type, .. } => {
+                return Err(anyhow!(
+                    "Unexpected MIME type '{mime_type}' in Gemini completion"
+                ))
+            }
+        };
+        let role = super::Role::User;
+        Ok(Message { content, role })
+    }
+}
+pub struct GeminiClient {
     client: Client,
     api_key: String,
 }
 
 impl GeminiClient {
-    fn new(client: Client, api_key: String) -> Self {
+    pub fn new(client: Client, api_key: String) -> Self {
         Self { client, api_key }
     }
 
-    fn from_env(client: Client, env_var_name: &str) -> Result<Self, VarError> {
+    pub fn from_env(client: Client, env_var_name: &str) -> Result<Self, VarError> {
         let api_key = std::env::var(env_var_name)?;
         Ok(Self::new(client, api_key))
     }
@@ -85,6 +125,12 @@ impl ChatMessage {
     fn user(parts: Vec<Part>) -> Self {
         Self {
             role: Role::User,
+            parts,
+        }
+    }
+    fn model(parts: Vec<Part>) -> Self {
+        Self {
+            role: Role::Model,
             parts,
         }
     }

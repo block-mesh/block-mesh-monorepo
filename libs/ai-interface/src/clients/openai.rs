@@ -1,4 +1,6 @@
-use anyhow::anyhow;
+use crate::clients::{ChatCompletionExt, Message};
+use anyhow::{anyhow, Context};
+use async_trait::async_trait;
 use dotenv::dotenv;
 use reqwest::header::AUTHORIZATION;
 use reqwest::Client;
@@ -7,17 +9,48 @@ use std::env::VarError;
 use std::fmt::{Display, Formatter};
 
 const ENV_VAR_NAME: &str = "OPENAI_API_KEY";
-struct OpenAiClient {
+
+#[async_trait]
+impl ChatCompletionExt for OpenAiClient {
+    async fn completion(&self, messages: Vec<Message>) -> anyhow::Result<Message> {
+        let request = ChatRequest::new(
+            String::from("gpt4"),
+            messages
+                .into_iter()
+                .map(|msg| {
+                    if matches!(msg.role, super::Role::User) {
+                        ChatMessage::user(msg.content)
+                    } else {
+                        ChatMessage::assistant(msg.content)
+                    }
+                })
+                .collect(),
+        );
+        let mut response = self.chat_completion(&request).await?;
+        let message = response
+            .choices
+            .pop()
+            .context("GPT returned no completion message")?;
+        let content = message.message.content;
+        let role = match message.message.role {
+            Role::User => super::Role::User,
+            Role::Assistant => super::Role::Assistant,
+            other => return Err(anyhow!("Unimplemented GPT role {other}")),
+        };
+        Ok(Message { content, role })
+    }
+}
+pub struct OpenAiClient {
     client: Client,
     api_key: String,
 }
 
 impl OpenAiClient {
-    fn new(client: Client, api_key: String) -> Self {
+    pub fn new(client: Client, api_key: String) -> Self {
         Self { client, api_key }
     }
 
-    fn from_env(client: Client, env_var_name: &str) -> Result<Self, VarError> {
+    pub fn from_env(client: Client, env_var_name: &str) -> Result<Self, VarError> {
         let api_key = std::env::var(env_var_name)?;
         Ok(Self::new(client, api_key))
     }
@@ -74,6 +107,12 @@ enum Role {
     Assistant,
     System,
     Function,
+}
+
+impl Display for Role {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{:?}", self)
+    }
 }
 
 #[derive(Serialize, Deserialize, Debug)]
