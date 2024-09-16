@@ -26,13 +26,7 @@ pub async fn get_nonce_by_user_id(
     .await?)
 }
 
-#[tracing::instrument(
-    name = "Get nonce via pool",
-    skip(transaction),
-    ret,
-    err,
-    level = "trace"
-)]
+#[tracing::instrument(name = "Get nonce via pool", skip_all, ret, err, level = "trace")]
 pub async fn get_nonce_by_user_id_pool(
     pool: &PgPool,
     user_id: &Uuid,

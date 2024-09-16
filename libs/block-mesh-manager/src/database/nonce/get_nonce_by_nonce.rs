@@ -25,7 +25,7 @@ pub async fn get_nonce_by_nonce(
     .await?)
 }
 
-#[tracing::instrument(name = "Get nonce by nonce by pool", skip(transaction), ret, err)]
+#[tracing::instrument(name = "Get nonce by nonce by pool", skip_all, ret, err)]
 pub async fn get_nonce_by_nonce_pool(pool: &PgPool, nonce: &str) -> anyhow::Result<Option<Nonce>> {
     Ok(sqlx::query_as!(
         Nonce,
