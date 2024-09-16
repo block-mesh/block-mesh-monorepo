@@ -64,7 +64,7 @@ async fn send_analytics(
                         .tx_analytics_agg
                         .send_async(AnalyticsMessage {
                             msg_type: DBMessageTypes::AnalyticsMessage,
-                            user_id: user_id.clone(),
+                            user_id: *user_id,
                             depin_aggregator: metadata.depin_aggregator.unwrap_or_default(),
                             device_type: metadata.device_type,
                         })
@@ -87,7 +87,7 @@ async fn touch_users_ip(state: Arc<AppState>, ip: String, user_id: &Uuid) {
             .tx_users_ip_agg
             .send_async(UsersIpMessage {
                 msg_type: DBMessageTypes::UsersIpMessage,
-                id: user_id.clone(),
+                id: *user_id,
                 ip: ip.clone(),
             })
             .await;
@@ -104,7 +104,7 @@ async fn send_to_rayon(state: Arc<AppState>, ip: String, user_id: &Uuid) {
         let _ = state
             .cleaner_tx
             .send_async(EnrichIp {
-                user_id: user_id.clone(),
+                user_id: *user_id,
                 ip: ip.clone(),
             })
             .await;
