@@ -1,4 +1,4 @@
-use crate::database::nonce::get_nonce_by_nonce::get_nonce_by_nonce;
+use crate::database::nonce::get_nonce_by_nonce::get_nonce_by_nonce_pool;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::database::user::update_verified_email::update_verified_email;
 use crate::errors::error::Error;
@@ -16,8 +16,8 @@ pub async fn handler(
     Query(query): Query<ConfirmEmailRequest>,
 ) -> Result<Redirect, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
-    let nonce = get_nonce_by_nonce(&mut transaction, &query.token).await?;
-    return match nonce {
+    let nonce = get_nonce_by_nonce_pool(&pool, &query.token).await?;
+    match nonce {
         None => Ok(Error::redirect(
             500,
             "Didn't find token",
@@ -55,5 +55,5 @@ pub async fn handler(
                 ))
             }
         }
-    };
+    }
 }
