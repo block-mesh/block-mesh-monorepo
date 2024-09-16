@@ -12,7 +12,6 @@ pub fn AdminDashboard() -> impl IntoView {
     let stats_resource = create_local_resource(
         move || (),
         move |_| async move {
-            log!("Running refetch");
             let client = Client::new();
             let response = client
                 .get(format!("{}/api/admin/reports_queue", window().origin()))
