@@ -36,7 +36,7 @@ pub fn set_rx(rx: Receiver<WsServerMessage>, ws: WebSocket) {
     spawn_local(async move {
         let rx = rx.clone();
         while let Ok(msg) = rx.recv_async().await {
-            if matches!(WsServerMessage::CloseConnection, _msg) {
+            if matches!(msg, WsServerMessage::CloseConnection) {
                 if let Err(error) = ws.close() {
                     log!("Error while closing WS: {error:?}");
                 }

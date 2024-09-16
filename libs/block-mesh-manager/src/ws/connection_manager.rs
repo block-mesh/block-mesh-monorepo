@@ -1,15 +1,15 @@
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_pool;
+use crate::database::aggregate::update_aggregate::update_aggregate;
+use crate::domain::aggregate::AggregateName;
+use crate::ws::broadcaster::Broadcaster;
+use crate::ws::cron_reports_controller::CronReportAggregateEntry;
 use crate::ws::task_scheduler::TaskScheduler;
+use anyhow::Context;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
-use dashmap::DashMap;
-use futures::future::join_all;
-use std::collections::VecDeque;
+use sqlx::PgPool;
 use std::fmt::Debug;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
-use tokio::sync::broadcast;
-use tokio::sync::broadcast::error::SendError;
-use tokio::sync::mpsc;
-use tokio::task::JoinHandle;
 use uuid::Uuid;
 
 #[derive(Debug, Clone)]
@@ -31,122 +31,73 @@ impl ConnectionManager {
             task_scheduler: TaskScheduler::new(),
         }
     }
-
-    pub fn cron_reports(&self, period: Duration) -> JoinHandle<()> {
-        let broadcaster = self.broadcaster.clone();
-        tokio::spawn(async move {
-            loop {
-                broadcaster
-                    .queue_multiple(
-                        &[
-                            WsServerMessage::RequestUptimeReport,
-                            WsServerMessage::RequestBandwidthReport,
-                        ],
-                        100,
-                    )
-                    .await;
-                tokio::time::sleep(period).await;
-            }
-        })
-    }
-}
-#[derive(Debug, Clone)]
-pub struct Broadcaster {
-    global_transmitter: broadcast::Sender<WsServerMessage>,
-    sockets: Arc<DashMap<(Uuid, String), mpsc::Sender<WsServerMessage>>>,
-    queue: Arc<Mutex<VecDeque<(Uuid, String)>>>,
 }
 
-impl Broadcaster {
-    fn new() -> Self {
-        let (global_transmitter, _) = broadcast::channel(10000);
-        Self {
-            global_transmitter,
-            sockets: Arc::new(DashMap::new()),
-            queue: Arc::new(Mutex::new(VecDeque::new())),
-        }
+pub async fn settings_loop(
+    pool: &PgPool,
+    user_id: &Uuid,
+    period: Duration,
+    messages: impl Into<Vec<WsServerMessage>> + Clone + Send + 'static,
+    window_size: usize,
+    broadcaster: Broadcaster,
+) -> anyhow::Result<()> {
+    let aggregate =
+        get_or_create_aggregate_by_user_and_name_pool(pool, AggregateName::CronReports, user_id)
+            .await?;
+    let mut transaction = pool.begin().await?;
+    update_aggregate(
+        &mut transaction,
+        &aggregate.id,
+        &serde_json::to_value(CronReportAggregateEntry::new(
+            period,
+            messages.clone().into(),
+            window_size,
+            0,
+            0,
+        ))
+        .context("Failed to parse cron report settings")?,
+    )
+    .await?;
+    transaction.commit().await?;
+    loop {
+        let settings = fetch_latest_cron_settings(pool, user_id).await?;
+        let new_period = settings.period;
+        let new_messages = settings.messages;
+        let new_window_size = settings.window_size;
+        let new_used_window_size = broadcaster
+            .queue_multiple(new_messages.clone(), new_window_size)
+            .await;
+        let new_queue_size = broadcaster.queue.lock().unwrap().len();
+        let mut transaction = pool.begin().await?;
+        update_aggregate(
+            &mut transaction,
+            &aggregate.id,
+            &serde_json::to_value(CronReportAggregateEntry::new(
+                new_period,
+                new_messages,
+                new_window_size,
+                new_used_window_size,
+                new_queue_size,
+            ))
+            .context("Failed to parse cron report settings")?,
+        )
+        .await?;
+        transaction.commit().await?;
+        tokio::time::sleep(new_period).await;
     }
-    pub fn broadcast(&self, message: WsServerMessage) -> Result<usize, SendError<WsServerMessage>> {
-        let subscribers = self.global_transmitter.send(message.clone())?;
-        tracing::info!("Sent {message:?} to {subscribers} subscribers");
-        Ok(subscribers)
-    }
+}
 
-    pub async fn batch(&self, message: WsServerMessage, targets: &[(Uuid, String)]) {
-        join_all(targets.iter().filter_map(|target| {
-            if let Some(entry) = self.sockets.get(target) {
-                let sink_tx = entry.value().clone();
-                let msg = message.clone();
-                let future = async move {
-                    if let Err(_error) = sink_tx.send(msg).await {
-                        tracing::error!("Batch broadcast failed");
-                    }
-                };
-                Some(future)
-            } else {
-                None
-            }
-        }))
-        .await;
-    }
-
-    pub fn move_queue(&self, count: usize) -> Vec<(Uuid, String)> {
-        let queue = &mut self.queue.lock().unwrap();
-        let count = count.min(queue.len());
-        let drained: Vec<(Uuid, String)> = queue.drain(0..count).collect();
-        queue.extend(drained.clone());
-        drained
-    }
-
-    pub async fn queue(&self, message: WsServerMessage, count: usize) {
-        let drained = self.move_queue(count);
-        join_all(drained.into_iter().map(|user_id| {
-            let entry = self.sockets.get(&user_id).unwrap();
-            let tx = entry.value().clone();
-            let msg = message.clone();
-            async move { tx.send(msg).await }
-        }))
-        .await;
-    }
-
-    pub async fn queue_multiple(&self, messages: &[WsServerMessage], count: usize) {
-        let drained = self.move_queue(count);
-        join_all(drained.into_iter().map(|user_id| {
-            let entry = self.sockets.get(&user_id).unwrap();
-            let tx = entry.value().clone();
-            async move {
-                for msg in messages {
-                    if let Err(error) = tx.send(msg.clone()).await {
-                        tracing::error!("Error while queuing WS message: {error}");
-                    }
-                }
-            }
-        }))
-        .await;
-    }
-
-    pub fn subscribe(
-        &self,
-        user_id: Uuid,
-        ip: String,
-        sink_sender: mpsc::Sender<WsServerMessage>,
-    ) -> broadcast::Receiver<WsServerMessage> {
-        let old_value = self
-            .sockets
-            .insert((user_id, ip.clone()), sink_sender.clone());
-        let queue = &mut self.queue.lock().unwrap();
-        queue.push_back((user_id, ip));
-        debug_assert!(old_value.is_none());
-        self.global_transmitter.subscribe()
-    }
-
-    pub fn unsubscribe(&self, user_id: Uuid, ip: String) {
-        self.sockets.remove(&(user_id, ip.clone()));
-        let queue = &mut self.queue.lock().unwrap();
-        if let Some(pos) = queue.iter().position(|(a, b)| a == &user_id && b == &ip) {
-            queue.remove(pos);
-        } else {
-            tracing::error!("Failed to remove a socket from the queue");
-        }
+pub async fn fetch_latest_cron_settings(
+    pool: &PgPool,
+    user_id: &Uuid,
+) -> anyhow::Result<CronReportAggregateEntry> {
+    let aggregate =
+        get_or_create_aggregate_by_user_and_name_pool(pool, AggregateName::CronReports, user_id)
+            .await?;
+    if aggregate.value.is_null() {
+        Ok(CronReportAggregateEntry::default())
+    } else {
+        let settings: CronReportAggregateEntry = serde_json::from_value(aggregate.value)?;
+        Ok(settings)
     }
 }

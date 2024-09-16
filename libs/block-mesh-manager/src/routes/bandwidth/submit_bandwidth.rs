@@ -63,14 +63,14 @@ pub async fn submit_bandwidth_content(
         .unwrap_or_default();
 
     let download =
-        get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Download, user.id)
+        get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Download, &user.id)
             .await?;
     let upload =
-        get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Upload, user.id)
+        get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Upload, &user.id)
             .await?;
 
     let latency =
-        get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Latency, user.id)
+        get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Latency, &user.id)
             .await?;
     let flag = state
         .flags

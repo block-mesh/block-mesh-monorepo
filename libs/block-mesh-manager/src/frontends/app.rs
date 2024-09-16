@@ -18,6 +18,7 @@ use crate::frontends::frontend_tauri::pages::login::TauriLogin;
 use crate::frontends::frontend_tauri::pages::register::TauriRegister;
 use crate::frontends::frontend_tauri::tauri_header::TauriHeader;
 use crate::frontends::frontend_webserver::webserver_header::WebServerHeader;
+use crate::frontends::new_frontend_webserver::app::admin_dashboard::AdminDashboard;
 use crate::frontends::new_frontend_webserver::app::daily_leaderboard::DailyLeaderboardDashboard;
 use crate::frontends::new_frontend_webserver::app::new_dashboard::NewDashboard;
 use crate::frontends::new_frontend_webserver::app::perks::Perks;
@@ -81,6 +82,7 @@ pub fn App() -> impl IntoView {
                             }
                         }
                     />
+                    <Route path="/admin_dashboard" view=AdminDashboard/>
 
                 </Route>
                 <Route
