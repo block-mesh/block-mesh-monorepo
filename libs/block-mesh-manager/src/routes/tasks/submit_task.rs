@@ -11,7 +11,7 @@ use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use axum::extract::{Query, Request, State};
-use axum::{Extension, Json};
+use axum::Json;
 use block_mesh_common::interfaces::db_messages::{AggregateMessage, DBMessageTypes};
 use block_mesh_common::interfaces::server_api::{
     HandlerMode, SubmitTaskRequest, SubmitTaskResponse,
@@ -56,9 +56,7 @@ pub async fn submit_task_content(
                     .await
                     .map_err(|_| Error::FailedReadingBody)?
                     .to_bytes();
-                let response_raw =
-                    String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from(""));
-                response_raw
+                String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from(""))
             }
             None => {
                 return Err(Error::InternalServer);

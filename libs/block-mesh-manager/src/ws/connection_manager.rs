@@ -94,7 +94,7 @@ impl Broadcaster {
         let queue = &mut self.queue.lock().unwrap();
         let count = count.min(queue.len());
         let drained: Vec<(Uuid, String)> = queue.drain(0..count).collect();
-        queue.extend(drained.clone().into_iter());
+        queue.extend(drained.clone());
         drained
     }
 

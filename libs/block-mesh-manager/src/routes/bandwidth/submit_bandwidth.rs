@@ -18,7 +18,7 @@ use tokio::task::JoinHandle;
 use uuid::Uuid;
 
 async fn submit_bandwidth_run_background(state: Arc<AppState>, pool: PgPool, user_id: &Uuid) {
-    let user_id = user_id.clone();
+    let user_id = *user_id;
     let flag = state
         .flags
         .get("submit_bandwidth_run_background")
@@ -26,7 +26,6 @@ async fn submit_bandwidth_run_background(state: Arc<AppState>, pool: PgPool, use
     let flag: bool = <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
     if flag {
         let handle: JoinHandle<()> = tokio::spawn(async move {
-            let user_id = user_id.clone();
             let mut transaction = pool.begin().await.map_err(Error::from).unwrap();
             delete_bandwidth_reports_by_time(&mut transaction, user_id, 60 * 60)
                 .await
