@@ -1473,6 +1473,7 @@ dependencies = [
  "flume",
  "form_urlencoded",
  "futures",
+ "futures-util",
  "gloo-utils 0.2.0",
  "headers",
  "http 1.1.0",

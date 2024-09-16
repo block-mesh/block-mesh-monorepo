@@ -6,6 +6,7 @@ pub mod find_task_assigned_to_user;
 pub mod find_task_by_excluded_user_id_and_status;
 pub mod find_task_by_status;
 pub mod find_task_by_task_id_and_status;
+pub mod find_users_tasks;
 pub mod finish_task;
 pub mod get_task_by_id;
 pub mod get_tasks_by_user_id;
