@@ -4,7 +4,6 @@ use dashmap::DashMap;
 use futures::future::join_all;
 use std::collections::VecDeque;
 use std::fmt::Debug;
-use std::net::SocketAddr;
 use std::sync::{Arc, Mutex};
 use std::time::Duration;
 use tokio::sync::broadcast;
@@ -54,8 +53,8 @@ impl ConnectionManager {
 #[derive(Debug, Clone)]
 pub struct Broadcaster {
     global_transmitter: broadcast::Sender<WsServerMessage>,
-    sockets: Arc<DashMap<(Uuid, SocketAddr), mpsc::Sender<WsServerMessage>>>,
-    queue: Arc<Mutex<VecDeque<(Uuid, SocketAddr)>>>,
+    sockets: Arc<DashMap<(Uuid, String), mpsc::Sender<WsServerMessage>>>,
+    queue: Arc<Mutex<VecDeque<(Uuid, String)>>>,
 }
 
 impl Broadcaster {
@@ -73,7 +72,7 @@ impl Broadcaster {
         Ok(subscribers)
     }
 
-    pub async fn batch(&self, message: WsServerMessage, targets: &[(Uuid, SocketAddr)]) {
+    pub async fn batch(&self, message: WsServerMessage, targets: &[(Uuid, String)]) {
         join_all(targets.iter().filter_map(|target| {
             if let Some(entry) = self.sockets.get(target) {
                 let sink_tx = entry.value().clone();
@@ -91,11 +90,11 @@ impl Broadcaster {
         .await;
     }
 
-    pub fn move_queue(&self, count: usize) -> Vec<(Uuid, SocketAddr)> {
+    pub fn move_queue(&self, count: usize) -> Vec<(Uuid, String)> {
         let queue = &mut self.queue.lock().unwrap();
         let count = count.min(queue.len());
-        let drained: Vec<(Uuid, SocketAddr)> = queue.drain(0..count).collect();
-        queue.extend(drained.iter());
+        let drained: Vec<(Uuid, String)> = queue.drain(0..count).collect();
+        queue.extend(drained.clone().into_iter());
         drained
     }
 
@@ -129,25 +128,22 @@ impl Broadcaster {
     pub fn subscribe(
         &self,
         user_id: Uuid,
-        socket_addr: SocketAddr,
+        ip: String,
         sink_sender: mpsc::Sender<WsServerMessage>,
     ) -> broadcast::Receiver<WsServerMessage> {
         let old_value = self
             .sockets
-            .insert((user_id, socket_addr), sink_sender.clone());
+            .insert((user_id, ip.clone()), sink_sender.clone());
         let queue = &mut self.queue.lock().unwrap();
-        queue.push_back((user_id, socket_addr));
+        queue.push_back((user_id, ip));
         debug_assert!(old_value.is_none());
         self.global_transmitter.subscribe()
     }
 
-    pub fn unsubscribe(&self, user_id: Uuid, socket_addr: SocketAddr) {
-        self.sockets.remove(&(user_id, socket_addr));
+    pub fn unsubscribe(&self, user_id: Uuid, ip: String) {
+        self.sockets.remove(&(user_id, ip.clone()));
         let queue = &mut self.queue.lock().unwrap();
-        if let Some(pos) = queue
-            .iter()
-            .position(|(a, b)| a == &user_id && b == &socket_addr)
-        {
+        if let Some(pos) = queue.iter().position(|(a, b)| a == &user_id && b == &ip) {
             queue.remove(pos);
         } else {
             tracing::error!("Failed to remove a socket from the queue");

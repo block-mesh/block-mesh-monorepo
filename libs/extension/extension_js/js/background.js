@@ -63,6 +63,7 @@ let intervals = []
 
 async function is_ws_feature_connection() {
   try {
+    return true
     const response1 = await fetch('https://feature-flags.blockmesh.xyz/read-flag/use_websocket')
     if (response1.ok) {
       const value = await response1.text()

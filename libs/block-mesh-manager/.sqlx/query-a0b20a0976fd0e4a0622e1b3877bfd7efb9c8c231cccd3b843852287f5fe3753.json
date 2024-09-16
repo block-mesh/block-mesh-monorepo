@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT\n        id,\n        user_id,\n        tasks_count,\n        status,\n        day,\n        created_at,\n        uptime\n        FROM daily_stats\n        WHERE user_id = $1 and day = $2\n        ",
+  "query": "\n        SELECT\n        id,\n        user_id,\n        tasks_count,\n        status,\n        day,\n        created_at,\n        uptime,\n        updated_at\n        FROM daily_stats\n        WHERE user_id = $1\n        ORDER BY created_at DESC\n        LIMIT 10\n        ",
   "describe": {
     "columns": [
       {
@@ -37,12 +37,16 @@
         "ordinal": 6,
         "name": "uptime",
         "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid",
-        "Date"
+        "Uuid"
       ]
     },
     "nullable": [
@@ -52,8 +56,9 @@
       false,
       false,
       false,
+      false,
       false
     ]
   },
-  "hash": "d6f2d4ed72c3e9fbdca033b47e1a5f5c259a6c292b2570c54f14d0648bd5d65a"
+  "hash": "a0b20a0976fd0e4a0622e1b3877bfd7efb9c8c231cccd3b843852287f5fe3753"
 }

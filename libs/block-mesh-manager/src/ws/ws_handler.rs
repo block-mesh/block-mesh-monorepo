@@ -4,10 +4,10 @@ use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use crate::ws::handle_socket::handle_socket;
 use anyhow::Context;
-use axum::extract::{ConnectInfo, Query, State, WebSocketUpgrade};
+use axum::extract::{Query, State, WebSocketUpgrade};
 use axum::response::IntoResponse;
+use http::HeaderMap;
 use std::collections::HashMap;
-use std::net::SocketAddr;
 use std::str::FromStr;
 use std::sync::Arc;
 use uuid::Uuid;
@@ -18,12 +18,11 @@ use uuid::Uuid;
 /// This is the last point where we can extract TCP/IP metadata such as IP address of the client
 /// as well as things from HTTP headers such as user-agent of the browser etc.
 pub async fn ws_handler(
+    headers: HeaderMap,
     ws: WebSocketUpgrade,
     State(state): State<Arc<AppState>>,
-    ConnectInfo(addr): ConnectInfo<SocketAddr>,
     Query(query): Query<HashMap<String, String>>,
 ) -> Result<impl IntoResponse, Error> {
-    tracing::info!("query => {:#?}", query);
     let email = query
         .get("email")
         .ok_or(Error::Auth("Missing email".to_string()))?
@@ -42,7 +41,17 @@ pub async fn ws_handler(
     if user.id != api_token.user_id {
         return Err(Error::UserNotFound);
     }
-    tracing::info!("ws_handle => connected {:#?}", query);
-    Ok(ws.on_upgrade(move |socket| handle_socket(socket, addr, state, email, Uuid::new_v4())))
-    // FIXME replace new_v4 with actual value
+    let app_environment = std::env::var("APP_ENVIRONMENT").unwrap_or_default();
+
+    let ip = if app_environment != "local" {
+        headers
+            .get("cf-connecting-ip")
+            .ok_or(Error::Auth("Missing cf-connecting-ip".to_string()))?
+            .to_str()
+            .unwrap_or_default()
+            .to_string()
+    } else {
+        "127.0.0.1".to_string()
+    };
+    Ok(ws.on_upgrade(move |socket| handle_socket(socket, ip, state, user.id)))
 }
