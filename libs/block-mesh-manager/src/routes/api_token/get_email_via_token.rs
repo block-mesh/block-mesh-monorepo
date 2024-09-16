@@ -1,4 +1,4 @@
-use crate::database::nonce::get_nonce_by_nonce::{get_nonce_by_nonce, get_nonce_by_nonce_pool};
+use crate::database::nonce::get_nonce_by_nonce::get_nonce_by_nonce_pool;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::errors::error::Error;
 use axum::{Extension, Json};

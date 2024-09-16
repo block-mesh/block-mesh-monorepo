@@ -1,7 +1,5 @@
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::database::api_token::find_token::find_token;
-use crate::database::daily_stat::create_daily_stat::create_daily_stat;
-use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
 use crate::database::daily_stat::get_or_create_daily_stat::get_or_create_daily_stat;
 use crate::database::daily_stat::increment_tasks_count::increment_tasks_count;
 use crate::database::task::find_task_by_task_id_and_status::find_task_by_task_id_and_status;
