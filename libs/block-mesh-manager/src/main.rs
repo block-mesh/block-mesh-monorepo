@@ -80,9 +80,7 @@ async fn run() -> anyhow::Result<()> {
     let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
     let redis = redis_client.get_multiplexed_async_connection().await?;
 
-    let mut transaction = db_pool.begin().await?;
-    let _ = create_test_user(&mut transaction).await;
-    transaction.commit().await?;
+    let _ = create_test_user(&db_pool).await;
 
     let mut ws_connection_manager = ConnectionManager::new();
     let _ = ws_connection_manager

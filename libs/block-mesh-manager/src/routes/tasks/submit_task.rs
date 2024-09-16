@@ -11,23 +11,23 @@ use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use axum::extract::{Query, Request, State};
-use axum::{Extension, Json};
+use axum::Json;
 use block_mesh_common::interfaces::db_messages::{AggregateMessage, DBMessageTypes};
-use block_mesh_common::interfaces::server_api::{SubmitTaskRequest, SubmitTaskResponse};
+use block_mesh_common::interfaces::server_api::{
+    HandlerMode, SubmitTaskRequest, SubmitTaskResponse,
+};
 use chrono::Utc;
 use http::StatusCode;
 use http_body_util::BodyExt;
-use sqlx::PgPool;
 use std::sync::Arc;
 
-#[tracing::instrument(name = "submit_task", skip_all, level = "trace", ret)]
-pub async fn handler(
-    Extension(pool): Extension<PgPool>,
-    State(state): State<Arc<AppState>>,
-    Query(query): Query<SubmitTaskRequest>,
-    request: Request,
+pub async fn submit_task_content(
+    state: Arc<AppState>,
+    query: SubmitTaskRequest,
+    request: Option<Request>,
+    mode: HandlerMode,
 ) -> Result<Json<SubmitTaskResponse>, Error> {
-    let (_parts, body) = request.into_parts();
+    let pool = state.pool.clone();
 
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let api_token = find_token(&mut transaction, &query.api_token)
@@ -46,12 +46,29 @@ pub async fn handler(
     if task.assigned_user_id.is_some() && task.assigned_user_id.unwrap() != user.id {
         return Err(Error::TaskAssignedToAnotherUser);
     }
-    let bytes = body
-        .collect()
-        .await
-        .map_err(|_| Error::FailedReadingBody)?
-        .to_bytes();
-    let response_raw = String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from(""));
+
+    let response_raw = match mode {
+        HandlerMode::Http => match request {
+            Some(request) => {
+                let (_parts, body) = request.into_parts();
+                let bytes = body
+                    .collect()
+                    .await
+                    .map_err(|_| Error::FailedReadingBody)?
+                    .to_bytes();
+                String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from(""))
+            }
+            None => {
+                return Err(Error::InternalServer);
+            }
+        },
+        HandlerMode::WebSocket => match query.response_body {
+            Some(body) => body,
+            None => {
+                return Err(Error::InternalServer);
+            }
+        },
+    };
 
     finish_task(
         &mut transaction,
@@ -101,4 +118,13 @@ pub async fn handler(
     Ok(Json(SubmitTaskResponse {
         status_code: u16::from(StatusCode::OK),
     }))
+}
+
+#[tracing::instrument(name = "submit_task", skip_all, level = "trace", ret)]
+pub async fn handler(
+    State(state): State<Arc<AppState>>,
+    Query(query): Query<SubmitTaskRequest>,
+    request: Request,
+) -> Result<Json<SubmitTaskResponse>, Error> {
+    submit_task_content(state, query, Some(request), HandlerMode::Http).await
 }

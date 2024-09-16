@@ -41,6 +41,7 @@ pub struct SubmitTaskRequest {
     pub asn: Option<String>,
     pub colo: Option<String>,
     pub response_time: Option<f64>,
+    pub response_body: Option<String>,
 }
 
 #[typeshare]
@@ -396,4 +397,10 @@ pub struct UserIpInfo {
     pub country: Option<String>,
     #[typeshare(serialized_as = "Date")]
     pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
+pub enum HandlerMode {
+    Http,
+    WebSocket,
 }

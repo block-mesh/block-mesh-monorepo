@@ -1,55 +1,79 @@
+use crate::routes::bandwidth::submit_bandwidth::submit_bandwidth_content;
+use crate::routes::tasks::submit_task::submit_task_content;
+use crate::routes::uptime_report::report_uptime::report_uptime_content;
+use crate::startup::application::AppState;
 use axum::extract::ws::Message;
+use block_mesh_common::interfaces::server_api::HandlerMode;
 use block_mesh_common::interfaces::ws_api::WsClientMessage;
-use std::net::SocketAddr;
 use std::ops::ControlFlow;
+use std::sync::Arc;
 
 /// helper to print contents of messages to stdout. Has special treatment for Close.
-pub fn process_message(msg: Message, who: SocketAddr) -> ControlFlow<(), Option<WsClientMessage>> {
-    tracing::info!("PROCESS_MESSAGE msg = {:#?}", msg);
+pub async fn process_message(
+    msg: Message,
+    ip: String,
+    state: Arc<AppState>,
+) -> ControlFlow<(), Option<WsClientMessage>> {
     match msg {
         Message::Text(text) => {
-            let ws_client_message = process_client_message(&text, who);
+            let ws_client_message = process_client_message(&text, ip, state).await;
             return ControlFlow::Continue(ws_client_message);
         }
         Message::Binary(bytes) => {
-            tracing::info!(">>> {} sent {} bytes: {:?}", who, bytes.len(), bytes);
+            tracing::info!(">>> {} sent {} bytes: {:?}", ip, bytes.len(), bytes);
         }
         Message::Close(frame) => {
             if let Some(cf) = frame {
                 tracing::info!(
                     ">>> {} sent close with code {} and reason `{}`",
-                    who,
+                    ip,
                     cf.code,
                     cf.reason
                 );
             } else {
-                tracing::info!(">>> {who} somehow sent close message without CloseFrame");
+                tracing::info!(">>> {ip} somehow sent close message without CloseFrame");
             }
             return ControlFlow::Break(());
         }
 
         Message::Pong(bytes) => {
-            tracing::info!(">>> {who} sent pong with {bytes:?}");
+            tracing::info!(">>> {ip} sent pong with {bytes:?}");
         }
         // You should never need to manually handle Message::Ping, as axum's websocket library
         // will do so for you automagically by replying with Pong and copying the v according to
         // spec. But if you need the contents of the pings you can see them here.
         Message::Ping(bytes) => {
-            tracing::info!(">>> {who} sent ping with {bytes:?}");
+            tracing::info!(">>> {ip} sent ping with {bytes:?}");
         }
     }
     ControlFlow::Continue(None)
 }
 
-fn process_client_message(text: &str, _who: SocketAddr) -> Option<WsClientMessage> {
+async fn process_client_message(
+    text: &str,
+    ip: String,
+    state: Arc<AppState>,
+) -> Option<WsClientMessage> {
     match serde_json::from_str::<WsClientMessage>(text) {
         Ok(message) => {
             match &message {
-                WsClientMessage::CompleteTask(_task) => {
-                    // TODO: Sync DB row
+                WsClientMessage::CompleteTask(query) => {
+                    let _ = submit_task_content(state, query.clone(), None, HandlerMode::WebSocket)
+                        .await;
                 }
-                WsClientMessage::ReportBandwidth(_) => {}
-                WsClientMessage::ReportUptime(_) => {}
+                WsClientMessage::ReportBandwidth(body) => {
+                    let _ = submit_bandwidth_content(state, body.clone()).await;
+                }
+                WsClientMessage::ReportUptime(query) => {
+                    let _ = report_uptime_content(
+                        state.clone(),
+                        ip.clone(),
+                        query.clone(),
+                        None,
+                        HandlerMode::WebSocket,
+                    )
+                    .await;
+                }
             }
             return Some(message);
         }

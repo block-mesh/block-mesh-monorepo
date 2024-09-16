@@ -103,6 +103,7 @@ pub async fn submit_task(
         asn: Option::from(metadata.asn.clone()),
         colo: Option::from(metadata.colo.clone()),
         response_time: Option::from(response_time),
+        response_body: None,
     };
     let response = reqwest::Client::new()
         .post(format!("{}/api/submit_task", base_url))

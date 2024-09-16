@@ -25,7 +25,8 @@ pub(crate) async fn get_daily_stat_by_user_id_and_day(
         status,
         day,
         created_at,
-        uptime
+        uptime,
+        updated_at
         FROM daily_stats
         WHERE user_id = $1 and day = $2
         "#,
