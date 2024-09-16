@@ -220,6 +220,7 @@ pub async fn submit_task(
         asn: Option::from(asn),
         colo: Option::from(colo),
         response_time: Option::from(response_time),
+        response_body: None,
     };
     let response = http_client()
         .post(format!("{}/api/submit_task", base_url))
