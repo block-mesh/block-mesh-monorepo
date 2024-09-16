@@ -86,7 +86,7 @@ async fn run() -> anyhow::Result<()> {
     let _ = ws_connection_manager
         .broadcaster
         .cron_reports(
-            Duration::from_secs(10),
+            Duration::from_secs(60),
             vec![
                 WsServerMessage::RequestUptimeReport,
                 WsServerMessage::RequestBandwidthReport,

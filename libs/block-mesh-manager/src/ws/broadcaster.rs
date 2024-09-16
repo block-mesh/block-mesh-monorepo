@@ -109,7 +109,6 @@ impl Broadcaster {
         ip: String,
         sink_sender: mpsc::Sender<WsServerMessage>,
     ) -> broadcast::Receiver<WsServerMessage> {
-        tracing::info!("Subscribe to WS messages user_id {user_id:?}");
         let old_value = self
             .sockets
             .insert((user_id, ip.clone()), sink_sender.clone());
@@ -120,7 +119,6 @@ impl Broadcaster {
     }
 
     pub fn unsubscribe(&self, user_id: Uuid, ip: String) {
-        tracing::info!("UN-Subscribe to WS messages user_id {user_id:?}");
         self.sockets.remove(&(user_id, ip.clone()));
         let queue = &mut self.queue.lock().unwrap();
         if let Some(pos) = queue.iter().position(|(a, b)| a == &user_id && b == &ip) {

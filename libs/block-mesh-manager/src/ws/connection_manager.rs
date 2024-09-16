@@ -59,7 +59,6 @@ pub async fn settings_loop(
     .await?;
     transaction.commit().await?;
     loop {
-        tracing::info!("Starting new loop");
         let settings = fetch_latest_cron_settings(pool, user_id).await?;
         let new_period = settings.period;
         let new_messages = settings.messages;
@@ -68,7 +67,6 @@ pub async fn settings_loop(
             .queue_multiple(new_messages.clone(), new_window_size)
             .await;
         let new_queue_size = broadcaster.queue.lock().unwrap().len();
-        tracing::info!("size = {}", new_queue_size);
         let mut transaction = pool.begin().await?;
         update_aggregate(
             &mut transaction,
