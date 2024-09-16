@@ -1,7 +1,7 @@
 use crate::database::api_token::find_token::find_token;
 use crate::database::task::count_user_tasks_in_period::count_user_tasks_in_period;
 use crate::database::task::create_task::create_task;
-use crate::database::user::get_user_by_id::get_user_opt_by_id;
+use crate::database::user::get_user_by_id::get_user_opt_by_id_pool;
 use crate::domain::task::TaskMethod;
 use crate::errors::error::Error;
 use axum::{Extension, Json};
@@ -34,7 +34,7 @@ pub async fn handler(
     let api_token = find_token(&mut transaction, &body.api_token)
         .await?
         .ok_or(Error::ApiTokenNotFound)?;
-    let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
+    let user = get_user_opt_by_id_pool(&pool, &api_token.user_id)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     if user.email.to_ascii_lowercase() != body.email.to_ascii_lowercase() {
