@@ -60,6 +60,17 @@ export TWITTER_API_HOST=""
 export TWITTER_API_TOKEN_TOKEN=""
 export TWITTER_CLIENT_ID=""
 export TWITTER_CLIENT_SECRET=""
+
+export OPENAI_API_KEY=""
+export ANTHROPIC_API_KEY=""
+export GOOGLE_GEMINI_API_KEY=""
+export META_LLAMA_API_KEY=""
+export MISTRAL_API_KEY=""
+
+export BRIGHT_DATA_PROXY_URL=""
+export BRIGHT_DATA_PROXY_USERNAME=""
+export BRIGHT_DATA_PROXY_PASSWORD=""
+
 ```
 
 Install the following:
