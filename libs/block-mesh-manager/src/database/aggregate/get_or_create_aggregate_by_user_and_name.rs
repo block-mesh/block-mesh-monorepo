@@ -61,7 +61,7 @@ pub(crate) async fn get_or_create_aggregate_by_user_and_name_pool(
         INSERT
         INTO aggregates (id, created_at, user_id, name, value, updated_at)
         VALUES ($1, $2, $3, $4, $5, $6)
-        ON CONFLICT (user_id, name) DO UPDATE SET updated_at = $6
+        ON CONFLICT (user_id, name) DO UPDATE SET dummy_updated_at = $6
         RETURNING id, created_at, user_id, name, value, updated_at
         "#,
         id,

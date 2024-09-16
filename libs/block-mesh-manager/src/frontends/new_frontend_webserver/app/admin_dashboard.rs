@@ -1,5 +1,6 @@
 use crate::frontends::components::heading::Heading;
 use crate::frontends::new_frontend_webserver::app::application_layout::ApplicationLayout;
+use leptos::logging::log;
 use leptos::*;
 use reqwest::Client;
 use serde_json::{json, Value};
@@ -11,6 +12,7 @@ pub fn AdminDashboard() -> impl IntoView {
     let stats_resource = create_local_resource(
         move || (),
         move |_| async move {
+            log!("Running refetch");
             let client = Client::new();
             let response = client
                 .get(format!("{}/api/admin/reports_queue", window().origin()))

@@ -139,7 +139,7 @@ async function init_background() {
   await main_interval()
   setInterval(async () => {
     await main_interval()
-  }, 300000)
+  }, 30000)
 }
 
 async function main_interval() {

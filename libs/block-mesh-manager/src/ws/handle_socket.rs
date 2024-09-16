@@ -44,7 +44,7 @@ async fn receiver(
 ) -> JoinHandle<()> {
     tokio::spawn(async move {
         while let Some(Ok(msg)) = ws_stream.next().await {
-            match process_message(msg, ip.clone(), state.clone()).await {
+            match process_message(msg.clone(), ip.clone(), state.clone()).await {
                 ControlFlow::Continue(ws_client_message) => {
                     if let Some(ws_client_message) = ws_client_message {
                         if matches!(ws_client_message, WsClientMessage::CompleteTask(_)) {
@@ -53,6 +53,7 @@ async fn receiver(
                     }
                 }
                 ControlFlow::Break(_) => {
+                    tracing::error!("Unhandled message: {msg:?}");
                     is_cls.store(true, Ordering::Relaxed);
                     return;
                 }
