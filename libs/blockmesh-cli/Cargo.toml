@@ -14,8 +14,8 @@ tokio = { workspace = true, features = ["full"] }
 serde = { workspace = true, features = ['derive'] }
 serde_json = { workspace = true }
 reqwest = { workspace = true, default-features = false, features = [
-  "json",
-  "rustls-tls",
+    "json",
+    "rustls-tls",
 ] }
 ureq = "2.10.1"
 tracing = { workspace = true }
@@ -28,6 +28,8 @@ futures-util = { workspace = true }
 rayon = { workspace = true }
 lazy_static = { workspace = true }
 once_cell = { workspace = true }
+reqwest-websocket = { workspace = true }
+rand = "0.7.3"
 
 [lib]
 crate-type = ["cdylib", "rlib", "staticlib"]

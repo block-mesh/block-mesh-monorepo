@@ -1,9 +1,14 @@
 use crate::helpers::{
     get_polling_interval, login_to_network, report_uptime, submit_bandwidth, task_poller,
 };
+use anyhow::anyhow;
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{ClientsMetadata, LoginForm};
+use block_mesh_common::interfaces::ws_api::WsServerMessage;
+use futures_util::{StreamExt, TryStreamExt};
 use logger_general::tracing::setup_tracing;
+use rand::{thread_rng, Rng};
+use reqwest_websocket::{Message, RequestBuilderExt};
 use std::process::ExitCode;
 use std::sync::Arc;
 use std::time::Duration;
@@ -16,7 +21,7 @@ pub async fn login_mode(
     depin_aggregator: Option<String>,
 ) -> anyhow::Result<ExitCode> {
     let url = url.to_string();
-    let url = Arc::new(url.to_string());
+    let email = email.to_string();
     info!("CLI running with url {}", url);
     let api_token = match login_to_network(
         &url,
@@ -37,9 +42,92 @@ pub async fn login_mode(
     setup_tracing(api_token, DeviceType::Cli);
 
     info!("Login successful");
+    info!("CLI starting");
+    let api_token = api_token.to_string();
+    let session_metadata = ClientsMetadata {
+        depin_aggregator,
+        device_type: DeviceType::Cli,
+    };
+    if is_ws_feature_connection().await? {
+        connect_ws(url, email, api_token, session_metadata).await?;
+    } else {
+        poll(url, email, api_token, session_metadata).await;
+    }
+    Ok(ExitCode::SUCCESS)
+}
+async fn connect_ws(
+    _url: String,
+    email: String,
+    api_token: String,
+    _session_metadata: ClientsMetadata,
+) -> anyhow::Result<()> {
+    let client = reqwest::Client::new();
+    let url = format!("ws://localhost:8000/ws?email={email}&api_token={api_token}");
+    let ws = client
+        .get(&url)
+        .upgrade()
+        .send()
+        .await?
+        .into_websocket()
+        .await?;
+    let (_sink, mut stream) = ws.split();
+    while let Some(msg) = stream.try_next().await? {
+        match msg {
+            Message::Text(text) => {
+                if let Ok(payload) = serde_json::from_str::<WsServerMessage>(text.as_str()) {
+                    match payload {
+                        WsServerMessage::AssignTask(_task) => {}
+                        WsServerMessage::RequestBandwidthReport => {}
+                        WsServerMessage::RequestUptimeReport => {}
+                        WsServerMessage::CloseConnection => {}
+                    }
+                }
+            }
+            Message::Binary(_) => {}
+            Message::Ping(_) => {}
+            Message::Pong(_) => {}
+            Message::Close { .. } => break,
+        }
+    }
+    todo!()
+}
+async fn is_ws_feature_connection() -> anyhow::Result<bool> {
+    let client = reqwest::Client::new();
+    let response = client
+        .get("https://feature-flags.blockmesh.xyz/read-flag/use_websocket")
+        .send()
+        .await?;
+    if response.status().is_success() {
+        let value = response.text().await?;
+        let is_enabled: bool = value.trim().parse()?;
+        if !is_enabled {
+            return Ok(false);
+        }
+    } else {
+        return Err(anyhow!(
+            "Failed to fetch 'use_websocket' feature flag: {response:#?}"
+        ));
+    }
+
+    let response = client
+        .get("https://feature-flags.blockmesh.xyz/read-flag/use_websocket_percent")
+        .send()
+        .await?;
+    if response.status().is_success() {
+        let value = response.text().await?;
+        let percentage: u32 = value.parse()?;
+        let probe = thread_rng().gen_range(0, 100);
+        Ok(probe < percentage)
+    } else {
+        Err(anyhow!(
+            "Failed to fetch 'use_websocket_percent' feature flag: {response:#?}"
+        ))
+    }
+}
+async fn poll(url: String, email: String, api_token: String, session_metadata: ClientsMetadata) {
+    let url = Arc::new(url);
     let email = Arc::new(email.to_string());
     let api_token = Arc::new(api_token.to_string());
-    info!("CLI starting");
     let u = url.clone();
     let e = email.clone();
     let a = api_token.clone();
@@ -53,10 +141,6 @@ pub async fn login_mode(
     let u = url.clone();
     let e = email.clone();
     let a = api_token.clone();
-    let session_metadata = ClientsMetadata {
-        depin_aggregator,
-        device_type: DeviceType::Cli,
-    };
     let uptime_poller = tokio::spawn(async move {
         loop {
             let _ = report_uptime(&u, e.as_ref(), a.as_ref(), session_metadata.clone()).await;
@@ -80,5 +164,4 @@ pub async fn login_mode(
         o = uptime_poller => error!("uptime_poller failed {:?}", o),
         o = bandwidth_poller => error!("bandwidth_poller failed {:?}", o)
     }
-    Ok(ExitCode::SUCCESS)
 }
