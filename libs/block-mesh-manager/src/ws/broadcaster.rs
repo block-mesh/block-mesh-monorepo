@@ -91,27 +91,21 @@ impl Broadcaster {
         count: usize,
     ) -> Vec<(Uuid, String)> {
         let drained = self.move_queue(count);
-        join_all(
-            drained
-                .clone()
-                .into_iter()
-                .map(|user_id| {
-                    if let Some(entry) = self.sockets.get(&user_id) {
-                        let tx = entry.value().clone();
-                        let msgs = messages.clone();
-                        Some(async move {
-                            for msg in msgs {
-                                if let Err(error) = tx.send(msg).await {
-                                    tracing::error!("Error while queuing WS message: {error}");
-                                }
-                            }
-                        })
-                    } else {
-                        None
+        join_all(drained.clone().into_iter().filter_map(|user_id| {
+            if let Some(entry) = self.sockets.get(&user_id) {
+                let tx = entry.value().clone();
+                let msgs = messages.clone();
+                Some(async move {
+                    for msg in msgs {
+                        if let Err(error) = tx.send(msg).await {
+                            tracing::error!("Error while queuing WS message: {error}");
+                        }
                     }
                 })
-                .flatten(),
-        )
+            } else {
+                None
+            }
+        }))
         .await;
         drained
     }
