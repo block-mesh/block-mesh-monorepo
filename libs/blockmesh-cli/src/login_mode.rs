@@ -1,17 +1,25 @@
 use crate::helpers::{
-    get_polling_interval, login_to_network, report_uptime, submit_bandwidth, task_poller,
+    get_polling_interval, login_to_network, report_uptime, run_task, submit_bandwidth, task_poller,
 };
 use anyhow::anyhow;
 use block_mesh_common::constants::DeviceType;
-use block_mesh_common::interfaces::server_api::{ClientsMetadata, LoginForm};
-use block_mesh_common::interfaces::ws_api::WsServerMessage;
-use futures_util::{StreamExt, TryStreamExt};
+use block_mesh_common::interfaces::server_api::{
+    ClientsMetadata, LoginForm, ReportBandwidthRequest, ReportUptimeRequest, SubmitTaskRequest,
+};
+use block_mesh_common::interfaces::ws_api::{WsClientMessage, WsServerMessage};
+use futures_util::{SinkExt, StreamExt, TryStreamExt};
 use logger_general::tracing::setup_tracing;
 use rand::{thread_rng, Rng};
 use reqwest_websocket::{Message, RequestBuilderExt};
+use speed_test::download::test_download;
+use speed_test::latency::test_latency;
+use speed_test::metadata::fetch_metadata;
+use speed_test::upload::test_upload;
+use speed_test::Metadata;
 use std::process::ExitCode;
 use std::sync::Arc;
 use std::time::Duration;
+use tokio::time::Instant;
 use uuid::Uuid;
 
 pub async fn login_mode(
@@ -43,7 +51,6 @@ pub async fn login_mode(
 
     info!("Login successful");
     info!("CLI starting");
-    let api_token = api_token.to_string();
     let session_metadata = ClientsMetadata {
         depin_aggregator,
         device_type: DeviceType::Cli,
@@ -58,7 +65,7 @@ pub async fn login_mode(
 async fn connect_ws(
     _url: String,
     email: String,
-    api_token: String,
+    api_token: Uuid,
     _session_metadata: ClientsMetadata,
 ) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
@@ -70,16 +77,78 @@ async fn connect_ws(
         .await?
         .into_websocket()
         .await?;
-    let (_sink, mut stream) = ws.split();
+    let (mut sink, mut stream) = ws.split();
     while let Some(msg) = stream.try_next().await? {
         match msg {
             Message::Text(text) => {
                 if let Ok(payload) = serde_json::from_str::<WsServerMessage>(text.as_str()) {
                     match payload {
-                        WsServerMessage::AssignTask(_task) => {}
-                        WsServerMessage::RequestBandwidthReport => {}
-                        WsServerMessage::RequestUptimeReport => {}
-                        WsServerMessage::CloseConnection => {}
+                        WsServerMessage::AssignTask(task) => {
+                            let Metadata {
+                                country,
+                                ip,
+                                asn,
+                                colo,
+                                ..
+                            } = fetch_metadata().await.unwrap_or_default();
+                            let task_start = Instant::now();
+                            let completed_task =
+                                run_task(&task.url, &task.method, task.headers, task.body).await?;
+                            let response_time =
+                                Some(std::cmp::max(task_start.elapsed().as_millis(), 1) as f64);
+                            let report = SubmitTaskRequest {
+                                email: email.clone(),
+                                api_token,
+                                task_id: task.id,
+                                response_code: Some(completed_task.status),
+                                country: Some(country),
+                                ip: Some(ip),
+                                asn: Some(asn),
+                                colo: Some(colo),
+                                response_time,
+                                response_body: Some(completed_task.raw),
+                            };
+                            sink.send(Message::Text(serde_json::to_string(
+                                &WsClientMessage::CompleteTask(report),
+                            )?))
+                            .await?;
+                        }
+                        WsServerMessage::RequestBandwidthReport => {
+                            let download_speed = test_download(100_000).await.unwrap_or_default();
+                            let upload_speed = test_upload(100_000).await.unwrap_or_default();
+                            let latency = test_latency().await.unwrap_or_default();
+                            let metadata = fetch_metadata().await.unwrap_or_default();
+
+                            let report = ReportBandwidthRequest {
+                                email: email.to_string(),
+                                api_token,
+                                download_speed,
+                                upload_speed,
+                                latency,
+                                city: metadata.city,
+                                country: metadata.country,
+                                ip: metadata.ip,
+                                asn: metadata.asn,
+                                colo: metadata.colo,
+                            };
+                            sink.send(Message::Text(serde_json::to_string(
+                                &WsClientMessage::ReportBandwidth(report),
+                            )?))
+                            .await?;
+                        }
+                        WsServerMessage::RequestUptimeReport => {
+                            let cf_meta = fetch_metadata().await.unwrap_or_default();
+                            let report = ReportUptimeRequest {
+                                email: email.clone(),
+                                api_token,
+                                ip: Some(cf_meta.ip).filter(|ip| !ip.is_empty()),
+                            };
+                            sink.send(Message::Text(serde_json::to_string(
+                                &WsClientMessage::ReportUptime(report),
+                            )?))
+                            .await?;
+                        }
+                        WsServerMessage::CloseConnection => break,
                     }
                 }
             }
@@ -89,6 +158,7 @@ async fn connect_ws(
             Message::Close { .. } => break,
         }
     }
+    // TODO: close WS
     todo!()
 }
 async fn is_ws_feature_connection() -> anyhow::Result<bool> {
@@ -124,7 +194,7 @@ async fn is_ws_feature_connection() -> anyhow::Result<bool> {
         ))
     }
 }
-async fn poll(url: String, email: String, api_token: String, session_metadata: ClientsMetadata) {
+async fn poll(url: String, email: String, api_token: Uuid, session_metadata: ClientsMetadata) {
     let url = Arc::new(url);
     let email = Arc::new(email.to_string());
     let api_token = Arc::new(api_token.to_string());
