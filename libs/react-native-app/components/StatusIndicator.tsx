@@ -40,12 +40,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     flexDirection: 'row',
     alignItems: 'center',
-    width: '80%'
+    width: '95%'
   },
   statusText: {
     color: 'white',
-    marginLeft: 10,
-    fontSize: 16
+    fontSize: 22
   }
 })
 

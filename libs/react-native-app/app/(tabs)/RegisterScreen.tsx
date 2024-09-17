@@ -30,6 +30,8 @@ export default function RegisterScreen() {
       setTimeout(() => {
         router.replace('/(tabs)/DashboardScreen')
       }, 1_500)
+    } else {
+      setRedirect(false)
     }
   })
 

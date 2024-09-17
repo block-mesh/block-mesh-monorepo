@@ -109,6 +109,7 @@ pub fn run_login_mode(url: &str, email: &str, password: &str) {
     runtime.block_on(async {
         let notify = get_notify();
         set_status(FFIStatus::RUNNING);
+        let url_s = url.to_string();
         let task = tokio::spawn(async move {
             login_mode(&url, &email, &password, Some("Mobile".to_string())).await
         });
@@ -119,10 +120,12 @@ pub fn run_login_mode(url: &str, email: &str, password: &str) {
         tokio::select! {
             o = task => {
                 set_status(FFIStatus::WAITING);
+                debug_stop(&url_s);
                 eprintln!("Task died {:?}", o)
             },
             o = cancel_future=> {
                 set_status(FFIStatus::WAITING);
+                debug_stop(&url_s);
                 eprintln!("Cancel request {:?}", o)
             },
         }
