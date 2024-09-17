@@ -1,4 +1,4 @@
-use crate::ws::connection_manager::settings_loop;
+use crate::ws::ws_loop::ws_loop;
 use anyhow::Context;
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
@@ -67,15 +67,21 @@ impl Broadcaster {
         drained
     }
 
-    pub async fn queue(&self, message: WsServerMessage, count: usize) {
-        let drained = self.move_queue(count);
-        join_all(drained.into_iter().map(|user_id| {
-            let entry = self.sockets.get(&user_id).unwrap();
+    pub async fn broadcast_to_user(
+        &self,
+        messages: impl IntoIterator<Item = WsServerMessage> + Clone,
+        id: (Uuid, String),
+    ) {
+        let entry = self.sockets.get(&id);
+        let msgs = messages.clone();
+        if let Some(entry) = entry {
             let tx = entry.value().clone();
-            let msg = message.clone();
-            async move { tx.send(msg).await }
-        }))
-        .await;
+            for msg in msgs {
+                if let Err(error) = tx.send(msg).await {
+                    tracing::error!("Error while queuing WS message: {error}");
+                }
+            }
+        }
     }
 
     /// returns a number of nodes to which [`WsServerMessage`]s were sent
@@ -83,10 +89,9 @@ impl Broadcaster {
         &self,
         messages: impl IntoIterator<Item = WsServerMessage> + Clone,
         count: usize,
-    ) -> usize {
+    ) -> Vec<(Uuid, String)> {
         let drained = self.move_queue(count);
-        let queued_messages_count = drained.len();
-        join_all(drained.into_iter().map(|user_id| {
+        join_all(drained.clone().into_iter().map(|user_id| {
             let entry = self.sockets.get(&user_id).unwrap();
             let tx = entry.value().clone();
 
@@ -100,7 +105,7 @@ impl Broadcaster {
             }
         }))
         .await;
-        queued_messages_count
+        drained
     }
 
     pub fn subscribe(
@@ -145,8 +150,7 @@ impl Broadcaster {
         .context("SERVER_UUID evn var contains invalid UUID value")?;
 
         let _cron_task = tokio::spawn(async move {
-            let _ =
-                settings_loop(&pool, &user_id, period, messages, window_size, broadcaster).await;
+            let _ = ws_loop(&pool, &user_id, period, messages, window_size, broadcaster).await;
         });
         Ok(())
     }
