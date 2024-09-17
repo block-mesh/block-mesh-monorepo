@@ -110,7 +110,7 @@ impl Broadcaster {
                         None
                     }
                 })
-                .filter_map(|result| result),
+                .flatten(),
         )
         .await;
         drained
