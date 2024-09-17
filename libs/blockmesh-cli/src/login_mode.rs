@@ -63,13 +63,16 @@ pub async fn login_mode(
     Ok(ExitCode::SUCCESS)
 }
 async fn connect_ws(
-    _url: String,
+    url: String,
     email: String,
     api_token: Uuid,
     _session_metadata: ClientsMetadata,
 ) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
-    let url = format!("ws://localhost:8000/ws?email={email}&api_token={api_token}");
+    let url = url
+        .replace("http://", "ws://")
+        .replace("https://", "wss://");
+    let url = format!("{url}/ws?email={email}&api_token={api_token}");
     let ws = client
         .get(&url)
         .upgrade()
