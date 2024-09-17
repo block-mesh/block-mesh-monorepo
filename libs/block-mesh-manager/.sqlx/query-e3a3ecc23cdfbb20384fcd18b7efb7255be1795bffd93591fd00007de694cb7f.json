@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n           WITH\n            extant AS (\n                SELECT id FROM daily_stats WHERE id = $1\n            ),\n            inserted AS (\n                INSERT INTO daily_stats (id, created_at, user_id, tasks_count, status, day, uptime)\n                SELECT $1, $2, $3, $4, $5, $6, $7\n                WHERE NOT EXISTS (SELECT FROM extant)\n                RETURNING id\n            )\n        SELECT id FROM inserted\n        UNION ALL\n        SELECT id FROM extant\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Uuid",
+        "Int4",
+        "Text",
+        "Date",
+        "Float8"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "e3a3ecc23cdfbb20384fcd18b7efb7255be1795bffd93591fd00007de694cb7f"
+}
