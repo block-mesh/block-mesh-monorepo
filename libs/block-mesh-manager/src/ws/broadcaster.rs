@@ -91,19 +91,27 @@ impl Broadcaster {
         count: usize,
     ) -> Vec<(Uuid, String)> {
         let drained = self.move_queue(count);
-        join_all(drained.clone().into_iter().map(|user_id| {
-            let entry = self.sockets.get(&user_id).unwrap();
-            let tx = entry.value().clone();
-
-            let msgs = messages.clone();
-            async move {
-                for msg in msgs {
-                    if let Err(error) = tx.send(msg).await {
-                        tracing::error!("Error while queuing WS message: {error}");
+        join_all(
+            drained
+                .clone()
+                .into_iter()
+                .map(|user_id| {
+                    if let Some(entry) = self.sockets.get(&user_id) {
+                        let tx = entry.value().clone();
+                        let msgs = messages.clone();
+                        Some(async move {
+                            for msg in msgs {
+                                if let Err(error) = tx.send(msg).await {
+                                    tracing::error!("Error while queuing WS message: {error}");
+                                }
+                            }
+                        })
+                    } else {
+                        None
                     }
-                }
-            }
-        }))
+                })
+                .filter_map(|result| result),
+        )
         .await;
         drained
     }
@@ -114,12 +122,11 @@ impl Broadcaster {
         ip: String,
         sink_sender: mpsc::Sender<WsServerMessage>,
     ) -> broadcast::Receiver<WsServerMessage> {
-        let old_value = self
+        let _ = self
             .sockets
             .insert((user_id, ip.clone()), sink_sender.clone());
         let queue = &mut self.queue.lock().unwrap();
         queue.push_back((user_id, ip));
-        debug_assert!(old_value.is_none());
         self.global_transmitter.subscribe()
     }
 

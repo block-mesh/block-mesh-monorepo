@@ -14,10 +14,10 @@ tokio = { workspace = true, features = ["full"] }
 serde = { workspace = true, features = ['derive'] }
 serde_json = { workspace = true }
 reqwest = { workspace = true, default-features = false, features = [
-    "json",
-    "rustls-tls",
+  "json",
+  "rustls-tls",
 ] }
-ureq = "2.10.1"
+ureq = { workspace = true }
 tracing = { workspace = true }
 anyhow = { workspace = true }
 uuid = { workspace = true, features = ["v4", "fast-rng", "macro-diagnostics", "serde", "js"] }
@@ -29,7 +29,7 @@ rayon = { workspace = true }
 lazy_static = { workspace = true }
 once_cell = { workspace = true }
 reqwest-websocket = { workspace = true }
-rand = "0.7.3"
+rand = { workspace = true }
 
 [lib]
 crate-type = ["cdylib", "rlib", "staticlib"]

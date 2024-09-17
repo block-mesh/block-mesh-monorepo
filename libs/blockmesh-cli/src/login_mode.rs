@@ -57,33 +57,36 @@ pub async fn login_mode(
         depin_aggregator,
         device_type: DeviceType::Cli,
     };
-    let mut prev_is_ws_feature = false;
-    let mut stop_notifier = Arc::new(Notify::new());
+    let mut prev_is_ws_feature: Option<bool> = None;
+    let stop_notifier = Arc::new(Notify::new());
     loop {
         let is_ws_feature = is_ws_feature_connection().await.unwrap_or_default();
-        if is_ws_feature != prev_is_ws_feature {
-            stop_notifier.notify_one();
-        }
-        prev_is_ws_feature = is_ws_feature;
-        stop_notifier = Arc::new(Notify::new());
-        if is_ws_feature {
-            connect_ws(
-                url.clone(),
-                email.clone(),
-                api_token,
-                session_metadata.clone(),
-                stop_notifier.clone(),
-            )
-            .await?;
-        } else {
-            poll(
-                url.clone(),
-                email.clone(),
-                api_token,
-                session_metadata.clone(),
-                stop_notifier.clone(),
-            )
-            .await;
+        if prev_is_ws_feature.is_none()
+            || (prev_is_ws_feature.is_some() && is_ws_feature != prev_is_ws_feature.unwrap())
+        {
+            prev_is_ws_feature = Some(is_ws_feature);
+            stop_notifier.notify_waiters();
+            if is_ws_feature {
+                tracing::info!("Starting WebSocket");
+                connect_ws(
+                    url.clone(),
+                    email.clone(),
+                    api_token,
+                    session_metadata.clone(),
+                    stop_notifier.clone(),
+                )
+                .await?;
+            } else {
+                tracing::info!("Polling");
+                poll(
+                    url.clone(),
+                    email.clone(),
+                    api_token,
+                    session_metadata.clone(),
+                    stop_notifier.clone(),
+                )
+                .await;
+            }
         }
         tokio::time::sleep(Duration::from_secs(30)).await;
     }
@@ -124,6 +127,7 @@ async fn connect_ws(
                         if matches!(payload, WsServerMessage::CloseConnection) {
                             break;
                         }
+                        tracing::info!("Got WS message {:#?}", payload);
                         handle_ws_message(payload, tx.clone(), email.clone(), api_token).await;
                     }
                 }
@@ -234,8 +238,9 @@ async fn is_ws_feature_connection() -> anyhow::Result<bool> {
         .await?;
     if response.status().is_success() {
         let value = response.text().await?;
-        let percentage: u32 = value.parse()?;
-        let probe = thread_rng().gen_range(0, 100);
+        let percentage: i32 = value.parse()?;
+        let mut rng = thread_rng();
+        let probe: i32 = rng.gen_range(0..100);
         Ok(probe < percentage)
     } else {
         Err(anyhow!(
