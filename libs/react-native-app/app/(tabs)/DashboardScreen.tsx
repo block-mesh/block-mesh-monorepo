@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from 'react'
 import ParallaxScrollView from '@/components/ParallaxScrollView'
-import { Alert, Image } from 'react-native'
+import { Image } from 'react-native'
 import { useStorage } from '@/hooks/useStorage'
-import { ThemedText } from '@/components/ThemedText'
 import { ThemedView } from '@/components/ThemedView'
 import { colors, styles } from '@/utils/theme'
 import CustomButton from '@/components/CustomButton'
@@ -10,20 +9,18 @@ import { check_token, dashboard } from '@/utils/auth'
 import { DashboardResponse } from '@/utils/apiTypes'
 import { useInterval } from '@/hooks/useInterval'
 import { get_lib_status, run_lib, stop_lib } from '@/utils/background'
-import { ActivityIndicator } from 'react-native'
-import { Switch, Case, Default } from 'react-if'
 import VerticalContainer from '@/components/VerticalContainer'
 import * as Location from 'expo-location'
 import { router } from 'expo-router'
 import { init_background } from '@/utils/backgroundFetch'
+import StatusWithIcon from '@/components/StatusIndicator'
 
 export default function DashboardScreen() {
   const storage = useStorage()
   const [data, setData] = useState<DashboardResponse>()
   const [status, setStatus] = useState(-1)
-  const [stringStatus, setStringStatus] = useState('Please login first')
-  const [disableToggleButton, setDisableToggleButton] = useState(false)
-  const [location, setLocation] = useState('')
+  const [_stringStatus, setStringStatus] = useState('Please login first')
+  const [_location, setLocation] = useState('')
   const [bgInit, setBgInit] = useState(false)
   const [grantedLocation, setGrantedLocation] = useState(false)
   const [canStart, setCanStart] = useState(false)
@@ -45,27 +42,27 @@ export default function DashboardScreen() {
     })()
   }, [storage.url, storage.password, storage.email, storage.api_token])
 
-  useEffect(() => {
-    (async () => {
-      let { status: fg_status } = await Location.requestForegroundPermissionsAsync()
-      if (fg_status !== 'granted') {
-        return
-      }
-
-      let { status: bg_status } = await Location.requestBackgroundPermissionsAsync()
-      if (bg_status !== 'granted') {
-        return
-      }
-      setGrantedLocation(true)
-
-      let location = await Location.getCurrentPositionAsync({})
-      const address = await Location.reverseGeocodeAsync(location.coords)
-      if (address.length > 0) {
-        const add = address[0]
-        setLocation(`${add.city}`)
-      }
-    })()
-  }, [])
+  // useEffect(() => {
+  //   (async () => {
+  //     let { status: fg_status } = await Location.requestForegroundPermissionsAsync()
+  //     if (fg_status !== 'granted') {
+  //       return
+  //     }
+  //
+  //     let { status: bg_status } = await Location.requestBackgroundPermissionsAsync()
+  //     if (bg_status !== 'granted') {
+  //       return
+  //     }
+  //     setGrantedLocation(true)
+  //
+  //     let location = await Location.getCurrentPositionAsync({})
+  //     const address = await Location.reverseGeocodeAsync(location.coords)
+  //     if (address.length > 0) {
+  //       const add = address[0]
+  //       setLocation(`${add.city}`)
+  //     }
+  //   })()
+  // }, [])
 
   useInterval(async () => {
     if (!grantedLocation) {
@@ -80,7 +77,13 @@ export default function DashboardScreen() {
   }, 15_000)
 
   useInterval(() => {
-    // Ping FFI for status
+    if (storage.url && storage.email && storage.password && storage.api_token) {
+      run_lib({
+        url: storage.url,
+        email: storage.email,
+        password: storage.password
+      })
+    }
     setStatus(get_lib_status())
   }, 3_000)
 
@@ -130,42 +133,34 @@ export default function DashboardScreen() {
       }>
       <ThemedView style={styles.stepContainer}>
         <VerticalContainer>
-          <Switch>
-            <Case condition={data?.connected && status === 1}>
-              <VerticalContainer>
-                <ThemedText type="subtitle">Connected</ThemedText>
-                <ActivityIndicator size="large" color="#00ff00" />
-              </VerticalContainer>
-            </Case>
-            <Default>
-              <ThemedText type="subtitle">Not connected</ThemedText>
-            </Default>
-          </Switch>
-          <ThemedText type="subtitle">{location}</ThemedText>
-          <CustomButton
-            disabled={disableToggleButton}
-            title={`${stringStatus}`}
-            buttonStyles={styles.button}
-            buttonText={styles.buttonText}
-            onPress={
-              () => {
-                if (!storage.url || !storage.email || !storage.password) {
-                  return
-                }
-                if (get_lib_status() === 1) {
-                  stop_lib(storage.url)
-                } else {
+          <VerticalContainer>
+            <StatusWithIcon status={status === 1} text={'Running'} />
+            <StatusWithIcon status={!!data?.connected} text={'Connected'} />
+          </VerticalContainer>
+          {/*<ThemedText type="subtitle">{location}</ThemedText>*/}
+          {/*<CustomButton*/}
+          {/*  title={`${stringStatus}`}*/}
+          {/*  buttonStyles={styles.button}*/}
+          {/*  buttonText={styles.buttonText}*/}
+          {/*  onPress={*/}
+          {/*    () => {*/}
+          {/*      if (!storage.url || !storage.email || !storage.password) {*/}
+          {/*        return*/}
+          {/*      }*/}
+          {/*      if (get_lib_status() === 1) {*/}
+          {/*        stop_lib(storage.url)*/}
+          {/*      } else {*/}
 
-                  run_lib({
-                    url: storage.url,
-                    email: storage.email,
-                    password: storage.password
-                  })
-                  setStringStatus('Click to turn off')
-                }
-              }
-            }
-          />
+          {/*        run_lib({*/}
+          {/*          url: storage.url,*/}
+          {/*          email: storage.email,*/}
+          {/*          password: storage.password*/}
+          {/*        })*/}
+          {/*        setStringStatus('Click to turn off')*/}
+          {/*      }*/}
+          {/*    }*/}
+          {/*  }*/}
+          {/*/>*/}
           <CustomButton
             title={'Logout'}
             buttonStyles={styles.button}
@@ -179,6 +174,5 @@ export default function DashboardScreen() {
         </VerticalContainer>
       </ThemedView>
     </ParallaxScrollView>
-
   )
 }

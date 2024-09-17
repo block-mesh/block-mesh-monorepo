@@ -59,16 +59,20 @@ export const styles = StyleSheet.create({
     paddingHorizontal: 32,
     borderRadius: 10,
     elevation: 3,
+    width: '95%',
     // backgroundColor: colors['orange']
-    borderColor: colors['orange'],
-    borderWidth: 2
+    borderColor: colors['magenta'],
+    backgroundColor: colors['orange'],
+    borderWidth: 3,
+    marginTop: 5,
+    marginBottom: 5
   },
   buttonText: {
     fontSize: 16,
     lineHeight: 21,
     fontWeight: 'bold',
     letterSpacing: 0.25,
-    color: colors['magenta']
+    color: colors['dark-blue']
   }
 })
 
