@@ -19,6 +19,8 @@ use speed_test::Metadata;
 use std::process::ExitCode;
 use std::sync::Arc;
 use std::time::Duration;
+use tokio::sync::mpsc::Sender;
+use tokio::sync::Notify;
 use tokio::time::Instant;
 use uuid::Uuid;
 
@@ -55,18 +57,43 @@ pub async fn login_mode(
         depin_aggregator,
         device_type: DeviceType::Cli,
     };
-    if is_ws_feature_connection().await? {
-        connect_ws(url, email, api_token, session_metadata).await?;
-    } else {
-        poll(url, email, api_token, session_metadata).await;
+    let mut prev_is_ws_feature = false;
+    let mut stop_notifier = Arc::new(Notify::new());
+    loop {
+        let is_ws_feature = is_ws_feature_connection().await.unwrap_or_default();
+        if is_ws_feature != prev_is_ws_feature {
+            stop_notifier.notify_one();
+        }
+        prev_is_ws_feature = is_ws_feature;
+        stop_notifier = Arc::new(Notify::new());
+        if is_ws_feature {
+            connect_ws(
+                url.clone(),
+                email.clone(),
+                api_token,
+                session_metadata.clone(),
+                stop_notifier.clone(),
+            )
+            .await?;
+        } else {
+            poll(
+                url.clone(),
+                email.clone(),
+                api_token,
+                session_metadata.clone(),
+                stop_notifier.clone(),
+            )
+            .await;
+        }
+        tokio::time::sleep(Duration::from_secs(30)).await;
     }
-    Ok(ExitCode::SUCCESS)
 }
 async fn connect_ws(
     url: String,
     email: String,
     api_token: Uuid,
     _session_metadata: ClientsMetadata,
+    stop_notifier: Arc<Notify>,
 ) -> anyhow::Result<()> {
     let client = reqwest::Client::new();
     let url = url
@@ -81,88 +108,107 @@ async fn connect_ws(
         .into_websocket()
         .await?;
     let (mut sink, mut stream) = ws.split();
-    while let Some(msg) = stream.try_next().await? {
-        match msg {
-            Message::Text(text) => {
-                if let Ok(payload) = serde_json::from_str::<WsServerMessage>(text.as_str()) {
-                    match payload {
-                        WsServerMessage::AssignTask(task) => {
-                            let Metadata {
-                                country,
-                                ip,
-                                asn,
-                                colo,
-                                ..
-                            } = fetch_metadata().await.unwrap_or_default();
-                            let task_start = Instant::now();
-                            let completed_task =
-                                run_task(&task.url, &task.method, task.headers, task.body).await?;
-                            let response_time =
-                                Some(std::cmp::max(task_start.elapsed().as_millis(), 1) as f64);
-                            let report = SubmitTaskRequest {
-                                email: email.clone(),
-                                api_token,
-                                task_id: task.id,
-                                response_code: Some(completed_task.status),
-                                country: Some(country),
-                                ip: Some(ip),
-                                asn: Some(asn),
-                                colo: Some(colo),
-                                response_time,
-                                response_body: Some(completed_task.raw),
-                            };
-                            sink.send(Message::Text(serde_json::to_string(
-                                &WsClientMessage::CompleteTask(report),
-                            )?))
-                            .await?;
+    let (tx, mut rx) = tokio::sync::mpsc::channel::<WsClientMessage>(10);
+    let messenger_handle = tokio::spawn(async move {
+        while let Some(msg) = rx.recv().await {
+            if let Ok(payload) = serde_json::to_string(&msg) {
+                let _ = sink.send(Message::Text(payload)).await;
+            }
+        }
+    });
+    let worker_handle = tokio::spawn(async move {
+        while let Some(msg) = stream.try_next().await.unwrap_or_default() {
+            match msg {
+                Message::Text(text) => {
+                    if let Ok(payload) = serde_json::from_str::<WsServerMessage>(text.as_str()) {
+                        if matches!(payload, WsServerMessage::CloseConnection) {
+                            break;
                         }
-                        WsServerMessage::RequestBandwidthReport => {
-                            let download_speed = test_download(100_000).await.unwrap_or_default();
-                            let upload_speed = test_upload(100_000).await.unwrap_or_default();
-                            let latency = test_latency().await.unwrap_or_default();
-                            let metadata = fetch_metadata().await.unwrap_or_default();
-
-                            let report = ReportBandwidthRequest {
-                                email: email.to_string(),
-                                api_token,
-                                download_speed,
-                                upload_speed,
-                                latency,
-                                city: metadata.city,
-                                country: metadata.country,
-                                ip: metadata.ip,
-                                asn: metadata.asn,
-                                colo: metadata.colo,
-                            };
-                            sink.send(Message::Text(serde_json::to_string(
-                                &WsClientMessage::ReportBandwidth(report),
-                            )?))
-                            .await?;
-                        }
-                        WsServerMessage::RequestUptimeReport => {
-                            let cf_meta = fetch_metadata().await.unwrap_or_default();
-                            let report = ReportUptimeRequest {
-                                email: email.clone(),
-                                api_token,
-                                ip: Some(cf_meta.ip).filter(|ip| !ip.is_empty()),
-                            };
-                            sink.send(Message::Text(serde_json::to_string(
-                                &WsClientMessage::ReportUptime(report),
-                            )?))
-                            .await?;
-                        }
-                        WsServerMessage::CloseConnection => break,
+                        handle_ws_message(payload, tx.clone(), email.clone(), api_token).await;
                     }
                 }
+                Message::Binary(_) => {}
+                Message::Ping(_) => {}
+                Message::Pong(_) => {}
+                Message::Close { .. } => break,
             }
-            Message::Binary(_) => {}
-            Message::Ping(_) => {}
-            Message::Pong(_) => {}
-            Message::Close { .. } => break,
         }
+    });
+    tokio::select! {
+        o = messenger_handle => error!("Messenger handle stopped receiving messages {o:?}"),
+        o = worker_handle => info!("WS Connection was closed {o:?}"),
+        o = stop_notifier.notified() => info!("WS connection was interrupted by a feature flag change {o:?}")
     }
-    // TODO: close WS
-    todo!()
+    Ok(())
+}
+
+async fn handle_ws_message(
+    payload: WsServerMessage,
+    tx: Sender<WsClientMessage>,
+    email: String,
+    api_token: Uuid,
+) {
+    let _task = tokio::spawn(async move {
+        match payload {
+            WsServerMessage::AssignTask(task) => {
+                let Metadata {
+                    country,
+                    ip,
+                    asn,
+                    colo,
+                    ..
+                } = fetch_metadata().await.unwrap_or_default();
+                let task_start = Instant::now();
+                let completed_task = run_task(&task.url, &task.method, task.headers, task.body)
+                    .await
+                    .unwrap();
+                let response_time = Some(std::cmp::max(task_start.elapsed().as_millis(), 1) as f64);
+                let report = SubmitTaskRequest {
+                    email: email.clone(),
+                    api_token,
+                    task_id: task.id,
+                    response_code: Some(completed_task.status),
+                    country: Some(country),
+                    ip: Some(ip),
+                    asn: Some(asn),
+                    colo: Some(colo),
+                    response_time,
+                    response_body: Some(completed_task.raw),
+                };
+                let _ = tx.send(WsClientMessage::CompleteTask(report)).await;
+            }
+            WsServerMessage::RequestBandwidthReport => {
+                let download_speed = test_download(100_000).await.unwrap_or_default();
+                let upload_speed = test_upload(100_000).await.unwrap_or_default();
+                let latency = test_latency().await.unwrap_or_default();
+                let metadata = fetch_metadata().await.unwrap_or_default();
+
+                let report = ReportBandwidthRequest {
+                    email: email.to_string(),
+                    api_token,
+                    download_speed,
+                    upload_speed,
+                    latency,
+                    city: metadata.city,
+                    country: metadata.country,
+                    ip: metadata.ip,
+                    asn: metadata.asn,
+                    colo: metadata.colo,
+                };
+                let _ = tx.send(WsClientMessage::ReportBandwidth(report)).await;
+            }
+            WsServerMessage::RequestUptimeReport => {
+                let cf_meta = fetch_metadata().await.unwrap_or_default();
+                let report = ReportUptimeRequest {
+                    email: email.clone(),
+                    api_token,
+                    ip: Some(cf_meta.ip).filter(|ip| !ip.is_empty()),
+                };
+                let _ = tx.send(WsClientMessage::ReportUptime(report)).await;
+            }
+            WsServerMessage::CloseConnection => {}
+        }
+    });
 }
 async fn is_ws_feature_connection() -> anyhow::Result<bool> {
     let client = reqwest::Client::new();
@@ -197,7 +243,13 @@ async fn is_ws_feature_connection() -> anyhow::Result<bool> {
         ))
     }
 }
-async fn poll(url: String, email: String, api_token: Uuid, session_metadata: ClientsMetadata) {
+async fn poll(
+    url: String,
+    email: String,
+    api_token: Uuid,
+    session_metadata: ClientsMetadata,
+    stop_notifier: Arc<Notify>,
+) {
     let url = Arc::new(url);
     let email = Arc::new(email.to_string());
     let api_token = Arc::new(api_token.to_string());
@@ -231,10 +283,10 @@ async fn poll(url: String, email: String, api_token: Uuid, session_metadata: Cli
             tokio::time::sleep(Duration::from_secs(polling_interval as u64)).await;
         }
     });
-
     tokio::select! {
         o = task_poller => error!("task_poller failed {:?}", o),
         o = uptime_poller => error!("uptime_poller failed {:?}", o),
-        o = bandwidth_poller => error!("bandwidth_poller failed {:?}", o)
+        o = bandwidth_poller => error!("bandwidth_poller failed {:?}", o),
+        o = stop_notifier.notified() => info!("Polling was interrupted by a feature flag change: {:?} ", o)
     }
 }
