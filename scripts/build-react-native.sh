@@ -6,6 +6,7 @@ source "${ROOT}/scripts/setup.sh"
 
 cd "${ROOT}" || exit 1
 
+ensure ./script/bump-ios-build.sh
 ensure ./scripts/build-native.sh --both
 
 ensure cd "${ROOT}/libs/react-native-app" && npx eas build --platform android --local

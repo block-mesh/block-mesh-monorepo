@@ -27,11 +27,11 @@ pub async fn get_connection_pool(
             .options([
                 (
                     "statement_timeout",
-                    env::var("statement_timeout").unwrap_or("500ms".to_string()),
+                    env::var("statement_timeout").unwrap_or("0".to_string()),
                 ),
                 (
                     "idle_in_transaction_session_timeout",
-                    env::var("idle_in_transaction_session_timeout").unwrap_or("500ms".to_string()),
+                    env::var("idle_in_transaction_session_timeout").unwrap_or("3000ms".to_string()),
                 ),
             ])
             .clone(),
