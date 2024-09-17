@@ -16,13 +16,13 @@ import VerticalContainer from '@/components/VerticalContainer'
 import * as Location from 'expo-location'
 import { router } from 'expo-router'
 import { init_background } from '@/utils/backgroundFetch'
+import StatusWithIcon from '@/components/StatusIndicator'
 
 export default function DashboardScreen() {
   const storage = useStorage()
   const [data, setData] = useState<DashboardResponse>()
   const [status, setStatus] = useState(-1)
   const [stringStatus, setStringStatus] = useState('Please login first')
-  const [disableToggleButton, setDisableToggleButton] = useState(false)
   const [location, setLocation] = useState('')
   const [bgInit, setBgInit] = useState(false)
   const [grantedLocation, setGrantedLocation] = useState(false)
@@ -130,20 +130,12 @@ export default function DashboardScreen() {
       }>
       <ThemedView style={styles.stepContainer}>
         <VerticalContainer>
-          <Switch>
-            <Case condition={data?.connected && status === 1}>
-              <VerticalContainer>
-                <ThemedText type="subtitle">Connected</ThemedText>
-                <ActivityIndicator size="large" color="#00ff00" />
-              </VerticalContainer>
-            </Case>
-            <Default>
-              <ThemedText type="subtitle">Not connected</ThemedText>
-            </Default>
-          </Switch>
+          <VerticalContainer>
+            <StatusWithIcon status={status === 1} text={'Running'} />
+            <StatusWithIcon status={!!data?.connected} text={'Connected'} />
+          </VerticalContainer>
           <ThemedText type="subtitle">{location}</ThemedText>
           <CustomButton
-            disabled={disableToggleButton}
             title={`${stringStatus}`}
             buttonStyles={styles.button}
             buttonText={styles.buttonText}
