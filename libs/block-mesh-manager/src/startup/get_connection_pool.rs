@@ -25,8 +25,14 @@ pub async fn get_connection_pool(
         Some(database_url) => PgConnectOptions::from_str(database_url.as_ref())?
             .log_statements(log::LevelFilter::Trace)
             .options([
-                ("statement_timeout", "250"),
-                ("idle_in_transaction_session_timeout", "50ms"),
+                (
+                    "statement_timeout",
+                    env::var("statement_timeout").unwrap_or("500ms".to_string()),
+                ),
+                (
+                    "idle_in_transaction_session_timeout",
+                    env::var("idle_in_transaction_session_timeout").unwrap_or("500ms".to_string()),
+                ),
             ])
             .clone(),
     };
