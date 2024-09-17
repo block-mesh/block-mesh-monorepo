@@ -30,7 +30,10 @@ impl DatabaseSettings {
             .ssl_mode(ssl_mode)
             .username(&self.username)
             .password(&self.password)
-            .options([("statement_timeout", "250")])
+            .options([
+                ("statement_timeout", "250"),
+                ("idle_in_transaction_session_timeout", "50ms"),
+            ])
     }
 
     pub fn with_db(&self) -> PgConnectOptions {
