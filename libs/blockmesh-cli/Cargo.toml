@@ -17,7 +17,7 @@ reqwest = { workspace = true, default-features = false, features = [
   "json",
   "rustls-tls",
 ] }
-ureq = "2.10.1"
+ureq = { workspace = true }
 tracing = { workspace = true }
 anyhow = { workspace = true }
 uuid = { workspace = true, features = ["v4", "fast-rng", "macro-diagnostics", "serde", "js"] }
@@ -28,6 +28,8 @@ futures-util = { workspace = true }
 rayon = { workspace = true }
 lazy_static = { workspace = true }
 once_cell = { workspace = true }
+reqwest-websocket = { workspace = true }
+rand = { workspace = true }
 
 [lib]
 crate-type = ["cdylib", "rlib", "staticlib"]
