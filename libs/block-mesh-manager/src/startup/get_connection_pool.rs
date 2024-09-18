@@ -45,14 +45,25 @@ pub async fn get_connection_pool(
                     .parse()
                     .unwrap_or(35),
             ))
-            .min_connections(3)
+            .min_connections(1)
             .max_connections(
                 env::var("MAX_CONNECTIONS")
                     .unwrap_or("35".to_string())
                     .parse()
                     .unwrap_or(35),
             )
-            .idle_timeout(Duration::from_secs(1))
+            .idle_timeout(Duration::from_millis(
+                env::var("IDLE_TIMEOUT")
+                    .unwrap_or("500".to_string())
+                    .parse()
+                    .unwrap_or(500),
+            ))
+            .max_lifetime(Duration::from_millis(
+                env::var("MAX_LIFETIME")
+                    .unwrap_or("30000".to_string())
+                    .parse()
+                    .unwrap_or(30000),
+            ))
             .test_before_acquire(true)
             .connect_with(settings.clone())
             .await;
