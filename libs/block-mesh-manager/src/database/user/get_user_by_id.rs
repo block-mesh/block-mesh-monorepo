@@ -5,14 +5,7 @@ use secret::Secret;
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(
-    name = "Get User opt by id",
-    level = "trace",
-    skip(transaction),
-    ret,
-    err
-)]
-pub(crate) async fn get_user_opt_by_id(
+pub async fn get_user_opt_by_id(
     transaction: &mut Transaction<'_, Postgres>,
     id: &Uuid,
 ) -> anyhow::Result<Option<User>> {

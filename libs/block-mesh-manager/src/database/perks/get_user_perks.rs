@@ -7,7 +7,6 @@ struct Id {
     id: Uuid,
 }
 
-#[tracing::instrument(name = "get_user_perks", skip(transaction), ret, err, level = "trace")]
 pub async fn get_user_perks(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,

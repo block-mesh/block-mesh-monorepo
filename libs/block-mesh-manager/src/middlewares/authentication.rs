@@ -72,7 +72,6 @@ impl AuthnBackend for Backend {
     type Credentials = Credentials;
     type Error = Error;
 
-    #[tracing::instrument(name = "authenticate", skip(creds), err, ret, level = "trace")]
     async fn authenticate(
         &self,
         creds: Self::Credentials,
@@ -117,7 +116,6 @@ impl AuthnBackend for Backend {
         Ok(Option::from(session_user))
     }
 
-    #[tracing::instrument(name = "get_user", err, ret, level = "trace")]
     async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {
         let key = Backend::authenticate_key_with_user_id(user_id);
         let mut c = self.con.clone();

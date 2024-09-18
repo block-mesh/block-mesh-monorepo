@@ -10,14 +10,7 @@ pub struct BandwidthReportAvg {
     pub latency: Option<f64>,
 }
 
-#[tracing::instrument(
-    name = "get_latest_bandwidth_reports",
-    skip(transaction),
-    ret,
-    err,
-    level = "trace"
-)]
-pub(crate) async fn get_latest_bandwidth_reports(
+pub async fn get_latest_bandwidth_reports(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,
     seconds: i64,

@@ -3,7 +3,6 @@ use secret::Secret;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-#[tracing::instrument(name = "Get nonce via pool", skip_all, ret, err, level = "trace")]
 pub async fn get_nonce_by_user_id_pool(
     pool: &PgPool,
     user_id: &Uuid,

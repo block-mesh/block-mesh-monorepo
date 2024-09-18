@@ -145,7 +145,6 @@ pub async fn submit_bandwidth_content(
     }))
 }
 
-#[tracing::instrument(name = "submit_bandwidth", skip_all, level = "trace", fields(email = body.email), ret)]
 pub async fn handler(
     State(state): State<Arc<AppState>>,
     Json(body): Json<ReportBandwidthRequest>,

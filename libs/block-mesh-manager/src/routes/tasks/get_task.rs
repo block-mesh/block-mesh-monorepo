@@ -16,7 +16,6 @@ use http::HeaderMap;
 use sqlx::PgPool;
 use std::sync::Arc;
 
-#[tracing::instrument(name = "get_task", skip(body, pool, headers, state), fields(email = body.email), level = "trace")]
 pub async fn handler(
     headers: HeaderMap,
     Extension(pool): Extension<PgPool>,

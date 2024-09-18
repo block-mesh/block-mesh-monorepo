@@ -114,7 +114,6 @@ pub async fn submit_task_content(
     }))
 }
 
-#[tracing::instrument(name = "submit_task", skip_all, level = "trace", ret)]
 pub async fn handler(
     State(state): State<Arc<AppState>>,
     Query(query): Query<SubmitTaskRequest>,

@@ -3,14 +3,7 @@ use chrono::NaiveDate;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(
-    name = "Get Daily Stat By UserId and Day",
-    skip(transaction),
-    ret,
-    err,
-    level = "trace"
-)]
-pub(crate) async fn get_daily_stat_by_user_id_and_day(
+pub async fn get_daily_stat_by_user_id_and_day(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,
     day: NaiveDate,

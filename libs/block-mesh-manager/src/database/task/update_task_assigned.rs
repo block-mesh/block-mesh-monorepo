@@ -2,14 +2,7 @@ use crate::domain::task::TaskStatus;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(
-    name = "update_task_assigned",
-    skip(transaction),
-    ret,
-    err,
-    level = "trace"
-)]
-pub(crate) async fn update_task_assigned(
+pub async fn update_task_assigned(
     transaction: &mut Transaction<'_, Postgres>,
     task_id: Uuid,
     user_id: Uuid,
