@@ -138,12 +138,12 @@ impl ExtensionWrapperState {
         self.last_update.update(|v| *v = now);
         send_storage_value_to_iframe(MessageKey::LastUpdate, MessageValue::I64(now));
         if !email.is_empty() && !api_token.is_nil() && api_token != Uuid::default() {
-            let credentials = CheckTokenRequest { api_token, email };
-            let result = check_token(&blockmesh_url, &credentials).await;
-            if result.is_ok() {
-                // TODO
-                self.status.update(|v| *v = AuthStatus::LoggedIn);
-            };
+            self.status.update(|v| *v = AuthStatus::LoggedIn);
+            // let credentials = CheckTokenRequest { api_token, email };
+            // let result = check_token(&blockmesh_url, &credentials).await;
+            // if result.is_ok() {
+            // self.status.update(|v| *v = AuthStatus::LoggedIn);
+            // };
         }
 
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
