@@ -14,6 +14,7 @@ use tokio::sync::Mutex;
 mod database;
 mod error;
 mod routes;
+use tower_http::cors::CorsLayer;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -23,11 +24,13 @@ async fn main() -> anyhow::Result<()> {
     let router = get_router();
     let check_token_map: CheckTokenResponseMap = Arc::new(Mutex::new(HashMap::new()));
     let get_token_map: GetTokenResponseMap = Arc::new(Mutex::new(HashMap::new()));
+    let cors = CorsLayer::permissive();
     let app = Router::new()
         .nest("/", router)
         .layer(Extension(db_pool.clone()))
         .layer(Extension(check_token_map))
-        .layer(Extension(get_token_map));
+        .layer(Extension(get_token_map))
+        .layer(cors);
     let port = env::var("PORT").unwrap_or("8001".to_string());
     let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
     tracing::info!("Listening on {}", listener.local_addr()?);
