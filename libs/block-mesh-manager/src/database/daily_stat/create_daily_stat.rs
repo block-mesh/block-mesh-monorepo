@@ -4,8 +4,7 @@ use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "Create Daily Stat", skip(transaction), ret, err)]
-pub(crate) async fn create_daily_stat(
+pub async fn create_daily_stat(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,
 ) -> anyhow::Result<Uuid> {

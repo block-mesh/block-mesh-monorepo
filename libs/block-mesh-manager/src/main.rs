@@ -6,6 +6,7 @@ use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_common::interfaces::ws_api::WsServerMessage;
+    use block_mesh_manager::ws::ws_keep_alive::ws_keep_alive;
     use block_mesh_manager::database::user::create_test_user::create_test_user;
     use block_mesh_manager::ws::connection_manager::ConnectionManager;
     use block_mesh_manager::worker::analytics_agg::analytics_agg;
@@ -89,6 +90,7 @@ async fn run() -> anyhow::Result<()> {
     let _ = create_test_user(&db_pool).await;
 
     let mut ws_connection_manager = ConnectionManager::new();
+    let broadcaster = ws_connection_manager.broadcaster.clone();
     let _ = ws_connection_manager
         .broadcaster
         .cron_reports(
@@ -140,6 +142,7 @@ async fn run() -> anyhow::Result<()> {
         rx_aggregate_agg,
         app_state.clone(),
     ));
+    let ws_ping_task = tokio::spawn(ws_keep_alive(broadcaster));
 
     tokio::select! {
         o = application_task => report_exit("API", o),
@@ -148,7 +151,8 @@ async fn run() -> anyhow::Result<()> {
         o = db_daily_stat_task => report_exit("DB daily_stat aggregator", o),
         o = db_analytics_task => report_exit("DB analytics aggregator", o),
         o = db_users_ip_task => report_exit("DB users_ip aggregator", o),
-        o = db_aggregate_task => report_exit("DB aggregate aggregator", o)
+        o = db_aggregate_task => report_exit("DB aggregate aggregator", o),
+        o = ws_ping_task => report_exit("ws_ping_task failed", o)
     };
     Ok(())
 }

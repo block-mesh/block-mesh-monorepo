@@ -54,6 +54,9 @@ async fn process_client_message(
     ip: String,
     state: Arc<AppState>,
 ) -> Option<WsClientMessage> {
+    if text == "pong" {
+        return None;
+    }
     match serde_json::from_str::<WsClientMessage>(text) {
         Ok(message) => {
             match &message {
