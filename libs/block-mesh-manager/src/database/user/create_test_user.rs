@@ -1,10 +1,10 @@
 use crate::database::invite_code::create_invite_code::create_invite_code;
 use crate::database::nonce::create_nonce::create_nonce;
 use crate::database::uptime_report::create_uptime_report::create_uptime_report;
-use crate::domain::nonce::Nonce;
 use bcrypt::{hash, DEFAULT_COST};
 use block_mesh_common::constants::{BLOCKMESH_SERVER_UUID_ENVAR, BLOCK_MESH_SUPPORT_EMAIL};
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
+use block_mesh_manager_database_domain::domain::nonce::Nonce;
 use chrono::Utc;
 use secret::Secret;
 use sqlx::PgPool;

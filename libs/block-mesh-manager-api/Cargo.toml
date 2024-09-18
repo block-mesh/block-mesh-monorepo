@@ -14,6 +14,7 @@ axum = { workspace = true, features = ["ws", "macros"] }
 http-body-util = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 secret = { path = "../secret", features = ["sqlx"] }
+bcrypt = { workspace = true }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
 chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }

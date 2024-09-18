@@ -1,8 +1,13 @@
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
 use secret::Secret;
 use sqlx::PgPool;
+use uuid::Uuid;
 
-pub async fn get_nonce_by_nonce_pool(pool: &PgPool, nonce: &str) -> anyhow::Result<Option<Nonce>> {
+#[allow(dead_code)]
+pub async fn get_nonce_by_user_id_pool(
+    pool: &PgPool,
+    user_id: &Uuid,
+) -> anyhow::Result<Option<Nonce>> {
     Ok(sqlx::query_as!(
         Nonce,
         r#"
@@ -12,10 +17,10 @@ pub async fn get_nonce_by_nonce_pool(pool: &PgPool, nonce: &str) -> anyhow::Resu
         user_id,
         nonce as "nonce: Secret<String>"
         FROM nonces
-        WHERE nonce = $1
+        WHERE user_id = $1
         ORDER BY created_at DESC
         LIMIT 1"#,
-        nonce
+        user_id
     )
     .fetch_optional(pool)
     .await?)

@@ -11,6 +11,10 @@ secret = { path = "../secret", features = ["sqlx"] }
 serde = { workspace = true, features = ["derive"] }
 chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }
 
+[dependencies.rand]
+workspace = true
+features = ["min_const_gen"]
+
 [dependencies.sqlx]
 workspace = true
 default-features = false

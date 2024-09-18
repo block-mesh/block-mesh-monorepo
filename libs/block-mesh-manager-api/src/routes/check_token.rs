@@ -11,10 +11,10 @@ use std::sync::Arc;
 use tokio::sync::Mutex;
 use uuid::Uuid;
 
-pub type GetTokenResponseMap = Arc<Mutex<HashMap<(String, Uuid), GetTokenResponseEnum>>>;
+pub type CheckTokenResponseMap = Arc<Mutex<HashMap<(String, Uuid), CheckTokenResponseEnum>>>;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
-pub enum GetTokenResponseEnum {
+pub enum CheckTokenResponseEnum {
     GetTokenResponse(GetTokenResponse),
     UserNotFound,
     ApiTokenMismatch,
@@ -23,7 +23,7 @@ pub enum GetTokenResponseEnum {
 
 pub async fn check_token(
     Extension(pool): Extension<PgPool>,
-    Extension(check_token_map): Extension<GetTokenResponseMap>,
+    Extension(check_token_map): Extension<CheckTokenResponseMap>,
     Json(body): Json<CheckTokenRequest>,
 ) -> Result<Json<GetTokenResponse>, Error> {
     let email = body.email.clone().to_ascii_lowercase();
@@ -32,10 +32,10 @@ pub async fn check_token(
 
     if let Some(value) = check_token_map.get(&key) {
         return match value {
-            GetTokenResponseEnum::ApiTokenMismatch => Err(Error::ApiTokenMismatch),
-            GetTokenResponseEnum::UserNotFound => Err(Error::UserNotFound),
-            GetTokenResponseEnum::ApiTokenNotFound => Err(Error::ApiTokenNotFound),
-            GetTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone())),
+            CheckTokenResponseEnum::ApiTokenMismatch => Err(Error::ApiTokenMismatch),
+            CheckTokenResponseEnum::UserNotFound => Err(Error::UserNotFound),
+            CheckTokenResponseEnum::ApiTokenNotFound => Err(Error::ApiTokenNotFound),
+            CheckTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone())),
         };
     }
 
@@ -43,12 +43,12 @@ pub async fn check_token(
         Ok(user) => match user {
             Some(user) => user,
             None => {
-                check_token_map.insert(key, GetTokenResponseEnum::UserNotFound);
+                check_token_map.insert(key, CheckTokenResponseEnum::UserNotFound);
                 return Err(Error::UserNotFound);
             }
         },
         Err(_) => {
-            check_token_map.insert(key, GetTokenResponseEnum::UserNotFound);
+            check_token_map.insert(key, CheckTokenResponseEnum::UserNotFound);
             return Err(Error::UserNotFound);
         }
     };
@@ -57,18 +57,18 @@ pub async fn check_token(
             Ok(api_token) => match api_token {
                 Some(api_token) => api_token,
                 None => {
-                    check_token_map.insert(key, GetTokenResponseEnum::ApiTokenNotFound);
+                    check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenNotFound);
                     return Err(Error::ApiTokenNotFound);
                 }
             },
             Err(_) => {
-                check_token_map.insert(key, GetTokenResponseEnum::ApiTokenNotFound);
+                check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenNotFound);
                 return Err(Error::ApiTokenNotFound);
             }
         };
 
     if *api_token.token.as_ref() != body.api_token {
-        check_token_map.insert(key, GetTokenResponseEnum::ApiTokenMismatch);
+        check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenMismatch);
         return Err(Error::ApiTokenMismatch);
     }
 
@@ -78,7 +78,7 @@ pub async fn check_token(
     };
     check_token_map.insert(
         key,
-        GetTokenResponseEnum::GetTokenResponse(response.clone()),
+        CheckTokenResponseEnum::GetTokenResponse(response.clone()),
     );
 
     Ok(Json(response))

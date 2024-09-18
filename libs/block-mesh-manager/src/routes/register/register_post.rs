@@ -11,6 +11,7 @@ use uuid::Uuid;
 use validator::validate_email;
 
 use block_mesh_common::interfaces::server_api::RegisterForm;
+use block_mesh_manager_database_domain::domain::nonce::Nonce;
 use secret::Secret;
 
 use crate::database::api_token::create_api_token::create_api_token;
@@ -21,7 +22,6 @@ use crate::database::uptime_report::create_uptime_report::create_uptime_report;
 use crate::database::user::create_user::create_user;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::database::user::update_user_invited_by::update_user_invited_by;
-use crate::domain::nonce::Nonce;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
 use crate::startup::application::AppState;
