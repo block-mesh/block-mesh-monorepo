@@ -2,14 +2,7 @@ use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(
-    name = "create_uptime_report",
-    skip(transaction),
-    ret,
-    err,
-    level = "trace"
-)]
-pub(crate) async fn create_uptime_report(
+pub async fn create_uptime_report(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
     ip: &Option<String>,

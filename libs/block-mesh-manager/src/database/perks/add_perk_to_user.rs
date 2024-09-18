@@ -4,13 +4,6 @@ use serde_json::Value;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(
-    name = "add_perk_to_user",
-    skip(transaction),
-    level = "trace",
-    ret,
-    err
-)]
 pub(crate) async fn add_perk_to_user(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,

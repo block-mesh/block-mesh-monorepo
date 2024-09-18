@@ -7,13 +7,6 @@ struct Id {
     id: Uuid,
 }
 
-#[tracing::instrument(
-    name = "get_user_call_to_action",
-    skip(transaction),
-    ret,
-    err,
-    level = "trace"
-)]
 pub async fn get_user_call_to_action(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,

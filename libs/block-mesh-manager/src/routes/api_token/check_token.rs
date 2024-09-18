@@ -11,7 +11,6 @@ use redis::AsyncCommands;
 use sqlx::PgPool;
 use std::sync::Arc;
 
-#[tracing::instrument(name = "check_token", skip_all, level = "trace", fields(email=body.email))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,

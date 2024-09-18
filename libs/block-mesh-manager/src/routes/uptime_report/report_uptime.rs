@@ -205,7 +205,6 @@ pub async fn report_uptime_content(
     }))
 }
 
-#[tracing::instrument(name = "report_uptime", level = "trace", skip_all, ret)]
 pub async fn handler(
     headers: HeaderMap,
     State(state): State<Arc<AppState>>,

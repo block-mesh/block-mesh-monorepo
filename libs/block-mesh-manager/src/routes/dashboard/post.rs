@@ -13,7 +13,6 @@ use crate::middlewares::authentication::Backend;
 use crate::routes::dashboard::dashboard_data_extractor::dashboard_data_extractor;
 use crate::startup::application::AppState;
 
-#[tracing::instrument(name = "dashboard post", skip(auth, state), level = "trace",  err(level = Level::TRACE))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,
