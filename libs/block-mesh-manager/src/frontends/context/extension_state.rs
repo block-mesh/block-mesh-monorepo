@@ -16,12 +16,12 @@ use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
-use crate::frontends::utils::auth::{check_token, get_latest_invite_code};
+use crate::frontends::utils::auth::get_latest_invite_code;
 use crate::frontends::utils::connectors::{
     ask_for_all_storage_values, onPostMessage, send_message_channel,
 };
 use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType};
-use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
+use block_mesh_common::interfaces::server_api::GetLatestInviteCodeRequest;
 
 #[derive(Clone, Serialize, Deserialize, Copy)]
 pub struct ExtensionContext {
@@ -203,18 +203,19 @@ impl ExtensionContext {
                                     && self.status.get_untracked() != AuthStatus::LoggedIn
                                 {
                                     spawn_local(async move {
-                                        let credentials = CheckTokenRequest {
-                                            api_token: self.api_token.get_untracked(),
-                                            email: self.email.get_untracked(),
-                                        };
-                                        let result = check_token(
-                                            &self.blockmesh_url.get_untracked(),
-                                            &credentials,
-                                        )
-                                        .await;
-                                        if result.is_ok() {
-                                            self.status.update(|v| *v = AuthStatus::LoggedIn);
-                                        };
+                                        self.status.update(|v| *v = AuthStatus::LoggedIn);
+                                        // let credentials = CheckTokenRequest {
+                                        //     api_token: self.api_token.get_untracked(),
+                                        //     email: self.email.get_untracked(),
+                                        // };
+                                        // let result = check_token(
+                                        //     &self.blockmesh_url.get_untracked(),
+                                        //     &credentials,
+                                        // )
+                                        // .await;
+                                        // if result.is_ok() {
+                                        //     self.status.update(|v| *v = AuthStatus::LoggedIn);
+                                        // };
                                     });
                                 }
                             }

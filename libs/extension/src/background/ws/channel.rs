@@ -57,6 +57,9 @@ pub fn set_rx(rx: Receiver<WsServerMessage>, ws: WebSocket) {
             let api_token = app_state.api_token.get_untracked();
 
             match msg {
+                WsServerMessage::Ping => {
+                    let _ = ws.clone().send_with_str("pong");
+                }
                 WsServerMessage::RequestUptimeReport => {
                     if let Some(r) =
                         report_uptime_inner(&base_url, &email, &api_token, OperationMode::WebSocket)

@@ -5,6 +5,7 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum WsServerMessage {
+    Ping,
     AssignTask(GetTaskResponse),
     RequestBandwidthReport,
     RequestUptimeReport,
@@ -13,6 +14,7 @@ pub enum WsServerMessage {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum WsClientMessage {
+    Ping,
     CompleteTask(SubmitTaskRequest),
     ReportBandwidth(ReportBandwidthRequest),
     ReportUptime(ReportUptimeRequest),

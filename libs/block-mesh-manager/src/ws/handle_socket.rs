@@ -116,12 +116,10 @@ pub async fn handle_socket(socket: WebSocket, ip: String, state: Arc<AppState>, 
     let task_sink_tx = sink_tx.clone();
     let broadcast_task = tokio::spawn(async move {
         while let Ok(broadcast_message) = broadcast_receiver.recv().await {
-            tracing::info!("Broadcast received {broadcast_message:?}");
             if let Err(_error) = task_sink_tx.send(broadcast_message).await {
                 if is_cls.load(Ordering::Relaxed) {
                     return;
                 }
-
                 tracing::error!("Failed to pass a message to task_sink_tx");
             }
         }
