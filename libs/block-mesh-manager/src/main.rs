@@ -77,7 +77,13 @@ async fn run() -> anyhow::Result<()> {
         .unwrap_or_default();
 
     let flags = get_all_flags(&client).await?;
-    let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
+    let redis_url = env::var("REDIS_URL")?;
+    let redis_url = if redis_url.ends_with("#insecure") {
+        redis_url
+    } else {
+        format!("{}#insecure", redis_url)
+    };
+    let redis_client = redis::Client::open(redis_url)?;
     let redis = redis_client.get_multiplexed_async_connection().await?;
 
     let _ = create_test_user(&db_pool).await;
