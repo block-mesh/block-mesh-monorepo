@@ -102,8 +102,6 @@ pub fn ApplicationSidebar() -> impl IntoView {
 pub fn ApplicationLayout(children: ChildrenFn) -> impl IntoView {
     let ReloadContext { value, .. } = expect_context();
 
-    let children2 = move || view! { <div></div> };
-
     let resource = create_local_resource(
         move || value.get(),
         move |_| async move {
@@ -126,36 +124,6 @@ pub fn ApplicationLayout(children: ChildrenFn) -> impl IntoView {
             {
                 if let Ok(json) = response.json::<DailyLeaderboard>().await {
                     provide_context(json);
-                }
-            }
-        },
-    );
-
-    let resource2 = create_local_resource(
-        move || value.get(),
-        move |_| async move {
-            let origin = window().origin();
-            let client = reqwest::Client::new();
-
-            let response = client
-                .post(&format!(
-                    "{}{}",
-                    origin,
-                    RoutesEnum::Static_Auth_Daily_Leaderboard
-                ))
-                .send()
-                .await;
-            match response {
-                Ok(response) => match response.json::<DailyLeaderboard>().await {
-                    Ok(json) => Some(json),
-                    Err(e) => {
-                        logging::log!("error: {}", e);
-                        None
-                    }
-                },
-                Err(e) => {
-                    logging::log!("error: {}", e);
-                    None
                 }
             }
         },
