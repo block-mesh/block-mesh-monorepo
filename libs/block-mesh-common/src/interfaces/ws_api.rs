@@ -14,6 +14,7 @@ pub enum WsServerMessage {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub enum WsClientMessage {
+    Ping,
     CompleteTask(SubmitTaskRequest),
     ReportBandwidth(ReportBandwidthRequest),
     ReportUptime(ReportUptimeRequest),

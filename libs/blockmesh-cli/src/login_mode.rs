@@ -210,6 +210,9 @@ async fn handle_ws_message(
                 };
                 let _ = tx.send(WsClientMessage::ReportUptime(report)).await;
             }
+            WsServerMessage::Ping => {
+                let _ = tx.send(WsClientMessage::Ping).await;
+            }
             WsServerMessage::CloseConnection => {}
         }
     });

@@ -55,7 +55,7 @@ async fn process_client_message(
     state: Arc<AppState>,
 ) -> Option<WsClientMessage> {
     if text == "pong" {
-        return None;
+        return Some(WsClientMessage::Ping);
     }
     match serde_json::from_str::<WsClientMessage>(text) {
         Ok(message) => {
@@ -76,6 +76,9 @@ async fn process_client_message(
                         HandlerMode::WebSocket,
                     )
                     .await;
+                }
+                WsClientMessage::Ping => {
+                    return Some(WsClientMessage::Ping);
                 }
             }
             return Some(message);
