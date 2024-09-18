@@ -159,7 +159,7 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
                         kv_email,
                         kv_password
                     );
-                    if verify::<&str>(password.as_ref(), kv_password.as_ref()).unwrap_or(false) {
+                    if verify::<&str>(password.as_ref(), kv_password).unwrap_or(false) {
                         let new_key = format!("{}:{}", kv_email, kv_password);
                         let value = get_key(&ctx, &new_key, NAMESPACE).await?.unwrap();
                         return Response::from_json(&GetTokenResponse {
@@ -192,14 +192,12 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
                 .to_string();
             let key = format!("{}:{}", email, api_token);
             console_log!("here 3 key = {} check_token", key);
-            if let Ok(value) = get_key(&ctx, &key, NAMESPACE).await {
-                if let Some(value) = value {
-                    console_log!("Found from KV {}/{}/{}", email, api_token, value);
-                    return Response::from_json(&GetTokenResponse {
-                        api_token: Some(Uuid::from_str(&value.to_string()).unwrap()),
-                        message: None,
-                    });
-                }
+            if let Ok(Some(value)) = get_key(&ctx, &key, NAMESPACE).await {
+                console_log!("Found from KV {}/{}/{}", email, api_token, value);
+                return Response::from_json(&GetTokenResponse {
+                    api_token: Some(Uuid::from_str(&value.to_string()).unwrap()),
+                    message: None,
+                });
             }
             // let response = check_token(email, api_token).await?;
             // Response::from_json(&response)
