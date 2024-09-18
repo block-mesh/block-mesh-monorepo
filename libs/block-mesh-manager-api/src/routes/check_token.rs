@@ -27,7 +27,7 @@ pub async fn check_token(
     Json(body): Json<CheckTokenRequest>,
 ) -> Result<Json<GetTokenResponse>, Error> {
     let email = body.email.clone().to_ascii_lowercase();
-    let key = (email.clone(), body.api_token.clone());
+    let key = (email.clone(), body.api_token);
     let mut check_token_map = check_token_map.lock().await;
 
     if let Some(value) = check_token_map.get(&key) {
