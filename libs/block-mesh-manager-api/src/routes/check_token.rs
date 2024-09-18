@@ -30,16 +30,13 @@ pub async fn check_token(
     let key = (email.clone(), body.api_token.clone());
     let mut check_token_map = check_token_map.lock().await;
 
-    match check_token_map.get(&key) {
-        Some(value) => {
-            return match value {
-                GetTokenResponseEnum::ApiTokenMismatch => Err(Error::ApiTokenMismatch),
-                GetTokenResponseEnum::UserNotFound => Err(Error::UserNotFound),
-                GetTokenResponseEnum::ApiTokenNotFound => Err(Error::ApiTokenNotFound),
-                GetTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone())),
-            }
-        }
-        None => {}
+    if let Some(value) = check_token_map.get(&key) {
+        return match value {
+            GetTokenResponseEnum::ApiTokenMismatch => Err(Error::ApiTokenMismatch),
+            GetTokenResponseEnum::UserNotFound => Err(Error::UserNotFound),
+            GetTokenResponseEnum::ApiTokenNotFound => Err(Error::ApiTokenNotFound),
+            GetTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone())),
+        };
     }
 
     let user = match get_user_opt_by_email_pool(&pool, &email).await {
