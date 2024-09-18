@@ -2189,6 +2189,25 @@ dependencies = [
 ]
 
 [[package]]
+name = "cloudflare-api-token"
+version = "0.0.265"
+dependencies = [
+ "askama",
+ "askama_axum",
+ "bcrypt",
+ "block-mesh-common",
+ "reqwest 0.12.7",
+ "serde",
+ "serde_json",
+ "time",
+ "tracing",
+ "tracing-subscriber",
+ "tracing-web",
+ "uuid",
+ "worker",
+]
+
+[[package]]
 name = "cloudflare-feature-flags"
 version = "0.0.265"
 dependencies = [

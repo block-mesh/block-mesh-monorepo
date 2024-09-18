@@ -8,6 +8,7 @@ use std::collections::HashMap;
 use std::env;
 use std::net::SocketAddr;
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio::sync::Mutex;
 
@@ -15,6 +16,7 @@ mod database;
 mod error;
 mod routes;
 use tower_http::cors::CorsLayer;
+use tower_http::timeout::TimeoutLayer;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -30,7 +32,13 @@ async fn main() -> anyhow::Result<()> {
         .layer(Extension(db_pool.clone()))
         .layer(Extension(check_token_map))
         .layer(Extension(get_token_map))
-        .layer(cors);
+        .layer(cors)
+        .layer(TimeoutLayer::new(Duration::from_millis(
+            env::var("REQUEST_TIMEOUT")
+                .unwrap_or("1000".to_string())
+                .parse()
+                .unwrap_or(1000),
+        )));
     let port = env::var("PORT").unwrap_or("8001".to_string());
     let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
     tracing::info!("Listening on {}", listener.local_addr()?);

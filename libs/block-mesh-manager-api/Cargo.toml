@@ -19,7 +19,7 @@ anyhow = { workspace = true }
 thiserror = { workspace = true }
 chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }
 tracing = { workspace = true }
-tower = { workspace = true, features = ["util"] }
+tower = { workspace = true, features = ["util", "timeout"] }
 serde_json = { workspace = true, features = ["raw_value"] }
 tower-http = { workspace = true, features = ["fs", "trace", "request-id", "util", "cors", "add-extension", "timeout"] }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
