@@ -4,7 +4,6 @@ use crate::error::Error;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetTokenResponse};
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
-use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::collections::HashMap;

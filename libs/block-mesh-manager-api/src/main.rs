@@ -1,8 +1,7 @@
-use crate::routes::check_token::{GetTokenResponseEnum, GetTokenResponseMap};
+use crate::routes::check_token::GetTokenResponseMap;
 use crate::routes::router::get_router;
 use axum::{Extension, Router};
 use block_mesh_common::env::load_dotenv::load_dotenv;
-use dashmap::DashMap;
 use logger_general::tracing::setup_tracing_stdout_only;
 use std::collections::HashMap;
 use std::env;
@@ -10,7 +9,6 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 use tokio::sync::Mutex;
-use uuid::Uuid;
 
 mod database;
 mod error;
