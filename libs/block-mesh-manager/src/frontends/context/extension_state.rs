@@ -21,7 +21,7 @@ use crate::frontends::utils::connectors::{
     ask_for_all_storage_values, onPostMessage, send_message_channel,
 };
 use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType};
-use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
+use block_mesh_common::interfaces::server_api::GetLatestInviteCodeRequest;
 
 #[derive(Clone, Serialize, Deserialize, Copy)]
 pub struct ExtensionContext {
