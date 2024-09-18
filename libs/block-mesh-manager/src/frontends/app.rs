@@ -44,8 +44,6 @@ pub fn App() -> impl IntoView {
     let extension_resource = ExtensionContext::init_resource(extension_state);
     let none_extension_resource = None::<Resource<(), ExtensionContext>>;
     let auth_state = AuthContext::init_as_resource(auth_state);
-    let new_server_class =
-        "text-zinc-950 antialiased lg:bg-zinc-100 bg-zinc-900 text-off-white lg:bg-zinc-950";
 
     view! {
         <CommonHeader/>
