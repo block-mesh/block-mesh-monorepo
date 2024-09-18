@@ -33,14 +33,7 @@ pub async fn get_or_create_aggregate_by_user_and_name(
     Ok(aggregate)
 }
 
-#[tracing::instrument(
-    name = "get_or_create_aggregate_by_user_and_name",
-    skip_all,
-    level = "trace",
-    ret,
-    err
-)]
-pub(crate) async fn get_or_create_aggregate_by_user_and_name_pool(
+pub async fn get_or_create_aggregate_by_user_and_name_pool(
     pool: &PgPool,
     name: AggregateName,
     user_id: &Uuid,

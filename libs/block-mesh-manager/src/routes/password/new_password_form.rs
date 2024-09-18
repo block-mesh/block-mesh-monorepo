@@ -34,7 +34,6 @@ struct NewPasswordTemplate {
     pub chat: String,
 }
 
-#[tracing::instrument(name = "new_password")]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,

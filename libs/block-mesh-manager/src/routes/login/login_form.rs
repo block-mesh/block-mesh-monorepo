@@ -26,11 +26,10 @@ struct LoginTemplate {
     pub chat: String,
 }
 
-#[tracing::instrument(name = "login")]
 pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<impl IntoResponse, Redirect> {
-    return match auth.user {
+    match auth.user {
         Some(_) => Err(Redirect::to("/ui/dashboard")),
         None => Ok(LoginTemplate {
             chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
@@ -43,5 +42,5 @@ pub async fn handler(
             support: BLOCK_MESH_SUPPORT_EMAIL.to_string(),
             chat: BLOCK_MESH_SUPPORT_CHAT.to_string(),
         }),
-    };
+    }
 }

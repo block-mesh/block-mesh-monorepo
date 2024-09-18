@@ -2,8 +2,7 @@ use crate::domain::api_token::ApiTokenStatus;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "update_api_token_status", skip(transaction), ret, err)]
-pub(crate) async fn update_api_token_status(
+pub async fn update_api_token_status(
     transaction: &mut Transaction<'_, Postgres>,
     id: Uuid,
     status: ApiTokenStatus,

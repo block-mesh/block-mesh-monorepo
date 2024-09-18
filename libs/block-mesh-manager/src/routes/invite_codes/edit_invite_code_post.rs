@@ -7,7 +7,6 @@ use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::EditInviteCodeForm;
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "edit_invite_code_post", skip(auth, pool))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,

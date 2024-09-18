@@ -7,7 +7,6 @@ use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{GetStatsRequest, GetStatsResponse, Stat};
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "get_stats", skip(body), fields(email = body.email))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Json(body): Json<GetStatsRequest>,

@@ -1,5 +1,6 @@
 use anyhow::anyhow;
 use leptos::leptos_dom;
+#[allow(unused_imports)]
 use leptos_dom::tracing;
 
 use block_mesh_common::interfaces::server_api::{
@@ -7,7 +8,6 @@ use block_mesh_common::interfaces::server_api::{
     RegisterForm, RegisterResponse,
 };
 
-#[tracing::instrument(name = "check_token", skip(credentials), err)]
 pub async fn check_token(
     blockmesh_url: &str,
     credentials: &CheckTokenRequest,
@@ -24,7 +24,6 @@ pub async fn check_token(
     Ok(response)
 }
 
-#[tracing::instrument(name = "register", skip(credentials), err)]
 pub async fn register(blockmesh_url: &str, credentials: &RegisterForm) -> anyhow::Result<()> {
     let url = format!("{}/register_api", blockmesh_url);
     let client = reqwest::Client::new();
@@ -40,7 +39,6 @@ pub async fn register(blockmesh_url: &str, credentials: &RegisterForm) -> anyhow
     }
 }
 
-#[tracing::instrument(name = "login", skip(credentials), err)]
 pub async fn login(
     blockmesh_url: &str,
     credentials: &LoginForm,
@@ -58,7 +56,6 @@ pub async fn login(
     Ok(response)
 }
 
-#[tracing::instrument(name = "connect_wallet", err)]
 pub async fn connect_wallet(
     origin: String,
     connect_wallet_request: ConnectWalletRequest,

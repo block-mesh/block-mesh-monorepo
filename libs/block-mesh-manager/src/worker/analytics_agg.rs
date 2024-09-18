@@ -49,7 +49,6 @@ pub async fn analytics_agg(
     Ok(())
 }
 
-#[tracing::instrument(name = "analytics_agg_submit_to_db", skip(pool, calls), ret, err)]
 pub async fn analytics_agg_submit_to_db(
     pool: &PgPool,
     calls: &mut HashMap<Uuid, AnalyticsMessage>,

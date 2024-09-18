@@ -6,6 +6,7 @@ use std::rc::Rc;
 use gloo_utils::format::JsValueSerdeExt;
 use leptos::logging::log;
 use leptos::*;
+#[allow(unused_imports)]
 use leptos_dom::tracing;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -66,7 +67,6 @@ impl AuthContext {
             },
         )
     }
-    #[tracing::instrument(name = "AuthContext::init")]
     pub async fn init(self) {
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
             if let Ok(data) = event.into_serde::<Value>() {

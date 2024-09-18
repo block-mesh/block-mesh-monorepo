@@ -8,7 +8,6 @@ use block_mesh_common::interfaces::server_api::{DailyLeaderboard, LeaderBoardUse
 use chrono::{Duration, Utc};
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "daily_leaderboard", skip(auth))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,

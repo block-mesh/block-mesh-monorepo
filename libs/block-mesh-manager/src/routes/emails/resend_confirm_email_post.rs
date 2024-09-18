@@ -11,7 +11,6 @@ use block_mesh_common::routes_enum::RoutesEnum;
 use sqlx::PgPool;
 use std::sync::Arc;
 
-#[tracing::instrument(name = "resend_confirm_email_post", skip(form, state))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,

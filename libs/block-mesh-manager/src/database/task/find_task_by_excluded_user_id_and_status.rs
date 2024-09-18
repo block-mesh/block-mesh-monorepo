@@ -3,13 +3,7 @@ use crate::domain::task::TaskStatus;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(
-    name = "Find task excluded user id and status",
-    skip(transaction),
-    ret,
-    err
-)]
-pub(crate) async fn find_task_by_excluded_user_id_and_status(
+pub async fn find_task_by_excluded_user_id_and_status(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
     status: TaskStatus,

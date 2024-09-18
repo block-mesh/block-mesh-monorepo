@@ -24,14 +24,7 @@ pub async fn get_api_token_by_usr_and_status(
     .await?)
 }
 
-#[tracing::instrument(
-    name = "Get API token by user and status",
-    skip(pool),
-    ret,
-    err,
-    level = "trace"
-)]
-pub(crate) async fn get_api_token_by_usr_and_status_pool(
+pub async fn get_api_token_by_usr_and_status_pool(
     pool: &PgPool,
     user_id: &Uuid,
     status: ApiTokenStatus,

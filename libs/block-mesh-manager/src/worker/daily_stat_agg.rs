@@ -49,7 +49,6 @@ pub async fn daily_stat_agg(
     Ok(())
 }
 
-#[tracing::instrument(name = "daily_stat_submit_to_db", skip(pool, calls), ret, err)]
 pub async fn daily_stat_submit_to_db(
     pool: &PgPool,
     calls: &mut HashMap<Uuid, f64>,

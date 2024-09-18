@@ -4,7 +4,6 @@ use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "Create Proxy Master", skip(transaction), ret, err)]
 pub async fn create_proxy_master(
     transaction: &mut Transaction<'_, Postgres>,
     address: &str,

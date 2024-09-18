@@ -26,7 +26,6 @@ struct ResendConfirmEmailTemplate {
     pub chat: String,
 }
 
-#[tracing::instrument(name = "resend_confirmation_email")]
 pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<impl IntoResponse, Redirect> {

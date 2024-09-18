@@ -36,7 +36,6 @@ pub struct ViewTaskParams {
     pub id: Uuid,
 }
 
-#[tracing::instrument(name = "view_task", skip(auth, pool))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,

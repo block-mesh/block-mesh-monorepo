@@ -6,7 +6,7 @@ use block_mesh_common::constants::{
     BLOCK_MESH_LANDING_PAGE_IMAGE, BLOCK_MESH_LOGO, BLOCK_MESH_SUPPORT_CHAT,
     BLOCK_MESH_SUPPORT_EMAIL, BLOCK_MESH_TWITTER,
 };
-use http::{HeaderMap, Method};
+use http::Method;
 use std::collections::HashMap;
 
 #[allow(dead_code)]
@@ -24,10 +24,8 @@ struct HealthCheckTemplate {
     pub chat: String,
 }
 
-#[tracing::instrument(name = "Health check")]
 pub async fn handler(
     method: Method,
-    headers: HeaderMap,
     Query(query): Query<HashMap<String, String>>,
 ) -> impl IntoResponse {
     tracing::info!("HEALTH-CHECK:: {:#?} - query = {:#?}", method, query);

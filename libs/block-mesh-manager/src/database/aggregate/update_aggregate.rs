@@ -20,8 +20,7 @@ pub async fn update_aggregate(
     Ok(*id)
 }
 
-#[tracing::instrument(name = "update_aggregate", skip(pool), ret, err, level = "trace")]
-pub(crate) async fn update_aggregate_pool(
+pub async fn update_aggregate_pool(
     pool: &PgPool,
     id: &Uuid,
     value: &Value,

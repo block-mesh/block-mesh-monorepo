@@ -28,7 +28,6 @@ struct EditInviteCodeTemplate {
     pub chat: String,
 }
 
-#[tracing::instrument(name = "edit_invite_code", skip(auth))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,

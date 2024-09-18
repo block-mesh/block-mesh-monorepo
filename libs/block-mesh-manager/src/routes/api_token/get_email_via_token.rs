@@ -7,7 +7,6 @@ use block_mesh_common::interfaces::server_api::{
 };
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "get_email_via_token", skip(body))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Json(body): Json<GetEmailViaTokenRequest>,

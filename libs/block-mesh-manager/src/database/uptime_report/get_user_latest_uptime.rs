@@ -10,7 +10,6 @@ pub struct UserUptime {
     pub duration_seconds: Option<f64>,
 }
 
-#[tracing::instrument(name = "get_user_latest_uptime", skip(transaction), ret, err)]
 pub async fn get_user_latest_uptime(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,

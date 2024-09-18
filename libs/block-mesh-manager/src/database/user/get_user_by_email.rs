@@ -26,8 +26,7 @@ pub async fn get_user_opt_by_email(
     .await?)
 }
 
-#[tracing::instrument(name = "Get User opt by email", skip(pool), ret, err, level = "trace")]
-pub(crate) async fn get_user_opt_by_email_pool(
+pub async fn get_user_opt_by_email_pool(
     pool: &PgPool,
     email: &str,
 ) -> anyhow::Result<Option<User>> {
