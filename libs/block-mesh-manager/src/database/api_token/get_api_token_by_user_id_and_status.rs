@@ -1,4 +1,4 @@
-use crate::domain::api_token::{ApiToken, ApiTokenStatus};
+use block_mesh_manager_database_domain::domain::api_token::{ApiToken, ApiTokenStatus};
 use secret::Secret;
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;

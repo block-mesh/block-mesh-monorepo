@@ -84,6 +84,7 @@ console_error_panic_hook = { workspace = true }
 console_log = { workspace = true }
 log = { workspace = true }
 tailwind_fuse = { version = "0.3", features = ["variant"] }
+block-mesh-manager-database-domain = { path = "../block-mesh-manager-database-domain", optional = true }
 
 [dependencies.rand]
 workspace = true
@@ -142,6 +143,7 @@ hydrate = [
   "dep:logger-leptos"
 ]
 ssr = [
+  "dep:block-mesh-manager-database-domain",
   "dep:twitter-v2",
   "dep:redis",
   "dep:tower_governor",

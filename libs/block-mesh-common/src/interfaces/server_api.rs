@@ -115,7 +115,7 @@ pub struct CheckTokenRequest {
 }
 
 #[typeshare]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GetTokenResponse {
     #[typeshare(serialized_as = "string")]
     pub api_token: Option<Uuid>,
