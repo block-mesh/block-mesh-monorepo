@@ -104,10 +104,9 @@ impl ExtensionWrapperState {
         let uptime = Self::get_uptime().await;
         let invite_code =
             Self::update_invite_code(&api_token, now - last_update, &blockmesh_url, &email).await;
+        Self::store_last_update(now).await;
         let download_speed = Self::get_download_speed().await;
         let upload_speed = Self::get_upload_speed().await;
-
-        Self::store_last_update(now).await;
 
         // Signals:
         self.invite_code.update(|v| *v = invite_code.clone());
@@ -255,7 +254,7 @@ impl ExtensionWrapperState {
         email: &str,
     ) -> String {
         let mut invite_code = Self::get_invite_code().await;
-        if !invite_code.is_empty() && time_diff < 600 {
+        if !invite_code.is_empty() && time_diff < 3000 {
             return invite_code;
         }
         if !api_token.is_nil() && *api_token != Uuid::default() {

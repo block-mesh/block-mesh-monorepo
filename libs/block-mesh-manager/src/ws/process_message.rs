@@ -84,7 +84,9 @@ async fn process_client_message(
             return Some(message);
         }
         Err(_) => {
-            tracing::info!("Invalid Message => {}", text)
+            if text != "ping" {
+                tracing::info!("Invalid Message => {}", text)
+            }
         }
     }
     None

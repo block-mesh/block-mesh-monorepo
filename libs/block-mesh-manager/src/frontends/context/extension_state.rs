@@ -16,12 +16,10 @@ use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
-use crate::frontends::utils::auth::get_latest_invite_code;
 use crate::frontends::utils::connectors::{
     ask_for_all_storage_values, onPostMessage, send_message_channel,
 };
 use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType};
-use block_mesh_common::interfaces::server_api::GetLatestInviteCodeRequest;
 
 #[derive(Clone, Serialize, Deserialize, Copy)]
 pub struct ExtensionContext {
@@ -229,34 +227,6 @@ impl ExtensionContext {
         let closure_clone = closure_ref.clone();
         onPostMessage(closure_clone.borrow().as_ref().unwrap());
         closure_ref.borrow_mut().take().unwrap().forget();
-    }
-
-    pub async fn update_invite_code(
-        api_token: &Uuid,
-        time_diff: i64,
-        blockmesh_url: &str,
-        email: &str,
-    ) -> String {
-        // let mut invite_code = Self::get_invite_code().await;
-        let mut invite_code = "".to_string();
-        if !invite_code.is_empty() && time_diff < 600 {
-            return invite_code;
-        }
-        if !api_token.is_nil() && *api_token != Uuid::default() {
-            if let Ok(result) = get_latest_invite_code(
-                blockmesh_url,
-                &GetLatestInviteCodeRequest {
-                    email: email.to_string(),
-                    api_token: *api_token,
-                },
-            )
-            .await
-            {
-                invite_code = result.invite_code;
-                // Self::store_invite_code(invite_code.clone()).await;
-            }
-        }
-        invite_code
     }
 
     pub fn has_api_token(&self) -> bool {
