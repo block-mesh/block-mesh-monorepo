@@ -1,4 +1,5 @@
-use crate::routes::check_token::GetTokenResponseMap;
+use crate::routes::check_token::CheckTokenResponseMap;
+use crate::routes::get_token::GetTokenResponseMap;
 use crate::routes::router::get_router;
 use axum::{Extension, Router};
 use block_mesh_common::env::load_dotenv::load_dotenv;
@@ -20,11 +21,13 @@ async fn main() -> anyhow::Result<()> {
     setup_tracing_stdout_only();
     let db_pool = sqlx::PgPool::connect(&env::var("DATABASE_URL")?).await?;
     let router = get_router();
-    let check_token_map: GetTokenResponseMap = Arc::new(Mutex::new(HashMap::new()));
+    let check_token_map: CheckTokenResponseMap = Arc::new(Mutex::new(HashMap::new()));
+    let get_token_map: GetTokenResponseMap = Arc::new(Mutex::new(HashMap::new()));
     let app = Router::new()
         .nest("/", router)
         .layer(Extension(db_pool.clone()))
-        .layer(Extension(check_token_map));
+        .layer(Extension(check_token_map))
+        .layer(Extension(get_token_map));
     let port = env::var("PORT").unwrap_or("8001".to_string());
     let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
     tracing::info!("Listening on {}", listener.local_addr()?);

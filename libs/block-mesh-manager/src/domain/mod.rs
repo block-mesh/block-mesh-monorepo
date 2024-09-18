@@ -4,7 +4,6 @@ pub mod call_to_action;
 pub mod daily_stat;
 pub mod invite_code;
 pub mod ip_address;
-pub mod nonce;
 pub mod perk;
 pub mod provider_master_status;
 pub mod proxy_master;
