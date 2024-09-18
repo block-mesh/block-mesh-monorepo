@@ -1,0 +1,39 @@
+use crate::routes::check_token::{GetTokenResponseEnum, GetTokenResponseMap};
+use crate::routes::router::get_router;
+use axum::{Extension, Router};
+use block_mesh_common::env::load_dotenv::load_dotenv;
+use dashmap::DashMap;
+use logger_general::tracing::setup_tracing_stdout_only;
+use std::collections::HashMap;
+use std::env;
+use std::net::SocketAddr;
+use std::sync::Arc;
+use tokio::net::TcpListener;
+use tokio::sync::Mutex;
+use uuid::Uuid;
+
+mod database;
+mod error;
+mod routes;
+
+#[tokio::main]
+async fn main() -> anyhow::Result<()> {
+    load_dotenv();
+    setup_tracing_stdout_only();
+    let db_pool = sqlx::PgPool::connect(&env::var("DATABASE_URL")?).await?;
+    let router = get_router();
+    let check_token_map: GetTokenResponseMap = Arc::new(Mutex::new(HashMap::new()));
+    let app = Router::new()
+        .nest("/", router)
+        .layer(Extension(db_pool.clone()))
+        .layer(Extension(check_token_map));
+    let port = env::var("PORT").unwrap_or("8001".to_string());
+    let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
+    tracing::info!("Listening on {}", listener.local_addr()?);
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await?;
+    Ok(())
+}

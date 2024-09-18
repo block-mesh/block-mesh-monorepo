@@ -4,6 +4,7 @@ use block_mesh_manager_database_domain::domain::user::UserRole;
 use secret::Secret;
 use sqlx::{PgPool, Postgres, Transaction};
 
+#[allow(dead_code)]
 pub async fn get_user_opt_by_email(
     transaction: &mut Transaction<'_, Postgres>,
     email: &str,

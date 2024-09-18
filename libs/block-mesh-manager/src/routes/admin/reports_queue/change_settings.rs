@@ -2,7 +2,6 @@ use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or
 use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
-use crate::domain::user::UserRole;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use crate::startup::application::AppState;
@@ -14,6 +13,7 @@ use axum::response::IntoResponse;
 use axum::{debug_handler, Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
+use block_mesh_manager_database_domain::domain::user::UserRole;
 use http::StatusCode;
 use std::env;
 use std::sync::Arc;

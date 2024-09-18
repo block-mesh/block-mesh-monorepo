@@ -1459,6 +1459,7 @@ dependencies = [
  "axum-login",
  "bcrypt",
  "block-mesh-common",
+ "block-mesh-manager-database-domain",
  "cfg-if",
  "charming",
  "chrono",
@@ -1524,6 +1525,46 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
+]
+
+[[package]]
+name = "block-mesh-manager-api"
+version = "0.0.261"
+dependencies = [
+ "anyhow",
+ "axum",
+ "axum-extra",
+ "block-mesh-common",
+ "block-mesh-manager-database-domain",
+ "chrono",
+ "dashmap 6.0.1",
+ "http-body-util",
+ "logger-general",
+ "rand 0.8.5",
+ "secret",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "tower",
+ "tower-http",
+ "tracing",
+ "tracing-appender",
+ "tracing-bunyan-formatter",
+ "tracing-subscriber",
+ "uuid",
+]
+
+[[package]]
+name = "block-mesh-manager-database-domain"
+version = "0.0.261"
+dependencies = [
+ "chrono",
+ "secret",
+ "serde",
+ "sqlx",
+ "uuid",
 ]
 
 [[package]]

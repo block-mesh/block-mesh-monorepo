@@ -3,9 +3,11 @@ use secret::Secret;
 use sqlx::{PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
-pub async fn find_token(
+#[allow(dead_code)]
+pub async fn get_api_token_by_usr_and_status(
     transaction: &mut Transaction<'_, Postgres>,
-    token: &Uuid,
+    user_id: &Uuid,
+    status: ApiTokenStatus,
 ) -> anyhow::Result<Option<ApiToken>> {
     Ok(sqlx::query_as!(
         ApiToken,
@@ -15,17 +17,18 @@ pub async fn find_token(
         user_id,
         token as "token: Secret<Uuid>",
         status as "status: ApiTokenStatus"
-        FROM api_tokens WHERE token = $1 and status = $2 LIMIT 1"#,
-        token,
-        ApiTokenStatus::Active.to_string()
+        FROM api_tokens WHERE user_id = $1 and status = $2 LIMIT 1"#,
+        user_id,
+        status.to_string()
     )
     .fetch_optional(&mut **transaction)
     .await?)
 }
 
-pub(crate) async fn find_token_pool(
+pub async fn get_api_token_by_usr_and_status_pool(
     pool: &PgPool,
-    token: &Uuid,
+    user_id: &Uuid,
+    status: ApiTokenStatus,
 ) -> anyhow::Result<Option<ApiToken>> {
     Ok(sqlx::query_as!(
         ApiToken,
@@ -35,9 +38,9 @@ pub(crate) async fn find_token_pool(
         user_id,
         token as "token: Secret<Uuid>",
         status as "status: ApiTokenStatus"
-        FROM api_tokens WHERE token = $1 and status = $2 LIMIT 1"#,
-        token,
-        ApiTokenStatus::Active.to_string()
+        FROM api_tokens WHERE user_id = $1 and status = $2 LIMIT 1"#,
+        user_id,
+        status.to_string()
     )
     .fetch_optional(pool)
     .await?)

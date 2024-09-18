@@ -1,12 +1,12 @@
 use crate::database::api_token::get_api_token_by_user_id_and_status::get_api_token_by_usr_and_status_pool;
 use crate::database::user::get_user_by_email::get_user_opt_by_email_pool;
-use crate::domain::api_token::ApiTokenStatus;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use crate::startup::application::AppState;
 use axum::extract::State;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetTokenResponse};
+use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
 use redis::AsyncCommands;
 use sqlx::PgPool;
 use std::sync::Arc;
