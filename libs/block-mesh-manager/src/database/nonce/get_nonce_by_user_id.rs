@@ -1,4 +1,4 @@
-use crate::domain::nonce::Nonce;
+use block_mesh_manager_database_domain::domain::nonce::Nonce;
 use secret::Secret;
 use sqlx::PgPool;
 use uuid::Uuid;
