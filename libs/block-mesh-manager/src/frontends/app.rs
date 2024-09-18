@@ -3,8 +3,8 @@ use crate::frontends::components::notification_popup::NotificationPopup;
 use crate::frontends::context::auth_context::AuthContext;
 use crate::frontends::context::extension_state::ExtensionContext;
 use crate::frontends::context::notification_context::NotificationContext;
+use crate::frontends::context::reload_context::ReloadContext;
 use crate::frontends::context::size_context::SizeContext;
-use crate::frontends::context::webapp_context::WebAppContext;
 use crate::frontends::frontend_extension::components::navigator::ExtensionNavigator;
 use crate::frontends::frontend_extension::extension_header::ExtensionServerHeader;
 use crate::frontends::frontend_extension::pages::loading::ExtensionLoading;
@@ -19,6 +19,7 @@ use crate::frontends::frontend_tauri::pages::register::TauriRegister;
 use crate::frontends::frontend_tauri::tauri_header::TauriHeader;
 use crate::frontends::frontend_webserver::webserver_header::WebServerHeader;
 use crate::frontends::new_frontend_webserver::app::admin_dashboard::AdminDashboard;
+use crate::frontends::new_frontend_webserver::app::application_layout::ApplicationLayout;
 use crate::frontends::new_frontend_webserver::app::daily_leaderboard::DailyLeaderboardDashboard;
 use crate::frontends::new_frontend_webserver::app::new_dashboard::NewDashboard;
 use crate::frontends::new_frontend_webserver::app::perks::Perks;
@@ -34,18 +35,15 @@ pub fn App() -> impl IntoView {
     provide_context(AuthContext::default());
     provide_context(NotificationContext::default());
     provide_context(ExtensionContext::default());
-    provide_context(WebAppContext::default());
     provide_context(SizeContext::default());
+    provide_context(ReloadContext::default());
 
-    let none_resource: Option<Resource<(), ()>> = None;
     let _notification = use_context::<NotificationContext>().unwrap();
     let extension_state = use_context::<ExtensionContext>().unwrap();
     let auth_state = use_context::<AuthContext>().unwrap();
     let extension_resource = ExtensionContext::init_resource(extension_state);
     let none_extension_resource = None::<Resource<(), ExtensionContext>>;
     let auth_state = AuthContext::init_as_resource(auth_state);
-    let new_server_class =
-        "text-zinc-950 antialiased lg:bg-zinc-100 bg-zinc-900 text-off-white lg:bg-zinc-950";
 
     view! {
         <CommonHeader/>
@@ -57,7 +55,10 @@ pub fn App() -> impl IntoView {
                         view! {
                             <WebServerHeader/>
                             <NotificationPopup/>
-                            <Outlet/>
+
+                            <ApplicationLayout>
+                                <Outlet/>
+                            </ApplicationLayout>
                         }
                     }
                 >
@@ -66,24 +67,7 @@ pub fn App() -> impl IntoView {
                     <Route path="/dashboard" view=NewDashboard/>
                     <Route path="/referrals" view=Referrals/>
                     <Route path="/perks" view=Perks/>
-                    <Route
-                        path="/new_dashboard"
-
-                        view=move || {
-                            view! {
-                                <Wrapper
-                                    resource=none_resource
-                                    auth=none_resource
-                                    loading=|| view! { <p>Loading</p> }
-                                    class=new_server_class
-                                >
-                                    <NewDashboard/>
-                                </Wrapper>
-                            }
-                        }
-                    />
                     <Route path="/admin_dashboard" view=AdminDashboard/>
-
                 </Route>
                 <Route
                     path="/tauri"

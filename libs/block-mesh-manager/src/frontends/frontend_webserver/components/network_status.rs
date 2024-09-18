@@ -1,16 +1,11 @@
-use crate::frontends::context::webapp_context::WebAppContext;
+use block_mesh_common::interfaces::server_api::DashboardResponse;
 use leptos::*;
 
 #[component]
 pub fn NetworkStatusComponent() -> impl IntoView {
-    let async_data = WebAppContext::get_dashboard_data();
-    let connected = Signal::derive(move || {
-        if let Some(data) = async_data.get() {
-            data.is_some_and(|d| d.connected)
-        } else {
-            false
-        }
-    });
+    let async_data = expect_context::<DashboardResponse>();
+
+    let connected = Signal::derive(move || async_data.connected);
 
     let status_color = Signal::derive(move || {
         if connected.get() {

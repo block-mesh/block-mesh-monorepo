@@ -29,7 +29,7 @@ pub async fn send_to_clipboard(link: &str) {
     let msg = PostMessage {
         msg_type: MessageType::COPY_TO_CLIPBOARD,
         key: MessageKey::InviteCode,
-        value: Option::from(MessageValue::String(link.to_string())),
+        value: Some(MessageValue::String(link.to_string())),
     };
     if let Ok(js_args) = serde_wasm_bindgen::to_value(&msg) {
         send_message(js_args).await;

@@ -11,6 +11,11 @@ export AGG_SIZE=1
 source "${ROOT}/scripts/setup.sh"
 export DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
 export REDIS_URL="redis://127.0.0.1:6379"
+export MAILGUN_SEND_KEY=""
+export TWITTER_CLIENT_ID=""
+export TWITTER_CLIENT_SECRET=""
+export TWITTER_CALLBACK_URL="http://localhost:3000"
+export BLOCKMESH_SERVER_UUID="ff28257b-4ac8-47c2-b26f-d567626a411e"
 if [ -f "${ROOT}/.env" ] ; then
   source "${ROOT}/.env"
 fi

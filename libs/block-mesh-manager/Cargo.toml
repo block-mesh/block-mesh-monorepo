@@ -30,6 +30,7 @@ solana-sdk = { workspace = true, optional = true }
 clap = { workspace = true, features = ["derive"] }
 dashmap = { workspace = true }
 futures-util = { workspace = true }
+
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = { workspace = true, optional = true }
 logger-leptos = { path = "../logger-leptos", optional = true }

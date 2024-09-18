@@ -231,6 +231,9 @@ impl ExtensionWrapperState {
                                             MessageValue::I64(casted_value),
                                         );
                                     }
+                                    MessageKey::WalletAddress => {
+                                        log!("WalletAddress")
+                                    }
                                     MessageKey::All => {
                                         log!("GET_ALL")
                                     }
