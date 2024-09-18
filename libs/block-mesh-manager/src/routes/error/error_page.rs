@@ -35,7 +35,6 @@ pub struct ErrorTemplate {
     pub chat: String,
 }
 
-#[tracing::instrument(name = "error_page")]
 pub async fn handler(error: Query<ErrorQueryParams>) -> Result<impl IntoResponse, Error> {
     let error_template = ErrorTemplate {
         code: error.code,

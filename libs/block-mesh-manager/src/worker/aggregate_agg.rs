@@ -50,7 +50,6 @@ pub async fn aggregate_agg(
     Ok(())
 }
 
-#[tracing::instrument(name = "users_ips_submit_to_db", skip(pool, calls), ret, err)]
 pub async fn aggregate_submit_to_db(
     pool: &PgPool,
     calls: &mut HashMap<Uuid, Value>,

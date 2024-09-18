@@ -27,11 +27,7 @@ pub async fn get_user_opt_by_id(
     .await?)
 }
 
-#[tracing::instrument(name = "Get User opt by id", level = "trace", skip(pool), ret, err)]
-pub(crate) async fn get_user_opt_by_id_pool(
-    pool: &PgPool,
-    id: &Uuid,
-) -> anyhow::Result<Option<User>> {
+pub async fn get_user_opt_by_id_pool(pool: &PgPool, id: &Uuid) -> anyhow::Result<Option<User>> {
     Ok(sqlx::query_as!(
         User,
         r#"SELECT

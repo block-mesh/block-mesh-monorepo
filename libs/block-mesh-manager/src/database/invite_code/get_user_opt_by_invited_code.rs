@@ -1,8 +1,7 @@
 use crate::domain::invite_code::InviteCode;
 use sqlx::{Postgres, Transaction};
 
-#[tracing::instrument(name = "get_user_opt_by_invited_code", skip(transaction), ret, err)]
-pub(crate) async fn get_user_opt_by_invited_code(
+pub async fn get_user_opt_by_invited_code(
     transaction: &mut Transaction<'_, Postgres>,
     invite_code: String,
 ) -> anyhow::Result<Option<InviteCode>> {

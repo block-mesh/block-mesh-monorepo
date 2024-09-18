@@ -10,7 +10,6 @@ use block_mesh_common::routes_enum::RoutesEnum;
 use secret::Secret;
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "login_post", skip(form, auth))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(mut auth): Extension<AuthSession<Backend>>,

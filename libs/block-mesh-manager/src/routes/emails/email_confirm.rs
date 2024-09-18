@@ -10,7 +10,6 @@ use block_mesh_common::interfaces::server_api::ConfirmEmailRequest;
 use block_mesh_common::routes_enum::RoutesEnum;
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "email_confirm", skip(pool, query))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Query(query): Query<ConfirmEmailRequest>,

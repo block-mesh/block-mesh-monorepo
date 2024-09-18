@@ -3,6 +3,7 @@ use std::fmt::{Debug, Display, Formatter};
 use std::time::Duration;
 
 use leptos::*;
+#[allow(unused_imports)]
 use leptos_dom::tracing;
 use serde::{Deserialize, Serialize};
 
@@ -22,7 +23,6 @@ impl Debug for NotificationContext {
 }
 
 impl NotificationContext {
-    #[tracing::instrument(name = "NotificationState::set_success")]
     pub fn set_success<T>(&self, success: T)
     where
         T: Display + Clone + Into<String> + Debug,
@@ -38,7 +38,6 @@ impl NotificationContext {
         );
     }
 
-    #[tracing::instrument(name = "NotificationState::set_error")]
     pub fn set_error<T>(&self, error: T)
     where
         T: Display + Clone + Into<String> + Debug,

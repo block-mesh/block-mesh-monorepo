@@ -23,7 +23,6 @@ pub async fn find_token(
     .await?)
 }
 
-#[tracing::instrument(name = "Find Token", level = "trace", skip(pool), ret)]
 pub(crate) async fn find_token_pool(
     pool: &PgPool,
     token: &Uuid,

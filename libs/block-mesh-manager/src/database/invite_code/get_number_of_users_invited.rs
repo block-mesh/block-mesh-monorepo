@@ -1,7 +1,6 @@
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "get_number_of_users_invited", skip(transaction), ret, err)]
 pub(crate) async fn get_number_of_users_invited(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,

@@ -49,7 +49,6 @@ pub struct MapMarker {
     geometry: MapMarkerGeometry,
 }
 
-#[tracing::instrument(name = "map")]
 pub async fn handler(Extension(pool): Extension<PgPool>) -> Result<impl IntoResponse, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let markers = world_map_markers(&mut transaction)

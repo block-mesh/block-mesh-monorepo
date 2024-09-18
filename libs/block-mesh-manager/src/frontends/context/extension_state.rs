@@ -9,6 +9,7 @@ use chrono::Utc;
 use gloo_utils::format::JsValueSerdeExt;
 use leptos::logging::log;
 use leptos::*;
+#[allow(unused_imports)]
 use leptos_dom::tracing;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -76,7 +77,6 @@ impl Debug for ExtensionContext {
 }
 
 impl ExtensionContext {
-    #[tracing::instrument(name = "init_resource")]
     pub fn init_resource(state: ExtensionContext) -> Resource<(), ExtensionContext> {
         create_local_resource(
             || (),
@@ -89,7 +89,6 @@ impl ExtensionContext {
         )
     }
 
-    #[tracing::instrument(name = "ExtensionState::init_with_storage")]
     pub async fn init_with_storage(self) {
         let now = Utc::now().timestamp();
         let mut blockmesh_url = self.blockmesh_url.get_untracked();
@@ -234,7 +233,6 @@ impl ExtensionContext {
         !(api_token.is_nil() || api_token == Uuid::default())
     }
 
-    #[tracing::instrument(name = "clear")]
     pub async fn clear(&self) {
         send_message_channel(MessageType::DELETE, MessageKey::ApiToken, None).await;
         send_message_channel(MessageType::DELETE, MessageKey::Email, None).await;

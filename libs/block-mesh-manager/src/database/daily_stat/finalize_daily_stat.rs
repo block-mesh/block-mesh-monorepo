@@ -2,8 +2,7 @@ use crate::domain::daily_stat::DailyStatStatus;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "finalize_daily_stat", skip(transaction), ret, err)]
-pub(crate) async fn finalize_daily_stat(
+pub async fn finalize_daily_stat(
     transaction: &mut Transaction<'_, Postgres>,
     id: Uuid,
 ) -> Result<(), sqlx::Error> {

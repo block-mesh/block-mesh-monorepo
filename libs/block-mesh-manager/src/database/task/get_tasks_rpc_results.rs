@@ -23,7 +23,6 @@ pub struct RpcResults {
     pub provider: String,
 }
 
-#[tracing::instrument(name = "get_tasks_rpc_results", skip(transaction), ret, err)]
 pub async fn get_tasks_rpc_results(
     transaction: &mut Transaction<'_, Postgres>,
     duration: u64,

@@ -2,7 +2,6 @@ use crate::domain::task::TaskStatus;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "Count User Tasks By Status", skip(transaction), ret, err)]
 pub async fn count_user_tasks_by_status(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,

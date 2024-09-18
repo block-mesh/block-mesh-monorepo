@@ -3,12 +3,6 @@ use sqlx::{Postgres, Transaction};
 use std::collections::HashMap;
 use uuid::Uuid;
 
-#[tracing::instrument(
-    name = "update_daily_stat_uptime_bulk",
-    skip(transaction, calls),
-    ret,
-    err
-)]
 pub async fn update_daily_stat_uptime_bulk(
     transaction: &mut Transaction<'_, Postgres>,
     calls: &mut HashMap<Uuid, f64>,

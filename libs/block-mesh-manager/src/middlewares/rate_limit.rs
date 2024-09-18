@@ -64,7 +64,6 @@ pub async fn touch_redis_value(con: &mut MultiplexedConnection, user_id: &Uuid, 
     }
 }
 
-#[tracing::instrument(name = "filter_request", skip(con))]
 pub async fn filter_request(
     con: &mut MultiplexedConnection,
     user_id: &Uuid,
