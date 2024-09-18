@@ -18,7 +18,8 @@ use crate::frontends::new_frontend_webserver::components::sidebar::{
 };
 use crate::frontends::new_frontend_webserver::components::sidebar_layout::SidebarLayout;
 use block_mesh_common::constants::BLOCK_MESH_LOGO;
-use block_mesh_common::interfaces::server_api::DashboardResponse;
+use block_mesh_common::interfaces::server_api::{DailyLeaderboard, DashboardResponse};
+use block_mesh_common::routes_enum::RoutesEnum;
 use leptos::*;
 
 #[component]
@@ -101,15 +102,51 @@ pub fn ApplicationSidebar() -> impl IntoView {
 pub fn ApplicationLayout(children: ChildrenFn) -> impl IntoView {
     let ReloadContext { value, .. } = expect_context();
 
+    let children2 = move || view! { <div></div> };
+
     let resource = create_local_resource(
         move || value.get(),
         move |_| async move {
             let origin = window().origin();
             let client = reqwest::Client::new();
-            let response = client.post(&format!("{}/dashboard", origin)).send().await;
+            if let Ok(response) = client.post(&format!("{}/dashboard", origin)).send().await {
+                if let Ok(json) = response.json::<DashboardResponse>().await {
+                    provide_context(json);
+                }
+            }
 
+            if let Ok(response) = client
+                .post(&format!(
+                    "{}{}",
+                    origin,
+                    RoutesEnum::Static_Auth_Daily_Leaderboard
+                ))
+                .send()
+                .await
+            {
+                if let Ok(json) = response.json::<DailyLeaderboard>().await {
+                    provide_context(json);
+                }
+            }
+        },
+    );
+
+    let resource2 = create_local_resource(
+        move || value.get(),
+        move |_| async move {
+            let origin = window().origin();
+            let client = reqwest::Client::new();
+
+            let response = client
+                .post(&format!(
+                    "{}{}",
+                    origin,
+                    RoutesEnum::Static_Auth_Daily_Leaderboard
+                ))
+                .send()
+                .await;
             match response {
-                Ok(response) => match response.json::<DashboardResponse>().await {
+                Ok(response) => match response.json::<DailyLeaderboard>().await {
                     Ok(json) => Some(json),
                     Err(e) => {
                         logging::log!("error: {}", e);
@@ -128,13 +165,12 @@ pub fn ApplicationLayout(children: ChildrenFn) -> impl IntoView {
         <SidebarLayout navbar=ApplicationNavbar sidebar=ApplicationSidebar>
             <Transition fallback=LoadingIndicator>
                 <IfLetSome
-                    opt=Signal::derive(move || resource.get().flatten())
-                    let:data
+                    opt=Signal::derive(move || resource.get())
+                    let:_data
                     clone:children
                 >
 
                     {
-                        provide_context(data.clone());
                         children()
                     }
 

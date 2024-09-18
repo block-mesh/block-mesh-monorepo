@@ -2,5 +2,5 @@ use leptos::*;
 
 #[component]
 pub fn LoadingIndicator() -> impl IntoView {
-    view! { Loading... }
+    view! { <div class="text-white">Loading...</div> }
 }

@@ -4,24 +4,14 @@ use crate::frontends::components::tables::table::Table;
 use crate::frontends::components::tables::table_cell::TableCell;
 use crate::frontends::components::tables::table_head::TableHead;
 use crate::frontends::components::tables::table_header::TableHeader;
-use block_mesh_common::interfaces::server_api::LeaderBoardUser;
+use block_mesh_common::interfaces::server_api::DailyLeaderboard;
 use leptos::*;
 
 #[component]
 pub fn DailyLeaderboardDashboard() -> impl IntoView {
-    // let async_data = vec![];
-    // WebAppContext::get_daily_leaderboard();
-
-    let day = create_rw_signal("".to_string());
-    let users: Signal<Vec<LeaderBoardUser>> = Signal::derive(move || {
-        vec![]
-        // if let Some(Some(j)) = async_data.get() {
-        //     day.set(j.day.to_string());
-        //     j.leaderboard_users
-        // } else {
-        //     vec![]
-        // }
-    });
+    let data = expect_context::<DailyLeaderboard>();
+    let day = data.day.to_string();
+    let users = Signal::derive(move || data.leaderboard_users.clone());
 
     view! {
         <div class="flex items-start justify-start gap-4">
@@ -36,10 +26,11 @@ pub fn DailyLeaderboardDashboard() -> impl IntoView {
                 <tr>
                     <TableHeader>Rank</TableHeader>
                     <TableHeader>Email</TableHeader>
-                        <TableHeader>IPs</TableHeader>
+                    <TableHeader>IPs</TableHeader>
                     <TableHeader class="text-right">Points</TableHeader>
                 </tr>
             </TableHead>
+
             <tbody>
                 <Suspense>
                     {users
@@ -51,7 +42,7 @@ pub fn DailyLeaderboardDashboard() -> impl IntoView {
                                 <tr>
                                     <TableCell>{index + 1}</TableCell>
                                     <TableCell>{user.email.clone()}</TableCell>
-                                        <TableCell>{user.ips.unwrap_or_default()}</TableCell>
+                                    <TableCell>{user.ips.unwrap_or_default()}</TableCell>
                                     <TableCell class="text-right">
                                         {format!("{:.1}", user.points.unwrap_or_default())}
                                     </TableCell>

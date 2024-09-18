@@ -38,7 +38,6 @@ pub fn App() -> impl IntoView {
     provide_context(SizeContext::default());
     provide_context(ReloadContext::default());
 
-    let none_resource: Option<Resource<(), ()>> = None;
     let _notification = use_context::<NotificationContext>().unwrap();
     let extension_state = use_context::<ExtensionContext>().unwrap();
     let auth_state = use_context::<AuthContext>().unwrap();
@@ -70,24 +69,7 @@ pub fn App() -> impl IntoView {
                     <Route path="/dashboard" view=NewDashboard/>
                     <Route path="/referrals" view=Referrals/>
                     <Route path="/perks" view=Perks/>
-                    <Route
-                        path="/new_dashboard"
-
-                        view=move || {
-                            view! {
-                                <Wrapper
-                                    resource=none_resource
-                                    auth=none_resource
-                                    loading=|| view! { <p>Loading</p> }
-                                    class=new_server_class
-                                >
-                                    <NewDashboard/>
-                                </Wrapper>
-                            }
-                        }
-                    />
                     <Route path="/admin_dashboard" view=AdminDashboard/>
-
                 </Route>
                 <Route
                     path="/tauri"

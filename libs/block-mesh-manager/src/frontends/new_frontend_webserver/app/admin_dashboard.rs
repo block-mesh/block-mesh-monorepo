@@ -54,20 +54,34 @@ pub fn AdminDashboard() -> impl IntoView {
                 <Heading>Admin Dashboard</Heading>
             </div>
             <div class="flex flex-col justify-start gap-10">
-            <label class="text-off-white">Window size</label>
-            <input type="number" placeholder="Window size (queue batch size)" prop:value=window_size on:input=move |ev| {
-                    windows_size_set.set(event_target_value(&ev));
-            }/>
-            <label class="text-off-white">Period (seconds)</label>
-            <input type="number" placeholder="Period in seconds" prop:value=period on:input=move |ev| {
-                period_set.set(event_target_value(&ev));
-            }/>
-            <button class="text-off-white" on:click=move |_| {update_settings.dispatch(())}>Update Settings</button>
-            <button class="text-off-white" on:click=move |_| {stats_resource.refetch()}>Refresh Stats</button>
+                <label class="text-off-white">Window size</label>
+                <input
+                    type="number"
+                    placeholder="Window size (queue batch size)"
+                    prop:value=window_size
+                    on:input=move |ev| {
+                        windows_size_set.set(event_target_value(&ev));
+                    }
+                />
+
+                <label class="text-off-white">Period (seconds)</label>
+                <input
+                    type="number"
+                    placeholder="Period in seconds"
+                    prop:value=period
+                    on:input=move |ev| {
+                        period_set.set(event_target_value(&ev));
+                    }
+                />
+
+                <button class="text-off-white" on:click=move |_| { update_settings.dispatch(()) }>
+                    Update Settings
+                </button>
+                <button class="text-off-white" on:click=move |_| { stats_resource.refetch() }>
+                    Refresh Stats
+                </button>
             </div>
-            <pre class="text-off-white">
-                {move || stats.get()}
-            </pre>
+            <pre class="text-off-white">{move || stats.get()}</pre>
         </ApplicationLayout>
     }
 }
