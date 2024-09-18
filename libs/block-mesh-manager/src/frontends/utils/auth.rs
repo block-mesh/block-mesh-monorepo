@@ -2,16 +2,18 @@ use crate::frontends::context::auth_context::AuthContext;
 use crate::frontends::context::notification_context::NotificationContext;
 use crate::frontends::utils::connectors::{pubkey, sign_message};
 use anyhow::anyhow;
+use leptos::leptos_dom;
+#[allow(unused_imports)]
+use leptos_dom::tracing;
+
 use block_mesh_common::interfaces::server_api::{
-    CheckTokenRequest, ConnectWalletRequest, ConnectWalletResponse, GetLatestInviteCodeRequest,
-    GetLatestInviteCodeResponse, GetTokenResponse, LoginForm, RegisterForm, RegisterResponse,
+    CheckTokenRequest, ConnectWalletRequest, ConnectWalletResponse, GetTokenResponse, LoginForm,
+    RegisterForm, RegisterResponse,
 };
 use js_sys::Uint8Array;
 use leptos::*;
-use leptos_dom::tracing;
 use uuid::Uuid;
 
-#[tracing::instrument(name = "check_token", skip(credentials), err)]
 pub async fn check_token(
     blockmesh_url: &str,
     credentials: &CheckTokenRequest,
@@ -28,7 +30,6 @@ pub async fn check_token(
     Ok(response)
 }
 
-#[tracing::instrument(name = "register", skip(credentials), err)]
 pub async fn register(blockmesh_url: &str, credentials: &RegisterForm) -> anyhow::Result<()> {
     let url = format!("{}/register_api", blockmesh_url);
     let client = reqwest::Client::new();
@@ -44,7 +45,6 @@ pub async fn register(blockmesh_url: &str, credentials: &RegisterForm) -> anyhow
     }
 }
 
-#[tracing::instrument(name = "login", skip(credentials), err)]
 pub async fn login(
     blockmesh_url: &str,
     credentials: &LoginForm,
@@ -62,25 +62,6 @@ pub async fn login(
     Ok(response)
 }
 
-#[tracing::instrument(name = "get_latest_invite_code", skip(credentials), err)]
-pub async fn get_latest_invite_code(
-    blockmesh_url: &str,
-    credentials: &GetLatestInviteCodeRequest,
-) -> anyhow::Result<GetLatestInviteCodeResponse> {
-    let url = format!("{}/api/get_latest_invite_code", blockmesh_url);
-    let client = reqwest::Client::new();
-    let response = client
-        .post(&url)
-        .header("Content-Type", "application/json")
-        .json(&credentials)
-        .send()
-        .await?
-        .json()
-        .await?;
-    Ok(response)
-}
-
-#[tracing::instrument(name = "connect_wallet", err)]
 pub async fn connect_wallet(
     origin: String,
     connect_wallet_request: ConnectWalletRequest,

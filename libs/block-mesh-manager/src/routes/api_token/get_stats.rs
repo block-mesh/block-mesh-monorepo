@@ -1,13 +1,12 @@
 use crate::database::api_token::get_api_token_by_user_id_and_status::get_api_token_by_usr_and_status;
 use crate::database::daily_stat::get_daily_stats_by_user_id::get_daily_stats_by_user_id;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
-use crate::domain::api_token::ApiTokenStatus;
 use crate::errors::error::Error;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{GetStatsRequest, GetStatsResponse, Stat};
+use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "get_stats", skip(body), fields(email = body.email))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Json(body): Json<GetStatsRequest>,

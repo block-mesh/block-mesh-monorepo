@@ -8,6 +8,7 @@ authors.workspace = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+flume = { workspace = true }
 logger-leptos = { path = "../logger-leptos" }
 tracing-subscriber-wasm = { workspace = true }
 url = { workspace = true }
@@ -35,6 +36,7 @@ speed-test = { path = "../speed-test" }
 thiserror = { workspace = true }
 chrono = { workspace = true, features = ["wasmbind"] }
 gloo-utils = { workspace = true }
+once_cell = { workspace = true }
 
 [dependencies.web-sys]
 workspace = true

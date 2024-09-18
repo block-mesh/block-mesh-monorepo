@@ -2,8 +2,7 @@ use crate::domain::task::TaskStatus;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "Get User Rank by Task Statsu", skip(transaction), ret, err)]
-pub(crate) async fn get_user_rank_by_task_status(
+pub async fn get_user_rank_by_task_status(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,
     status: TaskStatus,

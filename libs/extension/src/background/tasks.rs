@@ -51,9 +51,8 @@ pub async fn run_task(
         }
     };
 
-    if headers.is_some() {
+    if let Some(headers) = headers {
         let mut headers_map = HeaderMap::new();
-        let headers = headers.unwrap();
         if headers.is_object() {
             headers.as_object().unwrap().into_iter().for_each(|(k, v)| {
                 let header_name = HeaderName::from_str(k).unwrap();
@@ -104,6 +103,7 @@ pub async fn submit_task(
         asn: Option::from(metadata.asn.clone()),
         colo: Option::from(metadata.colo.clone()),
         response_time: Option::from(response_time),
+        response_body: None,
     };
     let response = reqwest::Client::new()
         .post(format!("{}/api/submit_task", base_url))

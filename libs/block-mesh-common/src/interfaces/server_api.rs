@@ -3,27 +3,37 @@ use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::cmp::Ordering;
+use typeshare::typeshare;
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Debug)]
+#[typeshare]
+#[derive(Clone, Serialize, Deserialize, Debug)]
 pub struct GetTaskResponse {
+    #[typeshare(serialized_as = "string")]
     pub id: Uuid,
     pub url: String,
     pub method: String,
+    #[typeshare(serialized_as = "object")]
     pub headers: Option<Value>,
+    #[typeshare(serialized_as = "object")]
     pub body: Option<Value>,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetTaskRequest {
     pub email: String,
+    #[typeshare(serialized_as = "string")]
     pub api_token: Uuid,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct SubmitTaskRequest {
     pub email: String,
+    #[typeshare(serialized_as = "string")]
     pub api_token: Uuid,
+    #[typeshare(serialized_as = "string")]
     pub task_id: Uuid,
     pub response_code: Option<i32>,
     pub country: Option<String>,
@@ -31,107 +41,135 @@ pub struct SubmitTaskRequest {
     pub asn: Option<String>,
     pub colo: Option<String>,
     pub response_time: Option<f64>,
+    pub response_body: Option<String>,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConfirmEmailRequest {
     pub token: String,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ClientsMetadata {
     pub depin_aggregator: Option<String>,
+    #[typeshare(serialized_as = "string")]
     pub device_type: DeviceType,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ReportUptimeRequest {
     pub email: String,
+    #[typeshare(serialized_as = "string")]
     pub api_token: Uuid,
     pub ip: Option<String>,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DashboardRequest {
     pub email: String,
+    #[typeshare(serialized_as = "string")]
     pub api_token: Uuid,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ReportUptimeResponse {
     pub status_code: u16,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct SubmitTaskResponse {
     pub status_code: u16,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetTokenRequest {
     pub email: String,
     pub password: String,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetEmailViaTokenRequest {
     pub token: String,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetEmailViaTokenResponse {
     pub email: String,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CheckTokenRequest {
     pub email: String,
+    #[typeshare(serialized_as = "string")]
     pub api_token: Uuid,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GetTokenResponse {
+    #[typeshare(serialized_as = "string")]
     pub api_token: Option<Uuid>,
     pub message: Option<String>,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetStatsRequest {
     pub email: String,
+    #[typeshare(serialized_as = "string")]
     pub api_token: Uuid,
 }
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Stat {
+    #[typeshare(serialized_as = "Date")]
     pub day: NaiveDate,
+    #[typeshare(serialized_as = "number")]
     pub tasks_count: i64,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetStatsResponse {
     pub stats: Vec<Stat>,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct LoginForm {
     pub email: String,
     pub password: String,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ResetPasswordForm {
     pub email: String,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ResendConfirmEmailForm {
     pub email: String,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct NewPasswordQuery {
     pub token: String,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct NewPasswordForm {
     pub email: String,
@@ -140,6 +178,7 @@ pub struct NewPasswordForm {
     pub password_confirm: String,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RegisterForm {
     pub email: String,
@@ -148,41 +187,53 @@ pub struct RegisterForm {
     pub invite_code: String,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RegisterResponse {
     pub status_code: u16,
     pub error: Option<String>,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetUserUptimeRequest {
     pub email: String,
+    #[typeshare(serialized_as = "string")]
     pub api_token: Uuid,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetLatestInviteCodeRequest {
     pub email: String,
+    #[typeshare(serialized_as = "string")]
     pub api_token: Uuid,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetUserUptimeResponse {
+    #[typeshare(serialized_as = "string")]
     pub user_id: Uuid,
+    #[typeshare(serialized_as = "Date")]
     pub start_time: Option<DateTime<Utc>>,
+    #[typeshare(serialized_as = "Date")]
     pub end_time: Option<DateTime<Utc>>,
     pub duration_seconds: Option<f64>,
     pub status_code: u16,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetLatestInviteCodeResponse {
     pub invite_code: String,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct ReportBandwidthRequest {
     pub email: String,
+    #[typeshare(serialized_as = "string")]
     pub api_token: Uuid,
     pub download_speed: f64,
     pub upload_speed: f64,
@@ -194,19 +245,23 @@ pub struct ReportBandwidthRequest {
     pub colo: String,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ReportBandwidthResponse {
     pub status_code: u16,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
 pub struct DashboardResponse {
     pub upload: f64,
     pub download: f64,
     pub latency: f64,
     pub uptime: f64,
+    #[typeshare(serialized_as = "number")]
     pub tasks: i64,
     pub points: f64,
+    #[typeshare(serialized_as = "number")]
     pub number_of_users_invited: i64,
     pub invite_code: String,
     pub connected: bool,
@@ -218,28 +273,36 @@ pub struct DashboardResponse {
     pub user_ips: Vec<UserIpInfo>,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
 pub struct PerkUI {
+    #[typeshare(serialized_as = "string")]
     pub id: Uuid,
     pub name: String,
     pub multiplier: f64,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
 pub struct CallToActionUI {
+    #[typeshare(serialized_as = "string")]
     pub id: Uuid,
     pub name: String,
     pub status: bool,
 }
 
+#[typeshare]
 #[derive(Default, Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct DailyStatForDashboard {
+    #[typeshare(serialized_as = "number")]
     pub tasks_count: i64,
     pub uptime: f64,
+    #[typeshare(serialized_as = "Date")]
     pub day: NaiveDate,
     pub points: f64,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct AuthStatusResponse {
     pub status_code: u16,
@@ -248,12 +311,14 @@ pub struct AuthStatusResponse {
     pub email: Option<String>,
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct RunTaskResponse {
     pub status: i32,
     pub raw: String,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConnectWalletRequest {
     pub pubkey: String,
@@ -261,39 +326,48 @@ pub struct ConnectWalletRequest {
     pub signature: Vec<u8>,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConnectWalletResponse {
     pub status: i32,
 }
 
+#[typeshare]
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq)]
 pub struct Referral {
     pub email: String,
+    #[typeshare(serialized_as = "Date")]
     pub created_at: DateTime<Utc>,
     pub verified_email: bool,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EditInviteCodeForm {
     pub new_invite_code: String,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct CallToActionForm {
     pub name: String,
     pub status: bool,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DailyLeaderboard {
+    #[typeshare(serialized_as = "Date")]
     pub day: NaiveDate,
     pub leaderboard_users: Vec<LeaderBoardUser>,
 }
 
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct LeaderBoardUser {
     pub email: String,
     pub points: Option<f64>,
+    pub ips: Option<i64>,
 }
 
 impl PartialEq<Self> for LeaderBoardUser {
@@ -316,9 +390,17 @@ impl Ord for LeaderBoardUser {
 
 impl Eq for LeaderBoardUser {}
 
+#[typeshare]
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 pub struct UserIpInfo {
     pub ip: String,
     pub country: Option<String>,
+    #[typeshare(serialized_as = "Date")]
     pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Serialize, Deserialize, PartialEq, Debug)]
+pub enum HandlerMode {
+    Http,
+    WebSocket,
 }

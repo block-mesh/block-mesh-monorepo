@@ -35,7 +35,6 @@ impl EmailClient {
             aws_client,
         }
     }
-    #[tracing::instrument(name = "send_confirmation_email", skip(self, token))]
     pub async fn send_confirmation_email(&self, to: &str, token: &str) -> anyhow::Result<()> {
         let mut dest: Destination = Destination::builder().build();
         dest.to_addresses = Some(vec![to.to_string()]);
@@ -65,7 +64,6 @@ impl EmailClient {
         Ok(())
     }
 
-    #[tracing::instrument(name = "send_reset_password_email", skip(self, token))]
     pub async fn send_reset_password_email(&self, to: &str, token: &str) -> anyhow::Result<()> {
         let mut dest: Destination = Destination::builder().build();
         dest.to_addresses = Some(vec![to.to_string()]);

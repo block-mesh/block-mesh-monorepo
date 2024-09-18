@@ -2,8 +2,7 @@ use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "Create User", skip(transaction), ret, err)]
-pub(crate) async fn create_user(
+pub async fn create_user(
     transaction: &mut Transaction<'_, Postgres>,
     wallet_address: Option<String>,
     email: &str,

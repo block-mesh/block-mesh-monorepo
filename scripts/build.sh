@@ -3,6 +3,7 @@ set -x
 export _PWD="$(pwd)"
 export ROOT="$(git rev-parse --show-toplevel)"
 source "${ROOT}/scripts/setup.sh"
+ensure cd "${ROOT}" && typeshare . --lang=typescript --output-file="${ROOT}/libs/react-native-app/utils/apiTypes.ts"
 cd "${ROOT}/libs/block-mesh-manager" || exit
 set +x
 if [ -n "${DATABASE_URL+1}" ]; then

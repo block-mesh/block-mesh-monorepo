@@ -19,3 +19,5 @@ pub mod rpc;
 pub mod tasks;
 pub mod twitter;
 pub mod uptime_report;
+
+pub mod admin;

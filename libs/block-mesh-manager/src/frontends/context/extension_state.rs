@@ -9,6 +9,7 @@ use chrono::Utc;
 use gloo_utils::format::JsValueSerdeExt;
 use leptos::logging::log;
 use leptos::*;
+#[allow(unused_imports)]
 use leptos_dom::tracing;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -16,12 +17,10 @@ use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
-use crate::frontends::utils::auth::{check_token, get_latest_invite_code};
 use crate::frontends::utils::connectors::{
     ask_for_all_storage_values, onPostMessage, send_message_channel,
 };
 use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType};
-use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
 
 #[derive(Clone, Serialize, Deserialize, Copy)]
 pub struct ExtensionContext {
@@ -81,7 +80,6 @@ impl Debug for ExtensionContext {
 }
 
 impl ExtensionContext {
-    #[tracing::instrument(name = "init_resource")]
     pub fn init_resource(state: ExtensionContext) -> Resource<(), ExtensionContext> {
         create_local_resource(
             || (),
@@ -94,7 +92,6 @@ impl ExtensionContext {
         )
     }
 
-    #[tracing::instrument(name = "ExtensionState::init_with_storage")]
     pub async fn init_with_storage(self) {
         let now = Utc::now().timestamp();
         let mut blockmesh_url = self.blockmesh_url.get_untracked();
@@ -210,18 +207,19 @@ impl ExtensionContext {
                                     && self.status.get_untracked() != AuthStatus::LoggedIn
                                 {
                                     spawn_local(async move {
-                                        let credentials = CheckTokenRequest {
-                                            api_token: self.api_token.get_untracked(),
-                                            email: self.email.get_untracked(),
-                                        };
-                                        let result = check_token(
-                                            &self.blockmesh_url.get_untracked(),
-                                            &credentials,
-                                        )
-                                        .await;
-                                        if result.is_ok() {
-                                            self.status.update(|v| *v = AuthStatus::LoggedIn);
-                                        };
+                                        self.status.update(|v| *v = AuthStatus::LoggedIn);
+                                        // let credentials = CheckTokenRequest {
+                                        //     api_token: self.api_token.get_untracked(),
+                                        //     email: self.email.get_untracked(),
+                                        // };
+                                        // let result = check_token(
+                                        //     &self.blockmesh_url.get_untracked(),
+                                        //     &credentials,
+                                        // )
+                                        // .await;
+                                        // if result.is_ok() {
+                                        //     self.status.update(|v| *v = AuthStatus::LoggedIn);
+                                        // };
                                     });
                                 }
                             }
@@ -237,40 +235,11 @@ impl ExtensionContext {
         closure_ref.borrow_mut().take().unwrap().forget();
     }
 
-    pub async fn update_invite_code(
-        api_token: &Uuid,
-        time_diff: i64,
-        blockmesh_url: &str,
-        email: &str,
-    ) -> String {
-        // let mut invite_code = Self::get_invite_code().await;
-        let mut invite_code = "".to_string();
-        if !invite_code.is_empty() && time_diff < 600 {
-            return invite_code;
-        }
-        if !api_token.is_nil() && *api_token != Uuid::default() {
-            if let Ok(result) = get_latest_invite_code(
-                blockmesh_url,
-                &GetLatestInviteCodeRequest {
-                    email: email.to_string(),
-                    api_token: *api_token,
-                },
-            )
-            .await
-            {
-                invite_code = result.invite_code;
-                // Self::store_invite_code(invite_code.clone()).await;
-            }
-        }
-        invite_code
-    }
-
     pub fn has_api_token(&self) -> bool {
         let api_token = self.api_token.get_untracked();
         !(api_token.is_nil() || api_token == Uuid::default())
     }
 
-    #[tracing::instrument(name = "clear")]
     pub async fn clear(&self) {
         send_message_channel(MessageType::DELETE, MessageKey::ApiToken, None).await;
         send_message_channel(MessageType::DELETE, MessageKey::Email, None).await;

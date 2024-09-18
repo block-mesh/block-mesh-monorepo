@@ -1,8 +1,8 @@
 #![allow(clippy::blocks_in_conditions)]
 
-use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
-use crate::database::user::get_user_by_email::get_user_opt_by_email;
-use crate::database::user::get_user_by_id::get_user_opt_by_id;
+use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id_pool;
+use crate::database::user::get_user_by_email::get_user_opt_by_email_pool;
+use crate::database::user::get_user_by_id::get_user_opt_by_id_pool;
 use crate::errors::error::Error;
 use anyhow::anyhow;
 use async_trait::async_trait;
@@ -72,7 +72,6 @@ impl AuthnBackend for Backend {
     type Credentials = Credentials;
     type Error = Error;
 
-    #[tracing::instrument(name = "authenticate", skip(creds), err, ret, level = "trace")]
     async fn authenticate(
         &self,
         creds: Self::Credentials,
@@ -85,8 +84,8 @@ impl AuthnBackend for Backend {
                 return Ok(Option::from(value));
             }
         }
-        let mut transaction = self.db.begin().await.map_err(Error::from)?;
-        let user = match get_user_opt_by_email(&mut transaction, &creds.email).await {
+        let pool = self.db.clone();
+        let user = match get_user_opt_by_email_pool(&pool, &creds.email).await {
             Ok(u) => u,
             Err(e) => {
                 let _: RedisResult<()> = c.del(&key).await;
@@ -110,31 +109,27 @@ impl AuthnBackend for Backend {
             email: user.email,
         };
         if let Ok(session_user) = serde_json::to_string(&session_user) {
-            let _: RedisResult<()> = c.set(&key, session_user).await;
-            let _: RedisResult<()> = c.expire(&key, Backend::get_expire()).await;
+            let _: RedisResult<()> = c
+                .set_ex(&key, session_user, Backend::get_expire() as u64)
+                .await;
         }
-        transaction.commit().await.map_err(Error::from)?;
         Ok(Option::from(session_user))
     }
 
-    #[tracing::instrument(name = "get_user", err, ret, level = "trace")]
     async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {
-        let key = Backend::authenticate_key_with_user_id(&user_id);
+        let key = Backend::authenticate_key_with_user_id(user_id);
         let mut c = self.con.clone();
-        let redis_user: RedisResult<String> = c.get(user_id.to_string()).await;
-        match redis_user {
-            Ok(redis_user) => {
-                return if let Ok(value) = serde_json::from_str::<SessionUser>(&redis_user) {
-                    Ok(Option::from(value))
-                } else {
-                    Err(Error::Auth("Wrong creds".to_string()))
-                };
-            }
-            Err(_) => {}
+        if let Ok(redis_user) = c.get(user_id.to_string()).await {
+            let redis_user: String = redis_user;
+            return if let Ok(value) = serde_json::from_str::<SessionUser>(&redis_user) {
+                Ok(Option::from(value))
+            } else {
+                Err(Error::Auth("Wrong creds".to_string()))
+            };
         }
 
-        let mut transaction = self.db.begin().await.map_err(Error::from)?;
-        let user = match get_user_opt_by_id(&mut transaction, &user_id).await {
+        let pool = self.db.clone();
+        let user = match get_user_opt_by_id_pool(&pool, user_id).await {
             Ok(u) => u,
             Err(e) => {
                 let _: RedisResult<()> = c.del(&key).await;
@@ -150,21 +145,18 @@ impl AuthnBackend for Backend {
             }
         };
 
-        let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
+        let nonce = get_nonce_by_user_id_pool(&pool, &user.id)
             .await?
             .ok_or_else(|| Error::Auth("Nonce not found".to_string()))?;
-        transaction
-            .commit()
-            .await
-            .map_err(|e| Error::Auth(e.to_string()))?;
         let session_user = SessionUser {
             id: user.id,
             email: user.email.clone(),
             nonce: nonce.nonce.as_ref().to_string(),
         };
         if let Ok(session_user) = serde_json::to_string(&session_user) {
-            let _: RedisResult<()> = c.set(&key, &session_user).await;
-            let _: RedisResult<()> = c.expire(&key, Backend::get_expire()).await;
+            let _: RedisResult<()> = c
+                .set_ex(&key, &session_user, Backend::get_expire() as u64)
+                .await;
         }
         Ok(Option::from(session_user))
     }
@@ -200,7 +192,7 @@ pub async fn authentication_layer(
 
     let session_layer = SessionManagerLayer::new(session_store)
         .with_secure(false)
-        .with_expiry(Expiry::OnInactivity(Duration::days(1)));
+        .with_expiry(Expiry::OnInactivity(Duration::days(2)));
 
     let backend = Backend::new(pool.clone(), con.clone());
     AuthManagerLayerBuilder::new(backend, session_layer).build()

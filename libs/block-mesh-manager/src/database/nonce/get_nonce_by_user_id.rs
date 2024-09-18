@@ -1,11 +1,10 @@
-use crate::domain::nonce::Nonce;
+use block_mesh_manager_database_domain::domain::nonce::Nonce;
 use secret::Secret;
-use sqlx::{Postgres, Transaction};
+use sqlx::PgPool;
 use uuid::Uuid;
 
-#[tracing::instrument(name = "Get nonce", skip(transaction), ret, err, level = "trace")]
-pub async fn get_nonce_by_user_id(
-    transaction: &mut Transaction<'_, Postgres>,
+pub async fn get_nonce_by_user_id_pool(
+    pool: &PgPool,
     user_id: &Uuid,
 ) -> anyhow::Result<Option<Nonce>> {
     Ok(sqlx::query_as!(
@@ -22,6 +21,6 @@ pub async fn get_nonce_by_user_id(
         LIMIT 1"#,
         user_id
     )
-    .fetch_optional(&mut **transaction)
+    .fetch_optional(pool)
     .await?)
 }

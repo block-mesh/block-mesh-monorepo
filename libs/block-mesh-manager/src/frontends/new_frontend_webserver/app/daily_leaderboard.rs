@@ -36,6 +36,7 @@ pub fn DailyLeaderboardDashboard() -> impl IntoView {
                 <tr>
                     <TableHeader>Rank</TableHeader>
                     <TableHeader>Email</TableHeader>
+                        <TableHeader>IPs</TableHeader>
                     <TableHeader class="text-right">Points</TableHeader>
                 </tr>
             </TableHead>
@@ -50,6 +51,7 @@ pub fn DailyLeaderboardDashboard() -> impl IntoView {
                                 <tr>
                                     <TableCell>{index + 1}</TableCell>
                                     <TableCell>{user.email.clone()}</TableCell>
+                                        <TableCell>{user.ips.unwrap_or_default()}</TableCell>
                                     <TableCell class="text-right">
                                         {format!("{:.1}", user.points.unwrap_or_default())}
                                     </TableCell>
@@ -58,7 +60,6 @@ pub fn DailyLeaderboardDashboard() -> impl IntoView {
                         })
                         .collect_view()}
                 </Suspense>
-
             </tbody>
         </Table>
     }

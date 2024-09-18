@@ -1,6 +1,12 @@
 // A static import is required in b/g scripts because they are executed in their own env
 // not connected to the content scripts where wasm is loaded automatically
-import initWasmModule, { task_poller, report_uptime, uptime_fetcher, measure_bandwidth } from './wasm/blockmesh_ext.js'
+import initWasmModule, {
+  task_poller,
+  report_uptime,
+  uptime_fetcher,
+  start_websocket,
+  stop_websocket
+} from './wasm/blockmesh_ext.js'
 
 console.log('Background script started')
 
@@ -54,6 +60,28 @@ chrome.runtime.onStartup.addListener(async function() {
 let polling_interval = 120000
 let intervals = []
 
+
+async function is_ws_feature_connection() {
+  try {
+    const response1 = await fetch('https://feature-flags.blockmesh.xyz/read-flag/use_websocket')
+    if (response1.ok) {
+      const value = await response1.text()
+      const is_enabled = Boolean(value)
+      if (!is_enabled) return false
+    }
+    const response2 = await fetch('https://feature-flags.blockmesh.xyz/read-flag/use_websocket_percent')
+    if (response2.ok) {
+      const value = await response2.text()
+      const percentage = parseInt(value, 10)
+      const probe = Math.random() * 100
+      return probe < percentage
+    }
+  } catch (e) {
+    console.error('is_ws_feature_connection', e)
+    return false
+  }
+}
+
 async function get_polling_interval() {
   try {
     const response = await fetch('https://feature-flags.blockmesh.xyz/read-flag/polling_interval')
@@ -70,9 +98,13 @@ async function get_polling_interval() {
   }
 }
 
+function clear_intervals() {
+  intervals.forEach(i => clearInterval(i))
+}
+
 function recreate_intervals() {
   console.log('Running recreate_intervals')
-  intervals.forEach(i => clearInterval(i))
+  clear_intervals()
   intervals.push(
     setInterval(async () => {
       await create_alarm().then(onSuccess, onError)
@@ -88,7 +120,7 @@ function recreate_intervals() {
   intervals.push(
     setInterval(async () => {
       await create_alarm().then(onSuccess, onError)
-      await measure_bandwidth().then(onSuccess, onError)
+      // await measure_bandwidth().then(onSuccess, onError) // TODO bring back, need to release this gradually
     }, polling_interval + Math.random())
   )
 }
@@ -102,14 +134,28 @@ async function init_background() {
   await chrome.alarms.create('stayAlive', {
     periodInMinutes: 0.55
   })
-  recreate_intervals()
+
+  await main_interval()
   setInterval(async () => {
+    await main_interval()
+  }, 300000)
+}
+
+async function main_interval() {
+  const is_ws_enabled = await is_ws_feature_connection()
+  if (is_ws_enabled) {
+    console.log('Using WebSocket')
+    clear_intervals()
+    start_websocket().then(onSuccess, onError)
+  } else {
+    console.log('Using polling')
+    await stop_websocket()
     const new_value = ((await get_polling_interval()) || polling_interval)
-    if (new_value !== polling_interval) {
+    if (new_value !== polling_interval || intervals.length === 0) {
       polling_interval = new_value
       recreate_intervals()
     }
-  }, 300000)
+  }
 }
 
 init_background().then(onSuccess, onError)

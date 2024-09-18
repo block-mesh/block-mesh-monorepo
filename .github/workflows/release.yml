@@ -58,8 +58,8 @@ jobs:
         include:
           - target: "x86_64-unknown-linux-gnu"
             os: "ubuntu-latest"
-    #          - target: "x86_64-unknown-linux-musl"
-    #            os: "ubuntu-latest"
+          - target: "x86_64-unknown-linux-musl"
+            os: "ubuntu-latest"
     runs-on: ${{ matrix.os }}
     steps:
       - name: "Check out the repo"
@@ -90,6 +90,18 @@ jobs:
         run: |
           cargo build -p blockmesh-cli --release
           tar acf blockmesh-cli-${{ matrix.target }}.tar.gz target/release/blockmesh-cli
+      - name: "Build Worker"
+        run: |
+          cargo build -p block-mesh-manager-worker --release
+          tar acf block-mesh-manager-worker-${{ matrix.target }}.tar.gz target/release/block-mesh-manager-worker
+      - name: "Build API"
+        run: |
+          cargo build -p block-mesh-manager-api --release
+          tar acf block-mesh-manager-api-${{ matrix.target }}.tar.gz target/release/block-mesh-manager-api
+      - name: "Build Feature Flags Server"
+        run: |
+          cargo build -p feature-flags-server --release
+          tar acf feature-flags-server-${{ matrix.target }}.tar.gz target/release/feature-flags-server
       - name: Release
         uses: softprops/action-gh-release@v2
         #if: startsWith(github.ref, 'refs/tags/')
@@ -97,7 +109,10 @@ jobs:
           tag_name: v${{ needs.get-tag.outputs.pkg-version }}
           files: |
             block-mesh-manager-${{ matrix.target }}.tar.gz
+            block-mesh-manager-worker-${{ matrix.target }}.tar.gz
             blockmesh-cli-${{ matrix.target }}.tar.gz
+            feature-flags-server-${{ matrix.target }}.tar.gz
+            block-mesh-manager-api-${{ matrix.target }}.tar.gz
   push-to-registry:
     name: "Push Docker image to Docker Hub"
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -135,6 +150,30 @@ jobs:
           context: .
           file: block-mesh-manager.Dockerfile
           push: true
-          tags: blockmesh/block-mesh-manager:latest,blockmesh/block-mesh-manager:v${{ needs.get-tag.outputs.pkg-version }}
+          tags: blockmesh/block-mesh-manager:latest-amd64,blockmesh/block-mesh-manager:v${{ needs.get-tag.outputs.pkg-version }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: "Build and push Docker image for worker"
+        uses: "docker/build-push-action@v5"
+        with:
+          context: .
+          file: block-mesh-manager-worker.Dockerfile
+          push: true
+          tags: blockmesh/block-mesh-manager-worker:latest-amd64,blockmesh/block-mesh-manager-worker:v${{ needs.get-tag.outputs.pkg-version }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: "Build and push Docker image for feature flags server"
+        uses: "docker/build-push-action@v5"
+        with:
+          context: .
+          file: feature-flags-server.Dockerfile
+          push: true
+          tags: blockmesh/feature-flags-server:latest-amd64,blockmesh/feature-flags-server:v${{ needs.get-tag.outputs.pkg-version }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: "Build and push Docker image for feature flags server"
+        uses: "docker/build-push-action@v5"
+        with:
+          context: .
+          file: block-mesh-manager-api.Dockerfile
+          push: true
+          tags: blockmesh/block-mesh-manager-api:latest-amd64,blockmesh/block-mesh-manager-api:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
 # https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/

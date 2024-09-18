@@ -3,8 +3,7 @@ use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "create_aggregate", skip(transaction), ret, err)]
-pub(crate) async fn create_aggregate(
+pub async fn create_aggregate(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,
     name: &AggregateName,

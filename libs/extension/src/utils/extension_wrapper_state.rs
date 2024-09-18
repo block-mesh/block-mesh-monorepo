@@ -103,11 +103,11 @@ impl ExtensionWrapperState {
         setup_leptos_tracing(Option::from(device_id), DeviceType::Extension);
         let uptime = Self::get_uptime().await;
         let invite_code =
-            Self::update_invite_code(&api_token, now - last_update, &blockmesh_url, &email).await;
+            Self::update_invite_code(&api_token, now, now - last_update, &blockmesh_url, &email)
+                .await;
+        Self::store_last_update(now).await;
         let download_speed = Self::get_download_speed().await;
         let upload_speed = Self::get_upload_speed().await;
-
-        Self::store_last_update(now).await;
 
         // Signals:
         self.invite_code.update(|v| *v = invite_code.clone());
@@ -138,12 +138,12 @@ impl ExtensionWrapperState {
         self.last_update.update(|v| *v = now);
         send_storage_value_to_iframe(MessageKey::LastUpdate, MessageValue::I64(now));
         if !email.is_empty() && !api_token.is_nil() && api_token != Uuid::default() {
-            let credentials = CheckTokenRequest { api_token, email };
-            let result = check_token(&blockmesh_url, &credentials).await;
-            if result.is_ok() {
-                // TODO
-                self.status.update(|v| *v = AuthStatus::LoggedIn);
-            };
+            self.status.update(|v| *v = AuthStatus::LoggedIn);
+            // let credentials = CheckTokenRequest { api_token, email };
+            // let result = check_token(&blockmesh_url, &credentials).await;
+            // if result.is_ok() {
+            // self.status.update(|v| *v = AuthStatus::LoggedIn);
+            // };
         }
 
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
@@ -253,12 +253,14 @@ impl ExtensionWrapperState {
 
     pub async fn update_invite_code(
         api_token: &Uuid,
+        now: i64,
         time_diff: i64,
         blockmesh_url: &str,
         email: &str,
     ) -> String {
         let mut invite_code = Self::get_invite_code().await;
-        if !invite_code.is_empty() && time_diff < 600 {
+        if !invite_code.is_empty() && time_diff < 3000 {
+            Self::store_last_update(now).await;
             return invite_code;
         }
         if !api_token.is_nil() && *api_token != Uuid::default() {
@@ -275,6 +277,7 @@ impl ExtensionWrapperState {
                 Self::store_invite_code(invite_code.clone()).await;
             }
         }
+        Self::store_last_update(now).await;
         invite_code
     }
 

@@ -35,14 +35,14 @@ pub async fn dashboard_data_extractor(
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     let tasks =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Tasks, user_id)
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Tasks, &user_id)
             .await?;
     let overall_task_count = tasks.value.as_i64().unwrap_or_default();
     let number_of_users_invited = get_number_of_users_invited(&mut transaction, user_id)
         .await
         .map_err(Error::from)?;
     let uptime_aggregate =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, user_id)
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, &user_id)
             .await
             .map_err(Error::from)?;
     let referrals = get_user_referrals(&mut transaction, user_id)
@@ -54,7 +54,7 @@ pub async fn dashboard_data_extractor(
         .map_err(Error::from)?;
 
     let uptime =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, user.id)
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, &user.id)
             .await
             .map_err(Error::from)?;
 
@@ -62,21 +62,16 @@ pub async fn dashboard_data_extractor(
         .flags
         .get("polling_interval")
         .unwrap_or(&FlagValue::Number(120_000.0));
-    let interval: f64 =
+    let _interval: f64 =
         <FlagValue as TryInto<f64>>::try_into(interval.to_owned()).unwrap_or_default();
 
     let now = Utc::now();
     let diff = now - uptime.updated_at.unwrap_or(now);
     let limit = 300;
-
     let user_ips = get_user_ips(&mut transaction, &user_id, limit).await?;
 
-    let connected =
-        if diff.num_seconds() < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240) {
-            true
-        } else {
-            false
-        };
+    let connected = diff.num_seconds() > 0;
+    // diff.num_seconds() < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240);
     let calls_to_action = get_user_call_to_action(&mut transaction, user_id).await?;
     let perks = get_user_perks(&mut transaction, user_id).await?;
     let daily_stats = get_daily_stats_by_user_id(&mut transaction, &user_id)
@@ -97,17 +92,20 @@ pub async fn dashboard_data_extractor(
     let download = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
         AggregateName::Download,
-        user_id,
+        &user_id,
     )
     .await?;
 
     let upload =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Upload, user_id)
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Upload, &user_id)
             .await?;
 
-    let latency =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Latency, user_id)
-            .await?;
+    let latency = get_or_create_aggregate_by_user_and_name(
+        &mut transaction,
+        AggregateName::Latency,
+        &user_id,
+    )
+    .await?;
 
     transaction.commit().await.map_err(Error::from)?;
     Ok(DashboardResponse {
@@ -127,7 +125,7 @@ pub async fn dashboard_data_extractor(
                 created_at: i.created_at,
                 verified_email: i.verified_email,
                 email: {
-                    let s: Vec<&str> = i.email.split("@").collect();
+                    let s: Vec<&str> = i.email.split('@').collect();
                     let re = Regex::new(r"[A-Za-z]").unwrap();
                     let result = re.replace_all(s[0], "x");
                     format!("{}@{}", result, s[1])

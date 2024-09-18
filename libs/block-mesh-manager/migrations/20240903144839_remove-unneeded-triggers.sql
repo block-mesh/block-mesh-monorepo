@@ -1,0 +1,3 @@
+DROP FUNCTION IF EXISTS trg_make_archive_of_changes_for_users_ip;
+DROP FUNCTION IF EXISTS trg_make_archive_of_changes_for_ip_addresses;
+DROP FUNCTION IF EXISTS trg_make_archive_of_changes_for_analytics;

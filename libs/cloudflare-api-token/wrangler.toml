@@ -1,0 +1,11 @@
+name = "cloudflare-api-token"
+main = "build/worker/shim.mjs"
+compatibility_date = "2023-12-01"
+
+kv_namespaces = [
+  { binding = "worker-api_tokens", id = "a91f5f1842b64a87aad534b858c92d0d" },
+]
+
+[build]
+command = "cargo install -q worker-build && worker-build --release"
+watch_dir = ["src", "templates"]

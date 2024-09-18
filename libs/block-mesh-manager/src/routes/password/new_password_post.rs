@@ -1,4 +1,4 @@
-use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
+use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id_pool;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::database::user::update_user_password::update_user_password;
 use crate::errors::error::Error;
@@ -10,7 +10,6 @@ use block_mesh_common::interfaces::server_api::NewPasswordForm;
 use block_mesh_common::routes_enum::RoutesEnum;
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "new_password_post", skip(form, pool))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Form(form): Form<NewPasswordForm>,
@@ -28,7 +27,7 @@ pub async fn handler(
     let user = get_user_opt_by_email(&mut transaction, &email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
+    let nonce = get_nonce_by_user_id_pool(&pool, &user.id)
         .await?
         .ok_or_else(|| Error::NonceNotFound)?;
     if *nonce.nonce.expose_secret() != form.token {

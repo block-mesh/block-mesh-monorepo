@@ -3,8 +3,7 @@ use chrono::{Duration, Utc};
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "get_user_ips", skip(transaction), ret, err, level = "trace")]
-pub(crate) async fn get_user_ips(
+pub async fn get_user_ips(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
     limit: i64,
@@ -27,7 +26,7 @@ pub(crate) async fn get_user_ips(
     .await?
     .iter()
     .map(|row| UserIpInfo {
-        updated_at: row.updated_at.clone(),
+        updated_at: row.updated_at,
         ip: row.ip.clone(),
         country: row.country.clone(),
     })

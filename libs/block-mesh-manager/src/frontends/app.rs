@@ -18,6 +18,7 @@ use crate::frontends::frontend_tauri::pages::login::TauriLogin;
 use crate::frontends::frontend_tauri::pages::register::TauriRegister;
 use crate::frontends::frontend_tauri::tauri_header::TauriHeader;
 use crate::frontends::frontend_webserver::webserver_header::WebServerHeader;
+use crate::frontends::new_frontend_webserver::app::admin_dashboard::AdminDashboard;
 use crate::frontends::new_frontend_webserver::app::application_layout::ApplicationLayout;
 use crate::frontends::new_frontend_webserver::app::daily_leaderboard::DailyLeaderboardDashboard;
 use crate::frontends::new_frontend_webserver::app::new_dashboard::NewDashboard;
@@ -37,11 +38,15 @@ pub fn App() -> impl IntoView {
     provide_context(SizeContext::default());
     provide_context(ReloadContext::default());
 
+    let none_resource: Option<Resource<(), ()>> = None;
+    let _notification = use_context::<NotificationContext>().unwrap();
     let extension_state = use_context::<ExtensionContext>().unwrap();
     let auth_state = use_context::<AuthContext>().unwrap();
     let extension_resource = ExtensionContext::init_resource(extension_state);
     let none_extension_resource = None::<Resource<(), ExtensionContext>>;
     let auth_state = AuthContext::init_as_resource(auth_state);
+    let new_server_class =
+        "text-zinc-950 antialiased lg:bg-zinc-100 bg-zinc-900 text-off-white lg:bg-zinc-950";
 
     view! {
         <CommonHeader/>
@@ -65,6 +70,24 @@ pub fn App() -> impl IntoView {
                     <Route path="/dashboard" view=NewDashboard/>
                     <Route path="/referrals" view=Referrals/>
                     <Route path="/perks" view=Perks/>
+                    <Route
+                        path="/new_dashboard"
+
+                        view=move || {
+                            view! {
+                                <Wrapper
+                                    resource=none_resource
+                                    auth=none_resource
+                                    loading=|| view! { <p>Loading</p> }
+                                    class=new_server_class
+                                >
+                                    <NewDashboard/>
+                                </Wrapper>
+                            }
+                        }
+                    />
+                    <Route path="/admin_dashboard" view=AdminDashboard/>
+
                 </Route>
                 <Route
                     path="/tauri"

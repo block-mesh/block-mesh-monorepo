@@ -6,7 +6,6 @@ use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::AuthStatusResponse;
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "auth_status", skip(auth))]
 pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
     Extension(pool): Extension<PgPool>,
@@ -29,7 +28,6 @@ pub async fn handler(
             wallet_address: db_user.wallet_address,
         }));
     }
-
     Ok(Json(AuthStatusResponse {
         email: None,
         status_code: 404,

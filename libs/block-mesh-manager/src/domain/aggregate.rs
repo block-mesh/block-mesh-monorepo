@@ -17,23 +17,27 @@ pub struct Aggregate {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum AggregateName {
+    Twitter,
     Uptime,
     Download,
     Upload,
     Latency,
     Tasks,
     Invalid,
+    CronReports,
 }
 
 impl Display for AggregateName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            AggregateName::Twitter => write!(f, "Twitter"),
             AggregateName::Uptime => write!(f, "Uptime"),
             AggregateName::Download => write!(f, "Download"),
             AggregateName::Upload => write!(f, "Upload"),
             AggregateName::Latency => write!(f, "Latency"),
             AggregateName::Tasks => write!(f, "Tasks"),
             AggregateName::Invalid => write!(f, "Invalid"),
+            AggregateName::CronReports => write!(f, "CronReports"),
         }
     }
 }
@@ -49,11 +53,13 @@ impl From<Option<String>> for AggregateName {
 impl From<String> for AggregateName {
     fn from(s: String) -> Self {
         match s.as_str() {
+            "Twitter" => AggregateName::Twitter,
             "Uptime" => AggregateName::Uptime,
             "Download" => AggregateName::Download,
             "Upload" => AggregateName::Upload,
             "Latency" => AggregateName::Latency,
             "Tasks" => AggregateName::Tasks,
+            "CronReports" => AggregateName::CronReports,
             _ => AggregateName::Invalid,
         }
     }

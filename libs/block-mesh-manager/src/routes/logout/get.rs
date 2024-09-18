@@ -5,7 +5,6 @@ use axum::Extension;
 use axum_login::AuthSession;
 use block_mesh_common::routes_enum::RoutesEnum;
 
-#[tracing::instrument(name = "logout", skip(auth))]
 pub async fn handler(
     Extension(mut auth): Extension<AuthSession<Backend>>,
 ) -> Result<Redirect, Error> {

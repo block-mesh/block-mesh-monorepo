@@ -3,11 +3,11 @@ use cfg_if::cfg_if;
 pub mod frontends;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    pub mod ws;
     pub mod utils;
     pub mod configuration;
     pub mod database;
     pub mod domain;
-    pub mod envars;
     pub mod errors;
     pub mod emails;
     pub mod middlewares;

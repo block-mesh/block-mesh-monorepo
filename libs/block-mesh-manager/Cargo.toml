@@ -9,6 +9,11 @@ authors.workspace = true
 fake = { workspace = true, features = ["derive"] }
 
 [dependencies]
+reqwest-websocket = { workspace = true }
+flume = { workspace = true, default-features = false, features = ["async", "select"] }
+headers = { workspace = true }
+axum-extra = { workspace = true, features = ["typed-header"] }
+futures = { workspace = true }
 twitter-v2 = { workspace = true, optional = true }
 regex = { workspace = true }
 redis = { workspace = true, optional = true, features = ["tokio-comp", "tokio-rustls-comp", "tls-rustls-insecure"] }
@@ -23,6 +28,8 @@ wasm-bindgen-futures = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
 solana-sdk = { workspace = true, optional = true }
 clap = { workspace = true, features = ["derive"] }
+dashmap = { workspace = true }
+futures-util = { workspace = true }
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = { workspace = true, optional = true }
@@ -51,7 +58,7 @@ serde-aux = { workspace = true }
 config = { workspace = true }
 dotenv = { workspace = true }
 enum-iterator = { workspace = true }
-block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag"] }
+block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env"] }
 tokio = { workspace = true, features = ["full"], optional = true }
 axum-login = { workspace = true, optional = true }
 tower-sessions-sqlx-store = { workspace = true, features = ["postgres"], optional = true }
@@ -78,6 +85,7 @@ console_error_panic_hook = { workspace = true }
 console_log = { workspace = true }
 log = { workspace = true }
 tailwind_fuse = { version = "0.3", features = ["variant"] }
+block-mesh-manager-database-domain = { path = "../block-mesh-manager-database-domain", optional = true }
 
 [dependencies.rand]
 workspace = true
@@ -136,6 +144,7 @@ hydrate = [
   "dep:logger-leptos"
 ]
 ssr = [
+  "dep:block-mesh-manager-database-domain",
   "dep:twitter-v2",
   "dep:redis",
   "dep:tower_governor",

@@ -8,7 +8,6 @@ use block_mesh_common::interfaces::server_api::{DailyLeaderboard, LeaderBoardUse
 use chrono::{Duration, Utc};
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "daily_leaderboard", skip(auth))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,
@@ -25,21 +24,17 @@ pub async fn handler(
                     LeaderBoardUser {
                         email: user.email.clone(),
                         points: i.points,
+                        ips: i.ips,
                     }
                 } else {
                     LeaderBoardUser {
                         email: "***@***".to_string(),
                         points: i.points,
+                        ips: i.ips,
                     }
                 }
             })
             .collect();
-
-    // let your_rank = daily_stats
-    //     .iter()
-    //     .position(|i| i.email == user.email)
-    //     .unwrap_or_default()
-    //     + 1;
     transaction.commit().await.map_err(Error::from)?;
     Ok(Json(DailyLeaderboard {
         leaderboard_users,

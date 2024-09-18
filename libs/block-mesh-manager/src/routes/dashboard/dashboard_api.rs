@@ -12,7 +12,6 @@ use crate::routes::dashboard::dashboard_data_extractor::dashboard_data_extractor
 use crate::startup::application::AppState;
 use block_mesh_common::interfaces::server_api::{DashboardRequest, DashboardResponse};
 
-#[tracing::instrument(name = "dashboard api", skip_all, level = "trace",  err(level = Level::TRACE))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,

@@ -5,6 +5,15 @@ use wasm_bindgen::JsValue;
 
 use block_mesh_common::chrome_storage::{MessageKey, MessageValue};
 
+#[wasm_bindgen(inline_js = r#"
+    export async function sleep_js(duration) {
+        return new Promise((resolve) => setTimeout(resolve, duration))
+    }
+"#)]
+extern "C" {
+    pub async fn sleep_js(duration: u32);
+}
+
 /// This is a proxy for report_progress() in progress.js
 /// to send messages to other js scripts.
 #[wasm_bindgen(inline_js = r#"

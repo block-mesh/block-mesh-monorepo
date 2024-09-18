@@ -13,7 +13,6 @@ use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use block_mesh_common::interfaces::server_api::{ConnectWalletRequest, ConnectWalletResponse};
 
-#[tracing::instrument(name = "connect_wallet", skip(auth))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,

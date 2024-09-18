@@ -9,7 +9,6 @@ use block_mesh_common::interfaces::server_api::CallToActionForm;
 use block_mesh_common::routes_enum::RoutesEnum;
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "call_to_action_post", skip(auth, pool))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,

@@ -2,8 +2,7 @@ use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "Create Invite Code", skip(transaction), ret, err)]
-pub(crate) async fn create_invite_code(
+pub async fn create_invite_code(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,
     invite_code: String,

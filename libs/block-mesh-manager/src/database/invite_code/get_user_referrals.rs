@@ -2,8 +2,7 @@ use block_mesh_common::interfaces::server_api::Referral;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "get_user_referrals", skip(transaction), ret, err)]
-pub(crate) async fn get_user_referrals(
+pub async fn get_user_referrals(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,
 ) -> anyhow::Result<Vec<Referral>> {

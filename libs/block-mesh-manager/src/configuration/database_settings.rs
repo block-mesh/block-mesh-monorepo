@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use serde_aux::prelude::deserialize_number_from_string;
 use sqlx::postgres::{PgConnectOptions, PgSslMode};
 use sqlx::ConnectOptions;
+use std::env;
 use tracing::log;
 
 #[derive(Deserialize, Debug, Serialize, Clone)]
@@ -30,7 +31,16 @@ impl DatabaseSettings {
             .ssl_mode(ssl_mode)
             .username(&self.username)
             .password(&self.password)
-            .options([("statement_timeout", "250")])
+            .options([
+                (
+                    "statement_timeout",
+                    env::var("statement_timeout").unwrap_or("0".to_string()),
+                ),
+                (
+                    "idle_in_transaction_session_timeout",
+                    env::var("idle_in_transaction_session_timeout").unwrap_or("3000ms".to_string()),
+                ),
+            ])
     }
 
     pub fn with_db(&self) -> PgConnectOptions {

@@ -4,14 +4,7 @@ use uuid::Uuid;
 
 use crate::domain::call_to_action::CallToActionName;
 
-#[tracing::instrument(
-    name = "get_or_create_call_to_action",
-    skip(transaction),
-    level = "trace",
-    ret,
-    err
-)]
-pub(crate) async fn get_or_create_call_to_action(
+pub async fn get_or_create_call_to_action(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,
     name: CallToActionName,
