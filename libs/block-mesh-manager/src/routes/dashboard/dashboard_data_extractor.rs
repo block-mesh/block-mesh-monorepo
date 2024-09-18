@@ -62,7 +62,7 @@ pub async fn dashboard_data_extractor(
         .flags
         .get("polling_interval")
         .unwrap_or(&FlagValue::Number(120_000.0));
-    let interval: f64 =
+    let _interval: f64 =
         <FlagValue as TryInto<f64>>::try_into(interval.to_owned()).unwrap_or_default();
 
     let now = Utc::now();
