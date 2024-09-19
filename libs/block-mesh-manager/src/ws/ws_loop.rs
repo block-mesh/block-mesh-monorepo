@@ -1,4 +1,4 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_pool;
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::task::find_users_tasks::find_users_tasks;
 use crate::database::task::update_task_assigned::update_task_assigned;
@@ -22,10 +22,13 @@ pub async fn ws_loop(
     window_size: usize,
     broadcaster: Broadcaster,
 ) -> anyhow::Result<()> {
-    let aggregate =
-        get_or_create_aggregate_by_user_and_name_pool(pool, AggregateName::CronReports, user_id)
-            .await?;
     let mut transaction = pool.begin().await?;
+    let aggregate = get_or_create_aggregate_by_user_and_name(
+        &mut transaction,
+        AggregateName::CronReports,
+        user_id,
+    )
+    .await?;
     update_aggregate(
         &mut transaction,
         &aggregate.id,

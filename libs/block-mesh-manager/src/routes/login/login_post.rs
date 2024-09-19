@@ -1,5 +1,5 @@
-use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id_pool;
-use crate::database::user::get_user_by_email::get_user_opt_by_email_pool;
+use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
+use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
 use axum::response::Redirect;
@@ -15,10 +15,11 @@ pub async fn handler(
     Extension(mut auth): Extension<AuthSession<Backend>>,
     Form(form): Form<LoginForm>,
 ) -> Result<Redirect, Error> {
-    let user = get_user_opt_by_email_pool(&pool, &form.email.to_ascii_lowercase())
+    let mut tranaction = pool.begin().await?;
+    let user = get_user_opt_by_email(&mut tranaction, &form.email.to_ascii_lowercase())
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    let nonce = get_nonce_by_user_id_pool(&pool, &user.id)
+    let nonce = get_nonce_by_user_id(&mut tranaction, &user.id)
         .await?
         .ok_or_else(|| Error::NonceNotFound)?;
     let creds: Credentials = Credentials {
@@ -49,5 +50,6 @@ pub async fn handler(
             ));
         }
     }
+    tranaction.commit().await?;
     Ok(Redirect::to("/ui/dashboard"))
 }

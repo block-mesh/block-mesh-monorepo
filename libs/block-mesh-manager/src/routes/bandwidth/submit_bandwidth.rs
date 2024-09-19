@@ -1,8 +1,8 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_pool;
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::database::aggregate::update_aggregate::update_aggregate;
-use crate::database::api_token::find_token::find_token_pool;
+use crate::database::api_token::find_token::find_token;
 use crate::database::bandwidth::delete_bandwidth_reports_by_time::delete_bandwidth_reports_by_time;
-use crate::database::user::get_user_by_id::get_user_opt_by_id_pool;
+use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
@@ -17,6 +17,7 @@ use std::sync::Arc;
 use tokio::task::JoinHandle;
 use uuid::Uuid;
 
+#[allow(dead_code)]
 async fn submit_bandwidth_run_background(state: Arc<AppState>, pool: PgPool, user_id: &Uuid) {
     let user_id = *user_id;
     let flag = state
@@ -42,10 +43,11 @@ pub async fn submit_bandwidth_content(
     body: ReportBandwidthRequest,
 ) -> Result<Json<ReportBandwidthResponse>, Error> {
     let pool = state.pool.clone();
-    let api_token = find_token_pool(&pool, &body.api_token)
+    let mut transaction = pool.begin().await?;
+    let api_token = find_token(&mut transaction, &body.api_token)
         .await?
         .ok_or(Error::ApiTokenNotFound)?;
-    let user = get_user_opt_by_id_pool(&pool, &api_token.user_id)
+    let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     if user.email.to_ascii_lowercase() != body.email.to_ascii_lowercase() {
@@ -62,16 +64,22 @@ pub async fn submit_bandwidth_content(
         .as_f64()
         .unwrap_or_default();
 
-    let download =
-        get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Download, &user.id)
-            .await?;
+    let download = get_or_create_aggregate_by_user_and_name(
+        &mut transaction,
+        AggregateName::Download,
+        &user.id,
+    )
+    .await?;
     let upload =
-        get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Upload, &user.id)
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Upload, &user.id)
             .await?;
 
-    let latency =
-        get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Latency, &user.id)
-            .await?;
+    let latency = get_or_create_aggregate_by_user_and_name(
+        &mut transaction,
+        AggregateName::Latency,
+        &user.id,
+    )
+    .await?;
     let flag = state
         .flags
         .get("submit_bandwidth_via_channel")
@@ -110,7 +118,6 @@ pub async fn submit_bandwidth_content(
             })
             .await;
     } else {
-        let mut transaction = pool.begin().await?;
         let _ = update_aggregate(
             &mut transaction,
             &latency.id,
@@ -135,10 +142,8 @@ pub async fn submit_bandwidth_content(
             ),
         )
         .await;
-        transaction.commit().await?;
     }
-
-    submit_bandwidth_run_background(state, pool, &user.id).await;
+    transaction.commit().await?;
 
     Ok(Json(ReportBandwidthResponse {
         status_code: u16::from(StatusCode::OK),

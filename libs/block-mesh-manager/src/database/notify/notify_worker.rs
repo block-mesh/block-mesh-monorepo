@@ -3,6 +3,7 @@ use serde::Serialize;
 use sqlx::PgPool;
 use std::fmt::Debug;
 
+#[tracing::instrument(name = "notify_worker", skip_all)]
 pub async fn notify_worker<M>(pool: &PgPool, message: M) -> anyhow::Result<()>
 where
     M: Serialize + Clone + Debug,
