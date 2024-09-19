@@ -3,6 +3,8 @@
 #![deny(unreachable_pub)]
 
 use cfg_if::cfg_if;
+use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
+use std::mem;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_common::interfaces::ws_api::WsServerMessage;
@@ -46,6 +48,31 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 
 #[cfg(feature = "ssr")]
 fn main() {
+    let sentry_layer = env::var("SENTRY_LAYER")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
+    let sentry_url = env::var("SENTRY").unwrap_or_default();
+    let sentry_sample_rate = env::var("SENTRY_SAMPLE_RATE")
+        .unwrap_or("0.1".to_string())
+        .parse()
+        .unwrap_or(0.1);
+
+    println!("sentry_layer = {sentry_layer} | sentry_url = {sentry_url} | sentry_sample_rate = {sentry_sample_rate}");
+    if sentry_layer {
+        let _guard = sentry::init((
+            sentry_url,
+            sentry::ClientOptions {
+                debug: true,
+                sample_rate: sentry_sample_rate,
+                traces_sample_rate: sentry_sample_rate,
+                release: sentry::release_name!(),
+                ..Default::default()
+            },
+        ));
+        mem::forget(_guard);
+    }
+
     let _ = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
@@ -56,7 +83,8 @@ fn main() {
 #[cfg(feature = "ssr")]
 async fn run() -> anyhow::Result<()> {
     load_dotenv();
-    setup_tracing_stdout_only();
+    // setup_tracing_stdout_only();
+    setup_tracing_stdout_only_with_sentry();
     let configuration = get_configuration().expect("Failed to read configuration");
     tracing::info!("Starting with configuration {:#?}", configuration);
     let database_url = get_env_var_or_panic(AppEnvVar::DatabaseUrl);

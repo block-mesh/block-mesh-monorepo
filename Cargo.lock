@@ -1488,6 +1488,7 @@ dependencies = [
  "reqwest-websocket",
  "secret",
  "sentry",
+ "sentry-tower",
  "serde",
  "serde-aux",
  "serde-wasm-bindgen 0.6.5",
@@ -7128,6 +7129,17 @@ checksum = "bc74f229c7186dd971a9491ffcbe7883544aa064d1589bd30b83fb856cd22d63"
 dependencies = [
  "sentry-backtrace",
  "sentry-core",
+]
+
+[[package]]
+name = "sentry-tower"
+version = "0.34.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6c90802b38c899a2c9e557dff25ad186362eddf755d5f5244001b172dd03bead"
+dependencies = [
+ "sentry-core",
+ "tower-layer",
+ "tower-service",
 ]
 
 [[package]]

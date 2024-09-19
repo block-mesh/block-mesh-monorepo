@@ -7,12 +7,14 @@ use crate::startup::routers::leptos_router::get_leptos_router;
 use crate::startup::routers::static_auth_router::get_static_auth_router;
 use crate::startup::routers::static_un_auth_router::get_static_un_auth_router;
 use crate::startup::routers::ws_router::get_ws_router;
+use axum::extract::Request;
 use axum::{Extension, Router};
 use axum_login::login_required;
 use block_mesh_common::feature_flag_client::FlagValue;
 use leptos::leptos_config::get_config_from_env;
 use redis::aio::MultiplexedConnection;
 use reqwest::Client;
+use sentry_tower::NewSentryLayer;
 use sqlx::postgres::PgPool;
 use std::collections::HashMap;
 use std::env;
@@ -134,6 +136,17 @@ impl Application {
         };
 
         let application_base_url = ApplicationBaseUrl(settings.application.base_url.clone());
+
+        // let base = if env::var("SENTRY_LAYER")
+        //     .unwrap_or("false".to_string())
+        //     .parse()
+        //     .unwrap_or(false)
+        // {
+        //     Router::new().layer(NewSentryLayer::<Request>::new_from_top())
+        // } else {
+        //     Router::new()
+        // };
+
         let backend = Router::new()
             .nest("/", auth_router)
             .route_layer(login_required!(Backend, login_url = "/login"))
@@ -159,7 +172,8 @@ impl Application {
             .nest("/", backend)
             .nest("/", leptos_pkg)
             .layer(Extension(Arc::new(Mutex::new(oauth_ctx))))
-            .layer(auth_layer);
+            .layer(auth_layer)
+            .layer(NewSentryLayer::<Request>::new_from_top());
 
         let listener = TcpListener::bind(settings.application.address())
             .await

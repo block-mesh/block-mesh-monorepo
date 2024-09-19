@@ -38,6 +38,7 @@ pub fn resolve_ip(
     }
 }
 
+#[tracing::instrument(name = "send_analytics", skip_all)]
 async fn send_analytics(
     state: Arc<AppState>,
     request: Option<Request>,
@@ -77,6 +78,7 @@ async fn send_analytics(
     Ok(())
 }
 
+#[tracing::instrument(name = "touch_users_ip", skip_all)]
 async fn touch_users_ip(state: Arc<AppState>, ip: String, user_id: &Uuid) {
     let flag = state
         .flags
@@ -95,6 +97,7 @@ async fn touch_users_ip(state: Arc<AppState>, ip: String, user_id: &Uuid) {
     }
 }
 
+#[tracing::instrument(name = "send_to_rayon", skip_all)]
 async fn send_to_rayon(state: Arc<AppState>, ip: String, user_id: &Uuid) {
     let flag = state
         .flags
@@ -205,6 +208,7 @@ pub async fn report_uptime_content(
     }))
 }
 
+#[tracing::instrument(name = "report_uptime", skip_all, ret, err)]
 pub async fn handler(
     headers: HeaderMap,
     State(state): State<Arc<AppState>>,

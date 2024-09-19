@@ -1,6 +1,8 @@
 #!/usr/bin/env bash
 set -x
 export APP_ENVIRONMENT="local"
+export SENTRY_LAYER="true"
+export SENTRY_SAMPLE_RATE="1.0"
 export _PWD="$(pwd)"
 export ROOT="$(git rev-parse --show-toplevel)"
 export CARGO_TARGET_DIR="${ROOT}/target/WEBSERVER"
