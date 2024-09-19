@@ -3,8 +3,10 @@ use block_mesh_manager_database_domain::domain::user::User;
 use block_mesh_manager_database_domain::domain::user::UserRole;
 use secret::Secret;
 use sqlx::PgExecutor;
+use tracing::instrument;
 
 #[allow(dead_code)]
+#[instrument]
 pub async fn get_user_opt_by_email(
     executor: impl PgExecutor<'_>,
     email: &str,

@@ -62,7 +62,7 @@ async fn run(is_with_sentry: bool) {
     let check_token_map: CheckTokenResponseMap = Arc::new(DashMap::new());
     let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());
     let cors = CorsLayer::permissive();
-    let mut app = Router::new()
+    let app = Router::new()
         .nest("/", router)
         .layer(Extension(db_pool.clone()))
         .layer(Extension(check_token_map))
@@ -74,9 +74,11 @@ async fn run(is_with_sentry: bool) {
                 .parse()
                 .unwrap_or(1000),
         )));
-    if is_with_sentry {
-        app = app.layer(NewSentryLayer::<Request>::new_from_top());
-    }
+    let app = if is_with_sentry {
+        app.layer(NewSentryLayer::<Request>::new_from_top())
+    } else {
+        app
+    };
     let port = env::var("PORT").unwrap_or("8001".to_string());
     let listener = TcpListener::bind(format!("0.0.0.0:{}", port))
         .await

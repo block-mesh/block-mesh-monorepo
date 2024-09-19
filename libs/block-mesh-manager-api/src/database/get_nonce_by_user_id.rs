@@ -1,9 +1,11 @@
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
 use secret::Secret;
 use sqlx::PgExecutor;
+use tracing::instrument;
 use uuid::Uuid;
 
 #[allow(dead_code)]
+#[instrument]
 pub async fn get_nonce_by_user_id(
     executor: impl PgExecutor<'_>,
     user_id: &Uuid,

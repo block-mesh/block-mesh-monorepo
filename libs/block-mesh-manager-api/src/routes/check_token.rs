@@ -6,8 +6,9 @@ use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetTokenRespo
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
 use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
-use sqlx::PgPool;
+use sqlx::{PgExecutor, PgPool};
 use std::sync::Arc;
+use tracing::instrument;
 use uuid::Uuid;
 
 pub type CheckTokenResponseMap = Arc<DashMap<(String, Uuid), CheckTokenResponseEnum>>;
@@ -20,6 +21,7 @@ pub enum CheckTokenResponseEnum {
     ApiTokenNotFound,
 }
 
+#[instrument(name = "check_token")]
 pub async fn check_token(
     Extension(pool): Extension<PgPool>,
     Extension(check_token_map): Extension<CheckTokenResponseMap>,
