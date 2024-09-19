@@ -492,20 +492,3 @@ pub async fn get_latest_invite_code(
         .await?;
     Ok(response)
 }
-
-#[tracing::instrument(name = "check_token", skip(credentials), err)]
-pub async fn check_token(
-    blockmesh_url: &str,
-    credentials: &CheckTokenRequest,
-) -> anyhow::Result<GetTokenResponse> {
-    let url = format!("{}/api/check_token", blockmesh_url);
-    let client = reqwest::Client::new();
-    let response = client
-        .post(&url)
-        .json(credentials)
-        .send()
-        .await?
-        .json()
-        .await?;
-    Ok(response)
-}

@@ -35,6 +35,7 @@ pub static BLOCK_MESH_CHROME_EXTENSION_LINK: &str =
     "https://chromewebstore.google.com/detail/blockmesh-network/obfhoiefijlolgdmphcekifedagnkfjp";
 
 pub static BLOCK_MESH_APP_SERVER: &str = "https://app.blockmesh.xyz";
+pub static BLOCK_MESH_API_SERVER: &str = "https://api.blockmesh.xyz";
 
 pub static BLOCK_MESH_GITHUB: &str = "https://github.com/block-mesh/block-mesh-monorepo";
 

@@ -169,10 +169,10 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
                     }
                 }
             }
-            // let response = get_token(email, password).await?;
-            // Response::from_json(&response)
-            console_log!("Not found {}/{}", email, password);
-            Response::error("Not found", 500)
+            let response = get_token(email, password).await?;
+            Response::from_json(&response)
+            // console_log!("Not found {}/{}", email, password);
+            // Response::error("Not found", 500)
         })
         .post_async("/api/check_token", |mut req, ctx| async move {
             console_log!("here 1");
@@ -199,10 +199,10 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
                     message: None,
                 });
             }
-            // let response = check_token(email, api_token).await?;
-            // Response::from_json(&response)
-            console_log!("Not found {}/{}", email, api_token);
-            Response::error("Not found", 500)
+            let response = check_token(email, api_token).await?;
+            Response::from_json(&response)
+            // console_log!("Not found {}/{}", email, api_token);
+            // Response::error("Not found", 500)
         })
         .get_async("/", |_, _| async move {
             let response = LoginPage {}.render().unwrap();

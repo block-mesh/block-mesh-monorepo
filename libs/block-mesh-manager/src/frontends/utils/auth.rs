@@ -14,22 +14,6 @@ use js_sys::Uint8Array;
 use leptos::*;
 use uuid::Uuid;
 
-pub async fn check_token(
-    blockmesh_url: &str,
-    credentials: &CheckTokenRequest,
-) -> anyhow::Result<GetTokenResponse> {
-    let url = format!("{}/api/check_token", blockmesh_url);
-    let client = reqwest::Client::new();
-    let response = client
-        .post(&url)
-        .json(credentials)
-        .send()
-        .await?
-        .json()
-        .await?;
-    Ok(response)
-}
-
 pub async fn register(blockmesh_url: &str, credentials: &RegisterForm) -> anyhow::Result<()> {
     let url = format!("{}/register_api", blockmesh_url);
     let client = reqwest::Client::new();
