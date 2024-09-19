@@ -1,4 +1,4 @@
-FROM blockmesh/blockmesh-ubuntu-base:latest-arm64
+FROM blockmesh/blockmesh-ubuntu-base:latest-amd64
 ARG DEBIAN_FRONTEND=noninteractive
 WORKDIR /opt/
 
