@@ -6,8 +6,11 @@ use axum::{Extension, Router};
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
 use sentry_tower::NewSentryLayer;
+use sqlx::postgres::PgConnectOptions;
+use sqlx::ConnectOptions;
 use std::collections::HashMap;
 use std::net::SocketAddr;
+use std::str::FromStr;
 use std::sync::Arc;
 use std::time::Duration;
 use std::{env, mem};
@@ -55,9 +58,8 @@ fn main() -> anyhow::Result<()> {
 }
 
 async fn run(is_with_sentry: bool) {
-    let db_pool = sqlx::PgPool::connect(&env::var("DATABASE_URL").unwrap())
-        .await
-        .unwrap();
+    let pg_options = PgConnectOptions::from_str(&env::var("DATABASE_URL").unwrap()).unwrap();
+    let db_pool = sqlx::PgPool::connect_with(pg_options).await.unwrap();
     let router = get_router();
     let check_token_map: CheckTokenResponseMap = Arc::new(Mutex::new(HashMap::new()));
     let get_token_map: GetTokenResponseMap = Arc::new(Mutex::new(HashMap::new()));
