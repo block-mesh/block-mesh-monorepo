@@ -2,11 +2,11 @@ use block_mesh_manager_database_domain::domain::option_uuid::OptionUuid;
 use block_mesh_manager_database_domain::domain::user::User;
 use block_mesh_manager_database_domain::domain::user::UserRole;
 use secret::Secret;
-use sqlx::{PgPool, Postgres, Transaction};
+use sqlx::{PgExecutor, PgPool, Postgres, Transaction};
 
 #[allow(dead_code)]
 pub async fn get_user_opt_by_email(
-    transaction: &mut Transaction<'_, Postgres>,
+    executor: impl PgExecutor<'_>,
     email: &str,
 ) -> anyhow::Result<Option<User>> {
     Ok(sqlx::query_as!(
@@ -23,12 +23,12 @@ pub async fn get_user_opt_by_email(
         FROM users WHERE email = $1 LIMIT 1"#,
         email
     )
-    .fetch_optional(&mut **transaction)
+    .fetch_optional(executor)
     .await?)
 }
 
 pub async fn get_user_opt_by_email_pool(
-    pool: &PgPool,
+    executor: impl PgExecutor<'_>,
     email: &str,
 ) -> anyhow::Result<Option<User>> {
     Ok(sqlx::query_as!(
@@ -45,6 +45,6 @@ pub async fn get_user_opt_by_email_pool(
         FROM users WHERE email = $1 LIMIT 1"#,
         email
     )
-    .fetch_optional(pool)
+    .fetch_optional(executor)
     .await?)
 }

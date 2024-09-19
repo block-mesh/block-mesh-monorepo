@@ -40,7 +40,7 @@ pub async fn get_token(
         };
     }
 
-    let user = match get_user_opt_by_email(&mut transaction, &email).await {
+    let user = match get_user_opt_by_email(&mut *transaction, &email).await {
         Ok(user) => match user {
             Some(user) => user,
             None => {

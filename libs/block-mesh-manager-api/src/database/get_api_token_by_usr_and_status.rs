@@ -1,11 +1,11 @@
 use block_mesh_manager_database_domain::domain::api_token::{ApiToken, ApiTokenStatus};
 use secret::Secret;
-use sqlx::{PgPool, Postgres, Transaction};
+use sqlx::{PgExecutor, PgPool, Postgres, Transaction};
 use uuid::Uuid;
 
 #[allow(dead_code)]
 pub async fn get_api_token_by_usr_and_status(
-    transaction: &mut Transaction<'_, Postgres>,
+    executor: impl PgExecutor<'_>,
     user_id: &Uuid,
     status: ApiTokenStatus,
 ) -> anyhow::Result<Option<ApiToken>> {
@@ -21,12 +21,12 @@ pub async fn get_api_token_by_usr_and_status(
         user_id,
         status.to_string()
     )
-    .fetch_optional(&mut **transaction)
+    .fetch_optional(executor)
     .await?)
 }
 
 pub async fn get_api_token_by_usr_and_status_pool(
-    pool: &PgPool,
+    executor: impl PgExecutor<'_>,
     user_id: &Uuid,
     status: ApiTokenStatus,
 ) -> anyhow::Result<Option<ApiToken>> {
@@ -42,6 +42,6 @@ pub async fn get_api_token_by_usr_and_status_pool(
         user_id,
         status.to_string()
     )
-    .fetch_optional(pool)
+    .fetch_optional(executor)
     .await?)
 }

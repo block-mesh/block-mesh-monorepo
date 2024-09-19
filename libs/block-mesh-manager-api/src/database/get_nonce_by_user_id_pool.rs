@@ -1,11 +1,11 @@
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
 use secret::Secret;
-use sqlx::PgPool;
+use sqlx::{PgExecutor, PgPool};
 use uuid::Uuid;
 
 #[allow(dead_code)]
 pub async fn get_nonce_by_user_id_pool(
-    pool: &PgPool,
+    executor: impl PgExecutor<'_>,
     user_id: &Uuid,
 ) -> anyhow::Result<Option<Nonce>> {
     Ok(sqlx::query_as!(
@@ -22,6 +22,6 @@ pub async fn get_nonce_by_user_id_pool(
         LIMIT 1"#,
         user_id
     )
-    .fetch_optional(pool)
+    .fetch_optional(executor)
     .await?)
 }
