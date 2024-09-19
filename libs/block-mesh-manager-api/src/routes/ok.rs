@@ -1,8 +1,7 @@
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
-use tracing::instrument;
 
-#[instrument(name = "ok_get_callback")]
+#[tracing::instrument(name = "ok_handler", skip_all)]
 pub async fn ok_handler() -> impl IntoResponse {
     (StatusCode::OK, "Request was successful")
 }

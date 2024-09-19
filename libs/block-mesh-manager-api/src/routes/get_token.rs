@@ -9,7 +9,6 @@ use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::sync::Arc;
-use tracing::instrument;
 
 pub type GetTokenResponseMap = Arc<DashMap<(String, String), GetTokenResponseEnum>>;
 
@@ -21,7 +20,7 @@ pub enum GetTokenResponseEnum {
     ApiTokenNotFound,
 }
 
-#[instrument(name = "get_token")]
+#[tracing::instrument(name = "get_token", skip_all)]
 pub async fn get_token(
     Extension(pool): Extension<PgPool>,
     Extension(get_token_map): Extension<GetTokenResponseMap>,

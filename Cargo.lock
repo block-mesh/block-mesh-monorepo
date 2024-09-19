@@ -1535,6 +1535,8 @@ dependencies = [
  "logger-general",
  "rand 0.8.5",
  "secret",
+ "sentry",
+ "sentry-tower",
  "serde",
  "serde_json",
  "sqlx",

@@ -21,7 +21,7 @@ pub enum CheckTokenResponseEnum {
     ApiTokenNotFound,
 }
 
-#[instrument(name = "check_token")]
+#[tracing::instrument(name = "check_token", skip_all)]
 pub async fn check_token(
     Extension(pool): Extension<PgPool>,
     Extension(check_token_map): Extension<CheckTokenResponseMap>,
