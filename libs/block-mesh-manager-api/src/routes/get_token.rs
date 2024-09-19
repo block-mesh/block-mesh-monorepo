@@ -5,13 +5,12 @@ use axum::{Extension, Json};
 use bcrypt::verify;
 use block_mesh_common::interfaces::server_api::{GetTokenRequest, GetTokenResponse};
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
+use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
-pub type GetTokenResponseMap = Arc<Mutex<HashMap<(String, String), GetTokenResponseEnum>>>;
+pub type GetTokenResponseMap = Arc<DashMap<(String, String), GetTokenResponseEnum>>;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum GetTokenResponseEnum {
@@ -29,10 +28,9 @@ pub async fn get_token(
     let mut transaction = pool.begin().await?;
     let email = body.email.clone().to_ascii_lowercase();
     let key = (email.clone(), body.password.clone());
-    let mut get_token_map = get_token_map.lock().await;
 
-    if let Some(value) = get_token_map.get(&key) {
-        return match value {
+    if let Some(entry) = get_token_map.get(&key) {
+        return match entry.value() {
             GetTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone())),
             GetTokenResponseEnum::UserNotFound => Err(Error::UserNotFound),
             GetTokenResponseEnum::PasswordMismatch => Err(Error::PasswordMismatch),

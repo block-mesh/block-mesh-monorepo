@@ -4,14 +4,13 @@ use crate::error::Error;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetTokenResponse};
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
+use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::Mutex;
 use uuid::Uuid;
 
-pub type CheckTokenResponseMap = Arc<Mutex<HashMap<(String, Uuid), CheckTokenResponseEnum>>>;
+pub type CheckTokenResponseMap = Arc<DashMap<(String, Uuid), CheckTokenResponseEnum>>;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum CheckTokenResponseEnum {
@@ -28,10 +27,9 @@ pub async fn check_token(
 ) -> Result<Json<GetTokenResponse>, Error> {
     let email = body.email.clone().to_ascii_lowercase();
     let key = (email.clone(), body.api_token);
-    let mut check_token_map = check_token_map.lock().await;
 
-    if let Some(value) = check_token_map.get(&key) {
-        return match value {
+    if let Some(entry) = check_token_map.get(&key) {
+        return match entry.value() {
             CheckTokenResponseEnum::ApiTokenMismatch => Err(Error::ApiTokenMismatch),
             CheckTokenResponseEnum::UserNotFound => Err(Error::UserNotFound),
             CheckTokenResponseEnum::ApiTokenNotFound => Err(Error::ApiTokenNotFound),
