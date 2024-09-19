@@ -19,7 +19,7 @@ use wasm_bindgen::JsValue;
 use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageValue};
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{
-    CheckTokenRequest, GetLatestInviteCodeRequest, GetLatestInviteCodeResponse, GetTokenResponse,
+    GetLatestInviteCodeRequest, GetLatestInviteCodeResponse,
 };
 use logger_leptos::leptos_tracing::setup_leptos_tracing;
 
@@ -486,23 +486,6 @@ pub async fn get_latest_invite_code(
         .post(&url)
         .header("Content-Type", "application/json")
         .json(&credentials)
-        .send()
-        .await?
-        .json()
-        .await?;
-    Ok(response)
-}
-
-#[tracing::instrument(name = "check_token", skip(credentials), err)]
-pub async fn check_token(
-    blockmesh_url: &str,
-    credentials: &CheckTokenRequest,
-) -> anyhow::Result<GetTokenResponse> {
-    let url = format!("{}/api/check_token", blockmesh_url);
-    let client = reqwest::Client::new();
-    let response = client
-        .post(&url)
-        .json(credentials)
         .send()
         .await?
         .json()

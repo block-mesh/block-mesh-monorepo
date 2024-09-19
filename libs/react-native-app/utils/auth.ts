@@ -53,7 +53,8 @@ export async function login(url: string,
 export async function get_token(url: string, body: GetTokenRequest):
   Promise<Result<GetTokenResponse, Error>> {
   try {
-    const response = await axios.post(url, body, {
+    const final_url = url.includes('app') ? url.replace('app', 'api') : url
+    const response = await axios.post(final_url, body, {
       maxRedirects: 0,
       headers: {
         'Content-Type': 'application/json'
@@ -85,7 +86,8 @@ export async function dashboard(url: string, body: DashboardRequest): Promise<Re
 
 export async function check_token(url: string, body: CheckTokenRequest): Promise<Result<GetTokenResponse>> {
   try {
-    const response = await axios.post(url, body, {
+    const final_url = url.includes('app') ? url.replace('app', 'api') : url
+    const response = await axios.post(final_url, body, {
       maxRedirects: 0,
       headers: {
         'Content-Type': 'application/json'
