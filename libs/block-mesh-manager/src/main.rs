@@ -24,6 +24,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_common::env::load_dotenv::load_dotenv;
     use std::env;
     use block_mesh_manager::worker::daily_stat_agg::{daily_stat_agg};
+    #[allow(unused_imports)]
     use logger_general::tracing::setup_tracing_stdout_only;
     use std::time::Duration;
     use reqwest::ClientBuilder;
