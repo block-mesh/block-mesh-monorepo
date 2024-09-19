@@ -6,9 +6,8 @@ use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetTokenRespo
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
 use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
-use sqlx::{PgExecutor, PgPool};
+use sqlx::PgPool;
 use std::sync::Arc;
-use tracing::instrument;
 use uuid::Uuid;
 
 pub type CheckTokenResponseMap = Arc<DashMap<(String, Uuid), CheckTokenResponseEnum>>;
