@@ -7,8 +7,8 @@ use leptos::leptos_dom;
 use leptos_dom::tracing;
 
 use block_mesh_common::interfaces::server_api::{
-    CheckTokenRequest, ConnectWalletRequest, ConnectWalletResponse, GetTokenResponse, LoginForm,
-    RegisterForm, RegisterResponse,
+    ConnectWalletRequest, ConnectWalletResponse, GetTokenResponse, LoginForm, RegisterForm,
+    RegisterResponse,
 };
 use js_sys::Uint8Array;
 use leptos::*;

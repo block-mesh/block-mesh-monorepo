@@ -19,7 +19,7 @@ use wasm_bindgen::JsValue;
 use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageValue};
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{
-    CheckTokenRequest, GetLatestInviteCodeRequest, GetLatestInviteCodeResponse, GetTokenResponse,
+    GetLatestInviteCodeRequest, GetLatestInviteCodeResponse,
 };
 use logger_leptos::leptos_tracing::setup_leptos_tracing;
 
