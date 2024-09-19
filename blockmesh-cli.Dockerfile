@@ -1,4 +1,4 @@
-FROM blockmesh/blockmesh-ubuntu-base:latest-amd64
+FROM blockmesh/blockmesh-ubuntu-base:latest-arm64
 ARG DEBIAN_FRONTEND=noninteractive
 ARG LEPTOS_HASH_FILES=true
 ARG LEPTOS_HASH_FILE_NAME=hash.txt
