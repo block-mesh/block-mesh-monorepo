@@ -33,6 +33,9 @@ DB_PASSWORD="${POSTGRES_PASSWORD:=password}"
 DB_NAME="${POSTGRES_DB:=block-mesh}"
 DB_PORT="${POSTGRES_PORT:=5559}"
 
+#docker network create blockmesh_network
+
+
 if [ "${SKIP_DOCKER}" != "yes" ]
 then
   DOCKERS="$(docker ps -a -q --filter ancestor=postgres:15.3-alpine3.18 --format="{{.ID}}")"
@@ -41,6 +44,7 @@ then
     ensure docker rm --force --volumes $DOCKERS
   fi
   ensure docker run \
+   --network=blockmesh_network \
     -e POSTGRES_USER=${DB_USER} \
     -e POSTGRES_PASSWORD=${DB_PASSWORD} \
     -e POSTGRES_DB=${DB_NAME} \
@@ -54,7 +58,9 @@ then
  then
   ensure docker rm --force --volumes $DOCKERS
  fi
- ensure docker run --name redis -p 6379:6379 -d redis:alpine3.20
+ ensure docker run \
+ --network=blockmesh_network \
+ --name redis -p 6379:6379 -d redis:alpine3.20
  export REDIS_URL="redis://127.0.0.1:6379"
 fi
 

@@ -1,10 +1,8 @@
-FROM ubuntu:22.04 AS builder
+FROM blockmesh/blockmesh-ubuntu-base:latest-amd64
 ARG DEBIAN_FRONTEND=noninteractive
 ARG LEPTOS_HASH_FILES=true
 ARG LEPTOS_HASH_FILE_NAME=hash.txt
 WORKDIR /opt/
-RUN apt-get update
-RUN apt-get install curl gzip git-all -y
 
 RUN git clone --depth 1 https://github.com/block-mesh/block-mesh-monorepo.git
 RUN cp -fr block-mesh-monorepo/libs/block-mesh-manager/* .
