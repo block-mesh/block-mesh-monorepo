@@ -22,9 +22,12 @@ pub(crate) async fn get_daily_leaderboard(
       		JOIN users_ip ON users.id = users_ip.user_id
         WHERE
             day = $3
+            AND users_ip.updated_at >= NOW() - INTERVAL '24 hours'
         GROUP BY
 	        users.email,
 	        points
+	    HAVING
+	        COUNT(users_ip.id) < 10
         ORDER BY
         	points DESC
         	LIMIT $4
