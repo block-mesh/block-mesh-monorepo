@@ -3,6 +3,7 @@ use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
+#[tracing::instrument(name = "get_daily_stat_of_user", skip_all)]
 pub async fn get_daily_stat_of_user(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,

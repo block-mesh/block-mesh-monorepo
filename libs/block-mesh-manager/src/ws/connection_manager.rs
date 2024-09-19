@@ -1,8 +1,9 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_pool;
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::domain::aggregate::AggregateName;
 use crate::ws::broadcaster::Broadcaster;
 use crate::ws::cron_reports_controller::CronReportAggregateEntry;
 use crate::ws::task_scheduler::TaskScheduler;
+use anyhow::Context;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use sqlx::PgPool;
 use std::fmt::Debug;
@@ -33,9 +34,17 @@ pub async fn fetch_latest_cron_settings(
     pool: &PgPool,
     user_id: &Uuid,
 ) -> anyhow::Result<CronReportAggregateEntry> {
-    let aggregate =
-        get_or_create_aggregate_by_user_and_name_pool(pool, AggregateName::CronReports, user_id)
-            .await?;
+    let mut transaction = pool.begin().await.context("Cant create transaction")?;
+    let aggregate = get_or_create_aggregate_by_user_and_name(
+        &mut transaction,
+        AggregateName::CronReports,
+        user_id,
+    )
+    .await?;
+    transaction
+        .commit()
+        .await
+        .context("Cant commit transaction")?;
     if aggregate.value.is_null() {
         Ok(CronReportAggregateEntry::default())
     } else {

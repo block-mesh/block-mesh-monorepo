@@ -1,4 +1,4 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_pool;
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
@@ -39,8 +39,8 @@ pub async fn handler(
             .as_str(),
     )
     .context("SERVER_UUID evn var contains invalid UUID value")?;
-    let agg = get_or_create_aggregate_by_user_and_name_pool(
-        &state.pool,
+    let agg = get_or_create_aggregate_by_user_and_name(
+        &mut transaction,
         AggregateName::CronReports,
         &server_user_id,
     )

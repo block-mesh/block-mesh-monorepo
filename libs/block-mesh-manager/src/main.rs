@@ -5,6 +5,8 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use std::mem;
+    use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
     use block_mesh_common::interfaces::ws_api::WsServerMessage;
     use block_mesh_manager::ws::ws_keep_alive::ws_keep_alive;
     use block_mesh_manager::database::user::create_test_user::create_test_user;
@@ -22,6 +24,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_common::env::load_dotenv::load_dotenv;
     use std::env;
     use block_mesh_manager::worker::daily_stat_agg::{daily_stat_agg};
+    #[allow(unused_imports)]
     use logger_general::tracing::setup_tracing_stdout_only;
     use std::time::Duration;
     use reqwest::ClientBuilder;
@@ -46,6 +49,29 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 
 #[cfg(feature = "ssr")]
 fn main() {
+    let sentry_layer = env::var("SENTRY_LAYER")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
+    let sentry_url = env::var("SENTRY").unwrap_or_default();
+    let sentry_sample_rate = env::var("SENTRY_SAMPLE_RATE")
+        .unwrap_or("0.1".to_string())
+        .parse()
+        .unwrap_or(0.1);
+    if sentry_layer {
+        let _guard = sentry::init((
+            sentry_url,
+            sentry::ClientOptions {
+                debug: true,
+                sample_rate: sentry_sample_rate,
+                traces_sample_rate: sentry_sample_rate,
+                release: sentry::release_name!(),
+                ..Default::default()
+            },
+        ));
+        mem::forget(_guard);
+    }
+
     let _ = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
@@ -56,7 +82,8 @@ fn main() {
 #[cfg(feature = "ssr")]
 async fn run() -> anyhow::Result<()> {
     load_dotenv();
-    setup_tracing_stdout_only();
+    // setup_tracing_stdout_only();
+    setup_tracing_stdout_only_with_sentry();
     let configuration = get_configuration().expect("Failed to read configuration");
     tracing::info!("Starting with configuration {:#?}", configuration);
     let database_url = get_env_var_or_panic(AppEnvVar::DatabaseUrl);

@@ -7,12 +7,14 @@ use crate::startup::routers::leptos_router::get_leptos_router;
 use crate::startup::routers::static_auth_router::get_static_auth_router;
 use crate::startup::routers::static_un_auth_router::get_static_un_auth_router;
 use crate::startup::routers::ws_router::get_ws_router;
+use axum::extract::Request;
 use axum::{Extension, Router};
 use axum_login::login_required;
 use block_mesh_common::feature_flag_client::FlagValue;
 use leptos::leptos_config::get_config_from_env;
 use redis::aio::MultiplexedConnection;
 use reqwest::Client;
+use sentry_tower::NewSentryLayer;
 use sqlx::postgres::PgPool;
 use std::collections::HashMap;
 use std::env;
@@ -134,6 +136,12 @@ impl Application {
         };
 
         let application_base_url = ApplicationBaseUrl(settings.application.base_url.clone());
+
+        let sentry_layer = env::var("SENTRY_LAYER")
+            .unwrap_or("false".to_string())
+            .parse()
+            .unwrap_or(false);
+
         let backend = Router::new()
             .nest("/", auth_router)
             .route_layer(login_required!(Backend, login_url = "/login"))
@@ -144,17 +152,52 @@ impl Application {
             .layer(Extension(db_pool.clone()))
             .layer(cors)
             .layer(auth_layer.clone())
+            // .layer(TraceLayer::new_for_http()
+            //     .make_span_with(|request: &Request<Body>| {
+            //     tracing::info_span!("request", method = %request.method(), uri = %request.uri())
+            //     })
+            //     .on_response(|response: &Response<_>, latency: Duration, _span: &Span| {
+            //         tracing::info!("Response status = {}, latency = {}ms", &response.status().as_u16(), latency.as_millis());
+            //     }))
             .with_state(app_state.clone());
-        let app = Router::new()
-            .layer(TimeoutLayer::new(Duration::from_millis(
+        let backend = if sentry_layer {
+            backend
+                .layer(NewSentryLayer::<Request>::new_from_top())
+                .layer(sentry_tower::SentryHttpLayer::with_transaction())
+        } else {
+            backend
+        };
+
+        let app = Router::new();
+
+        let timeout_layer = env::var("TIMEOUT_LAYER")
+            .unwrap_or("false".to_string())
+            .parse()
+            .unwrap_or(false);
+        let app = if timeout_layer {
+            app.layer(TimeoutLayer::new(Duration::from_millis(
                 env::var("REQUEST_TIMEOUT")
                     .unwrap_or("3500".to_string())
                     .parse()
                     .unwrap_or(3500),
             )))
-            .layer(GovernorLayer {
+        } else {
+            app
+        };
+        let gov_layer = env::var("GOV_LAYER")
+            .unwrap_or("false".to_string())
+            .parse()
+            .unwrap_or(false);
+
+        let app = if gov_layer {
+            app.layer(GovernorLayer {
                 config: governor_conf,
             })
+        } else {
+            app
+        };
+
+        let app = app
             .nest("/", leptos_router)
             .nest("/", backend)
             .nest("/", leptos_pkg)

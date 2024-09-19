@@ -1,10 +1,10 @@
 #![allow(clippy::blocks_in_conditions)]
 
-use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id_pool;
-use crate::database::user::get_user_by_email::get_user_opt_by_email_pool;
-use crate::database::user::get_user_by_id::get_user_opt_by_id_pool;
+use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
+use crate::database::user::get_user_by_email::get_user_opt_by_email;
+use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::errors::error::Error;
-use anyhow::anyhow;
+use anyhow::{anyhow, Context};
 use async_trait::async_trait;
 use axum_login::tower_sessions::cookie::time::Duration;
 use axum_login::{
@@ -85,13 +85,18 @@ impl AuthnBackend for Backend {
             }
         }
         let pool = self.db.clone();
-        let user = match get_user_opt_by_email_pool(&pool, &creds.email).await {
+        let mut transaction = pool.begin().await.context("Cant create transaction")?;
+        let user = match get_user_opt_by_email(&mut transaction, &creds.email).await {
             Ok(u) => u,
             Err(e) => {
                 let _: RedisResult<()> = c.del(&key).await;
                 return Err(Error::Auth(e.to_string()));
             }
         };
+        transaction
+            .commit()
+            .await
+            .context("Cant commit transaction")?;
 
         let user = match user {
             Some(u) => u,
@@ -129,7 +134,8 @@ impl AuthnBackend for Backend {
         }
 
         let pool = self.db.clone();
-        let user = match get_user_opt_by_id_pool(&pool, user_id).await {
+        let mut transaction = pool.begin().await?;
+        let user = match get_user_opt_by_id(&mut transaction, user_id).await {
             Ok(u) => u,
             Err(e) => {
                 let _: RedisResult<()> = c.del(&key).await;
@@ -145,7 +151,7 @@ impl AuthnBackend for Backend {
             }
         };
 
-        let nonce = get_nonce_by_user_id_pool(&pool, &user.id)
+        let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
             .await?
             .ok_or_else(|| Error::Auth("Nonce not found".to_string()))?;
         let session_user = SessionUser {
@@ -158,6 +164,7 @@ impl AuthnBackend for Backend {
                 .set_ex(&key, &session_user, Backend::get_expire() as u64)
                 .await;
         }
+        transaction.commit().await?;
         Ok(Option::from(session_user))
     }
 }

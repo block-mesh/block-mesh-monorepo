@@ -5,17 +5,16 @@ use axum::Extension;
 use axum_login::AuthSession;
 use sqlx::PgPool;
 
+use crate::database::nonce::get_nonce_by_nonce::get_nonce_by_nonce;
+use crate::database::user::get_user_by_id::get_user_opt_by_id;
+use crate::errors::error::Error;
+use crate::middlewares::authentication::Backend;
 use block_mesh_common::constants::{
     BLOCK_MESH_APP_SERVER, BLOCK_MESH_CHROME_EXTENSION_LINK, BLOCK_MESH_GITBOOK, BLOCK_MESH_GITHUB,
     BLOCK_MESH_LANDING_PAGE_IMAGE, BLOCK_MESH_LOGO, BLOCK_MESH_SUPPORT_CHAT,
     BLOCK_MESH_SUPPORT_EMAIL, BLOCK_MESH_TWITTER,
 };
 use block_mesh_common::interfaces::server_api::NewPasswordQuery;
-
-use crate::database::nonce::get_nonce_by_nonce::get_nonce_by_nonce_pool;
-use crate::database::user::get_user_by_id::get_user_opt_by_id;
-use crate::errors::error::Error;
-use crate::middlewares::authentication::Backend;
 
 #[allow(dead_code)]
 #[derive(Template)]
@@ -41,7 +40,7 @@ pub async fn handler(
 ) -> Result<impl IntoResponse, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let token = query.token;
-    let nonce = get_nonce_by_nonce_pool(&pool, &token)
+    let nonce = get_nonce_by_nonce(&mut transaction, &token)
         .await?
         .ok_or_else(|| Error::NonceNotFound)?;
     let user = get_user_opt_by_id(&mut transaction, &nonce.user_id)
