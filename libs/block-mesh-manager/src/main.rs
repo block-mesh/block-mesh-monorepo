@@ -58,8 +58,6 @@ fn main() {
         .unwrap_or("0.1".to_string())
         .parse()
         .unwrap_or(0.1);
-
-    println!("sentry_layer = {sentry_layer} | sentry_url = {sentry_url} | sentry_sample_rate = {sentry_sample_rate}");
     if sentry_layer {
         let _guard = sentry::init((
             sentry_url,

@@ -137,15 +137,10 @@ impl Application {
 
         let application_base_url = ApplicationBaseUrl(settings.application.base_url.clone());
 
-        // let base = if env::var("SENTRY_LAYER")
-        //     .unwrap_or("false".to_string())
-        //     .parse()
-        //     .unwrap_or(false)
-        // {
-        //     Router::new().layer(NewSentryLayer::<Request>::new_from_top())
-        // } else {
-        //     Router::new()
-        // };
+        let sentry_layer = env::var("SENTRY_LAYER")
+            .unwrap_or("false".to_string())
+            .parse()
+            .unwrap_or(false);
 
         let backend = Router::new()
             .nest("/", auth_router)
@@ -165,23 +160,49 @@ impl Application {
             //         tracing::info!("Response status = {}, latency = {}ms", &response.status().as_u16(), latency.as_millis());
             //     }))
             .with_state(app_state.clone());
-        let app = Router::new()
-            .layer(TimeoutLayer::new(Duration::from_millis(
+        let backend = if sentry_layer {
+            backend
+                .layer(NewSentryLayer::<Request>::new_from_top())
+                .layer(sentry_tower::SentryHttpLayer::with_transaction())
+        } else {
+            backend
+        };
+
+        let app = Router::new();
+
+        let timeout_layer = env::var("TIMEOUT_LAYER")
+            .unwrap_or("false".to_string())
+            .parse()
+            .unwrap_or(false);
+        let app = if timeout_layer {
+            app.layer(TimeoutLayer::new(Duration::from_millis(
                 env::var("REQUEST_TIMEOUT")
                     .unwrap_or("3500".to_string())
                     .parse()
                     .unwrap_or(3500),
             )))
-            .layer(GovernorLayer {
+        } else {
+            app
+        };
+        let gov_layer = env::var("GOV_LAYER")
+            .unwrap_or("false".to_string())
+            .parse()
+            .unwrap_or(false);
+
+        let app = if gov_layer {
+            app.layer(GovernorLayer {
                 config: governor_conf,
             })
+        } else {
+            app
+        };
+
+        let app = app
             .nest("/", leptos_router)
             .nest("/", backend)
             .nest("/", leptos_pkg)
             .layer(Extension(Arc::new(Mutex::new(oauth_ctx))))
-            .layer(auth_layer)
-            .layer(NewSentryLayer::<Request>::new_from_top())
-            .layer(sentry_tower::SentryHttpLayer::with_transaction());
+            .layer(auth_layer);
 
         let listener = TcpListener::bind(settings.application.address())
             .await
