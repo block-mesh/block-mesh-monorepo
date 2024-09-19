@@ -3,10 +3,10 @@
 #![deny(unreachable_pub)]
 
 use cfg_if::cfg_if;
-use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
-use std::mem;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use std::mem;
+    use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
     use block_mesh_common::interfaces::ws_api::WsServerMessage;
     use block_mesh_manager::ws::ws_keep_alive::ws_keep_alive;
     use block_mesh_manager::database::user::create_test_user::create_test_user;
