@@ -86,7 +86,7 @@ console_log = { workspace = true }
 log = { workspace = true }
 tailwind_fuse = { version = "0.3", features = ["variant"] }
 block-mesh-manager-database-domain = { path = "../block-mesh-manager-database-domain", optional = true }
-sentry-tower = { workspace = true, optional = true }
+sentry-tower = { workspace = true, optional = true, features = ["axum", "http", "axum-matched-path"] }
 
 [dependencies.rand]
 workspace = true
