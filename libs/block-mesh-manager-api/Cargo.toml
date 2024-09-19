@@ -28,6 +28,8 @@ tracing-bunyan-formatter = { workspace = true }
 block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env"] }
 logger-general = { path = "../logger-general", features = ["sentry"] }
 block-mesh-manager-database-domain = { path = "../block-mesh-manager-database-domain" }
+sentry = { workspace = true }
+sentry-tower = { workspace = true, features = ["axum", "http", "axum-matched-path"] }
 
 [dependencies.rand]
 workspace = true
@@ -38,25 +40,25 @@ features = ["min_const_gen"]
 workspace = true
 default-features = false
 features = [
-  "any",
-  "runtime-tokio-rustls",
-  "macros",
-  "postgres",
-  "uuid",
-  "chrono",
-  "migrate",
-  "json",
-  "bigdecimal",
+    "any",
+    "runtime-tokio-rustls",
+    "macros",
+    "postgres",
+    "uuid",
+    "chrono",
+    "migrate",
+    "json",
+    "bigdecimal",
 ]
 
 [dependencies.uuid]
 workspace = true
 features = [
-  "v4", # Lets you generate random UUIDs
-  "fast-rng", # Use a faster (but still sufficiently random) RNG
-  "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
-  "serde", # Enable serialization/deserialization of UUIDs
-  "js"
+    "v4", # Lets you generate random UUIDs
+    "fast-rng", # Use a faster (but still sufficiently random) RNG
+    "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
+    "serde", # Enable serialization/deserialization of UUIDs
+    "js"
 ]
 
 #[lints]

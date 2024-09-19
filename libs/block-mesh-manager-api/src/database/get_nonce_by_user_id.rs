@@ -1,14 +1,14 @@
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
 use secret::Secret;
-use sqlx::PgPool;
+use sqlx::PgExecutor;
 use uuid::Uuid;
 
-#[allow(dead_code)]
-pub async fn get_nonce_by_user_id_pool(
-    pool: &PgPool,
+#[tracing::instrument(name = "get_nonce_by_user_id", skip_all)]
+pub async fn get_nonce_by_user_id(
+    executor: impl PgExecutor<'_>,
     user_id: &Uuid,
-) -> anyhow::Result<Option<Nonce>> {
-    Ok(sqlx::query_as!(
+) -> sqlx::Result<Option<Nonce>> {
+    sqlx::query_as!(
         Nonce,
         r#"
         SELECT
@@ -22,6 +22,6 @@ pub async fn get_nonce_by_user_id_pool(
         LIMIT 1"#,
         user_id
     )
-    .fetch_optional(pool)
-    .await?)
+    .fetch_optional(executor)
+    .await
 }

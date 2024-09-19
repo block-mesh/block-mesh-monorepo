@@ -1,17 +1,16 @@
-use crate::database::get_api_token_by_usr_and_status::get_api_token_by_usr_and_status_pool;
+use crate::database::get_api_token_by_usr_and_status::get_api_token_by_usr_and_status;
 use crate::database::get_user_opt_by_email::get_user_opt_by_email;
 use crate::error::Error;
 use axum::{Extension, Json};
 use bcrypt::verify;
 use block_mesh_common::interfaces::server_api::{GetTokenRequest, GetTokenResponse};
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
+use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::Mutex;
 
-pub type GetTokenResponseMap = Arc<Mutex<HashMap<(String, String), GetTokenResponseEnum>>>;
+pub type GetTokenResponseMap = Arc<DashMap<(String, String), GetTokenResponseEnum>>;
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 pub enum GetTokenResponseEnum {
@@ -21,6 +20,7 @@ pub enum GetTokenResponseEnum {
     ApiTokenNotFound,
 }
 
+#[tracing::instrument(name = "get_token", skip_all)]
 pub async fn get_token(
     Extension(pool): Extension<PgPool>,
     Extension(get_token_map): Extension<GetTokenResponseMap>,
@@ -29,10 +29,9 @@ pub async fn get_token(
     let mut transaction = pool.begin().await?;
     let email = body.email.clone().to_ascii_lowercase();
     let key = (email.clone(), body.password.clone());
-    let mut get_token_map = get_token_map.lock().await;
 
-    if let Some(value) = get_token_map.get(&key) {
-        return match value {
+    if let Some(entry) = get_token_map.get(&key) {
+        return match entry.value() {
             GetTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone())),
             GetTokenResponseEnum::UserNotFound => Err(Error::UserNotFound),
             GetTokenResponseEnum::PasswordMismatch => Err(Error::PasswordMismatch),
@@ -40,7 +39,7 @@ pub async fn get_token(
         };
     }
 
-    let user = match get_user_opt_by_email(&mut transaction, &email).await {
+    let user = match get_user_opt_by_email(&mut *transaction, &email).await {
         Ok(user) => match user {
             Some(user) => user,
             None => {
@@ -60,7 +59,7 @@ pub async fn get_token(
     }
 
     let api_token =
-        match get_api_token_by_usr_and_status_pool(&pool, &user.id, ApiTokenStatus::Active).await {
+        match get_api_token_by_usr_and_status(&pool, &user.id, ApiTokenStatus::Active).await {
             Ok(api_token) => match api_token {
                 Some(api_token) => api_token,
                 None => {
