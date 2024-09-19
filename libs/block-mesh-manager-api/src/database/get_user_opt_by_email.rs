@@ -2,7 +2,7 @@ use block_mesh_manager_database_domain::domain::option_uuid::OptionUuid;
 use block_mesh_manager_database_domain::domain::user::User;
 use block_mesh_manager_database_domain::domain::user::UserRole;
 use secret::Secret;
-use sqlx::{PgExecutor, PgPool, Postgres, Transaction};
+use sqlx::PgExecutor;
 
 #[allow(dead_code)]
 pub async fn get_user_opt_by_email(

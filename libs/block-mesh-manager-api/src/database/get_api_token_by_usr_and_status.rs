@@ -1,6 +1,6 @@
 use block_mesh_manager_database_domain::domain::api_token::{ApiToken, ApiTokenStatus};
 use secret::Secret;
-use sqlx::{PgExecutor, PgPool, Postgres, Transaction};
+use sqlx::PgExecutor;
 use uuid::Uuid;
 
 #[allow(dead_code)]
