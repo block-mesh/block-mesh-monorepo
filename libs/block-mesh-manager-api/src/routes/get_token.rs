@@ -1,4 +1,4 @@
-use crate::database::get_api_token_by_usr_and_status::get_api_token_by_usr_and_status_pool;
+use crate::database::get_api_token_by_usr_and_status::get_api_token_by_usr_and_status;
 use crate::database::get_user_opt_by_email::get_user_opt_by_email;
 use crate::error::Error;
 use axum::{Extension, Json};
@@ -60,7 +60,7 @@ pub async fn get_token(
     }
 
     let api_token =
-        match get_api_token_by_usr_and_status_pool(&pool, &user.id, ApiTokenStatus::Active).await {
+        match get_api_token_by_usr_and_status(&pool, &user.id, ApiTokenStatus::Active).await {
             Ok(api_token) => match api_token {
                 Some(api_token) => api_token,
                 None => {
