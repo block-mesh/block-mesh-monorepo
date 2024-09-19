@@ -4,7 +4,6 @@ use uuid::Uuid;
 
 use crate::domain::aggregate::{Aggregate, AggregateName};
 
-#[tracing::instrument(name = "get_or_create_aggregate_by_user_and_name", skip_all)]
 pub async fn get_or_create_aggregate_by_user_and_name(
     transaction: &mut Transaction<'_, Postgres>,
     name: AggregateName,
