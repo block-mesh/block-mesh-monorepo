@@ -7,7 +7,9 @@ use crate::startup::routers::leptos_router::get_leptos_router;
 use crate::startup::routers::static_auth_router::get_static_auth_router;
 use crate::startup::routers::static_un_auth_router::get_static_un_auth_router;
 use crate::startup::routers::ws_router::get_ws_router;
+use axum::body::Body;
 use axum::extract::Request;
+use axum::response::Response;
 use axum::{Extension, Router};
 use axum_login::login_required;
 use block_mesh_common::feature_flag_client::FlagValue;
@@ -35,10 +37,13 @@ use block_mesh_common::interfaces::db_messages::{
 use flume::Sender;
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
+use tower::ServiceBuilder;
 use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
 use tower_http::timeout::TimeoutLayer;
+use tower_http::trace::TraceLayer;
+use tracing::Span;
 use twitter_v2::authorization::Oauth2Client;
 
 pub struct Application {
@@ -157,6 +162,13 @@ impl Application {
             .layer(Extension(db_pool.clone()))
             .layer(cors)
             .layer(auth_layer.clone())
+            .layer(TraceLayer::new_for_http()
+                .make_span_with(|request: &Request<Body>| {
+                tracing::info_span!("request", method = %request.method(), uri = %request.uri())
+                })
+                .on_response(|response: &Response<_>, latency: Duration, span: &Span| {
+                    tracing::info!("Response status = {}, latency = {}ms", &response.status().as_u16(), latency.as_millis());
+                }))
             .with_state(app_state.clone());
         let app = Router::new()
             .layer(TimeoutLayer::new(Duration::from_millis(
