@@ -37,7 +37,6 @@ use block_mesh_common::interfaces::db_messages::{
 use flume::Sender;
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
-use tower::ServiceBuilder;
 use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
@@ -166,7 +165,7 @@ impl Application {
                 .make_span_with(|request: &Request<Body>| {
                 tracing::info_span!("request", method = %request.method(), uri = %request.uri())
                 })
-                .on_response(|response: &Response<_>, latency: Duration, span: &Span| {
+                .on_response(|response: &Response<_>, latency: Duration, _span: &Span| {
                     tracing::info!("Response status = {}, latency = {}ms", &response.status().as_u16(), latency.as_millis());
                 }))
             .with_state(app_state.clone());
