@@ -30,8 +30,6 @@ impl ChatCompletionExt for GeminiClient {
             .pop()
             .context("Gemini returned no completion candidates")?
             .content
-            .pop()
-            .context("Gemini returned no completion content")?
             .parts
             .pop()
             .context("Gemini returned no completion messages")?;
@@ -45,6 +43,7 @@ impl ChatCompletionExt for GeminiClient {
         };
         let role = super::Role::User;
         Ok(Message { content, role })
+        // Err(anyhow!("aaaa"))
     }
 }
 pub struct GeminiClient {
@@ -80,6 +79,7 @@ impl GeminiClient {
 }
 
 #[derive(Serialize, Debug)]
+#[serde(rename_all = "camelCase")]
 struct ChatRequest {
     contents: Vec<ChatMessage>,
 }
@@ -90,32 +90,37 @@ impl ChatRequest {
     }
 }
 #[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 struct ChatResponse {
     candidates: Vec<Candidate>,
     usage_metadata: UsageMetadata,
 }
 
 #[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 struct Candidate {
-    content: Vec<ChatMessage>,
+    content: ChatMessage,
     finish_reason: String,
     index: u32,
     safety_ratings: Vec<SafetyRating>,
 }
 
 #[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 struct SafetyRating {
     category: String,
     probability: String,
 }
 
 #[derive(Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 struct UsageMetadata {
     prompt_token_count: u32,
     candidates_token_count: u32,
     total_token_count: u32,
 }
 #[derive(Serialize, Deserialize, Debug)]
+#[serde(rename_all = "camelCase")]
 struct ChatMessage {
     role: Role,
     parts: Vec<Part>,
@@ -136,13 +141,13 @@ impl ChatMessage {
     }
 }
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename_all = "snake_case")]
+#[serde(rename_all = "camelCase")]
 enum Part {
     Text(String),
     InlineData { mime_type: String, data: String },
 }
 #[derive(Serialize, Deserialize, Debug)]
-#[serde(rename = "lowercase")]
+#[serde(rename_all = "camelCase")]
 enum Role {
     User,
     Model,
@@ -157,8 +162,11 @@ async fn google_gemini() {
         .chat_completion(&ChatRequest::new(vec![ChatMessage::user(vec![
             Part::Text(String::from("Introduce yourself")),
         ])]))
-        .await;
+        .await
+        .unwrap();
+    println!("{response:#?}");
 }
+
 #[test]
 fn test_parts_parsing() {
     let p1 = Part::Text(String::from("Some text"));
