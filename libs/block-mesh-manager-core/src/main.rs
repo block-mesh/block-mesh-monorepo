@@ -1,5 +1,13 @@
 #![allow(unused)]
 
+pub mod errors;
+pub mod state;
+pub mod websocket;
+
+use crate::state::AppState;
+use crate::websocket::manager::WebSocketManager;
+use crate::websocket::ws_handler::ws_handler;
+use axum::extract::State;
 use axum::routing::get;
 use axum::{Router, ServiceExt};
 use block_mesh_common::env::environment::Environment;
@@ -13,9 +21,12 @@ use tokio::net::TcpListener;
 async fn main() {
     let addr = SocketAddr::V4(SocketAddrV4::new(Ipv4Addr::LOCALHOST, 8000));
     let listener = TcpListener::bind(addr).await.unwrap();
+    tracing::info!("Listening at {addr}");
 
-    let app_state = AppState::new();
-    let router = Router::new().with_state(app_state);
+    let app_state = AppState::new().await;
+    let router = Router::new()
+        .route("/ws", get(ws_handler))
+        .with_state(app_state);
 
     axum::serve(
         listener,
@@ -23,21 +34,4 @@ async fn main() {
     )
     .await
     .unwrap();
-}
-
-struct AppState {
-    pool: PgPool,
-    environment: Environment,
-}
-
-impl AppState {
-    async fn new() -> Self {
-        let environment = std::env::var("APP_ENVIRONMENT").unwrap();
-        let environment = Environment::from_str(&environment).unwrap();
-        let pg_url = std::env::var("DATABASE_URL").unwrap();
-        let pg_options = PgConnectOptions::from_str(&pg_url).unwrap();
-        let pool = PgPool::connect_with(pg_options).await.unwrap();
-
-        Self { pool, environment }
-    }
 }
