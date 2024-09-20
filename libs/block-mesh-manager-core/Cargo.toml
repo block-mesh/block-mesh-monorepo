@@ -20,5 +20,11 @@ thiserror = { workspace = true }
 futures = { workspace = true }
 dashmap = { workspace = true }
 block-mesh-common = { path = "../block-mesh-common", features = ["env"] }
+
+[dev-dependencies]
+reqwest = { workspace = true }
+reqwest-websocket = { workspace = true }
+testcontainers = "0.22.0"
+testcontainers-modules = { version = "0.10.0", features = ["postgres"] }
 [lints]
 workspace = true

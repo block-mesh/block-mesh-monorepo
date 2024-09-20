@@ -1,5 +1,5 @@
+use crate::state::AppState;
 use crate::websocket::process_message::process_message;
-use crate::AppState;
 use axum::extract::ws::{Message, WebSocket};
 use block_mesh_common::interfaces::ws_api::{WsClientMessage, WsServerMessage};
 use futures::stream::{SplitSink, SplitStream};

@@ -1,9 +1,7 @@
-use crate::AppState;
+use crate::state::AppState;
 use axum::extract::ws::Message;
-use block_mesh_common::interfaces::server_api::HandlerMode;
 use block_mesh_common::interfaces::ws_api::WsClientMessage;
 use std::ops::ControlFlow;
-use std::sync::Arc;
 
 pub async fn process_message(
     msg: Message,

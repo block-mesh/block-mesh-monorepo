@@ -4,9 +4,7 @@ pub mod task_scheduler;
 
 use crate::websocket::manager::broadcaster::Broadcaster;
 use crate::websocket::manager::task_scheduler::TaskScheduler;
-use anyhow::Context;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
-use sqlx::PgPool;
 use std::fmt::Debug;
 use uuid::Uuid;
 
