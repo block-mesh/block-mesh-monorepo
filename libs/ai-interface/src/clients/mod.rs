@@ -4,6 +4,7 @@ use crate::clients::meta::LlamaClient;
 use crate::clients::mistral::MistralClient;
 use crate::clients::openai::OpenAiClient;
 use async_trait::async_trait;
+use dotenv::dotenv;
 use reqwest::Client;
 use std::collections::HashSet;
 use std::env::VarError;
@@ -28,6 +29,7 @@ pub struct AIClient {
     openai: OpenAiClient,
 }
 
+#[derive(Hash, PartialEq, Eq)]
 pub enum ClientKind {
     Anthropic,
     Google,
@@ -105,4 +107,27 @@ pub struct Message {
 #[async_trait]
 pub trait ChatCompletionExt {
     async fn completion(&self, messages: Vec<Message>) -> anyhow::Result<Message>;
+}
+
+#[ignore = "Requires all AI API keys"]
+#[tokio::test]
+async fn bulk_message_propagation() {
+    dotenv().ok();
+    let client = AIClient::new().unwrap();
+    let responses = client
+        .completions(
+            [
+                ClientKind::Anthropic,
+                ClientKind::Google,
+                ClientKind::Meta,
+                ClientKind::Mistral,
+                ClientKind::OpenAi,
+            ],
+            vec![Message {
+                content: String::from("Introduce yourself"),
+                role: Role::User,
+            }],
+        )
+        .await;
+    println!("{responses:#?}")
 }
