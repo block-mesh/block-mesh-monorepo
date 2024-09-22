@@ -53,7 +53,6 @@ pub fn App() -> impl IntoView {
                     view=move || {
                         view! {
                             <NotificationPopup/>
-
                             <ApplicationLayout>
                                 <Outlet/>
                             </ApplicationLayout>
