@@ -44,6 +44,7 @@ async fn write_key<T>(
     Ok(keys.put(key, value)?.execute().await?)
 }
 
+#[allow(dead_code)]
 async fn get_key<T>(ctx: &RouteContext<T>, key: &str, namespace: &str) -> Result<Option<String>> {
     console_log!("here x key {}", key);
     let keys = ctx.kv(namespace)?;
@@ -60,6 +61,7 @@ async fn get_key<T>(ctx: &RouteContext<T>, key: &str, namespace: &str) -> Result
     }
 }
 
+#[allow(dead_code)]
 async fn get_key_by_prefix<T>(
     ctx: &RouteContext<T>,
     prefix: &str,
@@ -146,7 +148,7 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
                 .to_string();
 
             let response = get_token(email, password).await?;
-            return Response::from_json(&response);
+            Response::from_json(&response)
 
             // let hashed_password = hash(password.clone(), DEFAULT_COST).unwrap();
             // let key = format!("{}:{}", email, hashed_password);
@@ -193,7 +195,7 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
                 .trim_matches('"')
                 .to_string();
             let response = check_token(email, api_token).await?;
-            return Response::from_json(&response);
+            Response::from_json(&response)
             // let key = format!("{}:{}", email, api_token);
             // console_log!("here 3 key = {} check_token", key);
             // if let Ok(Some(value)) = get_key(&ctx, &key, NAMESPACE).await {
