@@ -13,7 +13,7 @@ use uuid::Uuid;
 use worker::kv::Key;
 use worker::*;
 
-const NAMESPACE: &str = "worker-api_tokens";
+const _NAMESPACE: &str = "worker-api_tokens";
 
 #[event(start)]
 fn start() {
