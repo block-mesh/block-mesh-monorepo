@@ -4,6 +4,6 @@ pub mod components;
 pub mod context;
 pub mod frontend_extension;
 pub mod frontend_tauri;
-pub mod new_frontend_webserver;
+pub mod frontend_webserver;
 pub mod utils;
 pub mod wrapper;

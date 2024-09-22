@@ -1,6 +1,6 @@
 use crate::frontends::components::extension_button::ExtensionButton;
 use crate::frontends::components::extension_input::ExtensionInput;
-use crate::frontends::new_frontend_webserver::app::application_layout::ApplicationLayout;
+use crate::frontends::frontend_webserver::app::application_layout::ApplicationLayout;
 use leptos::*;
 
 #[derive(Copy, Clone)]

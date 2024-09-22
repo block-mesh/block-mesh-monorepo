@@ -12,11 +12,11 @@ use crate::frontends::components::icons::perk_icon::PerkIcon;
 use crate::frontends::components::reload_button::ReloadButton;
 use crate::frontends::context::auth_context::AuthContext;
 use crate::frontends::context::reload_context::ReloadContext;
-use crate::frontends::new_frontend_webserver::components::sidebar::{
+use crate::frontends::frontend_webserver::components::sidebar::{
     Sidebar, SidebarBody, SidebarFooter, SidebarHeader, SidebarItem, SidebarItemLink, SidebarLabel,
     SidebarSection, SidebarSpacer,
 };
-use crate::frontends::new_frontend_webserver::components::sidebar_layout::SidebarLayout;
+use crate::frontends::frontend_webserver::components::sidebar_layout::SidebarLayout;
 use block_mesh_common::constants::BLOCK_MESH_LOGO;
 use block_mesh_common::interfaces::server_api::{DailyLeaderboard, DashboardResponse};
 use block_mesh_common::routes_enum::RoutesEnum;
