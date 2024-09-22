@@ -7,9 +7,13 @@ use reqwest::Client;
 #[component]
 pub fn EditInviteCode() -> impl IntoView {
     let notifications = expect_context::<NotificationContext>();
-    let async_data = expect_context::<DashboardResponse>();
+    let async_data = use_context::<DashboardResponse>();
+    let invite_code = RwSignal::new("".to_string());
 
-    let invite_code = create_rw_signal(async_data.invite_code.clone());
+    if let Some(data) = async_data {
+        invite_code.set(data.invite_code);
+    }
+
     let new_invite_code = create_rw_signal(String::default());
 
     let submit = create_action(move |_| async move {

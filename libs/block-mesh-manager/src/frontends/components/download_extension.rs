@@ -9,13 +9,18 @@ use reqwest::Client;
 #[component]
 pub fn DownloadExtension(show: RwSignal<bool>) -> impl IntoView {
     let notifications = expect_context::<NotificationContext>();
-    let async_data = expect_context::<DashboardResponse>();
-    let extension_installed = create_rw_signal(
-        async_data
+    let async_data = use_context::<DashboardResponse>();
+    let extension_installed = RwSignal::new(false);
+
+    if let Some(data) = async_data {
+        if data
             .calls_to_action
             .iter()
-            .any(|i| i.name == "install_extension"),
-    );
+            .any(|i| i.name == "install_extension")
+        {
+            extension_installed.set(true)
+        }
+    }
 
     let submit = create_action(move |input: &String| {
         let input = input.clone();

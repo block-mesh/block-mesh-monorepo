@@ -17,8 +17,11 @@ use crate::frontends::frontend_webserver::components::sidebar::{
     SidebarSection, SidebarSpacer,
 };
 use crate::frontends::frontend_webserver::components::sidebar_layout::SidebarLayout;
+use crate::frontends::utils::navigate_external::navigate_to_external_url;
 use block_mesh_common::constants::BLOCK_MESH_LOGO;
-use block_mesh_common::interfaces::server_api::{DailyLeaderboard, DashboardResponse};
+use block_mesh_common::interfaces::server_api::{
+    AuthStatusResponse, DailyLeaderboard, DashboardResponse,
+};
 use block_mesh_common::routes_enum::RoutesEnum;
 use leptos::*;
 
@@ -107,6 +110,17 @@ pub fn ApplicationLayout(children: ChildrenFn) -> impl IntoView {
         move |_| async move {
             let origin = window().origin();
             let client = reqwest::Client::new();
+
+            if let Ok(response) = client.get(&format!("{}/auth_status", origin)).send().await {
+                if let Ok(json) = response.json::<AuthStatusResponse>().await {
+                    provide_context(json);
+                } else {
+                    navigate_to_external_url(format!("{}/logout", origin));
+                }
+            } else {
+                navigate_to_external_url(format!("{}/logout", origin));
+            }
+
             if let Ok(response) = client.post(&format!("{}/dashboard", origin)).send().await {
                 if let Ok(json) = response.json::<DashboardResponse>().await {
                     provide_context(json);
