@@ -132,15 +132,9 @@ pub fn ApplicationLayout(children: ChildrenFn) -> impl IntoView {
     view! {
         <SidebarLayout navbar=ApplicationNavbar sidebar=ApplicationSidebar>
             <Transition fallback=LoadingIndicator>
-                <IfLetSome
-                    opt=Signal::derive(move || resource.get())
-                    let:_data
-                    clone:children
-                >
+                <IfLetSome opt=Signal::derive(move || resource.get()) let:_data clone:children>
 
-                    {
-                        children()
-                    }
+                    {children()}
 
                 </IfLetSome>
             </Transition>
