@@ -133,10 +133,10 @@ pub async fn handle_socket(socket: WebSocket, ip: String, state: Arc<AppState>, 
         .await;
 
     tokio::select! {
-        o = recv_task => tracing::error!("recv_task dead {:?}", o),
-        o = send_task => tracing::error!("send_task dead {:?}", o),
-        o = sink_task => tracing::error!("sink_task dead {:?}", o),
-        o = broadcast_task => tracing::error!("broadcast_task dead {:?}", o)
+        o = recv_task => tracing::warn!("recv_task dead {:?}", o),
+        o = send_task => tracing::warn!("send_task dead {:?}", o),
+        o = sink_task => tracing::warn!("sink_task dead {:?}", o),
+        o = broadcast_task => tracing::warn!("broadcast_task dead {:?}", o)
     }
 
     broadcaster.unsubscribe(user_id, ip.clone());
