@@ -14,9 +14,13 @@ use leptos_use::js;
 
 #[component]
 pub fn Perks() -> impl IntoView {
-    let async_data = expect_context::<DashboardResponse>();
+    let async_data = use_context::<DashboardResponse>();
     let notifications = expect_context::<NotificationContext>();
     let auth = expect_context::<AuthContext>();
+    let perks = RwSignal::new(vec![]);
+    if let Some(data) = async_data {
+        perks.set(data.perks);
+    }
 
     let has_backpack = RwSignal::new(false);
 
@@ -41,8 +45,6 @@ pub fn Perks() -> impl IntoView {
             connect_wallet_in_browser().await;
         });
     };
-
-    let perks = StoredValue::new(async_data.perks.clone());
 
     view! {
         <div class="flex items-start justify-start gap-4">
@@ -69,7 +71,7 @@ pub fn Perks() -> impl IntoView {
             >
                 <TwitterIcon/>
 
-                {if perks.with_value(|perks| perks.iter().any(|i| i.name == "twitter")) {
+                {if perks.get().iter().any(|i| i.name == "twitter") {
                     "Twitter Connected"
                 } else {
                     "Connect Twitter"
@@ -86,23 +88,22 @@ pub fn Perks() -> impl IntoView {
                 </tr>
             </TableHead>
             <tbody>
+
                 {perks
-                    .with_value(|perks| {
-                        perks
-                            .iter()
-                            .cloned()
-                            .map(|referral| {
-                                view! {
-                                    <tr>
-                                        <TableCell>{referral.name.to_uppercase()}</TableCell>
-                                        <TableCell class="text-right">
-                                            {referral.multiplier.to_string()}
-                                        </TableCell>
-                                    </tr>
-                                }
-                            })
-                            .collect_view()
-                    })}
+                    .get()
+                    .iter()
+                    .cloned()
+                    .map(|referral| {
+                        view! {
+                            <tr>
+                                <TableCell>{referral.name.to_uppercase()}</TableCell>
+                                <TableCell class="text-right">
+                                    {referral.multiplier.to_string()}
+                                </TableCell>
+                            </tr>
+                        }
+                    })
+                    .collect_view()}
 
             </tbody>
         </Table>

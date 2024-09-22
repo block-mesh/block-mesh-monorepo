@@ -1,4 +1,5 @@
 use askama::Template;
+#[allow(unused_imports)]
 use bcrypt::{hash, verify, DEFAULT_COST};
 use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetTokenResponse, LoginForm};
 use reqwest::Client;
@@ -12,7 +13,7 @@ use uuid::Uuid;
 use worker::kv::Key;
 use worker::*;
 
-const NAMESPACE: &str = "worker-api_tokens";
+const _NAMESPACE: &str = "worker-api_tokens";
 
 #[event(start)]
 fn start() {
@@ -44,6 +45,7 @@ async fn write_key<T>(
     Ok(keys.put(key, value)?.execute().await?)
 }
 
+#[allow(dead_code)]
 async fn get_key<T>(ctx: &RouteContext<T>, key: &str, namespace: &str) -> Result<Option<String>> {
     console_log!("here x key {}", key);
     let keys = ctx.kv(namespace)?;
@@ -60,6 +62,7 @@ async fn get_key<T>(ctx: &RouteContext<T>, key: &str, namespace: &str) -> Result
     }
 }
 
+#[allow(dead_code)]
 async fn get_key_by_prefix<T>(
     ctx: &RouteContext<T>,
     prefix: &str,
@@ -130,7 +133,7 @@ pub async fn check_token(email: String, api_token: String) -> Result<GetTokenRes
 async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
     let router = Router::new();
     router
-        .post_async("/api/get_token", |mut req, ctx| async move {
+        .post_async("/api/get_token", |mut req, _ctx| async move {
             let body = req.json::<Value>().await?;
             let email = body
                 .get("email")
@@ -144,37 +147,39 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
                 .to_string()
                 .trim_matches('"')
                 .to_string();
-            let hashed_password = hash(password.clone(), DEFAULT_COST).unwrap();
-            let key = format!("{}:{}", email, hashed_password);
-            console_log!("here 3 key = {} get_token", key);
-            if let Ok(values) = get_key_by_prefix(&ctx, &email, NAMESPACE).await {
-                console_log!("Found from KV {}/{}/{:#?}", email, password, values);
-                for v in values {
-                    let s: Vec<_> = v.split(':').collect();
-                    let kv_email = s[0];
-                    let kv_password = s[1];
-                    console_log!(
-                        "v = {:#?} kv_email = {} kv_password = {}",
-                        v,
-                        kv_email,
-                        kv_password
-                    );
-                    if verify::<&str>(password.as_ref(), kv_password).unwrap_or(false) {
-                        let new_key = format!("{}:{}", kv_email, kv_password);
-                        let value = get_key(&ctx, &new_key, NAMESPACE).await?.unwrap();
-                        return Response::from_json(&GetTokenResponse {
-                            api_token: Some(Uuid::from_str(&value.to_string()).unwrap()),
-                            message: None,
-                        });
-                    }
-                }
-            }
+
             let response = get_token(email, password).await?;
             Response::from_json(&response)
-            // console_log!("Not found {}/{}", email, password);
-            // Response::error("Not found", 500)
+
+            // let hashed_password = hash(password.clone(), DEFAULT_COST).unwrap();
+            // let key = format!("{}:{}", email, hashed_password);
+            // console_log!("here 3 key = {} get_token", key);
+            // if let Ok(values) = get_key_by_prefix(&ctx, &email, NAMESPACE).await {
+            //     console_log!("Found from KV {}/{}/{:#?}", email, password, values);
+            //     for v in values {
+            //         let s: Vec<_> = v.split(':').collect();
+            //         let kv_email = s[0];
+            //         let kv_password = s[1];
+            //         console_log!(
+            //             "v = {:#?} kv_email = {} kv_password = {}",
+            //             v,
+            //             kv_email,
+            //             kv_password
+            //         );
+            //         if verify::<&str>(password.as_ref(), kv_password).unwrap_or(false) {
+            //             let new_key = format!("{}:{}", kv_email, kv_password);
+            //             let value = get_key(&ctx, &new_key, NAMESPACE).await?.unwrap();
+            //             return Response::from_json(&GetTokenResponse {
+            //                 api_token: Some(Uuid::from_str(&value.to_string()).unwrap()),
+            //                 message: None,
+            //             });
+            //         }
+            //     }
+            // }
+            // let response = get_token(email, password).await?;
+            // Response::from_json(&response)
         })
-        .post_async("/api/check_token", |mut req, ctx| async move {
+        .post_async("/api/check_token", |mut req, _ctx| async move {
             console_log!("here 1");
             let body = req.json::<Value>().await?;
             let email = body
@@ -190,19 +195,19 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
                 .to_string()
                 .trim_matches('"')
                 .to_string();
-            let key = format!("{}:{}", email, api_token);
-            console_log!("here 3 key = {} check_token", key);
-            if let Ok(Some(value)) = get_key(&ctx, &key, NAMESPACE).await {
-                console_log!("Found from KV {}/{}/{}", email, api_token, value);
-                return Response::from_json(&GetTokenResponse {
-                    api_token: Some(Uuid::from_str(&value.to_string()).unwrap()),
-                    message: None,
-                });
-            }
             let response = check_token(email, api_token).await?;
             Response::from_json(&response)
-            // console_log!("Not found {}/{}", email, api_token);
-            // Response::error("Not found", 500)
+            // let key = format!("{}:{}", email, api_token);
+            // console_log!("here 3 key = {} check_token", key);
+            // if let Ok(Some(value)) = get_key(&ctx, &key, NAMESPACE).await {
+            //     console_log!("Found from KV {}/{}/{}", email, api_token, value);
+            //     return Response::from_json(&GetTokenResponse {
+            //         api_token: Some(Uuid::from_str(&value.to_string()).unwrap()),
+            //         message: None,
+            //     });
+            // }
+            // let response = check_token(email, api_token).await?;
+            // Response::from_json(&response)
         })
         .get_async("/", |_, _| async move {
             let response = LoginPage {}.render().unwrap();

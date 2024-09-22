@@ -8,8 +8,12 @@ use leptos::*;
 
 #[component]
 pub fn BarChart() -> impl IntoView {
-    let async_data = expect_context::<DashboardResponse>();
+    let async_data = use_context::<DashboardResponse>();
     let size_context = use_context::<SizeContext>().unwrap();
+    let daily_stats = RwSignal::new(vec![]);
+    if let Some(data) = async_data {
+        daily_stats.set(data.daily_stats)
+    }
 
     let width = Signal::derive(move || {
         let w = size_context.width.get();
@@ -17,7 +21,7 @@ pub fn BarChart() -> impl IntoView {
     });
 
     let html_chart = Signal::derive({
-        let data = async_data.daily_stats.clone();
+        let data = daily_stats.get();
 
         move || {
             let chart = Chart::new()
