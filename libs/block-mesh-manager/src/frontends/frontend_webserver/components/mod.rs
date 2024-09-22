@@ -1,4 +1,3 @@
-pub mod error;
-pub mod navbar;
-pub mod network_status;
-pub mod notification;
+pub mod loading_indicator;
+pub mod sidebar;
+pub mod sidebar_layout;
