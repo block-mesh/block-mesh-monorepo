@@ -15,9 +15,7 @@ use crate::frontends::components::tables::table_header::TableHeader;
 use crate::frontends::context::auth_context::AuthContext;
 use crate::frontends::context::notification_context::NotificationContext;
 use block_mesh_common::constants::BLOCK_MESH_CHROME_EXTENSION_LINK;
-use block_mesh_common::interfaces::server_api::{
-    AuthStatusResponse, DashboardResponse, ResendConfirmEmailForm,
-};
+use block_mesh_common::interfaces::server_api::{DashboardResponse, ResendConfirmEmailForm};
 use block_mesh_common::routes_enum::RoutesEnum;
 use chrono::Utc;
 use leptos::*;

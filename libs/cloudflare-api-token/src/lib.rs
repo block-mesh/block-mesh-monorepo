@@ -1,4 +1,5 @@
 use askama::Template;
+#[allow(unused_imports)]
 use bcrypt::{hash, verify, DEFAULT_COST};
 use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetTokenResponse, LoginForm};
 use reqwest::Client;
@@ -132,7 +133,7 @@ pub async fn check_token(email: String, api_token: String) -> Result<GetTokenRes
 async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
     let router = Router::new();
     router
-        .post_async("/api/get_token", |mut req, ctx| async move {
+        .post_async("/api/get_token", |mut req, _ctx| async move {
             let body = req.json::<Value>().await?;
             let email = body
                 .get("email")
@@ -178,7 +179,7 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
             // let response = get_token(email, password).await?;
             // Response::from_json(&response)
         })
-        .post_async("/api/check_token", |mut req, ctx| async move {
+        .post_async("/api/check_token", |mut req, _ctx| async move {
             console_log!("here 1");
             let body = req.json::<Value>().await?;
             let email = body
