@@ -1,7 +1,7 @@
 use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::database::api_token::find_token::find_token;
 use crate::database::daily_stat::create_daily_stat::create_daily_stat;
-use crate::database::daily_stat::get_daily_stat_by_user_id_and_day::get_daily_stat_by_user_id_and_day;
+use crate::database::daily_stat::get_daily_stat_of_user::get_daily_stat_of_user;
 use crate::database::daily_stat::increment_uptime::increment_uptime;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
@@ -9,20 +9,20 @@ use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use crate::worker::db_cleaner_cron::EnrichIp;
 use axum::extract::{ConnectInfo, Query, Request, State};
-use axum::{Extension, Json};
+use axum::Json;
 use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_common::interfaces::db_messages::{
     AggregateMessage, AnalyticsMessage, DBMessageTypes, DailyStatMessage, UsersIpMessage,
 };
 use block_mesh_common::interfaces::server_api::{
-    ClientsMetadata, ReportUptimeRequest, ReportUptimeResponse,
+    ClientsMetadata, HandlerMode, ReportUptimeRequest, ReportUptimeResponse,
 };
 use chrono::Utc;
 use http::{HeaderMap, HeaderValue, StatusCode};
 use http_body_util::BodyExt;
-use sqlx::PgPool;
 use std::net::SocketAddr;
 use std::sync::Arc;
+use uuid::Uuid;
 
 pub fn resolve_ip(
     query_ip: &Option<String>,
@@ -38,24 +38,12 @@ pub fn resolve_ip(
     }
 }
 
-#[tracing::instrument(name = "report_uptime", level = "trace", skip(pool, query, state), ret)]
-pub async fn handler(
-    headers: HeaderMap,
-    Extension(pool): Extension<PgPool>,
-    State(state): State<Arc<AppState>>,
-    ConnectInfo(addr): ConnectInfo<SocketAddr>,
-    Query(query): Query<ReportUptimeRequest>,
-    request: Request,
-) -> Result<Json<ReportUptimeResponse>, Error> {
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
-    let api_token = find_token(&mut transaction, &query.api_token)
-        .await?
-        .ok_or(Error::ApiTokenNotFound)?;
-    let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
-        .await?
-        .ok_or_else(|| Error::UserNotFound)?;
-    let (_parts, body) = request.into_parts();
-
+#[tracing::instrument(name = "send_analytics", skip_all)]
+async fn send_analytics(
+    state: Arc<AppState>,
+    request: Option<Request>,
+    user_id: &Uuid,
+) -> Result<(), Error> {
     let tx_analytics_agg = state
         .flags
         .get("tx_analytics_agg")
@@ -63,37 +51,35 @@ pub async fn handler(
     let tx_analytics_agg: bool =
         <FlagValue as TryInto<bool>>::try_into(tx_analytics_agg.to_owned()).unwrap_or_default();
 
-    if tx_analytics_agg {
-        let bytes = body
-            .collect()
-            .await
-            .map_err(|_| Error::FailedReadingBody)?
-            .to_bytes();
-        let body_raw = String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from(""));
-        if !body_raw.is_empty() {
-            if let Ok(metadata) = serde_json::from_str::<ClientsMetadata>(&body_raw) {
-                let _ = state
-                    .tx_analytics_agg
-                    .send_async(AnalyticsMessage {
-                        msg_type: DBMessageTypes::AnalyticsMessage,
-                        user_id: user.id,
-                        depin_aggregator: metadata.depin_aggregator.unwrap_or_default(),
-                        device_type: metadata.device_type,
-                    })
-                    .await;
+    if let Some(request) = request {
+        let (_parts, body) = request.into_parts();
+        if tx_analytics_agg {
+            let bytes = body
+                .collect()
+                .await
+                .map_err(|_| Error::FailedReadingBody)?
+                .to_bytes();
+            let body_raw = String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from(""));
+            if !body_raw.is_empty() {
+                if let Ok(metadata) = serde_json::from_str::<ClientsMetadata>(&body_raw) {
+                    let _ = state
+                        .tx_analytics_agg
+                        .send_async(AnalyticsMessage {
+                            msg_type: DBMessageTypes::AnalyticsMessage,
+                            user_id: *user_id,
+                            depin_aggregator: metadata.depin_aggregator.unwrap_or_default(),
+                            device_type: metadata.device_type,
+                        })
+                        .await;
+                }
             }
         }
     }
+    Ok(())
+}
 
-    if user.email.to_ascii_lowercase() != query.email.to_ascii_lowercase() {
-        return Err(Error::UserNotFound);
-    }
-    let header_ip = headers.get("cf-connecting-ip");
-    let ip = resolve_ip(&query.ip, &header_ip, addr.ip().to_string());
-    let daily_stat_opt =
-        get_daily_stat_by_user_id_and_day(&mut transaction, user.id, Utc::now().date_naive())
-            .await?;
-
+#[tracing::instrument(name = "touch_users_ip", skip_all)]
+async fn touch_users_ip(state: Arc<AppState>, ip: String, user_id: &Uuid) {
     let flag = state
         .flags
         .get("touch_users_ip")
@@ -104,15 +90,56 @@ pub async fn handler(
             .tx_users_ip_agg
             .send_async(UsersIpMessage {
                 msg_type: DBMessageTypes::UsersIpMessage,
-                id: user.id,
+                id: *user_id,
                 ip: ip.clone(),
             })
             .await;
     }
+}
 
-    if daily_stat_opt.is_none() {
-        create_daily_stat(&mut transaction, user.id).await?;
+#[tracing::instrument(name = "send_to_rayon", skip_all)]
+async fn send_to_rayon(state: Arc<AppState>, ip: String, user_id: &Uuid) {
+    let flag = state
+        .flags
+        .get("send_cleanup_to_rayon")
+        .unwrap_or(&FlagValue::Boolean(false));
+    let flag: bool = <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
+    if flag {
+        let _ = state
+            .cleaner_tx
+            .send_async(EnrichIp {
+                user_id: *user_id,
+                ip: ip.clone(),
+            })
+            .await;
     }
+}
+
+#[tracing::instrument(name = "report_uptime_content", skip_all)]
+pub async fn report_uptime_content(
+    state: Arc<AppState>,
+    ip: String,
+    query: ReportUptimeRequest,
+    request: Option<Request>,
+    mode: HandlerMode,
+) -> Result<Json<ReportUptimeResponse>, Error> {
+    let pool = state.pool.clone();
+    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let api_token = find_token(&mut transaction, &query.api_token)
+        .await?
+        .ok_or(Error::ApiTokenNotFound)?;
+    let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
+        .await?
+        .ok_or_else(|| Error::UserNotFound)?;
+
+    if user.email.to_ascii_lowercase() != query.email.to_ascii_lowercase() {
+        return Err(Error::UserNotFound);
+    }
+
+    let _ = create_daily_stat(&mut transaction, user.id).await;
+    let daily_stat = get_daily_stat_of_user(&mut transaction, user.id).await?;
+    let _ = send_analytics(state.clone(), request, &user.id).await;
+    touch_users_ip(state.clone(), ip.clone(), &user.id).await;
 
     let interval = state
         .flags
@@ -122,7 +149,7 @@ pub async fn handler(
         <FlagValue as TryInto<f64>>::try_into(interval.to_owned()).unwrap_or_default();
 
     let uptime =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, user.id)
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, &user.id)
             .await
             .map_err(Error::from)?;
     transaction.commit().await.map_err(Error::from)?;
@@ -130,17 +157,19 @@ pub async fn handler(
     let now = Utc::now();
     let diff = now - uptime.updated_at.unwrap_or(now);
 
-    let (extra, abs) =
-        if diff.num_seconds() < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240) {
-            (
-                diff.num_seconds() as f64,
-                uptime.value.as_f64().unwrap_or_default() + diff.num_seconds() as f64,
-            )
-        } else {
-            (0.0, uptime.value.as_f64().unwrap_or_default())
-        };
+    let (extra, abs) = if (diff.num_seconds()
+        < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240))
+        || mode == HandlerMode::WebSocket
+    {
+        (
+            diff.num_seconds() as f64,
+            uptime.value.as_f64().unwrap_or_default() + diff.num_seconds() as f64,
+        )
+    } else {
+        (0.0, uptime.value.as_f64().unwrap_or_default())
+    };
 
-    if daily_stat_opt.is_some() && extra > 0.0 {
+    if extra > 0.0 {
         let flag = state
             .flags
             .get("report_uptime_daily_stats_via_channel")
@@ -153,13 +182,13 @@ pub async fn handler(
                 .tx_daily_stat_agg
                 .send_async(DailyStatMessage {
                     msg_type: DBMessageTypes::DailyStatMessage,
-                    id: daily_stat_opt.unwrap().id,
+                    id: daily_stat.id,
                     uptime: extra,
                 })
                 .await;
         } else {
             let mut transaction = pool.begin().await.map_err(Error::from)?;
-            let _ = increment_uptime(&mut transaction, &daily_stat_opt.unwrap().id, extra).await;
+            let _ = increment_uptime(&mut transaction, &daily_stat.id, extra).await;
             transaction.commit().await?;
         }
     }
@@ -173,22 +202,22 @@ pub async fn handler(
         })
         .await;
 
-    let flag = state
-        .flags
-        .get("send_cleanup_to_rayon")
-        .unwrap_or(&FlagValue::Boolean(false));
-    let flag: bool = <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
-    if flag {
-        let _ = state
-            .cleaner_tx
-            .send_async(EnrichIp {
-                user_id: user.id,
-                ip: ip.clone(),
-            })
-            .await;
-    }
+    send_to_rayon(state.clone(), ip.clone(), &user.id).await;
 
     Ok(Json(ReportUptimeResponse {
         status_code: u16::from(StatusCode::OK),
     }))
+}
+
+#[tracing::instrument(name = "report_uptime", skip_all)]
+pub async fn handler(
+    headers: HeaderMap,
+    State(state): State<Arc<AppState>>,
+    ConnectInfo(addr): ConnectInfo<SocketAddr>,
+    Query(query): Query<ReportUptimeRequest>,
+    request: Request,
+) -> Result<Json<ReportUptimeResponse>, Error> {
+    let header_ip = headers.get("cf-connecting-ip");
+    let ip = resolve_ip(&query.ip, &header_ip, addr.ip().to_string());
+    report_uptime_content(state.clone(), ip, query, Some(request), HandlerMode::Http).await
 }

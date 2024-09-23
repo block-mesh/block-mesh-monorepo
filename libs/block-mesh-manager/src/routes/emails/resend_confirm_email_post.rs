@@ -11,13 +11,12 @@ use block_mesh_common::routes_enum::RoutesEnum;
 use sqlx::PgPool;
 use std::sync::Arc;
 
-#[tracing::instrument(name = "resend_confirm_email_post", skip(form, state))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,
     Form(form): Form<ResendConfirmEmailForm>,
 ) -> Result<Redirect, Error> {
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let mut transaction = pool.begin().await?;
     let user = get_user_opt_by_email(&mut transaction, &form.email.to_ascii_lowercase())
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
@@ -28,7 +27,7 @@ pub async fn handler(
         .email_client
         .send_confirmation_email(&user.email, nonce.nonce.expose_secret())
         .await;
-    transaction.commit().await.map_err(Error::from)?;
+    transaction.commit().await?;
     Ok(NotificationRedirect::redirect(
         "Email Sent",
         "Please check your email",

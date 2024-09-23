@@ -1,9 +1,8 @@
-use crate::domain::api_token::ApiTokenStatus;
+use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
 use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "Create API Token", skip(transaction), ret, err)]
 pub(crate) async fn create_api_token(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,

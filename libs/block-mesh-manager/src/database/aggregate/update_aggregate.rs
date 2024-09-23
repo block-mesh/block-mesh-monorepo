@@ -1,16 +1,9 @@
 use chrono::Utc;
 use serde_json::Value;
-use sqlx::{PgPool, Postgres, Transaction};
+use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(
-    name = "update_aggregate",
-    skip(transaction),
-    ret,
-    err,
-    level = "trace"
-)]
-pub(crate) async fn update_aggregate(
+pub async fn update_aggregate(
     transaction: &mut Transaction<'_, Postgres>,
     id: &Uuid,
     value: &Value,
@@ -23,24 +16,6 @@ pub(crate) async fn update_aggregate(
         id,
     )
     .execute(&mut **transaction)
-    .await?;
-    Ok(*id)
-}
-
-#[tracing::instrument(name = "update_aggregate", skip(pool), ret, err, level = "trace")]
-pub(crate) async fn update_aggregate_pool(
-    pool: &PgPool,
-    id: &Uuid,
-    value: &Value,
-) -> anyhow::Result<Uuid> {
-    let now = Utc::now();
-    sqlx::query!(
-        r#"UPDATE aggregates SET value = $1 , updated_at = $2  WHERE id = $3"#,
-        value,
-        now,
-        id,
-    )
-    .execute(pool)
     .await?;
     Ok(*id)
 }

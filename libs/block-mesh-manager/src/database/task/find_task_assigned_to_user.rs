@@ -3,14 +3,7 @@ use crate::domain::task::TaskStatus;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(
-    name = "Find task assigned to user",
-    skip(transaction),
-    ret,
-    err,
-    level = "trace"
-)]
-pub(crate) async fn find_task_assigned_to_user(
+pub async fn find_task_assigned_to_user(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
 ) -> anyhow::Result<Option<GetTask>> {

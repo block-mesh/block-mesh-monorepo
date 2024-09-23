@@ -1,14 +1,8 @@
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(
-    name = "increment_uptime",
-    skip(transaction),
-    ret,
-    err,
-    level = "trace"
-)]
-pub(crate) async fn increment_uptime(
+#[tracing::instrument(name = "increment_uptime", skip_all)]
+pub async fn increment_uptime(
     transaction: &mut Transaction<'_, Postgres>,
     id: &Uuid,
     uptime: f64,

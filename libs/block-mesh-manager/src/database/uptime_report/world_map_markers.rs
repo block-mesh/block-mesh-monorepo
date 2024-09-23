@@ -10,7 +10,6 @@ pub struct Marker {
     pub count: Option<i64>,
 }
 
-#[tracing::instrument(name = "world_map_markers", skip(transaction), ret, err)]
 pub(crate) async fn world_map_markers(
     transaction: &mut Transaction<'_, Postgres>,
 ) -> anyhow::Result<Vec<Marker>> {

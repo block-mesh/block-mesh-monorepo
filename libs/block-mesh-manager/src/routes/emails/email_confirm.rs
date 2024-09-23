@@ -10,14 +10,13 @@ use block_mesh_common::interfaces::server_api::ConfirmEmailRequest;
 use block_mesh_common::routes_enum::RoutesEnum;
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "email_confirm", skip(pool, query))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Query(query): Query<ConfirmEmailRequest>,
 ) -> Result<Redirect, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let nonce = get_nonce_by_nonce(&mut transaction, &query.token).await?;
-    return match nonce {
+    match nonce {
         None => Ok(Error::redirect(
             500,
             "Didn't find token",
@@ -55,5 +54,5 @@ pub async fn handler(
                 ))
             }
         }
-    };
+    }
 }

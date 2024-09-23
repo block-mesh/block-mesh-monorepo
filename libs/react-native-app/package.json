@@ -3,6 +3,7 @@
   "main": "expo-router/entry",
   "version": "1.0.0",
   "scripts": {
+    "clear": "npx expo start --clear",
     "start": "expo start",
     "reset-project": "node ./scripts/reset-project.js",
     "android": "pkill -9 adb && sleep 2 && adb reverse tcp:8000 tcp:8000 && sleep 2 && expo run:android",

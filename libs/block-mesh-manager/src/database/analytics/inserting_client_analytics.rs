@@ -3,7 +3,6 @@ use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "Inserting client analytics", skip(transaction), ret, err)]
 pub(crate) async fn inserting_client_analytics(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,

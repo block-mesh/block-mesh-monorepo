@@ -2,14 +2,7 @@ use crate::domain::task::GetTask;
 use crate::domain::task::TaskStatus;
 use sqlx::{Postgres, Transaction};
 
-#[tracing::instrument(
-    name = "Find task status",
-    skip(transaction),
-    ret,
-    err,
-    level = "trace"
-)]
-pub(crate) async fn find_task_by_status(
+pub async fn find_task_by_status(
     transaction: &mut Transaction<'_, Postgres>,
     status: TaskStatus,
 ) -> anyhow::Result<Option<GetTask>> {

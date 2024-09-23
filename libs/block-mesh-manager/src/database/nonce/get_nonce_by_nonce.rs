@@ -1,8 +1,7 @@
-use crate::domain::nonce::Nonce;
+use block_mesh_manager_database_domain::domain::nonce::Nonce;
 use secret::Secret;
 use sqlx::{Postgres, Transaction};
 
-#[tracing::instrument(name = "Get nonce by nonce", skip(transaction), ret, err)]
 pub async fn get_nonce_by_nonce(
     transaction: &mut Transaction<'_, Postgres>,
     nonce: &str,

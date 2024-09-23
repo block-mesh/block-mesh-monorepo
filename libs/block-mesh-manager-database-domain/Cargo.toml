@@ -1,0 +1,44 @@
+[package]
+name = "block-mesh-manager-database-domain"
+edition = "2021"
+authors.workspace = true
+version.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+secret = { path = "../secret", features = ["sqlx"] }
+serde = { workspace = true, features = ["derive"] }
+chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }
+
+[dependencies.rand]
+workspace = true
+features = ["min_const_gen"]
+
+[dependencies.sqlx]
+workspace = true
+default-features = false
+features = [
+  "any",
+  "runtime-tokio-rustls",
+  "macros",
+  "postgres",
+  "uuid",
+  "chrono",
+  "migrate",
+  "json",
+  "bigdecimal",
+]
+
+[dependencies.uuid]
+workspace = true
+features = [
+  "v4", # Lets you generate random UUIDs
+  "fast-rng", # Use a faster (but still sufficiently random) RNG
+  "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
+  "serde", # Enable serialization/deserialization of UUIDs
+  "js"
+]
+
+[lib]
+crate-type = ["cdylib", "rlib"]

@@ -1,7 +1,6 @@
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "get_user_uptime_rank", skip(transaction), ret, err)]
 pub async fn get_user_uptime_rank(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,

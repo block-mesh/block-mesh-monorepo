@@ -3,7 +3,6 @@ use sqlx::types::BigDecimal;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "get_user_overall_uptime", skip(transaction), ret, err)]
 pub async fn get_user_overall_uptime(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,

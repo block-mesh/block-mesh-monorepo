@@ -9,6 +9,7 @@ use chrono::Utc;
 use gloo_utils::format::JsValueSerdeExt;
 use leptos::logging::log;
 use leptos::*;
+#[allow(unused_imports)]
 use leptos_dom::tracing;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -16,12 +17,10 @@ use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
-use crate::frontends::utils::auth::{check_token, get_latest_invite_code};
 use crate::frontends::utils::connectors::{
     ask_for_all_storage_values, onPostMessage, send_message_channel,
 };
 use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType};
-use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetLatestInviteCodeRequest};
 
 #[derive(Clone, Serialize, Deserialize, Copy)]
 pub struct ExtensionContext {
@@ -37,23 +36,25 @@ pub struct ExtensionContext {
     pub download_speed: RwSignal<f64>,
     pub upload_speed: RwSignal<f64>,
     pub last_update: RwSignal<i64>,
+    pub wallet_address: RwSignal<Option<String>>,
 }
 
 impl Default for ExtensionContext {
     fn default() -> Self {
         Self {
-            email: create_rw_signal(String::default()),
-            api_token: create_rw_signal(Uuid::default()),
-            device_id: create_rw_signal(Uuid::default()),
-            blockmesh_url: create_rw_signal("https://app.blockmesh.xyz".to_string()),
-            status: create_rw_signal(AuthStatus::LoggedOut),
-            uptime: create_rw_signal(0.0),
-            invite_code: create_rw_signal(String::default()),
-            success: create_rw_signal(None),
-            error: create_rw_signal(None),
-            download_speed: create_rw_signal(0.0),
+            email: RwSignal::new(String::default()),
+            api_token: RwSignal::new(Uuid::default()),
+            device_id: RwSignal::new(Uuid::default()),
+            blockmesh_url: RwSignal::new("https://app.blockmesh.xyz".to_string()),
+            status: RwSignal::new(AuthStatus::LoggedOut),
+            uptime: RwSignal::new(0.0),
+            invite_code: RwSignal::new(String::default()),
+            success: RwSignal::new(None),
+            error: RwSignal::new(None),
+            download_speed: RwSignal::new(0.0),
             upload_speed: Default::default(),
-            last_update: create_rw_signal(0),
+            last_update: RwSignal::new(0),
+            wallet_address: RwSignal::new(None),
         }
     }
 }
@@ -73,12 +74,12 @@ impl Debug for ExtensionContext {
             .field("download_speed", &self.download_speed.get_untracked())
             .field("upload_speed", &self.upload_speed.get_untracked())
             .field("last_update", &self.last_update.get_untracked())
+            .field("wallet_address", &self.wallet_address.get_untracked())
             .finish()
     }
 }
 
 impl ExtensionContext {
-    #[tracing::instrument(name = "init_resource")]
     pub fn init_resource(state: ExtensionContext) -> Resource<(), ExtensionContext> {
         create_local_resource(
             || (),
@@ -91,7 +92,6 @@ impl ExtensionContext {
         )
     }
 
-    #[tracing::instrument(name = "ExtensionState::init_with_storage")]
     pub async fn init_with_storage(self) {
         let now = Utc::now().timestamp();
         let mut blockmesh_url = self.blockmesh_url.get_untracked();
@@ -125,6 +125,7 @@ impl ExtensionContext {
         self.download_speed.update(|v| *v = download_speed);
         self.upload_speed.update(|v| *v = upload_speed);
         self.last_update.update(|v| *v = now);
+        self.wallet_address.update(|v| *v = None);
         let default_value: Value = Value::String("".to_string());
 
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
@@ -192,6 +193,9 @@ impl ExtensionContext {
                                     MessageKey::LastUpdate => self
                                         .last_update
                                         .update(|v| *v = i64::from_str(&value).unwrap_or_default()),
+                                    MessageKey::WalletAddress => self.wallet_address.update(|v| {
+                                        *v = (!value.is_empty()).then_some(value);
+                                    }),
                                     MessageKey::All => {
                                         log!("GET_ALL");
                                     }
@@ -203,18 +207,19 @@ impl ExtensionContext {
                                     && self.status.get_untracked() != AuthStatus::LoggedIn
                                 {
                                     spawn_local(async move {
-                                        let credentials = CheckTokenRequest {
-                                            api_token: self.api_token.get_untracked(),
-                                            email: self.email.get_untracked(),
-                                        };
-                                        let result = check_token(
-                                            &self.blockmesh_url.get_untracked(),
-                                            &credentials,
-                                        )
-                                        .await;
-                                        if result.is_ok() {
-                                            self.status.update(|v| *v = AuthStatus::LoggedIn);
-                                        };
+                                        self.status.update(|v| *v = AuthStatus::LoggedIn);
+                                        // let credentials = CheckTokenRequest {
+                                        //     api_token: self.api_token.get_untracked(),
+                                        //     email: self.email.get_untracked(),
+                                        // };
+                                        // let result = check_token(
+                                        //     &self.blockmesh_url.get_untracked(),
+                                        //     &credentials,
+                                        // )
+                                        // .await;
+                                        // if result.is_ok() {
+                                        //     self.status.update(|v| *v = AuthStatus::LoggedIn);
+                                        // };
                                     });
                                 }
                             }
@@ -230,40 +235,11 @@ impl ExtensionContext {
         closure_ref.borrow_mut().take().unwrap().forget();
     }
 
-    pub async fn update_invite_code(
-        api_token: &Uuid,
-        time_diff: i64,
-        blockmesh_url: &str,
-        email: &str,
-    ) -> String {
-        // let mut invite_code = Self::get_invite_code().await;
-        let mut invite_code = "".to_string();
-        if !invite_code.is_empty() && time_diff < 600 {
-            return invite_code;
-        }
-        if !api_token.is_nil() && *api_token != Uuid::default() {
-            if let Ok(result) = get_latest_invite_code(
-                blockmesh_url,
-                &GetLatestInviteCodeRequest {
-                    email: email.to_string(),
-                    api_token: *api_token,
-                },
-            )
-            .await
-            {
-                invite_code = result.invite_code;
-                // Self::store_invite_code(invite_code.clone()).await;
-            }
-        }
-        invite_code
-    }
-
     pub fn has_api_token(&self) -> bool {
         let api_token = self.api_token.get_untracked();
         !(api_token.is_nil() || api_token == Uuid::default())
     }
 
-    #[tracing::instrument(name = "clear")]
     pub async fn clear(&self) {
         send_message_channel(MessageType::DELETE, MessageKey::ApiToken, None).await;
         send_message_channel(MessageType::DELETE, MessageKey::Email, None).await;

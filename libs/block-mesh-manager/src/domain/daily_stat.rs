@@ -64,4 +64,5 @@ pub struct DailyStat {
     pub status: DailyStatStatus,
     pub day: NaiveDate,
     pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
 }

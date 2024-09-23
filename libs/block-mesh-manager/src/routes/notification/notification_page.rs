@@ -33,7 +33,6 @@ pub struct NotificationTemplate {
     pub chat: String,
 }
 
-#[tracing::instrument(name = "notification_page")]
 pub async fn handler(error: Query<NotificationQueryParams>) -> Result<impl IntoResponse, Error> {
     let notification_template = NotificationTemplate {
         summary: error.summary.clone(),

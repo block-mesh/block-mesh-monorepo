@@ -4,7 +4,6 @@ use sqlx::{Postgres, Transaction};
 use std::collections::HashMap;
 use uuid::Uuid;
 
-#[tracing::instrument(name = "update_users_ip_bulk", skip(transaction, calls), ret, err)]
 pub async fn update_users_ip_bulk(
     transaction: &mut Transaction<'_, Postgres>,
     calls: &mut HashMap<(Uuid, String), String>,

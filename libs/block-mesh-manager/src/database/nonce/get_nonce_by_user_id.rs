@@ -1,9 +1,8 @@
-use crate::domain::nonce::Nonce;
+use block_mesh_manager_database_domain::domain::nonce::Nonce;
 use secret::Secret;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "Get nonce", skip(transaction), ret, err, level = "trace")]
 pub async fn get_nonce_by_user_id(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,

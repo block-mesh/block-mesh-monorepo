@@ -1,5 +1,5 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_pool;
-use crate::database::aggregate::update_aggregate::update_aggregate_pool;
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
+use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::perks::add_perk_to_user::add_perk_to_user;
 use crate::domain::aggregate::AggregateName;
 use crate::domain::perk::PerkName;
@@ -38,8 +38,10 @@ pub async fn callback(
     Query(CallbackParams { code, state }): Query<CallbackParams>,
 ) -> Result<Redirect, Error> {
     let id = Uuid::parse_str(env::var(BLOCKMESH_SERVER_UUID_ENVAR).unwrap().as_str()).unwrap();
+    let mut transaction = pool.begin().await?;
     let twitter_agg =
-        get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Twitter, id).await?;
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Twitter, &id)
+            .await?;
 
     let mut pg =
         serde_json::from_value::<Oauth2CtxPg>(twitter_agg.value).context("Cannot deserialize")?;
@@ -59,7 +61,7 @@ pub async fn callback(
             .map_err(|_| Error::InternalServer)?;
         // // check state returned to see if it matches, otherwise throw an error
         if state.secret() != saved_state.secret() {
-            update_aggregate_pool(&pool, &twitter_agg.id, &Value::Null).await?;
+            update_aggregate(&mut transaction, &twitter_agg.id, &Value::Null).await?;
             return Err(Error::InternalServer);
         }
         // // get verifier from ctx
@@ -86,11 +88,10 @@ pub async fn callback(
     // ctx.lock().await.token = Some(token);
 
     let user_id = pg.user_id;
-    update_aggregate_pool(&pool, &twitter_agg.id, &Value::Null).await?;
+    update_aggregate(&mut transaction, &twitter_agg.id, &Value::Null).await?;
 
     let api = TwitterApi::new(oauth_token);
     if let Ok(user) = api.get_users_me().send().await {
-        let mut transaction = pool.begin().await.map_err(Error::from)?;
         let data = user.into_data().unwrap();
         let follow_data = get_following(data.id.as_u64()).await?;
         if follow_data.following {

@@ -75,7 +75,7 @@ export BRIGHT_DATA_PROXY_PASSWORD=""
 
 Install the following:
 
-* `cargo install cargo-leptos --version=0.2.17`
+* `cargo install cargo-leptos --version=0.2.20`
 * `cargo install sqlx-cli --verison=0.7.3`
 * `cargo install wasm-pack --version=0.12.1`
 * `rustup target add wasm32-unknown-unknown`

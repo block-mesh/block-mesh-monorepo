@@ -10,13 +10,12 @@ use block_mesh_common::interfaces::server_api::ResetPasswordForm;
 use sqlx::PgPool;
 use std::sync::Arc;
 
-#[tracing::instrument(name = "reset_password_post", skip(form, state))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,
     Form(form): Form<ResetPasswordForm>,
 ) -> Result<Redirect, Error> {
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let mut transaction = pool.begin().await?;
     let email = form.email.clone().to_ascii_lowercase();
     let user = get_user_opt_by_email(&mut transaction, &email)
         .await?
@@ -28,7 +27,7 @@ pub async fn handler(
         .email_client
         .send_reset_password_email(&user.email, nonce.nonce.expose_secret())
         .await;
-    transaction.commit().await.map_err(Error::from)?;
+    transaction.commit().await?;
     Ok(NotificationRedirect::redirect(
         "Email Sent",
         "Please check your email",

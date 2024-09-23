@@ -25,7 +25,6 @@ pub struct CreateTaskResponse {
     pub task_id: Uuid,
 }
 
-#[tracing::instrument(name = "create_task_with_token", skip(pool, body), fields(email = body.email))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Json(body): Json<CreateTaskRequest>,

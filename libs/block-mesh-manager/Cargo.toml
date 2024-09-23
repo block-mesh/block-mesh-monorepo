@@ -28,7 +28,9 @@ wasm-bindgen-futures = { workspace = true }
 serde-wasm-bindgen = { workspace = true }
 solana-sdk = { workspace = true, optional = true }
 clap = { workspace = true, features = ["derive"] }
-dashmap = "6.0.1"
+dashmap = { workspace = true }
+futures-util = { workspace = true }
+
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = { workspace = true, optional = true }
 logger-leptos = { path = "../logger-leptos", optional = true }
@@ -83,6 +85,8 @@ console_error_panic_hook = { workspace = true }
 console_log = { workspace = true }
 log = { workspace = true }
 tailwind_fuse = { version = "0.3", features = ["variant"] }
+block-mesh-manager-database-domain = { path = "../block-mesh-manager-database-domain", optional = true }
+sentry-tower = { workspace = true, optional = true, features = ["axum", "http", "axum-matched-path"] }
 
 [dependencies.rand]
 workspace = true
@@ -141,6 +145,8 @@ hydrate = [
   "dep:logger-leptos"
 ]
 ssr = [
+  "dep:sentry-tower",
+  "dep:block-mesh-manager-database-domain",
   "dep:twitter-v2",
   "dep:redis",
   "dep:tower_governor",

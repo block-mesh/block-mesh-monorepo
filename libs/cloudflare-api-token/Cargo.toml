@@ -1,0 +1,25 @@
+[package]
+name = "cloudflare-api-token"
+version = { workspace = true }
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+block-mesh-common = { path = "../block-mesh-common" }
+bcrypt = { workspace = true }
+askama = { workspace = true, features = ["with-axum", "serde-json"] }
+askama_axum = { workspace = true }
+worker = { workspace = true }
+tracing = { workspace = true }
+tracing-web = { workspace = true }
+tracing-subscriber = { workspace = true, features = ['time', 'json'] }
+time = { workspace = true, features = ['wasm-bindgen'] }
+serde = { workspace = true, features = ['derive'] }
+serde_json = { workspace = true }
+uuid = { version = "1.10.0", features = ["v4"] }
+reqwest = { workspace = true, features = [
+  "json",
+  "rustls-tls"
+] }

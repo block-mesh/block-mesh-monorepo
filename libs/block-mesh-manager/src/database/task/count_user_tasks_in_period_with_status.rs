@@ -3,12 +3,6 @@ use chrono::{Duration, Utc};
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(
-    name = "Count User Tasks in Period of Time with Status",
-    skip(transaction),
-    ret,
-    err
-)]
 pub async fn count_user_tasks_in_period_with_status(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,

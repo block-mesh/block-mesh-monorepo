@@ -1,5 +1,7 @@
 use block_mesh_common::constants::{DeviceType, BLOCKMESH_VERSION};
 use reqwest::{Client, ClientBuilder};
+#[cfg(feature = "sentry")]
+use sentry_tracing;
 use serde_json::{json, Value};
 use std::option::Option;
 use std::sync::mpsc::{Receiver, Sender};
@@ -66,6 +68,27 @@ pub fn setup_tracing_stdout_only() {
             )
             .with(tracing_subscriber::fmt::layer().with_ansi(false));
         sub.init();
+    });
+}
+
+pub fn setup_tracing_stdout_only_with_sentry() {
+    static SET_HOOK: Once = Once::new();
+    SET_HOOK.call_once(|| {
+        let sub = tracing_subscriber::registry()
+            .with(
+                tracing_subscriber::EnvFilter::try_from_default_env()
+                    .unwrap_or_else(|_| "info".into()),
+            )
+            .with(tracing_subscriber::fmt::layer().with_ansi(false));
+        #[cfg(feature = "sentry")]
+        {
+            println!("ADDING SENTRY LAYER");
+            sub.with(sentry_tracing::layer()).init();
+        }
+        #[cfg(not(feature = "sentry"))]
+        {
+            sub.init();
+        }
     });
 }
 

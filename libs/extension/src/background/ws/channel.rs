@@ -5,10 +5,13 @@ use crate::background::uptime_reporter::report_uptime_inner;
 use crate::utils::extension_wrapper_state::ExtensionWrapperState;
 use crate::utils::log::log;
 use block_mesh_common::chrome_storage::AuthStatus;
+use block_mesh_common::interfaces::server_api::SubmitTaskRequest;
 use block_mesh_common::interfaces::ws_api::{WsClientMessage, WsServerMessage};
+use chrono::Utc;
 use flume::{Receiver, Sender};
 use leptos::{spawn_local, SignalGetUntracked};
 use once_cell::sync::OnceCell;
+use std::cmp;
 use std::sync::{Arc, Mutex};
 use web_sys::WebSocket;
 
@@ -33,7 +36,7 @@ pub fn set_rx(rx: Receiver<WsServerMessage>, ws: WebSocket) {
     spawn_local(async move {
         let rx = rx.clone();
         while let Ok(msg) = rx.recv_async().await {
-            if matches!(WsServerMessage::CloseConnection, _msg) {
+            if matches!(msg, WsServerMessage::CloseConnection) {
                 if let Err(error) = ws.close() {
                     log!("Error while closing WS: {error:?}");
                 }
@@ -54,6 +57,9 @@ pub fn set_rx(rx: Receiver<WsServerMessage>, ws: WebSocket) {
             let api_token = app_state.api_token.get_untracked();
 
             match msg {
+                WsServerMessage::Ping => {
+                    let _ = ws.clone().send_with_str("pong");
+                }
                 WsServerMessage::RequestUptimeReport => {
                     if let Some(r) =
                         report_uptime_inner(&base_url, &email, &api_token, OperationMode::WebSocket)
@@ -83,6 +89,8 @@ pub fn set_rx(rx: Receiver<WsServerMessage>, ws: WebSocket) {
                     }
                 }
                 WsServerMessage::AssignTask(task) => {
+                    let start = Utc::now();
+
                     if let Ok(completed_task) = run_task(
                         &task.url,
                         &task.method,
@@ -91,10 +99,25 @@ pub fn set_rx(rx: Receiver<WsServerMessage>, ws: WebSocket) {
                     )
                     .await
                     {
+                        let end = Utc::now();
+                        let response_time = cmp::max((end - start).num_milliseconds(), 1) as f64;
                         let _ = ws.clone().send_with_str(
-                            serde_json::to_string(&WsClientMessage::CompleteTask(completed_task))
-                                .unwrap_or_default()
-                                .as_str(),
+                            serde_json::to_string(&WsClientMessage::CompleteTask(
+                                SubmitTaskRequest {
+                                    email,
+                                    api_token,
+                                    task_id: task.id,
+                                    response_code: Some(completed_task.status),
+                                    country: None,
+                                    ip: None,
+                                    asn: None,
+                                    colo: None,
+                                    response_time: Some(response_time),
+                                    response_body: Some(completed_task.raw),
+                                },
+                            ))
+                            .unwrap_or_default()
+                            .as_str(),
                         );
                     }
                 }

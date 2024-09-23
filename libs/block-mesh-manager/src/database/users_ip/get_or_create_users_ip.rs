@@ -2,14 +2,7 @@ use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(
-    name = "get_or_create_users_ip",
-    skip(transaction),
-    ret,
-    err,
-    level = "trace"
-)]
-pub(crate) async fn get_or_create_users_ip(
+pub async fn get_or_create_users_ip(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
     ip_id: &Uuid,

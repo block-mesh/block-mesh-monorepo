@@ -10,7 +10,6 @@ use block_mesh_common::interfaces::server_api::NewPasswordForm;
 use block_mesh_common::routes_enum::RoutesEnum;
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "new_password_post", skip(form, pool))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Form(form): Form<NewPasswordForm>,

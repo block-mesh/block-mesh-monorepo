@@ -14,6 +14,7 @@ pub mod navbars;
 pub mod notification_popup;
 pub mod online_chip;
 pub mod referer_rank;
+pub mod reload_button;
 pub mod stat;
 pub mod sub_heading;
 pub mod tables;

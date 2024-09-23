@@ -4,7 +4,7 @@ use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::errors::error::Error;
-use anyhow::anyhow;
+use anyhow::{anyhow, Context};
 use async_trait::async_trait;
 use axum_login::tower_sessions::cookie::time::Duration;
 use axum_login::{
@@ -72,7 +72,6 @@ impl AuthnBackend for Backend {
     type Credentials = Credentials;
     type Error = Error;
 
-    #[tracing::instrument(name = "authenticate", skip(creds), err, ret, level = "trace")]
     async fn authenticate(
         &self,
         creds: Self::Credentials,
@@ -85,7 +84,8 @@ impl AuthnBackend for Backend {
                 return Ok(Option::from(value));
             }
         }
-        let mut transaction = self.db.begin().await.map_err(Error::from)?;
+        let pool = self.db.clone();
+        let mut transaction = pool.begin().await.context("Cant create transaction")?;
         let user = match get_user_opt_by_email(&mut transaction, &creds.email).await {
             Ok(u) => u,
             Err(e) => {
@@ -93,6 +93,10 @@ impl AuthnBackend for Backend {
                 return Err(Error::Auth(e.to_string()));
             }
         };
+        transaction
+            .commit()
+            .await
+            .context("Cant commit transaction")?;
 
         let user = match user {
             Some(u) => u,
@@ -114,11 +118,9 @@ impl AuthnBackend for Backend {
                 .set_ex(&key, session_user, Backend::get_expire() as u64)
                 .await;
         }
-        transaction.commit().await.map_err(Error::from)?;
         Ok(Option::from(session_user))
     }
 
-    #[tracing::instrument(name = "get_user", err, ret, level = "trace")]
     async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {
         let key = Backend::authenticate_key_with_user_id(user_id);
         let mut c = self.con.clone();
@@ -131,7 +133,8 @@ impl AuthnBackend for Backend {
             };
         }
 
-        let mut transaction = self.db.begin().await.map_err(Error::from)?;
+        let pool = self.db.clone();
+        let mut transaction = pool.begin().await?;
         let user = match get_user_opt_by_id(&mut transaction, user_id).await {
             Ok(u) => u,
             Err(e) => {
@@ -151,10 +154,6 @@ impl AuthnBackend for Backend {
         let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
             .await?
             .ok_or_else(|| Error::Auth("Nonce not found".to_string()))?;
-        transaction
-            .commit()
-            .await
-            .map_err(|e| Error::Auth(e.to_string()))?;
         let session_user = SessionUser {
             id: user.id,
             email: user.email.clone(),
@@ -165,6 +164,7 @@ impl AuthnBackend for Backend {
                 .set_ex(&key, &session_user, Backend::get_expire() as u64)
                 .await;
         }
+        transaction.commit().await?;
         Ok(Option::from(session_user))
     }
 }

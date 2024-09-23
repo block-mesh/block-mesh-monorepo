@@ -1,0 +1,67 @@
+[package]
+name = "block-mesh-manager-api"
+edition = "2021"
+authors.workspace = true
+version.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+dashmap = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+axum-extra = { workspace = true, features = ["typed-header"] }
+axum = { workspace = true, features = ["ws", "macros"] }
+http-body-util = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+secret = { path = "../secret", features = ["sqlx"] }
+bcrypt = { workspace = true }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }
+tracing = { workspace = true }
+tower = { workspace = true, features = ["util", "timeout"] }
+serde_json = { workspace = true, features = ["raw_value"] }
+tower-http = { workspace = true, features = ["fs", "trace", "request-id", "util", "cors", "add-extension", "timeout"] }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+tracing-appender = { workspace = true }
+tracing-bunyan-formatter = { workspace = true }
+block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env"] }
+logger-general = { path = "../logger-general", features = ["sentry"] }
+block-mesh-manager-database-domain = { path = "../block-mesh-manager-database-domain" }
+sentry = { workspace = true }
+sentry-tower = { workspace = true, features = ["axum", "http", "axum-matched-path"] }
+http = { workspace = true }
+
+[dependencies.rand]
+workspace = true
+features = ["min_const_gen"]
+
+
+[dependencies.sqlx]
+workspace = true
+default-features = false
+features = [
+  "any",
+  "runtime-tokio-rustls",
+  "macros",
+  "postgres",
+  "uuid",
+  "chrono",
+  "migrate",
+  "json",
+  "bigdecimal",
+]
+
+[dependencies.uuid]
+workspace = true
+features = [
+  "v4", # Lets you generate random UUIDs
+  "fast-rng", # Use a faster (but still sufficiently random) RNG
+  "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
+  "serde", # Enable serialization/deserialization of UUIDs
+  "js"
+]
+
+#[lints]
+#workspace = true
+

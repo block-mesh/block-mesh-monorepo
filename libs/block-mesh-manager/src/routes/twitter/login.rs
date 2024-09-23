@@ -1,5 +1,5 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_pool;
-use crate::database::aggregate::update_aggregate::update_aggregate_pool;
+use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
+use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
@@ -36,8 +36,10 @@ pub async fn login(
     );
 
     let id = Uuid::parse_str(std::env::var(BLOCKMESH_SERVER_UUID_ENVAR).unwrap().as_str()).unwrap();
+    let mut transaction = pool.begin().await?;
     let twitter_agg =
-        get_or_create_aggregate_by_user_and_name_pool(&pool, AggregateName::Twitter, id).await?;
+        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Twitter, &id)
+            .await?;
     let pg = Oauth2CtxPg {
         verifier: Some(verifier),
         state: Some(state),
@@ -46,6 +48,12 @@ pub async fn login(
         user_id: Some(user.id),
     };
 
-    update_aggregate_pool(&pool, &twitter_agg.id, &serde_json::to_value(&pg).unwrap()).await?;
+    update_aggregate(
+        &mut transaction,
+        &twitter_agg.id,
+        &serde_json::to_value(&pg).unwrap(),
+    )
+    .await?;
+    transaction.commit().await?;
     Ok(Redirect::to(url.as_ref()))
 }

@@ -26,7 +26,6 @@ struct ResetPasswordTemplate {
     pub chat: String,
 }
 
-#[tracing::instrument(name = "password")]
 pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<impl IntoResponse, Redirect> {

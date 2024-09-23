@@ -5,6 +5,10 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use std::mem;
+    use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
+    use block_mesh_common::interfaces::ws_api::WsServerMessage;
+    use block_mesh_manager::ws::ws_keep_alive::ws_keep_alive;
     use block_mesh_manager::database::user::create_test_user::create_test_user;
     use block_mesh_manager::ws::connection_manager::ConnectionManager;
     use block_mesh_manager::worker::analytics_agg::analytics_agg;
@@ -20,6 +24,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_common::env::load_dotenv::load_dotenv;
     use std::env;
     use block_mesh_manager::worker::daily_stat_agg::{daily_stat_agg};
+    #[allow(unused_imports)]
     use logger_general::tracing::setup_tracing_stdout_only;
     use std::time::Duration;
     use reqwest::ClientBuilder;
@@ -44,6 +49,29 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 
 #[cfg(feature = "ssr")]
 fn main() {
+    let sentry_layer = env::var("SENTRY_LAYER")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
+    let sentry_url = env::var("SENTRY").unwrap_or_default();
+    let sentry_sample_rate = env::var("SENTRY_SAMPLE_RATE")
+        .unwrap_or("0.1".to_string())
+        .parse()
+        .unwrap_or(0.1);
+    if sentry_layer {
+        let _guard = sentry::init((
+            sentry_url,
+            sentry::ClientOptions {
+                debug: true,
+                sample_rate: sentry_sample_rate,
+                traces_sample_rate: sentry_sample_rate,
+                release: sentry::release_name!(),
+                ..Default::default()
+            },
+        ));
+        mem::forget(_guard);
+    }
+
     let _ = tokio::runtime::Builder::new_multi_thread()
         .enable_all()
         .build()
@@ -54,7 +82,8 @@ fn main() {
 #[cfg(feature = "ssr")]
 async fn run() -> anyhow::Result<()> {
     load_dotenv();
-    setup_tracing_stdout_only();
+    // setup_tracing_stdout_only();
+    setup_tracing_stdout_only_with_sentry();
     let configuration = get_configuration().expect("Failed to read configuration");
     tracing::info!("Starting with configuration {:#?}", configuration);
     let database_url = get_env_var_or_panic(AppEnvVar::DatabaseUrl);
@@ -76,15 +105,31 @@ async fn run() -> anyhow::Result<()> {
         .unwrap_or_default();
 
     let flags = get_all_flags(&client).await?;
-    let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
+    let redis_url = env::var("REDIS_URL")?;
+    let redis_url = if redis_url.ends_with("#insecure") {
+        redis_url
+    } else {
+        format!("{}#insecure", redis_url)
+    };
+    let redis_client = redis::Client::open(redis_url)?;
     let redis = redis_client.get_multiplexed_async_connection().await?;
 
-    let mut transaction = db_pool.begin().await?;
-    let _ = create_test_user(&mut transaction).await;
-    transaction.commit().await?;
+    let _ = create_test_user(&db_pool).await;
 
-    let ws_connection_manager = ConnectionManager::new();
-    let _reports_cron_task = ws_connection_manager.cron_reports(Duration::from_secs(60)); // FIXME
+    let mut ws_connection_manager = ConnectionManager::new();
+    let broadcaster = ws_connection_manager.broadcaster.clone();
+    let _ = ws_connection_manager
+        .broadcaster
+        .cron_reports(
+            Duration::from_secs(60),
+            vec![
+                WsServerMessage::RequestUptimeReport,
+                WsServerMessage::RequestBandwidthReport,
+            ],
+            100,
+            db_pool.clone(),
+        )
+        .await;
     let app_state = Arc::new(AppState {
         email_client,
         pool: db_pool.clone(),
@@ -99,6 +144,7 @@ async fn run() -> anyhow::Result<()> {
         tx_users_ip_agg,
         tx_aggregate_agg,
     });
+
     let application = Application::build(configuration, app_state.clone(), db_pool.clone()).await;
     let application_task = tokio::spawn(application.run());
     let joiner_task = tokio::spawn(joiner_loop(rx));
@@ -123,6 +169,7 @@ async fn run() -> anyhow::Result<()> {
         rx_aggregate_agg,
         app_state.clone(),
     ));
+    let ws_ping_task = tokio::spawn(ws_keep_alive(broadcaster));
 
     tokio::select! {
         o = application_task => report_exit("API", o),
@@ -131,7 +178,8 @@ async fn run() -> anyhow::Result<()> {
         o = db_daily_stat_task => report_exit("DB daily_stat aggregator", o),
         o = db_analytics_task => report_exit("DB analytics aggregator", o),
         o = db_users_ip_task => report_exit("DB users_ip aggregator", o),
-        o = db_aggregate_task => report_exit("DB aggregate aggregator", o)
+        o = db_aggregate_task => report_exit("DB aggregate aggregator", o),
+        o = ws_ping_task => report_exit("ws_ping_task failed", o)
     };
     Ok(())
 }

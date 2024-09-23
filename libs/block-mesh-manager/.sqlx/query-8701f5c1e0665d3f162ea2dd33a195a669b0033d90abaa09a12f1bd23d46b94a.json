@@ -1,0 +1,37 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n        \tusers.email AS email,\n        \t(uptime * $1 + CAST(tasks_count as DOUBLE PRECISION) * $2) AS points,\n        \tCOUNT(users_ip.id) AS ips\n        FROM\n        \tdaily_stats\n      \t\tJOIN users ON users.id = daily_stats.user_id\n      \t\tJOIN users_ip ON users.id = users_ip.user_id\n        WHERE\n            day = $3\n            AND users_ip.updated_at >= NOW() - INTERVAL '24 hours'\n        GROUP BY\n\t        users.email,\n\t        points\n\t    HAVING\n\t        COUNT(users_ip.id) < 10\n        ORDER BY\n        \tpoints DESC\n        \tLIMIT $4\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "email",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "points",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 2,
+        "name": "ips",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Float8",
+        "Float8",
+        "Date",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      null,
+      null
+    ]
+  },
+  "hash": "8701f5c1e0665d3f162ea2dd33a195a669b0033d90abaa09a12f1bd23d46b94a"
+}

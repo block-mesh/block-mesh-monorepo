@@ -17,6 +17,7 @@ pub enum RoutesEnum {
     Static_UnAuth_Register,
     Static_UnAuth_Login,
     Static_UnAuth_HealthCheck,
+    Static_UnAuth_Health,
     Static_Auth_Twitter_Login,
     Static_Auth_Edit_Invite,
     Static_Auth_Call_To_Action,
@@ -36,6 +37,7 @@ pub enum RoutesEnum {
     Api_CheckToken,
     Api_EMailViaToken,
     Api_Dashboard,
+    Api_ReportsQueue,
 }
 
 impl Display for RoutesEnum {
@@ -61,6 +63,7 @@ impl Display for RoutesEnum {
             RoutesEnum::Static_UnAuth_Register => write!(f, "/register"),
             RoutesEnum::Static_UnAuth_Login => write!(f, "/login"),
             RoutesEnum::Static_UnAuth_HealthCheck => write!(f, "/health_check"),
+            RoutesEnum::Static_UnAuth_Health => write!(f, "/health"),
             RoutesEnum::Static_Auth_Logout => write!(f, "/logout"),
             RoutesEnum::Static_Auth_Dashboard => write!(f, "/dashboard"),
             RoutesEnum::Static_Auth_Edit_Invite => write!(f, "/edit_invite_code"),
@@ -77,6 +80,7 @@ impl Display for RoutesEnum {
             RoutesEnum::Api_CheckToken => write!(f, "/check_token"),
             RoutesEnum::Api_EMailViaToken => write!(f, "/get_email_via_token"),
             RoutesEnum::Api_Dashboard => write!(f, "/dashboard"),
+            RoutesEnum::Api_ReportsQueue => write!(f, "/admin/reports_queue"),
         }
     }
 }

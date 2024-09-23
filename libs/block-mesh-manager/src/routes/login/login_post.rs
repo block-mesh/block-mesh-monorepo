@@ -10,17 +10,16 @@ use block_mesh_common::routes_enum::RoutesEnum;
 use secret::Secret;
 use sqlx::PgPool;
 
-#[tracing::instrument(name = "login_post", skip(form, auth))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(mut auth): Extension<AuthSession<Backend>>,
     Form(form): Form<LoginForm>,
 ) -> Result<Redirect, Error> {
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
-    let user = get_user_opt_by_email(&mut transaction, &form.email.to_ascii_lowercase())
+    let mut tranaction = pool.begin().await?;
+    let user = get_user_opt_by_email(&mut tranaction, &form.email.to_ascii_lowercase())
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
+    let nonce = get_nonce_by_user_id(&mut tranaction, &user.id)
         .await?
         .ok_or_else(|| Error::NonceNotFound)?;
     let creds: Credentials = Credentials {
@@ -51,6 +50,6 @@ pub async fn handler(
             ));
         }
     }
-    transaction.commit().await.map_err(Error::from)?;
+    tranaction.commit().await?;
     Ok(Redirect::to("/ui/dashboard"))
 }

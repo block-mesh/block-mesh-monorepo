@@ -4,13 +4,6 @@ use serde_json::Value;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(
-    name = "add_perk_to_user",
-    skip(transaction),
-    level = "trace",
-    ret,
-    err
-)]
 pub(crate) async fn add_perk_to_user(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,
@@ -24,19 +17,22 @@ pub(crate) async fn add_perk_to_user(
     let _ = sqlx::query!(
         r#"
         INSERT INTO perks
-        (id, user_id, created_at, name, multiplier, one_time_bonus, data)
+        (id, user_id, created_at, name, multiplier, one_time_bonus, data, updated_at)
         VALUES
-        ($1, $2, $3, $4, $5, $6, $7)
+        ($1, $2, $3, $4, $5, $6, $7, $8)
+        ON CONFLICT (user_id, name) DO UPDATE SET updated_at = $8
+        RETURNING id, user_id, created_at, name, multiplier, one_time_bonus, data, updated_at
         "#,
         id,
         user_id,
-        now,
+        now.clone(),
         name.to_string(),
         multiplier,
         one_time_bonus,
-        data
+        data,
+        now
     )
-    .execute(&mut **transaction)
+    .fetch_one(&mut **transaction)
     .await?;
     Ok(())
 }
