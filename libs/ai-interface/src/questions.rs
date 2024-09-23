@@ -95,7 +95,7 @@ pub fn generate_questions() -> Vec<Message> {
         // "A large government is better than a small one",
         // "Countries borders should be open",
         // "Countries borders should be closed",
-        // "USA border should be open",
+        "USA border should be open",
         "USA border should be closed",
         // "You should always listen to expert , even if your personal opinion is different",
     ];
