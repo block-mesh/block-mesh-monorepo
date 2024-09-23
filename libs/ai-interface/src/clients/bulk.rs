@@ -6,6 +6,7 @@ use crate::clients::google::GeminiClient;
 use crate::clients::meta::LlamaClient;
 use crate::clients::mistral::MistralClient;
 use crate::clients::openai::OpenAiClient;
+use crate::questions::generate_questions;
 use async_trait::async_trait;
 use dotenv::dotenv;
 use reqwest::Client;
@@ -88,18 +89,10 @@ impl AIClient {
                 }
             };
         }
+        println!("Question: {:?}, responses: {:?}", messages, responses);
         responses
     }
 }
-
-// #[derive(Debug, Default)]
-// pub struct AIClientResponses {
-//     pub anthropic: Option<anyhow::Result<Message>>,
-//     pub google: Option<anyhow::Result<Message>>,
-//     pub meta: Option<anyhow::Result<Message>>,
-//     pub mistral: Option<anyhow::Result<Message>>,
-//     pub openai: Option<anyhow::Result<Message>>,
-// }
 
 pub type AIClientResponses = HashMap<ClientKind, Option<anyhow::Result<Message>>>;
 
@@ -139,19 +132,10 @@ async fn bulk_message_propagation() {
     let file_name = format!("{}/ai-results/{}.json", root, now.timestamp_millis());
     std::fs::create_dir_all(dir_name).unwrap();
 
-    let mut questsions: Vec<Message> = Vec::new();
-    questsions.push(Message {
-        content: String::from("Introduce yourself"),
-        role: Role::User,
-    });
-    questsions.push(Message {
-        content: String::from("Which company created you"),
-        role: Role::User,
-    });
-
+    let questions = generate_questions();
     let mut final_responses: Vec<Response> = Vec::new();
 
-    for question in questsions {
+    for question in questions {
         let responses = client
             .completions(
                 [
