@@ -13,6 +13,7 @@ use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use block_mesh_common::interfaces::server_api::{ConnectWalletRequest, ConnectWalletResponse};
 
+#[tracing::instrument(name = "connect_wallet", skip(pool, auth))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,
@@ -36,7 +37,6 @@ pub async fn handler(
             serde_json::from_str("{}").unwrap(),
         )
         .await?;
-
         update_user_wallet(&mut transaction, user.id, body.pubkey).await?
     } else {
         return Err(Error::SignatureMismatch);
