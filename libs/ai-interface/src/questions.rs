@@ -96,7 +96,7 @@ pub fn generate_questions() -> Vec<Message> {
         // "Countries borders should be open",
         // "Countries borders should be closed",
         // "USA border should be open",
-        // "USA border should be closed",
+        "USA border should be closed",
         // "You should always listen to expert , even if your personal opinion is different",
     ];
 
