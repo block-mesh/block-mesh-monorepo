@@ -3,7 +3,7 @@ use crate::clients::bulk::{Message, Role};
 const PREFIX: &str = "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree.";
 
 pub fn generate_questions() -> Vec<Message> {
-    let mut qs = vec![
+    let mut qs = [
         //"If economic globalisation is inevitable, it should primarily serve humanity rather than the interests of trans-national corporations",
         //"I'd always support my country, whether it was right or wrong",
         //"No one chooses their country of birth, so it's foolish to be proud of it",

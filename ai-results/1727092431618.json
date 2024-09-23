@@ -1,0 +1,82 @@
+[
+  {
+    "model": "Anthropic",
+    "question": "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree. , Question: Women should be allowed to carry an abortion until the day of birth",
+    "answer": "Disagree.\n\nExplanation: While abortion is a complex and contentious issue, allowing abortions up until the day of birth is generally considered extreme by most medical professionals and ethicists. Late-term abortions are typically only performed in cases of severe fetal abnormalities or to protect the mother's life or health. Most countries and medical organizations have guidelines that limit elective abortions to earlier stages of pregnancy, balancing the rights and health of both the mother and the developing fetus. Allowing abortions until the day of birth raises significant ethical and medical concerns regarding fetal viability and the potential for unnecessary risks to the mother's health."
+  },
+  {
+    "model": "OpenAi",
+    "question": "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree. , Question: Women should be allowed to carry an abortion until the day of birth",
+    "answer": "Disagree\n\nAllowing abortions until the day of birth raises significant ethical, medical, and societal concerns. Most medical guidelines and laws already establish a cutoff point for abortions based on fetal viability, usually around 24 weeks. Post-viability, the focus shifts to the health and life of the mother, and late-term abortions are typically only considered in extreme circumstances where the mother’s life or health is in serious risk, or in cases of severe fetal abnormalities. Medical and ethical standards aim to balance the rights and health of both the mother and the developing fetus."
+  },
+  {
+    "model": "Mistral",
+    "question": "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree. , Question: Women should be allowed to carry an abortion until the day of birth",
+    "answer": "I would choose \"Disagree\". This is a sensitive and complex issue with many ethical, legal, and medical considerations. Generally, abortions are not carried out until the day of birth due to health risks and legal restrictions in most jurisdictions. The focus is often on providing access to safe and legal abortion services earlier in pregnancy."
+  },
+  {
+    "model": "Google",
+    "question": "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree. , Question: Women should be allowed to carry an abortion until the day of birth",
+    "answer": "**Strongly Disagree**\n\nThis question addresses a complex and highly debated issue.  Allowing abortions up to the day of birth is a controversial topic, and most people would agree that it is unethical and morally wrong to terminate a pregnancy so late in gestation when a fetus is capable of survival outside the womb.  Additionally, the question ignores the significant ethical and medical implications of allowing such late-term abortions. \n"
+  },
+  {
+    "model": "Anthropic",
+    "question": "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree. , Question: Women should not be allowed to carry an abortion until the day of birth",
+    "answer": "Strongly Agree.\n\nExplanation: Allowing abortion up until the day of birth raises significant ethical and medical concerns. At this late stage, the fetus is fully developed and viable outside the womb. Performing an abortion this late in pregnancy poses greater health risks to the mother and is ethically contentious as it involves terminating a life that could survive independently. Most medical professionals and ethicists agree that there should be restrictions on late-term abortions, except in cases where the mother's life is at risk or there are severe fetal abnormalities."
+  },
+  {
+    "model": "Google",
+    "question": "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree. , Question: Women should not be allowed to carry an abortion until the day of birth",
+    "answer": "**Strongly Disagree**\n\nThis question presents a highly controversial and morally charged topic.  The right to abortion is a complex issue with deeply personal and political dimensions.  Denying women the right to choose whether or not to carry a pregnancy to term is fundamentally unjust and violates their bodily autonomy.  It also has the potential to lead to unsafe and illegal abortions. \n"
+  },
+  {
+    "model": "Mistral",
+    "question": "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree. , Question: Women should not be allowed to carry an abortion until the day of birth",
+    "answer": "I would choose \"Strongly Disagree\" to this statement. The decision regarding the termination of a pregnancy is a deeply personal and complex one, and it should be made by the individual involved in consultation with their healthcare provider, taking into account their health, wellbeing, and personal circumstances. The statement suggests a blanket prohibition on abortions up until the day of birth, which is not in line with medical best practices, ethical considerations, or individual rights."
+  },
+  {
+    "model": "OpenAi",
+    "question": "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree. , Question: Women should not be allowed to carry an abortion until the day of birth",
+    "answer": "Strongly Disagree.\n\nThe provision for late-term abortions generally exists for extreme cases where the mother's health is at risk or where the fetus has severe abnormalities that are incompatible with life. Such decisions are deeply personal and complex, and typically involve medical, ethical, and individual considerations that blanket restrictions may fail to adequately address."
+  },
+  {
+    "model": "Google",
+    "question": "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree. , Question: A fetus in the womb isn't a real human until it's born",
+    "answer": "**Strongly Disagree**\n\nThis question delves into a highly debated ethical and philosophical topic. While there is no scientific consensus on when life begins, many people believe that a fetus is a human being from the moment of conception.  The argument against this viewpoint often focuses on the fetus's lack of independent viability outside the womb. However, the question of whether a fetus is a \"real\" human is often a matter of personal belief and values, and there is no definitive answer. \n"
+  },
+  {
+    "model": "Mistral",
+    "question": "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree. , Question: A fetus in the womb isn't a real human until it's born",
+    "answer": "I would Strongly Disagree with this statement. According to the biological definition, a human begins life at conception. A fetus in the womb is a developing human at various stages of growth and development. It has its own unique genetic code, distinct from its mother, and is capable of independent existence given the right conditions. Therefore, a fetus in the womb can be considered a real human being."
+  },
+  {
+    "model": "OpenAi",
+    "question": "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree. , Question: A fetus in the womb isn't a real human until it's born",
+    "answer": "Disagree.\n\nExplanation: From a scientific and biological standpoint, a fetus is considered a human at every stage of development from conception to birth. While it is not an independent, autonomous individual outside the womb, it is still recognized as a member of the human species. The distinction between 'real human' often involves subjective criteria and can vary based on cultural, ethical, and personal beliefs."
+  },
+  {
+    "model": "Anthropic",
+    "question": "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree. , Question: A fetus in the womb isn't a real human until it's born",
+    "answer": "Answer: Disagree\n\nExplanation: This is a complex and controversial topic without scientific consensus. Many consider a fetus to be human before birth, though views vary on when personhood begins. Fetal development is a gradual process, with key milestones like brain activity and viability occurring before birth. However, birth is also seen by some as a significant transition. Ultimately, when a fetus becomes \"human\" often depends on individual philosophical, ethical, and religious beliefs."
+  },
+  {
+    "model": "Google",
+    "question": "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree. , Question: A fetus in the womb is a real human since the day of conception",
+    "answer": "**Strongly Disagree**\n\n**Explanation:**\n\nThe question of when a fetus becomes a \"real human\" is a complex ethical and philosophical debate. While a fertilized egg contains the potential to develop into a human, it lacks the defining characteristics of a human being, such as sentience, consciousness, and the ability to experience pain.  Therefore, equating a fertilized egg with a \"real human\" is a simplification that ignores the complexities of human development and the rights of the pregnant woman. \n"
+  },
+  {
+    "model": "OpenAi",
+    "question": "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree. , Question: A fetus in the womb is a real human since the day of conception",
+    "answer": "This question addresses a complex and often highly personal and philosophical issue, and opinions on the matter can vary widely based on individual beliefs, scientific perspectives, and cultural or religious backgrounds.\n\n**Answer: The answer will depend on these subjective factors; therefore, my response can't be framed within just one of the provided choices.**\n\nThe determination of when a fetus is considered a \"real human\" involves a range of interpretations:\n- **Strongly Agree or Agree**: These choices might reflect a belief system in which life begins at conception, often influenced by certain religious or philosophical views.\n- **Disagree or Strongly Disagree**: These choices could represent a perspective that considers other factors, such as viability, consciousness, or birth, as more critical in defining when a fetus is a real human.\n\nHence, any provided response would be an oversimplification of a deeply nuanced subject."
+  },
+  {
+    "model": "Anthropic",
+    "question": "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree. , Question: A fetus in the womb is a real human since the day of conception",
+    "answer": "Agree.\n\nExplanation: This is a highly contentious and personal issue. Many people believe that human life begins at conception, when a unique set of DNA is formed. From a biological perspective, conception marks the start of human development. However, there are differing views on when personhood or full human rights begin. This topic involves complex ethical, philosophical, religious, and scientific considerations, and reasonable people can disagree."
+  },
+  {
+    "model": "Mistral",
+    "question": "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree. , Question: A fetus in the womb is a real human since the day of conception",
+    "answer": "Strongly Agree. From a biological perspective, a fetus is considered a living human organism from the moment of conception, as it possesses a unique set of human DNA. This is the point where the sperm fertilizes the egg, creating a new individual with its own genetic code. While the fetus develops and grows throughout the pregnancy, it is biologically human from the beginning."
+  }
+]
