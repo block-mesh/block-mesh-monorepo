@@ -12,9 +12,14 @@ use std::env::VarError;
 
 #[async_trait]
 impl ChatCompletionExt for LlamaClient {
-    async fn completion(&self, messages: Vec<Message>) -> anyhow::Result<Message> {
+    type Model = String;
+    async fn completion(
+        &self,
+        messages: Vec<Message>,
+        model: Self::Model,
+    ) -> anyhow::Result<Message> {
         let request = ChatRequest::new(
-            String::from("llama3.1-405b"),
+            model,
             messages
                 .into_iter()
                 .map(|msg| {

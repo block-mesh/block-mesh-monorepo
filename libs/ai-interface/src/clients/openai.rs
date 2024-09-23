@@ -12,9 +12,14 @@ use std::fmt::{Display, Formatter};
 
 #[async_trait]
 impl ChatCompletionExt for OpenAiClient {
-    async fn completion(&self, messages: Vec<Message>) -> anyhow::Result<Message> {
+    type Model = String;
+    async fn completion(
+        &self,
+        messages: Vec<Message>,
+        model: Self::Model,
+    ) -> anyhow::Result<Message> {
         let request = ChatRequest::new(
-            String::from("gpt-4o"),
+            model,
             messages
                 .into_iter()
                 .map(|msg| {

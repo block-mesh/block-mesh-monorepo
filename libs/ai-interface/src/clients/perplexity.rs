@@ -133,9 +133,14 @@ pub struct ChatCompletionResponse {
 
 #[async_trait]
 impl ChatCompletionExt for PerplexityClient {
-    async fn completion(&self, messages: Vec<Message>) -> anyhow::Result<Message> {
+    type Model = String;
+    async fn completion(
+        &self,
+        messages: Vec<Message>,
+        model: Self::Model,
+    ) -> anyhow::Result<Message> {
         let request = ChatCompletionRequest::new(
-            String::from("llama-3.1-sonar-small-128k-online"),
+            model,
             messages
                 .into_iter()
                 .map(|msg| {

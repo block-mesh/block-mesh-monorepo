@@ -11,7 +11,12 @@ use std::fmt::{Display, Formatter};
 
 #[async_trait]
 impl ChatCompletionExt for AnthropicClient {
-    async fn completion(&self, messages: Vec<Message>) -> anyhow::Result<Message> {
+    type Model = Model;
+    async fn completion(
+        &self,
+        messages: Vec<Message>,
+        model: Self::Model,
+    ) -> anyhow::Result<Message> {
         let request = ChatRequest {
             model: Model::Sonnet,
             max_tokens: 1024,
@@ -160,7 +165,7 @@ impl ChatMessage {
 }
 
 #[derive(Debug)]
-enum Model {
+pub enum Model {
     /// Opus 3.0
     Opus,
     /// Sonnet 3.5

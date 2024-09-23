@@ -11,7 +11,12 @@ use std::env::VarError;
 
 #[async_trait]
 impl ChatCompletionExt for GeminiClient {
-    async fn completion(&self, messages: Vec<Message>) -> anyhow::Result<Message> {
+    type Model = String;
+    async fn completion(
+        &self,
+        messages: Vec<Message>,
+        model: Self::Model,
+    ) -> anyhow::Result<Message> {
         let request = ChatRequest::new(
             messages
                 .into_iter()
@@ -24,7 +29,7 @@ impl ChatCompletionExt for GeminiClient {
                 })
                 .collect(),
         );
-        let mut result = self.chat_completion(&request).await?;
+        let mut result = self.chat_completion(&request, model.clone()).await?;
         let part = result
             .candidates
             .pop()
@@ -43,7 +48,6 @@ impl ChatCompletionExt for GeminiClient {
         };
         let role = SuperRole::User;
         Ok(Message { content, role })
-        // Err(anyhow!("aaaa"))
     }
 }
 pub struct GeminiClient {
@@ -61,8 +65,12 @@ impl GeminiClient {
         Ok(Self::new(client, api_key))
     }
 
-    async fn chat_completion(&self, chat_request: &ChatRequest) -> anyhow::Result<ChatResponse> {
-        let url = format!("https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash-latest:generateContent?key={}", self.api_key);
+    async fn chat_completion(
+        &self,
+        chat_request: &ChatRequest,
+        model: String,
+    ) -> anyhow::Result<ChatResponse> {
+        let url = format!("https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={}", self.api_key);
         let response = self.client.post(url).json(chat_request).send().await?;
         if response.status().is_success() {
             return Ok(response.json().await?);
@@ -159,9 +167,12 @@ async fn google_gemini() {
     dotenv().ok();
     let client = GeminiClient::from_env(Client::new(), GEMINI_VAR_NAME).unwrap();
     let response = client
-        .chat_completion(&ChatRequest::new(vec![ChatMessage::user(vec![
-            Part::Text(String::from("Introduce yourself")),
-        ])]))
+        .chat_completion(
+            &ChatRequest::new(vec![ChatMessage::user(vec![Part::Text(String::from(
+                "Introduce yourself",
+            ))])]),
+            String::from("gemini-1.5-flash-latest"),
+        )
         .await
         .unwrap();
     println!("{response:#?}");

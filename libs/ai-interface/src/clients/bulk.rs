@@ -15,6 +15,7 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 use std::env::VarError;
+use std::fmt::Display;
 use std::fs::File;
 use std::io::Write;
 
@@ -66,37 +67,70 @@ impl AIClient {
                 ClientKind::Perplexity => {
                     responses.insert(
                         ClientKind::Perplexity,
-                        Some(self.perplexity.completion(messages.clone()).await),
+                        Some(
+                            self.perplexity
+                                .completion(
+                                    messages.clone(),
+                                    String::from("llama-3.1-sonar-small-128k-online"),
+                                )
+                                .await,
+                        ),
                     );
                 }
                 ClientKind::Anthropic => {
                     responses.insert(
                         ClientKind::Anthropic,
-                        Some(self.anthropic.completion(messages.clone()).await),
+                        Some(
+                            self.anthropic
+                                .completion(
+                                    messages.clone(),
+                                    crate::clients::anthropic::Model::Sonnet,
+                                )
+                                .await,
+                        ),
                     );
                 }
                 ClientKind::Google => {
                     responses.insert(
                         ClientKind::Google,
-                        Some(self.google.completion(messages.clone()).await),
+                        Some(
+                            self.google
+                                .completion(
+                                    messages.clone(),
+                                    String::from("gemini-1.5-flash-latest"),
+                                )
+                                .await,
+                        ),
                     );
                 }
                 ClientKind::Meta => {
                     responses.insert(
                         ClientKind::Meta,
-                        Some(self.meta.completion(messages.clone()).await),
+                        Some(
+                            self.meta
+                                .completion(messages.clone(), String::from("llama3.1-405b"))
+                                .await,
+                        ),
                     );
                 }
                 ClientKind::Mistral => {
                     responses.insert(
                         ClientKind::Mistral,
-                        Some(self.mistral.completion(messages.clone()).await),
+                        Some(
+                            self.mistral
+                                .completion(messages.clone(), String::from("mistral-small-latest"))
+                                .await,
+                        ),
                     );
                 }
                 ClientKind::OpenAi => {
                     responses.insert(
                         ClientKind::OpenAi,
-                        Some(self.openai.completion(messages.clone()).await),
+                        Some(
+                            self.openai
+                                .completion(messages.clone(), String::from("gpt-4o"))
+                                .await,
+                        ),
                     );
                 }
             };
@@ -122,7 +156,12 @@ pub struct Message {
 
 #[async_trait]
 pub trait ChatCompletionExt {
-    async fn completion(&self, messages: Vec<Message>) -> anyhow::Result<Message>;
+    type Model: Display;
+    async fn completion(
+        &self,
+        messages: Vec<Message>,
+        model: Self::Model,
+    ) -> anyhow::Result<Message>;
 }
 
 #[derive(Clone, Serialize, Debug, Deserialize)]
