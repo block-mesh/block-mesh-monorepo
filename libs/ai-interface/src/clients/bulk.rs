@@ -120,7 +120,7 @@ pub struct Response {
     answer: String,
 }
 
-// #[ignore = "Requires all AI API keys"]
+#[ignore = "Requires all AI API keys"]
 #[tokio::test]
 async fn bulk_message_propagation() {
     dotenv().ok();
