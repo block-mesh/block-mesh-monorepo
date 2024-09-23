@@ -1531,6 +1531,7 @@ dependencies = [
  "block-mesh-manager-database-domain",
  "chrono",
  "dashmap 6.1.0",
+ "http 1.1.0",
  "http-body-util",
  "logger-general",
  "rand 0.8.5",

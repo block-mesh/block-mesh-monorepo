@@ -1,11 +1,18 @@
 use crate::database::{get_flag, get_flags};
 use crate::error::Error;
 use axum::extract::Path;
+use axum::http::StatusCode;
+use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::{Extension, Json, Router};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::PgPool;
+
+#[tracing::instrument(name = "health", skip_all)]
+pub async fn health() -> impl IntoResponse {
+    (StatusCode::OK, "OK")
+}
 
 #[tracing::instrument(name = "read_flag", skip_all)]
 pub async fn read_flag(
@@ -44,6 +51,7 @@ pub async fn read_flags(Extension(pool): Extension<PgPool>) -> Result<Json<Vec<F
 
 pub fn get_router() -> Router {
     Router::new()
+        .route("/health", get(health))
         .route("/read-flag/:flag", get(read_flag))
         .route("/read-flags", get(read_flags))
 }
