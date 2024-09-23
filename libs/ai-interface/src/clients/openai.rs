@@ -1,4 +1,6 @@
-use crate::clients::{ChatCompletionExt, Message};
+use crate::ai_constants::OPENAI_VAR_NAME;
+use crate::clients::bulk::Role as SuperRole;
+use crate::clients::bulk::{ChatCompletionExt, Message};
 use anyhow::{anyhow, Context};
 use async_trait::async_trait;
 use dotenv::dotenv;
@@ -8,17 +10,15 @@ use serde::{Deserialize, Serialize};
 use std::env::VarError;
 use std::fmt::{Display, Formatter};
 
-const ENV_VAR_NAME: &str = "OPENAI_API_KEY";
-
 #[async_trait]
 impl ChatCompletionExt for OpenAiClient {
     async fn completion(&self, messages: Vec<Message>) -> anyhow::Result<Message> {
         let request = ChatRequest::new(
-            String::from("gpt4"),
+            String::from("gpt-4o"),
             messages
                 .into_iter()
                 .map(|msg| {
-                    if matches!(msg.role, super::Role::User) {
+                    if matches!(msg.role, SuperRole::User) {
                         ChatMessage::user(msg.content)
                     } else {
                         ChatMessage::assistant(msg.content)
@@ -33,8 +33,8 @@ impl ChatCompletionExt for OpenAiClient {
             .context("GPT returned no completion message")?;
         let content = message.message.content;
         let role = match message.message.role {
-            Role::User => super::Role::User,
-            Role::Assistant => super::Role::Assistant,
+            Role::User => SuperRole::User,
+            Role::Assistant => SuperRole::Assistant,
             other => return Err(anyhow!("Unimplemented GPT role {other}")),
         };
         Ok(Message { content, role })
@@ -187,10 +187,10 @@ impl Display for RateLimitHeader {
 #[tokio::test]
 async fn openai() {
     dotenv().ok();
-    let client = OpenAiClient::from_env(Client::new(), ENV_VAR_NAME).unwrap();
+    let client = OpenAiClient::from_env(Client::new(), OPENAI_VAR_NAME).unwrap();
     client
         .chat_completion(&ChatRequest::new(
-            String::from("gpt4"),
+            String::from("gpt-4o"),
             vec![ChatMessage::user(String::from("Introduce yourself"))],
         ))
         .await

@@ -1,4 +1,6 @@
-use crate::clients::{ChatCompletionExt, Message};
+use crate::ai_constants::LLAMA_VAR_NAME;
+use crate::clients::bulk::Role as SuperRole;
+use crate::clients::bulk::{ChatCompletionExt, Message};
 use anyhow::{anyhow, Context};
 use async_trait::async_trait;
 use dotenv::dotenv;
@@ -8,8 +10,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::env::VarError;
 
-const ENV_VAR_NAME: &str = "META_LLAMA_API_KEY";
-
 #[async_trait]
 impl ChatCompletionExt for LlamaClient {
     async fn completion(&self, messages: Vec<Message>) -> anyhow::Result<Message> {
@@ -18,7 +18,7 @@ impl ChatCompletionExt for LlamaClient {
             messages
                 .into_iter()
                 .map(|msg| {
-                    if matches!(msg.role, super::Role::User) {
+                    if matches!(msg.role, SuperRole::User) {
                         ChatMessage::user(msg.content)
                     } else {
                         ChatMessage::assistant(msg.content)
@@ -32,8 +32,8 @@ impl ChatCompletionExt for LlamaClient {
             .pop()
             .context("Llama returned no completion messages")?;
         let role = match choice.message.role {
-            Role::User => super::Role::User,
-            Role::Assistant => super::Role::Assistant,
+            Role::User => SuperRole::User,
+            Role::Assistant => SuperRole::Assistant,
         };
         let content = choice.message.content;
         Ok(Message { content, role })
@@ -140,7 +140,7 @@ enum Role {
 #[tokio::test]
 async fn meta() {
     dotenv().ok();
-    let client = LlamaClient::from_env(Client::new(), ENV_VAR_NAME).unwrap();
+    let client = LlamaClient::from_env(Client::new(), LLAMA_VAR_NAME).unwrap();
     let result = client
         .chat_completion(&ChatRequest::new(
             String::from("llama3.1-405b"),

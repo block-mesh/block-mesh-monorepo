@@ -97,9 +97,11 @@ dependencies = [
 
 [[package]]
 name = "ai-interface"
-version = "0.0.252"
+version = "0.0.275"
 dependencies = [
  "anyhow",
+ "async-trait",
+ "chrono",
  "dotenv",
  "reqwest 0.12.7",
  "serde",

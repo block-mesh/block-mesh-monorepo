@@ -1,0 +1,5 @@
+pub const ANTHROPIC_VAR_NAME: &str = "ANTHROPIC_API_KEY";
+pub const GEMINI_VAR_NAME: &str = "GOOGLE_GEMINI_API_KEY";
+pub const LLAMA_VAR_NAME: &str = "META_LLAMA_API_KEY";
+pub const MISTRAL_VAR_NAME: &str = "MISTRAL_API_KEY";
+pub const OPENAI_VAR_NAME: &str = "OPENAI_API_KEY";

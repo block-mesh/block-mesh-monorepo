@@ -1,4 +1,6 @@
-use crate::clients::{ChatCompletionExt, Message};
+use crate::ai_constants::GEMINI_VAR_NAME;
+use crate::clients::bulk::Role as SuperRole;
+use crate::clients::bulk::{ChatCompletionExt, Message};
 use anyhow::{anyhow, Context};
 use async_trait::async_trait;
 use dotenv::dotenv;
@@ -7,8 +9,6 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::env::VarError;
 
-const ENV_VAR_NAME: &str = "GOOGLE_GEMINI_API_KEY";
-
 #[async_trait]
 impl ChatCompletionExt for GeminiClient {
     async fn completion(&self, messages: Vec<Message>) -> anyhow::Result<Message> {
@@ -16,7 +16,7 @@ impl ChatCompletionExt for GeminiClient {
             messages
                 .into_iter()
                 .map(|msg| {
-                    if matches!(msg.role, super::Role::User) {
+                    if matches!(msg.role, SuperRole::User) {
                         ChatMessage::user(vec![Part::Text(msg.content)])
                     } else {
                         ChatMessage::model(vec![Part::Text(msg.content)])
@@ -41,7 +41,7 @@ impl ChatCompletionExt for GeminiClient {
                 ))
             }
         };
-        let role = super::Role::User;
+        let role = SuperRole::User;
         Ok(Message { content, role })
         // Err(anyhow!("aaaa"))
     }
@@ -157,7 +157,7 @@ enum Role {
 #[tokio::test]
 async fn google_gemini() {
     dotenv().ok();
-    let client = GeminiClient::from_env(Client::new(), ENV_VAR_NAME).unwrap();
+    let client = GeminiClient::from_env(Client::new(), GEMINI_VAR_NAME).unwrap();
     let response = client
         .chat_completion(&ChatRequest::new(vec![ChatMessage::user(vec![
             Part::Text(String::from("Introduce yourself")),

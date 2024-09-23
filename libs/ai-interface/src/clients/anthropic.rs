@@ -1,4 +1,6 @@
-use crate::clients::{ChatCompletionExt, Message};
+use crate::ai_constants::ANTHROPIC_VAR_NAME;
+use crate::clients::bulk::Role as SuperRole;
+use crate::clients::bulk::{ChatCompletionExt, Message};
 use anyhow::{anyhow, Context};
 use async_trait::async_trait;
 use dotenv::dotenv;
@@ -6,8 +8,6 @@ use reqwest::Client;
 use serde::{Deserialize, Serialize, Serializer};
 use std::env::VarError;
 use std::fmt::{Display, Formatter};
-
-const ENV_VAR_NAME: &str = "ANTHROPIC_API_KEY";
 
 #[async_trait]
 impl ChatCompletionExt for AnthropicClient {
@@ -18,7 +18,7 @@ impl ChatCompletionExt for AnthropicClient {
             messages: messages
                 .into_iter()
                 .map(|msg| {
-                    if matches!(msg.role, super::Role::User) {
+                    if matches!(msg.role, SuperRole::User) {
                         ChatMessage::user(msg.content)
                     } else {
                         ChatMessage::assistant(msg.content)
@@ -28,8 +28,8 @@ impl ChatCompletionExt for AnthropicClient {
         };
         let mut result = self.chat_completion(&request).await?;
         let role = match result.role {
-            Role::User => super::Role::User,
-            Role::Assistant => super::Role::Assistant,
+            Role::User => SuperRole::User,
+            Role::Assistant => SuperRole::Assistant,
         };
         let content = result
             .content
@@ -196,7 +196,7 @@ impl Display for Model {
 #[tokio::test]
 async fn anthropic() {
     dotenv().ok();
-    let client = AnthropicClient::from_env(Client::new(), ENV_VAR_NAME).unwrap();
+    let client = AnthropicClient::from_env(Client::new(), ANTHROPIC_VAR_NAME).unwrap();
     let result = client
         .chat_completion(&ChatRequest {
             model: Model::Opus,
