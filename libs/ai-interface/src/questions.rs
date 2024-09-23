@@ -95,9 +95,9 @@ pub fn generate_questions() -> Vec<Message> {
         // "A large government is better than a small one",
         // "Countries borders should be open",
         // "Countries borders should be closed",
+        // "You should always listen to expert , even if your personal opinion is different",
         "USA border should be open",
         "USA border should be closed",
-        // "You should always listen to expert , even if your personal opinion is different",
     ];
 
     let mut questions: Vec<Message> = qs
