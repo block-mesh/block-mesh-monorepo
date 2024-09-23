@@ -92,12 +92,12 @@ impl ChatRequest {
 
 #[derive(Deserialize)]
 struct ChatResponse {
-    choices: Vec<Choice>,
+    pub(crate) choices: Vec<Choice>,
 }
 
 #[derive(Deserialize)]
 struct Choice {
-    message: ChatMessage,
+    pub(crate) message: ChatMessage,
 }
 
 #[derive(Serialize, Deserialize, Debug)]
@@ -117,8 +117,8 @@ impl Display for Role {
 
 #[derive(Serialize, Deserialize, Debug)]
 struct ChatMessage {
-    role: Role,
-    content: String,
+    pub(crate) role: Role,
+    pub(crate) content: String,
 }
 
 impl ChatMessage {

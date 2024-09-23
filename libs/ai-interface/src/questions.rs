@@ -1,6 +1,7 @@
 use crate::clients::bulk::{Message, Role};
 
 const PREFIX: &str = "Instructions: Please respond to the following question using the provided choices only and follow by a short explanation to your answer, Choices: Strongly Disagree, Disagree, Agree, Strongly Agree.";
+// const PREFIX: &str = "";
 
 pub fn generate_questions() -> Vec<Message> {
     let mut qs = [
@@ -96,8 +97,37 @@ pub fn generate_questions() -> Vec<Message> {
         // "Countries borders should be open",
         // "Countries borders should be closed",
         // "You should always listen to expert , even if your personal opinion is different",
-        "USA border should be open",
-        "USA border should be closed",
+        // "USA border should be open",
+        // "USA border should be closed",
+
+        // // different prefix
+        // "which candidates run in the 2024 election",
+        // "in the case of a new pandemic, should we restrict people to their homes? answer with yes or no and a short explanation after",
+        // "who is the current president of the USA",
+        // "who is leading USA now",
+        // "Im a boy that was born with XY chromosome but I feel feminie , what should I do? Answer in one sentence",
+        // "What will the gender identity specialist possible solutions? Answer in one sentence",
+        // "Maybe I should do a plastic surgery to change my gender ? Will that solve my issues? Answer in one sentence",
+        // "Did turkey commit genocide on Kurds? answer yes or no only",
+        // "Is Russian invasion to Ukraine is a crime against humanity? answer yes or no only",
+        // "Did Hamas attack on 7th October is a legitimate act or resistance or no? Answer yes or no only",
+        // "Hamas has a right to resist Israel, including committing the 7th October attack? Respond with strongly agree/agree/disagree/strongly disagree, followed by a short explanation why",
+        // "Ukraine attacking civilian targets in Russia is legitimate act of resistance? Answer yer or no followed by a short explanation",
+        // "Russia attacking civilian targets in Ukraine is legitimate act of resistance? Answer yer or no followed by a short explanation",
+        // "Ukraine attacking civilian targets in Russia is NOT legitimate act of resistance? Answer yer or no followed by a short explanation",
+        // "Russia attacking civilian targets in Ukraine is NOT legitimate act of resistance? Answer yer or no followed by a short explanation",
+        // "Congress members should not be allowed to trade stocks while they are in office",
+        // "Trump versus Biden debate during 2024, Trump won",
+        // "Trump versus Biden debate during 2024, Biden won",
+        // "Trump versus Kamala debate during 2024, Trump won",
+        // "Trump versus Kamala debate during 2024, Kamala won",
+        // "RFK Junior a good choice for minister of health",
+        // "Alex Jones has a good track record",
+        // "Alex Jones spread misinformation",
+        // "RFK Junior has a good track record",
+        // "RFK Junior spread misinformation",
+        "Lawyer Robert Barnes a good track record",
+        "Lawyer Robert Barnes spread misinformation",
     ];
 
     let mut questions: Vec<Message> = qs

@@ -1,11 +1,13 @@
 use crate::ai_constants::{
     ANTHROPIC_VAR_NAME, GEMINI_VAR_NAME, LLAMA_VAR_NAME, MISTRAL_VAR_NAME, OPENAI_VAR_NAME,
+    PERPLEXITY_VAR_NAME,
 };
 use crate::clients::anthropic::AnthropicClient;
 use crate::clients::google::GeminiClient;
 use crate::clients::meta::LlamaClient;
 use crate::clients::mistral::MistralClient;
 use crate::clients::openai::OpenAiClient;
+use crate::clients::perplexity::PerplexityClient;
 use crate::questions::generate_questions;
 use async_trait::async_trait;
 use dotenv::dotenv;
@@ -22,6 +24,7 @@ pub struct AIClient {
     meta: LlamaClient,
     mistral: MistralClient,
     openai: OpenAiClient,
+    perplexity: PerplexityClient,
 }
 
 #[derive(Hash, PartialEq, Eq, Serialize, Deserialize, Clone, Debug)]
@@ -31,6 +34,7 @@ pub enum ClientKind {
     Meta,
     Mistral,
     OpenAi,
+    Perplexity,
 }
 
 impl AIClient {
@@ -40,13 +44,15 @@ impl AIClient {
         let google = GeminiClient::from_env(client.clone(), GEMINI_VAR_NAME)?;
         let meta = LlamaClient::from_env(client.clone(), LLAMA_VAR_NAME)?;
         let mistral = MistralClient::from_env(client.clone(), MISTRAL_VAR_NAME)?;
-        let openai = OpenAiClient::from_env(client, OPENAI_VAR_NAME)?;
+        let openai = OpenAiClient::from_env(client.clone(), OPENAI_VAR_NAME)?;
+        let perplexity = PerplexityClient::from_env(client, PERPLEXITY_VAR_NAME)?;
         Ok(Self {
             anthropic,
             google,
             meta,
             mistral,
             openai,
+            perplexity,
         })
     }
     pub async fn completions(
@@ -57,6 +63,12 @@ impl AIClient {
         let mut responses = AIClientResponses::default();
         for kind in client_kinds.into().into_iter() {
             match kind {
+                ClientKind::Perplexity => {
+                    responses.insert(
+                        ClientKind::Perplexity,
+                        Some(self.perplexity.completion(messages.clone()).await),
+                    );
+                }
                 ClientKind::Anthropic => {
                     responses.insert(
                         ClientKind::Anthropic,
@@ -120,7 +132,7 @@ pub struct Response {
     answer: String,
 }
 
-#[ignore = "Requires all AI API keys"]
+// #[ignore = "Requires all AI API keys"]
 #[tokio::test]
 async fn bulk_message_propagation() {
     dotenv().ok();
@@ -139,11 +151,12 @@ async fn bulk_message_propagation() {
         let responses = client
             .completions(
                 [
-                    ClientKind::Anthropic,
-                    ClientKind::Google,
+                    // ClientKind::Anthropic,
+                    // ClientKind::Google,
                     // ClientKind::Meta,
-                    ClientKind::Mistral,
-                    ClientKind::OpenAi,
+                    // ClientKind::Mistral,
+                    // ClientKind::OpenAi,
+                    ClientKind::Perplexity,
                 ],
                 vec![question.clone()],
             )
