@@ -62,7 +62,7 @@ fn main() {
         let _guard = sentry::init((
             sentry_url,
             sentry::ClientOptions {
-                debug: true,
+                debug: env::var("APP_ENVIRONMENT").unwrap_or_default() == "local",
                 sample_rate: sentry_sample_rate,
                 traces_sample_rate: sentry_sample_rate,
                 release: sentry::release_name!(),
