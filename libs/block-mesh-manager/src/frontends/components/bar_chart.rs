@@ -21,7 +21,7 @@ pub fn BarChart() -> impl IntoView {
     });
 
     let html_chart = Signal::derive({
-        let data = daily_stats.get();
+        let data = daily_stats.get_untracked();
 
         move || {
             let chart = Chart::new()
