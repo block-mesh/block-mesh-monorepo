@@ -1,14 +1,13 @@
 use crate::frontends::components::avatar::Avatar;
-use crate::frontends::components::navbars::navbar::Navbar;
-use crate::frontends::components::navbars::navbar_section::NavbarSection;
-use crate::frontends::components::navbars::navbar_spacer::NavbarSpacer;
-// use crate::frontends::components::online_chip::OnlineChip;
 use crate::frontends::components::conditionals::if_let_some::IfLetSome;
 use crate::frontends::components::icons::home_icon::HomeIcon;
 use crate::frontends::components::icons::link_icon::LinkIcon;
 use crate::frontends::components::icons::logout_icon::LogoutIcon;
 use crate::frontends::components::icons::medal_icon::MedalIcon;
 use crate::frontends::components::icons::perk_icon::PerkIcon;
+use crate::frontends::components::navbars::navbar::Navbar;
+use crate::frontends::components::navbars::navbar_section::NavbarSection;
+use crate::frontends::components::navbars::navbar_spacer::NavbarSpacer;
 use crate::frontends::components::reload_button::ReloadButton;
 use crate::frontends::context::auth_context::AuthContext;
 use crate::frontends::context::reload_context::ReloadContext;
@@ -32,7 +31,6 @@ pub fn ApplicationNavbar() -> impl IntoView {
             <NavbarSpacer/>
             <NavbarSection>
                 <div></div>
-            // <OnlineChip is_online=true/>
             </NavbarSection>
         </Navbar>
     }
