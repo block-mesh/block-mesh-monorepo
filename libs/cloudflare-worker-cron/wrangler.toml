@@ -2,6 +2,9 @@ name = "cloudflare-worker-cron"
 main = "build/worker/shim.mjs"
 compatibility_date = "2023-12-01"
 
+[vars]
+app_name = "block-mesh-manager"
+
 [build]
 command = "cargo install -q worker-build && worker-build --release"
 
