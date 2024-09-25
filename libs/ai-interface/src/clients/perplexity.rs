@@ -12,6 +12,7 @@ use serde_json::Value;
 use std::env::VarError;
 use std::fmt::{Display, Formatter};
 
+#[derive(Clone)]
 pub struct PerplexityClient {
     client: Client,
     api_key: String,
@@ -135,7 +136,7 @@ pub struct ChatCompletionResponse {
 impl ChatCompletionExt for PerplexityClient {
     type Model = String;
     async fn completion(
-        &self,
+        self,
         messages: Vec<Message>,
         model: Self::Model,
     ) -> anyhow::Result<Message> {

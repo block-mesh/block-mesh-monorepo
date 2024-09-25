@@ -15,7 +15,7 @@ use std::fmt::{Display, Formatter};
 impl ChatCompletionExt for MistralClient {
     type Model = String;
     async fn completion(
-        &self,
+        self,
         messages: Vec<Message>,
         model: Self::Model,
     ) -> anyhow::Result<Message> {
@@ -48,6 +48,7 @@ impl ChatCompletionExt for MistralClient {
         Ok(Message { content, role })
     }
 }
+#[derive(Clone)]
 pub struct MistralClient {
     client: Client,
     api_key: String,

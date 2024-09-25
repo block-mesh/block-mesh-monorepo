@@ -14,7 +14,7 @@ use std::env::VarError;
 impl ChatCompletionExt for LlamaClient {
     type Model = String;
     async fn completion(
-        &self,
+        self,
         messages: Vec<Message>,
         model: Self::Model,
     ) -> anyhow::Result<Message> {
@@ -44,6 +44,7 @@ impl ChatCompletionExt for LlamaClient {
         Ok(Message { content, role })
     }
 }
+#[derive(Clone)]
 pub struct LlamaClient {
     client: Client,
     api_key: String,

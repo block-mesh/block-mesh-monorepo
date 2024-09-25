@@ -14,7 +14,7 @@ use std::fmt::{Display, Formatter};
 impl ChatCompletionExt for OpenAiClient {
     type Model = String;
     async fn completion(
-        &self,
+        self,
         messages: Vec<Message>,
         model: Self::Model,
     ) -> anyhow::Result<Message> {
@@ -45,6 +45,7 @@ impl ChatCompletionExt for OpenAiClient {
         Ok(Message { content, role })
     }
 }
+#[derive(Clone)]
 pub struct OpenAiClient {
     client: Client,
     api_key: String,

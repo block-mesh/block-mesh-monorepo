@@ -11,6 +11,8 @@ use crate::clients::perplexity::PerplexityClient;
 use crate::questions::generate_questions;
 use async_trait::async_trait;
 use dotenv::dotenv;
+use futures::future::join_all;
+use futures::task::SpawnExt;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
@@ -18,6 +20,7 @@ use std::env::VarError;
 use std::fmt::Display;
 use std::fs::File;
 use std::io::Write;
+use tokio::task::JoinSet;
 
 pub struct AIClient {
     anthropic: AnthropicClient,
@@ -39,22 +42,22 @@ pub enum ClientKind {
 }
 
 impl AIClient {
-    pub fn new() -> Result<Self, VarError> {
+    pub fn new() -> Self {
         let client = reqwest::Client::new();
-        let anthropic = AnthropicClient::from_env(client.clone(), ANTHROPIC_VAR_NAME)?;
-        let google = GeminiClient::from_env(client.clone(), GEMINI_VAR_NAME)?;
-        let meta = LlamaClient::from_env(client.clone(), LLAMA_VAR_NAME)?;
-        let mistral = MistralClient::from_env(client.clone(), MISTRAL_VAR_NAME)?;
-        let openai = OpenAiClient::from_env(client.clone(), OPENAI_VAR_NAME)?;
-        let perplexity = PerplexityClient::from_env(client, PERPLEXITY_VAR_NAME)?;
-        Ok(Self {
+        let anthropic = AnthropicClient::from_env(client.clone(), ANTHROPIC_VAR_NAME).unwrap();
+        let google = GeminiClient::from_env(client.clone(), GEMINI_VAR_NAME).unwrap();
+        let meta = LlamaClient::from_env(client.clone(), LLAMA_VAR_NAME).unwrap();
+        let mistral = MistralClient::from_env(client.clone(), MISTRAL_VAR_NAME).unwrap();
+        let openai = OpenAiClient::from_env(client.clone(), OPENAI_VAR_NAME).unwrap();
+        let perplexity = PerplexityClient::from_env(client, PERPLEXITY_VAR_NAME).unwrap();
+        Self {
             anthropic,
             google,
             meta,
             mistral,
             openai,
             perplexity,
-        })
+        }
     }
     pub async fn completions(
         &self,
@@ -62,78 +65,39 @@ impl AIClient {
         messages: Vec<Message>,
     ) -> AIClientResponses {
         let mut responses = AIClientResponses::default();
+        let mut set = JoinSet::new();
         for kind in client_kinds.into().into_iter() {
-            match kind {
-                ClientKind::Perplexity => {
-                    responses.insert(
-                        ClientKind::Perplexity,
-                        Some(
-                            self.perplexity
-                                .completion(
-                                    messages.clone(),
-                                    String::from("llama-3.1-sonar-small-128k-online"),
-                                )
-                                .await,
-                        ),
-                    );
-                }
-                ClientKind::Anthropic => {
-                    responses.insert(
-                        ClientKind::Anthropic,
-                        Some(
-                            self.anthropic
-                                .completion(
-                                    messages.clone(),
-                                    crate::clients::anthropic::Model::Sonnet,
-                                )
-                                .await,
-                        ),
-                    );
-                }
-                ClientKind::Google => {
-                    responses.insert(
-                        ClientKind::Google,
-                        Some(
-                            self.google
-                                .completion(
-                                    messages.clone(),
-                                    String::from("gemini-1.5-flash-latest"),
-                                )
-                                .await,
-                        ),
-                    );
-                }
-                ClientKind::Meta => {
-                    responses.insert(
-                        ClientKind::Meta,
-                        Some(
-                            self.meta
-                                .completion(messages.clone(), String::from("llama3.1-405b"))
-                                .await,
-                        ),
-                    );
-                }
-                ClientKind::Mistral => {
-                    responses.insert(
-                        ClientKind::Mistral,
-                        Some(
-                            self.mistral
-                                .completion(messages.clone(), String::from("mistral-small-latest"))
-                                .await,
-                        ),
-                    );
-                }
-                ClientKind::OpenAi => {
-                    responses.insert(
-                        ClientKind::OpenAi,
-                        Some(
-                            self.openai
-                                .completion(messages.clone(), String::from("gpt-4o"))
-                                .await,
-                        ),
-                    );
-                }
+            let messages = messages.clone();
+            let future = match kind {
+                ClientKind::Perplexity => self
+                    .perplexity
+                    .clone()
+                    .completion(messages, String::from("llama-3.1-sonar-small-128k-online")),
+                ClientKind::Anthropic => self
+                    .anthropic
+                    .clone()
+                    .completion(messages, crate::clients::anthropic::Model::Sonnet),
+                ClientKind::Google => self
+                    .google
+                    .clone()
+                    .completion(messages, String::from("gemini-1.5-flash-latest")),
+                ClientKind::Meta => self
+                    .meta
+                    .clone()
+                    .completion(messages, String::from("llama3.1-405b")),
+                ClientKind::Mistral => self
+                    .mistral
+                    .clone()
+                    .completion(messages, String::from("mistral-small-latest")),
+                ClientKind::OpenAi => self
+                    .openai
+                    .clone()
+                    .completion(messages, String::from("gpt-4o")),
             };
+            set.spawn(async move { (future.await, kind) });
+        }
+        while let Some(Ok((response, client_kind))) = set.join_next().await {
+            responses.insert(client_kind, Some(response));
         }
         println!("Question: {:?}, responses: {:?}", messages, responses);
         responses
@@ -158,7 +122,7 @@ pub struct Message {
 pub trait ChatCompletionExt {
     type Model: Display;
     async fn completion(
-        &self,
+        self,
         messages: Vec<Message>,
         model: Self::Model,
     ) -> anyhow::Result<Message>;
@@ -171,11 +135,11 @@ pub struct Response {
     answer: String,
 }
 
-// #[ignore = "Requires all AI API keys"]
+#[ignore = "Requires all AI API keys"]
 #[tokio::test]
 async fn bulk_message_propagation() {
     dotenv().ok();
-    let client = AIClient::new().unwrap();
+    let client = AIClient::new();
 
     let root = std::env::var("ROOT").unwrap();
     let now = chrono::offset::Utc::now();

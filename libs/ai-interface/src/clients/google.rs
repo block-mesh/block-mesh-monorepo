@@ -13,7 +13,7 @@ use std::env::VarError;
 impl ChatCompletionExt for GeminiClient {
     type Model = String;
     async fn completion(
-        &self,
+        self,
         messages: Vec<Message>,
         model: Self::Model,
     ) -> anyhow::Result<Message> {
@@ -50,6 +50,7 @@ impl ChatCompletionExt for GeminiClient {
         Ok(Message { content, role })
     }
 }
+#[derive(Clone)]
 pub struct GeminiClient {
     client: Client,
     api_key: String,
@@ -66,7 +67,7 @@ impl GeminiClient {
     }
 
     async fn chat_completion(
-        &self,
+        self,
         chat_request: &ChatRequest,
         model: String,
     ) -> anyhow::Result<ChatResponse> {

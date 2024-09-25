@@ -13,7 +13,7 @@ use std::fmt::{Display, Formatter};
 impl ChatCompletionExt for AnthropicClient {
     type Model = Model;
     async fn completion(
-        &self,
+        self,
         messages: Vec<Message>,
         model: Self::Model,
     ) -> anyhow::Result<Message> {
@@ -44,6 +44,7 @@ impl ChatCompletionExt for AnthropicClient {
         Ok(Message { role, content })
     }
 }
+#[derive(Clone)]
 pub struct AnthropicClient {
     client: Client,
     api_key: String,
