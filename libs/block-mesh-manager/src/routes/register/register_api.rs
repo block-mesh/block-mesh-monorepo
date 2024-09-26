@@ -22,6 +22,7 @@ use std::sync::Arc;
 use uuid::Uuid;
 use validator::validate_email;
 
+#[tracing::instrument(name = "register_api", skip_all)]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(mut auth): Extension<AuthSession<Backend>>,

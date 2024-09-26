@@ -26,6 +26,7 @@ struct RpcDashboardTemplate {
     pub results: Vec<RpcResults>,
 }
 
+#[tracing::instrument(name = "rpc_dashboard", skip_all)]
 pub async fn handler(Extension(pool): Extension<PgPool>) -> Result<impl IntoResponse, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let results = get_tasks_rpc_results(&mut transaction, 600).await?;

@@ -7,6 +7,7 @@ use block_mesh_common::interfaces::server_api::{GetStatsRequest, GetStatsRespons
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
 use sqlx::PgPool;
 
+#[tracing::instrument(name = "get_stats", skip_all)]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Json(body): Json<GetStatsRequest>,

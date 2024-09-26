@@ -40,10 +40,6 @@ pub fn get_api_router() -> Router<Arc<AppState>> {
             post(routes::invite_codes::get_latest_invite_code::handler),
         )
         .route(
-            RoutesEnum::Api_CreateTaskWithToken.to_string().as_str(),
-            post(routes::tasks::create_task_with_token::handler),
-        )
-        .route(
             RoutesEnum::Api_CheckToken.to_string().as_str(),
             post(routes::api_token::check_token::handler),
         )

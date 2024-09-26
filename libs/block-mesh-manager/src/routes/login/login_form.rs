@@ -26,6 +26,7 @@ struct LoginTemplate {
     pub chat: String,
 }
 
+#[tracing::instrument(name = "login_form", skip_all)]
 pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<impl IntoResponse, Redirect> {

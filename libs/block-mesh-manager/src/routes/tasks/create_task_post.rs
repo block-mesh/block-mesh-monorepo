@@ -19,6 +19,7 @@ pub struct CreateTaskForm {
     pub body: Option<Value>,
 }
 
+#[tracing::instrument(name = "create_task", skip_all)]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,

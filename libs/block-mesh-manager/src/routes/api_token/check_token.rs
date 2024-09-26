@@ -12,6 +12,7 @@ use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, 
 use sqlx::PgPool;
 use std::sync::Arc;
 
+#[tracing::instrument(name = "check_token", skip(pool, state))]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,

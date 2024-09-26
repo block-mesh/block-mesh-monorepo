@@ -7,15 +7,17 @@ use axum::{Extension, Form};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::LoginForm;
 use block_mesh_common::routes_enum::RoutesEnum;
+use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use secret::Secret;
 use sqlx::PgPool;
 
+#[tracing::instrument(name = "login_post", skip_all)]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(mut auth): Extension<AuthSession<Backend>>,
     Form(form): Form<LoginForm>,
 ) -> Result<Redirect, Error> {
-    let mut tranaction = pool.begin().await?;
+    let mut tranaction = create_txn(&pool).await?;
     let user = get_user_opt_by_email(&mut tranaction, &form.email.to_ascii_lowercase())
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
@@ -30,6 +32,7 @@ pub async fn handler(
     let session = match auth.authenticate(creds).await {
         Ok(Some(user)) => user,
         _ => {
+            commit_txn(tranaction).await?;
             return Ok(Error::redirect(
                 400,
                 "Authentication failed",
@@ -41,6 +44,7 @@ pub async fn handler(
     match auth.login(&session).await {
         Ok(_) => {}
         Err(e) => {
+            commit_txn(tranaction).await?;
             tracing::error!("Login failed: {:?} for user {}", e, user.id);
             return Ok(Error::redirect(
                 400,
@@ -50,6 +54,6 @@ pub async fn handler(
             ));
         }
     }
-    tranaction.commit().await?;
+    commit_txn(tranaction).await?;
     Ok(Redirect::to("/ui/dashboard"))
 }

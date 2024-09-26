@@ -26,6 +26,7 @@ struct RegisterTemplate {
     pub chat: String,
 }
 
+#[tracing::instrument(name = "register_form", skip_all)]
 pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<impl IntoResponse, Redirect> {
