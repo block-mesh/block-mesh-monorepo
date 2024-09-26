@@ -2,7 +2,7 @@ use crate::database::api_token::get_api_token_by_user_id_and_status::get_api_tok
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
-use anyhow::Context;
+use crate::utils::instrument_wrapper::{commit_txn, create_txn};
 use axum::extract::State;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{
@@ -30,20 +30,20 @@ pub async fn handler(
         };
     }
 
-    let mut trasaction = pool.begin().await.expect("Cant create txn");
+    let mut trasaction = create_txn(&pool).await?;
 
     let user = match get_user_opt_by_email(&mut trasaction, &email).await {
         Ok(user) => match user {
             Some(user) => user,
             None => {
                 check_token_map.insert(key, CheckTokenResponseEnum::UserNotFound);
-                let _ = trasaction.commit().await.context("Cannot commit txn");
+                commit_txn(trasaction).await?;
                 return Err(Error::UserNotFound);
             }
         },
         Err(_) => {
             check_token_map.insert(key, CheckTokenResponseEnum::UserNotFound);
-            let _ = trasaction.commit().await.context("Cannot commit txn");
+            commit_txn(trasaction).await?;
             return Err(Error::UserNotFound);
         }
     };
@@ -55,20 +55,20 @@ pub async fn handler(
                 Some(api_token) => api_token,
                 None => {
                     check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenNotFound);
-                    let _ = trasaction.commit().await.context("Cannot commit txn");
+                    commit_txn(trasaction).await?;
                     return Err(Error::ApiTokenNotFound);
                 }
             },
             Err(_) => {
                 check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenNotFound);
-                let _ = trasaction.commit().await.context("Cannot commit txn");
+                commit_txn(trasaction).await?;
                 return Err(Error::ApiTokenNotFound);
             }
         };
 
     if *api_token.token.as_ref() != body.api_token {
         check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenMismatch);
-        let _ = trasaction.commit().await.context("Cannot commit txn");
+        commit_txn(trasaction).await?;
         return Err(Error::ApiTokenMismatch);
     }
 
@@ -81,6 +81,6 @@ pub async fn handler(
         CheckTokenResponseEnum::GetTokenResponse(response.clone()),
     );
 
-    let _ = trasaction.commit().await.context("Cannot commit txn");
+    commit_txn(trasaction).await?;
     Ok(Json(response))
 }
