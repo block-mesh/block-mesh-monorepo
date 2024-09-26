@@ -44,7 +44,6 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_manager::emails::email_client::EmailClient;
     use block_mesh_manager::startup::application::{AppState, Application};
     use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
-    use block_mesh_manager::startup::report_exit::report_exit;
     use secret::Secret;
     use std::sync::Arc;
 }}
@@ -180,16 +179,15 @@ async fn run() -> anyhow::Result<()> {
     let ws_ping_task = tokio::spawn(ws_keep_alive(broadcaster));
 
     tokio::select! {
-        o = application_task => report_exit("API", o),
-        o = joiner_task => report_exit("Joiner task failed", o),
-        o = db_cleaner_task => report_exit("DB cleaner task failed", o),
-        o = db_daily_stat_task => report_exit("DB daily_stat aggregator", o),
-        o = db_analytics_task => report_exit("DB analytics aggregator", o),
-        o = db_users_ip_task => report_exit("DB users_ip aggregator", o),
-        o = db_aggregate_task => report_exit("DB aggregate aggregator", o),
-        o = ws_ping_task => report_exit("ws_ping_task failed", o)
-    };
-    Ok(())
+        o = application_task => panic!("API {:?}", o),
+        o = joiner_task => panic!("Joiner task failed {:?}", o),
+        o = db_cleaner_task => panic!("DB cleaner task failed {:?}", o),
+        o = db_daily_stat_task => panic!("DB daily_stat aggregator {:?}", o),
+        o = db_analytics_task => panic!("DB analytics aggregator {:?}", o),
+        o = db_users_ip_task => panic!("DB users_ip aggregator {:?}", o),
+        o = db_aggregate_task => panic!("DB aggregate aggregator {:?}", o),
+        o = ws_ping_task => panic!("ws_ping_task failed {:?}", o)
+    }
 }
 
 #[cfg(not(feature = "ssr"))]

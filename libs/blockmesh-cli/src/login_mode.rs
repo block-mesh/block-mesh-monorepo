@@ -139,9 +139,9 @@ async fn connect_ws(
         }
     });
     tokio::select! {
-        o = messenger_handle => error!("Messenger handle stopped receiving messages {o:?}"),
-        o = worker_handle => info!("WS Connection was closed {o:?}"),
-        o = stop_notifier.notified() => info!("WS connection was interrupted by a feature flag change {o:?}")
+        o = messenger_handle => warn!("Messenger handle stopped receiving messages {o:?}"),
+        o = worker_handle => warn!("WS Connection was closed {o:?}"),
+        o = stop_notifier.notified() => warn!("WS connection was interrupted by a feature flag change {o:?}")
     }
     Ok(())
 }
