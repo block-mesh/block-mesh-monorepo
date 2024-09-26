@@ -66,7 +66,7 @@ async function is_ws_feature_connection() {
     const response1 = await fetch('https://feature-flags.blockmesh.xyz/read-flag/use_websocket')
     if (response1.ok) {
       const value = await response1.text()
-      const is_enabled = Boolean(value)
+      const is_enabled = value === 'true'
       if (!is_enabled) return false
     }
     const response2 = await fetch('https://feature-flags.blockmesh.xyz/read-flag/use_websocket_percent')
