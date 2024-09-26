@@ -59,7 +59,12 @@ async fn run() -> anyhow::Result<()> {
     let db_pool = get_pg_pool().await;
     let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
     let _redis = redis_client.get_multiplexed_async_connection().await?;
-    let (tx, _rx) = tokio::sync::broadcast::channel::<Value>(5000);
+    let (tx, _rx) = tokio::sync::broadcast::channel::<Value>(
+        env::var("BROADCAST_CHANNEL_SIZE")
+            .unwrap_or("5000".to_string())
+            .parse()
+            .unwrap_or(5000),
+    );
 
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
     let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
