@@ -30,5 +30,4 @@ block-mesh-common = { path = "../block-mesh-common", features = ["http", "ip-dat
 http-body-util = { workspace = true }
 reqwest = { workspace = true, features = [
   "json",
-  "hickory-dns"
 ] }

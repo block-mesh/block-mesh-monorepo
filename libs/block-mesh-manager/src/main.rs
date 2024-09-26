@@ -84,6 +84,7 @@ fn main() {
 async fn run() -> anyhow::Result<()> {
     load_dotenv();
     // setup_tracing_stdout_only();
+    // console_subscriber::init(); // tokio-console
     setup_tracing_stdout_only_with_sentry();
     let configuration = get_configuration().expect("Failed to read configuration");
     tracing::info!("Starting with configuration {:#?}", configuration);
