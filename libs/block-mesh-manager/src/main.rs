@@ -44,7 +44,6 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_manager::emails::email_client::EmailClient;
     use block_mesh_manager::startup::application::{AppState, Application};
     use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
-    use block_mesh_manager::startup::report_exit::report_exit;
     use secret::Secret;
     use std::sync::Arc;
 }}
