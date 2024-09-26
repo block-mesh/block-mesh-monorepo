@@ -66,6 +66,11 @@ pub async fn register(url: &str, credentials: &RegisterForm) -> anyhow::Result<(
 
 #[allow(dead_code)]
 pub async fn login_to_network(url: &str, login_form: LoginForm) -> anyhow::Result<Uuid> {
+    let url = if url.contains("app") {
+        url.replace("app", "api")
+    } else {
+        url.to_string()
+    };
     let url = format!("{}/api{}", url, RoutesEnum::Api_GetToken);
     let client = http_client();
     let response: GetTokenResponse = client
