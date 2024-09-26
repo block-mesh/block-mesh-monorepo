@@ -7,6 +7,7 @@ authors.workspace = true
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+dashmap = { workspace = true }
 secret = { path = "../secret" }
 rand = { workspace = true }
 dotenv = { workspace = true, optional = true }

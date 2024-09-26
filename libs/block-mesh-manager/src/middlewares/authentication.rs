@@ -72,6 +72,7 @@ impl AuthnBackend for Backend {
     type Credentials = Credentials;
     type Error = Error;
 
+    #[tracing::instrument(name = "authenticate", skip_all)]
     async fn authenticate(
         &self,
         creds: Self::Credentials,
@@ -121,6 +122,7 @@ impl AuthnBackend for Backend {
         Ok(Option::from(session_user))
     }
 
+    #[tracing::instrument(name = "get_user", skip_all)]
     async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {
         let key = Backend::authenticate_key_with_user_id(user_id);
         let mut c = self.con.clone();
@@ -205,6 +207,7 @@ pub async fn authentication_layer(
     AuthManagerLayerBuilder::new(backend, session_layer).build()
 }
 
+#[tracing::instrument(name = "get_user_from_redis", skip_all)]
 pub async fn get_user_from_redis(
     email: &str,
     con: &MultiplexedConnection,

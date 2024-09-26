@@ -32,6 +32,7 @@ use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
 use block_mesh_common::interfaces::db_messages::{
     AggregateMessage, AnalyticsMessage, DailyStatMessage, UsersIpMessage,
 };
+use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
 use flume::Sender;
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
@@ -47,6 +48,8 @@ pub struct Application {
 }
 
 pub struct AppState {
+    pub get_token_map: GetTokenResponseMap,
+    pub check_token_map: CheckTokenResponseMap,
     pub pool: PgPool,
     pub email_client: Arc<EmailClient>,
     pub client: Client,

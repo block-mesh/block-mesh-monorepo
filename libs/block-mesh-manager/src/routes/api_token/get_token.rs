@@ -1,74 +1,80 @@
 use crate::database::api_token::get_api_token_by_user_id_and_status::get_api_token_by_usr_and_status;
-use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::errors::error::Error;
-use crate::middlewares::authentication::{Backend, Credentials};
 use crate::startup::application::AppState;
-use anyhow::anyhow;
 use axum::extract::State;
 use axum::{Extension, Json};
-use axum_login::AuthSession;
-use block_mesh_common::interfaces::server_api::{GetTokenRequest, GetTokenResponse};
+use bcrypt::verify;
+use block_mesh_common::interfaces::server_api::{
+    GetTokenRequest, GetTokenResponse, GetTokenResponseEnum,
+};
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
-use redis::AsyncCommands;
-use secret::Secret;
 use sqlx::PgPool;
 use std::sync::Arc;
 
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,
-    Extension(mut auth): Extension<AuthSession<Backend>>,
     Json(body): Json<GetTokenRequest>,
 ) -> Result<Json<GetTokenResponse>, Error> {
-    let key = Backend::authenticate_key_with_password(
-        &body.email.to_ascii_lowercase(),
-        &Secret::from(body.password.clone()),
-    );
-    let mut c = state.redis.clone();
-    if let Ok(token) = c.get(&key).await {
-        return Ok(Json(GetTokenResponse {
-            api_token: Some(token),
-            message: None,
-        }));
-    }
-
     let mut transaction = pool.begin().await?;
     let email = body.email.clone().to_ascii_lowercase();
-    let user = get_user_opt_by_email(&mut transaction, &email)
-        .await?
-        .ok_or_else(|| Error::UserNotFound)?;
-    let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
-        .await?
-        .ok_or_else(|| Error::NonceNotFound)?;
-    let creds: Credentials = Credentials {
-        email,
-        password: Secret::from(body.password.clone()),
-        nonce: nonce.nonce.as_ref().to_string(),
+    let key = (email.clone(), body.password.clone());
+    let get_token_map = &state.get_token_map;
+
+    if let Some(entry) = get_token_map.get(&key) {
+        return match entry.value() {
+            GetTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone())),
+            GetTokenResponseEnum::UserNotFound => Err(Error::UserNotFound),
+            GetTokenResponseEnum::PasswordMismatch => Err(Error::PasswordMismatch),
+            GetTokenResponseEnum::ApiTokenNotFound => Err(Error::ApiTokenNotFound),
+        };
+    }
+
+    let user = match get_user_opt_by_email(&mut transaction, &email).await {
+        Ok(user) => match user {
+            Some(user) => user,
+            None => {
+                get_token_map.insert(key, GetTokenResponseEnum::UserNotFound);
+                return Err(Error::UserNotFound);
+            }
+        },
+        Err(_) => {
+            get_token_map.insert(key, GetTokenResponseEnum::UserNotFound);
+            return Err(Error::UserNotFound);
+        }
     };
-    let session = auth
-        .authenticate(creds)
-        .await
-        .map_err(|_| Error::Auth(anyhow!("Authentication failed").to_string()))?
-        .ok_or(Error::UserNotFound)?;
-    auth.login(&session)
-        .await
-        .map_err(|_| Error::Auth(anyhow!("Login failed").to_string()))?;
+
+    if !verify::<&str>(body.password.as_ref(), user.password.as_ref()).unwrap_or(false) {
+        get_token_map.insert(key, GetTokenResponseEnum::PasswordMismatch);
+        return Err(Error::PasswordMismatch);
+    }
+
     let api_token =
-        get_api_token_by_usr_and_status(&mut transaction, &user.id, ApiTokenStatus::Active)
-            .await?
-            .ok_or(Error::ApiTokenNotFound)?;
-    transaction.commit().await?;
+        match get_api_token_by_usr_and_status(&mut transaction, &user.id, ApiTokenStatus::Active)
+            .await
+        {
+            Ok(api_token) => match api_token {
+                Some(api_token) => api_token,
+                None => {
+                    get_token_map.insert(key, GetTokenResponseEnum::ApiTokenNotFound);
+                    return Err(Error::ApiTokenNotFound);
+                }
+            },
+            Err(_) => {
+                get_token_map.insert(key, GetTokenResponseEnum::ApiTokenNotFound);
+                return Err(Error::ApiTokenNotFound);
+            }
+        };
 
-    c.set_ex(
-        &key,
-        api_token.token.expose_secret().to_string(),
-        Backend::get_expire() as u64,
-    )
-    .await?;
-
-    Ok(Json(GetTokenResponse {
+    let response = GetTokenResponse {
         api_token: Some(*api_token.token.as_ref()),
         message: None,
-    }))
+    };
+
+    get_token_map.insert(
+        key,
+        GetTokenResponseEnum::GetTokenResponse(response.clone()),
+    );
+    Ok(Json(response))
 }
