@@ -13,6 +13,7 @@ pub async fn get_cache<'a>() -> &'a EnvVarMap {
         .await
 }
 
+#[tracing::instrument(name = "get_envar", skip_all)]
 pub async fn get_envar(name: &str) -> String {
     let cache = get_cache().await;
     if let Some(entry) = cache.get(name) {
