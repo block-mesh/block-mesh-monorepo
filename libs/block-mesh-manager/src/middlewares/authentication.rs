@@ -211,12 +211,12 @@ pub async fn get_user_from_redis(
 pub async fn save_to_redis(key: &str, session_user: &SessionUser, con: &mut MultiplexedConnection) {
     if let Ok(session_user) = serde_json::to_string(session_user) {
         let _: RedisResult<()> = con
-            .set_ex(&key, session_user, Backend::get_expire() as u64)
+            .set_ex(key, session_user, Backend::get_expire() as u64)
             .await;
     }
 }
 
 #[tracing::instrument(name = "del_from_redis", skip_all)]
 pub async fn del_from_redis(key: &str, con: &mut MultiplexedConnection) {
-    let _: RedisResult<()> = con.del(&key).await;
+    let _: RedisResult<()> = con.del(key).await;
 }
