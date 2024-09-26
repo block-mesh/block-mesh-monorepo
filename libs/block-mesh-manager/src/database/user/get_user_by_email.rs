@@ -4,6 +4,7 @@ use block_mesh_manager_database_domain::domain::user::UserRole;
 use secret::Secret;
 use sqlx::{Postgres, Transaction};
 
+#[tracing::instrument(name = "get_user_opt_by_email", skip_all)]
 pub async fn get_user_opt_by_email(
     transaction: &mut Transaction<'_, Postgres>,
     email: &str,

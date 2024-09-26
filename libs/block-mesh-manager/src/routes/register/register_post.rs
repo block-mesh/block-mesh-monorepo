@@ -25,6 +25,7 @@ use crate::database::user::update_user_invited_by::update_user_invited_by;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
 use crate::startup::application::AppState;
+use crate::utils::instrument_wrapper::{commit_txn, create_txn};
 
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
@@ -32,7 +33,7 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Form(form): Form<RegisterForm>,
 ) -> Result<Redirect, Error> {
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let mut transaction = create_txn(&pool).await?;
     let email = form.email.clone().to_ascii_lowercase();
     if !validate_email(email.clone()) {
         return Ok(Error::redirect(
@@ -116,7 +117,7 @@ pub async fn handler(
             "/register",
         ));
     }
-    transaction.commit().await.map_err(Error::from)?;
+    commit_txn(transaction).await?;
 
     let creds: Credentials = Credentials {
         email: email.clone(),

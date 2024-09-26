@@ -4,14 +4,15 @@ use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::errors::error::Error;
-use anyhow::{anyhow, Context};
+use crate::utils::instrument_wrapper::{commit_txn, create_txn};
+use crate::utils::verify_cache::verify_with_cache;
+use anyhow::anyhow;
 use async_trait::async_trait;
 use axum_login::tower_sessions::cookie::time::Duration;
 use axum_login::{
     tower_sessions::{ExpiredDeletion, Expiry, SessionManagerLayer},
     AuthManagerLayer, AuthManagerLayerBuilder, AuthUser, AuthnBackend, UserId,
 };
-use bcrypt::verify;
 use redis::aio::MultiplexedConnection;
 use redis::{AsyncCommands, RedisResult};
 use secret::Secret;
@@ -79,34 +80,28 @@ impl AuthnBackend for Backend {
     ) -> Result<Option<Self::User>, Self::Error> {
         let key = Backend::authenticate_key_with_password(&creds.email, &creds.password);
         let mut c = self.con.clone();
-        let redis_user: RedisResult<String> = c.get(key.clone()).await;
-        if let Ok(redis_user) = redis_user {
-            if let Ok(value) = serde_json::from_str::<SessionUser>(&redis_user) {
-                return Ok(Option::from(value));
-            }
+        if let Ok(redis_user) = get_user_from_redis(&key, &c).await {
+            return Ok(Some(redis_user));
         }
         let pool = self.db.clone();
-        let mut transaction = pool.begin().await.context("Cant create transaction")?;
+        let mut transaction = create_txn(&pool).await?;
         let user = match get_user_opt_by_email(&mut transaction, &creds.email).await {
             Ok(u) => u,
             Err(e) => {
-                let _: RedisResult<()> = c.del(&key).await;
+                del_from_redis(&key, &mut c).await;
                 return Err(Error::Auth(e.to_string()));
             }
         };
-        transaction
-            .commit()
-            .await
-            .context("Cant commit transaction")?;
+        commit_txn(transaction).await?;
 
         let user = match user {
             Some(u) => u,
             None => {
-                let _: RedisResult<()> = c.del(&key).await;
+                del_from_redis(&key, &mut c).await;
                 return Err(Error::Auth("User not found".to_string()));
             }
         };
-        if !verify(creds.password.as_ref(), user.password.as_ref())? {
+        if !verify_with_cache(creds.password.as_ref(), user.password.as_ref()).await {
             return Err(Error::Auth("Invalid password".to_string()));
         }
         let session_user = SessionUser {
@@ -114,11 +109,7 @@ impl AuthnBackend for Backend {
             nonce: creds.nonce,
             email: user.email,
         };
-        if let Ok(session_user) = serde_json::to_string(&session_user) {
-            let _: RedisResult<()> = c
-                .set_ex(&key, session_user, Backend::get_expire() as u64)
-                .await;
-        }
+        save_to_redis(&key, &session_user, &mut c).await;
         Ok(Option::from(session_user))
     }
 
@@ -126,21 +117,15 @@ impl AuthnBackend for Backend {
     async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {
         let key = Backend::authenticate_key_with_user_id(user_id);
         let mut c = self.con.clone();
-        if let Ok(redis_user) = c.get(user_id.to_string()).await {
-            let redis_user: String = redis_user;
-            return if let Ok(value) = serde_json::from_str::<SessionUser>(&redis_user) {
-                Ok(Option::from(value))
-            } else {
-                Err(Error::Auth("Wrong creds".to_string()))
-            };
+        if let Ok(redis_user) = get_user_from_redis(&user_id.to_string(), &c).await {
+            return Ok(Some(redis_user));
         }
-
         let pool = self.db.clone();
-        let mut transaction = pool.begin().await?;
+        let mut transaction = create_txn(&pool).await?;
         let user = match get_user_opt_by_id(&mut transaction, user_id).await {
             Ok(u) => u,
             Err(e) => {
-                let _: RedisResult<()> = c.del(&key).await;
+                del_from_redis(&key, &mut c).await;
                 return Err(Error::Auth(e.to_string()));
             }
         };
@@ -148,7 +133,7 @@ impl AuthnBackend for Backend {
         let user = match user {
             Some(u) => u,
             None => {
-                let _: RedisResult<()> = c.del(&key).await;
+                del_from_redis(&key, &mut c).await;
                 return Err(Error::Auth("User not found".to_string()));
             }
         };
@@ -161,12 +146,8 @@ impl AuthnBackend for Backend {
             email: user.email.clone(),
             nonce: nonce.nonce.as_ref().to_string(),
         };
-        if let Ok(session_user) = serde_json::to_string(&session_user) {
-            let _: RedisResult<()> = c
-                .set_ex(&key, &session_user, Backend::get_expire() as u64)
-                .await;
-        }
-        transaction.commit().await?;
+        save_to_redis(&key, &session_user, &mut c).await;
+        commit_txn(transaction).await?;
         Ok(Option::from(session_user))
     }
 }
@@ -209,11 +190,11 @@ pub async fn authentication_layer(
 
 #[tracing::instrument(name = "get_user_from_redis", skip_all)]
 pub async fn get_user_from_redis(
-    email: &str,
+    key: &str,
     con: &MultiplexedConnection,
 ) -> anyhow::Result<SessionUser> {
     let mut c = con.clone();
-    let redis_user: RedisResult<String> = c.get(email.to_string()).await;
+    let redis_user: RedisResult<String> = c.get(key.to_string()).await;
     match redis_user {
         Ok(redis_user) => {
             if let Ok(value) = serde_json::from_str::<SessionUser>(&redis_user) {
@@ -224,4 +205,18 @@ pub async fn get_user_from_redis(
         }
         Err(_) => Err(anyhow!("User not found".to_string())),
     }
+}
+
+#[tracing::instrument(name = "save_to_redis", skip_all)]
+pub async fn save_to_redis(key: &str, session_user: &SessionUser, con: &mut MultiplexedConnection) {
+    if let Ok(session_user) = serde_json::to_string(session_user) {
+        let _: RedisResult<()> = con
+            .set_ex(&key, session_user, Backend::get_expire() as u64)
+            .await;
+    }
+}
+
+#[tracing::instrument(name = "del_from_redis", skip_all)]
+pub async fn del_from_redis(key: &str, con: &mut MultiplexedConnection) {
+    let _: RedisResult<()> = con.del(&key).await;
 }
