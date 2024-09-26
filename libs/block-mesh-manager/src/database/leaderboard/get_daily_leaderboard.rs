@@ -1,14 +1,25 @@
 use block_mesh_common::interfaces::server_api::LeaderBoardUser;
-use chrono::{Duration, Utc};
+use chrono::{Duration, NaiveDate, Utc};
+use dashmap::DashMap;
 use sqlx::{Postgres, Transaction};
+use std::sync::Arc;
+use tokio::sync::OnceCell;
 
-pub(crate) async fn get_daily_leaderboard(
+static QUERY_CACHE: OnceCell<Arc<DashMap<NaiveDate, Vec<LeaderBoardUser>>>> = OnceCell::const_new();
+
+pub async fn get_daily_leaderboard(
     transaction: &mut Transaction<'_, Postgres>,
     uptime_factor: f64,
     tasks_factor: f64,
     limit: i64,
 ) -> anyhow::Result<Vec<LeaderBoardUser>> {
+    let query = QUERY_CACHE
+        .get_or_init(|| async { Arc::new(DashMap::new()) })
+        .await;
     let day = Utc::now().date_naive() - Duration::days(1);
+    if let Some(entry) = query.get(&day) {
+        return Ok(entry.clone());
+    }
     let daily_stats = sqlx::query_as!(
         LeaderBoardUser,
         r#"
@@ -39,5 +50,6 @@ pub(crate) async fn get_daily_leaderboard(
     )
     .fetch_all(&mut **transaction)
     .await?;
+    query.insert(day, daily_stats.clone());
     Ok(daily_stats)
 }
