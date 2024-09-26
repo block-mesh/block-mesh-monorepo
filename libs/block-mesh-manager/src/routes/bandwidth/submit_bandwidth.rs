@@ -11,13 +11,15 @@ use axum::Json;
 use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_common::interfaces::db_messages::{AggregateMessage, DBMessageTypes};
 use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
+use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
+use futures_util::TryFutureExt;
 use http::StatusCode;
 use sqlx::PgPool;
 use std::sync::Arc;
 use tokio::task::JoinHandle;
 use uuid::Uuid;
 
-#[allow(dead_code)]
+#[tracing::instrument(name = "submit_bandwidth_run_background", skip_all)]
 async fn submit_bandwidth_run_background(state: Arc<AppState>, pool: PgPool, user_id: &Uuid) {
     let user_id = *user_id;
     let flag = state
@@ -27,12 +29,13 @@ async fn submit_bandwidth_run_background(state: Arc<AppState>, pool: PgPool, use
     let flag: bool = <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
     if flag {
         let handle: JoinHandle<()> = tokio::spawn(async move {
-            let mut transaction = pool.begin().await.map_err(Error::from).unwrap();
-            delete_bandwidth_reports_by_time(&mut transaction, user_id, 60 * 60)
-                .await
-                .map_err(Error::from)
-                .unwrap();
-            transaction.commit().await.map_err(Error::from).unwrap();
+            if let Ok(mut transaction) = create_txn(&pool).await {
+                delete_bandwidth_reports_by_time(&mut transaction, user_id, 60 * 60)
+                    .await
+                    .map_err(Error::from)
+                    .unwrap();
+                let _ = commit_txn(transaction).await;
+            }
         });
         let _ = state.tx.send_async(handle).await;
     }
@@ -44,7 +47,7 @@ pub async fn submit_bandwidth_content(
     body: ReportBandwidthRequest,
 ) -> Result<Json<ReportBandwidthResponse>, Error> {
     let pool = state.pool.clone();
-    let mut transaction = pool.begin().await?;
+    let mut transaction = create_txn(&pool).await?;
     let api_token = find_token(&mut transaction, &body.api_token)
         .await?
         .ok_or(Error::ApiTokenNotFound)?;
@@ -52,6 +55,7 @@ pub async fn submit_bandwidth_content(
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     if user.email.to_ascii_lowercase() != body.email.to_ascii_lowercase() {
+        commit_txn(transaction).await?;
         return Err(Error::UserNotFound);
     }
 
@@ -144,13 +148,13 @@ pub async fn submit_bandwidth_content(
         )
         .await;
     }
-    transaction.commit().await?;
-
+    commit_txn(transaction).await?;
     Ok(Json(ReportBandwidthResponse {
         status_code: u16::from(StatusCode::OK),
     }))
 }
 
+#[tracing::instrument(name = "submit_bandwidth", skip_all)]
 pub async fn handler(
     State(state): State<Arc<AppState>>,
     Json(body): Json<ReportBandwidthRequest>,
