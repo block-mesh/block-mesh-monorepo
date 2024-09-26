@@ -24,7 +24,7 @@ pub async fn ws_loop(
     window_size: usize,
     broadcaster: Broadcaster,
 ) -> anyhow::Result<()> {
-    let mut transaction = create_txn(&pool).await?;
+    let mut transaction = create_txn(pool).await?;
     let aggregate = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
         AggregateName::CronReports,
@@ -56,7 +56,7 @@ pub async fn ws_loop(
         let new_used_window_size = queued.len();
         let new_queue_size = broadcaster.queue.lock().unwrap().len();
 
-        let mut transaction = create_txn(&pool).await?;
+        let mut transaction = create_txn(pool).await?;
         let mut tasks = find_users_tasks(&mut transaction, new_window_size as i64).await?;
         loop {
             let task = match tasks.pop() {

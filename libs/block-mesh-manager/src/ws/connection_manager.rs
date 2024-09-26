@@ -36,7 +36,7 @@ pub async fn fetch_latest_cron_settings(
     pool: &PgPool,
     user_id: &Uuid,
 ) -> anyhow::Result<CronReportAggregateEntry> {
-    let mut transaction = create_txn(&pool).await?;
+    let mut transaction = create_txn(pool).await?;
     let aggregate = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
         AggregateName::CronReports,

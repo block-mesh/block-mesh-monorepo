@@ -36,7 +36,6 @@ fn messenger(
     (sink_task, sink_tx)
 }
 
-#[tracing::instrument(name = "receiver", skip_all)]
 async fn receiver(
     mut ws_stream: SplitStream<WebSocket>,
     is_cls: Arc<AtomicBool>,
