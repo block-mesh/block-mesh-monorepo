@@ -21,9 +21,9 @@ use crate::database::users_ip::get_user_ips::get_user_ips;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
-use crate::utils::instrument_wrapper::{commit_txn, create_txn};
 use crate::utils::points::{calc_points_daily, calc_total_points};
 use block_mesh_common::feature_flag_client::FlagValue;
+use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use regex::Regex;
 
 #[tracing::instrument(name = "dashboard_data_extractor", skip_all)]

@@ -7,7 +7,6 @@ use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
-use crate::utils::instrument_wrapper::{commit_txn, create_txn};
 use crate::worker::db_cleaner_cron::EnrichIp;
 use axum::extract::{ConnectInfo, Query, Request, State};
 use axum::Json;
@@ -18,6 +17,7 @@ use block_mesh_common::interfaces::db_messages::{
 use block_mesh_common::interfaces::server_api::{
     ClientsMetadata, HandlerMode, ReportUptimeRequest, ReportUptimeResponse,
 };
+use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use chrono::Utc;
 use http::{HeaderMap, HeaderValue, StatusCode};
 use http_body_util::BodyExt;

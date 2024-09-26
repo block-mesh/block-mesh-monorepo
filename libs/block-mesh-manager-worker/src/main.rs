@@ -2,9 +2,10 @@ use crate::db_aggregators::users_ip_aggregator::users_ip_aggregator;
 use crate::pg_listener::start_listening;
 use block_mesh_common::constants::BLOCKMESH_PG_NOTIFY;
 use block_mesh_common::env::load_dotenv::load_dotenv;
+use block_mesh_manager_database_domain::utils::connection::get_pg_pool;
 use logger_general::tracing::setup_tracing_stdout_only;
 use serde_json::Value;
-use std::env;
+use std::{env, mem};
 
 mod call_backs;
 mod cron_jobs;
@@ -20,13 +21,43 @@ use crate::cron_jobs::rpc_cron::rpc_worker_loop;
 use crate::db_aggregators::aggregates_aggregator::aggregates_aggregator;
 use crate::db_aggregators::analytics_aggregator::analytics_aggregator;
 use crate::db_aggregators::daily_stats_aggregator::daily_stats_aggregator;
+use sentry;
 
-#[tokio::main]
-async fn main() -> anyhow::Result<()> {
+fn main() {
+    let sentry_layer = env::var("SENTRY_LAYER")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
+    let sentry_url = env::var("SENTRY_WORKER").unwrap_or_default();
+    let sentry_sample_rate = env::var("SENTRY_SAMPLE_RATE")
+        .unwrap_or("0.1".to_string())
+        .parse()
+        .unwrap_or(0.1);
+    if sentry_layer {
+        let _guard = sentry::init((
+            sentry_url,
+            sentry::ClientOptions {
+                debug: env::var("APP_ENVIRONMENT").unwrap_or_default() == "local",
+                sample_rate: sentry_sample_rate,
+                traces_sample_rate: sentry_sample_rate,
+                release: sentry::release_name!(),
+                ..Default::default()
+            },
+        ));
+        mem::forget(_guard);
+    }
+
+    let _ = tokio::runtime::Builder::new_multi_thread()
+        .enable_all()
+        .build()
+        .unwrap()
+        .block_on(async { run().await });
+}
+async fn run() -> anyhow::Result<()> {
     load_dotenv();
     setup_tracing_stdout_only();
     tracing::info!("Starting worker");
-    let db_pool = sqlx::PgPool::connect(&env::var("DATABASE_URL")?).await?;
+    let db_pool = get_pg_pool().await;
     let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
     let _redis = redis_client.get_multiplexed_async_connection().await?;
     let (tx, _rx) = tokio::sync::broadcast::channel::<Value>(5000);

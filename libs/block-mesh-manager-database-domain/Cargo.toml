@@ -10,6 +10,9 @@ version.workspace = true
 secret = { path = "../secret", features = ["sqlx"] }
 serde = { workspace = true, features = ["derive"] }
 chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }
+anyhow = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+tracing = { workspace = true }
 
 [dependencies.rand]
 workspace = true

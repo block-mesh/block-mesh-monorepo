@@ -18,6 +18,7 @@ mod database;
 mod error;
 mod routes;
 use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
+use block_mesh_manager_database_domain::utils::connection::get_pg_pool;
 use tower_http::cors::CorsLayer;
 use tower_http::timeout::TimeoutLayer;
 use tracing::log;
@@ -57,53 +58,7 @@ fn main() -> anyhow::Result<()> {
 }
 
 async fn run(is_with_sentry: bool) {
-    let settings = PgConnectOptions::from_str(&env::var("DATABASE_URL").unwrap())
-        .unwrap()
-        .log_statements(log::LevelFilter::Trace)
-        .options([
-            (
-                "statement_timeout",
-                env::var("statement_timeout").unwrap_or("0".to_string()),
-            ),
-            (
-                "idle_in_transaction_session_timeout",
-                env::var("idle_in_transaction_session_timeout").unwrap_or("3000ms".to_string()),
-            ),
-            (
-                "lock_timeout",
-                env::var("lock_timeout").unwrap_or("1500ms".to_string()),
-            ),
-        ]);
-    let db_pool = PgPoolOptions::new()
-        .acquire_timeout(Duration::from_secs(
-            env::var("ACQUIRE_TIMEOUT")
-                .unwrap_or("35".to_string())
-                .parse()
-                .unwrap_or(35),
-        ))
-        .min_connections(1)
-        .max_connections(
-            env::var("MAX_CONNECTIONS")
-                .unwrap_or("35".to_string())
-                .parse()
-                .unwrap_or(35),
-        )
-        .idle_timeout(Duration::from_millis(
-            env::var("IDLE_TIMEOUT")
-                .unwrap_or("500".to_string())
-                .parse()
-                .unwrap_or(500),
-        ))
-        .max_lifetime(Duration::from_millis(
-            env::var("MAX_LIFETIME")
-                .unwrap_or("30000".to_string())
-                .parse()
-                .unwrap_or(30000),
-        ))
-        .test_before_acquire(true)
-        .connect_with(settings.clone())
-        .await
-        .unwrap();
+    let db_pool = get_pg_pool().await;
     let router = get_router();
     let check_token_map: CheckTokenResponseMap = Arc::new(DashMap::new());
     let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());
