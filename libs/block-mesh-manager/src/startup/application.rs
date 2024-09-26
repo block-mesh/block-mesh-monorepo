@@ -75,32 +75,6 @@ impl ApplicationBaseUrl {
 
 impl Application {
     pub async fn build(settings: Settings, app_state: Arc<AppState>, db_pool: PgPool) -> Self {
-        let governor_conf = Arc::new(
-            GovernorConfigBuilder::default()
-                .per_second(
-                    env::var("REQUEST_PER_SECOND")
-                        .unwrap_or("10".to_string())
-                        .parse()
-                        .unwrap_or(10),
-                )
-                .burst_size(
-                    env::var("REQUEST_PER_SECOND_BURST")
-                        .unwrap_or("30".to_string())
-                        .parse()
-                        .unwrap_or(30),
-                )
-                .finish()
-                .unwrap(),
-        );
-        let governor_limiter = governor_conf.limiter().clone();
-        let interval = Duration::from_secs(60);
-        // a separate background task to clean up
-        std::thread::spawn(move || loop {
-            std::thread::sleep(interval);
-            tracing::info!("rate limiting storage size: {}", governor_limiter.len());
-            governor_limiter.retain_recent();
-        });
-
         let auth_layer = authentication_layer(&db_pool, &app_state.redis).await;
 
         let app_env = get_env_var_or_panic(AppEnvVar::AppEnvironment);
@@ -205,6 +179,32 @@ impl Application {
             .unwrap_or(false);
 
         let app = if gov_layer {
+            let governor_conf = Arc::new(
+                GovernorConfigBuilder::default()
+                    .per_second(
+                        env::var("REQUEST_PER_SECOND")
+                            .unwrap_or("10".to_string())
+                            .parse()
+                            .unwrap_or(10),
+                    )
+                    .burst_size(
+                        env::var("REQUEST_PER_SECOND_BURST")
+                            .unwrap_or("30".to_string())
+                            .parse()
+                            .unwrap_or(30),
+                    )
+                    .finish()
+                    .unwrap(),
+            );
+            let governor_limiter = governor_conf.limiter().clone();
+            let interval = Duration::from_secs(60);
+            // a separate background task to clean up
+            std::thread::spawn(move || loop {
+                std::thread::sleep(interval);
+                tracing::info!("rate limiting storage size: {}", governor_limiter.len());
+                governor_limiter.retain_recent();
+                governor_limiter.shrink_to_fit();
+            });
             app.layer(GovernorLayer {
                 config: governor_conf,
             })
