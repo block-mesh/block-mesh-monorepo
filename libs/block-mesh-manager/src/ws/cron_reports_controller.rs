@@ -33,6 +33,7 @@ impl Default for CronReportAggregateEntry {
 }
 
 impl CronReportAggregateEntry {
+    #[tracing::instrument(name = "new", skip_all)]
     pub fn new(
         period: Duration,
         messages: Vec<WsServerMessage>,
@@ -51,6 +52,7 @@ impl CronReportAggregateEntry {
 }
 
 impl CronReportSettings {
+    #[tracing::instrument(name = "new", skip_all)]
     pub fn new(
         period: Option<Duration>,
         messages: Option<impl Into<Vec<WsServerMessage>>>,

@@ -12,6 +12,7 @@ use tokio::task::JoinHandle;
 use uuid::Uuid;
 
 /// Actual websocket statemachine (one will be spawned per connection)
+#[tracing::instrument(name = "messenger", skip_all)]
 fn messenger(
     mut ws_sink: SplitSink<WebSocket, Message>,
     is_cls: Arc<AtomicBool>,
@@ -63,6 +64,7 @@ async fn receiver(
 }
 
 /// Actual websocket statemachine (one will be spawned per connection)
+#[tracing::instrument(name = "handle_socket", skip_all)]
 pub async fn handle_socket(socket: WebSocket, ip: String, state: Arc<AppState>, user_id: Uuid) {
     let is_closing = Arc::new(AtomicBool::new(false));
     let (ws_sink, ws_stream) = socket.split();

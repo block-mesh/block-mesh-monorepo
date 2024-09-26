@@ -27,6 +27,7 @@ impl Default for Broadcaster {
 }
 
 impl Broadcaster {
+    #[tracing::instrument(name = "new", skip_all)]
     pub fn new() -> Self {
         let (global_transmitter, _) = broadcast::channel(10000);
         Self {
@@ -35,12 +36,14 @@ impl Broadcaster {
             queue: Arc::new(Mutex::new(VecDeque::new())),
         }
     }
+    #[tracing::instrument(name = "broadcast", skip_all)]
     pub fn broadcast(&self, message: WsServerMessage) -> Result<usize, SendError<WsServerMessage>> {
         let subscribers = self.global_transmitter.send(message.clone())?;
         tracing::info!("Sent {message:?} to {subscribers} subscribers");
         Ok(subscribers)
     }
 
+    #[tracing::instrument(name = "batch", skip_all)]
     pub async fn batch(&self, message: WsServerMessage, targets: &[(Uuid, String)]) {
         join_all(targets.iter().filter_map(|target| {
             if let Some(entry) = self.sockets.get(target) {
@@ -59,6 +62,7 @@ impl Broadcaster {
         .await;
     }
 
+    #[tracing::instrument(name = "move_queue", skip_all)]
     pub fn move_queue(&self, count: usize) -> Vec<(Uuid, String)> {
         let queue = &mut self.queue.lock().unwrap();
         let count = count.min(queue.len());
@@ -67,6 +71,7 @@ impl Broadcaster {
         drained
     }
 
+    #[tracing::instrument(name = "broadcast_to_user", skip_all)]
     pub async fn broadcast_to_user(
         &self,
         messages: impl IntoIterator<Item = WsServerMessage> + Clone,
@@ -85,6 +90,7 @@ impl Broadcaster {
     }
 
     /// returns a number of nodes to which [`WsServerMessage`]s were sent
+    #[tracing::instrument(name = "queue_multiple", skip_all)]
     pub async fn queue_multiple(
         &self,
         messages: impl IntoIterator<Item = WsServerMessage> + Clone,
@@ -110,6 +116,7 @@ impl Broadcaster {
         drained
     }
 
+    #[tracing::instrument(name = "subscribe", skip_all)]
     pub fn subscribe(
         &self,
         user_id: Uuid,
@@ -124,6 +131,7 @@ impl Broadcaster {
         self.global_transmitter.subscribe()
     }
 
+    #[tracing::instrument(name = "unsubscribe", skip_all)]
     pub fn unsubscribe(&self, user_id: Uuid, ip: String) {
         self.sockets.remove(&(user_id, ip.clone()));
         let queue = &mut self.queue.lock().unwrap();
@@ -134,6 +142,7 @@ impl Broadcaster {
         }
     }
 
+    #[tracing::instrument(name = "cron_reports", skip_all)]
     pub async fn cron_reports(
         &mut self,
         period: Duration,

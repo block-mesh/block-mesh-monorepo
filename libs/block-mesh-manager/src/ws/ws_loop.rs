@@ -4,6 +4,7 @@ use crate::database::task::find_users_tasks::find_users_tasks;
 use crate::database::task::update_task_assigned::update_task_assigned;
 use crate::domain::aggregate::AggregateName;
 use crate::domain::task::TaskStatus;
+use crate::utils::instrument_wrapper::{commit_txn, create_txn};
 use crate::ws::broadcaster::Broadcaster;
 use crate::ws::connection_manager::fetch_latest_cron_settings;
 use crate::ws::cron_reports_controller::CronReportAggregateEntry;
@@ -14,6 +15,7 @@ use sqlx::PgPool;
 use std::time::Duration;
 use uuid::Uuid;
 
+#[tracing::instrument(name = "ws_loop", skip_all)]
 pub async fn ws_loop(
     pool: &PgPool,
     user_id: &Uuid,
@@ -22,7 +24,7 @@ pub async fn ws_loop(
     window_size: usize,
     broadcaster: Broadcaster,
 ) -> anyhow::Result<()> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = create_txn(pool).await?;
     let aggregate = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
         AggregateName::CronReports,
@@ -42,7 +44,7 @@ pub async fn ws_loop(
         .context("Failed to parse cron report settings")?,
     )
     .await?;
-    transaction.commit().await?;
+    commit_txn(transaction).await?;
     loop {
         let settings = fetch_latest_cron_settings(pool, user_id).await?;
         let new_period = settings.period;
@@ -54,7 +56,7 @@ pub async fn ws_loop(
         let new_used_window_size = queued.len();
         let new_queue_size = broadcaster.queue.lock().unwrap().len();
 
-        let mut transaction = pool.begin().await?;
+        let mut transaction = create_txn(pool).await?;
         let mut tasks = find_users_tasks(&mut transaction, new_window_size as i64).await?;
         loop {
             let task = match tasks.pop() {
@@ -93,7 +95,7 @@ pub async fn ws_loop(
             .context("Failed to parse cron report settings")?,
         )
         .await?;
-        transaction.commit().await?;
+        commit_txn(transaction).await?;
         tokio::time::sleep(new_period).await;
     }
 }
