@@ -2,9 +2,9 @@ use crate::database::api_token::get_api_token_by_user_id_and_status::get_api_tok
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
+use crate::utils::verify_cache::verify_with_cache;
 use axum::extract::State;
 use axum::{Extension, Json};
-use bcrypt::verify;
 use block_mesh_common::interfaces::server_api::{
     GetTokenRequest, GetTokenResponse, GetTokenResponseEnum,
 };
@@ -45,7 +45,7 @@ pub async fn handler(
         }
     };
 
-    if !verify::<&str>(body.password.as_ref(), user.password.as_ref()).unwrap_or(false) {
+    if !verify_with_cache(body.password.as_ref(), user.password.as_ref()).await {
         get_token_map.insert(key, GetTokenResponseEnum::PasswordMismatch);
         return Err(Error::PasswordMismatch);
     }
