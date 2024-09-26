@@ -26,10 +26,10 @@ fn messenger(
                     if is_cls.load(Ordering::Relaxed) {
                         return;
                     }
-                    tracing::error!("Sink task error: {error}");
+                    tracing::warn!("Sink task error: {error}");
                 }
             } else {
-                tracing::error!("Failed to serialize message {server_message:?}");
+                tracing::warn!("Failed to serialize message {server_message:?}");
             }
         }
     });

@@ -113,13 +113,12 @@ async fn run() -> anyhow::Result<()> {
     ));
 
     tokio::select! {
-        o = finalize_daily_stats_task => eprintln!("finalize_daily_stats_task exit {:?}", o),
-        o = rpc_worker_task => eprintln!("rpc_worker_task exit {:?}", o),
-        o = db_listen_task => eprintln!("db_listen_task exit {:?}", o),
-        o = db_aggregator_users_ip_task => eprintln!("db_aggregator_users_ip_task exit {:?}", o),
-        o = db_aggregates_aggregator_task => eprintln!("db_aggregates_aggregator_task exit {:?}", o),
-        o = db_analytics_aggregator_task => eprintln!("db_analytics_aggregator_task exit {:?}", o),
-        o = db_daily_stats_aggregator_task => eprintln!("db_daily_stats_aggregator_task exit {:?}", o)
+        o = finalize_daily_stats_task => panic!("finalize_daily_stats_task exit {:?}", o),
+        o = rpc_worker_task => panic!("rpc_worker_task exit {:?}", o),
+        o = db_listen_task => panic!("db_listen_task exit {:?}", o),
+        o = db_aggregator_users_ip_task => panic!("db_aggregator_users_ip_task exit {:?}", o),
+        o = db_aggregates_aggregator_task => panic!("db_aggregates_aggregator_task exit {:?}", o),
+        o = db_analytics_aggregator_task => panic!("db_analytics_aggregator_task exit {:?}", o),
+        o = db_daily_stats_aggregator_task => panic!("db_daily_stats_aggregator_task exit {:?}", o)
     }
-    Ok(())
 }
