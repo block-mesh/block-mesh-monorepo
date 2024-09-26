@@ -32,6 +32,7 @@ pub fn user_ip_key(user_id: &Uuid, ip: &str) -> String {
     format!("{}-{}", user_id, ip)
 }
 
+#[tracing::instrument(name = "get_value_from_redis", skip_all)]
 pub async fn get_value_from_redis(
     con: &mut MultiplexedConnection,
     key: &str,
@@ -48,6 +49,7 @@ pub async fn get_value_from_redis(
     Ok(redis_user)
 }
 
+#[tracing::instrument(name = "touch_redis_value", skip_all)]
 pub async fn touch_redis_value(con: &mut MultiplexedConnection, user_id: &Uuid, ip: &str) {
     let redis_user = RateLimitUser::new(user_id, ip);
     if let Ok(redis_user) = serde_json::to_string(&redis_user) {
@@ -64,6 +66,7 @@ pub async fn touch_redis_value(con: &mut MultiplexedConnection, user_id: &Uuid, 
     }
 }
 
+#[tracing::instrument(name = "filter_request", skip_all)]
 pub async fn filter_request(
     con: &mut MultiplexedConnection,
     user_id: &Uuid,

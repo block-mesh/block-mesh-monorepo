@@ -21,16 +21,18 @@ use crate::database::users_ip::get_user_ips::get_user_ips;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
+use crate::utils::instrument_wrapper::{commit_txn, create_txn};
 use crate::utils::points::{calc_points_daily, calc_total_points};
 use block_mesh_common::feature_flag_client::FlagValue;
 use regex::Regex;
 
+#[tracing::instrument(name = "dashboard_data_extractor", skip_all)]
 pub async fn dashboard_data_extractor(
     pool: &PgPool,
     user_id: Uuid,
     state: Arc<AppState>,
 ) -> anyhow::Result<DashboardResponse> {
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let mut transaction = create_txn(pool).await?;
     let user = get_user_opt_by_id(&mut transaction, &user_id)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
@@ -107,7 +109,7 @@ pub async fn dashboard_data_extractor(
     )
     .await?;
 
-    transaction.commit().await.map_err(Error::from)?;
+    commit_txn(transaction).await?;
     Ok(DashboardResponse {
         user_ips,
         calls_to_action: calls_to_action

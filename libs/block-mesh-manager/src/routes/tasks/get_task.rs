@@ -8,6 +8,7 @@ use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
 use crate::middlewares::rate_limit::filter_request;
 use crate::startup::application::AppState;
+use crate::utils::instrument_wrapper::{commit_txn, create_txn};
 use anyhow::Context;
 use axum::extract::State;
 use axum::{Extension, Json};
@@ -16,13 +17,14 @@ use http::HeaderMap;
 use sqlx::PgPool;
 use std::sync::Arc;
 
+#[tracing::instrument(name = "get_task", skip_all)]
 pub async fn handler(
     headers: HeaderMap,
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,
     Json(body): Json<GetTaskRequest>,
 ) -> Result<Json<Option<GetTaskResponse>>, Error> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = create_txn(&pool).await?;
     let api_token = find_token(&mut transaction, &body.api_token)
         .await?
         .ok_or(Error::ApiTokenNotFound)?;
@@ -64,7 +66,7 @@ pub async fn handler(
     };
     let _ = create_daily_stat(&mut transaction, user.id).await?;
     update_task_assigned(&mut transaction, task.id, user.id, TaskStatus::Assigned).await?;
-    transaction.commit().await.map_err(Error::from)?;
+    commit_txn(transaction).await?;
     Ok(Json(Some(GetTaskResponse {
         id: task.id,
         url: task.url,

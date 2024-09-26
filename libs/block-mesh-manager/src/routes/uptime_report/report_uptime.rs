@@ -7,6 +7,7 @@ use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
+use crate::utils::instrument_wrapper::{commit_txn, create_txn};
 use crate::worker::db_cleaner_cron::EnrichIp;
 use axum::extract::{ConnectInfo, Query, Request, State};
 use axum::Json;
@@ -124,7 +125,7 @@ pub async fn report_uptime_content(
     mode: HandlerMode,
 ) -> Result<Json<ReportUptimeResponse>, Error> {
     let pool = state.pool.clone();
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let mut transaction = create_txn(&pool).await?;
     let api_token = find_token(&mut transaction, &query.api_token)
         .await?
         .ok_or(Error::ApiTokenNotFound)?;
@@ -152,7 +153,7 @@ pub async fn report_uptime_content(
         get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, &user.id)
             .await
             .map_err(Error::from)?;
-    transaction.commit().await.map_err(Error::from)?;
+    commit_txn(transaction).await?;
 
     let now = Utc::now();
     let diff = now - uptime.updated_at.unwrap_or(now);
@@ -187,9 +188,9 @@ pub async fn report_uptime_content(
                 })
                 .await;
         } else {
-            let mut transaction = pool.begin().await.map_err(Error::from)?;
+            let mut transaction = create_txn(&pool).await?;
             let _ = increment_uptime(&mut transaction, &daily_stat.id, extra).await;
-            transaction.commit().await?;
+            commit_txn(transaction).await?;
         }
     }
 
