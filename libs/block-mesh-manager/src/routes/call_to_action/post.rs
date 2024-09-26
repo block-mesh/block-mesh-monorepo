@@ -7,14 +7,16 @@ use axum::{Extension, Form};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::CallToActionForm;
 use block_mesh_common::routes_enum::RoutesEnum;
+use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 
+#[tracing::instrument(name = "call_to_action", skip_all)]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,
     Form(form): Form<CallToActionForm>,
 ) -> Result<Redirect, Error> {
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let mut transaction = create_txn(&pool).await?;
     let user = auth.user.ok_or(Error::UserNotFound)?;
     get_or_create_call_to_action(
         &mut transaction,
@@ -24,7 +26,7 @@ pub async fn handler(
     )
     .await
     .map_err(Error::from)?;
-    transaction.commit().await.map_err(Error::from)?;
+    commit_txn(transaction).await?;
     Ok(Redirect::to(&format!(
         "/ui{}",
         RoutesEnum::Static_Auth_Dashboard.to_string().as_str()
