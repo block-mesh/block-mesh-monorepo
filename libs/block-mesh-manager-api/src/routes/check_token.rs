@@ -4,16 +4,10 @@ use crate::error::Error;
 use anyhow::Context;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{
-    CheckTokenRequest, CheckTokenResponseEnum, GetTokenResponse,
+    CheckTokenRequest, CheckTokenResponseEnum, CheckTokenResponseMap, GetTokenResponse,
 };
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
-use dashmap::DashMap;
-use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-use std::sync::Arc;
-use uuid::Uuid;
-
-pub type CheckTokenResponseMap = Arc<DashMap<(String, Uuid), CheckTokenResponseEnum>>;
 
 #[tracing::instrument(name = "check_token", skip_all)]
 pub async fn check_token(
