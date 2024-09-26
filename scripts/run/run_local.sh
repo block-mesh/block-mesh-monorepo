@@ -1,5 +1,7 @@
 #!/usr/bin/env bash
 set -x
+# tokio-console:
+#export RUSTFLAGS="--cfg tokio_unstable"
 export APP_ENVIRONMENT="local"
 export SENTRY_LAYER="true"
 export SENTRY_SAMPLE_RATE="1.0"

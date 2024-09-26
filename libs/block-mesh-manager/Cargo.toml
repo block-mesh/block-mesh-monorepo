@@ -36,6 +36,7 @@ tikv-jemallocator = { workspace = true, optional = true }
 logger-leptos = { path = "../logger-leptos", optional = true }
 logger-general = { path = "../logger-general", optional = true, features = ["sentry"] }
 tracing-subscriber-wasm = { workspace = true }
+console-subscriber = { workspace = true, optional = true }
 num-traits = { workspace = true }
 reqwest = { workspace = true, default-features = false, features = [
   "multipart",
@@ -59,7 +60,7 @@ config = { workspace = true }
 dotenv = { workspace = true }
 enum-iterator = { workspace = true }
 block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env"] }
-tokio = { workspace = true, features = ["full"], optional = true }
+tokio = { workspace = true, features = ["full", "tracing"], optional = true }
 axum-login = { workspace = true, optional = true }
 tower-sessions-sqlx-store = { workspace = true, features = ["postgres"], optional = true }
 axum = { workspace = true, features = ["ws", "macros"], optional = true }
@@ -145,6 +146,7 @@ hydrate = [
   "dep:logger-leptos"
 ]
 ssr = [
+  "dep:console-subscriber",
   "dep:sentry-tower",
   "dep:block-mesh-manager-database-domain",
   "dep:twitter-v2",
