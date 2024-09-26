@@ -20,6 +20,20 @@ use block_mesh_common::interfaces::server_api::{
 use http::StatusCode;
 use http_body_util::BodyExt;
 use std::sync::Arc;
+use tracing::{span, Level};
+
+#[tracing::instrument(name = "extract_body", skip_all)]
+pub async fn extract_body(request: Request) -> anyhow::Result<String> {
+    let (_parts, body) = request.into_parts();
+    let bytes = body
+        .collect()
+        .await
+        .map_err(|_| Error::FailedReadingBody)?
+        .to_bytes();
+    let span = span!(Level::INFO, "bytes", len = bytes.len()).entered();
+    span.exit();
+    Ok(String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from("")))
+}
 
 #[tracing::instrument(name = "submit_task_content", skip_all)]
 pub async fn submit_task_content(
@@ -37,6 +51,7 @@ pub async fn submit_task_content(
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     if user.email.to_ascii_lowercase() != query.email.to_ascii_lowercase() {
+        commit_txn(transaction).await?;
         return Err(Error::UserNotFound);
     }
     let task =
@@ -44,27 +59,22 @@ pub async fn submit_task_content(
             .await?
             .ok_or(Error::TaskNotFound)?;
     if task.assigned_user_id.is_some() && task.assigned_user_id.unwrap() != user.id {
+        commit_txn(transaction).await?;
         return Err(Error::TaskAssignedToAnotherUser);
     }
 
     let response_raw = match mode {
         HandlerMode::Http => match request {
-            Some(request) => {
-                let (_parts, body) = request.into_parts();
-                let bytes = body
-                    .collect()
-                    .await
-                    .map_err(|_| Error::FailedReadingBody)?
-                    .to_bytes();
-                String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from(""))
-            }
+            Some(request) => extract_body(request).await?,
             None => {
+                commit_txn(transaction).await?;
                 return Err(Error::InternalServer);
             }
         },
         HandlerMode::WebSocket => match query.response_body {
             Some(body) => body,
             None => {
+                commit_txn(transaction).await?;
                 return Err(Error::InternalServer);
             }
         },
