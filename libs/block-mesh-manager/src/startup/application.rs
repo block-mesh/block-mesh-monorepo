@@ -145,12 +145,24 @@ impl Application {
             .parse()
             .unwrap_or(false);
 
+        let use_websocket = env::var("USE_WEBSOCKET")
+            .unwrap_or("false".to_string())
+            .parse()
+            .unwrap_or(false);
+
         let backend = Router::new()
             .nest("/", auth_router)
             .route_layer(login_required!(Backend, login_url = "/login"))
-            .nest("/", ws_router)
             .nest("/api", api_router)
-            .nest("/", un_auth_router)
+            .nest("/", un_auth_router);
+
+        let backend = if use_websocket {
+            backend.nest("/", ws_router)
+        } else {
+            backend
+        };
+
+        let backend = backend
             .layer(Extension(application_base_url))
             .layer(Extension(db_pool.clone()))
             .layer(cors)
