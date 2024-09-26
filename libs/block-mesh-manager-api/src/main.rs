@@ -1,5 +1,3 @@
-use crate::routes::check_token::CheckTokenResponseMap;
-use crate::routes::get_token::GetTokenResponseMap;
 use crate::routes::router::get_router;
 use axum::extract::Request;
 use axum::{Extension, Router};
@@ -19,6 +17,7 @@ use tokio::net::TcpListener;
 mod database;
 mod error;
 mod routes;
+use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
 use tower_http::cors::CorsLayer;
 use tower_http::timeout::TimeoutLayer;
 use tracing::log;

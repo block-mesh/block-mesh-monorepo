@@ -10,6 +10,7 @@ use crate::domain::aggregate::AggregateName;
 use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
+use crate::utils::instrument_wrapper::{commit_txn, create_txn};
 use axum::extract::{Query, Request, State};
 use axum::Json;
 use block_mesh_common::interfaces::db_messages::{AggregateMessage, DBMessageTypes};
@@ -20,6 +21,7 @@ use http::StatusCode;
 use http_body_util::BodyExt;
 use std::sync::Arc;
 
+#[tracing::instrument(name = "submit_task_content", skip_all)]
 pub async fn submit_task_content(
     state: Arc<AppState>,
     query: SubmitTaskRequest,
@@ -27,7 +29,7 @@ pub async fn submit_task_content(
     mode: HandlerMode,
 ) -> Result<Json<SubmitTaskResponse>, Error> {
     let pool = state.pool.clone();
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let mut transaction = create_txn(&pool).await?;
     let api_token = find_token(&mut transaction, &query.api_token)
         .await?
         .ok_or(Error::ApiTokenNotFound)?;
@@ -87,17 +89,17 @@ pub async fn submit_task_content(
     let _ = create_daily_stat(&mut transaction, user.id).await;
     let daily_stat = get_daily_stat_of_user(&mut transaction, user.id).await?;
     increment_tasks_count(&mut transaction, daily_stat.id).await?;
-    transaction.commit().await.map_err(Error::from)?;
+    commit_txn(transaction).await?;
 
     if query.response_code.unwrap_or(520) == 200 {
-        let mut transaction = pool.begin().await.map_err(Error::from)?;
+        let mut transaction = create_txn(&pool).await?;
         let tasks = get_or_create_aggregate_by_user_and_name(
             &mut transaction,
             AggregateName::Tasks,
             &user.id,
         )
         .await?;
-        transaction.commit().await.map_err(Error::from)?;
+        commit_txn(transaction).await?;
         let _ = state
             .tx_aggregate_agg
             .send_async(AggregateMessage {
@@ -113,6 +115,7 @@ pub async fn submit_task_content(
     }))
 }
 
+#[tracing::instrument(name = "submit_task", skip_all)]
 pub async fn handler(
     State(state): State<Arc<AppState>>,
     Query(query): Query<SubmitTaskRequest>,

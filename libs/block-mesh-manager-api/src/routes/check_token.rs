@@ -1,24 +1,13 @@
 use crate::database::get_api_token_by_usr_and_status::get_api_token_by_usr_and_status;
 use crate::database::get_user_opt_by_email::get_user_opt_by_email;
 use crate::error::Error;
+use anyhow::Context;
 use axum::{Extension, Json};
-use block_mesh_common::interfaces::server_api::{CheckTokenRequest, GetTokenResponse};
+use block_mesh_common::interfaces::server_api::{
+    CheckTokenRequest, CheckTokenResponseEnum, CheckTokenResponseMap, GetTokenResponse,
+};
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
-use dashmap::DashMap;
-use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-use std::sync::Arc;
-use uuid::Uuid;
-
-pub type CheckTokenResponseMap = Arc<DashMap<(String, Uuid), CheckTokenResponseEnum>>;
-
-#[derive(Clone, Serialize, Deserialize, Debug)]
-pub enum CheckTokenResponseEnum {
-    GetTokenResponse(GetTokenResponse),
-    UserNotFound,
-    ApiTokenMismatch,
-    ApiTokenNotFound,
-}
 
 #[tracing::instrument(name = "check_token", skip_all)]
 pub async fn check_token(
@@ -38,16 +27,20 @@ pub async fn check_token(
         };
     }
 
-    let user = match get_user_opt_by_email(&pool, &email).await {
+    let mut transaction = pool.begin().await?;
+
+    let user = match get_user_opt_by_email(&mut *transaction, &email).await {
         Ok(user) => match user {
             Some(user) => user,
             None => {
                 check_token_map.insert(key, CheckTokenResponseEnum::UserNotFound);
+                let _ = transaction.commit().await.context("Cannot commit txn");
                 return Err(Error::UserNotFound);
             }
         },
         Err(_) => {
             check_token_map.insert(key, CheckTokenResponseEnum::UserNotFound);
+            let _ = transaction.commit().await.context("Cannot commit txn");
             return Err(Error::UserNotFound);
         }
     };
@@ -57,17 +50,20 @@ pub async fn check_token(
                 Some(api_token) => api_token,
                 None => {
                     check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenNotFound);
+                    let _ = transaction.commit().await.context("Cannot commit txn");
                     return Err(Error::ApiTokenNotFound);
                 }
             },
             Err(_) => {
                 check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenNotFound);
+                let _ = transaction.commit().await.context("Cannot commit txn");
                 return Err(Error::ApiTokenNotFound);
             }
         };
 
     if *api_token.token.as_ref() != body.api_token {
         check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenMismatch);
+        let _ = transaction.commit().await.context("Cannot commit txn");
         return Err(Error::ApiTokenMismatch);
     }
 
@@ -79,6 +75,7 @@ pub async fn check_token(
         key,
         CheckTokenResponseEnum::GetTokenResponse(response.clone()),
     );
+    let _ = transaction.commit().await.context("Cannot commit txn");
 
     Ok(Json(response))
 }

@@ -5,6 +5,8 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use dashmap::DashMap;
+    use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
     use std::mem;
     use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
     use block_mesh_common::interfaces::ws_api::WsServerMessage;
@@ -130,7 +132,13 @@ async fn run() -> anyhow::Result<()> {
             db_pool.clone(),
         )
         .await;
+
+    let check_token_map: CheckTokenResponseMap = Arc::new(DashMap::new());
+    let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());
+
     let app_state = Arc::new(AppState {
+        check_token_map,
+        get_token_map,
         email_client,
         pool: db_pool.clone(),
         client,

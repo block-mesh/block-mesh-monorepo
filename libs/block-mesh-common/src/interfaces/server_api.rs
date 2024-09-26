@@ -1,8 +1,10 @@
 use crate::constants::DeviceType;
 use chrono::{DateTime, NaiveDate, Utc};
+use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::cmp::Ordering;
+use std::sync::Arc;
 use typeshare::typeshare;
 use uuid::Uuid;
 
@@ -404,3 +406,22 @@ pub enum HandlerMode {
     Http,
     WebSocket,
 }
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub enum GetTokenResponseEnum {
+    GetTokenResponse(GetTokenResponse),
+    UserNotFound,
+    PasswordMismatch,
+    ApiTokenNotFound,
+}
+
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub enum CheckTokenResponseEnum {
+    GetTokenResponse(GetTokenResponse),
+    UserNotFound,
+    ApiTokenMismatch,
+    ApiTokenNotFound,
+}
+
+pub type GetTokenResponseMap = Arc<DashMap<(String, String), GetTokenResponseEnum>>;
+pub type CheckTokenResponseMap = Arc<DashMap<(String, Uuid), CheckTokenResponseEnum>>;
