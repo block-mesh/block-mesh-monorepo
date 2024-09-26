@@ -11,6 +11,7 @@ use tokio::sync::broadcast::Sender;
 use tracing::error;
 
 #[allow(dead_code)]
+#[tracing::instrument(name = "start_listening", skip_all, err)]
 pub async fn start_listening<T, F, R, Fut>(
     pool: Pool<Postgres>,
     channels: Vec<&str>,
@@ -26,7 +27,7 @@ where
     listener.listen_all(channels).await?;
     let tx = Arc::new(tx);
     loop {
-        while let Some(notification) = listener.try_recv().await? {
+        while let Ok(Some(notification)) = listener.try_recv().await {
             let tx = tx.clone();
             let string = notification.payload().to_owned();
             if let Ok(payload) = serde_json::from_str::<T>(&string) {

@@ -3,6 +3,7 @@ use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
+#[tracing::instrument(name = "get_or_create_analytics", skip_all)]
 pub async fn get_or_create_analytics(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,

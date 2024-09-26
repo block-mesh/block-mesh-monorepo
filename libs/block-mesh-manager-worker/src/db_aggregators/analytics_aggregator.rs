@@ -1,11 +1,13 @@
 use crate::db_calls::get_or_create_analytics::get_or_create_analytics;
 use block_mesh_common::interfaces::db_messages::AnalyticsMessage;
+use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use chrono::Utc;
 use serde_json::Value;
 use sqlx::PgPool;
 use std::collections::HashMap;
 use tokio::sync::broadcast::Receiver;
 
+#[tracing::instrument(name = "analytics_aggregator", skip_all, err)]
 pub async fn analytics_aggregator(
     pool: PgPool,
     mut rx: Receiver<Value>,
@@ -24,7 +26,7 @@ pub async fn analytics_aggregator(
             let run = diff.num_seconds() > time_limit || count >= agg_size;
             prev = Utc::now();
             if run {
-                if let Ok(mut transaction) = pool.begin().await {
+                if let Ok(mut transaction) = create_txn(&pool).await {
                     for pair in calls.iter() {
                         let _ = get_or_create_analytics(
                             &mut transaction,
@@ -34,7 +36,7 @@ pub async fn analytics_aggregator(
                         )
                         .await;
                     }
-                    let _ = transaction.commit().await;
+                    let _ = commit_txn(transaction).await;
                     count = 0;
                     calls.clear();
                 }

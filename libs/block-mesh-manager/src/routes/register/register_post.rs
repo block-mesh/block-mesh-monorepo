@@ -12,6 +12,7 @@ use validator::validate_email;
 
 use block_mesh_common::interfaces::server_api::RegisterForm;
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
+use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use secret::Secret;
 
 use crate::database::api_token::create_api_token::create_api_token;
@@ -25,7 +26,6 @@ use crate::database::user::update_user_invited_by::update_user_invited_by;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
 use crate::startup::application::AppState;
-use crate::utils::instrument_wrapper::{commit_txn, create_txn};
 
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
