@@ -53,7 +53,6 @@ pub async fn submit_task_content(
     let response_raw = match mode {
         HandlerMode::Http => match request {
             Some(request) => {
-                let span = span!(Level::INFO, "body_processing").entered();
                 let (_parts, body) = request.into_parts();
                 let bytes = body
                     .collect()
@@ -61,7 +60,6 @@ pub async fn submit_task_content(
                     .map_err(|_| Error::FailedReadingBody)?
                     .to_bytes();
                 let v = String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from(""));
-                span.exit();
                 v
             }
             None => {
@@ -123,6 +121,7 @@ pub async fn submit_task_content(
     }))
 }
 
+#[tracing::instrument(name = "submit_task", skip_all)]
 pub async fn handler(
     State(state): State<Arc<AppState>>,
     Query(query): Query<SubmitTaskRequest>,
