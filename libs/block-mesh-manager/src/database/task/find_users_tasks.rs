@@ -2,6 +2,7 @@ use crate::domain::task::GetTask;
 use crate::domain::task::TaskStatus;
 use sqlx::{Postgres, Transaction};
 
+#[tracing::instrument(name = "find_users_tasks", skip_all)]
 pub async fn find_users_tasks(
     transaction: &mut Transaction<'_, Postgres>,
     limit: i64,

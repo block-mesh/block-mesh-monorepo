@@ -38,6 +38,7 @@ async fn submit_bandwidth_run_background(state: Arc<AppState>, pool: PgPool, use
     }
 }
 
+#[tracing::instrument(name = "submit_bandwidth_content", skip_all)]
 pub async fn submit_bandwidth_content(
     state: Arc<AppState>,
     body: ReportBandwidthRequest,

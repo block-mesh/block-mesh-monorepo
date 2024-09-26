@@ -3,6 +3,7 @@ use serde_json::Value;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
+#[tracing::instrument(name = "update_aggregate", skip_all)]
 pub async fn update_aggregate(
     transaction: &mut Transaction<'_, Postgres>,
     id: &Uuid,

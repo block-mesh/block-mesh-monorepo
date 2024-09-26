@@ -26,6 +26,10 @@ pub async fn get_connection_pool(
                     "idle_in_transaction_session_timeout",
                     env::var("idle_in_transaction_session_timeout").unwrap_or("3000ms".to_string()),
                 ),
+                (
+                    "lock_timeout",
+                    env::var("lock_timeout").unwrap_or("1500ms".to_string()),
+                ),
             ])
             .clone(),
     };

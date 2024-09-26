@@ -20,6 +20,7 @@ impl<T> TaskScheduler<T>
 where
     T: Debug + Send + 'static,
 {
+    #[tracing::instrument(name = "new", skip_all)]
     pub fn new() -> Self {
         let (task_sender, mut task_receiver) = mpsc::channel(50);
         let (session_sender, mut session_receiver) = mpsc::channel::<NodeController<T>>(1000);
@@ -42,6 +43,7 @@ where
         }
     }
 
+    #[tracing::instrument(name = "add_session", skip_all)]
     pub async fn add_session(&self) -> Option<oneshot::Receiver<T>> {
         let (task_sender, task_receiver) = oneshot::channel();
         let controller = NodeController::new(task_sender);
@@ -51,6 +53,7 @@ where
         Some(task_receiver)
     }
 
+    #[tracing::instrument(name = "add_task", skip_all)]
     pub async fn add_task(&self, http_task: T) {
         if let Err(_error) = self.task_sender.send(http_task).await {
             tracing::error!("Failed to add new task to scheduler");
@@ -63,6 +66,7 @@ struct NodeController<T> {
 }
 
 impl<T> NodeController<T> {
+    #[tracing::instrument(name = "new", skip_all)]
     fn new(task_sender: oneshot::Sender<T>) -> Self {
         Self { task_sender }
     }

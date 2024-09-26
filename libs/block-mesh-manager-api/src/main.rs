@@ -69,6 +69,10 @@ async fn run(is_with_sentry: bool) {
                 "idle_in_transaction_session_timeout",
                 env::var("idle_in_transaction_session_timeout").unwrap_or("3000ms".to_string()),
             ),
+            (
+                "lock_timeout",
+                env::var("lock_timeout").unwrap_or("1500ms".to_string()),
+            ),
         ]);
     let db_pool = PgPoolOptions::new()
         .acquire_timeout(Duration::from_secs(

@@ -9,6 +9,7 @@ use std::ops::ControlFlow;
 use std::sync::Arc;
 
 /// helper to print contents of messages to stdout. Has special treatment for Close.
+#[tracing::instrument(name = "process_message", skip_all)]
 pub async fn process_message(
     msg: Message,
     ip: String,
@@ -49,6 +50,7 @@ pub async fn process_message(
     ControlFlow::Continue(None)
 }
 
+#[tracing::instrument(name = "process_client_message", skip_all)]
 async fn process_client_message(
     text: &str,
     ip: String,

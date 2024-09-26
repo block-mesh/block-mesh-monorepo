@@ -12,6 +12,7 @@ use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
 use sqlx::PgPool;
 use std::sync::Arc;
 
+#[tracing::instrument(name = "get_token", skip_all)]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
     State(state): State<Arc<AppState>>,
