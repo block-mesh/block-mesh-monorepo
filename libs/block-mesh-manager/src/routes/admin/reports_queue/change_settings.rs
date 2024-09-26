@@ -10,7 +10,7 @@ use crate::ws::cron_reports_controller::CronReportSettings;
 use anyhow::Context;
 use axum::extract::State;
 use axum::response::IntoResponse;
-use axum::{debug_handler, Extension, Json};
+use axum::{Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
 use block_mesh_manager_database_domain::domain::user::UserRole;
@@ -19,7 +19,7 @@ use std::env;
 use std::sync::Arc;
 use uuid::Uuid;
 
-#[debug_handler]
+#[tracing::instrument(name = "change_settings", skip_all)]
 pub async fn handler(
     State(state): State<Arc<AppState>>,
     Extension(auth): Extension<AuthSession<Backend>>,

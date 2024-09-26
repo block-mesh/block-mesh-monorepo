@@ -3,6 +3,7 @@ use secret::Secret;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
+#[tracing::instrument(name = "get_api_token_by_usr_and_status", skip_all)]
 pub async fn get_api_token_by_usr_and_status(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,

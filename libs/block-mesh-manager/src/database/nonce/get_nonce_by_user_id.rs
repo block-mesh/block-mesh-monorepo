@@ -3,6 +3,7 @@ use secret::Secret;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
+#[tracing::instrument(name = "get_nonce_by_user_id", skip_all)]
 pub async fn get_nonce_by_user_id(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,

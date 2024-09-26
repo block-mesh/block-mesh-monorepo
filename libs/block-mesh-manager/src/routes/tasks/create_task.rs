@@ -24,6 +24,7 @@ struct CreateTaskTemplate {
     pub chat: String,
 }
 
+#[tracing::instrument(name = "create_task", skip_all)]
 pub async fn handler(Extension(_auth): Extension<AuthSession<Backend>>) -> impl IntoResponse {
     CreateTaskTemplate {
         chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),

@@ -6,6 +6,7 @@ use crate::database::users_ip::get_or_create_users_ip::get_or_create_users_ip;
 use crate::errors::error::Error;
 use block_mesh_common::constants::BLOCK_MESH_IP_WORKER;
 use block_mesh_common::interfaces::ip_data::{IPData, IpDataPostRequest};
+use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use flume::Receiver;
 use reqwest::{Client, ClientBuilder};
 use serde::{Deserialize, Serialize};
@@ -19,6 +20,7 @@ pub struct EnrichIp {
     pub ip: String,
 }
 
+#[tracing::instrument(name = "db_cleaner_cron", skip_all)]
 pub async fn db_cleaner_cron(pool: PgPool, rx: Receiver<EnrichIp>) -> Result<(), anyhow::Error> {
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
@@ -38,13 +40,14 @@ pub async fn db_cleaner_cron(pool: PgPool, rx: Receiver<EnrichIp>) -> Result<(),
     Ok(())
 }
 
+#[tracing::instrument(name = "enrich_ip_and_cleanup", skip_all)]
 pub async fn enrich_ip_and_cleanup(
     pool: PgPool,
     client: Client,
     job: EnrichIp,
 ) -> anyhow::Result<()> {
     let pool = pool.clone();
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let mut transaction = create_txn(&pool).await?;
     delete_uptime_report_by_time_for_all(&mut transaction, 3600)
         .await
         .map_err(Error::from)?;
@@ -67,6 +70,6 @@ pub async fn enrich_ip_and_cleanup(
             .await?;
         enrich_ip_address(&mut transaction, ip_address.id, &ip_data).await?;
     }
-    transaction.commit().await?;
+    commit_txn(transaction).await?;
     Ok(())
 }

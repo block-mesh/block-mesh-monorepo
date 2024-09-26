@@ -2,9 +2,7 @@ use crate::frontends::components::bandwidth_card::BandwidthCard;
 use crate::frontends::components::bar_chart::BarChart;
 use crate::frontends::components::download_extension::DownloadExtension;
 use crate::frontends::components::heading::Heading;
-use crate::frontends::components::icons::checkmark_icon::CheckMarkIcon;
 use crate::frontends::components::icons::chrome_icon::ChromeIcon;
-use crate::frontends::components::icons::xmark_icon::XMarkIcon;
 use crate::frontends::components::modal::Modal;
 use crate::frontends::components::stat::Stat;
 use crate::frontends::components::sub_heading::Subheading;
@@ -19,7 +17,6 @@ use block_mesh_common::interfaces::server_api::{
     AuthStatusResponse, DashboardResponse, ResendConfirmEmailForm,
 };
 use block_mesh_common::routes_enum::RoutesEnum;
-use chrono::Utc;
 use leptos::*;
 use reqwest::Client;
 
@@ -185,7 +182,6 @@ pub fn NewDashboard() -> impl IntoView {
                 <tr>
                     <TableHeader>IP</TableHeader>
                     <TableHeader>Country</TableHeader>
-                    <TableHeader>Active</TableHeader>
                 </tr>
             </TableHead>
             <tbody>
@@ -198,19 +194,6 @@ pub fn NewDashboard() -> impl IntoView {
                                 <tr>
                                     <TableCell>{ip_info.ip.clone()}</TableCell>
                                     <TableCell>{ip_info.country.clone()}</TableCell>
-                                    <TableCell>
-
-                                        {
-                                            let now = Utc::now();
-                                            let diff = now - ip_info.updated_at;
-                                            if diff.num_seconds() > 300 {
-                                                view! { <XMarkIcon/> }
-                                            } else {
-                                                view! { <CheckMarkIcon/> }
-                                            }
-                                        }
-
-                                    </TableCell>
                                 </tr>
                             }
                         })

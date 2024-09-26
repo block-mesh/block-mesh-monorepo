@@ -3,6 +3,7 @@ use crate::database::notify::notify_worker::notify_worker;
 use crate::startup::application::AppState;
 use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_common::interfaces::db_messages::AnalyticsMessage;
+use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use chrono::Utc;
 use flume::Receiver;
 use sqlx::PgPool;
@@ -11,6 +12,7 @@ use std::env;
 use std::sync::Arc;
 use uuid::Uuid;
 
+#[tracing::instrument(name = "analytics_agg", skip_all)]
 pub async fn analytics_agg(
     pool: PgPool,
     rx: Receiver<AnalyticsMessage>,
@@ -23,13 +25,12 @@ pub async fn analytics_agg(
     let mut calls: HashMap<Uuid, AnalyticsMessage> = HashMap::new();
     let mut count = 0;
     let mut prev = Utc::now();
+    let flag = state
+        .flags
+        .get("send_to_worker")
+        .unwrap_or(&FlagValue::Boolean(false));
+    let flag: bool = <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
     while let Ok(query) = rx.recv_async().await {
-        let flag = state
-            .flags
-            .get("send_to_worker")
-            .unwrap_or(&FlagValue::Boolean(false));
-        let flag: bool =
-            <FlagValue as TryInto<bool>>::try_into(flag.to_owned()).unwrap_or_default();
         if flag {
             let _ = notify_worker(&pool, query.clone()).await;
         } else {
@@ -49,12 +50,13 @@ pub async fn analytics_agg(
     Ok(())
 }
 
+#[tracing::instrument(name = "analytics_agg_submit_to_db", skip_all)]
 pub async fn analytics_agg_submit_to_db(
     pool: &PgPool,
     calls: &mut HashMap<Uuid, AnalyticsMessage>,
 ) -> anyhow::Result<()> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = create_txn(pool).await?;
     inserting_client_analytics_bulk(&mut transaction, calls).await?;
-    transaction.commit().await?;
+    commit_txn(transaction).await?;
     Ok(())
 }

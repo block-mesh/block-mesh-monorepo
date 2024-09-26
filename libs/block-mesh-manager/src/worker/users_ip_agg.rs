@@ -3,6 +3,7 @@ use crate::database::users_ip::update_users_ip_bulk::update_users_ip_bulk;
 use crate::startup::application::AppState;
 use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_common::interfaces::db_messages::UsersIpMessage;
+use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use chrono::Utc;
 use flume::Receiver;
 use sqlx::PgPool;
@@ -11,6 +12,7 @@ use std::env;
 use std::sync::Arc;
 use uuid::Uuid;
 
+#[tracing::instrument(name = "users_ip_agg", skip_all)]
 pub async fn users_ip_agg(
     pool: PgPool,
     rx: Receiver<UsersIpMessage>,
@@ -49,12 +51,13 @@ pub async fn users_ip_agg(
     Ok(())
 }
 
+#[tracing::instrument(name = "users_ips_submit_to_db", skip_all)]
 pub async fn users_ips_submit_to_db(
     pool: &PgPool,
     calls: &mut HashMap<(Uuid, String), String>,
 ) -> anyhow::Result<()> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = create_txn(pool).await?;
     update_users_ip_bulk(&mut transaction, calls).await?;
-    transaction.commit().await?;
+    commit_txn(transaction).await?;
     Ok(())
 }

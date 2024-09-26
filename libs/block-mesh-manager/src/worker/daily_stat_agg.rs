@@ -3,6 +3,7 @@ use crate::database::notify::notify_worker::notify_worker;
 use crate::startup::application::AppState;
 use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_common::interfaces::db_messages::DailyStatMessage;
+use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use chrono::Utc;
 use flume::Receiver;
 use sqlx::PgPool;
@@ -11,6 +12,7 @@ use std::env;
 use std::sync::Arc;
 use uuid::Uuid;
 
+#[tracing::instrument(name = "daily_stat_agg", skip_all)]
 pub async fn daily_stat_agg(
     pool: PgPool,
     rx: Receiver<DailyStatMessage>,
@@ -49,12 +51,13 @@ pub async fn daily_stat_agg(
     Ok(())
 }
 
+#[tracing::instrument(name = "daily_stat_submit_to_db", skip_all)]
 pub async fn daily_stat_submit_to_db(
     pool: &PgPool,
     calls: &mut HashMap<Uuid, f64>,
 ) -> anyhow::Result<()> {
-    let mut transaction = pool.begin().await?;
+    let mut transaction = create_txn(pool).await?;
     update_daily_stat_uptime_bulk(&mut transaction, calls).await?;
-    transaction.commit().await?;
+    commit_txn(transaction).await?;
     Ok(())
 }
