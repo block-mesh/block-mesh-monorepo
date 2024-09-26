@@ -14,7 +14,7 @@ pub async fn create_rpc_tasks(pool: PgPool) -> anyhow::Result<()> {
     for rpc in get_all_rpcs(&mut transaction).await? {
         rpc.create_rpc_task(&mut transaction, &uuid).await?;
     }
-    Ok(commit_txn(transaction).await?)
+    commit_txn(transaction).await
 }
 
 #[tracing::instrument(name = "rpc_worker_loop", skip(pool))]

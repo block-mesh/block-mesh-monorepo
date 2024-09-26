@@ -3,7 +3,7 @@ use crate::pg_listener::start_listening;
 use block_mesh_common::constants::BLOCKMESH_PG_NOTIFY;
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use block_mesh_manager_database_domain::utils::connection::get_pg_pool;
-use logger_general::tracing::{setup_tracing_stdout_only, setup_tracing_stdout_only_with_sentry};
+use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
 use serde_json::Value;
 use std::{env, mem};
 
