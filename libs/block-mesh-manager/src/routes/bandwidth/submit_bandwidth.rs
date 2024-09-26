@@ -12,7 +12,6 @@ use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_common::interfaces::db_messages::{AggregateMessage, DBMessageTypes};
 use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
 use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
-use futures_util::TryFutureExt;
 use http::StatusCode;
 use sqlx::PgPool;
 use std::sync::Arc;
