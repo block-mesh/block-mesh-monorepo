@@ -21,7 +21,6 @@ use crate::cron_jobs::rpc_cron::rpc_worker_loop;
 use crate::db_aggregators::aggregates_aggregator::aggregates_aggregator;
 use crate::db_aggregators::analytics_aggregator::analytics_aggregator;
 use crate::db_aggregators::daily_stats_aggregator::daily_stats_aggregator;
-use sentry;
 
 fn main() {
     let sentry_layer = env::var("SENTRY_LAYER")
