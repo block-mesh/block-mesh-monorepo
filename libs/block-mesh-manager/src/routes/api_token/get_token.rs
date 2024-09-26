@@ -2,6 +2,7 @@ use crate::database::api_token::get_api_token_by_user_id_and_status::get_api_tok
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
+use crate::utils::instrument_wrapper::{commit_txn, create_txn};
 use crate::utils::verify_cache::verify_with_cache;
 use axum::extract::State;
 use axum::{Extension, Json};
@@ -18,7 +19,6 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Json(body): Json<GetTokenRequest>,
 ) -> Result<Json<GetTokenResponse>, Error> {
-    let mut transaction = pool.begin().await?;
     let email = body.email.clone().to_ascii_lowercase();
     let key = (email.clone(), body.password.clone());
     let get_token_map = &state.get_token_map;
@@ -31,23 +31,27 @@ pub async fn handler(
             GetTokenResponseEnum::ApiTokenNotFound => Err(Error::ApiTokenNotFound),
         };
     }
+    let mut transaction = create_txn(&pool).await?;
 
     let user = match get_user_opt_by_email(&mut transaction, &email).await {
         Ok(user) => match user {
             Some(user) => user,
             None => {
                 get_token_map.insert(key, GetTokenResponseEnum::UserNotFound);
+                commit_txn(transaction).await?;
                 return Err(Error::UserNotFound);
             }
         },
         Err(_) => {
             get_token_map.insert(key, GetTokenResponseEnum::UserNotFound);
+            commit_txn(transaction).await?;
             return Err(Error::UserNotFound);
         }
     };
 
     if !verify_with_cache(body.password.as_ref(), user.password.as_ref()).await {
         get_token_map.insert(key, GetTokenResponseEnum::PasswordMismatch);
+        commit_txn(transaction).await?;
         return Err(Error::PasswordMismatch);
     }
 
@@ -59,11 +63,13 @@ pub async fn handler(
                 Some(api_token) => api_token,
                 None => {
                     get_token_map.insert(key, GetTokenResponseEnum::ApiTokenNotFound);
+                    commit_txn(transaction).await?;
                     return Err(Error::ApiTokenNotFound);
                 }
             },
             Err(_) => {
                 get_token_map.insert(key, GetTokenResponseEnum::ApiTokenNotFound);
+                commit_txn(transaction).await?;
                 return Err(Error::ApiTokenNotFound);
             }
         };
@@ -77,5 +83,6 @@ pub async fn handler(
         key,
         GetTokenResponseEnum::GetTokenResponse(response.clone()),
     );
+    commit_txn(transaction).await?;
     Ok(Json(response))
 }
