@@ -19,7 +19,7 @@ pub async fn verify_with_cache(password: &str, hash: &str) -> bool {
     let key = (password.to_string(), hash.to_string());
     let cache = get_cache().await;
     if let Some(entry) = cache.get(&key) {
-        return entry.value().clone();
+        return *entry.value();
     }
     if let Ok(result) = verify::<&str>(password, hash) {
         cache.insert(key, result);
