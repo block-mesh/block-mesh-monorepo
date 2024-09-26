@@ -18,7 +18,6 @@ use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenR
 use block_mesh_manager_database_domain::utils::connection::get_pg_pool;
 use tower_http::cors::CorsLayer;
 use tower_http::timeout::TimeoutLayer;
-use tracing::log;
 
 fn main() -> anyhow::Result<()> {
     load_dotenv();
