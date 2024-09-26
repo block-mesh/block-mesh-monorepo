@@ -39,11 +39,7 @@ pub async fn login(
     } else {
         blockmesh_url.to_string()
     };
-    let url = format!(
-        "{}/api{}",
-        blockmesh_url,
-        RoutesEnum::Api_GetToken.to_string()
-    );
+    let url = format!("{}/api{}", blockmesh_url, RoutesEnum::Api_GetToken);
     let client = reqwest::Client::new();
     let response = client
         .post(&url)
