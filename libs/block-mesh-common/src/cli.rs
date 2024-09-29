@@ -215,6 +215,7 @@ pub struct ProxyMasterNodeOptions {
 }
 
 #[derive(Parser, Debug, Clone, PartialEq, Default)]
+#[command(author = "BlockMesh Network", version, about)]
 pub struct CliOpts {
     /// Email
     #[arg(long)]
