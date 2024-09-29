@@ -64,7 +64,7 @@ pub async fn dashboard_data_extractor(
         .flags
         .get("polling_interval")
         .unwrap_or(&FlagValue::Number(120_000.0));
-    let _interval: f64 =
+    let interval: f64 =
         <FlagValue as TryInto<f64>>::try_into(interval.to_owned()).unwrap_or_default();
 
     let now = Utc::now();
@@ -72,8 +72,9 @@ pub async fn dashboard_data_extractor(
     let limit = 5;
     let user_ips = get_user_ips(&mut transaction, &user_id, limit).await?;
 
-    let connected = diff.num_seconds() > 0;
-    // diff.num_seconds() < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240);
+    // let connected = diff.num_seconds() > 0;
+    let connected =
+        diff.num_seconds() < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240);
     let calls_to_action = get_user_call_to_action(&mut transaction, user_id).await?;
     let perks = get_user_perks(&mut transaction, user_id).await?;
     let daily_stats = get_daily_stats_by_user_id(&mut transaction, &user_id)
