@@ -4,9 +4,6 @@
     <img width="33%" src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/e4f3cdc0-c2ba-442d-3e48-e2f31c0dc100/public"> 
 </p>
 
-BlockMesh (http://blockmesh.notion.site/): Decentralized AI Monitoring 
-BlockMesh challenges the centralized control of AI monitoring by promoting a transparent, community-driven approach. As AI becomes more embedded in our lives, the risks of centralized oversight and ethical misalignment grow. Our mission is to democratize AI oversight, making it accessible, accountable, and secure through blockchain and geo-diverse networks. BlockMesh empowers individuals globally to participate in ensuring that AI systems align with human values, fostering a balanced and open digital ecosystem. Join us in reshaping AI accountability.
-
 ## Links
 
 * [BlockMesh GitBoook](https://gitbook.blockmesh.xyz/)
