@@ -1,11 +1,15 @@
 use crate::db_aggregators::users_ip_aggregator::users_ip_aggregator;
 use crate::pg_listener::start_listening;
+use axum::{Extension, Router};
 use block_mesh_common::constants::BLOCKMESH_PG_NOTIFY;
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use block_mesh_manager_database_domain::utils::connection::get_pg_pool;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
 use serde_json::Value;
+use std::net::SocketAddr;
 use std::{env, mem};
+use tokio::net::TcpListener;
+use tower_http::cors::CorsLayer;
 
 mod call_backs;
 mod cron_jobs;
@@ -13,6 +17,7 @@ mod db_aggregators;
 mod db_calls;
 mod domain;
 mod pg_listener;
+mod routes;
 mod utils;
 
 use crate::call_backs::send_to_rx::send_to_rx;
@@ -21,6 +26,15 @@ use crate::cron_jobs::rpc_cron::rpc_worker_loop;
 use crate::db_aggregators::aggregates_aggregator::aggregates_aggregator;
 use crate::db_aggregators::analytics_aggregator::analytics_aggregator;
 use crate::db_aggregators::daily_stats_aggregator::daily_stats_aggregator;
+use crate::routes::get_router;
+
+pub async fn run_server(listener: TcpListener, app: Router<()>) -> std::io::Result<()> {
+    axum::serve(
+        listener,
+        app.into_make_service_with_connect_info::<SocketAddr>(),
+    )
+    .await
+}
 
 fn main() {
     let sentry_layer = env::var("SENTRY_LAYER")
@@ -57,8 +71,8 @@ async fn run() -> anyhow::Result<()> {
     setup_tracing_stdout_only_with_sentry();
     tracing::info!("Starting worker");
     let db_pool = get_pg_pool().await;
-    let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
-    let _redis = redis_client.get_multiplexed_async_connection().await?;
+    // let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
+    // let _redis = redis_client.get_multiplexed_async_connection().await?;
     let (tx, _rx) = tokio::sync::broadcast::channel::<Value>(
         env::var("BROADCAST_CHANNEL_SIZE")
             .unwrap_or("5000".to_string())
@@ -112,7 +126,19 @@ async fn run() -> anyhow::Result<()> {
         5,
     ));
 
+    let router = get_router();
+    let cors = CorsLayer::permissive();
+    let app = Router::new()
+        .nest("/", router)
+        .layer(cors)
+        .layer(Extension(db_pool.clone()));
+    let port = env::var("PORT").unwrap_or("8001".to_string());
+    let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
+    tracing::info!("Listening on {}", listener.local_addr()?);
+    let server_task = run_server(listener, app);
+
     tokio::select! {
+        o = server_task => panic!("server task exit {:?}", o),
         o = finalize_daily_stats_task => panic!("finalize_daily_stats_task exit {:?}", o),
         o = rpc_worker_task => panic!("rpc_worker_task exit {:?}", o),
         o = db_listen_task => panic!("db_listen_task exit {:?}", o),
