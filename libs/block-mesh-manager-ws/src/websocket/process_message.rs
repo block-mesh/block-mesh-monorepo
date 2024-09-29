@@ -41,13 +41,13 @@ pub async fn process_message(
     ControlFlow::Continue(None)
 }
 
-async fn process_client_message(text: &str, state: AppState) -> Option<WsClientMessage> {
+async fn process_client_message(text: &str, _state: AppState) -> Option<WsClientMessage> {
     match serde_json::from_str::<WsClientMessage>(text) {
         Ok(message) => {
             match &message {
-                WsClientMessage::CompleteTask(query) => {}
-                WsClientMessage::ReportBandwidth(body) => {}
-                WsClientMessage::ReportUptime(query) => {}
+                WsClientMessage::CompleteTask(_query) => {}
+                WsClientMessage::ReportBandwidth(_body) => {}
+                WsClientMessage::ReportUptime(_query) => {}
                 WsClientMessage::Ping => {}
             }
             return Some(message);

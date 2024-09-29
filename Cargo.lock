@@ -1628,7 +1628,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-ws"
-version = "0.0.273"
+version = "0.0.292"
 dependencies = [
  "anyhow",
  "axum",
@@ -1636,6 +1636,7 @@ dependencies = [
  "dashmap 6.1.0",
  "dotenv",
  "futures",
+ "matches",
  "reqwest 0.12.7",
  "reqwest-websocket",
  "serde",
@@ -5243,6 +5244,12 @@ checksum = "8263075bb86c5a1b1427b5ae862e8889656f126e9f77c484496e8b47cf5c5558"
 dependencies = [
  "regex-automata 0.1.10",
 ]
+
+[[package]]
+name = "matches"
+version = "0.1.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2532096657941c2fea9c289d370a250971c689d4f143798ff67113ec042024a5"
 
 [[package]]
 name = "matchit"

@@ -22,6 +22,7 @@ dashmap = { workspace = true }
 block-mesh-common = { path = "../block-mesh-common", features = ["env"] }
 reqwest = { workspace = true }
 reqwest-websocket = { workspace = true }
+matches = "0.1.10"
 
 [dev-dependencies]
 testcontainers = { workspace = true }

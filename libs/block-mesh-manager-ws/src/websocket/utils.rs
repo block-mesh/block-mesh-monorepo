@@ -7,14 +7,12 @@ use std::time::Duration;
 pub async fn ws_keep_alive<T: Hash + Eq + Clone>(
     broadcaster: Broadcaster<T>,
 ) -> Result<(), anyhow::Error> {
+    let sleep = env::var("WS_KEEP_ALIVE")
+        .ok()
+        .and_then(|var| var.parse().ok())
+        .unwrap_or(15000);
     loop {
         let _ = broadcaster.broadcast(WsServerMessage::Ping);
-        tokio::time::sleep(Duration::from_millis(
-            env::var("WS_KEEP_ALIVE")
-                .ok()
-                .and_then(|var| var.parse().ok())
-                .unwrap_or(15000),
-        ))
-        .await;
+        tokio::time::sleep(Duration::from_millis(sleep)).await;
     }
 }
