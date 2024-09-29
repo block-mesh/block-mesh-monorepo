@@ -1,7 +1,5 @@
-#![allow(unused)]
-
-use block_mesh_manager_core::app::app;
-use block_mesh_manager_core::state::AppState;
+use block_mesh_manager_ws::app::app;
+use block_mesh_manager_ws::state::AppState;
 use dotenv::dotenv;
 use futures::SinkExt;
 use reqwest::{Client, IntoUrl};
