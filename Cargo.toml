@@ -197,6 +197,8 @@ ipinfo = { version = "3.0.0" }
 cargo-husky = { version = "1.5.0", features = ["precommit-hook", "run-cargo-clippy", "run-cargo-fmt"] }
 bcrypt = { version = "0.15" }
 cocoa = { version = "0.25.0" }
+testcontainers = { version = "0.23.1" }
+testcontainers-modules = { version = "0.10.0", features = ["postgres"] }
 
 [workspace.dependencies.web-sys]
 version = "0.3"
