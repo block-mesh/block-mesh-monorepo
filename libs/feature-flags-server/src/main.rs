@@ -1,5 +1,6 @@
 use crate::database::{migrate, pre_populate_db};
 use crate::routes::get_router;
+use anyhow::anyhow;
 use axum::{Extension, Router};
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use logger_general::tracing::setup_tracing_stdout_only;
@@ -33,5 +34,5 @@ async fn main() -> anyhow::Result<()> {
         app.into_make_service_with_connect_info::<SocketAddr>(),
     )
     .await?;
-    Ok(())
+    Err(anyhow!("server stopped"))
 }
