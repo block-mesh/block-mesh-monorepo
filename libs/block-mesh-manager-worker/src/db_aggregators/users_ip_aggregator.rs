@@ -26,6 +26,7 @@ pub async fn users_ip_aggregator(
             let run = diff.num_seconds() > time_limit || count >= agg_size;
             prev = Utc::now();
             if run {
+                tracing::info!("users_ip_aggregator starting txn");
                 if let Ok(mut transaction) = create_txn(&pool).await {
                     for pair in calls.iter() {
                         let _ = touch_users_ip(&mut transaction, pair.0, pair.1).await;
@@ -34,6 +35,7 @@ pub async fn users_ip_aggregator(
                 }
                 count = 0;
                 calls.clear();
+                tracing::info!("users_ip_aggregator finished txn");
             }
         }
     }

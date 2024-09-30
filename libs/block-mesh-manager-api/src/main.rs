@@ -59,18 +59,30 @@ async fn run(is_with_sentry: bool) {
     let check_token_map: CheckTokenResponseMap = Arc::new(DashMap::new());
     let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());
     let cors = CorsLayer::permissive();
+
+    let timeout_layer = env::var("TIMEOUT_LAYER")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
+
     let app = Router::new()
         .nest("/", router)
         .layer(Extension(db_pool.clone()))
         .layer(Extension(check_token_map))
         .layer(Extension(get_token_map))
-        .layer(cors)
-        .layer(TimeoutLayer::new(Duration::from_millis(
+        .layer(cors);
+
+    let app = if timeout_layer {
+        app.layer(TimeoutLayer::new(Duration::from_millis(
             env::var("REQUEST_TIMEOUT")
-                .unwrap_or("1000".to_string())
+                .unwrap_or("3500".to_string())
                 .parse()
-                .unwrap_or(1000),
-        )));
+                .unwrap_or(3500),
+        )))
+    } else {
+        app
+    };
+
     let app = if is_with_sentry {
         app.layer(NewSentryLayer::<Request>::new_from_top())
     } else {

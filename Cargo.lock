@@ -1628,7 +1628,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-ws"
-version = "0.0.273"
+version = "0.0.292"
 dependencies = [
  "anyhow",
  "axum",
