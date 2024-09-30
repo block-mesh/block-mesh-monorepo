@@ -30,6 +30,7 @@ pub struct AnalyticsMessage {
     pub user_id: Uuid,
     pub depin_aggregator: String,
     pub device_type: DeviceType,
+    pub version: String,
     pub msg_type: DBMessageTypes,
 }
 

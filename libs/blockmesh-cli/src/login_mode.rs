@@ -56,6 +56,7 @@ pub async fn login_mode(
     let session_metadata = ClientsMetadata {
         depin_aggregator,
         device_type: DeviceType::Cli,
+        version: Some(env!("CARGO_PKG_VERSION").to_string()),
     };
     let mut prev_is_ws_feature: Option<bool> = None;
     let stop_notifier = Arc::new(Notify::new());
