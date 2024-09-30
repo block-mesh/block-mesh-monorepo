@@ -287,7 +287,7 @@ async fn poll(
     let bandwidth_poller = tokio::spawn(async move {
         loop {
             let _ = submit_bandwidth(&u, e.as_ref(), a.as_ref()).await;
-            let polling_interval = get_polling_interval().await;
+            let polling_interval = 10.0 * get_polling_interval().await;
             tokio::time::sleep(Duration::from_secs(polling_interval as u64)).await;
         }
     });

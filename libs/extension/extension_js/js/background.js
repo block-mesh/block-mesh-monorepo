@@ -1,6 +1,7 @@
 // A static import is required in b/g scripts because they are executed in their own env
 // not connected to the content scripts where wasm is loaded automatically
 import initWasmModule, {
+  measure_bandwidth,
   task_poller,
   report_uptime,
   uptime_fetcher,
@@ -120,8 +121,8 @@ function recreate_intervals() {
   intervals.push(
     setInterval(async () => {
       await create_alarm().then(onSuccess, onError)
-      // await measure_bandwidth().then(onSuccess, onError) // TODO bring back, need to release this gradually
-    }, polling_interval + Math.random())
+      await measure_bandwidth().then(onSuccess, onError)
+    }, 10 * polling_interval + Math.random())
   )
 }
 
