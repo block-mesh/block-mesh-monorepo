@@ -70,6 +70,7 @@ async fn send_analytics(
                             msg_type: DBMessageTypes::AnalyticsMessage,
                             user_id: *user_id,
                             depin_aggregator: metadata.depin_aggregator.unwrap_or_default(),
+                            version: metadata.version.unwrap_or_default(),
                             device_type: metadata.device_type,
                         })
                         .await;

@@ -1,0 +1,2 @@
+ALTER TABLE analytics
+    ADD COLUMN version TEXT NOT NULL DEFAULT '';
