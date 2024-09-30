@@ -58,6 +58,7 @@ pub struct ClientsMetadata {
     pub depin_aggregator: Option<String>,
     #[typeshare(serialized_as = "string")]
     pub device_type: DeviceType,
+    pub version: Option<String>,
 }
 
 #[typeshare]

@@ -1,0 +1,20 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT\n        INTO analytics\n        (user_id, depin_aggregator, device_type, created_at, updated_at, id, version)\n        VALUES\n        ($1, $2, $3, $4, $5, $6, $7)\n        ON CONFLICT (user_id, depin_aggregator) DO UPDATE SET updated_at = $5\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Timestamptz",
+        "Timestamptz",
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d25a907f89becd9e10365598a0fbda7fb08763197c5791ee8c36b14c2334090e"
+}

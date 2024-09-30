@@ -34,6 +34,7 @@ pub async fn analytics_aggregator(
                             pair.0,
                             &pair.1.depin_aggregator,
                             &pair.1.device_type,
+                            &pair.1.version,
                         )
                         .await;
                     }
