@@ -57,7 +57,7 @@ chrome.runtime.onStartup.addListener(async function() {
   console.log('onStartup')
 })
 
-let polling_interval = 20000
+let polling_interval = 120000
 let intervals = []
 
 
@@ -83,7 +83,6 @@ async function is_ws_feature_connection() {
 }
 
 async function get_polling_interval() {
-  return 20000
   try {
     const response = await fetch('https://feature-flags.blockmesh.xyz/read-flag/polling_interval')
     if (response.ok) {
