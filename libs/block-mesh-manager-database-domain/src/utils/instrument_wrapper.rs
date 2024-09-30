@@ -19,7 +19,7 @@ async fn get_timeout_duration() -> tokio::time::Duration {
     tokio::time::Duration::from_millis(*duration)
 }
 
-#[tracing::instrument(name = "create_txn", skip_all)]
+#[tracing::instrument(name = "create_txn", skip_all, err)]
 pub async fn create_txn(pool: &PgPool) -> anyhow::Result<Transaction<'_, Postgres>> {
     let duration = get_timeout_duration().await;
     match timeout(duration, pool.begin()).await {
@@ -31,7 +31,7 @@ pub async fn create_txn(pool: &PgPool) -> anyhow::Result<Transaction<'_, Postgre
     }
 }
 
-#[tracing::instrument(name = "commit_txn", skip_all)]
+#[tracing::instrument(name = "commit_txn", skip_all, err)]
 pub async fn commit_txn(txn: Transaction<'_, Postgres>) -> anyhow::Result<()> {
     let duration = get_timeout_duration().await;
     match timeout(duration, txn.commit()).await {

@@ -26,12 +26,14 @@ pub async fn aggregates_aggregator(
             let run = diff.num_seconds() > time_limit || count >= agg_size;
             prev = Utc::now();
             if run {
+                tracing::info!("aggregates_aggregator starting txn");
                 if let Ok(mut transaction) = create_txn(&pool).await {
                     for pair in calls.iter() {
                         let _ = update_aggregate(&mut transaction, pair.0, pair.1).await;
                     }
                     let _ = commit_txn(transaction).await;
                 }
+                tracing::info!("aggregates_aggregator finished txn");
                 count = 0;
                 calls.clear();
             }
