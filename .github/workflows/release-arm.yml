@@ -32,6 +32,25 @@ jobs:
     outputs:
       pkg-version: ${{ steps.pkg-version.outputs.PKG_VERSION }}
     steps:
+      - name: "Download tag"
+        needs:
+          - "get-tag"
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ needs.get-tag.outputs.pkg-version }}.txt
+      - name: Read value from artifact
+        id: read_value
+        run: |
+          VALUE=$(cat ${{ needs.get-tag.outputs.pkg-version }}.txt)
+          echo "value=${VALUE}" >> $GITHUB_ENV
+      - name: Create envar
+        shell: "bash"
+        run: |
+          if [ "$value" == "production" ] ; then
+            echo "suffix=" >> $GITHUB_ENV
+          else
+            echo "suffix=staging-" >> $GITHUB_ENV
+          fi
       - name: "Check out the repo"
         uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -91,7 +110,12 @@ jobs:
         run: |
           cargo build -p block-mesh-manager-worker --release
           tar acf block-mesh-manager-worker-${{ matrix.target }}.tar.gz target/release/block-mesh-manager-worker
+      - name: "Copy files to dir"
+        run: |
+          mkdir -p upload_to
+          cp block-mesh-manager-${{ matrix.target }}.tar.gz block-mesh-manager-worker-${{ matrix.target }}.tar.gz blockmesh-cli-${{ matrix.target }}.tar.gz upload_to
       - name: Release
+        if: env.value == 'production'
         uses: softprops/action-gh-release@v2
         #if: startsWith(github.ref, 'refs/tags/')
         with:
@@ -100,6 +124,21 @@ jobs:
             block-mesh-manager-${{ matrix.target }}.tar.gz
             block-mesh-manager-worker-${{ matrix.target }}.tar.gz
             blockmesh-cli-${{ matrix.target }}.tar.gz
+      - name: Upload to R2
+        if: env.value == 'staging'
+        uses: ryand56/r2-upload-action@latest # Can be any release
+        with:
+          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          r2-bucket: ${{ secrets.R2_BUCKET }}
+          source-dir: ./upload_to
+          destination-dir: ${{ needs.get-tag.outputs.pkg-version }} # Can be anything as long as it is an actual path
+          output-file-url: 'true' # defaults to true
+          multipart-size: 100 # If the file size is greater than the value provided here, then use multipart upload
+          max-retries: 5 # The maximum number of retries it takes to upload a multipart chunk until it moves on to the next part
+          multipart-concurrent: true # Whether to concurrently upload a multipart chunk
+          keep-file-fresh: 'false' # defaults to false
   push-to-registry:
     name: "Push Docker image to Docker Hub"
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -127,6 +166,6 @@ jobs:
           context: .
           file: blockmesh-cli.Dockerfile
           push: true
-          tags: blockmesh/blockmesh-cli:latest-arm64,blockmesh/blockmesh-cli:v${{ needs.get-tag.outputs.pkg-version }}
+          tags: blockmesh/blockmesh-cli:${ env.suffix }latest-arm64,blockmesh/blockmesh-cli:${ env.suffix }v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
 # https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/
