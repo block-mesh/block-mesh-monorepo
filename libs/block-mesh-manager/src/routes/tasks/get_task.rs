@@ -57,7 +57,11 @@ pub async fn handler(
     if user.email.to_ascii_lowercase() != body.email.to_ascii_lowercase() {
         return Err(Error::UserNotFound);
     }
-    let mut redis_user = TaskLimit::get_task_limit(&user.id, &mut redis).await?;
+    let mut redis_user = match TaskLimit::get_task_limit(&user.id, &mut redis).await {
+        Ok(r) => r,
+        Err(_) => return Ok(Json(None)),
+    };
+
     let task = find_task_assigned_to_user(&mut transaction, &user.id).await?;
     if let Some(task) = task {
         return Ok(Json(Some(GetTaskResponse {
