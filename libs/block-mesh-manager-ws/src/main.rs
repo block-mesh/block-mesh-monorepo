@@ -8,6 +8,7 @@ use dotenv::dotenv;
 // use sqlx::postgres::PgConnectOptions;
 // use sqlx::PgPool;
 use std::net::{Ipv4Addr, SocketAddr, SocketAddrV4};
+use std::process;
 // use std::str::FromStr;
 use tokio::net::TcpListener;
 
@@ -20,5 +21,6 @@ async fn main() {
     tracing::info!("Listening at {addr}");
 
     let state = AppState::new().await;
-    app(listener, state).await
+    app(listener, state).await;
+    process::exit(1);
 }

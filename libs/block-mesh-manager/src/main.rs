@@ -5,6 +5,7 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use std::process;
     use dashmap::DashMap;
     use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
     use std::mem;
@@ -78,6 +79,7 @@ fn main() {
         .build()
         .unwrap()
         .block_on(async { run().await });
+    process::exit(1);
 }
 
 #[cfg(feature = "ssr")]

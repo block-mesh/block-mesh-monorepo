@@ -7,7 +7,9 @@ use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::task::TaskStatus;
 use crate::errors::error::Error;
 use crate::middlewares::rate_limit::filter_request;
+use crate::middlewares::task_limit::TaskLimit;
 use crate::startup::application::AppState;
+use crate::utils::cache_envar::get_envar;
 use anyhow::Context;
 use axum::extract::State;
 use axum::{Extension, Json};
@@ -31,11 +33,17 @@ pub async fn handler(
     let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    let ip = headers
-        .get("cf-connecting-ip")
-        .context("Missing CF-CONNECTING-IP")?
-        .to_str()
-        .context("Unable to STR CF-CONNECTING-IP")?;
+    let app_env = get_envar("APP_ENVIRONMENT").await;
+
+    let ip = if app_env != "local" {
+        headers
+            .get("cf-connecting-ip")
+            .context("Missing CF-CONNECTING-IP")?
+            .to_str()
+            .context("Unable to STR CF-CONNECTING-IP")?
+    } else {
+        "127.0.0.1"
+    };
 
     let mut redis = state.redis.clone();
     let filter = filter_request(&mut redis, &user.id, ip).await;
@@ -49,6 +57,7 @@ pub async fn handler(
     if user.email.to_ascii_lowercase() != body.email.to_ascii_lowercase() {
         return Err(Error::UserNotFound);
     }
+    let mut redis_user = TaskLimit::get_task_limit(&user.id, &mut redis).await?;
     let task = find_task_assigned_to_user(&mut transaction, &user.id).await?;
     if let Some(task) = task {
         return Ok(Json(Some(GetTaskResponse {
@@ -66,7 +75,9 @@ pub async fn handler(
     };
     let _ = create_daily_stat(&mut transaction, user.id).await?;
     update_task_assigned(&mut transaction, task.id, user.id, TaskStatus::Assigned).await?;
+    redis_user.tasks += 1;
     commit_txn(transaction).await?;
+    TaskLimit::save_user(&mut redis, &redis_user).await;
     Ok(Json(Some(GetTaskResponse {
         id: task.id,
         url: task.url,

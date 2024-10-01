@@ -1,10 +1,10 @@
 use crate::middlewares::authentication::Backend;
+use crate::utils::cache_envar::get_envar;
 use chrono::{DateTime, Duration, Utc};
 use redis::aio::MultiplexedConnection;
 use redis::{AsyncCommands, RedisResult};
 use serde::{Deserialize, Serialize};
 use std::cmp::max;
-use std::env;
 use uuid::Uuid;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -57,11 +57,11 @@ pub async fn touch_redis_value(con: &mut MultiplexedConnection, user_id: &Uuid, 
             .set_ex(
                 &get_key(&user_ip_key(user_id, ip)),
                 redis_user.clone(),
-                Backend::get_expire() as u64,
+                Backend::get_expire().await as u64,
             )
             .await;
         let _: RedisResult<()> = con
-            .set_ex(get_key(ip), redis_user, Backend::get_expire() as u64)
+            .set_ex(get_key(ip), redis_user, Backend::get_expire().await as u64)
             .await;
     }
 }
@@ -73,10 +73,7 @@ pub async fn filter_request(
     ip: &str,
 ) -> anyhow::Result<bool> {
     let now = Utc::now();
-    let limit = env::var("FILTER_REQUEST")
-        .unwrap_or("2500".to_string())
-        .parse()
-        .unwrap_or(2500);
+    let limit = get_envar("FILTER_REQUEST").await.parse().unwrap_or(2500);
     let diff = now - Duration::milliseconds(limit);
     let fallback = RateLimitUser::new(user_id, ip);
     let by_user: RateLimitUser =

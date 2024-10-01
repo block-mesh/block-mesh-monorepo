@@ -8,7 +8,7 @@ use sentry_tower::NewSentryLayer;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
-use std::{env, mem};
+use std::{env, mem, process};
 use tokio::net::TcpListener;
 
 mod database;
@@ -50,7 +50,7 @@ fn main() -> anyhow::Result<()> {
         .build()
         .unwrap()
         .block_on(async { run(sentry_layer).await });
-    Ok(())
+    process::exit(1);
 }
 
 async fn run(is_with_sentry: bool) {
