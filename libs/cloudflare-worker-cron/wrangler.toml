@@ -2,15 +2,18 @@ name = "cloudflare-worker-cron"
 main = "build/worker/shim.mjs"
 compatibility_date = "2023-12-01"
 
+kv_namespaces = [
+  { binding = "restart_round_robin", id = "548799a7781e4d088c7449d11243beb9" }
+]
+
 [vars]
 app_name = "block-mesh-manager"
 
 [build]
 command = "cargo install -q worker-build && worker-build --release"
 
-
 [triggers]
-crons = ["0/15 * * * *"]
+crons = ["0/5 * * * *"]
 
 [env.dev.triggers]
 crons = ["* * * * *"]
