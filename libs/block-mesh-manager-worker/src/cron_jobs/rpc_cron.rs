@@ -1,5 +1,6 @@
 use crate::db_calls::create_server_user::create_server_user;
 use crate::db_calls::get_all_rpcs::get_all_rpcs;
+use anyhow::anyhow;
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
 use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
@@ -23,9 +24,10 @@ pub async fn rpc_worker_loop(pool: PgPool) -> Result<(), anyhow::Error> {
         .unwrap_or("30000".to_string())
         .parse()
         .unwrap_or(30_000);
-    let mut transaction = create_txn(&pool).await?;
-    create_server_user(&mut transaction).await?;
-    commit_txn(transaction).await?;
+    if let Ok(mut transaction) = create_txn(&pool).await {
+        _ = create_server_user(&mut transaction).await;
+        _ = commit_txn(transaction).await;
+    }
     loop {
         match create_rpc_tasks(pool.clone()).await {
             Ok(_) => {}
