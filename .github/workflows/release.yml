@@ -32,13 +32,15 @@ jobs:
       pkg-version: ${{ steps.pkg-version.outputs.PKG_VERSION }}
     steps:
       - name: "Upload tag"
+        needs:
+          - "get-tag"
         uses: actions/download-artifact@v4
         with:
-          name: ${{ steps.get-tag.outputs.PKG_VERSION }}.txt
+          name: ${{ needs.get-tag.outputs.pkg-version }}.txt
       - name: Read value from artifact
         id: read_value
         run: |
-          VALUE=$(cat ${{ steps.get-tag.outputs.PKG_VERSION }}.txt)
+          VALUE=$(cat ${{ needs.get-tag.outputs.pkg-version }}.txt)
           echo "value=${VALUE}" >> $GITHUB_ENV
       - name: Creat envar
         shell: "bash"
