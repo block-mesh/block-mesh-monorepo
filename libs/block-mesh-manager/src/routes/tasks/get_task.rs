@@ -32,11 +32,17 @@ pub async fn handler(
     let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    let ip = headers
-        .get("cf-connecting-ip")
-        .context("Missing CF-CONNECTING-IP")?
-        .to_str()
-        .context("Unable to STR CF-CONNECTING-IP")?;
+    let app_env = get_envar("APP_ENVIRONMENT").await;
+
+    let ip = if app_env != "local" {
+        headers
+            .get("cf-connecting-ip")
+            .context("Missing CF-CONNECTING-IP")?
+            .to_str()
+            .context("Unable to STR CF-CONNECTING-IP")?
+    } else {
+        "127.0.0.1"
+    };
 
     let mut redis = state.redis.clone();
     let filter = filter_request(&mut redis, &user.id, ip).await;
