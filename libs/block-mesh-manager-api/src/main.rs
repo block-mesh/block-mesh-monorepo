@@ -1,5 +1,4 @@
 use crate::routes::router::get_router;
-use anyhow::anyhow;
 use axum::extract::Request;
 use axum::{Extension, Router};
 use block_mesh_common::env::load_dotenv::load_dotenv;
