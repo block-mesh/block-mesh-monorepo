@@ -133,7 +133,7 @@ jobs:
             block-mesh-manager-api-${{ matrix.target }}.tar.gz
       - name: Upload to R2
         if: env.value == 'staging'
-      - uses: ryand56/r2-upload-action@latest # Can be any release
+        uses: ryand56/r2-upload-action@latest # Can be any release
         with:
           r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
           r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
