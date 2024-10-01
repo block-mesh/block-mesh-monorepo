@@ -1,6 +1,5 @@
 use crate::database::{migrate, pre_populate_db};
 use crate::routes::get_router;
-use anyhow::anyhow;
 use axum::{Extension, Router};
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use logger_general::tracing::setup_tracing_stdout_only;
