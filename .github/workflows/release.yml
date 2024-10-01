@@ -31,6 +31,23 @@ jobs:
     outputs:
       pkg-version: ${{ steps.pkg-version.outputs.PKG_VERSION }}
     steps:
+      - name: "Upload tag"
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ steps.get-tag.outputs.PKG_VERSION }}.txt
+      - name: Read value from artifact
+        id: read_value
+        run: |
+          VALUE=$(cat ${{ steps.get-tag.outputs.PKG_VERSION }}.txt)
+          echo "value=${VALUE}" >> $GITHUB_ENV
+      - name: Creat envar
+        shell: "bash"
+        run: |
+          if [ "$value" == "production" ] ; then
+            echo "suffix=" >> $GITHUB_ENV
+          else
+            echo "suffix=staging-" >> $GITHUB_ENV
+          fi
       - name: "Check out the repo"
         uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@stable
@@ -103,6 +120,7 @@ jobs:
           cargo build -p feature-flags-server --release
           tar acf feature-flags-server-${{ matrix.target }}.tar.gz target/release/feature-flags-server
       - name: Release
+        if: env.value == 'production'
         uses: softprops/action-gh-release@v2
         #if: startsWith(github.ref, 'refs/tags/')
         with:
@@ -113,6 +131,21 @@ jobs:
             blockmesh-cli-${{ matrix.target }}.tar.gz
             feature-flags-server-${{ matrix.target }}.tar.gz
             block-mesh-manager-api-${{ matrix.target }}.tar.gz
+      - name: Upload to R2
+        if: env.value == 'staging'
+      - uses: ryand56/r2-upload-action@latest # Can be any release
+        with:
+          r2-account-id: ${{ secrets.R2_ACCOUNT_ID }}
+          r2-access-key-id: ${{ secrets.R2_ACCESS_KEY_ID }}
+          r2-secret-access-key: ${{ secrets.R2_SECRET_ACCESS_KEY }}
+          r2-bucket: ${{ secrets.R2_BUCKET }}
+          source-dir: ./
+          destination-dir: ${{ needs.get-tag.outputs.pkg-version }} # Can be anything as long as it is an actual path
+          output-file-url: 'true' # defaults to true
+          multipart-size: 100 # If the file size is greater than the value provided here, then use multipart upload
+          max-retries: 5 # The maximum number of retries it takes to upload a multipart chunk until it moves on to the next part
+          multipart-concurrent: true # Whether to concurrently upload a multipart chunk
+          keep-file-fresh: 'false' # defaults to false
   push-to-registry:
     name: "Push Docker image to Docker Hub"
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -150,7 +183,7 @@ jobs:
           context: .
           file: block-mesh-manager.Dockerfile
           push: true
-          tags: blockmesh/block-mesh-manager:latest-amd64,blockmesh/block-mesh-manager:v${{ needs.get-tag.outputs.pkg-version }}
+          tags: blockmesh/block-mesh-manager:${ env.suffix }latest-amd64,blockmesh/block-mesh-manager:${ env.suffix }v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: "Build and push Docker image for worker"
         uses: "docker/build-push-action@v5"
@@ -158,7 +191,7 @@ jobs:
           context: .
           file: block-mesh-manager-worker.Dockerfile
           push: true
-          tags: blockmesh/block-mesh-manager-worker:latest-amd64,blockmesh/block-mesh-manager-worker:v${{ needs.get-tag.outputs.pkg-version }}
+          tags: blockmesh/block-mesh-manager-worker:${ env.suffix }latest-amd64,blockmesh/block-mesh-manager-worker:${ env.suffix }v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: "Build and push Docker image for feature flags server"
         uses: "docker/build-push-action@v5"
@@ -166,7 +199,7 @@ jobs:
           context: .
           file: feature-flags-server.Dockerfile
           push: true
-          tags: blockmesh/feature-flags-server:latest-amd64,blockmesh/feature-flags-server:v${{ needs.get-tag.outputs.pkg-version }}
+          tags: blockmesh/feature-flags-server:${ env.suffix }latest-amd64,blockmesh/feature-flags-server:${ env.suffix }v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: "Build and push Docker image for feature flags server"
         uses: "docker/build-push-action@v5"
@@ -174,6 +207,6 @@ jobs:
           context: .
           file: block-mesh-manager-api.Dockerfile
           push: true
-          tags: blockmesh/block-mesh-manager-api:latest-amd64,blockmesh/block-mesh-manager-api:v${{ needs.get-tag.outputs.pkg-version }}
+          tags: blockmesh/block-mesh-manager-api:${ env.suffix }latest-amd64,blockmesh/block-mesh-manager-api:${ env.suffix }v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
 # https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/
