@@ -62,7 +62,7 @@ impl TaskLimit {
     ) -> anyhow::Result<Self> {
         let limit = get_envar("TASK_LIMIT").await.parse().unwrap_or(10);
         let fallback = Self::new(user_id);
-        let user: Self = Self::get_value_from_redis(con, &user_id, &fallback).await?;
+        let user: Self = Self::get_value_from_redis(con, user_id, &fallback).await?;
         if user.tasks > limit {
             Err(anyhow::anyhow!("task limit exceeded"))
         } else {
