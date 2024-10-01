@@ -7,7 +7,7 @@ use block_mesh_manager_database_domain::utils::connection::get_pg_pool;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
 use serde_json::Value;
 use std::net::SocketAddr;
-use std::{env, mem};
+use std::{env, mem, process};
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 
@@ -65,6 +65,7 @@ fn main() {
         .build()
         .unwrap()
         .block_on(async { run().await });
+    process::exit(1);
 }
 async fn run() -> anyhow::Result<()> {
     load_dotenv();
