@@ -81,6 +81,7 @@ pub fn Perks() -> impl IntoView {
             <TableHead>
                 <tr>
                     <TableHeader>Perk</TableHeader>
+                    <TableHeader>One Time Bonus</TableHeader>
                     <TableHeader class="text-right">Multiplier</TableHeader>
                 </tr>
             </TableHead>
@@ -94,6 +95,7 @@ pub fn Perks() -> impl IntoView {
                             view! {
                                 <tr>
                                     <TableCell>{referral.name.to_uppercase()}</TableCell>
+                                    <TableCell>{referral.one_time_bonus.to_string()}</TableCell>
                                     <TableCell class="text-right">
                                         {referral.multiplier.to_string()}
                                     </TableCell>
