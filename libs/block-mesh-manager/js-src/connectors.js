@@ -27,22 +27,24 @@ export async function send_message(msg) {
   }
 }
 
-export async function pubkey() {
-  if (!window.backpack) {
+export async function pubkey(wallet) {
+  if (!window[wallet]) {
+    console.error(`pubkey::window doesnt have ${wallet}`)
     return ''
   }
-  await window.backpack.connect()
-  return window.backpack.publicKey.toBase58()
+  await window[wallet].connect()
+  return window[wallet].publicKey.toBase58()
 }
 
-export async function sign_message(msg) {
+export async function sign_message(msg, wallet) {
   try {
-    if (!window.backpack) {
+    if (!window[wallet]) {
+      console.error(`sign_message::window doesnt have ${wallet}`)
       return ''
     }
-    await window.backpack.connect()
+    await window[wallet].connect()
     const message = new TextEncoder().encode(msg)
-    const out = await window.backpack.signMessage(message)
+    const out = await window[wallet].signMessage(message)
     return out.signature
   } catch (e) {
     console.error('sign_message error:', e)

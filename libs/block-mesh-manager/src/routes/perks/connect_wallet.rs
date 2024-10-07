@@ -31,7 +31,7 @@ pub async fn handler(
         add_perk_to_user(
             &mut transaction,
             user.id,
-            PerkName::Backpack,
+            PerkName::Wallet,
             1.1,
             0.0,
             serde_json::from_str("{}").unwrap(),

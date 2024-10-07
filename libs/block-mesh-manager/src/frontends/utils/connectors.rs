@@ -9,9 +9,9 @@ extern "C" {
     pub fn onPostMessage(callback: &Closure<dyn Fn(JsValue)>);
     pub async fn send_message(msg: JsValue) -> JsValue;
 
-    pub async fn pubkey() -> JsValue;
+    pub async fn pubkey(wallet: &str) -> JsValue;
 
-    pub async fn sign_message(msg: &str) -> JsValue;
+    pub async fn sign_message(msg: &str, wallet: &str) -> JsValue;
 }
 
 pub async fn ask_for_all_storage_values() {
