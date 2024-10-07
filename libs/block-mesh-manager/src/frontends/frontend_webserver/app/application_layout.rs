@@ -22,6 +22,7 @@ use block_mesh_common::interfaces::server_api::{
     AuthStatusResponse, DailyLeaderboard, DashboardResponse,
 };
 use block_mesh_common::routes_enum::RoutesEnum;
+use leptos::logging::log;
 use leptos::*;
 
 #[component]
@@ -120,8 +121,9 @@ pub fn ApplicationLayout(children: ChildrenFn) -> impl IntoView {
             }
 
             if let Ok(response) = client.post(&format!("{}/dashboard", origin)).send().await {
-                if let Ok(json) = response.json::<DashboardResponse>().await {
-                    provide_context(json);
+                match response.json::<DashboardResponse>().await {
+                    Ok(json) => provide_context(json),
+                    Err(e) => log!("dashboard json error {:#?}", e),
                 }
             }
 

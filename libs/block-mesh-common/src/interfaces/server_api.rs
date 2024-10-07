@@ -274,6 +274,7 @@ pub struct DashboardResponse {
     pub referrals: Vec<Referral>,
     pub verified_email: bool,
     pub user_ips: Vec<UserIpInfo>,
+    pub wallet_address: Option<String>,
 }
 
 #[typeshare]

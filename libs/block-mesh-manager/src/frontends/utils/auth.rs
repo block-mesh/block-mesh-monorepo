@@ -68,11 +68,13 @@ pub async fn connect_wallet(
     Ok(response)
 }
 
-pub async fn connect_wallet_in_browser() {
+pub async fn connect_wallet_in_browser(wallet: String) -> bool {
+    if wallet.is_empty() {
+        return false;
+    }
     let msg = Uuid::new_v4().to_string();
-
-    let key = pubkey().await;
-    let sign = sign_message(&msg).await;
+    let key = pubkey(&wallet).await;
+    let sign = sign_message(&msg, &wallet).await;
     let uint8_array = Uint8Array::new(&sign);
     let mut signature = vec![0; uint8_array.length() as usize];
     uint8_array.copy_to(&mut signature[..]);
@@ -96,11 +98,12 @@ pub async fn connect_wallet_in_browser() {
         Ok(_) => {
             let auth = expect_context::<AuthContext>();
             auth.wallet_address.set(Some(pubkey));
-
             notifications.set_success("Connected successfully");
+            true
         }
         Err(_) => {
             notifications.set_error("Failed to connect");
+            false
         }
     }
 }
