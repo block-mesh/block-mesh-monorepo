@@ -284,6 +284,7 @@ pub struct PerkUI {
     pub id: Uuid,
     pub name: String,
     pub multiplier: f64,
+    pub one_time_bonus: f64,
 }
 
 #[typeshare]

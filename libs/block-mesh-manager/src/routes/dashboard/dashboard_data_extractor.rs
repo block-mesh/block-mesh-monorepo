@@ -152,6 +152,7 @@ pub async fn dashboard_data_extractor(
                 id: i.id,
                 name: i.name.to_string(),
                 multiplier: i.multiplier,
+                one_time_bonus: i.one_time_bonus,
             })
             .collect(),
     })
