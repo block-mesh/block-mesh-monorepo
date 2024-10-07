@@ -65,6 +65,7 @@ fn main() {
         .build()
         .unwrap()
         .block_on(async { run().await });
+    tracing::error!("block mesh manager worker stopped, exiting with exit code 1");
     process::exit(1);
 }
 async fn run() -> anyhow::Result<()> {
