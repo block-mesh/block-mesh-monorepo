@@ -6,6 +6,7 @@ use chrono::Utc;
 use serde_json::Value;
 use sqlx::PgPool;
 use std::collections::HashMap;
+use tokio::sync::broadcast::error::RecvError;
 use tokio::sync::broadcast::Receiver;
 
 #[tracing::instrument(name = "daily_stats_aggregator", skip_all, err)]
@@ -42,10 +43,15 @@ pub async fn daily_stats_aggregator(
                     }
                 }
             }
-            Err(e) => {
-                tracing::error!("daily_stats_aggregator error recv: {:?}", e);
-                return Err(anyhow!("daily_stats_aggregator error recv: {:?}", e));
-            }
+            Err(e) => match e {
+                RecvError::Closed => {
+                    tracing::error!("daily_stats_aggregator error recv: {:?}", e);
+                    return Err(anyhow!("daily_stats_aggregator error recv: {:?}", e));
+                }
+                RecvError::Lagged(_) => {
+                    tracing::error!("daily_stats_aggregator error recv: {:?}", e);
+                }
+            },
         }
     }
 }
