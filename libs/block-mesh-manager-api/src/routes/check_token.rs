@@ -1,12 +1,12 @@
 use crate::database::get_api_token_by_usr_and_status::get_api_token_by_usr_and_status;
-use crate::database::get_user_opt_by_email::get_user_opt_by_email;
 use crate::error::Error;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{
     CheckTokenRequest, CheckTokenResponseEnum, CheckTokenResponseMap, GetTokenResponse,
 };
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
-use block_mesh_manager_database_domain::utils::instrument_wrapper::commit_txn;
+use block_mesh_manager_database_domain::domain::get_user_opt_by_email::get_user_opt_by_email;
+use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 
 #[tracing::instrument(name = "check_token", skip_all)]
@@ -27,7 +27,7 @@ pub async fn check_token(
         };
     }
 
-    let mut transaction = pool.begin().await?;
+    let mut transaction = create_txn(&pool).await?;
 
     let user = match get_user_opt_by_email(&mut *transaction, &email).await {
         Ok(user) => match user {

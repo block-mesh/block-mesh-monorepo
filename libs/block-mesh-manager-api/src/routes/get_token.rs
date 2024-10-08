@@ -1,5 +1,4 @@
 use crate::database::get_api_token_by_usr_and_status::get_api_token_by_usr_and_status;
-use crate::database::get_user_opt_by_email::get_user_opt_by_email;
 use crate::error::Error;
 use anyhow::Context;
 use axum::{Extension, Json};
@@ -8,6 +7,8 @@ use block_mesh_common::interfaces::server_api::{
     GetTokenRequest, GetTokenResponse, GetTokenResponseEnum, GetTokenResponseMap,
 };
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
+use block_mesh_manager_database_domain::domain::get_user_opt_by_email::get_user_opt_by_email;
+use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 
 #[tracing::instrument(name = "get_token", skip_all)]
@@ -28,27 +29,27 @@ pub async fn get_token(
         };
     }
 
-    let mut transaction = pool.begin().await?;
+    let mut transaction = create_txn(&pool).await?;
 
     let user = match get_user_opt_by_email(&mut *transaction, &email).await {
         Ok(user) => match user {
             Some(user) => user,
             None => {
-                let _ = transaction.commit().await.context("Cannot commit txn");
+                commit_txn(transaction).await?;
                 get_token_map.insert(key, GetTokenResponseEnum::UserNotFound);
                 return Err(Error::UserNotFound);
             }
         },
         Err(_) => {
             get_token_map.insert(key, GetTokenResponseEnum::UserNotFound);
-            let _ = transaction.commit().await.context("Cannot commit txn");
+            commit_txn(transaction).await?;
             return Err(Error::UserNotFound);
         }
     };
 
     if !verify::<&str>(body.password.as_ref(), user.password.as_ref()).unwrap_or(false) {
         get_token_map.insert(key, GetTokenResponseEnum::PasswordMismatch);
-        let _ = transaction.commit().await.context("Cannot commit txn");
+        commit_txn(transaction).await?;
         return Err(Error::PasswordMismatch);
     }
 
@@ -60,13 +61,13 @@ pub async fn get_token(
                 Some(api_token) => api_token,
                 None => {
                     get_token_map.insert(key, GetTokenResponseEnum::ApiTokenNotFound);
-                    let _ = transaction.commit().await.context("Cannot commit txn");
+                    commit_txn(transaction).await?;
                     return Err(Error::ApiTokenNotFound);
                 }
             },
             Err(_) => {
                 get_token_map.insert(key, GetTokenResponseEnum::ApiTokenNotFound);
-                let _ = transaction.commit().await.context("Cannot commit txn");
+                commit_txn(transaction).await?;
                 return Err(Error::ApiTokenNotFound);
             }
         };
@@ -80,6 +81,6 @@ pub async fn get_token(
         key,
         GetTokenResponseEnum::GetTokenResponse(response.clone()),
     );
-    let _ = transaction.commit().await.context("Cannot commit txn");
+    commit_txn(transaction).await?;
     Ok(Json(response))
 }
