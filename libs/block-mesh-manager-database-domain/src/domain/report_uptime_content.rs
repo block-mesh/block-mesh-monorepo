@@ -52,7 +52,7 @@ async fn send_analytics(
         if !body_raw.is_empty() {
             if let Ok(metadata) = serde_json::from_str::<ClientsMetadata>(&body_raw) {
                 let _ = notify_worker(
-                    &pool,
+                    pool,
                     AnalyticsMessage {
                         msg_type: DBMessageTypes::AnalyticsMessage,
                         user_id: *user_id,
@@ -71,7 +71,7 @@ async fn send_analytics(
 #[tracing::instrument(name = "touch_users_ip", skip_all)]
 async fn touch_users_ip(pool: &PgPool, ip: String, user_id: &Uuid) {
     let _ = notify_worker(
-        &pool,
+        pool,
         UsersIpMessage {
             msg_type: DBMessageTypes::UsersIpMessage,
             id: *user_id,
@@ -91,7 +91,7 @@ pub async fn report_uptime_content(
     polling_interval: f64,
     interval_factor: f64,
 ) -> Result<Json<ReportUptimeResponse>, Error> {
-    let mut transaction = create_txn(&pool).await?;
+    let mut transaction = create_txn(pool).await?;
     let api_token = find_token(&mut transaction, &query.api_token)
         .await?
         .ok_or(anyhow!("Api Token Not Found"))?;
@@ -143,7 +143,7 @@ pub async fn report_uptime_content(
         .await;
     }
     let _ = notify_worker(
-        &pool,
+        pool,
         AggregateMessage {
             msg_type: DBMessageTypes::AggregateMessage,
             id: uptime.id,

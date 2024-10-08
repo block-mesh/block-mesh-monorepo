@@ -42,7 +42,7 @@ pub async fn submit_task_content(
     request: Option<Request>,
     mode: HandlerMode,
 ) -> Result<Json<SubmitTaskResponse>, Error> {
-    let mut transaction = create_txn(&pool).await?;
+    let mut transaction = create_txn(pool).await?;
     let api_token = find_token(&mut transaction, &query.api_token)
         .await?
         .ok_or(anyhow!("Api Token Not Found".to_string()))?;
@@ -101,7 +101,7 @@ pub async fn submit_task_content(
     commit_txn(transaction).await?;
 
     if query.response_code.unwrap_or(520) == 200 {
-        let mut transaction = create_txn(&pool).await?;
+        let mut transaction = create_txn(pool).await?;
         let tasks = get_or_create_aggregate_by_user_and_name(
             &mut transaction,
             AggregateName::Tasks,
@@ -110,7 +110,7 @@ pub async fn submit_task_content(
         .await?;
         commit_txn(transaction).await?;
         let _ = notify_worker(
-            &pool,
+            pool,
             AggregateMessage {
                 msg_type: DBMessageTypes::AggregateMessage,
                 id: tasks.id,

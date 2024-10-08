@@ -16,7 +16,7 @@ pub async fn submit_bandwidth_content(
     pool: &PgPool,
     body: ReportBandwidthRequest,
 ) -> Result<Json<ReportBandwidthResponse>, Error> {
-    let mut transaction = create_txn(&pool).await?;
+    let mut transaction = create_txn(pool).await?;
     let api_token = find_token(&mut transaction, &body.api_token)
         .await?
         .ok_or(anyhow!("Token Not Found"))?;
@@ -56,7 +56,7 @@ pub async fn submit_bandwidth_content(
     .await?;
 
     let _ = notify_worker(
-        &pool,
+        pool,
         AggregateMessage {
             msg_type: DBMessageTypes::AggregateMessage,
             id: download.id,
@@ -67,7 +67,7 @@ pub async fn submit_bandwidth_content(
     )
     .await;
     let _ = notify_worker(
-        &pool,
+        pool,
         AggregateMessage {
             msg_type: DBMessageTypes::AggregateMessage,
             id: upload.id,
@@ -78,7 +78,7 @@ pub async fn submit_bandwidth_content(
     )
     .await;
     let _ = notify_worker(
-        &pool,
+        pool,
         AggregateMessage {
             msg_type: DBMessageTypes::AggregateMessage,
             id: latency.id,
