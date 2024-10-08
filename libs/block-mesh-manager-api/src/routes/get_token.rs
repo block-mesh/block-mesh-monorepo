@@ -1,6 +1,5 @@
 use crate::database::get_api_token_by_usr_and_status::get_api_token_by_usr_and_status;
 use crate::error::Error;
-use anyhow::Context;
 use axum::{Extension, Json};
 use bcrypt::verify;
 use block_mesh_common::interfaces::server_api::{
