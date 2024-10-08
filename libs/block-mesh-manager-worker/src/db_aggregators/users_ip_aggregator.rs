@@ -6,6 +6,7 @@ use chrono::Utc;
 use serde_json::Value;
 use sqlx::PgPool;
 use std::collections::HashMap;
+use tokio::sync::broadcast::error::RecvError;
 use tokio::sync::broadcast::Receiver;
 
 #[tracing::instrument(name = "users_ip_aggregator", skip_all, err)]
@@ -42,10 +43,15 @@ pub async fn users_ip_aggregator(
                     }
                 }
             }
-            Err(e) => {
-                tracing::error!("users_ip_aggregator error recv: {:?}", e);
-                return Err(anyhow!("users_ip_aggregator error recv: {:?}", e));
-            }
+            Err(e) => match e {
+                RecvError::Closed => {
+                    tracing::error!("users_ip_aggregator error recv: {:?}", e);
+                    return Err(anyhow!("users_ip_aggregator error recv: {:?}", e));
+                }
+                RecvError::Lagged(_) => {
+                    tracing::error!("users_ip_aggregator error recv: {:?}", e);
+                }
+            },
         }
     }
 }
