@@ -78,8 +78,13 @@ ensure sqlx database create
 ensure sqlx migrate run --source migrations
 ensure cargo sqlx prepare -- --features ssr
 cd "${ROOT}/libs/block-mesh-manager-worker" || exit
+ensure sqlx migrate run --source migrations
 ensure cargo sqlx prepare
 cd "${ROOT}/libs/block-mesh-manager-ws" || exit
+ensure sqlx migrate run --source migrations
+ensure cargo sqlx prepare
+cd "${ROOT}/libs/feature-flags-server" || exit
+ensure sqlx migrate run --source migrations
 ensure cargo sqlx prepare
 >&2 echo "Postgres has been migrated, ready to go!"
 cd "${_PWD}"
