@@ -1,4 +1,3 @@
-use crate::database::daily_stat::increment_uptime::increment_uptime;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
@@ -12,7 +11,6 @@ use block_mesh_manager_database_domain::domain::report_uptime_content::{
     report_uptime_content, resolve_ip,
 };
 use http::HeaderMap;
-use http_body_util::BodyExt;
 use std::net::SocketAddr;
 use std::sync::Arc;
 

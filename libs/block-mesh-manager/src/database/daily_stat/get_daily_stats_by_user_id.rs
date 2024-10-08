@@ -1,4 +1,4 @@
-use crate::domain::daily_stat::DailyStat;
+use block_mesh_manager_database_domain::domain::daily_stat::DailyStat;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 

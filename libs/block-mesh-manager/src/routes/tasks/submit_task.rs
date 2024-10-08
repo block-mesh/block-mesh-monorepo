@@ -6,7 +6,6 @@ use block_mesh_common::interfaces::server_api::{
     HandlerMode, SubmitTaskRequest, SubmitTaskResponse,
 };
 use block_mesh_manager_database_domain::domain::submit_task_content::submit_task_content;
-use http_body_util::BodyExt;
 use std::sync::Arc;
 
 #[tracing::instrument(name = "submit_task", skip_all)]

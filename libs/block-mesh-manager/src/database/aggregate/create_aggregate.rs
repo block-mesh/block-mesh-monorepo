@@ -1,4 +1,4 @@
-use crate::domain::aggregate::AggregateName;
+use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;

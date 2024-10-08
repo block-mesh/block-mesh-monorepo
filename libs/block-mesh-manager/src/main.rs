@@ -16,11 +16,8 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_manager::ws::connection_manager::ConnectionManager;
     use block_mesh_manager::worker::analytics_agg::analytics_agg;
     use block_mesh_common::interfaces::db_messages::{
-        AggregateMessage, AnalyticsMessage, DailyStatMessage,
+        AnalyticsMessage, DailyStatMessage,
     };
-    use block_mesh_manager::worker::aggregate_agg::aggregate_agg;
-    use block_mesh_common::interfaces::db_messages::UsersIpMessage;
-    use block_mesh_manager::worker::users_ip_agg::users_ip_agg;
     use block_mesh_common::env::app_env_var::AppEnvVar;
     use block_mesh_common::env::env_var::EnvVar;
     use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
@@ -100,7 +97,6 @@ async fn run() -> anyhow::Result<()> {
     let (tx, rx) = flume::bounded::<JoinHandle<()>>(500);
     let (tx_daily_stat_agg, rx_daily_stat_agg) = flume::bounded::<DailyStatMessage>(500);
     let (tx_analytics_agg, rx_analytics_agg) = flume::bounded::<AnalyticsMessage>(500);
-    let (tx_aggregate_agg, rx_aggregate_agg) = flume::bounded::<AggregateMessage>(500);
     let (cleaner_tx, cleaner_rx) = flume::bounded::<EnrichIp>(500);
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
@@ -150,7 +146,6 @@ async fn run() -> anyhow::Result<()> {
         cleaner_tx,
         redis,
         ws_connection_manager,
-        tx_aggregate_agg,
     });
 
     let application = Application::build(configuration, app_state.clone(), db_pool.clone()).await;

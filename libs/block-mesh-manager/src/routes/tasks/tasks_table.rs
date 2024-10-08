@@ -1,5 +1,4 @@
 use crate::database::task::get_tasks_by_user_id::get_tasks_by_user_id;
-use crate::domain::task::{Task, TaskMethod, TaskStatus};
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use askama::Template;
@@ -11,6 +10,7 @@ use block_mesh_common::constants::{
     BLOCK_MESH_LANDING_PAGE_IMAGE, BLOCK_MESH_LOGO, BLOCK_MESH_SUPPORT_CHAT,
     BLOCK_MESH_SUPPORT_EMAIL, BLOCK_MESH_TWITTER,
 };
+use block_mesh_manager_database_domain::domain::task::{Task, TaskMethod, TaskStatus};
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;

@@ -1,5 +1,4 @@
 use crate::database::nonce::get_nonce_by_nonce::get_nonce_by_nonce;
-use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::database::user::update_verified_email::update_verified_email;
 use crate::errors::error::Error;
 use crate::notification::notification_redirect::NotificationRedirect;
@@ -8,6 +7,7 @@ use axum::response::Redirect;
 use axum::Extension;
 use block_mesh_common::interfaces::server_api::ConfirmEmailRequest;
 use block_mesh_common::routes_enum::RoutesEnum;
+use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
 use sqlx::PgPool;
 
 pub async fn handler(

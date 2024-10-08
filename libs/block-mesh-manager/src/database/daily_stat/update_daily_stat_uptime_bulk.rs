@@ -1,4 +1,4 @@
-use crate::database::daily_stat::increment_uptime::increment_uptime;
+use block_mesh_manager_database_domain::domain::increment_uptime::increment_uptime;
 use sqlx::{Postgres, Transaction};
 use std::collections::HashMap;
 use uuid::Uuid;

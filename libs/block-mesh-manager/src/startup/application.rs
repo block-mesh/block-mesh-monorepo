@@ -29,9 +29,7 @@ use crate::ws::connection_manager::ConnectionManager;
 use block_mesh_common::env::app_env_var::AppEnvVar;
 use block_mesh_common::env::env_var;
 use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
-use block_mesh_common::interfaces::db_messages::{
-    AggregateMessage, AnalyticsMessage, DailyStatMessage, UsersIpMessage,
-};
+use block_mesh_common::interfaces::db_messages::{AnalyticsMessage, DailyStatMessage};
 use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
 use flume::Sender;
 use tokio::sync::Mutex;
@@ -60,7 +58,6 @@ pub struct AppState {
     pub cleaner_tx: Sender<EnrichIp>,
     pub redis: MultiplexedConnection,
     pub ws_connection_manager: ConnectionManager,
-    pub tx_aggregate_agg: Sender<AggregateMessage>,
 }
 
 #[derive(Clone)]

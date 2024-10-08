@@ -1,5 +1,4 @@
 use crate::database::analytics::inserting_client_analytics_bulk::inserting_client_analytics_bulk;
-use crate::database::notify::notify_worker::notify_worker;
 use crate::startup::application::AppState;
 use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_common::interfaces::db_messages::AnalyticsMessage;

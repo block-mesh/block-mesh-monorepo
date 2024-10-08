@@ -6,7 +6,6 @@ use axum_login::AuthSession;
 use sqlx::PgPool;
 
 use crate::database::nonce::get_nonce_by_nonce::get_nonce_by_nonce;
-use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use block_mesh_common::constants::{
@@ -15,6 +14,7 @@ use block_mesh_common::constants::{
     BLOCK_MESH_SUPPORT_EMAIL, BLOCK_MESH_TWITTER,
 };
 use block_mesh_common::interfaces::server_api::NewPasswordQuery;
+use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
 
 #[allow(dead_code)]
 #[derive(Template)]

@@ -2,7 +2,6 @@
 
 use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
-use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::errors::error::Error;
 use crate::utils::cache_envar::get_envar;
 use crate::utils::verify_cache::verify_with_cache;
@@ -13,6 +12,7 @@ use axum_login::{
     tower_sessions::{ExpiredDeletion, Expiry, SessionManagerLayer},
     AuthManagerLayer, AuthManagerLayerBuilder, AuthUser, AuthnBackend, UserId,
 };
+use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
 use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use redis::aio::MultiplexedConnection;
 use redis::{AsyncCommands, RedisResult};

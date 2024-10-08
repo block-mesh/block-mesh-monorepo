@@ -1,4 +1,4 @@
-use crate::domain::task::TaskStatus;
+use block_mesh_manager_database_domain::domain::task::TaskStatus;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, Transaction};

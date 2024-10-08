@@ -1,6 +1,4 @@
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::database::aggregate::update_aggregate::update_aggregate;
-use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use crate::routes::twitter::context::{Oauth2Ctx, Oauth2CtxPg};
@@ -8,6 +6,8 @@ use axum::response::Redirect;
 use axum::Extension;
 use axum_login::AuthSession;
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
+use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
+use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use sqlx::PgPool;
 use std::sync::Arc;
 use tokio::sync::Mutex;

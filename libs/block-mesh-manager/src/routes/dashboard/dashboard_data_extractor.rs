@@ -9,20 +9,20 @@ use block_mesh_common::interfaces::server_api::{
     CallToActionUI, DailyStatForDashboard, DashboardResponse, PerkUI, Referral,
 };
 
-use crate::database::aggregate::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::database::call_to_action::get_user_calls_to_action::get_user_call_to_action;
 use crate::database::daily_stat::get_daily_stats_by_user_id::get_daily_stats_by_user_id;
 use crate::database::invite_code::get_number_of_users_invited::get_number_of_users_invited;
 use crate::database::invite_code::get_user_latest_invite_code::get_user_latest_invite_code;
 use crate::database::invite_code::get_user_referrals::get_user_referrals;
 use crate::database::perks::get_user_perks::get_user_perks;
-use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::database::users_ip::get_user_ips::get_user_ips;
-use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use crate::utils::points::{calc_points_daily, calc_total_points};
 use block_mesh_common::feature_flag_client::FlagValue;
+use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
+use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
+use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
 use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use regex::Regex;
 
