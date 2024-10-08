@@ -16,6 +16,7 @@ pub async fn inserting_client_analytics_bulk(
             user_id,
             &value.depin_aggregator,
             &value.device_type,
+            &value.version,
         )
         .await;
     }

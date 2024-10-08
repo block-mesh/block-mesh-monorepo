@@ -4,6 +4,7 @@ use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::errors::error::Error;
+use crate::utils::cache_envar::get_envar;
 use crate::utils::verify_cache::verify_with_cache;
 use anyhow::anyhow;
 use async_trait::async_trait;
@@ -18,7 +19,6 @@ use redis::{AsyncCommands, RedisResult};
 use secret::Secret;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-use std::env;
 use tower_sessions_sqlx_store::PostgresStore;
 use uuid::Uuid;
 
@@ -38,11 +38,8 @@ pub struct Backend {
 }
 
 impl Backend {
-    pub fn get_expire() -> i64 {
-        env::var("REDIS_EXPIRE")
-            .unwrap_or("86400".to_string())
-            .parse()
-            .unwrap_or(86400)
+    pub async fn get_expire() -> i64 {
+        get_envar("REDIS_EXPIRE").await.parse().unwrap_or(86400)
     }
     pub fn new(db: PgPool, con: MultiplexedConnection) -> Self {
         Self { db, con }
@@ -211,7 +208,7 @@ pub async fn get_user_from_redis(
 pub async fn save_to_redis(key: &str, session_user: &SessionUser, con: &mut MultiplexedConnection) {
     if let Ok(session_user) = serde_json::to_string(session_user) {
         let _: RedisResult<()> = con
-            .set_ex(key, session_user, Backend::get_expire() as u64)
+            .set_ex(key, session_user, Backend::get_expire().await as u64)
             .await;
     }
 }

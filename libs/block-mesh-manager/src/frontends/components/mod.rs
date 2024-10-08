@@ -18,3 +18,4 @@ pub mod reload_button;
 pub mod stat;
 pub mod sub_heading;
 pub mod tables;
+pub mod wallet_selector;

@@ -12,6 +12,7 @@ use crate::domain::perk::PerkName;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use block_mesh_common::interfaces::server_api::{ConnectWalletRequest, ConnectWalletResponse};
+use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 
 #[tracing::instrument(name = "connect_wallet", skip(pool, auth))]
 pub async fn handler(
@@ -19,19 +20,17 @@ pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
     Json(body): Json<ConnectWalletRequest>,
 ) -> Result<Json<ConnectWalletResponse>, Error> {
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let mut transaction = create_txn(&pool).await?;
     let user = auth.user.ok_or(Error::UserNotFound)?;
-
     let signature =
         Signature::try_from(body.signature.as_slice()).map_err(|_| Error::InternalServer)?;
     let pubkey = Pubkey::from_str(body.pubkey.as_str()).unwrap_or_default();
     let message = body.message.as_bytes();
-
     if signature.verify(pubkey.as_ref(), message) {
         add_perk_to_user(
             &mut transaction,
             user.id,
-            PerkName::Backpack,
+            PerkName::Wallet,
             1.1,
             0.0,
             serde_json::from_str("{}").unwrap(),
@@ -39,10 +38,9 @@ pub async fn handler(
         .await?;
         update_user_wallet(&mut transaction, user.id, body.pubkey).await?
     } else {
+        tracing::error!("Signature verification failed.");
         return Err(Error::SignatureMismatch);
     }
-
-    transaction.commit().await.map_err(Error::from)?;
-
+    commit_txn(transaction).await?;
     Ok(Json(ConnectWalletResponse { status: 200 }))
 }

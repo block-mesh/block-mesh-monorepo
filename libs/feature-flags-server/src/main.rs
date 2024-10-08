@@ -3,8 +3,8 @@ use crate::routes::get_router;
 use axum::{Extension, Router};
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use logger_general::tracing::setup_tracing_stdout_only;
-use std::env;
 use std::net::SocketAddr;
+use std::{env, process};
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 
@@ -33,5 +33,5 @@ async fn main() -> anyhow::Result<()> {
         app.into_make_service_with_connect_info::<SocketAddr>(),
     )
     .await?;
-    Ok(())
+    process::exit(1);
 }

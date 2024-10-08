@@ -23,9 +23,10 @@ pub async fn rpc_worker_loop(pool: PgPool) -> Result<(), anyhow::Error> {
         .unwrap_or("30000".to_string())
         .parse()
         .unwrap_or(30_000);
-    let mut transaction = create_txn(&pool).await?;
-    create_server_user(&mut transaction).await?;
-    commit_txn(transaction).await?;
+    if let Ok(mut transaction) = create_txn(&pool).await {
+        _ = create_server_user(&mut transaction).await;
+        _ = commit_txn(transaction).await;
+    }
     loop {
         match create_rpc_tasks(pool.clone()).await {
             Ok(_) => {}

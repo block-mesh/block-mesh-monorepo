@@ -7,6 +7,7 @@ use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::domain::aggregate::AggregateName;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
+use crate::utils::cache_envar::get_envar;
 use crate::worker::db_cleaner_cron::EnrichIp;
 use axum::extract::{ConnectInfo, Query, Request, State};
 use axum::Json;
@@ -69,6 +70,7 @@ async fn send_analytics(
                             msg_type: DBMessageTypes::AnalyticsMessage,
                             user_id: *user_id,
                             depin_aggregator: metadata.depin_aggregator.unwrap_or_default(),
+                            version: metadata.version.unwrap_or_default(),
                             device_type: metadata.device_type,
                         })
                         .await;
@@ -157,9 +159,12 @@ pub async fn report_uptime_content(
 
     let now = Utc::now();
     let diff = now - uptime.updated_at.unwrap_or(now);
+    let interval_factor = get_envar("INTERVAL_FACTOR").await.parse().unwrap_or(10.0);
 
     let (extra, abs) = if (diff.num_seconds()
-        < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240))
+        < ((interval * interval_factor) as i64)
+            .checked_div(1_000)
+            .unwrap_or(240))
         || mode == HandlerMode::WebSocket
     {
         (

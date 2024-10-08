@@ -112,6 +112,7 @@ pub async fn dashboard_data_extractor(
 
     commit_txn(transaction).await?;
     Ok(DashboardResponse {
+        wallet_address: user.wallet_address,
         user_ips,
         calls_to_action: calls_to_action
             .into_iter()
@@ -151,6 +152,7 @@ pub async fn dashboard_data_extractor(
                 id: i.id,
                 name: i.name.to_string(),
                 multiplier: i.multiplier,
+                one_time_bonus: i.one_time_bonus,
             })
             .collect(),
     })

@@ -58,6 +58,7 @@ pub struct ClientsMetadata {
     pub depin_aggregator: Option<String>,
     #[typeshare(serialized_as = "string")]
     pub device_type: DeviceType,
+    pub version: Option<String>,
 }
 
 #[typeshare]
@@ -273,6 +274,7 @@ pub struct DashboardResponse {
     pub referrals: Vec<Referral>,
     pub verified_email: bool,
     pub user_ips: Vec<UserIpInfo>,
+    pub wallet_address: Option<String>,
 }
 
 #[typeshare]
@@ -282,6 +284,7 @@ pub struct PerkUI {
     pub id: Uuid,
     pub name: String,
     pub multiplier: f64,
+    pub one_time_bonus: f64,
 }
 
 #[typeshare]
