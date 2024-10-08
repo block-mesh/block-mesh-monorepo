@@ -9,12 +9,19 @@ use tokio::sync::Notify;
 use uuid::Uuid;
 
 /// Actual websocket statemachine (one will be spawned per connection)
-pub async fn handle_socket(socket: WebSocket, state: AppState) {
+pub async fn handle_socket(socket: WebSocket, ip: String, state: Arc<AppState>) {
     let is_closing = Arc::new(AtomicBool::new(false));
     let (ws_sink, ws_stream) = socket.split();
     let (sink_task, sink_tx) = messenger(ws_sink, is_closing.clone());
     let notify = Arc::new(Notify::new());
-    let recv_task = receiver(ws_stream, is_closing.clone(), notify.clone(), state.clone()).await;
+    let recv_task = receiver(
+        ws_stream,
+        is_closing.clone(),
+        ip.clone(),
+        notify.clone(),
+        state.clone(),
+    )
+    .await;
 
     let ws_connection_manager = state.websocket_manager.clone();
     let task_scheduler = ws_connection_manager.task_scheduler;

@@ -13,12 +13,13 @@ use tokio::task::JoinHandle;
 pub async fn receiver(
     mut ws_stream: SplitStream<WebSocket>,
     is_cls: Arc<AtomicBool>,
+    ip: String,
     task_scheduler_notifier: Arc<Notify>,
-    state: AppState,
+    state: Arc<AppState>,
 ) -> JoinHandle<()> {
     tokio::spawn(async move {
         while let Some(Ok(msg)) = ws_stream.next().await {
-            match process_message(msg.clone(), state.clone()).await {
+            match process_message(msg.clone(), ip.clone(), state.clone()).await {
                 ControlFlow::Continue(ws_client_message) => {
                     if let Some(ws_client_message) = ws_client_message {
                         if matches!(ws_client_message, WsClientMessage::CompleteTask(_)) {

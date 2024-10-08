@@ -100,7 +100,6 @@ async fn run() -> anyhow::Result<()> {
     let (tx, rx) = flume::bounded::<JoinHandle<()>>(500);
     let (tx_daily_stat_agg, rx_daily_stat_agg) = flume::bounded::<DailyStatMessage>(500);
     let (tx_analytics_agg, rx_analytics_agg) = flume::bounded::<AnalyticsMessage>(500);
-    let (tx_users_ip_agg, rx_users_ip_agg) = flume::bounded::<UsersIpMessage>(500);
     let (tx_aggregate_agg, rx_aggregate_agg) = flume::bounded::<AggregateMessage>(500);
     let (cleaner_tx, cleaner_rx) = flume::bounded::<EnrichIp>(500);
     let client = ClientBuilder::new()
@@ -151,7 +150,6 @@ async fn run() -> anyhow::Result<()> {
         cleaner_tx,
         redis,
         ws_connection_manager,
-        tx_users_ip_agg,
         tx_aggregate_agg,
     });
 
@@ -169,16 +167,6 @@ async fn run() -> anyhow::Result<()> {
         rx_analytics_agg,
         app_state.clone(),
     ));
-    let db_users_ip_task = tokio::spawn(users_ip_agg(
-        db_pool.clone(),
-        rx_users_ip_agg,
-        app_state.clone(),
-    ));
-    let db_aggregate_task = tokio::spawn(aggregate_agg(
-        db_pool.clone(),
-        rx_aggregate_agg,
-        app_state.clone(),
-    ));
     let ws_ping_task = tokio::spawn(ws_keep_alive(broadcaster));
 
     tokio::select! {
@@ -187,8 +175,6 @@ async fn run() -> anyhow::Result<()> {
         o = db_cleaner_task => panic!("DB cleaner task failed {:?}", o),
         o = db_daily_stat_task => panic!("DB daily_stat aggregator {:?}", o),
         o = db_analytics_task => panic!("DB analytics aggregator {:?}", o),
-        o = db_users_ip_task => panic!("DB users_ip aggregator {:?}", o),
-        o = db_aggregate_task => panic!("DB aggregate aggregator {:?}", o),
         o = ws_ping_task => panic!("ws_ping_task failed {:?}", o)
     }
 }

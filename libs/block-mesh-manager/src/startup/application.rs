@@ -60,7 +60,6 @@ pub struct AppState {
     pub cleaner_tx: Sender<EnrichIp>,
     pub redis: MultiplexedConnection,
     pub ws_connection_manager: ConnectionManager,
-    pub tx_users_ip_agg: Sender<UsersIpMessage>,
     pub tx_aggregate_agg: Sender<AggregateMessage>,
 }
 

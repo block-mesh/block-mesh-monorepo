@@ -1,5 +1,4 @@
-use crate::domain::task::Task;
-use crate::domain::task::TaskStatus;
+use crate::domain::task::{Task, TaskStatus};
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 

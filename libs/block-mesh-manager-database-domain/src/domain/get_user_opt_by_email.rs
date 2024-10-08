@@ -1,6 +1,6 @@
-use block_mesh_manager_database_domain::domain::option_uuid::OptionUuid;
-use block_mesh_manager_database_domain::domain::user::User;
-use block_mesh_manager_database_domain::domain::user::UserRole;
+use crate::domain::option_uuid::OptionUuid;
+use crate::domain::user::User;
+use crate::domain::user::UserRole;
 use secret::Secret;
 use sqlx::PgExecutor;
 

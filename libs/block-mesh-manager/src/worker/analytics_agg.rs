@@ -3,6 +3,7 @@ use crate::database::notify::notify_worker::notify_worker;
 use crate::startup::application::AppState;
 use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_common::interfaces::db_messages::AnalyticsMessage;
+use block_mesh_manager_database_domain::domain::notify_worker::notify_worker;
 use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use chrono::Utc;
 use flume::Receiver;
