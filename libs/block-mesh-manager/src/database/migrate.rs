@@ -1,3 +1,4 @@
+use crate::utils::cache_envar::get_envar;
 use sqlx::PgPool;
 
 struct Migrate {
@@ -13,14 +14,21 @@ pub async fn migrate(db_pool: &PgPool) -> anyhow::Result<()> {
         retry_delay: 100,
     };
     tracing::info!("Starting migrations");
+    let env = get_envar("APP_ENVIRONMENT").await;
 
     for retry in 0..=opt.retry {
         if retry > 0 {
             tracing::info!("Retry number {} (waiting {}s)", retry, opt.retry_delay);
             std::thread::sleep(std::time::Duration::from_millis(opt.retry_delay));
         }
-
-        sqlx::migrate!("./migrations").run(db_pool).await?;
+        match sqlx::migrate!("./migrations").run(db_pool).await {
+            Ok(_) => tracing::info!("Successfully migrated"),
+            Err(e) => {
+                if env != "local" {
+                    return Err(e.into());
+                }
+            }
+        }
         tracing::info!("Migration completed with success");
     }
     Ok(())
