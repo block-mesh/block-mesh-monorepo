@@ -125,7 +125,7 @@ jobs:
         uses: "docker/build-push-action@v5"
         with:
           context: .
-          file: blockmesh-cli.Dockerfile
+          file: docker/blockmesh-cli.Dockerfile
           push: true
           tags: blockmesh/blockmesh-cli:latest-arm64,blockmesh/blockmesh-cli:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}

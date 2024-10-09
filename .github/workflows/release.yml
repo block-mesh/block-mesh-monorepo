@@ -98,6 +98,10 @@ jobs:
         run: |
           cargo build -p block-mesh-manager-api --release
           tar acf block-mesh-manager-api-${{ matrix.target }}.tar.gz target/release/block-mesh-manager-api
+      - name: "Build WS"
+        run: |
+          cargo build -p block-mesh-manager-ws --release
+          tar acf block-mesh-manager-ws-${{ matrix.target }}.tar.gz target/release/block-mesh-manager-ws
       - name: "Build Feature Flags Server"
         run: |
           cargo build -p feature-flags-server --release
@@ -113,6 +117,7 @@ jobs:
             blockmesh-cli-${{ matrix.target }}.tar.gz
             feature-flags-server-${{ matrix.target }}.tar.gz
             block-mesh-manager-api-${{ matrix.target }}.tar.gz
+            block-mesh-manager-ws-${{ matrix.target }}.tar.gz
   push-to-registry:
     name: "Push Docker image to Docker Hub"
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -148,7 +153,7 @@ jobs:
         uses: "docker/build-push-action@v5"
         with:
           context: .
-          file: block-mesh-manager.Dockerfile
+          file: docker/block-mesh-manager.Dockerfile
           push: true
           tags: blockmesh/block-mesh-manager:latest-amd64,blockmesh/block-mesh-manager:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -156,7 +161,7 @@ jobs:
         uses: "docker/build-push-action@v5"
         with:
           context: .
-          file: block-mesh-manager-worker.Dockerfile
+          file: docker/block-mesh-manager-worker.Dockerfile
           push: true
           tags: blockmesh/block-mesh-manager-worker:latest-amd64,blockmesh/block-mesh-manager-worker:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -164,7 +169,7 @@ jobs:
         uses: "docker/build-push-action@v5"
         with:
           context: .
-          file: feature-flags-server.Dockerfile
+          file: docker/feature-flags-server.Dockerfile
           push: true
           tags: blockmesh/feature-flags-server:latest-amd64,blockmesh/feature-flags-server:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
@@ -172,8 +177,16 @@ jobs:
         uses: "docker/build-push-action@v5"
         with:
           context: .
-          file: block-mesh-manager-api.Dockerfile
+          file: docker/block-mesh-manager-api.Dockerfile
           push: true
           tags: blockmesh/block-mesh-manager-api:latest-amd64,blockmesh/block-mesh-manager-api:v${{ needs.get-tag.outputs.pkg-version }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: "Build and push Docker WS"
+        uses: "docker/build-push-action@v5"
+        with:
+          context: .
+          file: docker/block-mesh-manager-ws.Dockerfile
+          push: true
+          tags: blockmesh/block-mesh-manager-ws:latest-amd64,blockmesh/block-mesh-manager-ws:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
 # https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/
