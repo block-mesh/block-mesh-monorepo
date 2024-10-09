@@ -71,23 +71,33 @@ do
     sleep 1
 done
 
+function migrate() {
+  sqlx migrate run --source migrations --ignore-missing
+}
+
 >&2 echo "Postgres is up and running on port ${DB_PORT}!"
 set -x
 export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}"
+echo "create DB"
 ensure sqlx database create
-ensure sqlx migrate run --source migrations
+echo "migrate DB :79"
+ensure migrate
 ensure cargo sqlx prepare -- --features ssr
 cd "${ROOT}/libs/block-mesh-manager-worker" || exit
-sqlx migrate run --source migrations
+echo "migrate DB :83"
+ensure migrate
 ensure cargo sqlx prepare
 cd "${ROOT}/libs/block-mesh-manager-api" || exit
-sqlx migrate run --source migrations
+echo "migrate DB :87"
+ensure migrate
 ensure cargo sqlx prepare
 cd "${ROOT}/libs/block-mesh-manager-ws" || exit
-sqlx migrate run --source migrations
+echo "migrate DB :91"
+ensure migrate
 ensure cargo sqlx prepare
 cd "${ROOT}/libs/feature-flags-server" || exit
-sqlx migrate run --source migrations
+echo "migrate DB :95"
+ensure migrate
 ensure cargo sqlx prepare
 >&2 echo "Postgres has been migrated, ready to go!"
 cd "${_PWD}"
