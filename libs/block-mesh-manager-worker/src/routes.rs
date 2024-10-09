@@ -8,6 +8,12 @@ pub async fn health() -> impl IntoResponse {
     (StatusCode::OK, "OK")
 }
 
+#[tracing::instrument(name = "version", skip_all)]
+pub async fn version() -> impl IntoResponse {
+    (StatusCode::OK, env!("CARGO_PKG_VERSION"))
+}
 pub fn get_router() -> Router {
-    Router::new().route("/health", get(health))
+    Router::new()
+        .route("/health", get(health))
+        .route("/version", get(version))
 }

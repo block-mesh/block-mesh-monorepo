@@ -9,6 +9,7 @@ use serde_json::Value;
 use std::net::SocketAddr;
 use std::{env, mem, process};
 use tokio::net::TcpListener;
+use tokio::task::JoinHandle;
 use tower_http::cors::CorsLayer;
 
 mod call_backs;
@@ -26,6 +27,7 @@ use crate::cron_jobs::rpc_cron::rpc_worker_loop;
 use crate::db_aggregators::aggregates_aggregator::aggregates_aggregator;
 use crate::db_aggregators::analytics_aggregator::analytics_aggregator;
 use crate::db_aggregators::daily_stats_aggregator::daily_stats_aggregator;
+use crate::db_aggregators::joiner_loop::joiner_loop;
 use crate::routes::get_router;
 
 pub async fn run_server(listener: TcpListener, app: Router<()>) -> std::io::Result<()> {
@@ -75,6 +77,7 @@ async fn run() -> anyhow::Result<()> {
     let db_pool = get_pg_pool().await;
     // let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
     // let _redis = redis_client.get_multiplexed_async_connection().await?;
+    let (joiner_tx, joiner_rx) = flume::bounded::<JoinHandle<()>>(500);
     let (tx, _rx) = tokio::sync::broadcast::channel::<Value>(
         env::var("BROADCAST_CHANNEL_SIZE")
             .unwrap_or("5000".to_string())
@@ -82,6 +85,7 @@ async fn run() -> anyhow::Result<()> {
             .unwrap_or(5000),
     );
 
+    let joiner_task = tokio::spawn(joiner_loop(joiner_rx));
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
     let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
 
@@ -101,6 +105,7 @@ async fn run() -> anyhow::Result<()> {
         5,
     ));
     let db_aggregates_aggregator_task = tokio::spawn(aggregates_aggregator(
+        joiner_tx.clone(),
         db_pool.clone(),
         tx.subscribe(),
         env::var("AGG_SIZE")
@@ -140,6 +145,7 @@ async fn run() -> anyhow::Result<()> {
     let server_task = run_server(listener, app);
 
     tokio::select! {
+        o = joiner_task => panic!("joiner_task exit {:?}", o),
         o = server_task => panic!("server task exit {:?}", o),
         o = finalize_daily_stats_task => panic!("finalize_daily_stats_task exit {:?}", o),
         o = rpc_worker_task => panic!("rpc_worker_task exit {:?}", o),

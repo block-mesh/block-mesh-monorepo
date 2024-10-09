@@ -3,14 +3,17 @@ use anyhow::anyhow;
 use block_mesh_common::interfaces::db_messages::AggregateMessage;
 use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use chrono::Utc;
+use flume::Sender;
 use serde_json::Value;
 use sqlx::PgPool;
 use std::collections::HashMap;
 use tokio::sync::broadcast::error::RecvError;
 use tokio::sync::broadcast::Receiver;
+use tokio::task::JoinHandle;
 
 #[tracing::instrument(name = "aggregates_aggregator", skip_all, err)]
 pub async fn aggregates_aggregator(
+    joiner_tx: Sender<JoinHandle<()>>,
     pool: PgPool,
     mut rx: Receiver<Value>,
     agg_size: i32,
@@ -30,14 +33,20 @@ pub async fn aggregates_aggregator(
                     let run = diff.num_seconds() > time_limit || count >= agg_size;
                     prev = Utc::now();
                     if run {
-                        tracing::info!("aggregates_aggregator starting txn");
-                        if let Ok(mut transaction) = create_txn(&pool).await {
-                            for pair in calls.iter() {
-                                let _ = update_aggregate(&mut transaction, pair.0, pair.1).await;
+                        let calls_clone = calls.clone();
+                        let poll_clone = pool.clone();
+                        let handle = tokio::spawn(async move {
+                            tracing::info!("aggregates_aggregator starting txn");
+                            if let Ok(mut transaction) = create_txn(&poll_clone).await {
+                                for pair in calls_clone.iter() {
+                                    let _ =
+                                        update_aggregate(&mut transaction, pair.0, pair.1).await;
+                                }
+                                let _ = commit_txn(transaction).await;
                             }
-                            let _ = commit_txn(transaction).await;
-                        }
-                        tracing::info!("aggregates_aggregator finished txn");
+                            tracing::info!("aggregates_aggregator finished txn");
+                        });
+                        let _ = joiner_tx.send_async(handle).await;
                         count = 0;
                         calls.clear();
                     }
