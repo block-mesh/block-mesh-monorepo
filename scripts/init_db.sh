@@ -99,5 +99,9 @@ cd "${ROOT}/libs/feature-flags-server" || exit
 echo "migrate DB :95"
 ensure migrate
 ensure cargo sqlx prepare
+cd "${ROOT}/libs/block-mesh-manager-database-domain" || exit
+echo "migrate DB :103"
+ensure migrate
+ensure cargo sqlx prepare
 >&2 echo "Postgres has been migrated, ready to go!"
 cd "${_PWD}"
