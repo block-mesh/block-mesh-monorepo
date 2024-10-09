@@ -1,4 +1,4 @@
-use crate::domain::task::Task;
+use block_mesh_manager_database_domain::domain::task::Task;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 

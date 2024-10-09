@@ -1,11 +1,11 @@
 use crate::database::task::count_user_tasks_in_period::count_user_tasks_in_period;
 use crate::database::task::create_task::create_task;
-use crate::domain::task::TaskMethod;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use axum::response::Redirect;
 use axum::{Extension, Form};
 use axum_login::AuthSession;
+use block_mesh_manager_database_domain::domain::task::TaskMethod;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::PgPool;

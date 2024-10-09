@@ -1,13 +1,13 @@
 use axum::{Extension, Json};
 use sqlx::PgPool;
 
-use crate::database::api_token::find_token::find_token;
 use crate::database::invite_code::get_user_latest_invite_code::get_user_latest_invite_code;
-use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::errors::error::Error;
 use block_mesh_common::interfaces::server_api::{
     GetLatestInviteCodeRequest, GetLatestInviteCodeResponse,
 };
+use block_mesh_manager_database_domain::domain::find_token::find_token;
+use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
 use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 
 #[tracing::instrument(name = "get_latest_invite_code", skip_all)]

@@ -1,9 +1,9 @@
-use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use axum::{Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::AuthStatusResponse;
+use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
 use sqlx::PgPool;
 
 pub async fn handler(

@@ -1,4 +1,3 @@
-use crate::database::api_token::find_token::find_token;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
@@ -7,6 +6,7 @@ use crate::ws::handle_socket::handle_socket;
 use anyhow::Context;
 use axum::extract::{Query, State, WebSocketUpgrade};
 use axum::response::IntoResponse;
+use block_mesh_manager_database_domain::domain::find_token::find_token;
 use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::HeaderMap;
 use std::collections::HashMap;

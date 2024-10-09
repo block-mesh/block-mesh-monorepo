@@ -1581,10 +1581,15 @@ name = "block-mesh-manager-database-domain"
 version = "0.0.303"
 dependencies = [
  "anyhow",
+ "axum",
+ "block-mesh-common",
  "chrono",
+ "http 1.1.0",
+ "http-body-util",
  "rand 0.8.5",
  "secret",
  "serde",
+ "serde_json",
  "sqlx",
  "tokio",
  "tracing",
@@ -1633,11 +1638,17 @@ dependencies = [
  "anyhow",
  "axum",
  "block-mesh-common",
+ "block-mesh-manager-database-domain",
  "dashmap 6.1.0",
  "dotenv",
  "futures",
+ "http 1.1.0",
+ "http-body-util",
+ "logger-general",
+ "matches",
  "reqwest 0.12.7",
  "reqwest-websocket",
+ "sentry",
  "serde",
  "serde_json",
  "sqlx",
@@ -5243,6 +5254,12 @@ checksum = "8263075bb86c5a1b1427b5ae862e8889656f126e9f77c484496e8b47cf5c5558"
 dependencies = [
  "regex-automata 0.1.10",
 ]
+
+[[package]]
+name = "matches"
+version = "0.1.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2532096657941c2fea9c289d370a250971c689d4f143798ff67113ec042024a5"
 
 [[package]]
 name = "matchit"

@@ -1,5 +1,5 @@
-use crate::domain::daily_stat::DailyStat;
-use crate::domain::daily_stat::DailyStatStatus;
+use block_mesh_manager_database_domain::domain::daily_stat::DailyStat;
+use block_mesh_manager_database_domain::domain::daily_stat::DailyStatStatus;
 use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;

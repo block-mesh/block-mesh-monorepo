@@ -1,10 +1,10 @@
-use crate::database::api_token::find_token::find_token;
 use crate::database::uptime_report::get_user_latest_uptime::get_user_latest_uptime;
-use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::errors::error::Error;
 use axum::extract::Query;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{GetUserUptimeRequest, GetUserUptimeResponse};
+use block_mesh_manager_database_domain::domain::find_token::find_token;
+use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
 use http::StatusCode;
 use sqlx::PgPool;
 

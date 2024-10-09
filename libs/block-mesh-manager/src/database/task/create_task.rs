@@ -1,5 +1,5 @@
-use crate::domain::task::TaskMethod;
-use crate::domain::task::TaskStatus;
+use block_mesh_manager_database_domain::domain::task::TaskMethod;
+use block_mesh_manager_database_domain::domain::task::TaskStatus;
 use chrono::Utc;
 use sqlx::types::JsonValue;
 use sqlx::{Postgres, Transaction};

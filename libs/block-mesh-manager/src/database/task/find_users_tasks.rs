@@ -1,5 +1,5 @@
-use crate::domain::task::GetTask;
-use crate::domain::task::TaskStatus;
+use block_mesh_manager_database_domain::domain::task::GetTask;
+use block_mesh_manager_database_domain::domain::task::TaskStatus;
 use sqlx::{Postgres, Transaction};
 
 #[tracing::instrument(name = "find_users_tasks", skip_all)]

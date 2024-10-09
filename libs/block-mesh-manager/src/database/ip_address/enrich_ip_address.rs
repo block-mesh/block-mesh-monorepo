@@ -2,7 +2,8 @@ use block_mesh_common::interfaces::ip_data::IPData;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-pub(crate) async fn enrich_ip_address(
+#[allow(dead_code)]
+pub async fn enrich_ip_address(
     transaction: &mut Transaction<'_, Postgres>,
     id: Uuid,
     ip_data: &IPData,

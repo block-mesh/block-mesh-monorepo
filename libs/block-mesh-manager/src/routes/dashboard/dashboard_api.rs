@@ -5,12 +5,12 @@ use std::sync::Arc;
 #[allow(unused_imports)]
 use tracing::Level;
 
-use crate::database::api_token::find_token::find_token;
-use crate::database::user::get_user_by_id::get_user_opt_by_id;
 use crate::errors::error::Error;
 use crate::routes::dashboard::dashboard_data_extractor::dashboard_data_extractor;
 use crate::startup::application::AppState;
 use block_mesh_common::interfaces::server_api::{DashboardRequest, DashboardResponse};
+use block_mesh_manager_database_domain::domain::find_token::find_token;
+use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
 
 #[tracing::instrument(name = "dashboard_api", skip_all)]
 pub async fn handler(

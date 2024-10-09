@@ -1,7 +1,8 @@
 use chrono::{Duration, Utc};
 use sqlx::{Postgres, Transaction};
 
-pub(crate) async fn delete_uptime_report_by_time_for_all(
+#[allow(dead_code)]
+pub async fn delete_uptime_report_by_time_for_all(
     transaction: &mut Transaction<'_, Postgres>,
     seconds: i64,
 ) -> anyhow::Result<()> {

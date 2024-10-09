@@ -11,7 +11,7 @@ use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Default, Clone, Debug)]
 pub struct AppConfig {
-    pub auto_start_blockmesh: Option<TaskStatus>,
+    pub auto_start_blockmesh: Option<AppTaskStatus>,
     pub email: Option<String>,
     pub api_token: Option<String>,
     pub blockmesh_url: Option<String>,
@@ -25,9 +25,9 @@ pub struct AppConfig {
     pub gui: Option<bool>,
     pub minimized: Option<bool>,
     pub config_path: Option<String>,
-    pub task_status: Option<TaskStatus>,
+    pub task_status: Option<AppTaskStatus>,
     pub device_id: Option<Uuid>,
-    pub ore_status: Option<TaskStatus>,
+    pub ore_status: Option<AppTaskStatus>,
     pub ore_rpc: Option<String>,
     pub ore_threads: Option<u16>,
     pub ore_keypair: Option<String>,
@@ -35,26 +35,26 @@ pub struct AppConfig {
 }
 
 #[derive(Serialize, Deserialize, Default, Clone, Debug, PartialEq, Copy)]
-pub enum TaskStatus {
+pub enum AppTaskStatus {
     Running,
     #[default]
     Off,
 }
 
-impl Display for TaskStatus {
+impl Display for AppTaskStatus {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            TaskStatus::Running => write!(f, "Running"),
-            TaskStatus::Off => write!(f, "Off"),
+            AppTaskStatus::Running => write!(f, "Running"),
+            AppTaskStatus::Off => write!(f, "Off"),
         }
     }
 }
 
-impl From<String> for TaskStatus {
+impl From<String> for AppTaskStatus {
     fn from(s: String) -> Self {
         match s.as_str() {
-            "Running" => TaskStatus::Running,
-            _ => TaskStatus::Off,
+            "Running" => AppTaskStatus::Running,
+            _ => AppTaskStatus::Off,
         }
     }
 }

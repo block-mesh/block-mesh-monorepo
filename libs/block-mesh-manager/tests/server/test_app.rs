@@ -79,7 +79,6 @@ pub async fn spawn_app() -> TestApp {
     let (tx, rx) = flume::bounded::<JoinHandle<()>>(500);
     let (tx_daily_stat_agg, rx_daily_stat_agg) = flume::bounded::<DailyStatMessage>(500);
     let (tx_analytics_agg, rx_analytics_agg) = flume::bounded::<AnalyticsMessage>(500);
-    let (tx_users_ip_agg, rx_users_ip_agg) = flume::bounded::<UsersIpMessage>(500);
     let (tx_aggregate_agg, rx_aggregate_agg) = flume::bounded::<AggregateMessage>(500);
     let (cleaner_tx, cleaner_rx) = flume::bounded::<EnrichIp>(500);
 
@@ -95,7 +94,6 @@ pub async fn spawn_app() -> TestApp {
         cleaner_tx,
         redis: redis.clone(),
         ws_connection_manager,
-        tx_users_ip_agg,
         tx_aggregate_agg,
     });
     let application =
