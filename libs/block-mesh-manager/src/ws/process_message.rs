@@ -1,11 +1,11 @@
 use crate::startup::application::AppState;
+use crate::utils::cache_envar::get_envar;
 use axum::extract::ws::Message;
 use block_mesh_common::interfaces::server_api::HandlerMode;
 use block_mesh_common::interfaces::ws_api::WsClientMessage;
 use block_mesh_manager_database_domain::domain::report_uptime_content::report_uptime_content;
 use block_mesh_manager_database_domain::domain::submit_bandwidth_content::submit_bandwidth_content;
 use block_mesh_manager_database_domain::domain::submit_task_content::submit_task_content;
-use std::env;
 use std::ops::ControlFlow;
 use std::sync::Arc;
 
@@ -82,14 +82,11 @@ async fn process_client_message(
                         query.clone(),
                         None,
                         HandlerMode::WebSocket,
-                        env::var("POLLING_INTERVAL")
-                            .unwrap_or("120_000.0".to_string())
+                        get_envar("POLLING_INTERVAL")
+                            .await
                             .parse()
                             .unwrap_or(120_000.0),
-                        env::var("INTERVAL_FACTOR")
-                            .unwrap_or("10.0".to_string())
-                            .parse()
-                            .unwrap_or(10.0),
+                        get_envar("INTERVAL_FACTOR").await.parse().unwrap_or(10.0),
                     )
                     .await;
                 }

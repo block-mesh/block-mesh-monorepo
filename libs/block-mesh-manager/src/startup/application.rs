@@ -24,16 +24,12 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::net::TcpListener;
 
-use crate::worker::db_cleaner_cron::EnrichIp;
 use crate::ws::connection_manager::ConnectionManager;
 use block_mesh_common::env::app_env_var::AppEnvVar;
 use block_mesh_common::env::env_var;
 use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
-use block_mesh_common::interfaces::db_messages::{AnalyticsMessage, DailyStatMessage};
 use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
-use flume::Sender;
 use tokio::sync::Mutex;
-use tokio::task::JoinHandle;
 use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
@@ -51,11 +47,7 @@ pub struct AppState {
     pub pool: PgPool,
     pub email_client: Arc<EmailClient>,
     pub client: Client,
-    pub tx: Sender<JoinHandle<()>>,
-    pub tx_daily_stat_agg: Sender<DailyStatMessage>,
-    pub tx_analytics_agg: Sender<AnalyticsMessage>,
     pub flags: HashMap<String, FlagValue>,
-    pub cleaner_tx: Sender<EnrichIp>,
     pub redis: MultiplexedConnection,
     pub ws_connection_manager: ConnectionManager,
 }

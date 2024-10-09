@@ -14,24 +14,16 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_manager::ws::ws_keep_alive::ws_keep_alive;
     use block_mesh_manager::database::user::create_test_user::create_test_user;
     use block_mesh_manager::ws::connection_manager::ConnectionManager;
-    use block_mesh_manager::worker::analytics_agg::analytics_agg;
-    use block_mesh_common::interfaces::db_messages::{
-        AnalyticsMessage, DailyStatMessage,
-    };
     use block_mesh_common::env::app_env_var::AppEnvVar;
     use block_mesh_common::env::env_var::EnvVar;
     use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
     use block_mesh_common::env::load_dotenv::load_dotenv;
     use std::env;
-    use block_mesh_manager::worker::daily_stat_agg::{daily_stat_agg};
     #[allow(unused_imports)]
     use logger_general::tracing::setup_tracing_stdout_only;
     use std::time::Duration;
     use reqwest::ClientBuilder;
-    use block_mesh_manager::worker::db_cleaner_cron::{db_cleaner_cron, EnrichIp};
     use block_mesh_common::feature_flag_client::get_all_flags;
-    use tokio::task::JoinHandle;
-    use block_mesh_manager::worker::joiner::joiner_loop;
     #[cfg(not(target_env = "msvc"))]
     use tikv_jemallocator::Jemalloc;
     #[cfg(not(target_env = "msvc"))]
@@ -94,15 +86,10 @@ async fn run() -> anyhow::Result<()> {
     let db_pool = get_connection_pool(&configuration.database, Option::from(database_url)).await?;
     migrate(&db_pool).await.expect("Failed to migrate database");
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
-    let (tx, rx) = flume::bounded::<JoinHandle<()>>(500);
-    let (tx_daily_stat_agg, rx_daily_stat_agg) = flume::bounded::<DailyStatMessage>(500);
-    let (tx_analytics_agg, rx_analytics_agg) = flume::bounded::<AnalyticsMessage>(500);
-    let (cleaner_tx, cleaner_rx) = flume::bounded::<EnrichIp>(500);
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
         .build()
         .unwrap_or_default();
-
     let flags = get_all_flags(&client).await?;
     let redis_url = env::var("REDIS_URL")?;
     let redis_url = if redis_url.ends_with("#insecure") {
@@ -139,37 +126,17 @@ async fn run() -> anyhow::Result<()> {
         email_client,
         pool: db_pool.clone(),
         client,
-        tx,
-        tx_daily_stat_agg,
-        tx_analytics_agg,
         flags,
-        cleaner_tx,
         redis,
         ws_connection_manager,
     });
 
     let application = Application::build(configuration, app_state.clone(), db_pool.clone()).await;
     let application_task = tokio::spawn(application.run());
-    let joiner_task = tokio::spawn(joiner_loop(rx));
-    let db_cleaner_task = tokio::spawn(db_cleaner_cron(db_pool.clone(), cleaner_rx));
-    let db_daily_stat_task = tokio::spawn(daily_stat_agg(
-        db_pool.clone(),
-        rx_daily_stat_agg,
-        app_state.clone(),
-    ));
-    let db_analytics_task = tokio::spawn(analytics_agg(
-        db_pool.clone(),
-        rx_analytics_agg,
-        app_state.clone(),
-    ));
     let ws_ping_task = tokio::spawn(ws_keep_alive(broadcaster));
 
     tokio::select! {
         o = application_task => panic!("API {:?}", o),
-        o = joiner_task => panic!("Joiner task failed {:?}", o),
-        o = db_cleaner_task => panic!("DB cleaner task failed {:?}", o),
-        o = db_daily_stat_task => panic!("DB daily_stat aggregator {:?}", o),
-        o = db_analytics_task => panic!("DB analytics aggregator {:?}", o),
         o = ws_ping_task => panic!("ws_ping_task failed {:?}", o)
     }
 }
