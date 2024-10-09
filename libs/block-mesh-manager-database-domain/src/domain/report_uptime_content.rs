@@ -133,7 +133,7 @@ pub async fn report_uptime_content(
 
     if extra > 0.0 {
         let _ = notify_worker(
-            &pool,
+            pool,
             DailyStatMessage {
                 msg_type: DBMessageTypes::DailyStatMessage,
                 id: daily_stat.id,
