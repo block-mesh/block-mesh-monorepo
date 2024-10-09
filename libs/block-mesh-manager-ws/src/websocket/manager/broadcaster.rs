@@ -3,9 +3,9 @@ use dashmap::DashMap;
 use futures::future::join_all;
 use std::collections::VecDeque;
 use std::hash::Hash;
-use std::sync::{Arc, Mutex};
+use std::sync::Arc;
 use tokio::sync::broadcast::error::SendError;
-use tokio::sync::{broadcast, mpsc};
+use tokio::sync::{broadcast, mpsc, Mutex};
 
 #[derive(Debug, Clone)]
 pub struct Broadcaster<T: Hash + Eq + Clone> {
@@ -53,8 +53,8 @@ impl<T: Hash + Eq + Clone> Broadcaster<T> {
         .await;
     }
 
-    pub fn move_queue(&self, count: usize) -> Vec<T> {
-        let queue = &mut self.queue.lock().unwrap();
+    pub async fn move_queue(&self, count: usize) -> Vec<T> {
+        let queue = &mut self.queue.lock().await;
         let count = count.min(queue.len());
         let drained: Vec<T> = queue.drain(0..count).collect();
         queue.extend(drained.clone());
@@ -84,7 +84,7 @@ impl<T: Hash + Eq + Clone> Broadcaster<T> {
         messages: impl IntoIterator<Item = WsServerMessage> + Clone,
         count: usize,
     ) -> Vec<T> {
-        let drained = self.move_queue(count);
+        let drained = self.move_queue(count).await;
         join_all(drained.clone().into_iter().filter_map(|id| {
             if let Some(entry) = self.sockets.get(&id) {
                 let tx = entry.value().clone();
@@ -104,20 +104,20 @@ impl<T: Hash + Eq + Clone> Broadcaster<T> {
         drained
     }
 
-    pub fn subscribe(
+    pub async fn subscribe(
         &self,
         key: T,
         sink_sender: mpsc::Sender<WsServerMessage>,
     ) -> broadcast::Receiver<WsServerMessage> {
         let _ = self.sockets.insert(key.clone(), sink_sender.clone());
-        let queue = &mut self.queue.lock().unwrap();
+        let queue = &mut self.queue.lock().await;
         queue.push_back(key);
         self.global_transmitter.subscribe()
     }
 
-    pub fn unsubscribe(&self, key: &T) {
+    pub async fn unsubscribe(&self, key: &T) {
         self.sockets.remove(key);
-        let queue = &mut self.queue.lock().unwrap();
+        let queue = &mut self.queue.lock().await;
         if let Some(pos) = queue.iter().position(|x| x == key) {
             queue.remove(pos);
         } else {

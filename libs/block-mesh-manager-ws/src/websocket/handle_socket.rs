@@ -27,7 +27,7 @@ pub async fn handle_socket(socket: WebSocket, ip: String, state: Arc<AppState>) 
     let task_scheduler = ws_connection_manager.task_scheduler;
     let broadcaster = ws_connection_manager.broadcaster;
     let session_id = Uuid::new_v4();
-    let mut broadcast_receiver = broadcaster.subscribe(session_id, sink_tx.clone()); // FIXME
+    let mut broadcast_receiver = broadcaster.subscribe(session_id, sink_tx.clone()).await; // FIXME
 
     // Using notify to process one task at a time
     let notify = Arc::new(Notify::new());
@@ -72,6 +72,6 @@ pub async fn handle_socket(socket: WebSocket, ip: String, state: Arc<AppState>) 
         o = broadcast_task => tracing::error!("broadcast_task dead {:?}", o)
     }
 
-    broadcaster.unsubscribe(&session_id);
+    broadcaster.unsubscribe(&session_id).await;
     tracing::info!("Websocket context destroyed");
 }
