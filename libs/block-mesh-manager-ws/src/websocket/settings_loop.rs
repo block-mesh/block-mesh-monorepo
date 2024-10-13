@@ -33,7 +33,6 @@ pub async fn settings_loop(
             vec![],
             window_size,
             0,
-            0,
         ))
         .context("Failed to parse cron report settings")?,
     )
@@ -44,10 +43,6 @@ pub async fn settings_loop(
         let new_period = settings.period;
         let new_messages = settings.messages;
         let new_window_size = settings.window_size;
-        let queued = broadcaster
-            .queue_multiple(new_messages.clone(), new_window_size)
-            .await;
-        let new_used_window_size = queued.len();
         let new_queue_size = broadcaster.queue.lock().await.len();
         let mut transaction = create_txn(&pool).await?;
         update_aggregate(
@@ -57,7 +52,6 @@ pub async fn settings_loop(
                 new_period,
                 new_messages,
                 new_window_size,
-                new_used_window_size,
                 new_queue_size,
             ))
             .context("Failed to parse cron report settings")?,

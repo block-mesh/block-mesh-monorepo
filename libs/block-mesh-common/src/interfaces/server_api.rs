@@ -457,7 +457,7 @@ pub struct CronReportAggregateEntry {
     pub period: Duration,
     pub messages: Vec<WsServerMessage>,
     pub window_size: usize,
-    pub used_window_size: usize,
+    pub used_window_size: Option<usize>,
     pub queue_size: usize,
 }
 
@@ -471,7 +471,6 @@ impl Default for CronReportAggregateEntry {
             ],
             10,
             0,
-            0,
         )
     }
 }
@@ -482,14 +481,13 @@ impl CronReportAggregateEntry {
         period: Duration,
         messages: Vec<WsServerMessage>,
         window_size: usize,
-        used_window_size: usize,
         queue_size: usize,
     ) -> Self {
         Self {
             period,
             messages,
             window_size,
-            used_window_size,
+            used_window_size: None,
             queue_size,
         }
     }

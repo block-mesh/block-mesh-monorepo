@@ -28,8 +28,7 @@ pub async fn handle_socket(socket: WebSocket, ip: String, state: Arc<AppState>, 
     let broadcaster = ws_connection_manager.broadcaster;
     let mut broadcast_receiver = broadcaster
         .subscribe(user_id, ip.clone(), sink_tx.clone())
-        .await; // FIXME
-
+        .await;
     // Using notify to process one task at a time
     let notify = Arc::new(Notify::new());
     let _task_sink_tx = sink_tx.clone();
