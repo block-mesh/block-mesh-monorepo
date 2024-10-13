@@ -96,12 +96,7 @@ pub async fn ws_task_loop(
             user_limit.tasks += 1;
             TaskLimit::save_user(&mut redis, &user_limit, expire).await;
         }
-        match commit_txn(transaction).await {
-            Ok(_) => {}
-            Err(e) => {
-                tracing::error!("commit_txn {}", e);
-            }
-        }
+        let _ = commit_txn(transaction).await;
         tokio::time::sleep(new_period).await;
     }
 }

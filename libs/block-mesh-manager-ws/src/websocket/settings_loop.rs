@@ -39,13 +39,27 @@ pub async fn settings_loop(
     .await?;
     commit_txn(transaction).await?;
     loop {
-        let settings = fetch_latest_cron_settings(&pool, &server_user_id).await?;
+        let settings = match fetch_latest_cron_settings(&pool, &server_user_id).await {
+            Ok(settings) => settings,
+            Err(e) => {
+                tracing::error!("fetch_latest_cron_settings error {}", e);
+                tokio::time::sleep(period).await;
+                continue;
+            }
+        };
         let new_period = settings.period;
         let new_messages = settings.messages;
         let new_window_size = settings.window_size;
         let new_queue_size = broadcaster.queue.lock().await.len();
-        let mut transaction = create_txn(&pool).await?;
-        update_aggregate(
+        let mut transaction = match create_txn(&pool).await {
+            Ok(transaction) => transaction,
+            Err(e) => {
+                tracing::error!("create_txn error {}", e);
+                tokio::time::sleep(period).await;
+                continue;
+            }
+        };
+        let _ = update_aggregate(
             &mut transaction,
             &aggregate.id,
             &serde_json::to_value(CronReportAggregateEntry::new(
@@ -56,8 +70,8 @@ pub async fn settings_loop(
             ))
             .context("Failed to parse cron report settings")?,
         )
-        .await?;
-        commit_txn(transaction).await?;
+        .await;
+        let _ = commit_txn(transaction).await;
         tokio::time::sleep(new_period).await;
     }
 }
