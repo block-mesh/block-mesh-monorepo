@@ -101,6 +101,12 @@ impl ExtensionContext {
             blockmesh_url = "https://app.blockmesh.xyz".to_string();
             self.blockmesh_url.update(|v| *v = blockmesh_url.clone());
         }
+        let mut blockmesh_ws_url = self.blockmesh_ws_url.get_untracked();
+        if blockmesh_ws_url.is_empty() {
+            blockmesh_ws_url = "https://ws.blockmesh.xyz".to_string();
+            self.blockmesh_ws_url
+                .update(|v| *v = blockmesh_ws_url.clone());
+        }
         let email = self.email.get_untracked();
         let api_token = self.api_token.get_untracked();
         let mut device_id = self.device_id.get_untracked();
@@ -249,8 +255,11 @@ impl ExtensionContext {
         send_message_channel(MessageType::DELETE, MessageKey::ApiToken, None).await;
         send_message_channel(MessageType::DELETE, MessageKey::Email, None).await;
         send_message_channel(MessageType::DELETE, MessageKey::BlockMeshUrl, None).await;
+        send_message_channel(MessageType::DELETE, MessageKey::BlockMeshWsUrl, None).await;
         self.blockmesh_url
             .update(|v| *v = "https://app.blockmesh.xyz".to_string());
+        self.blockmesh_ws_url
+            .update(|v| *v = "https://ws.blockmesh.xyz".to_string());
         self.email.update(|v| *v = "".to_string());
         self.api_token.update(|v| *v = Uuid::default());
         self.status.update(|v| *v = AuthStatus::LoggedOut);
