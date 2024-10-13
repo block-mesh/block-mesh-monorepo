@@ -28,6 +28,7 @@ logger-general = { path = "../logger-general", features = ["sentry"] }
 block-mesh-manager-database-domain = { path = "../block-mesh-manager-database-domain" }
 http = { workspace = true }
 http-body-util = { workspace = true }
+redis = { workspace = true, features = ["tokio-comp", "tokio-rustls-comp", "tls-rustls-insecure"] }
 
 [dev-dependencies]
 testcontainers = { workspace = true }

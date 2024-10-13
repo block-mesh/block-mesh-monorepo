@@ -6,7 +6,6 @@ use crate::startup::routers::api_router::get_api_router;
 use crate::startup::routers::leptos_router::get_leptos_router;
 use crate::startup::routers::static_auth_router::get_static_auth_router;
 use crate::startup::routers::static_un_auth_router::get_static_un_auth_router;
-use crate::startup::routers::ws_router::get_ws_router;
 use axum::extract::Request;
 use axum::{Extension, Router};
 use axum_login::login_required;
@@ -24,7 +23,6 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::net::TcpListener;
 
-use crate::ws::connection_manager::ConnectionManager;
 use block_mesh_common::env::app_env_var::AppEnvVar;
 use block_mesh_common::env::env_var;
 use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
@@ -49,7 +47,6 @@ pub struct AppState {
     pub client: Client,
     pub flags: HashMap<String, FlagValue>,
     pub redis: MultiplexedConnection,
-    pub ws_connection_manager: ConnectionManager,
 }
 
 #[derive(Clone)]
@@ -72,7 +69,6 @@ impl Application {
             _ => CorsLayer::permissive(),
         };
 
-        let ws_router = get_ws_router();
         let auth_router = get_static_auth_router();
         let api_router = get_api_router();
         let un_auth_router = get_static_un_auth_router();
@@ -107,22 +103,11 @@ impl Application {
             .parse()
             .unwrap_or(false);
 
-        let use_websocket = env::var("USE_WEBSOCKET")
-            .unwrap_or("false".to_string())
-            .parse()
-            .unwrap_or(false);
-
         let backend = Router::new()
             .nest("/", auth_router)
             .route_layer(login_required!(Backend, login_url = "/login"))
             .nest("/api", api_router)
             .nest("/", un_auth_router);
-
-        let backend = if use_websocket {
-            backend.nest("/", ws_router)
-        } else {
-            backend
-        };
 
         let backend = backend
             .layer(Extension(application_base_url))

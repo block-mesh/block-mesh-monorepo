@@ -1,16 +1,14 @@
 pub mod broadcaster;
-pub mod cron_reports_controller;
 pub mod task_scheduler;
 
 use crate::websocket::manager::broadcaster::Broadcaster;
 use crate::websocket::manager::task_scheduler::TaskScheduler;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use std::fmt::Debug;
-use uuid::Uuid;
 
 #[derive(Debug, Clone)]
 pub struct WebSocketManager {
-    pub broadcaster: Broadcaster<Uuid>,
+    pub broadcaster: Broadcaster,
     pub task_scheduler: TaskScheduler<WsServerMessage>,
 }
 

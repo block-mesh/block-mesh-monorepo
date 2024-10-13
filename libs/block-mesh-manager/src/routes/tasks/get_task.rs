@@ -1,6 +1,5 @@
 use crate::database::task::find_task_assigned_to_user::find_task_assigned_to_user;
 use crate::database::task::find_task_by_status::find_task_by_status;
-use crate::database::task::update_task_assigned::update_task_assigned;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use crate::middlewares::rate_limit::filter_request;
@@ -15,6 +14,7 @@ use block_mesh_manager_database_domain::domain::find_token::find_token;
 use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
 use block_mesh_manager_database_domain::domain::task::TaskStatus;
 use block_mesh_manager_database_domain::domain::task_limit::TaskLimit;
+use block_mesh_manager_database_domain::domain::update_task_assigned::update_task_assigned;
 use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::HeaderMap;
 use sqlx::PgPool;
@@ -82,8 +82,8 @@ pub async fn handler(
     update_task_assigned(&mut transaction, task.id, user.id, TaskStatus::Assigned).await?;
     redis_user.tasks += 1;
     commit_txn(transaction).await?;
-    let limit = 10u64 * Backend::get_expire().await as u64;
-    TaskLimit::save_user(&mut redis, &redis_user, limit).await;
+    let expire = 10u64 * Backend::get_expire().await as u64;
+    TaskLimit::save_user(&mut redis, &redis_user, expire).await;
     Ok(Json(Some(GetTaskResponse {
         id: task.id,
         url: task.url,

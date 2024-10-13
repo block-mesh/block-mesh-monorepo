@@ -3,5 +3,7 @@ pub mod manager;
 pub mod messenger;
 pub mod process_message;
 pub mod receiver;
-pub mod utils;
+pub mod settings_loop;
 pub mod ws_handler;
+pub mod ws_keep_alive;
+pub mod ws_task_loop;

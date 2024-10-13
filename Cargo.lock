@@ -1647,6 +1647,7 @@ dependencies = [
  "http-body-util",
  "logger-general",
  "matches",
+ "redis",
  "reqwest 0.12.7",
  "reqwest-websocket",
  "sentry",
