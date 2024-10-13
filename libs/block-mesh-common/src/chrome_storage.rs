@@ -10,6 +10,7 @@ use uuid::Uuid;
 pub enum MessageKey {
     All,
     BlockMeshUrl,
+    BlockMeshWsUrl,
     Email,
     ApiToken,
     DeviceId,
@@ -35,6 +36,7 @@ impl Display for MessageKey {
         let str = match self {
             MessageKey::All => "all".to_string(),
             MessageKey::BlockMeshUrl => "blockmesh_url".to_string(),
+            MessageKey::BlockMeshWsUrl => "blockmesh_ws_url".to_string(),
             MessageKey::Email => "email".to_string(),
             MessageKey::ApiToken => "blockmesh_api_token".to_string(),
             MessageKey::DeviceId => "device_id".to_string(),
@@ -57,6 +59,7 @@ impl TryFrom<&str> for MessageKey {
         match value {
             "all" => Ok(MessageKey::All),
             "blockmesh_url" => Ok(MessageKey::BlockMeshUrl),
+            "blockmesh_ws_url" => Ok(MessageKey::BlockMeshWsUrl),
             "email" => Ok(MessageKey::Email),
             "blockmesh_api_token" => Ok(MessageKey::ApiToken),
             "device_id" => Ok(MessageKey::DeviceId),

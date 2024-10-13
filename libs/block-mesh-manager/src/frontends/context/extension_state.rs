@@ -28,6 +28,7 @@ pub struct ExtensionContext {
     pub api_token: RwSignal<Uuid>,
     pub device_id: RwSignal<Uuid>,
     pub blockmesh_url: RwSignal<String>,
+    pub blockmesh_ws_url: RwSignal<String>,
     pub status: RwSignal<AuthStatus>,
     pub uptime: RwSignal<f64>,
     pub invite_code: RwSignal<String>,
@@ -46,6 +47,7 @@ impl Default for ExtensionContext {
             api_token: RwSignal::new(Uuid::default()),
             device_id: RwSignal::new(Uuid::default()),
             blockmesh_url: RwSignal::new("https://app.blockmesh.xyz".to_string()),
+            blockmesh_ws_url: RwSignal::new("https://ws.blockmesh.xyz".to_string()),
             status: RwSignal::new(AuthStatus::LoggedOut),
             uptime: RwSignal::new(0.0),
             invite_code: RwSignal::new(String::default()),
@@ -157,6 +159,9 @@ impl ExtensionContext {
                                 match storage_value {
                                     MessageKey::BlockMeshUrl => {
                                         self.blockmesh_url.update(|v| *v = value);
+                                    }
+                                    MessageKey::BlockMeshWsUrl => {
+                                        self.blockmesh_ws_url.update(|v| *v = value);
                                     }
                                     MessageKey::ApiToken => {
                                         self.api_token.update(|v| {

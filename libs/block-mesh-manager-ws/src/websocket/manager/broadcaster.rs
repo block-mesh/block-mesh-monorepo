@@ -1,17 +1,21 @@
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
+use block_mesh_manager_database_domain::domain::task_limit::TaskLimit;
 use dashmap::DashMap;
 use futures::future::join_all;
+use sqlx::types::chrono::NaiveDate;
 use std::collections::VecDeque;
 use std::hash::Hash;
 use std::sync::Arc;
 use tokio::sync::broadcast::error::SendError;
 use tokio::sync::{broadcast, mpsc, Mutex};
+use uuid::Uuid;
 
 #[derive(Debug, Clone)]
 pub struct Broadcaster<T: Hash + Eq + Clone> {
     pub global_transmitter: broadcast::Sender<WsServerMessage>,
     pub sockets: Arc<DashMap<T, mpsc::Sender<WsServerMessage>>>,
     pub queue: Arc<Mutex<VecDeque<T>>>,
+    pub users_limit: Arc<DashMap<(Uuid, NaiveDate), TaskLimit>>,
 }
 
 impl<T: Hash + Eq + Clone> Default for Broadcaster<T> {
@@ -27,6 +31,7 @@ impl<T: Hash + Eq + Clone> Broadcaster<T> {
             global_transmitter,
             sockets: Arc::new(DashMap::new()),
             queue: Arc::new(Mutex::new(VecDeque::new())),
+            users_limit: Arc::new(DashMap::new()),
         }
     }
     pub fn broadcast(&self, message: WsServerMessage) -> Result<usize, SendError<WsServerMessage>> {

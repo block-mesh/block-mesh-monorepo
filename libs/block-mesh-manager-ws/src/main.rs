@@ -1,7 +1,9 @@
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use block_mesh_manager_ws::app::app;
 use block_mesh_manager_ws::state::AppState;
+use block_mesh_manager_ws::websocket::utils::ws_keep_alive;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
+use std::sync::Arc;
 use std::{env, mem, process};
 use tokio::net::TcpListener;
 
@@ -41,11 +43,15 @@ fn main() {
 async fn run() -> anyhow::Result<()> {
     load_dotenv();
     setup_tracing_stdout_only_with_sentry();
-
     let port = env::var("PORT").unwrap_or("8002".to_string());
     let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
     tracing::info!("Listening on {}", listener.local_addr()?);
-    let state = AppState::new().await;
-    app(listener, state).await;
-    process::exit(1);
+    let state = Arc::new(AppState::new().await);
+    let broadcaster = state.websocket_manager.broadcaster.clone();
+    let ping_task = tokio::spawn(ws_keep_alive(broadcaster));
+    let server_task = app(listener, state);
+    tokio::select! {
+        o = ping_task => panic!("ping_task {:?}", o),
+        o = server_task => panic!("server_task {:?}", o),
+    }
 }

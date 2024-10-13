@@ -18,4 +18,5 @@ pub mod report_uptime_content;
 pub mod submit_bandwidth_content;
 pub mod submit_task_content;
 pub mod task;
+pub mod task_limit;
 pub mod user;
