@@ -11,6 +11,7 @@ use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, 
 use sqlx::PgPool;
 use std::env;
 use std::sync::Arc;
+use std::time::Duration;
 use uuid::Uuid;
 
 #[tracing::instrument(name = "ws_task_loop", skip_all)]
@@ -28,12 +29,33 @@ pub async fn ws_task_loop(
             .parse::<u64>()?;
 
     loop {
-        let settings = fetch_latest_cron_settings(&pool, &server_user_id).await?;
+        let settings = match fetch_latest_cron_settings(&pool, &server_user_id).await {
+            Ok(settings) => settings,
+            Err(e) => {
+                tracing::error!("fetch_latest_cron_settings error {}", e);
+                tokio::time::sleep(Duration::from_millis(30_000)).await;
+                continue;
+            }
+        };
         let new_period = settings.period;
         let new_window_size = settings.window_size;
         let mut queued = broadcaster.move_queue(new_window_size).await;
-        let mut transaction = create_txn(&pool).await?;
-        let mut tasks = find_users_tasks(&mut transaction, new_window_size as i64).await?;
+        let mut transaction = match create_txn(&pool).await {
+            Ok(transaction) => transaction,
+            Err(e) => {
+                tracing::error!("create_txn error {}", e);
+                tokio::time::sleep(Duration::from_millis(30_000)).await;
+                continue;
+            }
+        };
+        let mut tasks = match find_users_tasks(&mut transaction, new_window_size as i64).await {
+            Ok(tasks) => tasks,
+            Err(e) => {
+                tracing::error!("find_users_tasks error {}", e);
+                tokio::time::sleep(Duration::from_millis(30_000)).await;
+                continue;
+            }
+        };
         loop {
             let task = match tasks.pop() {
                 Some(t) => t,
@@ -69,11 +91,17 @@ pub async fn ws_task_loop(
                     queue,
                 )
                 .await;
-            update_task_assigned(&mut transaction, task.id, user_id, TaskStatus::Assigned).await?;
+            let _ = update_task_assigned(&mut transaction, task.id, user_id, TaskStatus::Assigned)
+                .await;
             user_limit.tasks += 1;
             TaskLimit::save_user(&mut redis, &user_limit, expire).await;
         }
-        commit_txn(transaction).await?;
+        match commit_txn(transaction).await {
+            Ok(_) => {}
+            Err(e) => {
+                tracing::error!("commit_txn {}", e);
+            }
+        }
         tokio::time::sleep(new_period).await;
     }
 }
