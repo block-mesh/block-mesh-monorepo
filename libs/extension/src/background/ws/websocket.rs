@@ -48,7 +48,7 @@ pub async fn start_websocket() -> Result<(), JsValue> {
     let email = app_state.email.get_untracked();
     let api_token = app_state.api_token.get_untracked();
     let blockmesh_url = app_state
-        .blockmesh_url
+        .blockmesh_ws_url
         .get_untracked()
         .replace("http://", "ws://")
         .replace("https://", "wss://");

@@ -32,13 +32,13 @@ pub async fn stats(State(state): State<Arc<AppState>>) -> Json<StatsResponse> {
     Json(StatsResponse { queue: queue.len() })
 }
 
-pub async fn app(listener: TcpListener, state: AppState) {
+pub async fn app(listener: TcpListener, state: Arc<AppState>) {
     let router = Router::new()
         .route("/health", get(health))
         .route("/version", get(version))
         .route("/stats", get(stats))
         .route("/ws", get(ws_handler))
-        .with_state(Arc::new(state));
+        .with_state(state);
 
     axum::serve(
         listener,

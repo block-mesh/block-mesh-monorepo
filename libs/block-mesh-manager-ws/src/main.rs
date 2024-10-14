@@ -1,9 +1,17 @@
+use anyhow::Context;
+use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use block_mesh_manager_ws::app::app;
 use block_mesh_manager_ws::state::AppState;
+use block_mesh_manager_ws::websocket::settings_loop::settings_loop;
+use block_mesh_manager_ws::websocket::ws_keep_alive::ws_keep_alive;
+use block_mesh_manager_ws::websocket::ws_task_loop::ws_task_loop;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
+use std::sync::Arc;
+use std::time::Duration;
 use std::{env, mem, process};
 use tokio::net::TcpListener;
+use uuid::Uuid;
 
 fn main() {
     let sentry_layer = env::var("SENTRY_LAYER")
@@ -41,11 +49,35 @@ fn main() {
 async fn run() -> anyhow::Result<()> {
     load_dotenv();
     setup_tracing_stdout_only_with_sentry();
-
+    let server_user_id = Uuid::parse_str(
+        env::var(BLOCKMESH_SERVER_UUID_ENVAR)
+            .context("Could not find SERVER_UUID env var")?
+            .as_str(),
+    )
+    .context("SERVER_UUID evn var contains invalid UUID value")?;
     let port = env::var("PORT").unwrap_or("8002".to_string());
     let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
     tracing::info!("Listening on {}", listener.local_addr()?);
-    let state = AppState::new().await;
-    app(listener, state).await;
-    process::exit(1);
+    let state = Arc::new(AppState::new().await);
+    let broadcaster = state.websocket_manager.broadcaster.clone();
+    let period = Duration::from_millis(env::var("PERIOD").unwrap_or("60000".to_string()).parse()?);
+    let window_size = env::var("WINDOW_SIZE")
+        .unwrap_or("100".to_string())
+        .parse()?;
+
+    let b = broadcaster.clone();
+    let p = state.pool.clone();
+    let settings_task = tokio::spawn(settings_loop(p, server_user_id, period, window_size, b));
+    let p = state.pool.clone();
+    let b = broadcaster.clone();
+    let s = state.clone();
+    let cron_task = tokio::spawn(ws_task_loop(p, server_user_id, b, s));
+    let ping_task = tokio::spawn(ws_keep_alive(broadcaster));
+    let server_task = app(listener, state);
+    tokio::select! {
+        o = ping_task => panic!("ping_task {:?}", o),
+        o = server_task => panic!("server_task {:?}", o),
+        o = settings_task => panic!("settings_task {:?}", o),
+        o = cron_task => panic!("cron_task {:?}", o),
+    }
 }

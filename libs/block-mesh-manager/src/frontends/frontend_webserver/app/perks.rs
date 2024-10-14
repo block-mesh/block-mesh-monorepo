@@ -104,6 +104,7 @@ pub fn Perks() -> impl IntoView {
                         })
                         .collect_view()
                 }}
+
             </tbody>
         </Table>
     }

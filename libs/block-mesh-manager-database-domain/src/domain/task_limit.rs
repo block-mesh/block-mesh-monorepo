@@ -1,5 +1,3 @@
-use crate::middlewares::authentication::Backend;
-use crate::utils::cache_envar::get_envar;
 use chrono::{NaiveDate, Utc};
 use redis::aio::MultiplexedConnection;
 use redis::{AsyncCommands, RedisResult};
@@ -44,13 +42,13 @@ impl TaskLimit {
         Ok(redis_user)
     }
 
-    pub async fn save_user(con: &mut MultiplexedConnection, user: &Self) {
+    pub async fn save_user(con: &mut MultiplexedConnection, user: &Self, expire: u64) {
         if let Ok(redis_user) = serde_json::to_string(&user) {
             let _: RedisResult<()> = con
                 .set_ex(
                     &Self::get_key(&user.user_id),
                     redis_user.clone(),
-                    10u64 * Backend::get_expire().await as u64,
+                    expire, // 10u64 * Backend::get_expire().await as u64,
                 )
                 .await;
         }
@@ -59,8 +57,9 @@ impl TaskLimit {
     pub async fn get_task_limit(
         user_id: &Uuid,
         con: &mut MultiplexedConnection,
+        limit: u64,
     ) -> anyhow::Result<Self> {
-        let limit = get_envar("TASK_LIMIT").await.parse().unwrap_or(10);
+        // let limit = get_envar("TASK_LIMIT").await.parse().unwrap_or(10);
         let fallback = Self::new(user_id);
         let user: Self = Self::get_value_from_redis(con, user_id, &fallback).await?;
         if user.tasks > limit {

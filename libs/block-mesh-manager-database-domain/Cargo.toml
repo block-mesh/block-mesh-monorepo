@@ -17,6 +17,7 @@ serde_json = { workspace = true, features = ["raw_value"] }
 http = { workspace = true }
 block-mesh-common = { path = "../block-mesh-common", features = ["env"] }
 axum = { workspace = true }
+redis = { workspace = true, features = ["tokio-comp", "tokio-rustls-comp", "tls-rustls-insecure"] }
 http-body-util = { workspace = true }
 
 [dependencies.rand]

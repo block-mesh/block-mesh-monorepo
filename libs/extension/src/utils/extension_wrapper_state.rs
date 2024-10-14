@@ -33,6 +33,7 @@ pub struct ExtensionWrapperState {
     pub api_token: RwSignal<Uuid>,
     pub device_id: RwSignal<Uuid>,
     pub blockmesh_url: RwSignal<String>,
+    pub blockmesh_ws_url: RwSignal<String>,
     pub status: RwSignal<AuthStatus>,
     pub uptime: RwSignal<f64>,
     pub invite_code: RwSignal<String>,
@@ -50,6 +51,7 @@ impl Default for ExtensionWrapperState {
             api_token: create_rw_signal(Uuid::default()),
             device_id: create_rw_signal(Uuid::default()),
             blockmesh_url: create_rw_signal("https://app.blockmesh.xyz".to_string()),
+            blockmesh_ws_url: create_rw_signal("https://ws.blockmesh.xyz".to_string()),
             status: create_rw_signal(AuthStatus::LoggedOut),
             uptime: create_rw_signal(0.0),
             invite_code: create_rw_signal(String::default()),
@@ -69,6 +71,7 @@ impl Debug for ExtensionWrapperState {
             .field("user_id", &self.device_id.get_untracked())
             .field("api_token", &"********")
             .field("blockmesh_url", &self.blockmesh_url.get_untracked())
+            .field("blockmesh_ws_url", &self.blockmesh_ws_url.get_untracked())
             .field("uptime", &self.uptime.get_untracked())
             .field("status", &self.status.get_untracked())
             .field("invite_code", &self.invite_code.get_untracked())
@@ -90,6 +93,11 @@ impl ExtensionWrapperState {
         if blockmesh_url.is_empty() {
             blockmesh_url = "https://app.blockmesh.xyz".to_string();
             Self::store_blockmesh_url(blockmesh_url.clone()).await;
+        }
+        let mut blockmesh_ws_url = Self::get_blockmesh_ws_url().await;
+        if blockmesh_ws_url.is_empty() {
+            blockmesh_ws_url = "https://ws.blockmesh.xyz".to_string();
+            Self::store_blockmesh_ws_url(blockmesh_ws_url.clone()).await;
         }
         let email = Self::get_email().await;
         let api_token = Self::get_api_token().await;
@@ -120,9 +128,15 @@ impl ExtensionWrapperState {
         self.api_token.update(|v| *v = api_token);
         send_storage_value_to_iframe(MessageKey::ApiToken, MessageValue::UUID(api_token));
         self.blockmesh_url.update(|v| *v = blockmesh_url.clone());
+        self.blockmesh_ws_url
+            .update(|v| *v = blockmesh_ws_url.clone());
         send_storage_value_to_iframe(
             MessageKey::BlockMeshUrl,
             MessageValue::String(blockmesh_url.clone()),
+        );
+        send_storage_value_to_iframe(
+            MessageKey::BlockMeshWsUrl,
+            MessageValue::String(blockmesh_ws_url.clone()),
         );
         self.status.update(|v| *v = AuthStatus::LoggedOut);
         self.device_id.update(|v| *v = device_id);
@@ -158,6 +172,13 @@ impl ExtensionWrapperState {
                                         self.blockmesh_url.update(|v| *v = value.clone());
                                         send_storage_value_to_iframe(
                                             MessageKey::BlockMeshUrl,
+                                            MessageValue::String(value),
+                                        );
+                                    }
+                                    MessageKey::BlockMeshWsUrl => {
+                                        self.blockmesh_ws_url.update(|v| *v = value.clone());
+                                        send_storage_value_to_iframe(
+                                            MessageKey::BlockMeshWsUrl,
                                             MessageValue::String(value),
                                         );
                                     }
@@ -331,12 +352,15 @@ impl ExtensionWrapperState {
     pub async fn clear(&self) {
         self.blockmesh_url
             .update(|v| *v = "https://app.blockmesh.xyz".to_string());
+        self.blockmesh_ws_url
+            .update(|v| *v = "https://ws.blockmesh.xyz".to_string());
         self.email.update(|v| *v = "".to_string());
         self.api_token.update(|v| *v = Uuid::default());
         self.status.update(|v| *v = AuthStatus::LoggedOut);
         ExtensionWrapperState::store_api_token(Uuid::default()).await;
         ExtensionWrapperState::store_email("".to_string()).await;
         ExtensionWrapperState::store_blockmesh_url("https://app.blockmesh.xyz".to_string()).await;
+        ExtensionWrapperState::store_blockmesh_ws_url("https://ws.blockmesh.xyz".to_string()).await;
     }
 
     pub async fn store_blockmesh_url(blockmesh_url: String) {
@@ -348,6 +372,18 @@ impl ExtensionWrapperState {
         send_storage_value_to_iframe(
             MessageKey::BlockMeshUrl,
             MessageValue::String(blockmesh_url),
+        );
+    }
+
+    pub async fn store_blockmesh_ws_url(blockmesh_ws_url: String) {
+        set_storage_value(
+            &MessageKey::BlockMeshWsUrl.to_string(),
+            JsValue::from_str(&blockmesh_ws_url),
+        )
+        .await;
+        send_storage_value_to_iframe(
+            MessageKey::BlockMeshWsUrl,
+            MessageValue::String(blockmesh_ws_url),
         );
     }
 
@@ -420,6 +456,13 @@ impl ExtensionWrapperState {
             .await
             .as_string()
             .unwrap_or("https://app.blockmesh.xyz".to_string())
+    }
+
+    pub async fn get_blockmesh_ws_url() -> String {
+        get_storage_value(MessageKey::BlockMeshWsUrl.to_string().as_str())
+            .await
+            .as_string()
+            .unwrap_or("https://ws.blockmesh.xyz".to_string())
     }
 
     pub async fn get_email() -> String {

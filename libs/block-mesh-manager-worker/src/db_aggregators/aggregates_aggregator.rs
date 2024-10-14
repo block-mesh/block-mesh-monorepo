@@ -1,6 +1,6 @@
-use crate::db_calls::update_aggregate::update_aggregate;
 use anyhow::anyhow;
 use block_mesh_common::interfaces::db_messages::AggregateMessage;
+use block_mesh_manager_database_domain::domain::update_aggregate::update_aggregate;
 use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use chrono::Utc;
 use flume::Sender;

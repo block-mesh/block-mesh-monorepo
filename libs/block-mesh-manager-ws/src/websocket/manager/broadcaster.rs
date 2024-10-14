@@ -2,25 +2,25 @@ use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use dashmap::DashMap;
 use futures::future::join_all;
 use std::collections::VecDeque;
-use std::hash::Hash;
 use std::sync::Arc;
 use tokio::sync::broadcast::error::SendError;
 use tokio::sync::{broadcast, mpsc, Mutex};
+use uuid::Uuid;
 
 #[derive(Debug, Clone)]
-pub struct Broadcaster<T: Hash + Eq + Clone> {
+pub struct Broadcaster {
     pub global_transmitter: broadcast::Sender<WsServerMessage>,
-    pub sockets: Arc<DashMap<T, mpsc::Sender<WsServerMessage>>>,
-    pub queue: Arc<Mutex<VecDeque<T>>>,
+    pub sockets: Arc<DashMap<(Uuid, String), mpsc::Sender<WsServerMessage>>>,
+    pub queue: Arc<Mutex<VecDeque<(Uuid, String)>>>,
 }
 
-impl<T: Hash + Eq + Clone> Default for Broadcaster<T> {
+impl Default for Broadcaster {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<T: Hash + Eq + Clone> Broadcaster<T> {
+impl Broadcaster {
     pub fn new() -> Self {
         let (global_transmitter, _) = broadcast::channel(10000);
         Self {
@@ -35,7 +35,7 @@ impl<T: Hash + Eq + Clone> Broadcaster<T> {
         Ok(subscribers)
     }
 
-    pub async fn batch(&self, message: WsServerMessage, targets: &[T]) {
+    pub async fn batch(&self, message: WsServerMessage, targets: &[(Uuid, String)]) {
         join_all(targets.iter().filter_map(|target| {
             if let Some(entry) = self.sockets.get(target) {
                 let sink_tx = entry.value().clone();
@@ -53,10 +53,10 @@ impl<T: Hash + Eq + Clone> Broadcaster<T> {
         .await;
     }
 
-    pub async fn move_queue(&self, count: usize) -> Vec<T> {
+    pub async fn move_queue(&self, count: usize) -> Vec<(Uuid, String)> {
         let queue = &mut self.queue.lock().await;
         let count = count.min(queue.len());
-        let drained: Vec<T> = queue.drain(0..count).collect();
+        let drained: Vec<(Uuid, String)> = queue.drain(0..count).collect();
         queue.extend(drained.clone());
         drained
     }
@@ -64,9 +64,9 @@ impl<T: Hash + Eq + Clone> Broadcaster<T> {
     pub async fn broadcast_to_user(
         &self,
         messages: impl IntoIterator<Item = WsServerMessage> + Clone,
-        id: &T,
+        id: (Uuid, String),
     ) {
-        let entry = self.sockets.get(id);
+        let entry = self.sockets.get(&id);
         let msgs = messages.clone();
         if let Some(entry) = entry {
             let tx = entry.value().clone();
@@ -83,7 +83,7 @@ impl<T: Hash + Eq + Clone> Broadcaster<T> {
         &self,
         messages: impl IntoIterator<Item = WsServerMessage> + Clone,
         count: usize,
-    ) -> Vec<T> {
+    ) -> Vec<(Uuid, String)> {
         let drained = self.move_queue(count).await;
         join_all(drained.clone().into_iter().filter_map(|id| {
             if let Some(entry) = self.sockets.get(&id) {
@@ -106,19 +106,22 @@ impl<T: Hash + Eq + Clone> Broadcaster<T> {
 
     pub async fn subscribe(
         &self,
-        key: T,
+        user_id: Uuid,
+        ip: String,
         sink_sender: mpsc::Sender<WsServerMessage>,
     ) -> broadcast::Receiver<WsServerMessage> {
-        let _ = self.sockets.insert(key.clone(), sink_sender.clone());
+        let _ = self
+            .sockets
+            .insert((user_id, ip.clone()), sink_sender.clone());
         let queue = &mut self.queue.lock().await;
-        queue.push_back(key);
+        queue.push_back((user_id, ip));
         self.global_transmitter.subscribe()
     }
 
-    pub async fn unsubscribe(&self, key: &T) {
-        self.sockets.remove(key);
+    pub async fn unsubscribe(&self, user_id: Uuid, ip: String) {
+        self.sockets.remove(&(user_id, ip.clone()));
         let queue = &mut self.queue.lock().await;
-        if let Some(pos) = queue.iter().position(|x| x == key) {
+        if let Some(pos) = queue.iter().position(|(a, b)| a == &user_id && b == &ip) {
             queue.remove(pos);
         } else {
             tracing::error!("Failed to remove a socket from the queue");

@@ -10,10 +10,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
     use std::mem;
     use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
-    use block_mesh_common::interfaces::ws_api::WsServerMessage;
-    use block_mesh_manager::ws::ws_keep_alive::ws_keep_alive;
     use block_mesh_manager::database::user::create_test_user::create_test_user;
-    use block_mesh_manager::ws::connection_manager::ConnectionManager;
     use block_mesh_common::env::app_env_var::AppEnvVar;
     use block_mesh_common::env::env_var::EnvVar;
     use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
@@ -102,21 +99,6 @@ async fn run() -> anyhow::Result<()> {
 
     let _ = create_test_user(&db_pool).await;
 
-    let mut ws_connection_manager = ConnectionManager::new();
-    let broadcaster = ws_connection_manager.broadcaster.clone();
-    let _ = ws_connection_manager
-        .broadcaster
-        .cron_reports(
-            Duration::from_secs(60),
-            vec![
-                WsServerMessage::RequestUptimeReport,
-                WsServerMessage::RequestBandwidthReport,
-            ],
-            100,
-            db_pool.clone(),
-        )
-        .await;
-
     let check_token_map: CheckTokenResponseMap = Arc::new(DashMap::new());
     let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());
 
@@ -128,16 +110,13 @@ async fn run() -> anyhow::Result<()> {
         client,
         flags,
         redis,
-        ws_connection_manager,
     });
 
     let application = Application::build(configuration, app_state.clone(), db_pool.clone()).await;
     let application_task = tokio::spawn(application.run());
-    let ws_ping_task = tokio::spawn(ws_keep_alive(broadcaster));
 
     tokio::select! {
         o = application_task => panic!("API {:?}", o),
-        o = ws_ping_task => panic!("ws_ping_task failed {:?}", o)
     }
 }
 

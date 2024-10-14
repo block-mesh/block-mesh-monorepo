@@ -28,6 +28,7 @@ pub struct ExtensionContext {
     pub api_token: RwSignal<Uuid>,
     pub device_id: RwSignal<Uuid>,
     pub blockmesh_url: RwSignal<String>,
+    pub blockmesh_ws_url: RwSignal<String>,
     pub status: RwSignal<AuthStatus>,
     pub uptime: RwSignal<f64>,
     pub invite_code: RwSignal<String>,
@@ -46,6 +47,7 @@ impl Default for ExtensionContext {
             api_token: RwSignal::new(Uuid::default()),
             device_id: RwSignal::new(Uuid::default()),
             blockmesh_url: RwSignal::new("https://app.blockmesh.xyz".to_string()),
+            blockmesh_ws_url: RwSignal::new("https://ws.blockmesh.xyz".to_string()),
             status: RwSignal::new(AuthStatus::LoggedOut),
             uptime: RwSignal::new(0.0),
             invite_code: RwSignal::new(String::default()),
@@ -98,6 +100,12 @@ impl ExtensionContext {
         if blockmesh_url.is_empty() {
             blockmesh_url = "https://app.blockmesh.xyz".to_string();
             self.blockmesh_url.update(|v| *v = blockmesh_url.clone());
+        }
+        let mut blockmesh_ws_url = self.blockmesh_ws_url.get_untracked();
+        if blockmesh_ws_url.is_empty() {
+            blockmesh_ws_url = "https://ws.blockmesh.xyz".to_string();
+            self.blockmesh_ws_url
+                .update(|v| *v = blockmesh_ws_url.clone());
         }
         let email = self.email.get_untracked();
         let api_token = self.api_token.get_untracked();
@@ -157,6 +165,9 @@ impl ExtensionContext {
                                 match storage_value {
                                     MessageKey::BlockMeshUrl => {
                                         self.blockmesh_url.update(|v| *v = value);
+                                    }
+                                    MessageKey::BlockMeshWsUrl => {
+                                        self.blockmesh_ws_url.update(|v| *v = value);
                                     }
                                     MessageKey::ApiToken => {
                                         self.api_token.update(|v| {
@@ -244,8 +255,11 @@ impl ExtensionContext {
         send_message_channel(MessageType::DELETE, MessageKey::ApiToken, None).await;
         send_message_channel(MessageType::DELETE, MessageKey::Email, None).await;
         send_message_channel(MessageType::DELETE, MessageKey::BlockMeshUrl, None).await;
+        send_message_channel(MessageType::DELETE, MessageKey::BlockMeshWsUrl, None).await;
         self.blockmesh_url
             .update(|v| *v = "https://app.blockmesh.xyz".to_string());
+        self.blockmesh_ws_url
+            .update(|v| *v = "https://ws.blockmesh.xyz".to_string());
         self.email.update(|v| *v = "".to_string());
         self.api_token.update(|v| *v = Uuid::default());
         self.status.update(|v| *v = AuthStatus::LoggedOut);

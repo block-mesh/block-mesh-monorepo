@@ -9,7 +9,7 @@ use tokio::sync::Notify;
 use uuid::Uuid;
 
 /// Actual websocket statemachine (one will be spawned per connection)
-pub async fn handle_socket(socket: WebSocket, ip: String, state: Arc<AppState>) {
+pub async fn handle_socket(socket: WebSocket, ip: String, state: Arc<AppState>, user_id: Uuid) {
     let is_closing = Arc::new(AtomicBool::new(false));
     let (ws_sink, ws_stream) = socket.split();
     let (sink_task, sink_tx) = messenger(ws_sink, is_closing.clone());
@@ -26,9 +26,9 @@ pub async fn handle_socket(socket: WebSocket, ip: String, state: Arc<AppState>) 
     let ws_connection_manager = state.websocket_manager.clone();
     let task_scheduler = ws_connection_manager.task_scheduler;
     let broadcaster = ws_connection_manager.broadcaster;
-    let session_id = Uuid::new_v4();
-    let mut broadcast_receiver = broadcaster.subscribe(session_id, sink_tx.clone()).await; // FIXME
-
+    let mut broadcast_receiver = broadcaster
+        .subscribe(user_id, ip.clone(), sink_tx.clone())
+        .await;
     // Using notify to process one task at a time
     let notify = Arc::new(Notify::new());
     let _task_sink_tx = sink_tx.clone();
@@ -72,6 +72,6 @@ pub async fn handle_socket(socket: WebSocket, ip: String, state: Arc<AppState>) 
         o = broadcast_task => tracing::error!("broadcast_task dead {:?}", o)
     }
 
-    broadcaster.unsubscribe(&session_id).await;
+    broadcaster.unsubscribe(user_id, ip.clone()).await;
     tracing::info!("Websocket context destroyed");
 }

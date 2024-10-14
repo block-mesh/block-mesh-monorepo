@@ -56,5 +56,5 @@ pub async fn ws_handler(
     } else {
         "127.0.0.1".to_string()
     };
-    Ok(ws.on_upgrade(move |socket| handle_socket(socket, ip, state)))
+    Ok(ws.on_upgrade(move |socket| handle_socket(socket, ip, state, user.id)))
 }
