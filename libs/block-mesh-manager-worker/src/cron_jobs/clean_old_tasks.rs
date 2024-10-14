@@ -10,6 +10,6 @@ pub async fn clean_old_tasks(pool: PgPool) -> Result<(), anyhow::Error> {
             let _ = bulk_delete_old_tasks(&mut transaction).await;
             let _ = commit_txn(transaction).await;
         }
-        tokio::time::sleep(Duration::from_secs(60 * 60)).await;
+        tokio::time::sleep(Duration::from_secs(60)).await;
     }
 }
