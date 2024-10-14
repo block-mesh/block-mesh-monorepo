@@ -1,0 +1,6 @@
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_api_tokens ON api_tokens;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_call_to_action ON call_to_actions;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_invite_codes ON invite_codes;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_proxy_masters ON proxy_masters;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_rpcs ON rpcs;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_users ON users;
