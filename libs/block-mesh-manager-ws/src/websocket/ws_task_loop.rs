@@ -56,6 +56,12 @@ pub async fn ws_task_loop(
                 continue;
             }
         };
+        tracing::info!(
+            "find_users_tasks tasks.len() = {:?}, new_period = {} , new_window_size = {}",
+            tasks.len(),
+            new_period,
+            new_window_size
+        );
         loop {
             let task = match tasks.pop() {
                 Some(t) => t,
