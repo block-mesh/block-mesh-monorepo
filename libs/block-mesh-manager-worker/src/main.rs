@@ -22,6 +22,7 @@ mod routes;
 mod utils;
 
 use crate::call_backs::send_to_rx::send_to_rx;
+use crate::cron_jobs::clean_old_tasks::clean_old_tasks;
 use crate::cron_jobs::finalize_daily_cron::finalize_daily_cron;
 use crate::cron_jobs::rpc_cron::rpc_worker_loop;
 use crate::db_aggregators::aggregates_aggregator::aggregates_aggregator;
@@ -88,6 +89,7 @@ async fn run() -> anyhow::Result<()> {
     let joiner_task = tokio::spawn(joiner_loop(joiner_rx));
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
     let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
+    let delete_old_tasks_task = tokio::spawn(clean_old_tasks(db_pool.clone()));
 
     let db_listen_task = tokio::spawn(start_listening(
         db_pool.clone(),
@@ -145,6 +147,7 @@ async fn run() -> anyhow::Result<()> {
     let server_task = run_server(listener, app);
 
     tokio::select! {
+        o = delete_old_tasks_task => panic!("delete_old_tasks_task exit {:?}", o),
         o = joiner_task => panic!("joiner_task exit {:?}", o),
         o = server_task => panic!("server task exit {:?}", o),
         o = finalize_daily_stats_task => panic!("finalize_daily_stats_task exit {:?}", o),

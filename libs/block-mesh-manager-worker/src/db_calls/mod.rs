@@ -1,3 +1,4 @@
+pub mod bulk_delete_old_tasks;
 pub mod bulk_finalize;
 pub mod create_server_user;
 pub mod create_task;
