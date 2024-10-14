@@ -57,7 +57,7 @@ pub async fn ws_task_loop(
             }
         };
         tracing::info!(
-            "find_users_tasks tasks.len() = {:?}, new_period = {} , new_window_size = {}",
+            "find_users_tasks tasks.len() = {:?}, new_period = {:?} , new_window_size = {:?}",
             tasks.len(),
             new_period,
             new_window_size
