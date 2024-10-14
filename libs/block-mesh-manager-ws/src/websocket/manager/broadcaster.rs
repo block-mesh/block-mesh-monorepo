@@ -41,8 +41,8 @@ impl Broadcaster {
                 let sink_tx = entry.value().clone();
                 let msg = message.clone();
                 let future = async move {
-                    if let Err(_error) = sink_tx.send(msg).await {
-                        tracing::error!("Batch broadcast failed");
+                    if let Err(error) = sink_tx.send(msg).await {
+                        tracing::warn!("Batch broadcast failed {error:?}");
                     }
                 };
                 Some(future)
@@ -72,7 +72,7 @@ impl Broadcaster {
             let tx = entry.value().clone();
             for msg in msgs {
                 if let Err(error) = tx.send(msg).await {
-                    tracing::error!("Error while queuing WS message: {error}");
+                    tracing::warn!("Error while queuing WS message: {error}");
                 }
             }
         }
@@ -92,7 +92,7 @@ impl Broadcaster {
                 Some(async move {
                     for msg in msgs {
                         if let Err(error) = tx.send(msg).await {
-                            tracing::error!("Error while queuing WS message: {error}");
+                            tracing::warn!("Error while queuing WS message: {error}");
                         }
                     }
                 })
@@ -124,7 +124,7 @@ impl Broadcaster {
         if let Some(pos) = queue.iter().position(|(a, b)| a == &user_id && b == &ip) {
             queue.remove(pos);
         } else {
-            tracing::error!("Failed to remove a socket from the queue");
+            tracing::warn!("Failed to remove a socket from the queue");
         }
     }
 }

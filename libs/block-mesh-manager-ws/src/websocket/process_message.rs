@@ -31,7 +31,7 @@ pub async fn process_message(
                     cf.reason
                 );
             } else {
-                tracing::info!(">>> somone somehow sent close message without CloseFrame");
+                tracing::info!(">>> someone somehow sent close message without CloseFrame");
             }
             return ControlFlow::Break(());
         }
