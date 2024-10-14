@@ -28,7 +28,7 @@ pub async fn receiver(
                     }
                 }
                 ControlFlow::Break(_) => {
-                    tracing::error!("Unhandled message: {msg:?}");
+                    tracing::warn!("Unhandled message: {msg:?}");
                     is_cls.store(true, Ordering::Relaxed);
                     return;
                 }

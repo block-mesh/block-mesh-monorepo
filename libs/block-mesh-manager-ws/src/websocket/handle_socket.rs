@@ -60,16 +60,16 @@ pub async fn handle_socket(socket: WebSocket, ip: String, state: Arc<AppState>, 
                 if is_cls.load(Ordering::Relaxed) {
                     return;
                 }
-                tracing::error!("Failed to pass a message to task_sink_tx");
+                tracing::warn!("Failed to pass a message to task_sink_tx");
             }
         }
     });
 
     tokio::select! {
-        o = recv_task => tracing::error!("recv_task dead {:?}", o),
-        o = send_task => tracing::error!("send_task dead {:?}", o),
-        o = sink_task => tracing::error!("sink_task dead {:?}", o),
-        o = broadcast_task => tracing::error!("broadcast_task dead {:?}", o)
+        o = recv_task => tracing::warn!("recv_task dead {:?}", o),
+        o = send_task => tracing::warn!("send_task dead {:?}", o),
+        o = sink_task => tracing::warn!("sink_task dead {:?}", o),
+        o = broadcast_task => tracing::warn!("broadcast_task dead {:?}", o)
     }
 
     broadcaster.unsubscribe(user_id, ip.clone()).await;
