@@ -1,5 +1,4 @@
 use crate::HandlerResult;
-use teloxide::prelude::CallbackQuery;
 use teloxide::prelude::*;
 use teloxide::Bot;
 
@@ -8,7 +7,7 @@ use teloxide::Bot;
 ///
 /// **IMPORTANT**: do not send privacy-sensitive data this way!!!
 /// Anyone can read data stored in the callback button.
-pub async fn callback_handler(bot: Bot, q: CallbackQuery) -> HandlerResult {
+pub async fn callback_handler(_bot: Bot, q: CallbackQuery) -> HandlerResult {
     println!("\nReceived callback query: {:?}\n", q);
     Ok(())
 }

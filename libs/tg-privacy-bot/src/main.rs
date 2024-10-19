@@ -10,7 +10,6 @@ use teloxide::dispatching::dialogue::InMemStorage;
 use teloxide::dispatching::{dialogue, UpdateHandler};
 use teloxide::dptree::case;
 use teloxide::prelude::*;
-use teloxide::types::BotCommand;
 use teloxide::Bot;
 
 type MyDialogue = Dialogue<State, InMemStorage<State>>;
