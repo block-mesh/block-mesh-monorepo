@@ -1,0 +1,45 @@
+[package]
+name = "tg-privacy-bot"
+edition = "2021"
+authors.workspace = true
+version.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+teloxide = { workspace = true, features = ["macros", "webhooks", "webhooks-axum"] }
+log = { workspace = true }
+pretty_env_logger = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+serde = { workspace = true, features = ["derive"] }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+serde_json = { workspace = true, features = ["raw_value"] }
+askama = { workspace = true, features = ["with-axum", "serde-json"] }
+askama_axum = { workspace = true }
+tower-sessions-sqlx-store = { workspace = true, features = ["postgres"] }
+axum = { workspace = true, features = ["ws", "macros"] }
+tower = { workspace = true, features = ["util"] }
+tower-http = { workspace = true, features = ["fs", "trace", "request-id", "util", "cors", "add-extension", "timeout"] }
+async-trait = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+tracing-appender = { workspace = true }
+tracing-bunyan-formatter = { workspace = true }
+tracing-log = { workspace = true }
+http = { workspace = true }
+bcrypt = { workspace = true }
+sentry-tower = { workspace = true, features = ["axum", "http", "axum-matched-path"] }
+sentry = { workspace = true }
+openai_api_rust = { workspace = true }
+reqwest = { workspace = true, default-features = false, features = [
+  "multipart",
+  "json",
+] }
+logger-general = { path = "../logger-general", optional = true, features = ["sentry"] }
+http-body-util = { workspace = true }
+block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env"] }
+chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }
+
+
+
+
