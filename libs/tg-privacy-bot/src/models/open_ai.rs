@@ -1,7 +1,8 @@
-use anyhow::{anyhow, Context};
+use anyhow::anyhow;
 use openai_api_rust::chat::{ChatApi, ChatBody};
 use openai_api_rust::{Auth, Message, OpenAI, Role};
 
+#[allow(dead_code)]
 pub async fn ask(question: String) -> anyhow::Result<String> {
     let auth = Auth::from_env().map_err(|_| anyhow!("Cannot find OpenAI envar"))?;
     let openai = OpenAI::new(auth, "https://api.openai.com/v1/");
