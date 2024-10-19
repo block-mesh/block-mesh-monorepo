@@ -3,7 +3,7 @@ use openai_api_rust::chat::{ChatApi, ChatBody};
 use openai_api_rust::{Auth, Message, OpenAI, Role};
 
 pub async fn ask(question: String) -> anyhow::Result<String> {
-    let auth = Auth::from_env().map_err(anyhow!("Cannot find OpenAI envar"))?;
+    let auth = Auth::from_env().map_err(|_| anyhow!("Cannot find OpenAI envar"))?;
     let openai = OpenAI::new(auth, "https://api.openai.com/v1/");
     let body = ChatBody {
         model: "gpt-3.5-turbo".to_string(),
