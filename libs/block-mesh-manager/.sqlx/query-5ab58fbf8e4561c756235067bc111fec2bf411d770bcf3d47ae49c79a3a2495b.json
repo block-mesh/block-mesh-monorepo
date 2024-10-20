@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE\n        tasks\n        SET\n        assigned_user_id = $1,\n        status = $2\n        WHERE\n        id = $3",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "5ab58fbf8e4561c756235067bc111fec2bf411d770bcf3d47ae49c79a3a2495b"
+}
