@@ -1497,6 +1497,7 @@ dependencies = [
  "console_error_panic_hook",
  "console_log 1.0.0",
  "dashmap 6.1.0",
+ "database-utils",
  "dotenv",
  "enum-iterator 2.1.0",
  "fake",
@@ -1569,6 +1570,7 @@ dependencies = [
  "block-mesh-manager-database-domain",
  "chrono",
  "dashmap 6.1.0",
+ "database-utils",
  "http 1.1.0",
  "http-body-util",
  "logger-general",
@@ -1598,6 +1600,7 @@ dependencies = [
  "axum",
  "block-mesh-common",
  "chrono",
+ "database-utils",
  "http 1.1.0",
  "http-body-util",
  "rand 0.8.5",
@@ -1623,6 +1626,7 @@ dependencies = [
  "block-mesh-manager-database-domain",
  "chrono",
  "dashmap 6.1.0",
+ "database-utils",
  "flume",
  "futures",
  "http-body-util",
@@ -1655,6 +1659,7 @@ dependencies = [
  "block-mesh-common",
  "block-mesh-manager-database-domain",
  "dashmap 6.1.0",
+ "database-utils",
  "dotenv",
  "futures",
  "http 1.1.0",
@@ -3056,6 +3061,27 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 
 [[package]]
+name = "database-utils"
+version = "0.0.307"
+dependencies = [
+ "anyhow",
+ "axum",
+ "block-mesh-common",
+ "chrono",
+ "http 1.1.0",
+ "http-body-util",
+ "rand 0.8.5",
+ "redis",
+ "secret",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "tracing",
+ "uuid",
+]
+
+[[package]]
 name = "debug-area"
 version = "0.0.307"
 dependencies = [
@@ -3564,6 +3590,7 @@ dependencies = [
  "axum-extra",
  "block-mesh-common",
  "chrono",
+ "database-utils",
  "http-body-util",
  "logger-general",
  "rand 0.8.5",
@@ -9906,11 +9933,13 @@ dependencies = [
  "logger-general",
  "openai_api_rust",
  "pretty_env_logger",
+ "rand 0.8.5",
  "reqwest 0.12.7",
  "sentry",
  "sentry-tower",
  "serde",
  "serde_json",
+ "sqlx",
  "teloxide",
  "thiserror",
  "tokio",
@@ -9921,6 +9950,7 @@ dependencies = [
  "tracing-bunyan-formatter",
  "tracing-log 0.2.0",
  "tracing-subscriber",
+ "uuid",
 ]
 
 [[package]]

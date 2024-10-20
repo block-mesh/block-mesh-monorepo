@@ -4,7 +4,8 @@ use teloxide::Bot;
 
 pub async fn message_handler(bot: Bot, msg: Message) -> HandlerResult {
     println!("\nmessage_handler: {:?}\n", msg);
-    let _message = msg.text().unwrap_or_default().to_string();
+    let message = msg.text().unwrap_or_default().to_string();
+    println!("message received: {:?}\n", message);
     let _new_msg = bot
         .send_message(
             msg.chat.id,

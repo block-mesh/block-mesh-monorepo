@@ -1,7 +1,7 @@
 use crate::domain::aggregate::AggregateName;
 use crate::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
-use crate::utils::instrument_wrapper::{commit_txn, create_txn};
 use block_mesh_common::interfaces::server_api::CronReportAggregateEntry;
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use uuid::Uuid;
 

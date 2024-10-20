@@ -12,7 +12,7 @@ use crate::domain::perk::PerkName;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use block_mesh_common::interfaces::server_api::{ConnectWalletRequest, ConnectWalletResponse};
-use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 
 #[tracing::instrument(name = "connect_wallet", skip(pool, auth))]
 pub async fn handler(

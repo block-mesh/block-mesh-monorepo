@@ -15,7 +15,7 @@ mod database;
 mod error;
 mod routes;
 use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
-use block_mesh_manager_database_domain::utils::connection::get_pg_pool;
+use database_utils::utils::connection::get_pg_pool;
 use tower_http::cors::CorsLayer;
 use tower_http::timeout::TimeoutLayer;
 

@@ -9,7 +9,7 @@ use block_mesh_common::interfaces::server_api::{
     GetTokenRequest, GetTokenResponse, GetTokenResponseEnum,
 };
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
-use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::sync::Arc;
 

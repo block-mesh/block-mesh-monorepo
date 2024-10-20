@@ -2,7 +2,9 @@
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unreachable_pub)]
 
+use block_mesh_manager::utils::cache_envar::get_envar;
 use cfg_if::cfg_if;
+use database_utils::utils::migrate::migrate;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
     use std::process;
@@ -27,7 +29,6 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     #[global_allocator]
     static GLOBAL: Jemalloc = Jemalloc;
     use block_mesh_manager::configuration::get_configuration::get_configuration;
-    use block_mesh_manager::database::migrate::migrate;
     use block_mesh_manager::emails::email_client::EmailClient;
     use block_mesh_manager::startup::application::{AppState, Application};
     use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
@@ -81,7 +82,10 @@ async fn run() -> anyhow::Result<()> {
     let mailgun_token = get_env_var_or_panic(AppEnvVar::MailgunSendKey);
     let _mailgun_token = <EnvVar as AsRef<Secret<String>>>::as_ref(&mailgun_token);
     let db_pool = get_connection_pool(&configuration.database, Option::from(database_url)).await?;
-    migrate(&db_pool).await.expect("Failed to migrate database");
+    let env = get_envar("APP_ENVIRONMENT").await;
+    migrate(&db_pool, env)
+        .await
+        .expect("Failed to migrate database");
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
