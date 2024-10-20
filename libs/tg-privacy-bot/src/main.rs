@@ -53,7 +53,7 @@ async fn main() {
     let bot = Bot::from_env();
     let db_pool = get_pool().await;
     let env = env::var("APP_ENVIRONMENT").unwrap();
-    migrate(&db_pool, env).await.unwrap();
+    migrate(db_pool, env).await.unwrap();
     println!("Dispatching bot");
     Dispatcher::builder(bot.clone(), bot_schema())
         .dependencies(dptree::deps![InMemStorage::<State>::new()])
