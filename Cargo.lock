@@ -9927,6 +9927,7 @@ dependencies = [
  "bcrypt",
  "block-mesh-common",
  "chrono",
+ "database-utils",
  "http 1.1.0",
  "http-body-util",
  "log",

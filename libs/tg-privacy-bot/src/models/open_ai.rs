@@ -24,7 +24,6 @@ pub async fn ask(question: String) -> anyhow::Result<String> {
     };
     let rs = openai.chat_completion_create(&body);
     let choices = rs.unwrap().choices;
-    println!("choice: {:?}", choices);
     let message = &choices[0].message.as_ref().ok_or(anyhow!("No message"))?;
     Ok(message.content.clone())
 }
