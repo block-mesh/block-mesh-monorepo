@@ -1,11 +1,15 @@
 mod commands;
+mod database;
 mod handlers;
 mod models;
 
 use crate::commands::Commands;
+use crate::database::db_utils::get_pool;
 use crate::handlers::callback::callback_handler;
 use crate::handlers::inline::inline_query_handler;
 use block_mesh_common::env::load_dotenv::load_dotenv;
+use database_utils::utils::migrate::migrate;
+use std::env;
 use teloxide::dispatching::dialogue::InMemStorage;
 use teloxide::dispatching::{dialogue, UpdateHandler};
 use teloxide::dptree::case;
@@ -47,6 +51,9 @@ fn bot_schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'stat
 async fn main() {
     load_dotenv();
     let bot = Bot::from_env();
+    let db_pool = get_pool().await;
+    let env = env::var("APP_ENVIRONMENT").unwrap();
+    migrate(&db_pool, env).await.unwrap();
     println!("Dispatching bot");
     Dispatcher::builder(bot.clone(), bot_schema())
         .dependencies(dptree::deps![InMemStorage::<State>::new()])

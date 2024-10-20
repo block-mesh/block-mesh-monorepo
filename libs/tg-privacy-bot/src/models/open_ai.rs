@@ -2,16 +2,15 @@ use anyhow::anyhow;
 use openai_api_rust::chat::{ChatApi, ChatBody};
 use openai_api_rust::{Auth, Message, OpenAI, Role};
 
-#[allow(dead_code)]
 pub async fn ask(question: String) -> anyhow::Result<String> {
     let auth = Auth::from_env().map_err(|_| anyhow!("Cannot find OpenAI envar"))?;
     let openai = OpenAI::new(auth, "https://api.openai.com/v1/");
     let body = ChatBody {
         model: "gpt-3.5-turbo".to_string(),
-        max_tokens: Some(7),
+        max_tokens: None,
         temperature: Some(0_f32),
         top_p: Some(0_f32),
-        n: Some(2),
+        n: Some(1),
         stream: Some(false),
         stop: None,
         presence_penalty: None,
@@ -24,7 +23,8 @@ pub async fn ask(question: String) -> anyhow::Result<String> {
         }],
     };
     let rs = openai.chat_completion_create(&body);
-    let choice = rs.unwrap().choices;
-    let message = &choice[0].message.as_ref().ok_or(anyhow!("No message"))?;
+    let choices = rs.unwrap().choices;
+    println!("choice: {:?}", choices);
+    let message = &choices[0].message.as_ref().ok_or(anyhow!("No message"))?;
     Ok(message.content.clone())
 }

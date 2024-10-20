@@ -1,16 +1,30 @@
+use crate::database::calls::get_or_create_user::get_or_create_user;
+use crate::models::open_ai::ask;
 use crate::HandlerResult;
+use database_utils::utils::connection::get_pg_pool;
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use teloxide::prelude::*;
 use teloxide::Bot;
 
 pub async fn message_handler(bot: Bot, msg: Message) -> HandlerResult {
     println!("\nmessage_handler: {:?}\n", msg);
-    let message = msg.text().unwrap_or_default().to_string();
-    println!("message received: {:?}\n", message);
-    let _new_msg = bot
-        .send_message(
-            msg.chat.id,
-            "Please setup your Telegram username first and retry",
-        )
-        .await?;
+    match msg.from {
+        Some(ref from) => {
+            let username = from.username.clone().unwrap_or_default();
+            let tg_id = from.id.0;
+            let message = msg.text().unwrap_or_default().to_string();
+            println!("message received: {:?}\n", message);
+            let pool = get_pg_pool().await;
+            let mut transaction = create_txn(&pool).await?;
+            let _user = get_or_create_user(&mut transaction, tg_id as i64, &username).await?;
+            commit_txn(transaction).await?;
+            let response = ask(message).await?;
+            bot.send_message(msg.chat.id, response).await?;
+        }
+        None => {
+            bot.send_message(msg.chat.id, "Cannot get user data")
+                .await?;
+        }
+    }
     Ok(())
 }
