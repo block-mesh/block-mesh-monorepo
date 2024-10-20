@@ -5,13 +5,6 @@ use sqlx::Postgres;
 use sqlx::{PgPool, Transaction};
 use uuid::Uuid;
 
-struct Migrate {
-    /// It will retry this number of times before giving up
-    pub retry: u64,
-    /// Make migration sleep this amount of time before each retry
-    pub retry_delay: u64,
-}
-
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
 pub struct Flag {
     pub id: Uuid,

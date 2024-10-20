@@ -2,11 +2,11 @@
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unreachable_pub)]
 
-use block_mesh_manager::utils::cache_envar::get_envar;
 use cfg_if::cfg_if;
-use database_utils::utils::migrate::migrate;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use block_mesh_manager::utils::cache_envar::get_envar;
+    use database_utils::utils::migrate::migrate;
     use std::process;
     use dashmap::DashMap;
     use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
