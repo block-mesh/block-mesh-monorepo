@@ -73,7 +73,7 @@ done
 
 function migrate() {
   sqlx migrate run --source migrations --ignore-missing
-  sqlx prepare --all-targets --all-features
+  cargo sqlx prepare -- --all-targets --all-features
 }
 
 >&2 echo "Postgres is up and running on port ${DB_PORT}!"

@@ -3,10 +3,9 @@ use block_mesh_common::env::env_var::EnvVar;
 use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use block_mesh_common::feature_flag_client::get_all_flags;
-use block_mesh_common::interfaces::db_messages::{
-    AggregateMessage, AnalyticsMessage, DailyStatMessage, UsersIpMessage,
+use block_mesh_common::interfaces::server_api::{
+    CheckTokenResponseMap, GetTokenRequest, GetTokenResponse, GetTokenResponseMap, RegisterForm,
 };
-use block_mesh_common::interfaces::server_api::{GetTokenRequest, GetTokenResponse, RegisterForm};
 use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager::configuration::get_configuration::get_configuration;
 use block_mesh_manager::configuration::settings::Settings;
@@ -14,12 +13,7 @@ use block_mesh_manager::database::migrate::migrate;
 use block_mesh_manager::emails::email_client::EmailClient;
 use block_mesh_manager::startup::application::{AppState, Application};
 use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
-use block_mesh_manager::worker::aggregate_agg::aggregate_agg;
-use block_mesh_manager::worker::analytics_agg::analytics_agg;
-use block_mesh_manager::worker::daily_stat_agg::daily_stat_agg;
-use block_mesh_manager::worker::db_cleaner_cron::{db_cleaner_cron, EnrichIp};
-use block_mesh_manager::worker::users_ip_agg::users_ip_agg;
-use block_mesh_manager::ws::connection_manager::ConnectionManager;
+use dashmap::DashMap;
 use logger_general::tracing::setup_tracing_stdout_only;
 use redis;
 use redis::aio::MultiplexedConnection;
@@ -64,7 +58,6 @@ pub async fn spawn_app() -> TestApp {
 
     migrate(&db_pool).await.expect("Failed to migrate database");
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
-    let (tx, rx) = tokio::sync::mpsc::channel::<JoinHandle<()>>(500);
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
         .build()
@@ -76,52 +69,23 @@ pub async fn spawn_app() -> TestApp {
         .get_multiplexed_async_connection()
         .await
         .unwrap();
-    let (tx, rx) = flume::bounded::<JoinHandle<()>>(500);
-    let (tx_daily_stat_agg, rx_daily_stat_agg) = flume::bounded::<DailyStatMessage>(500);
-    let (tx_analytics_agg, rx_analytics_agg) = flume::bounded::<AnalyticsMessage>(500);
-    let (tx_aggregate_agg, rx_aggregate_agg) = flume::bounded::<AggregateMessage>(500);
-    let (cleaner_tx, cleaner_rx) = flume::bounded::<EnrichIp>(500);
 
-    let ws_connection_manager = ConnectionManager::new();
+    let check_token_map: CheckTokenResponseMap = Arc::new(DashMap::new());
+    let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());
+
     let app_state = Arc::new(AppState {
+        get_token_map,
         email_client,
         pool: db_pool.clone(),
         client,
-        tx,
-        tx_daily_stat_agg,
-        tx_analytics_agg,
         flags,
-        cleaner_tx,
         redis: redis.clone(),
-        ws_connection_manager,
-        tx_aggregate_agg,
+        check_token_map,
     });
     let application =
         Application::build(configuration.clone(), app_state.clone(), db_pool.clone()).await;
     let address = format!("http://{}", application.address());
     let port = application.port();
-
-    let _db_cleaner_task = tokio::spawn(db_cleaner_cron(db_pool.clone(), cleaner_rx));
-    let _db_daily_stat_task = tokio::spawn(daily_stat_agg(
-        db_pool.clone(),
-        rx_daily_stat_agg,
-        app_state.clone(),
-    ));
-    let _db_analytics_task = tokio::spawn(analytics_agg(
-        db_pool.clone(),
-        rx_analytics_agg,
-        app_state.clone(),
-    ));
-    let _db_users_ip_task = tokio::spawn(users_ip_agg(
-        db_pool.clone(),
-        rx_users_ip_agg,
-        app_state.clone(),
-    ));
-    let _db_aggregate_task = tokio::spawn(aggregate_agg(
-        db_pool.clone(),
-        rx_aggregate_agg,
-        app_state.clone(),
-    ));
 
     sleep(Duration::from_secs(1)).await;
     let client = ClientBuilder::new()
