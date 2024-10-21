@@ -14,6 +14,7 @@ use teloxide::dispatching::dialogue::InMemStorage;
 use teloxide::dispatching::{dialogue, UpdateHandler};
 use teloxide::dptree::case;
 use teloxide::prelude::*;
+use teloxide::utils::command::BotCommands;
 use teloxide::Bot;
 
 type MyDialogue = Dialogue<State, InMemStorage<State>>;
@@ -31,6 +32,18 @@ fn bot_schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'stat
     let command_handler = teloxide::filter_command::<Commands, _>().branch(
         case![State::Start]
             .branch(case![Commands::Help].endpoint(handlers::help::help))
+            .branch(
+                case![Commands::ResetOnEachMessage]
+                    .endpoint(handlers::reset_on_each_message::reset_on_each_message),
+            )
+            .branch(
+                case![Commands::ResetOnModelChange]
+                    .endpoint(handlers::reset_on_model_change::reset_on_model_change),
+            )
+            .branch(case![Commands::Reset].endpoint(handlers::reset::reset))
+            .branch(case![Commands::Keep].endpoint(handlers::keep::keep))
+            .branch(case![Commands::SelectModel].endpoint(handlers::select_model::select_model))
+            .branch(case![Commands::Info].endpoint(handlers::info::info))
             .branch(case![Commands::Start].endpoint(handlers::start::start)),
     );
 
@@ -51,6 +64,7 @@ fn bot_schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'stat
 async fn main() {
     load_dotenv();
     let bot = Bot::from_env();
+    bot.set_my_commands(Commands::bot_commands()).await.unwrap();
     let db_pool = get_pool().await;
     let env = env::var("APP_ENVIRONMENT").unwrap();
     migrate(db_pool, env).await.unwrap();
