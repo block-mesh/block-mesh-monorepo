@@ -1,4 +1,5 @@
 target/
+build/
 debug/
 
 .env
@@ -17,3 +18,14 @@ tmp_ext/firefox
 node_modules/
 
 .DS_Store
+libs/extension/target-ext
+libs/blockmesh-bin/src-tauri/target
+libs/blockmesh-bin/src-tauri/gen
+libs/blockmesh-bin/src-tauri/resources/ore
+libs/react-native-app/android/app/build
+libs/react-native-app/ios/Pods
+
+
+
+
+
