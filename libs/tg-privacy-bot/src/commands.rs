@@ -6,19 +6,15 @@ use teloxide::utils::command::BotCommands;
     description = "These commands are supported:"
 )]
 pub enum Commands {
-    #[command(description = "Display Help.")]
-    Help,
     #[default]
-    #[command(
-        description = "Start interaction with bot and another user.\n\t\t\tUsage: /start username"
-    )]
+    #[command(description = "Start bot")]
     Start,
-    #[command(description = "Search user notes.\n\t\t\tUsage: /ask question")]
-    Ask,
     #[command(description = "select_mode")]
     SelectMode,
     #[command(description = "select_model")]
     SelectModel,
     #[command(description = "info")]
     Info,
+    #[command(description = "Display Help.")]
+    Help,
 }

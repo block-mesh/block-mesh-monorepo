@@ -1,9 +1,10 @@
+use enum_iterator::Sequence;
 use serde::{Deserialize, Serialize};
 use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Sequence)]
 pub enum ModelName {
     Gpt4o,
     Gpt4oLatest,

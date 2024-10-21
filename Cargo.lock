@@ -9928,6 +9928,7 @@ dependencies = [
  "block-mesh-common",
  "chrono",
  "database-utils",
+ "enum-iterator 2.1.0",
  "http 1.1.0",
  "http-body-util",
  "log",

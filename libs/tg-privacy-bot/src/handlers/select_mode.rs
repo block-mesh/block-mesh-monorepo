@@ -33,25 +33,27 @@ pub async fn select_mode(bot: Bot, _dialogue: MyDialogue, msg: Message) -> Handl
     let keyboard = InlineKeyboardMarkup::new(vec![
         vec![InlineKeyboardButton::callback(
             "Reset on each message",
-            MessageMode::ResetOnEachMessage.to_string(),
+            format!(
+                "select_mode_{}",
+                MessageMode::ResetOnEachMessage.to_string()
+            ),
         )],
         vec![InlineKeyboardButton::callback(
             "Reset on model change",
-            MessageMode::ResetOnModelChange.to_string(),
+            format!(
+                "select_mode_{}",
+                MessageMode::ResetOnModelChange.to_string()
+            ),
         )],
         vec![InlineKeyboardButton::callback(
             "Keep always",
-            MessageMode::KeepAlways.to_string(),
+            format!("select_mode_{}", MessageMode::KeepAlways.to_string()),
         )],
     ]);
 
     // Send a message with the inline keyboard
     bot.send_message(msg.chat.id, "Please operation mode:")
         .reply_markup(keyboard)
-        .await?;
-
-    let _ = bot
-        .send_message(msg.chat.id, "reset_on_each_message")
         .await?;
     Ok(())
 }

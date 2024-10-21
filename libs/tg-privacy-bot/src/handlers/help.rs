@@ -2,10 +2,7 @@ use crate::{HandlerResult, MyDialogue};
 use teloxide::prelude::*;
 
 const HELP_TEXT: &str = r#"
-/reset_on_each_message - [Default] Reset chat context for each message
-/reset_on_model_change - Reset chat context on model change
-/reset - Reset current chat context
-/keep -  Will keep the context until it reaches the limit
+/select_mode - Select message context mode
 /select_model - Select a different model
 /info - Show current settings
 /help - This message
