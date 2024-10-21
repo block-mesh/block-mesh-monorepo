@@ -1,3 +1,5 @@
+docker-target/*
+!docker-target/.gitkeep
 tailwind.css.gz
 tmp_ext/chrome
 tmp_ext/firefox
