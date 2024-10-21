@@ -55,7 +55,7 @@ pub fn NewDashboard() -> impl IntoView {
         points.set(data.points);
         tasks.set(data.tasks);
         number_of_users_invited.set(data.number_of_users_invited);
-        if !data
+        if data
             .calls_to_action
             .iter()
             .any(|i| i.name == "install_extension" && i.status)
