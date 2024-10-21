@@ -1,10 +1,5 @@
 FROM blockmesh/blockmesh-ubuntu-base:latest-amd64 AS base
 ARG DEBIAN_FRONTEND=noninteractive
-ARG SCCACHE_BUCKET=blockmesh-sccache
-ARG SCCACHE_ENDPOINT=https://66f69a5836ae4963ba7e97414a2c17d9.r2.cloudflarestorage.com
-ARG SCCACHE_REGION=auto
-ARG AWS_ACCESS_KEY_ID=91ec8f700f4f652cee43bd1d46753fb5
-ARG AWS_SECRET_ACCESS_KEY=ee229e8956ae7d8c752c42ffcff2f14a997f46707d3ed30cd677bc10a1b51ea7
 ENV PATH="/root/.cargo/bin:${PATH}"
 
 WORKDIR /code
