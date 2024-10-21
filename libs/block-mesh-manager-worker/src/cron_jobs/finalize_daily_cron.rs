@@ -1,5 +1,5 @@
 use crate::db_calls::bulk_finalize::bulk_finalize;
-use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::time::Duration;
 

@@ -80,28 +80,35 @@ set -x
 export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}"
 echo "create DB"
 ensure sqlx database create
-echo "migrate DB :79"
-ensure migrate
-ensure cargo sqlx prepare -- --features ssr
-cd "${ROOT}/libs/block-mesh-manager-worker" || exit
-echo "migrate DB :83"
-ensure migrate
-ensure cargo sqlx prepare
-cd "${ROOT}/libs/block-mesh-manager-api" || exit
-echo "migrate DB :87"
-ensure migrate
-ensure cargo sqlx prepare
-cd "${ROOT}/libs/block-mesh-manager-ws" || exit
-echo "migrate DB :91"
-ensure migrate
-ensure cargo sqlx prepare
-cd "${ROOT}/libs/feature-flags-server" || exit
-echo "migrate DB :95"
-ensure migrate
-ensure cargo sqlx prepare
-cd "${ROOT}/libs/block-mesh-manager-database-domain" || exit
-echo "migrate DB :103"
-ensure migrate
-ensure cargo sqlx prepare
+if [ "${DB_NAME}" = "block-mesh" ]; then
+  echo "migrate DB :79"
+  ensure migrate
+  ensure cargo sqlx prepare -- --features ssr
+  cd "${ROOT}/libs/block-mesh-manager-worker" || exit
+  echo "migrate DB :83"
+  ensure migrate
+  ensure cargo sqlx prepare
+  cd "${ROOT}/libs/block-mesh-manager-api" || exit
+  echo "migrate DB :87"
+  ensure migrate
+  ensure cargo sqlx prepare
+  cd "${ROOT}/libs/block-mesh-manager-ws" || exit
+  echo "migrate DB :91"
+  ensure migrate
+  ensure cargo sqlx prepare
+  cd "${ROOT}/libs/feature-flags-server" || exit
+  echo "migrate DB :95"
+  ensure migrate
+  ensure cargo sqlx prepare
+  cd "${ROOT}/libs/block-mesh-manager-database-domain" || exit
+  echo "migrate DB :103"
+  ensure migrate
+  ensure cargo sqlx prepare
+else
+  cd "${ROOT}/libs/tg-privacy-bot" || exit
+  echo "migrate DB :107"
+  ensure migrate
+  ensure cargo sqlx prepare
+fi
 >&2 echo "Postgres has been migrated, ready to go!"
 cd "${_PWD}"

@@ -9,7 +9,7 @@ use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
 use block_mesh_manager_database_domain::domain::fetch_latest_cron_settings::fetch_latest_cron_settings;
 use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
 use block_mesh_manager_database_domain::domain::user::UserRole;
-use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use std::env;
 use std::sync::Arc;
 use uuid::Uuid;

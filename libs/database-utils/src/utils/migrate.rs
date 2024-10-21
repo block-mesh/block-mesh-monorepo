@@ -1,4 +1,3 @@
-use crate::utils::cache_envar::get_envar;
 use sqlx::PgPool;
 
 struct Migrate {
@@ -8,13 +7,12 @@ struct Migrate {
     pub retry_delay: u64,
 }
 
-pub async fn migrate(db_pool: &PgPool) -> anyhow::Result<()> {
+pub async fn migrate(db_pool: &PgPool, env: String) -> anyhow::Result<()> {
     let opt = Migrate {
         retry: 3,
         retry_delay: 100,
     };
     tracing::info!("Starting migrations");
-    let env = get_envar("APP_ENVIRONMENT").await;
 
     for retry in 0..=opt.retry {
         if retry > 0 {

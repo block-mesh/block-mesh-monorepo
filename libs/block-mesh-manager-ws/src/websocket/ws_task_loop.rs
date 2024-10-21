@@ -7,7 +7,7 @@ use block_mesh_manager_database_domain::domain::find_users_tasks::find_users_tas
 use block_mesh_manager_database_domain::domain::task::TaskStatus;
 use block_mesh_manager_database_domain::domain::task_limit::TaskLimit;
 use block_mesh_manager_database_domain::domain::update_task_assigned::update_task_assigned;
-use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::env;
 use std::sync::Arc;

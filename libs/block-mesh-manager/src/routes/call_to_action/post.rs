@@ -7,7 +7,7 @@ use axum::{Extension, Form};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::CallToActionForm;
 use block_mesh_common::routes_enum::RoutesEnum;
-use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 
 #[tracing::instrument(name = "call_to_action", skip_all)]

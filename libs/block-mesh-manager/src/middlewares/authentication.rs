@@ -13,7 +13,7 @@ use axum_login::{
     AuthManagerLayer, AuthManagerLayerBuilder, AuthUser, AuthnBackend, UserId,
 };
 use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
-use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use redis::aio::MultiplexedConnection;
 use redis::{AsyncCommands, RedisResult};
 use secret::Secret;

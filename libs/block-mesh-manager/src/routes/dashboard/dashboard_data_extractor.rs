@@ -23,7 +23,7 @@ use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
-use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use regex::Regex;
 
 #[tracing::instrument(name = "dashboard_data_extractor", skip_all)]

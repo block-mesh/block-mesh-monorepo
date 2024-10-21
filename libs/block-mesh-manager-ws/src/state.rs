@@ -1,6 +1,6 @@
 use crate::websocket::manager::WebSocketManager;
 use block_mesh_common::env::environment::Environment;
-use block_mesh_manager_database_domain::utils::connection::get_pg_pool;
+use database_utils::utils::connection::get_pg_pool;
 use redis::aio::MultiplexedConnection;
 use sqlx::PgPool;
 use std::env;

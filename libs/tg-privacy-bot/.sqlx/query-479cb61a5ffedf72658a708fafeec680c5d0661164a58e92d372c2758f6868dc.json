@@ -1,0 +1,57 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT INTO usages\n        (id, user_id, usage_limit, usage, created_at, updated_at)\n        VALUES\n        ($1, $2, $3, $4, $5, $6)\n        ON CONFLICT (user_id) DO UPDATE SET updated_at = $6\n        RETURNING id, user_id, usage_limit, usage, created_at, updated_at\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "usage_limit",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 3,
+        "name": "usage",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 4,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 5,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Uuid",
+        "Int8",
+        "Int8",
+        "Timestamptz",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "479cb61a5ffedf72658a708fafeec680c5d0661164a58e92d372c2758f6868dc"
+}

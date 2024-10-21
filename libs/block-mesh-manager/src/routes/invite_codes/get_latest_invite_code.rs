@@ -8,7 +8,7 @@ use block_mesh_common::interfaces::server_api::{
 };
 use block_mesh_manager_database_domain::domain::find_token::find_token;
 use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
-use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 
 #[tracing::instrument(name = "get_latest_invite_code", skip_all)]
 pub async fn handler(

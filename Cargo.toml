@@ -58,6 +58,9 @@ aes-gcm-siv = { git = 'https://github.com/block-mesh/AEADs', branch = 'rustls-de
 curve25519-dalek = { git = "https://github.com/block-mesh/curve25519-dalek", branch = "rustls-dep-hell-1-18" }
 
 [workspace.dependencies]
+teloxide = { version = "0.13", features = ["macros", "webhooks", "webhooks-axum"] }
+openai_api_rust = { version = "0.1.9" }
+pretty_env_logger = "0.5"
 matches = { version = "0.1.10" }
 sentry-tower = { version = "0.34.0" }
 ureq = { version = "2.10.1" }
