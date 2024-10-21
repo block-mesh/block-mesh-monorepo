@@ -1,3 +1,5 @@
+use crate::database::models::message_mode::MessageMode;
+use crate::database::models::model_name::ModelName;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
@@ -6,8 +8,8 @@ use uuid::Uuid;
 pub struct UserSettings {
     pub id: Uuid,
     pub user_id: Uuid,
-    pub model_name: String,
-    pub message_mode: String,
+    pub model_name: ModelName,
+    pub message_mode: MessageMode,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
 }

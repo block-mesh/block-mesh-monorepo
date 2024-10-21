@@ -14,7 +14,8 @@ fi
 export POSTGRES_DB="tg-bot"
 ensure "${ROOT}/scripts/init_db.sh"
 export DATABASE_URL="postgres://postgres:password@localhost:5559/tg-bot"
-cargo run -p tg-privacy-bot | bunyan &
+#cargo watch --watch libs --shell "cargo run -p tg-privacy-bot | bunyan &"
+cargo watch --watch libs --shell "cargo run -p tg-privacy-bot"
 export backend=$!
 function cleanup()
 {

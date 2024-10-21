@@ -1,7 +1,7 @@
+mod ai_models;
 mod commands;
 mod database;
 mod handlers;
-mod models;
 
 use crate::commands::Commands;
 use crate::database::db_utils::get_pool;
@@ -32,16 +32,7 @@ fn bot_schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'stat
     let command_handler = teloxide::filter_command::<Commands, _>().branch(
         case![State::Start]
             .branch(case![Commands::Help].endpoint(handlers::help::help))
-            .branch(
-                case![Commands::ResetOnEachMessage]
-                    .endpoint(handlers::reset_on_each_message::reset_on_each_message),
-            )
-            .branch(
-                case![Commands::ResetOnModelChange]
-                    .endpoint(handlers::reset_on_model_change::reset_on_model_change),
-            )
-            .branch(case![Commands::Reset].endpoint(handlers::reset::reset))
-            .branch(case![Commands::Keep].endpoint(handlers::keep::keep))
+            .branch(case![Commands::SelectMode].endpoint(handlers::select_mode::select_mode))
             .branch(case![Commands::SelectModel].endpoint(handlers::select_model::select_model))
             .branch(case![Commands::Info].endpoint(handlers::info::info))
             .branch(case![Commands::Start].endpoint(handlers::start::start)),
