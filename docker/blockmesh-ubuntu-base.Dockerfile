@@ -23,3 +23,5 @@ RUN rustup component add rust-src
 RUN rustup target add wasm32-unknown-unknown
 RUN cargo install cargo-leptos --version=$LEPTOS_VERSION
 RUN cargo install sqlx-cli --version=$SQLX_VERSION --no-default-features --features postgres,rustls
+RUN cargo install cargo-chef
+RUN cargo install sccache
