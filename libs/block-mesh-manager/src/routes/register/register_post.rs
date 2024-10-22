@@ -12,7 +12,7 @@ use validator::validate_email;
 
 use block_mesh_common::interfaces::server_api::RegisterForm;
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
-use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use secret::Secret;
 
 use crate::database::api_token::create_api_token::create_api_token;

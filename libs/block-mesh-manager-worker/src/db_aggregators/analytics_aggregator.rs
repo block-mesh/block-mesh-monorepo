@@ -1,8 +1,8 @@
 use crate::db_calls::get_or_create_analytics::get_or_create_analytics;
 use anyhow::anyhow;
 use block_mesh_common::interfaces::db_messages::AnalyticsMessage;
-use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
 use chrono::Utc;
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use serde_json::Value;
 use sqlx::PgPool;
 use std::collections::HashMap;

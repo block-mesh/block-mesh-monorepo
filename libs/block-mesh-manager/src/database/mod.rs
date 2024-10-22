@@ -7,7 +7,6 @@ pub mod daily_stat;
 pub mod invite_code;
 pub mod ip_address;
 pub mod leaderboard;
-pub mod migrate;
 pub mod nonce;
 pub mod perks;
 pub mod proxy_master;

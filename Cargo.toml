@@ -61,6 +61,9 @@ curve25519-dalek = { git = "https://github.com/block-mesh/curve25519-dalek", bra
 actix-files = { version = "0.6" }
 actix-web = { version = "4", features = ["macros"] }
 leptos_actix = { version = "0.6" }
+teloxide = { version = "0.13", features = ["macros", "webhooks", "webhooks-axum"] }
+openai_api_rust = { version = "0.1.9" }
+pretty_env_logger = "0.5"
 matches = { version = "0.1.10" }
 sentry-tower = { version = "0.34.0" }
 ureq = { version = "2.10.1" }

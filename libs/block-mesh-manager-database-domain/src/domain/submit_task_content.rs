@@ -9,7 +9,6 @@ use crate::domain::get_user_opt_by_id::get_user_opt_by_id;
 use crate::domain::increment_tasks_count::increment_tasks_count;
 use crate::domain::notify_worker::notify_worker;
 use crate::domain::task::TaskStatus;
-use crate::utils::instrument_wrapper::{commit_txn, create_txn};
 use anyhow::{anyhow, Error};
 use axum::extract::Request;
 use axum::Json;
@@ -17,6 +16,7 @@ use block_mesh_common::interfaces::db_messages::{AggregateMessage, DBMessageType
 use block_mesh_common::interfaces::server_api::{
     HandlerMode, SubmitTaskRequest, SubmitTaskResponse,
 };
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::StatusCode;
 use http_body_util::BodyExt;
 use sqlx::PgPool;

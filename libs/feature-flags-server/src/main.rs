@@ -1,7 +1,9 @@
-use crate::database::{migrate, pre_populate_db};
+use crate::database::pre_populate_db;
 use crate::routes::get_router;
 use axum::{Extension, Router};
 use block_mesh_common::env::load_dotenv::load_dotenv;
+use database_utils::utils::connection::get_pg_pool;
+use database_utils::utils::migrate::migrate;
 use logger_general::tracing::setup_tracing_stdout_only;
 use std::net::SocketAddr;
 use std::{env, process};
@@ -16,8 +18,11 @@ mod routes;
 async fn main() -> anyhow::Result<()> {
     load_dotenv();
     setup_tracing_stdout_only();
-    let db_pool = sqlx::PgPool::connect(&env::var("DATABASE_URL")?).await?;
-    migrate(&db_pool).await.expect("Failed to migrate database");
+    let db_pool = get_pg_pool().await;
+    let env = env::var("APP_ENVIRONMENT")?;
+    migrate(&db_pool, env)
+        .await
+        .expect("Failed to migrate database");
     let _ = pre_populate_db(&db_pool).await;
     let router = get_router();
     let cors = CorsLayer::permissive();

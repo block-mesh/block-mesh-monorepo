@@ -7,7 +7,7 @@ use block_mesh_common::interfaces::server_api::{
 };
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
 use block_mesh_manager_database_domain::domain::get_user_opt_by_email::get_user_opt_by_email;
-use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 
 #[tracing::instrument(name = "get_token", skip_all)]

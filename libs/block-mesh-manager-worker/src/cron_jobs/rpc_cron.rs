@@ -1,7 +1,7 @@
 use crate::db_calls::create_server_user::create_server_user;
 use crate::db_calls::get_all_rpcs::get_all_rpcs;
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
-use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::env;
 use std::time::Duration;

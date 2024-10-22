@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE usages SET usage = usage + 1, updated_at = $2 WHERE id = $1\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a883a30878066893810e20a1b9aef6d128ae9f709e0e1cd747c25d100f86cbfc"
+}

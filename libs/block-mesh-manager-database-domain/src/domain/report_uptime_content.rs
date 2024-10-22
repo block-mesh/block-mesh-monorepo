@@ -5,7 +5,6 @@ use crate::domain::get_daily_stat_of_user::get_daily_stat_of_user;
 use crate::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::domain::get_user_opt_by_id::get_user_opt_by_id;
 use crate::domain::notify_worker::notify_worker;
-use crate::utils::instrument_wrapper::{commit_txn, create_txn};
 use anyhow::{anyhow, Error};
 use axum::extract::Request;
 use axum::Json;
@@ -16,6 +15,7 @@ use block_mesh_common::interfaces::server_api::{
     ClientsMetadata, HandlerMode, ReportUptimeRequest, ReportUptimeResponse,
 };
 use chrono::Utc;
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::{HeaderValue, StatusCode};
 use http_body_util::BodyExt;
 use sqlx::PgPool;

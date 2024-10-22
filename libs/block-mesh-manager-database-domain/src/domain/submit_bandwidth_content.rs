@@ -3,11 +3,11 @@ use crate::domain::find_token::find_token;
 use crate::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::domain::get_user_opt_by_id::get_user_opt_by_id;
 use crate::domain::notify_worker::notify_worker;
-use crate::utils::instrument_wrapper::{commit_txn, create_txn};
 use anyhow::{anyhow, Error};
 use axum::Json;
 use block_mesh_common::interfaces::db_messages::{AggregateMessage, DBMessageTypes};
 use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::StatusCode;
 use sqlx::PgPool;
 

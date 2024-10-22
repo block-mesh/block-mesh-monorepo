@@ -15,7 +15,7 @@ use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt
 use block_mesh_manager_database_domain::domain::task::TaskStatus;
 use block_mesh_manager_database_domain::domain::task_limit::TaskLimit;
 use block_mesh_manager_database_domain::domain::update_task_assigned::update_task_assigned;
-use block_mesh_manager_database_domain::utils::instrument_wrapper::{commit_txn, create_txn};
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::HeaderMap;
 use sqlx::PgPool;
 use std::sync::Arc;
