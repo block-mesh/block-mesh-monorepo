@@ -58,6 +58,9 @@ aes-gcm-siv = { git = 'https://github.com/block-mesh/AEADs', branch = 'rustls-de
 curve25519-dalek = { git = "https://github.com/block-mesh/curve25519-dalek", branch = "rustls-dep-hell-1-18" }
 
 [workspace.dependencies]
+actix-files = { version = "0.6" }
+actix-web = { version = "4", features = ["macros"] }
+leptos_actix = { version = "0.6" }
 matches = { version = "0.1.10" }
 sentry-tower = { version = "0.34.0" }
 ureq = { version = "2.10.1" }

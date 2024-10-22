@@ -3,6 +3,7 @@ ARG DEBIAN_FRONTEND=noninteractive
 ARG SQLX_VERSION=0.7.3
 ARG LEPTOS_VERSION=0.2.20
 ARG RUSTC_VERSION=1.77.0
+ARG WASM_PACK=0.12.1
 RUN apt-get update
 RUN apt-get install curl gzip git-all -y
 RUN apt-get install build-essential -y
@@ -21,7 +22,3 @@ RUN rustup component add rust-analyzer
 RUN rustup component add clippy
 RUN rustup component add rust-src
 RUN rustup target add wasm32-unknown-unknown
-RUN cargo install cargo-leptos --version=$LEPTOS_VERSION
-RUN cargo install sqlx-cli --version=$SQLX_VERSION --no-default-features --features postgres,rustls
-RUN cargo install cargo-chef
-RUN cargo install sccache
