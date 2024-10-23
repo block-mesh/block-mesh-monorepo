@@ -1,14 +1,15 @@
-FROM --platform=$BUILDPLATFORM ubuntu:22.04
+FROM --platform=$BUILDPLATFORM alpine:3.20.3
 ARG TARGETPLATFORM
 ARG DEBIAN_FRONTEND=noninteractive
 ARG SQLX_VERSION=0.7.3
 ARG LEPTOS_VERSION=0.2.20
 ARG RUSTC_VERSION=1.77.0
 ARG WASM_PACK=0.12.1
-RUN apt-get update
-RUN apt-get install curl gzip git-all -y
-RUN apt-get install build-essential -y
-RUN apt-get install -y pkg-config openssl libssl-dev
+RUN apk update
+RUN apk add curl gzip git
+RUN apk add g++ make gcc build-base
+RUN apk add pkgconfig openssl libressl-dev musl-dev python3-dev libffi-dev
+RUN apk add bash
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
 RUN echo 'source $HOME/.cargo/env' >> $HOME/.bashrc
 ENV PATH="/root/.cargo/bin:${PATH}"
@@ -23,7 +24,7 @@ RUN rustup component add rust-analyzer
 RUN rustup component add clippy
 RUN rustup component add rust-src
 RUN rustup target add wasm32-unknown-unknown
-RUN apt-get install -y --no-install-recommends openssl ca-certificates
-RUN apt-get install musl-tools -y
+RUN apk add openssl ca-certificates
 RUN rustup target add x86_64-unknown-linux-gnu
 RUN rustup target add aarch64-unknown-linux-gnu
+RUN apk add zig

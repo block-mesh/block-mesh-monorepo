@@ -1,4 +1,4 @@
-FROM blockmesh/blockmesh-extra-rust
+FROM --platform=$BUILDPLATFORM blockmesh/blockmesh-extra-rust
 RUN git clone --depth 1 https://github.com/block-mesh/block-mesh-monorepo.git
 RUN cd block-mesh-monorepo && cargo fetch
 RUN mkdir -p /code/target && touch /code/target/hello.txt

@@ -7,16 +7,16 @@ docker login
 docker buildx create --name buildx --use
 set -eo pipefail
 #####################################################################################################################################################
-#docker buildx build --platform linux/amd64 -t blockmesh-ubuntu-base -f "${ROOT}/docker/base/blockmesh-ubuntu-base.Dockerfile" --load .
-#docker tag blockmesh-ubuntu-base blockmesh/blockmesh-ubuntu-base:latest-amd64
-#docker push blockmesh/blockmesh-ubuntu-base:latest-amd64
+#docker buildx build --platform linux/amd64 -t blockmesh-alpine-base -f "${ROOT}/docker/base/blockmesh-alpine-base.Dockerfile" --load .
+#docker tag blockmesh-alpine-base blockmesh/blockmesh-alpine-base:latest-amd64
+#docker push blockmesh/blockmesh-alpine-base:latest-amd64
 #####################################################################################################################################################
-#docker buildx build --platform linux/arm64 -t blockmesh-ubuntu-base -f "${ROOT}/docker/base/blockmesh-ubuntu-base.Dockerfile" --load .
-#docker tag blockmesh-ubuntu-base blockmesh/blockmesh-ubuntu-base:latest-arm64
-#docker push blockmesh/blockmesh-ubuntu-base:latest-arm64
+#docker buildx build --platform linux/arm64 -t blockmesh-alpine-base -f "${ROOT}/docker/base/blockmesh-alpine-base.Dockerfile" --load .
+#docker tag blockmesh-alpine-base blockmesh/blockmesh-alpine-base:latest-arm64
+#docker push blockmesh/blockmesh-alpine-base:latest-arm64
 #####################################################################################################################################################
-docker buildx build --platform linux/amd64,linux/arm64 -t blockmesh/blockmesh-ubuntu-base -f "${ROOT}/docker/base/blockmesh-ubuntu-base.Dockerfile" --push .
+docker buildx build --platform linux/amd64,linux/arm64 -t blockmesh/blockmesh-alpine-base -f "${ROOT}/docker/base/blockmesh-alpine-base.Dockerfile" --push .
 #####################################################################################################################################################
-docker pull blockmesh/blockmesh-ubuntu-base
-#docker pull blockmesh/blockmesh-ubuntu-base:latest-amd64
-#docker pull blockmesh/blockmesh-ubuntu-base:latest-arm64
+docker pull blockmesh/blockmesh-alpine-base
+#docker pull blockmesh/blockmesh-alpine-base:latest-amd64
+#docker pull blockmesh/blockmesh-alpine-base:latest-arm64
