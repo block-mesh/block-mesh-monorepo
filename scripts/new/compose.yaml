@@ -1,0 +1,82 @@
+# TODO: make service names more verbose
+services:
+  redis:
+    image: redis:alpine3.20
+    ports:
+      - '6379:6379'
+    networks:
+      - rdnet
+    restart: always
+
+  postgres:
+    image: postgres:15
+    networks:
+      - pgnet
+    restart: always
+    environment:
+      - POSTGRES_PASSWORD=password
+      - POSTGRES_USER=postgres
+      - POSTGRES_DB=block-mesh
+      - POSTGRES_PORT=5559
+
+  server:
+    platform: "linux/arm64"
+    build:
+      context: '../..'
+      dockerfile: Dockerfile
+      target: development
+      platforms:
+        - "linux/amd64"
+        - "linux/arm64"
+    ports:
+      - '8000:8000'
+    networks:
+      - pgnet
+      - rdnet
+    depends_on:
+      - postgres
+      - redis
+    volumes:
+      - ../../docker-target:/code/target
+    environment:
+      - APP_ENVIRONMENT=local
+      - DATABASE_URL=postgres://postgres:password@postgres:5432/block-mesh
+      - LINODE_ACCESS_TOKEN=""
+      - MAILGUN_SEND_KEY=""
+      - BLOCKMESH_LOG_ENV="dev"
+      - BLOCKMESH_SERVER_UUID="11111111-1111-4111-8111-111111111111"
+      - SENTRY=""
+      - SENTRY_LAYER="false"
+      - MAPBOX=""
+      - AWS_ACCESS_KEY_ID=""
+      - AWS_SECRET_ACCESS_KEY=""
+      - TWITTER_API_KEY=""
+      - TWITTER_API_SECRET_KEY=""
+      - TWITTER_BEARER_TOKEN=""
+      - TWITTER_ACCESS_TOKEN=""
+      - TWITTER_ACCESS_TOKEN_SECRET=""
+      - TWITTER_CALLBACK_URL=""
+      - TWITTER_API_TOKEN=""
+      - TWITTER_API_URL=""
+      - TWITTER_API_HOST=""
+      - TWITTER_API_TOKEN_TOKEN=""
+      - TWITTER_CLIENT_ID=""
+      - TWITTER_CLIENT_SECRET=""
+
+  pghero:
+    image: ankane/pghero
+    container_name: pghero
+    ports:
+      - '8080:8080'
+    networks:
+      - pgnet
+    restart: always
+    environment:
+      - DATABASE_URL=postgres://postgres:password@postgres:5432/block-mesh
+    depends_on:
+      - postgres
+
+networks:
+  pgnet:
+    driver: bridge
+  rdnet:
