@@ -19,10 +19,10 @@ pub fn messenger(
                     if is_cls.load(Ordering::Relaxed) {
                         return;
                     }
-                    tracing::warn!("Sink task error: {error}");
+                    tracing::trace!("Sink task error: {error}");
                 }
             } else {
-                tracing::warn!("Failed to serialize message {server_message:?}");
+                tracing::trace!("Failed to serialize message {server_message:?}");
             }
         }
     });
