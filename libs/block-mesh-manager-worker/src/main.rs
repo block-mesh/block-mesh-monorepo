@@ -17,6 +17,7 @@ mod cron_jobs;
 mod db_aggregators;
 mod db_calls;
 mod domain;
+mod errors;
 mod pg_listener;
 mod routes;
 mod utils;

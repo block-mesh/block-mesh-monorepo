@@ -9,11 +9,11 @@ use block_mesh_common::interfaces::server_api::{
 use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager::configuration::get_configuration::get_configuration;
 use block_mesh_manager::configuration::settings::Settings;
-use block_mesh_manager::database::migrate::migrate;
 use block_mesh_manager::emails::email_client::EmailClient;
 use block_mesh_manager::startup::application::{AppState, Application};
 use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
 use dashmap::DashMap;
+use database_utils::utils::migrate::migrate;
 use logger_general::tracing::setup_tracing_stdout_only;
 use redis;
 use redis::aio::MultiplexedConnection;
@@ -24,7 +24,6 @@ use std::env;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio;
-use tokio::task::JoinHandle;
 use tokio::time::sleep;
 use uuid::Uuid;
 
@@ -56,7 +55,9 @@ pub async fn spawn_app() -> TestApp {
         .await
         .unwrap();
 
-    migrate(&db_pool).await.expect("Failed to migrate database");
+    migrate(&db_pool, "test".to_string())
+        .await
+        .expect("Failed to migrate database");
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
