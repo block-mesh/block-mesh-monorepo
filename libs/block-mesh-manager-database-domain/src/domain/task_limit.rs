@@ -18,8 +18,7 @@ impl Into<Value> for TaskLimit {
         m.insert("day".to_string(), self.day.clone().to_string().into());
         m.insert("user_id".to_string(), self.user_id.to_string().into());
         m.insert("tasks".to_string(), self.tasks.to_string().into());
-        let v = Value::Object(m);
-        v
+        Value::Object(m)
     }
 }
 impl TaskLimit {
