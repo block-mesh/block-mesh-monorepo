@@ -1,3 +1,4 @@
+use sqlx::migrate::MigrateError;
 use sqlx::PgPool;
 
 struct Migrate {
@@ -23,8 +24,15 @@ pub async fn migrate(db_pool: &PgPool, env: String) -> anyhow::Result<()> {
             Ok(_) => tracing::info!("Successfully migrated"),
             Err(e) => {
                 if env != "local" {
-                    tracing::error!("Failed to migrate database: {}", e);
-                    return Err(e.into());
+                    match e {
+                        MigrateError::VersionMissing(_) => {
+                            tracing::warn!("Failed to migrate database: {}", e);
+                        }
+                        _ => {
+                            tracing::error!("Failed to migrate database: {}", e);
+                            return Err(e.into());
+                        }
+                    }
                 }
             }
         }
