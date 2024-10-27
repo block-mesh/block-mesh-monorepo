@@ -19,7 +19,7 @@ pub async fn health(Extension(pool): Extension<PgPool>) -> Result<impl IntoRespo
     Ok((StatusCode::OK, "OK"))
 }
 
-#[tracing::instrument(name = "read_flag", skip_all)]
+#[tracing::instrument(name = "read_flag", skip_all, level = "trace")]
 pub async fn read_flag(
     Extension(pool): Extension<PgPool>,
     Path(flag): Path<String>,
@@ -38,7 +38,7 @@ pub struct FlagOut {
     value: Value,
 }
 
-#[tracing::instrument(name = "read_flags", skip_all)]
+#[tracing::instrument(name = "read_flags", skip_all, level = "trace")]
 pub async fn read_flags(Extension(pool): Extension<PgPool>) -> Result<Json<Vec<FlagOut>>, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let db_flags = get_flags(&mut transaction).await.map_err(Error::from)?;
