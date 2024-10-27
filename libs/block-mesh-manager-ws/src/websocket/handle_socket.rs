@@ -44,7 +44,7 @@ pub async fn handle_socket(socket: WebSocket, ip: String, state: Arc<AppState>, 
             let _task = match task_receiver.await {
                 Ok(task) => task,
                 Err(_) => {
-                    tracing::info!("Task scheduler was dropper");
+                    tracing::trace!("Task scheduler was dropper");
                     return;
                 }
             };
@@ -60,18 +60,18 @@ pub async fn handle_socket(socket: WebSocket, ip: String, state: Arc<AppState>, 
                 if is_cls.load(Ordering::Relaxed) {
                     return;
                 }
-                tracing::warn!("Failed to pass a message to task_sink_tx");
+                tracing::trace!("Failed to pass a message to task_sink_tx");
             }
         }
     });
 
     tokio::select! {
-        o = recv_task => tracing::warn!("recv_task dead {:?}", o),
-        o = send_task => tracing::warn!("send_task dead {:?}", o),
-        o = sink_task => tracing::warn!("sink_task dead {:?}", o),
-        o = broadcast_task => tracing::warn!("broadcast_task dead {:?}", o)
+        o = recv_task => tracing::trace!("recv_task dead {:?}", o),
+        o = send_task => tracing::trace!("send_task dead {:?}", o),
+        o = sink_task => tracing::trace!("sink_task dead {:?}", o),
+        o = broadcast_task => tracing::trace!("broadcast_task dead {:?}", o)
     }
 
     broadcaster.unsubscribe(user_id, ip.clone()).await;
-    tracing::info!("Websocket context destroyed");
+    tracing::trace!("Websocket context destroyed");
 }
