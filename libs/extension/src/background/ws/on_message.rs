@@ -39,7 +39,11 @@ pub fn on_error_handler(ws: web_sys::WebSocket) -> Closure<dyn FnMut(ErrorEvent)
     Closure::<dyn FnMut(_)>::new(move |e: ErrorEvent| {
         let state: WebSocketReadyState = ws.ready_state().into();
         set_ws_status(&state);
-        log_error!("closing ws with error error event: {:?} | {:?}", e, state);
+        log_error!(
+            "on_error_handler:: closing ws with error error event: {:?} | {:?}",
+            e.error().as_string(),
+            state
+        );
     })
 }
 
@@ -57,7 +61,12 @@ pub fn on_close_handler(ws: web_sys::WebSocket) -> Closure<dyn FnMut(CloseEvent)
     Closure::<dyn FnMut(_)>::new(move |e: CloseEvent| {
         let state: WebSocketReadyState = ws.ready_state().into();
         set_ws_status(&state);
-        log_error!("closing ws with error error event: {:?} | {:?}", e, state);
+        log_error!(
+            "on_close_handler:: closing ws with error error event: {:?} | {:?} | {:?}",
+            e.code(),
+            e.reason(),
+            state
+        );
     })
 }
 

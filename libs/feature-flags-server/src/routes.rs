@@ -56,6 +56,7 @@ pub async fn read_flags(Extension(pool): Extension<PgPool>) -> Result<Json<Vec<F
 
 pub fn get_router() -> Router {
     Router::new()
+        .route("/", get(health))
         .route("/health", get(health))
         .route("/read-flag/:flag", get(read_flag))
         .route("/read-flags", get(read_flags))

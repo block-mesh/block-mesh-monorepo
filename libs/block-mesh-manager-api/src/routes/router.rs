@@ -7,6 +7,7 @@ use axum::Router;
 
 pub fn get_router() -> Router {
     Router::new()
+        .route("/", get(health))
         .route("/health", get(health))
         .route("/api/check_token", post(check_token).get(ok_handler))
         .route("/api/get_token", post(get_token).get(ok_handler))

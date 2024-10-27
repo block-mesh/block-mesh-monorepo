@@ -23,7 +23,7 @@ pub async fn receiver(
                 ControlFlow::Continue(ws_client_message) => {
                     if let Some(ws_client_message) = ws_client_message {
                         if matches!(ws_client_message, WsClientMessage::CompleteTask(_)) {
-                            task_scheduler_notifier.notify_one();
+                            task_scheduler_notifier.notify_waiters();
                         }
                     }
                 }
