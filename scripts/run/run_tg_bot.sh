@@ -13,7 +13,7 @@ if [ -f "${ROOT}/.env" ] ; then
 fi
 export POSTGRES_DB="tg-bot"
 ensure "${ROOT}/scripts/init_db.sh"
-export DATABASE_URL="postgres://postgres:password@localhost:5559/tg-bot"
+export DATABASE_URL="postgres://postgres:password@localhost:5551/tg-bot"
 #cargo watch --watch libs --shell "cargo run -p tg-privacy-bot | bunyan &"
 cargo watch --watch libs --shell "cargo run -p tg-privacy-bot"
 export backend=$!

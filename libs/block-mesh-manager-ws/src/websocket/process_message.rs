@@ -21,29 +21,29 @@ pub async fn process_message(
             return ControlFlow::Continue(ws_client_message);
         }
         Message::Binary(bytes) => {
-            tracing::info!(">>> sent {} bytes: {:?}", bytes.len(), bytes);
+            tracing::trace!(">>> sent {} bytes: {:?}", bytes.len(), bytes);
         }
         Message::Close(frame) => {
             if let Some(cf) = frame {
-                tracing::info!(
+                tracing::trace!(
                     ">>> sent close with code {} and reason `{}`",
                     cf.code,
                     cf.reason
                 );
             } else {
-                tracing::info!(">>> someone somehow sent close message without CloseFrame");
+                tracing::trace!(">>> someone somehow sent close message without CloseFrame");
             }
             return ControlFlow::Break(());
         }
 
         Message::Pong(bytes) => {
-            tracing::info!(">>> sent pong with {bytes:?}");
+            tracing::trace!(">>> sent pong with {bytes:?}");
         }
         // You should never need to manually handle Message::Ping, as axum's websocket library
         // will do so for you automagically by replying with Pong and copying the v according to
         // spec. But if you need the contents of the pings you can see them here.
         Message::Ping(bytes) => {
-            tracing::info!(">>> sent ping with {bytes:?}");
+            tracing::trace!(">>> sent ping with {bytes:?}");
         }
     }
     ControlFlow::Continue(None)
