@@ -23,12 +23,12 @@ pub async fn receiver(
                 ControlFlow::Continue(ws_client_message) => {
                     if let Some(ws_client_message) = ws_client_message {
                         if matches!(ws_client_message, WsClientMessage::CompleteTask(_)) {
-                            task_scheduler_notifier.notify_one();
+                            task_scheduler_notifier.notify_waiters();
                         }
                     }
                 }
                 ControlFlow::Break(_) => {
-                    tracing::warn!("Unhandled message: {msg:?}");
+                    tracing::trace!("Unhandled message: {msg:?}");
                     is_cls.store(true, Ordering::Relaxed);
                     return;
                 }

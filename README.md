@@ -64,6 +64,11 @@ if [ $current_branch == "master" ] ; then
         echo "Cannot commit to master"
         exit 1
 fi
+
+#echo '+cargo test --all'
+#cargo test --all
+#echo '+cargo clippy --all -- -D warnings'
+#cargo clippy --all -- -D warnings
 echo '+cargo fmt --all -- --check'
 cargo fmt --all -- --check
 ```
@@ -79,14 +84,20 @@ source "${ROOT}/scripts/setup.sh"
 export CARGO_TARGET_DIR="${ROOT}/target/PRE-PUSH"
 current_branch=$(git branch --show-current)
 if [ $current_branch == "master" ] ; then
-        echo "Cannot commit to master"
-        exit 1
+	echo "Cannot commit to master"
+	exit 1
 fi
 
-echo '+cargo test --all'
-cargo test --all
-echo '+cargo clippy --all -- -D warnings'
-cargo clippy --all -- -D warnings
+echo '+cargo test --all --exclude tg-privacy-bot'
+export DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
+cargo test --all --exclude tg-privacy-bot 
+echo '+cargo test --package tg-privacy-bot'
+export DATABASE_URL="postgres://postgres:password@localhost:5551/tg-bot"
+cargo test --package tg-privacy-bot
+export DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
+echo '+cargo clippy --all  --features ssr,hydrate -- -D warnings'
+unset DATABASE_URL
+cargo clippy --all --features ssr,hydrate -- -D warnings
 echo '+cargo fmt --all -- --check'
 cargo fmt --all -- --check
 ```

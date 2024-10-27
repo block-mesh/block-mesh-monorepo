@@ -49,7 +49,7 @@ async fn test_connect_to_ws() {
 
 #[tokio::test]
 async fn test_send_msg_to_ws() {
-    let (app, websocket) = test_ws().await;
+    let (_app, websocket) = test_ws().await;
     let (_tx, mut rx) = websocket.split();
     while let Some(message) = rx.try_next().await.unwrap() {
         if let Message::Text(text) = message {

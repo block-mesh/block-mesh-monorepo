@@ -1,5 +1,6 @@
 use crate::helpers::http_client;
 use crate::login_mode::login_mode;
+use anyhow::anyhow;
 use chrono::Utc;
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
@@ -18,7 +19,6 @@ pub static LOCALHOST_ANDROID: &str = "http://10.0.2.2:8000";
 pub enum FFIStatus {
     WAITING,
     RUNNING,
-    STOP,
 }
 
 #[derive(Clone)]
@@ -42,7 +42,6 @@ impl Display for FFIStatus {
         match self {
             FFIStatus::WAITING => write!(f, "waiting"),
             FFIStatus::RUNNING => write!(f, "running"),
-            FFIStatus::STOP => write!(f, "stop"),
         }
     }
 }
@@ -52,32 +51,40 @@ impl From<FFIStatus> for i8 {
         match val {
             FFIStatus::WAITING => -1,
             FFIStatus::RUNNING => 1,
-            FFIStatus::STOP => 0,
         }
     }
 }
 
 pub fn get_status() -> FFIStatus {
     let value = STATUS.get_or_init(LibState::new);
-    value.lock().unwrap().status
+    if let Ok(v) = value.lock() {
+        v.status
+    } else {
+        FFIStatus::WAITING
+    }
 }
 
 pub fn cancel() {
     let value = STATUS.get_or_init(LibState::new);
-    let value = value.lock().unwrap();
-    value.notify.notify_waiters();
+    if let Ok(v) = value.lock() {
+        v.notify.notify_waiters();
+    }
 }
 
 pub fn set_status(status: FFIStatus) {
     let value = STATUS.get_or_init(LibState::new);
-    let mut val = value.lock().unwrap();
-    val.status = status;
+    if let Ok(mut v) = value.lock() {
+        v.status = status;
+    }
 }
 
-pub fn get_notify() -> Arc<Notify> {
+pub fn get_notify() -> anyhow::Result<Arc<Notify>> {
     let value = STATUS.get_or_init(LibState::new);
-    let val = value.lock().unwrap();
-    val.notify.clone()
+    if let Ok(v) = value.lock() {
+        Ok(v.notify.clone())
+    } else {
+        Err(anyhow!("Cant get notifier"))
+    }
 }
 
 pub fn create_current_thread_runtime() -> Arc<Runtime> {
@@ -93,12 +100,12 @@ pub fn create_current_thread_runtime() -> Arc<Runtime> {
 
 pub fn debug_stop(_url: &str) {
     let runtime = create_current_thread_runtime();
-    set_status(FFIStatus::STOP);
     runtime.block_on(async {
-        let notify = get_notify();
-        notify.notify_waiters();
+        if let Ok(notify) = get_notify() {
+            notify.notify_waiters();
+            set_status(FFIStatus::WAITING);
+        }
     });
-    set_status(FFIStatus::WAITING);
 }
 
 pub fn run_login_mode(url: &str, email: &str, password: &str) {
@@ -107,10 +114,17 @@ pub fn run_login_mode(url: &str, email: &str, password: &str) {
     let email = email.to_string();
     let password = password.to_string();
     runtime.block_on(async {
-        let notify = get_notify();
-        set_status(FFIStatus::RUNNING);
+        let notify = match get_notify() {
+            Ok(n) => n,
+            Err(e) => {
+                eprintln!("get_notify failed {:?}", e);
+                return;
+            }
+        };
+
         let url_s = url.to_string();
         let task = tokio::spawn(async move {
+            set_status(FFIStatus::RUNNING);
             login_mode(&url, &email, &password, Some("Mobile".to_string())).await
         });
         let cancel_future = tokio::spawn(async move {
@@ -119,18 +133,15 @@ pub fn run_login_mode(url: &str, email: &str, password: &str) {
         });
         tokio::select! {
             o = task => {
-                set_status(FFIStatus::WAITING);
                 debug_stop(&url_s);
                 eprintln!("Task died {:?}", o)
             },
             o = cancel_future=> {
-                set_status(FFIStatus::WAITING);
                 debug_stop(&url_s);
                 eprintln!("Cancel request {:?}", o)
             },
         }
     });
-    set_status(FFIStatus::WAITING);
 }
 
 pub async fn debug_running(url: &str) {
