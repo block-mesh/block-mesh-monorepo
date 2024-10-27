@@ -12,6 +12,16 @@ pub struct TaskLimit {
     pub tasks: u64,
 }
 
+impl From<TaskLimit> for Value {
+    fn from(val: TaskLimit) -> Self {
+        let mut m: serde_json::Map<String, Value> = serde_json::Map::new();
+        m.insert("day".to_string(), val.day.clone().to_string().into());
+        m.insert("user_id".to_string(), val.user_id.to_string().into());
+        m.insert("tasks".to_string(), val.tasks.to_string().into());
+        Value::Object(m)
+    }
+}
+
 impl Into<Value> for TaskLimit {
     fn into(self) -> Value {
         let mut m: serde_json::Map<String, Value> = serde_json::Map::new();
