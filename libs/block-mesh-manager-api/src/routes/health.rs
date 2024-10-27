@@ -9,7 +9,7 @@ use sqlx::PgPool;
 #[tracing::instrument(name = "health", skip_all)]
 pub async fn health(Extension(pool): Extension<PgPool>) -> Result<impl IntoResponse, Error> {
     let mut transaction = create_txn(&pool).await?;
-    let _ = health_check(&mut *transaction).await?;
+    health_check(&mut *transaction).await?;
     commit_txn(transaction).await?;
     Ok((StatusCode::OK, "OK"))
 }
