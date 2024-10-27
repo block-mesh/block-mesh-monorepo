@@ -45,10 +45,13 @@ where
     pub async fn add_session(&self) -> Option<oneshot::Receiver<T>> {
         let (task_sender, task_receiver) = oneshot::channel();
         let controller = NodeController::new(task_sender);
-        if let Err(_error) = self.session_sender.send(controller).await {
-            tracing::error!("Failed to add new session to scheduler");
+        match self.session_sender.send(controller).await {
+            Ok(_) => Some(task_receiver),
+            Err(e) => {
+                tracing::error!("Failed to add new session to scheduler {:?}", e);
+                None
+            }
         }
-        Some(task_receiver)
     }
 
     pub async fn add_task(&self, http_task: T) {

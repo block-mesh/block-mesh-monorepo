@@ -21,6 +21,7 @@ pub async fn version() -> impl IntoResponse {
 }
 pub fn get_router() -> Router {
     Router::new()
+        .route("/", get(health))
         .route("/health", get(health))
         .route("/version", get(version))
 }
