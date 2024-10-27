@@ -97,6 +97,9 @@ if [ "${DB_NAME}" = "block-mesh" ]; then
   echo "migrate DB :95"
   ensure migrate
   cd "${ROOT}/libs/block-mesh-manager-database-domain" || exit
+  echo "migrate DB :100"
+  ensure migrate
+  cd "${ROOT}/libs/database-utils" || exit
   echo "migrate DB :103"
   ensure migrate
 else
