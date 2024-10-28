@@ -2,6 +2,7 @@ use crate::websocket::manager::broadcaster::Broadcaster;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use block_mesh_manager_database_domain::domain::fetch_latest_cron_settings::fetch_latest_cron_settings;
 use sqlx::PgPool;
+use std::env;
 use std::time::Duration;
 use uuid::Uuid;
 
@@ -11,10 +12,19 @@ pub async fn ws_base_msg_loop(
     server_user_id: Uuid,
     broadcaster: Broadcaster,
 ) -> anyhow::Result<()> {
+    let queue_size = env::var("QUEUE_SIZE")
+        .unwrap_or("100".to_string())
+        .parse()?;
+    let in_between_iterations = Duration::from_millis(
+        env::var("IN_BETWEEN_ITERATIONS_TIME")
+            .unwrap_or("100".to_string())
+            .parse()?,
+    );
     let messages = vec![
         WsServerMessage::RequestUptimeReport,
         WsServerMessage::RequestBandwidthReport,
     ];
+
     loop {
         let settings = match fetch_latest_cron_settings(&pool, &server_user_id).await {
             Ok(settings) => settings,
@@ -25,10 +35,12 @@ pub async fn ws_base_msg_loop(
             }
         };
         let new_period = settings.period;
-
-        for i in broadcaster.sockets.iter() {
-            let id = i.key().clone();
-            broadcaster.broadcast_to_user(messages.clone(), id).await;
+        let iterations = broadcaster.sockets.len() / queue_size + 1;
+        for _ in 0..iterations {
+            broadcaster
+                .queue_multiple(messages.clone(), queue_size)
+                .await;
+            tokio::time::sleep(in_between_iterations).await;
         }
         tokio::time::sleep(new_period).await;
     }
