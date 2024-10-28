@@ -12,7 +12,7 @@ pub async fn create_special_task_cron(pool: &PgPool) -> anyhow::Result<()> {
         .parse()
         .unwrap_or(300);
     let url = env::var("SPECIAL_URL")?;
-    let uuid = Uuid::parse_str(env::var(BLOCKMESH_SERVER_UUID_ENVAR).unwrap().as_str()).unwrap();
+    let uuid = Uuid::parse_str(env::var(BLOCKMESH_SERVER_UUID_ENVAR)?.as_str())?;
 
     let mut transaction = create_txn(pool).await?;
     for _ in 0..limit {

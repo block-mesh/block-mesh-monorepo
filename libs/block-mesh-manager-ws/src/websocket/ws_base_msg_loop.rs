@@ -24,17 +24,13 @@ pub async fn ws_base_msg_loop(
         WsServerMessage::RequestUptimeReport,
         WsServerMessage::RequestBandwidthReport,
     ];
+    let base_msg_sleep = Duration::from_millis(
+        env::var("BASE_MSG_SLEEP")
+            .unwrap_or("300000".to_string())
+            .parse()?,
+    );
 
     loop {
-        let settings = match fetch_latest_cron_settings(&pool, &server_user_id).await {
-            Ok(settings) => settings,
-            Err(e) => {
-                tracing::error!("fetch_latest_cron_settings error {}", e);
-                tokio::time::sleep(Duration::from_millis(30_000)).await;
-                continue;
-            }
-        };
-        let new_period = settings.period;
         let iterations = broadcaster.sockets.len() / queue_size + 1;
         for _ in 0..iterations {
             broadcaster
@@ -42,6 +38,6 @@ pub async fn ws_base_msg_loop(
                 .await;
             tokio::time::sleep(in_between_iterations).await;
         }
-        tokio::time::sleep(new_period).await;
+        tokio::time::sleep(base_msg_sleep).await;
     }
 }
