@@ -3,6 +3,7 @@ use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use std::env;
 use std::time::Duration;
 
+#[tracing::instrument(name = "ws_keep_alive", skip_all)]
 pub async fn ws_keep_alive(broadcaster: Broadcaster) -> Result<(), anyhow::Error> {
     let sleep = env::var("WS_KEEP_ALIVE")
         .ok()

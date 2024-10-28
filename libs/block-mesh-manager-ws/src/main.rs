@@ -4,6 +4,7 @@ use block_mesh_common::env::load_dotenv::load_dotenv;
 use block_mesh_manager_ws::app::app;
 use block_mesh_manager_ws::state::AppState;
 use block_mesh_manager_ws::websocket::settings_loop::settings_loop;
+use block_mesh_manager_ws::websocket::ws_base_msg_loop::ws_base_msg_loop;
 use block_mesh_manager_ws::websocket::ws_keep_alive::ws_keep_alive;
 use block_mesh_manager_ws::websocket::ws_task_loop::ws_task_loop;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
@@ -72,9 +73,13 @@ async fn run() -> anyhow::Result<()> {
     let b = broadcaster.clone();
     let s = state.clone();
     let cron_task = tokio::spawn(ws_task_loop(p, server_user_id, b, s));
-    let ping_task = tokio::spawn(ws_keep_alive(broadcaster));
+    let ping_task = tokio::spawn(ws_keep_alive(broadcaster.clone()));
+    let p = state.pool.clone();
+    let b = broadcaster.clone();
+    let base_msg_task = tokio::spawn(ws_base_msg_loop(p, server_user_id, b));
     let server_task = app(listener, state);
     tokio::select! {
+        o = base_msg_task => panic!("base_msg_task {:?}", o),
         o = ping_task => panic!("ping_task {:?}", o),
         o = server_task => panic!("server_task {:?}", o),
         o = settings_task => panic!("settings_task {:?}", o),
