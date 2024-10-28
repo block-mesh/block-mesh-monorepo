@@ -26,6 +26,7 @@ use crate::call_backs::send_to_rx::send_to_rx;
 use crate::cron_jobs::clean_old_tasks::clean_old_tasks;
 use crate::cron_jobs::finalize_daily_cron::finalize_daily_cron;
 use crate::cron_jobs::rpc_cron::rpc_worker_loop;
+use crate::cron_jobs::special_task_cron::special_worker_loop;
 use crate::db_aggregators::aggregates_aggregator::aggregates_aggregator;
 use crate::db_aggregators::analytics_aggregator::analytics_aggregator;
 use crate::db_aggregators::daily_stats_aggregator::daily_stats_aggregator;
@@ -135,6 +136,7 @@ async fn run() -> anyhow::Result<()> {
             .unwrap_or(300),
         5,
     ));
+    let db_special_task = tokio::spawn(special_worker_loop(db_pool.clone()));
 
     let router = get_router();
     let cors = CorsLayer::permissive();
@@ -148,6 +150,7 @@ async fn run() -> anyhow::Result<()> {
     let server_task = run_server(listener, app);
 
     tokio::select! {
+        o = db_special_task => panic!("db_special_task exit {:?}", o),
         o = delete_old_tasks_task => panic!("delete_old_tasks_task exit {:?}", o),
         o = joiner_task => panic!("joiner_task exit {:?}", o),
         o = server_task => panic!("server task exit {:?}", o),

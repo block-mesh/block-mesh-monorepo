@@ -4,7 +4,7 @@ use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
 #[tracing::instrument(name = "Create Task", level = "trace", skip(transaction), ret, err)]
-pub(crate) async fn create_task(
+pub async fn create_task(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
     url: &str,
