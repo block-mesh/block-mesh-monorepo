@@ -18,7 +18,7 @@ pub async fn create_special_task_cron(pool: &PgPool) -> anyhow::Result<()> {
     for _ in 0..limit {
         let _ = create_task(&mut transaction, &uuid, &url, "GET", None, None).await?;
     }
-    _ = commit_txn(transaction).await?;
+    commit_txn(transaction).await?;
     Ok(())
 }
 
