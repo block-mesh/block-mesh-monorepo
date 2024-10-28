@@ -47,6 +47,7 @@ features = [
 
 [features]
 http = ["dep:http-body-util", "dep:bytes", "dep:hyper"]
+clap = ["dep:clap"]
 cli = ["dep:clap", "dep:solana-sdk"]
 app-config = ["dep:clap", "dep:solana-sdk"]
 ip-data = ["dep:ipgeolocate", "dep:reqwest"]

@@ -9,7 +9,7 @@ version.workspace = true
 [dependencies]
 jni = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
-block-mesh-common = { path = "../block-mesh-common", features = ["http", "cli", "app-config", "feature-flag"] }
+block-mesh-common = { path = "../block-mesh-common", features = ["http", "clap", "feature-flag"] }
 tokio = { workspace = true, features = ["full"] }
 serde = { workspace = true, features = ['derive'] }
 serde_json = { workspace = true }
