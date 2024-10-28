@@ -1,7 +1,7 @@
 use std::process::ExitCode;
 
-use block_mesh_common::cli::{CliOptMod, CliOpts};
 use block_mesh_common::constants::DeviceType;
+use block_mesh_common::interfaces::cli::{CliOptMod, CliOpts};
 use block_mesh_common::interfaces::server_api::{DashboardRequest, LoginForm, RegisterForm};
 use blockmesh_cli::helpers::{dashboard, login_to_network, register};
 use blockmesh_cli::login_mode::login_mode;
