@@ -41,6 +41,8 @@ num-traits = { workspace = true }
 reqwest = { workspace = true, default-features = false, features = [
   "multipart",
   "json",
+  "cookies",
+  "rustls-tls"
 ] }
 validator = { workspace = true }
 sentry = { workspace = true, optional = true }

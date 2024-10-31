@@ -93,6 +93,8 @@ async fn run() -> anyhow::Result<()> {
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
+        .cookie_store(true)
+        .user_agent("curl/8.7.1")
         .build()
         .unwrap_or_default();
     tracing::info!("Starting to get feature flags");
