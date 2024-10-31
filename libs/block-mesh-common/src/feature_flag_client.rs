@@ -47,6 +47,7 @@ impl TryInto<f64> for FlagValue {
     }
 }
 
+#[tracing::instrument(name = "get_all_flags", skip_all, ret, err)]
 pub async fn get_all_flags(client: &Client) -> anyhow::Result<HashMap<String, FlagValue>> {
     let mut flags: HashMap<String, FlagValue> = HashMap::new();
     for flag in FLAGS {

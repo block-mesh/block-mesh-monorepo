@@ -37,6 +37,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 }}
 
 #[cfg(feature = "ssr")]
+#[tracing::instrument(name = "main", skip_all)]
 fn main() {
     let sentry_layer = env::var("SENTRY_LAYER")
         .unwrap_or("false".to_string())
@@ -70,6 +71,7 @@ fn main() {
 }
 
 #[cfg(feature = "ssr")]
+#[tracing::instrument(name = "run", skip_all, ret, err)]
 async fn run() -> anyhow::Result<()> {
     load_dotenv();
     // setup_tracing_stdout_only();
@@ -83,23 +85,30 @@ async fn run() -> anyhow::Result<()> {
     let _mailgun_token = <EnvVar as AsRef<Secret<String>>>::as_ref(&mailgun_token);
     let db_pool = get_connection_pool(&configuration.database, Option::from(database_url)).await?;
     let env = get_envar("APP_ENVIRONMENT").await;
+    tracing::info!("Database migration started");
     migrate(&db_pool, env)
         .await
         .expect("Failed to migrate database");
+    tracing::info!("Database migration complete");
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
     let client = ClientBuilder::new()
         .timeout(Duration::from_secs(3))
         .build()
         .unwrap_or_default();
+    tracing::info!("Starting to get feature flags");
     let flags = get_all_flags(&client).await?;
+    tracing::info!("Finished getting feature flags");
     let redis_url = env::var("REDIS_URL")?;
     let redis_url = if redis_url.ends_with("#insecure") {
         redis_url
     } else {
         format!("{}#insecure", redis_url)
     };
+    tracing::info!("Starting redis client");
     let redis_client = redis::Client::open(redis_url)?;
+    tracing::info!("Found redis client URL");
     let redis = redis_client.get_multiplexed_async_connection().await?;
+    tracing::info!("Finished redis client");
 
     let _ = create_test_user(&db_pool).await;
 
@@ -115,7 +124,7 @@ async fn run() -> anyhow::Result<()> {
         flags,
         redis,
     });
-
+    tracing::info!("Starting application server");
     let application = Application::build(configuration, app_state.clone(), db_pool.clone()).await;
     let application_task = tokio::spawn(application.run());
 
