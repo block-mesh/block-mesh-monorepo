@@ -76,7 +76,7 @@ async fn run() -> anyhow::Result<()> {
     let ping_task = tokio::spawn(ws_keep_alive(broadcaster.clone()));
     let p = state.pool.clone();
     let b = broadcaster.clone();
-    let base_msg_task = tokio::spawn(ws_base_msg_loop(p, server_user_id, b));
+    let base_msg_task = tokio::spawn(ws_base_msg_loop(b));
     let server_task = app(listener, state);
     tokio::select! {
         o = base_msg_task => panic!("base_msg_task {:?}", o),
