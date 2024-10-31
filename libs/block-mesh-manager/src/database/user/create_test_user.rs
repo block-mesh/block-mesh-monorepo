@@ -11,6 +11,7 @@ use sqlx::PgPool;
 use std::env;
 use uuid::Uuid;
 
+#[tracing::instrument(name = "create_test_user", skip_all, ret, err)]
 pub async fn create_test_user(pool: &PgPool) -> anyhow::Result<()> {
     let app_environment = env::var("APP_ENVIRONMENT").unwrap_or("local".to_string());
     if app_environment != "local" {

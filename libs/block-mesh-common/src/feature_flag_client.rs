@@ -47,10 +47,13 @@ impl TryInto<f64> for FlagValue {
     }
 }
 
+#[tracing::instrument(name = "get_all_flags", skip_all, ret, err)]
 pub async fn get_all_flags(client: &Client) -> anyhow::Result<HashMap<String, FlagValue>> {
     let mut flags: HashMap<String, FlagValue> = HashMap::new();
     for flag in FLAGS {
+        tracing::info!("Fetching flag {:?}", flag);
         let value = get_flag_value(flag, client).await?.unwrap();
+        tracing::info!("Fetching flag {:?} from http , value = {:?}", flag, value);
         if value.is_boolean() {
             flags.insert(
                 flag.to_string(),
@@ -61,10 +64,12 @@ pub async fn get_all_flags(client: &Client) -> anyhow::Result<HashMap<String, Fl
         } else if value.is_number() {
             flags.insert(flag.to_string(), FlagValue::Number(value.as_f64().unwrap()));
         }
+        tracing::info!("Finished fetching flag {:?} , value = {:?}", flag, value);
     }
     Ok(flags)
 }
 
+#[tracing::instrument(name = "get_flag_value", skip_all, ret, err)]
 pub async fn get_flag_value(flag: &str, client: &Client) -> anyhow::Result<Option<Value>> {
     let url = format!("{}/read-flag/{}", BLOCK_MESH_FEATURE_FLAGS, flag);
     let response: Value = client.get(&url).send().await?.json().await?;

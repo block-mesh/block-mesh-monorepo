@@ -8,6 +8,7 @@ use std::time::Duration;
 use std::{env, thread, time};
 use tracing::log;
 
+#[tracing::instrument(name = "get_connection_pool", skip_all, ret, err)]
 pub async fn get_connection_pool(
     settings: &DatabaseSettings,
     database_url: Option<&Secret<String>>,

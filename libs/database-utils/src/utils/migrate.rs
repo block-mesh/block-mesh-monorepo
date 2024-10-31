@@ -8,6 +8,7 @@ struct Migrate {
     pub retry_delay: u64,
 }
 
+#[tracing::instrument(name = "migrate", skip_all, ret, err)]
 pub async fn migrate(db_pool: &PgPool, env: String) -> anyhow::Result<()> {
     let opt = Migrate {
         retry: 3,

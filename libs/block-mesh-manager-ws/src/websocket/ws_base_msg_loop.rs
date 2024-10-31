@@ -1,17 +1,10 @@
 use crate::websocket::manager::broadcaster::Broadcaster;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
-use block_mesh_manager_database_domain::domain::fetch_latest_cron_settings::fetch_latest_cron_settings;
-use sqlx::PgPool;
 use std::env;
 use std::time::Duration;
-use uuid::Uuid;
 
 #[tracing::instrument(name = "ws_base_msg_loop", skip_all)]
-pub async fn ws_base_msg_loop(
-    pool: PgPool,
-    server_user_id: Uuid,
-    broadcaster: Broadcaster,
-) -> anyhow::Result<()> {
+pub async fn ws_base_msg_loop(broadcaster: Broadcaster) -> anyhow::Result<()> {
     let queue_size = env::var("QUEUE_SIZE")
         .unwrap_or("100".to_string())
         .parse()?;
