@@ -74,7 +74,6 @@ async fn run() -> anyhow::Result<()> {
     let s = state.clone();
     let cron_task = tokio::spawn(ws_task_loop(p, server_user_id, b, s));
     let ping_task = tokio::spawn(ws_keep_alive(broadcaster.clone()));
-    let p = state.pool.clone();
     let b = broadcaster.clone();
     let base_msg_task = tokio::spawn(ws_base_msg_loop(b));
     let server_task = app(listener, state);
