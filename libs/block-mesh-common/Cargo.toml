@@ -31,7 +31,8 @@ anyhow = { workspace = true }
 once_cell = { workspace = true }
 reqwest = { workspace = true, optional = true, default-features = false, features = [
   "json",
-  "rustls-tls"
+  "rustls-tls",
+  "cookies"
 ] }
 ipgeolocate = { workspace = true, optional = true }
 
@@ -56,3 +57,4 @@ env = ["dep:dotenv"]
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["full"] }
+tracing-test = { workspace = true }

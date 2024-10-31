@@ -39,7 +39,7 @@ dead_code = "forbid"
 
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.316"
+version = "0.0.317"
 
 [patch.crates-io]
 ## aes-gcm-siv 0.10.3 and curve25519-dalek 3.x pin zeroize to <1.4
@@ -58,6 +58,7 @@ aes-gcm-siv = { git = 'https://github.com/block-mesh/AEADs', branch = 'rustls-de
 curve25519-dalek = { git = "https://github.com/block-mesh/curve25519-dalek", branch = "rustls-dep-hell-1-18" }
 
 [workspace.dependencies]
+tracing-test = { version = "0.2.5" }
 actix-files = { version = "0.6" }
 actix-web = { version = "4", features = ["macros"] }
 leptos_actix = { version = "0.6" }
@@ -185,7 +186,7 @@ serde = { version = "1.0.164", features = ["derive"] }
 anyhow = { version = "1.0.71" }
 thiserror = { version = "1.0.40" }
 dotenv = { version = "0.15.0" }
-reqwest = { version = "0.12.5", default-features = false }
+reqwest = { version = "0.12.5", default-features = false, features = ["cookies"] }
 bytes = { version = "1.5.0" }
 argon2 = { version = "0.5.0", features = ["std"] }
 validator = { version = "0.16" }

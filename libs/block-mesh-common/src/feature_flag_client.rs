@@ -81,14 +81,22 @@ mod tests {
     use super::*;
     use reqwest::ClientBuilder;
     use std::time::Duration;
+    use tracing_test::traced_test;
     use uuid::Uuid;
 
-    #[tokio::test]
-    async fn test_test_boolean_false() {
-        let client = ClientBuilder::new()
+    pub fn get_client() -> Client {
+        ClientBuilder::new()
             .timeout(Duration::from_secs(3))
+            .cookie_store(true)
+            .user_agent("curl/8.7.1")
             .build()
-            .unwrap_or_default();
+            .unwrap_or_default()
+    }
+
+    #[tokio::test]
+    #[traced_test]
+    async fn test_test_boolean_false() {
+        let client = get_client();
         let value = get_flag_value("test_boolean_false", &client).await;
         assert!(value.is_ok());
         let value = value.unwrap();
@@ -98,11 +106,9 @@ mod tests {
     }
 
     #[tokio::test]
+    #[traced_test]
     async fn test_test_boolean_true() {
-        let client = ClientBuilder::new()
-            .timeout(Duration::from_secs(3))
-            .build()
-            .unwrap_or_default();
+        let client = get_client();
         let value = get_flag_value("test_boolean_true", &client).await;
         assert!(value.is_ok());
         let value = value.unwrap();
@@ -112,22 +118,18 @@ mod tests {
     }
 
     #[tokio::test]
+    #[traced_test]
     async fn test_missing_value() {
-        let client = ClientBuilder::new()
-            .timeout(Duration::from_secs(3))
-            .build()
-            .unwrap_or_default();
+        let client = get_client();
         let uuid = Uuid::new_v4();
         let value = get_flag_value(&uuid.to_string(), &client).await;
         assert!(value.is_err());
     }
 
     #[tokio::test]
+    #[traced_test]
     async fn test_polling_value() {
-        let client = ClientBuilder::new()
-            .timeout(Duration::from_secs(3))
-            .build()
-            .unwrap_or_default();
+        let client = get_client();
         let value = get_flag_value("polling_interval", &client).await;
         assert!(value.is_ok());
         let value = value.unwrap();
@@ -138,11 +140,9 @@ mod tests {
     }
 
     #[tokio::test]
+    #[traced_test]
     async fn test_all_values() {
-        let client = ClientBuilder::new()
-            .timeout(Duration::from_secs(3))
-            .build()
-            .unwrap_or_default();
+        let client = get_client();
         let _values = get_all_flags(&client).await.unwrap();
     }
 }
