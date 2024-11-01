@@ -5,11 +5,11 @@ name: Release CLI multi platform
 permissions:
   contents: "write"
 on:
-  workflow_dispatch:
-#  workflow_run:
-#    workflows: ["Create CLI release both platforms"]
-#    types:
-#      - "completed"
+  #  workflow_dispatch:
+  workflow_run:
+    workflows: ["Create CLI release both platforms"]
+    types:
+      - "completed"
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -54,7 +54,7 @@ jobs:
           echo PKG_VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g') >> $GITHUB_OUTPUT
   upload-assets:
     name: "Upload assets to Github releases"
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs:
       - "get-tag"
     strategy:
@@ -102,7 +102,7 @@ jobs:
             blockmesh-cli-${{ matrix.target }}.tar.gz
   push-to-registry:
     name: "Push Docker image to Docker Hub"
-    #if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs:
       - "get-tag"
       - "upload-assets"
@@ -124,12 +124,7 @@ jobs:
         uses: "docker/metadata-action@v5"
         with:
           images: "blockmesh/blockmesh-cli"
-      - name: Login to Docker Hub
-        uses: docker/login-action@v3
-        with:
-          username: ${{ vars.DOCKERHUB_USERNAME }}
-          password: ${{ secrets.DOCKERHUB_TOKEN }}
-      - name: "Build and push Docker image"
+      - name: "Build and push Docker image, multi platform"
         uses: docker/build-push-action@v6
         with:
           platforms: linux/amd64,linux/arm64
@@ -137,4 +132,22 @@ jobs:
           context: .
           file: docker/blockmesh-cli.Dockerfile
           labels: ${{ steps.meta.outputs.labels }}
-          tags: blockmesh/blockmesh-test-cli:latest,blockmesh/blockmesh-test-cli:v${{ needs.get-tag.outputs.pkg-version }}
+          tags: blockmesh/blockmesh-cli:latest,blockmesh/blockmesh-cli:v${{ needs.get-tag.outputs.pkg-version }}
+      - name: "Build and push Docker image, amd64"
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64
+          push: true
+          context: .
+          file: docker/blockmesh-cli.Dockerfile
+          labels: ${{ steps.meta.outputs.labels }}
+          tags: blockmesh/blockmesh-cli:latest-amd64,blockmesh/blockmesh-cli-amd64:v${{ needs.get-tag.outputs.pkg-version }}
+      - name: "Build and push Docker image, arm64"
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/arm64
+          push: true
+          context: .
+          file: docker/blockmesh-cli.Dockerfile
+          labels: ${{ steps.meta.outputs.labels }}
+          tags: blockmesh/blockmesh-cli:latest-arm64,blockmesh/blockmesh-cli-arm64:v${{ needs.get-tag.outputs.pkg-version }}

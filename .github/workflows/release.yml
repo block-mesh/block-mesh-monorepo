@@ -86,10 +86,6 @@ jobs:
         run: |
           cargo leptos build --project block-mesh-manager --release
           tar acf block-mesh-manager-${{ matrix.target }}.tar.gz target/release/block-mesh-manager target/release/hash.txt target/site
-      - name: "Build CLI"
-        run: |
-          cargo build -p blockmesh-cli --release
-          tar acf blockmesh-cli-${{ matrix.target }}.tar.gz target/release/blockmesh-cli
       - name: "Build Worker"
         run: |
           cargo build -p block-mesh-manager-worker --release
@@ -114,7 +110,6 @@ jobs:
           files: |
             block-mesh-manager-${{ matrix.target }}.tar.gz
             block-mesh-manager-worker-${{ matrix.target }}.tar.gz
-            blockmesh-cli-${{ matrix.target }}.tar.gz
             feature-flags-server-${{ matrix.target }}.tar.gz
             block-mesh-manager-api-${{ matrix.target }}.tar.gz
             block-mesh-manager-ws-${{ matrix.target }}.tar.gz
