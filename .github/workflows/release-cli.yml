@@ -3,7 +3,7 @@ permissions:
   contents: "write"
 on:
   workflow_run:
-    workflows: ["Create CLI release both platforms"]
+    workflows: ["Create Release"]
     types:
       - "completed"
 concurrency:
