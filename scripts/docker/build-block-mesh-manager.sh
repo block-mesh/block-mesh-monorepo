@@ -1,6 +1,6 @@
 #!/bin/bash
 docker pull blockmesh/block-mesh-manager:latest-amd64
-#docker buildx build --platform linux/amd64 -t bmesh -f block-mesh-manager.Dockerfile --load .
+#docker buildx build --platform linux/amd64 -t bmesh -f docker/block-mesh-manager.Dockerfile --load .
 docker run \
 -it \
 --platform linux/amd64 \
