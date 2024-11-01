@@ -50,7 +50,7 @@ jobs:
           echo PKG_VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g') >> $GITHUB_OUTPUT
   upload-assets:
     name: "Upload assets to Github releases"
-    #    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs:
       - "get-tag"
     strategy:
