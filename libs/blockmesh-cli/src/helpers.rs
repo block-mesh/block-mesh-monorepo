@@ -25,6 +25,8 @@ use uuid::Uuid;
 pub fn http_client() -> Client {
     ClientBuilder::new()
         .timeout(Duration::from_secs(3))
+        .cookie_store(true)
+        .user_agent("curl/8.7.1")
         .no_hickory_dns()
         .use_rustls_tls()
         .build()
@@ -332,18 +334,23 @@ pub async fn submit_bandwidth(
 
 #[allow(dead_code)]
 pub async fn get_polling_interval() -> f64 {
-    match get_flag_value("polling_interval", &http_client())
+    let output = match get_flag_value("polling_interval", &http_client())
         .await
-        .unwrap_or(Some(Value::from(30.0)))
+        .unwrap_or(Some(Value::from(120_000.0)))
     {
         Some(polling_interval) => {
             if polling_interval.is_number() {
                 polling_interval.as_f64().unwrap() / 1000.0
             } else {
-                30.0
+                120.0
             }
         }
-        None => 30.0,
+        None => 120.0,
+    };
+    if output < 1.0 {
+        30.0
+    } else {
+        output
     }
 }
 

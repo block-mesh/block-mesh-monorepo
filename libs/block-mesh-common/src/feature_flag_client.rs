@@ -1,8 +1,10 @@
 use crate::constants::BLOCK_MESH_FEATURE_FLAGS;
 use reqwest::Client;
+use reqwest::ClientBuilder;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::collections::HashMap;
+use std::time::Duration;
 
 const FLAGS: [&str; 11] = [
     "enrich_ip_and_cleanup_in_background",
@@ -76,22 +78,22 @@ pub async fn get_flag_value(flag: &str, client: &Client) -> anyhow::Result<Optio
     Ok(Some(response))
 }
 
+pub fn get_client() -> Client {
+    ClientBuilder::new()
+        .timeout(Duration::from_secs(3))
+        .cookie_store(true)
+        .user_agent("curl/8.7.1")
+        .no_hickory_dns()
+        .use_rustls_tls()
+        .build()
+        .unwrap_or_default()
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
-    use reqwest::ClientBuilder;
-    use std::time::Duration;
     use tracing_test::traced_test;
     use uuid::Uuid;
-
-    pub fn get_client() -> Client {
-        ClientBuilder::new()
-            .timeout(Duration::from_secs(3))
-            .cookie_store(true)
-            .user_agent("curl/8.7.1")
-            .build()
-            .unwrap_or_default()
-    }
 
     #[tokio::test]
     #[traced_test]
