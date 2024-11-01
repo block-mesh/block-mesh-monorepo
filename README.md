@@ -4,6 +4,11 @@
     <img width="33%" src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/e4f3cdc0-c2ba-442d-3e48-e2f31c0dc100/public"> 
 </p>
 
+[![Tag](https://github.com/block-mesh/block-mesh-monorepo/actions/workflows/tag.yml/badge.svg)](https://github.com/block-mesh/block-mesh-monorepo/actions/workflows/tag.yml)
+[![Release](https://github.com/block-mesh/block-mesh-monorepo/actions/workflows/release.yml/badge.svg)](https://github.com/block-mesh/block-mesh-monorepo/actions/workflows/release.yml)
+[![Release CLI multi platform](https://github.com/block-mesh/block-mesh-monorepo/actions/workflows/release-cli.yml/badge.svg)](https://github.com/block-mesh/block-mesh-monorepo/actions/workflows/release-cli.yml)
+
+
 ## Links
 
 * [BlockMesh GitBoook](https://gitbook.blockmesh.xyz/)
