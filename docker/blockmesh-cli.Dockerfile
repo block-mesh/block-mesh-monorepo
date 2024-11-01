@@ -1,4 +1,4 @@
-FROM blockmesh/blockmesh-ubuntu-base:latest-arm64
+FROM --platform=$BUILDPLATFORM blockmesh/blockmesh-ubuntu-base:latest AS build
 ARG DEBIAN_FRONTEND=noninteractive
 ARG LEPTOS_HASH_FILES=true
 ARG LEPTOS_HASH_FILE_NAME=hash.txt
