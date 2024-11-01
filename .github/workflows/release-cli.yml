@@ -1,0 +1,141 @@
+# https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/
+# https://docs.docker.com/build/ci/github-actions/multi-platform/
+
+name: Release CLI multi platform
+permissions:
+  contents: "write"
+on:
+  workflow_dispatch:
+#  workflow_run:
+#    workflows: ["Create CLI release both platforms"]
+#    types:
+#      - "completed"
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+env:
+  BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
+  LEPTOS_OUTPUT_NAME: block-mesh-manager
+  LEPTOS_SITE_ROOT: target/site
+  LEPTOS_SITE_PKG_DIR: pkg
+  LEPTOS_SITE_ADDR: 127.0.0.1:8000
+  LEPTOS_RELOAD_PORT: 3001
+  LEPTOS_LIB_DIR: libs/block-mesh-manager
+  LEPTOS_BIN_DIR: libs/block-mesh-manager
+  LEPTOS_HASH_FILES: true
+  APP_ENVIRONMENT: production
+  SENTRY: ${{ secrets.SENTRY }}
+  MAPBOX: ${{ secrets.MAPBOX }}
+#  SCCACHE_GHA_ENABLED: "true"
+#  RUSTC_WRAPPER: "sccache"
+jobs:
+  get-tag:
+    name: "Get Tag From Package Version"
+    runs-on: "ubuntu-latest"
+    outputs:
+      pkg-version: ${{ steps.pkg-version.outputs.PKG_VERSION }}
+    steps:
+      - name: "Check out the repo"
+        uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          targets: wasm32-unknown-unknown, aarch64-unknown-linux-gnu
+      - uses: Swatinem/rust-cache@v2
+        with:
+          key: release-tag-cli-both-tags
+          cache-all-crates: true
+      #      - name: Sccache Action
+      #        uses: Mozilla-Actions/sccache-action@v0.0.5
+      - name: "Get tag"
+        id: "pkg-version"
+        shell: "bash"
+        run: |
+          echo PKG_VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g') >> $GITHUB_OUTPUT
+  upload-assets:
+    name: "Upload assets to Github releases"
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs:
+      - "get-tag"
+    strategy:
+      matrix:
+        include:
+          - target: "aarch64-unknown-linux-gnu"
+            os: "ubuntu-latest"
+          - target: "x86_64-unknown-linux-gnu"
+            os: "ubuntu-latest"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: "Check out the repo"
+        uses: actions/checkout@v4
+      - name: "Install deps"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y file build-essential pkg-config openssl libssl-dev musl-tools gcc-aarch64-linux-gnu g++-aarch64-linux-gnu
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          targets: wasm32-unknown-unknown, aarch64-unknown-linux-gnu
+      - name: "Cache"
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: release-upload-${{ matrix.target }}-cli-both-tags
+          cache-all-crates: true
+      #      - name: Sccache Action
+      #        uses: Mozilla-Actions/sccache-action@v0.0.5
+      - name: Setup Zig
+        uses: goto-bus-stop/setup-zig@v2.2.0
+      - name: Install zigbuild
+        run: |
+          cargo install cross
+          cargo install --version=0.19.3 cargo-zigbuild
+      - name: "Build CLI"
+        run: |
+          echo cargo zigbuild -p blockmesh-cli --release --target ${{ matrix.target }}
+          cross build -p blockmesh-cli --release --target ${{ matrix.target }}
+          tar acf blockmesh-cli-${{ matrix.target }}.tar.gz target/${{ matrix.target }}/release/blockmesh-cli
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        #if: startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: v${{ needs.get-tag.outputs.pkg-version }}
+          files: |
+            blockmesh-cli-${{ matrix.target }}.tar.gz
+  push-to-registry:
+    name: "Push Docker image to Docker Hub"
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs:
+      - "get-tag"
+      - "upload-assets"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: "Check out the repo"
+        uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: "Log in to Docker Hub"
+        uses: "docker/login-action@v3"
+        with:
+          username: ${{ secrets.DOCKER_USERNAME }}
+          password: ${{ secrets.DOCKER_TOKEN }}
+      - name: "Extract metadata (tags, labels) for Docker"
+        id: "meta"
+        uses: "docker/metadata-action@v5"
+        with:
+          images: "blockmesh/blockmesh-cli"
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ vars.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: "Build and push Docker image"
+        uses: docker/build-push-action@v6
+        with:
+          platforms: linux/amd64,linux/arm64
+          push: true
+          context: .
+          file: docker/blockmesh-cli.Dockerfile
+          labels: ${{ steps.meta.outputs.labels }}
+          tags: blockmesh/blockmesh-test-cli:latest,blockmesh/blockmesh-test-cli:v${{ needs.get-tag.outputs.pkg-version }}
