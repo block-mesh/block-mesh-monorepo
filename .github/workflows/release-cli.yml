@@ -1,11 +1,7 @@
-# https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/
-# https://docs.docker.com/build/ci/github-actions/multi-platform/
-
 name: Release CLI multi platform
 permissions:
   contents: "write"
 on:
-  #  workflow_dispatch:
   workflow_run:
     workflows: ["Create CLI release both platforms"]
     types:
@@ -151,3 +147,6 @@ jobs:
           file: docker/blockmesh-cli.Dockerfile
           labels: ${{ steps.meta.outputs.labels }}
           tags: blockmesh/blockmesh-cli:latest-arm64,blockmesh/blockmesh-cli-arm64:v${{ needs.get-tag.outputs.pkg-version }}
+
+# https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/
+# https://docs.docker.com/build/ci/github-actions/multi-platform/
