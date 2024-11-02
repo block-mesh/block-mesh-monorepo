@@ -155,7 +155,7 @@ jobs:
           platforms: linux/amd64
           file: docker/block-mesh-manager.Dockerfile
           push: true
-          tags: blockmesh/block-mesh-manager:latest-amd64,blockmesh/block-mesh-manager:v${{ needs.get-tag.outputs.pkg-version }}
+          tags: blockmesh/block-mesh-manager:latest,blockmesh/block-mesh-manager:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: "Build and push Docker image for worker"
         uses: "docker/build-push-action@v5"
@@ -163,7 +163,7 @@ jobs:
           context: .
           file: docker/block-mesh-manager-worker.Dockerfile
           push: true
-          tags: blockmesh/block-mesh-manager-worker:latest-amd64,blockmesh/block-mesh-manager-worker:v${{ needs.get-tag.outputs.pkg-version }}
+          tags: blockmesh/block-mesh-manager-worker:latest,blockmesh/block-mesh-manager-worker:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: "Build and push Docker image for feature flags server"
         uses: "docker/build-push-action@v5"
@@ -172,7 +172,7 @@ jobs:
           platforms: linux/amd64
           file: docker/feature-flags-server.Dockerfile
           push: true
-          tags: blockmesh/feature-flags-server:latest-amd64,blockmesh/feature-flags-server:v${{ needs.get-tag.outputs.pkg-version }}
+          tags: blockmesh/feature-flags-server:latest,blockmesh/feature-flags-server:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: "Build and push Docker image for feature flags server"
         uses: "docker/build-push-action@v5"
@@ -181,7 +181,7 @@ jobs:
           platforms: linux/amd64
           file: docker/block-mesh-manager-api.Dockerfile
           push: true
-          tags: blockmesh/block-mesh-manager-api:latest-amd64,blockmesh/block-mesh-manager-api:v${{ needs.get-tag.outputs.pkg-version }}
+          tags: blockmesh/block-mesh-manager-api:latest,blockmesh/block-mesh-manager-api:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: "Build and push Docker WS"
         uses: "docker/build-push-action@v5"
@@ -190,6 +190,6 @@ jobs:
           platforms: linux/amd64
           file: docker/block-mesh-manager-ws.Dockerfile
           push: true
-          tags: blockmesh/block-mesh-manager-ws:latest-amd64,blockmesh/block-mesh-manager-ws:v${{ needs.get-tag.outputs.pkg-version }}
+          tags: blockmesh/block-mesh-manager-ws:latest,blockmesh/block-mesh-manager-ws:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
 # https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/
