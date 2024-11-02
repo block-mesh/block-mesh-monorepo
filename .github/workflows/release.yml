@@ -123,6 +123,10 @@ jobs:
     steps:
       - name: "Check out the repo"
         uses: actions/checkout@v4
+      - name: Set up QEMU
+        uses: docker/setup-qemu-action@v3
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
@@ -148,6 +152,7 @@ jobs:
         uses: "docker/build-push-action@v5"
         with:
           context: .
+          platforms: linux/amd64
           file: docker/block-mesh-manager.Dockerfile
           push: true
           tags: blockmesh/block-mesh-manager:latest-amd64,blockmesh/block-mesh-manager:v${{ needs.get-tag.outputs.pkg-version }}
@@ -164,6 +169,7 @@ jobs:
         uses: "docker/build-push-action@v5"
         with:
           context: .
+          platforms: linux/amd64
           file: docker/feature-flags-server.Dockerfile
           push: true
           tags: blockmesh/feature-flags-server:latest-amd64,blockmesh/feature-flags-server:v${{ needs.get-tag.outputs.pkg-version }}
@@ -172,6 +178,7 @@ jobs:
         uses: "docker/build-push-action@v5"
         with:
           context: .
+          platforms: linux/amd64
           file: docker/block-mesh-manager-api.Dockerfile
           push: true
           tags: blockmesh/block-mesh-manager-api:latest-amd64,blockmesh/block-mesh-manager-api:v${{ needs.get-tag.outputs.pkg-version }}
@@ -180,6 +187,7 @@ jobs:
         uses: "docker/build-push-action@v5"
         with:
           context: .
+          platforms: linux/amd64
           file: docker/block-mesh-manager-ws.Dockerfile
           push: true
           tags: blockmesh/block-mesh-manager-ws:latest-amd64,blockmesh/block-mesh-manager-ws:v${{ needs.get-tag.outputs.pkg-version }}
