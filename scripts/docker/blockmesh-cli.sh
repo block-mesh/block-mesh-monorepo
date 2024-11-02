@@ -13,6 +13,8 @@ function run() {
   docker run \
   -e EMAIL=${EMAIL} -e PASSWORD=${PASSWORD} \
   --restart=unless-stopped blockmesh/blockmesh-cli:latest-arm64
+
+  docker run -e EMAIL=${EMAIL} -e PASSWORD=${PASSWORD} blockmesh/blockmesh-cli:latest
 }
 
 
