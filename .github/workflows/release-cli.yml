@@ -129,24 +129,24 @@ jobs:
           file: docker/blockmesh-cli.Dockerfile
           labels: ${{ steps.meta.outputs.labels }}
           tags: blockmesh/blockmesh-cli:latest,blockmesh/blockmesh-cli:v${{ needs.get-tag.outputs.pkg-version }}
-      - name: "Build and push Docker image, amd64"
-        uses: docker/build-push-action@v6
-        with:
-          platforms: linux/amd64
-          push: true
-          context: .
-          file: docker/blockmesh-cli.Dockerfile
-          labels: ${{ steps.meta.outputs.labels }}
-          tags: blockmesh/blockmesh-cli:latest-amd64,blockmesh/blockmesh-cli-amd64:v${{ needs.get-tag.outputs.pkg-version }}
-      - name: "Build and push Docker image, arm64"
-        uses: docker/build-push-action@v6
-        with:
-          platforms: linux/arm64
-          push: true
-          context: .
-          file: docker/blockmesh-cli.Dockerfile
-          labels: ${{ steps.meta.outputs.labels }}
-          tags: blockmesh/blockmesh-cli:latest-arm64,blockmesh/blockmesh-cli-arm64:v${{ needs.get-tag.outputs.pkg-version }}
+#      - name: "Build and push Docker image, amd64"
+#        uses: docker/build-push-action@v6
+#        with:
+#          platforms: linux/amd64
+#          push: true
+#          context: .
+#          file: docker/blockmesh-cli.Dockerfile
+#          labels: ${{ steps.meta.outputs.labels }}
+#          tags: blockmesh/blockmesh-cli:latest-amd64,blockmesh/blockmesh-cli-amd64:v${{ needs.get-tag.outputs.pkg-version }}
+#      - name: "Build and push Docker image, arm64"
+#        uses: docker/build-push-action@v6
+#        with:
+#          platforms: linux/arm64
+#          push: true
+#          context: .
+#          file: docker/blockmesh-cli.Dockerfile
+#          labels: ${{ steps.meta.outputs.labels }}
+#          tags: blockmesh/blockmesh-cli:latest-arm64,blockmesh/blockmesh-cli-arm64:v${{ needs.get-tag.outputs.pkg-version }}
 
 # https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/
 # https://docs.docker.com/build/ci/github-actions/multi-platform/
