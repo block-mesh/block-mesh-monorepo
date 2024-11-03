@@ -1,1 +1,1 @@
-#![allow(dead_code)]
+pub mod update_feature_flags;

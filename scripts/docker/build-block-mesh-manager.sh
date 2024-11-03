@@ -1,5 +1,5 @@
 #!/bin/bash
-docker pull blockmesh/block-mesh-manager:latest-amd64
+docker pull blockmesh/block-mesh-manager:latest
 #docker buildx build --platform linux/amd64 -t bmesh -f docker/block-mesh-manager.Dockerfile --load .
 docker run \
 -it \
@@ -11,3 +11,5 @@ docker run \
 -e MAILGUN_SEND_KEY="" \
 -t blockmesh/block-mesh-manager:latest-amd64 \
 /bin/bash
+
+docker run -it --entrypoint /bin/bash -t blockmesh/block-mesh-manager:latest
