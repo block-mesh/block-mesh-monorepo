@@ -64,7 +64,7 @@ pub async fn spawn_app() -> TestApp {
         .build()
         .unwrap_or_default();
 
-    let flags = get_all_flags(&client).await.unwrap();
+    let flags = Arc::new(get_all_flags(&client).await.unwrap());
     let redis_client = redis::Client::open(env::var("REDIS_URL").unwrap()).unwrap();
     let redis = redis_client
         .get_multiplexed_async_connection()
