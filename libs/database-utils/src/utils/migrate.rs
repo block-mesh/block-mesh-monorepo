@@ -1,5 +1,7 @@
-use sqlx::migrate::MigrateError;
+use sqlx::migrate::{MigrateError, Migrator};
 use sqlx::PgPool;
+use std::env;
+use std::path::Path;
 
 struct Migrate {
     /// It will retry this number of times before giving up
@@ -14,14 +16,22 @@ pub async fn migrate(db_pool: &PgPool, env: String) -> anyhow::Result<()> {
         retry: 3,
         retry_delay: 100,
     };
-    tracing::info!("Starting migrations");
+    let path = env::current_dir()?;
+    tracing::info!("Starting migrations from {}", path.to_string_lossy());
 
     for retry in 0..=opt.retry {
         if retry > 0 {
             tracing::info!("Retry number {} (waiting {}s)", retry, opt.retry_delay);
             std::thread::sleep(std::time::Duration::from_millis(opt.retry_delay));
         }
-        match sqlx::migrate!("./migrations").run(db_pool).await {
+        let migrator = Migrator::new(Path::new("./migrations")).await?;
+
+        for migration in migrator.iter() {
+            tracing::info!("migration found = {:?}", migration.description);
+        }
+
+        // match sqlx::migrate!("./migrations").run(db_pool).await {
+        match migrator.run(db_pool).await {
             Ok(_) => tracing::info!("Successfully migrated"),
             Err(e) => {
                 if env != "local" {
