@@ -5,6 +5,7 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use block_mesh_manager::worker::update_feature_flags::feature_flags_loop;
     use block_mesh_manager::utils::cache_envar::get_envar;
     use database_utils::utils::migrate::migrate;
     use std::process;
@@ -98,7 +99,7 @@ async fn run() -> anyhow::Result<()> {
         .build()
         .unwrap_or_default();
     tracing::info!("Starting to get feature flags");
-    let flags = get_all_flags(&client).await?;
+    let flags = Arc::new(get_all_flags(&client).await?);
     tracing::info!("Finished getting feature flags");
     let redis_url = env::var("REDIS_URL")?;
     let redis_url = if redis_url.ends_with("#insecure") {
@@ -122,16 +123,18 @@ async fn run() -> anyhow::Result<()> {
         get_token_map,
         email_client,
         pool: db_pool.clone(),
-        client,
-        flags,
+        client: client.clone(),
+        flags: flags.clone(),
         redis,
     });
     tracing::info!("Starting application server");
     let application = Application::build(configuration, app_state.clone(), db_pool.clone()).await;
     let application_task = tokio::spawn(application.run());
+    let feature_flags_update_task = tokio::spawn(feature_flags_loop(client, flags.clone()));
 
     tokio::select! {
         o = application_task => panic!("API {:?}", o),
+        o = feature_flags_update_task => panic!("feature_flags_update_task {:?}", o)
     }
 }
 

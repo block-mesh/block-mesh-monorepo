@@ -10,12 +10,12 @@ use axum::extract::Request;
 use axum::{Extension, Router};
 use axum_login::login_required;
 use block_mesh_common::feature_flag_client::FlagValue;
+use dashmap::DashMap;
 use leptos::leptos_config::get_config_from_env;
 use redis::aio::MultiplexedConnection;
 use reqwest::Client;
 use sentry_tower::NewSentryLayer;
 use sqlx::postgres::PgPool;
-use std::collections::HashMap;
 use std::env;
 use std::net::SocketAddr;
 use std::path::Path;
@@ -45,7 +45,7 @@ pub struct AppState {
     pub pool: PgPool,
     pub email_client: Arc<EmailClient>,
     pub client: Client,
-    pub flags: HashMap<String, FlagValue>,
+    pub flags: Arc<DashMap<String, FlagValue>>,
     pub redis: MultiplexedConnection,
 }
 

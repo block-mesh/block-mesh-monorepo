@@ -18,8 +18,9 @@ use crate::database::perks::get_user_perks::get_user_perks;
 use crate::database::users_ip::get_user_ips::get_user_ips;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
+use crate::utils::cache_envar::get_envar;
 use crate::utils::points::{calc_points_daily, calc_total_points};
-use block_mesh_common::feature_flag_client::FlagValue;
+use block_mesh_common::feature_flag_client::{get_flag_value_from_map, FlagValue};
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
@@ -60,10 +61,11 @@ pub async fn dashboard_data_extractor(
             .await
             .map_err(Error::from)?;
 
-    let interval = state
-        .flags
-        .get("polling_interval")
-        .unwrap_or(&FlagValue::Number(120_000.0));
+    let interval = get_flag_value_from_map(
+        &state.flags,
+        "polling_interval",
+        FlagValue::Number(120_000.0),
+    );
     let interval: f64 =
         <FlagValue as TryInto<f64>>::try_into(interval.to_owned()).unwrap_or_default();
 
@@ -71,10 +73,9 @@ pub async fn dashboard_data_extractor(
     let diff = now - uptime.updated_at.unwrap_or(now);
     let limit = 5;
     let user_ips = get_user_ips(&mut transaction, &user_id, limit).await?;
-
-    // let connected = diff.num_seconds() > 0;
-    let connected =
-        diff.num_seconds() < ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240);
+    let connected_buffer = get_envar("CONNECTED_BUFFER").await.parse().unwrap_or(10);
+    let connected = diff.num_seconds()
+        < connected_buffer * ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240);
     let calls_to_action = get_user_call_to_action(&mut transaction, user_id).await?;
     let perks = get_user_perks(&mut transaction, user_id).await?;
     let daily_stats = get_daily_stats_by_user_id(&mut transaction, &user_id)

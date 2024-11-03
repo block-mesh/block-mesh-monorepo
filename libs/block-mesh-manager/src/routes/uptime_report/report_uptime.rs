@@ -3,7 +3,7 @@ use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
 use axum::extract::{ConnectInfo, Query, Request, State};
 use axum::Json;
-use block_mesh_common::feature_flag_client::FlagValue;
+use block_mesh_common::feature_flag_client::{get_flag_value_from_map, FlagValue};
 use block_mesh_common::interfaces::server_api::{
     HandlerMode, ReportUptimeRequest, ReportUptimeResponse,
 };
@@ -24,10 +24,11 @@ pub async fn handler(
 ) -> Result<Json<ReportUptimeResponse>, Error> {
     let header_ip = headers.get("cf-connecting-ip");
     let ip = resolve_ip(&query.ip, &header_ip, addr.ip().to_string());
-    let polling_interval = state
-        .flags
-        .get("polling_interval")
-        .unwrap_or(&FlagValue::Number(120_000.0));
+    let polling_interval = get_flag_value_from_map(
+        &state.flags,
+        "polling_interval",
+        FlagValue::Number(120_000.0),
+    );
     let polling_interval: f64 =
         <FlagValue as TryInto<f64>>::try_into(polling_interval.to_owned()).unwrap_or_default();
     let interval_factor = get_envar("INTERVAL_FACTOR").await.parse().unwrap_or(10.0);
