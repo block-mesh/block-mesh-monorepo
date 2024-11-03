@@ -73,6 +73,8 @@ fn main() {
     tracing::error!("block mesh manager worker stopped, exiting with exit code 1");
     process::exit(1);
 }
+
+#[tracing::instrument(name = "run", skip_all, ret, err)]
 async fn run() -> anyhow::Result<()> {
     load_dotenv();
     setup_tracing_stdout_only_with_sentry();

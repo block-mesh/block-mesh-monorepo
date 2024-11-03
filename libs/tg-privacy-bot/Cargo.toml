@@ -28,7 +28,9 @@ tracing-subscriber = { workspace = true, features = ["env-filter"] }
 tracing-appender = { workspace = true }
 tracing-bunyan-formatter = { workspace = true }
 tracing-log = { workspace = true }
+tracing = { workspace = true }
 http = { workspace = true }
+url = { workspace = true }
 bcrypt = { workspace = true }
 sentry-tower = { workspace = true, features = ["axum", "http", "axum-matched-path"] }
 sentry = { workspace = true }
@@ -37,11 +39,10 @@ reqwest = { workspace = true, default-features = false, features = [
   "multipart",
   "json",
 ] }
-logger-general = { path = "../logger-general", optional = true, features = ["sentry"] }
+logger-general = { path = "../logger-general", features = ["sentry"] }
 http-body-util = { workspace = true }
 block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env"] }
 chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }
-
 
 [dependencies.rand]
 workspace = true

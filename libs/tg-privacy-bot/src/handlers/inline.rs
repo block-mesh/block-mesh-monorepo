@@ -3,8 +3,7 @@ use teloxide::Bot;
 
 use crate::HandlerResult;
 
-pub async fn inline_query_handler(_bot: Bot, q: InlineQuery) -> HandlerResult {
-    println!("\nReceived inline query: {:?}\n", q);
+pub async fn inline_query_handler(_bot: Bot, _q: InlineQuery) -> HandlerResult {
     // let choose_debian_version = InlineQueryResultArticle::new(
     //     "0",
     //     "Chose debian version",
