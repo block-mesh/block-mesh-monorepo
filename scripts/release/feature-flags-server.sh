@@ -3,7 +3,7 @@ set -x
 set -eo pipefail
 
 heroku container:login
-docker pull blockmesh/feature-flags-server:latest
+docker pull  --platform linux/amd64 blockmesh/feature-flags-server:latest
 docker tag blockmesh/feature-flags-server:latest registry.heroku.com/feature-flags-server/web
 docker push registry.heroku.com/feature-flags-server/web
 #heroku container:push web -a feature-flags-server
