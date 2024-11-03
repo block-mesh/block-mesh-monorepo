@@ -8,7 +8,7 @@ use anyhow::{anyhow, Context};
 use axum::extract::Query;
 use axum::response::Redirect;
 use axum::Extension;
-use block_mesh_common::constants::{BLOCKMESH_SERVER_UUID_ENVAR, BLOCKMESH_TWITTER_USER_ID};
+use block_mesh_common::constants::BLOCKMESH_TWITTER_USER_ID;
 use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;

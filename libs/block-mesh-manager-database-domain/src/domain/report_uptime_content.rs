@@ -115,7 +115,7 @@ pub async fn report_uptime_content(
     commit_txn(transaction).await?;
 
     let now = Utc::now();
-    let diff = now - uptime.updated_at.unwrap_or(now);
+    let diff = now - uptime.updated_at;
 
     let (extra, abs) = if (diff.num_seconds()
         < ((polling_interval * interval_factor) as i64)
