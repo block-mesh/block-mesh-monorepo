@@ -10261,10 +10261,12 @@ dependencies = [
  "tower",
  "tower-http",
  "tower-sessions-sqlx-store",
+ "tracing",
  "tracing-appender",
  "tracing-bunyan-formatter",
  "tracing-log 0.2.0",
  "tracing-subscriber",
+ "url",
  "uuid",
 ]
 
