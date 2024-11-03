@@ -70,7 +70,7 @@ pub async fn dashboard_data_extractor(
         <FlagValue as TryInto<f64>>::try_into(interval.to_owned()).unwrap_or_default();
 
     let now = Utc::now();
-    let diff = now - uptime.updated_at.unwrap_or(now);
+    let diff = now - uptime.updated_at;
     let limit = 5;
     let user_ips = get_user_ips(&mut transaction, &user_id, limit).await?;
     let connected_buffer = get_envar("CONNECTED_BUFFER").await.parse().unwrap_or(10);

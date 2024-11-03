@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT\n        INTO aggregates (id, created_at, user_id, name, value, updated_at)\n        VALUES ($1, $2, $3, $4, $5, $6)\n        ON CONFLICT (user_id, name) DO UPDATE SET dummy_updated_at = $6\n        RETURNING id, created_at, user_id, name, value, updated_at\n        ",
+  "query": "\nWITH extant AS (\n\tSELECT id,created_at,user_id,name,value,updated_at\n\tFROM aggregates\n\tWHERE (user_id, name) = ($3,$4)\n),\ninserted AS (\nINSERT INTO aggregates (id,\tcreated_at,\tuser_id, name, value, updated_at, dummy_updated_at)\nSELECT $1,$2,$3,$4,$5,$2,$2\nWHERE\n\tNOT EXISTS (SELECT\tFROM extant)\n\tRETURNING id, created_at,user_id, name, value, updated_at\n)\nSELECT id,created_at,user_id,name,value,updated_at\nFROM inserted\nUNION ALL\nSELECT id,created_at,user_id,name,value,updated_at\nFROM extant;\n",
   "describe": {
     "columns": [
       {
@@ -40,18 +40,17 @@
         "Timestamptz",
         "Uuid",
         "Text",
-        "Jsonb",
-        "Timestamptz"
+        "Jsonb"
       ]
     },
     "nullable": [
-      false,
-      false,
-      false,
-      false,
-      false,
-      false
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
     ]
   },
-  "hash": "70a24262294d3aaa239a90e4368999808a8b2d004ccbfaa7cbfbc13f6b89dc65"
+  "hash": "067795fcbc5f0c1251cb3e1f0fb3924cfe10807966a8d962ead7432b1ed1b218"
 }
