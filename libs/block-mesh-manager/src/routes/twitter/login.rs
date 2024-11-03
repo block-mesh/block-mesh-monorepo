@@ -5,15 +5,13 @@ use crate::routes::twitter::context::{Oauth2Ctx, Oauth2CtxPg};
 use axum::response::Redirect;
 use axum::Extension;
 use axum_login::AuthSession;
-use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use sqlx::PgPool;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use twitter_v2::authorization::Scope;
-use twitter_v2::oauth2::PkceCodeChallenge;
-use uuid::Uuid;
+use twitter_v2::oauth2::{CsrfToken, PkceCodeChallenge};
 
 pub async fn login(
     Extension(pool): Extension<PgPool>,
@@ -35,14 +33,18 @@ pub async fn login(
         ],
     );
 
-    let id = Uuid::parse_str(std::env::var(BLOCKMESH_SERVER_UUID_ENVAR).unwrap().as_str()).unwrap();
+    let new_state = CsrfToken::new(format!("{}___{}", state.secret(), user.id));
+    let url = url.to_string().replace(state.secret(), new_state.secret());
     let mut transaction = pool.begin().await?;
-    let twitter_agg =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Twitter, &id)
-            .await?;
+    let twitter_agg = get_or_create_aggregate_by_user_and_name(
+        &mut transaction,
+        AggregateName::Twitter,
+        &user.id,
+    )
+    .await?;
     let pg = Oauth2CtxPg {
         verifier: Some(verifier),
-        state: Some(state),
+        state: Some(new_state),
         token: None,
         user_nonce: Some(user.nonce),
         user_id: Some(user.id),

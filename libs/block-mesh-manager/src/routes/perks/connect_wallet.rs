@@ -20,7 +20,7 @@ pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
     Json(body): Json<ConnectWalletRequest>,
 ) -> Result<Json<ConnectWalletResponse>, Error> {
-    let mut transaction = create_txn(&pool).await?;
+    let mut transaction = pool.begin().await?;
     let user = auth.user.ok_or(Error::UserNotFound)?;
     let signature =
         Signature::try_from(body.signature.as_slice()).map_err(|_| Error::InternalServer)?;
@@ -41,6 +41,6 @@ pub async fn handler(
         tracing::error!("Signature verification failed.");
         return Err(Error::SignatureMismatch);
     }
-    commit_txn(transaction).await?;
+    transaction.commit().await?;
     Ok(Json(ConnectWalletResponse { status: 200 }))
 }

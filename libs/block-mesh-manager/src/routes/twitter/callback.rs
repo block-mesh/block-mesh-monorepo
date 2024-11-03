@@ -4,7 +4,7 @@ use crate::domain::perk::PerkName;
 use crate::errors::error::Error;
 use crate::notification::notification_redirect::NotificationRedirect;
 use crate::routes::twitter::context::{Oauth2Ctx, Oauth2CtxPg};
-use anyhow::Context;
+use anyhow::{anyhow, Context};
 use axum::extract::Query;
 use axum::response::Redirect;
 use axum::Extension;
@@ -37,29 +37,26 @@ pub async fn callback(
     Extension(pool): Extension<PgPool>,
     Query(CallbackParams { code, state }): Query<CallbackParams>,
 ) -> Result<Redirect, Error> {
-    let id = Uuid::parse_str(env::var(BLOCKMESH_SERVER_UUID_ENVAR).unwrap().as_str()).unwrap();
+    let parts: Vec<&str> = state.secret().split("___").collect();
+    let state = CsrfToken::new(parts[0].to_string());
+    let user_id = Uuid::parse_str(parts[1]).map_err(|e| anyhow!("Cannot parse UUID - {}", e))?;
+
     let mut transaction = pool.begin().await?;
-    let twitter_agg =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Twitter, &id)
-            .await?;
+    let twitter_agg = get_or_create_aggregate_by_user_and_name(
+        &mut transaction,
+        AggregateName::Twitter,
+        &user_id,
+    )
+    .await?;
 
     let mut pg =
         serde_json::from_value::<Oauth2CtxPg>(twitter_agg.value).context("Cannot deserialize")?;
+    let pg_state = pg.state.clone().ok_or(anyhow!("No state"))?;
+    let saved_parts: Vec<&str> = pg_state.secret().split("___").collect();
+    let saved_state = CsrfToken::new(saved_parts[0].to_string());
 
     let (client, verifier) = {
         let ctx = ctx.lock().await;
-        // get previous state from ctx (see login)
-        let saved_state = pg
-            .state
-            .take()
-            .ok_or_else(|| {
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "No previous state found".to_string(),
-                )
-            })
-            .map_err(|_| Error::InternalServer)?;
-        // // check state returned to see if it matches, otherwise throw an error
         if state.secret() != saved_state.secret() {
             update_aggregate(&mut transaction, &twitter_agg.id, &Value::Null).await?;
             return Err(Error::InternalServer);
