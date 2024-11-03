@@ -1,8 +1,14 @@
 use crate::{HandlerResult, MyDialogue};
 use teloxide::prelude::*;
 
+// const HELP_TEXT: &str = r#"
+// /select_mode - Select message context mode
+// /select_model - Select a different model
+// /info - Show current settings
+// /help - This message
+// "#;
+
 const HELP_TEXT: &str = r#"
-/select_mode - Select message context mode
 /select_model - Select a different model
 /info - Show current settings
 /help - This message

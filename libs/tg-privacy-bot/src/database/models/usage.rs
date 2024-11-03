@@ -1,4 +1,4 @@
-use chrono::{DateTime, Utc};
+use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;
 
@@ -10,11 +10,11 @@ pub struct Usage {
     pub usage: i64,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+    pub day: NaiveDate,
 }
 
 impl Usage {
     pub fn over_limit(&self) -> bool {
-        // TODO: Need to implement
-        false
+        self.usage > self.usage_limit
     }
 }

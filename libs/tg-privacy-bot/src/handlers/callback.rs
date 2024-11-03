@@ -17,7 +17,6 @@ use teloxide::Bot;
 /// **IMPORTANT**: do not send privacy-sensitive data this way!!!
 /// Anyone can read data stored in the callback button.
 pub async fn callback_handler(bot: Bot, query: CallbackQuery) -> HandlerResult {
-    println!("\nReceived callback query: {:?}\n", query);
     let pool = get_pg_pool().await;
     let mut transaction = create_txn(&pool).await?;
 

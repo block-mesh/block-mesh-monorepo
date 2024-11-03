@@ -32,7 +32,7 @@ fn bot_schema() -> UpdateHandler<Box<dyn std::error::Error + Send + Sync + 'stat
     let command_handler = teloxide::filter_command::<Commands, _>().branch(
         case![State::Start]
             .branch(case![Commands::Help].endpoint(handlers::help::help))
-            .branch(case![Commands::SelectMode].endpoint(handlers::select_mode::select_mode))
+            // .branch(case![Commands::SelectMode].endpoint(handlers::select_mode::select_mode))
             .branch(case![Commands::SelectModel].endpoint(handlers::select_model::select_model))
             .branch(case![Commands::Info].endpoint(handlers::info::info))
             .branch(case![Commands::Start].endpoint(handlers::start::start)),
@@ -64,7 +64,7 @@ async fn main() {
         .dependencies(dptree::deps![InMemStorage::<State>::new()])
         .enable_ctrlc_handler()
         .default_handler(|upd| async move {
-            println!("\nUnhandled update: {:?}\n", upd);
+            eprintln!("\nUnhandled update: {:?}\n", upd);
         })
         .error_handler(LoggingErrorHandler::with_custom_text(
             "\nAn error has occurred in the dispatcher\n",

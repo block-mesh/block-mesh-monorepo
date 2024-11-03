@@ -9,6 +9,7 @@ use teloxide::prelude::*;
 use teloxide::types::{InlineKeyboardButton, InlineKeyboardMarkup};
 use teloxide::Bot;
 
+#[allow(dead_code)]
 pub async fn select_mode(bot: Bot, _dialogue: MyDialogue, msg: Message) -> HandlerResult {
     let pool = get_pg_pool().await;
     let mut transaction = create_txn(&pool).await?;
@@ -17,8 +18,7 @@ pub async fn select_mode(bot: Bot, _dialogue: MyDialogue, msg: Message) -> Handl
         Some(ref from) => {
             let username = from.username.clone().unwrap_or_default();
             let tg_id = from.id.0;
-            let message = msg.text().unwrap_or_default().to_string();
-            println!("message received: {:?}\n", message);
+            let _message = msg.text().unwrap_or_default().to_string();
             let user = get_or_create_user(&mut transaction, tg_id as i64, &username).await?;
             let _ = get_or_create_usage(&mut transaction, &user.id).await?;
             let _ = get_or_create_user_settings(&mut transaction, &user.id).await?;

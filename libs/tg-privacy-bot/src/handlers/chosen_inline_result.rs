@@ -4,7 +4,6 @@ use teloxide::Bot;
 use crate::HandlerResult;
 
 pub async fn chosen_inline_result_handler(_bot: Bot, q: ChosenInlineResult) -> HandlerResult {
-    println!("\nchosen_inline_result_handler: {:?}\n", q);
     // let choose_debian_version = InlineQueryResultArticle::new(
     //     "0",
     //     "Chose debian version",
