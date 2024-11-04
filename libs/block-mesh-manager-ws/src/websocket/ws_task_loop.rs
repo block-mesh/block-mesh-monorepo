@@ -104,7 +104,7 @@ pub async fn ws_task_loop(
                     continue;
                 }
             };
-            let mut tasks =
+            let tasks =
                 match find_pending_tasks_with_limit(&mut transaction, window_size as i64).await {
                     Ok(tasks) => tasks,
                     Err(e) => {
