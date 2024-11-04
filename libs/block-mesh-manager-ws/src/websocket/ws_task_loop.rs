@@ -23,7 +23,7 @@ pub async fn assign_tasks_to_users(
     mut redis: MultiplexedConnection,
     task_limit: u64,
     broadcaster: &Broadcaster,
-    mut transaction: &mut Transaction<'_, Postgres>,
+    transaction: &mut Transaction<'_, Postgres>,
     expire: u64,
 ) {
     loop {
