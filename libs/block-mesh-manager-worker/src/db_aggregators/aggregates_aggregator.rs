@@ -1,6 +1,5 @@
 use anyhow::anyhow;
 use block_mesh_common::interfaces::db_messages::AggregateMessage;
-use block_mesh_manager_database_domain::domain::update_aggregate::update_aggregate;
 use chrono::Utc;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use flume::Sender;
@@ -10,6 +9,40 @@ use std::collections::HashMap;
 use tokio::sync::broadcast::error::RecvError;
 use tokio::sync::broadcast::Receiver;
 use tokio::task::JoinHandle;
+use uuid::Uuid;
+
+pub fn aggregates_create_bulk_query(calls: HashMap<Uuid, Value>) -> String {
+    let now = Utc::now();
+    let values: Vec<String> = calls
+        .iter()
+        .map(|(id, value)| {
+            format!(
+                "('{}'::uuid, '{}'::jsonb, '{}'::timestamptz)",
+                id,
+                value,
+                now.to_rfc3339()
+            )
+        })
+        .collect();
+
+    let value_str = values.join(",");
+    format!(
+        r#"
+-- Temporary table or CTE holding new values
+WITH updates (id, value, updated_at) AS (
+VALUES {}
+)
+-- Update statement using the CTE
+UPDATE aggregates
+SET
+    value = updates.value,
+    updated_at = updates.updated_at
+FROM updates
+WHERE aggregates.id = updates.id;
+"#,
+        value_str
+    )
+}
 
 #[tracing::instrument(name = "aggregates_aggregator", skip_all, err)]
 pub async fn aggregates_aggregator(
@@ -38,10 +71,8 @@ pub async fn aggregates_aggregator(
                         let handle = tokio::spawn(async move {
                             tracing::info!("aggregates_aggregator starting txn");
                             if let Ok(mut transaction) = create_txn(&poll_clone).await {
-                                for pair in calls_clone.iter() {
-                                    let _ =
-                                        update_aggregate(&mut transaction, pair.0, pair.1).await;
-                                }
+                                let query = aggregates_create_bulk_query(calls_clone);
+                                let _ = sqlx::query(&query).execute(&mut *transaction).await;
                                 let _ = commit_txn(transaction).await;
                             }
                             tracing::info!("aggregates_aggregator finished txn");

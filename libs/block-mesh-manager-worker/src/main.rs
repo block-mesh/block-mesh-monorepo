@@ -130,6 +130,7 @@ async fn run() -> anyhow::Result<()> {
         5,
     ));
     let db_daily_stats_aggregator_task = tokio::spawn(daily_stats_aggregator(
+        joiner_tx.clone(),
         db_pool.clone(),
         tx.subscribe(),
         env::var("AGG_SIZE")
