@@ -4,10 +4,43 @@ use block_mesh_common::interfaces::db_messages::UsersIpMessage;
 use chrono::Utc;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use serde_json::Value;
-use sqlx::PgPool;
+use sqlx::{PgPool, Row};
 use std::collections::HashMap;
 use tokio::sync::broadcast::error::RecvError;
 use tokio::sync::broadcast::Receiver;
+use uuid::Uuid;
+
+// TODO: finish this
+#[allow(dead_code)]
+pub async fn ip_address_bulk_query(
+    pool: &PgPool,
+    calls: HashMap<Uuid, String>,
+) -> HashMap<Uuid, Uuid> {
+    let mut output: HashMap<Uuid, Uuid> = HashMap::new();
+    let values: Vec<String> = calls
+        .iter()
+        .map(|(id, value)| format!("'{}'", value))
+        .collect();
+    let value_str = values.join(",");
+    let query = format!(
+        r#"
+    SELECT id, ip from ip_addresses where ip in ({})
+    "#,
+        value_str
+    );
+    if let Ok(mut transaction) = create_txn(&pool).await {
+        let rows = sqlx::query(&query).fetch_all(&mut *transaction).await;
+        if let Ok(rows) = rows {
+            for row in rows {
+                tracing::info!("db query execute result: {:?}", row.get::<Uuid, _>("id"));
+                tracing::info!("db query execute result: {:?}", row.get::<&str, _>("ip"));
+            }
+        }
+        let _ = commit_txn(transaction).await;
+    }
+    output
+}
+// pub fn users_ip_bulk_insert_query(calls: HashMap<Uuid, String>) -> String {}
 
 #[tracing::instrument(name = "users_ip_aggregator", skip_all, err)]
 pub async fn users_ip_aggregator(
