@@ -6,7 +6,7 @@ use flume::Sender;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{PgPool, Row};
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 use tokio::sync::broadcast::error::RecvError;
 use tokio::sync::broadcast::Receiver;
 use tokio::task::JoinHandle;
@@ -30,13 +30,15 @@ pub async fn ip_address_and_users_ip_bulk_query(
     let now = Utc::now();
     let mut bulk_data: HashMap<(Uuid, Uuid), BulkIpData> = HashMap::new();
     let mut reverse_calls: HashMap<String, Uuid> = HashMap::new();
-    let values: Vec<String> = calls
+    calls.iter().for_each(|(id, ip)| {
+        reverse_calls.insert(ip.clone(), *id);
+    });
+    let values: Vec<String> = reverse_calls
         .iter()
-        .map(|(id, value)| {
-            reverse_calls.insert(value.clone(), *id);
+        .map(|(ip, id)| {
             format!(
                 "(gen_random_uuid(), '{}', '{}'::timestamptz, false)",
-                value,
+                ip,
                 now.to_rfc3339(),
             )
         })
