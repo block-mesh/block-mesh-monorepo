@@ -3,6 +3,7 @@ use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
+#[allow(dead_code)]
 pub async fn touch_users_ip(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
