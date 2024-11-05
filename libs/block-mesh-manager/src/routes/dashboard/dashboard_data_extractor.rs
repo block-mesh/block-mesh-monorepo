@@ -1,5 +1,7 @@
 use chrono::Utc;
+use num_traits::ToPrimitive;
 use sqlx::PgPool;
+use std::cmp::max;
 use std::sync::Arc;
 #[allow(unused_imports)]
 use tracing::Level;
@@ -78,21 +80,26 @@ pub async fn dashboard_data_extractor(
         < connected_buffer * ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240);
     let calls_to_action = get_user_call_to_action(&mut transaction, user_id).await?;
     let perks = get_user_perks(&mut transaction, user_id).await?;
-    let daily_stats = get_daily_stats_by_user_id(&mut transaction, &user_id)
-        .await?
-        .into_iter()
-        .map(|i| {
-            let points = calc_points_daily(i.uptime, i.tasks_count, &perks);
-            DailyStatForDashboard {
-                tasks_count: i.tasks_count,
-                uptime: i.uptime,
-                points,
-                day: i.day,
-            }
-        })
-        .rev()
-        .collect();
-    let points = calc_total_points(overall_uptime, overall_task_count, &perks);
+    let daily_stats: Vec<DailyStatForDashboard> =
+        get_daily_stats_by_user_id(&mut transaction, &user_id)
+            .await?
+            .into_iter()
+            .map(|i| {
+                let points = calc_points_daily(i.uptime, i.tasks_count, &perks);
+                DailyStatForDashboard {
+                    tasks_count: i.tasks_count,
+                    uptime: i.uptime,
+                    points,
+                    day: i.day,
+                }
+            })
+            .rev()
+            .collect();
+    let points = max(
+        calc_total_points(overall_uptime, overall_task_count, &perks).to_u64(),
+        daily_stats.iter().map(|i| i.points).sum().to_u64(),
+    )
+    .unwrap_or_default() as f64;
     let download = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
         AggregateName::Download,
