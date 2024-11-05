@@ -1,5 +1,4 @@
 use chrono::Utc;
-use num_traits::ToPrimitive;
 use sqlx::PgPool;
 use std::cmp::max;
 use std::sync::Arc;
@@ -100,7 +99,7 @@ pub async fn dashboard_data_extractor(
     let points = max(
         calc_total_points(overall_uptime, overall_task_count, &perks) as u64,
         one_time_bonus_points + daily_stats.iter().map(|i| i.points).sum::<f64>() as u64,
-    );
+    ) as f64;
     let download = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
         AggregateName::Download,
