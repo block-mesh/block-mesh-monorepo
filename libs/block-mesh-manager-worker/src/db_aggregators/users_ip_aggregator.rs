@@ -55,7 +55,13 @@ pub async fn ip_address_and_users_ip_bulk_query(
         now.to_rfc3339(),
     );
     let mut transaction = create_txn(pool).await?;
-    let rows = sqlx::query(&query).fetch_all(&mut *transaction).await?;
+    let rows = sqlx::query(&query)
+        .fetch_all(&mut *transaction)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to execute query: {} , with error {:?}", query, e);
+            e
+        })?;
     for row in rows {
         let ip_id = row.get::<Uuid, _>("id");
         let ip = row.get::<&str, _>("ip");
@@ -92,7 +98,13 @@ pub async fn ip_address_and_users_ip_bulk_query(
         value_str,
         now.to_rfc3339()
     );
-    let _ = sqlx::query(&query).execute(&mut *transaction).await?;
+    let _ = sqlx::query(&query)
+        .execute(&mut *transaction)
+        .await
+        .map_err(|e| {
+            tracing::error!("Failed to execute query: {} , with error {:?}", query, e);
+            e
+        })?;
     commit_txn(transaction).await?;
     Ok(())
 }
@@ -122,10 +134,8 @@ pub async fn users_ip_aggregator(
                         let calls_clone = calls.clone();
                         let poll_clone = pool.clone();
                         let handle = tokio::spawn(async move {
-                            tracing::info!("users_ip_aggregator starting txn");
                             let _ =
                                 ip_address_and_users_ip_bulk_query(&poll_clone, calls_clone).await;
-                            tracing::info!("users_ip_aggregator finished txn");
                         });
                         let _ = joiner_tx.send_async(handle).await;
                         count = 0;

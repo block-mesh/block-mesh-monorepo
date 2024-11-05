@@ -10,7 +10,6 @@ use crate::frontends::components::tables::table::Table;
 use crate::frontends::components::tables::table_cell::TableCell;
 use crate::frontends::components::tables::table_head::TableHead;
 use crate::frontends::components::tables::table_header::TableHeader;
-use crate::frontends::context::auth_context::AuthContext;
 use crate::frontends::context::notification_context::NotificationContext;
 use block_mesh_common::constants::BLOCK_MESH_CHROME_EXTENSION_LINK;
 use block_mesh_common::interfaces::server_api::{
@@ -24,7 +23,6 @@ use reqwest::Client;
 pub fn NewDashboard() -> impl IntoView {
     let notifications = expect_context::<NotificationContext>();
     let async_data = use_context::<DashboardResponse>();
-    let auth = expect_context::<AuthContext>();
     let auth_status = use_context::<AuthStatusResponse>();
 
     let connected = RwSignal::new(false);
@@ -39,7 +37,6 @@ pub fn NewDashboard() -> impl IntoView {
     let number_of_users_invited = RwSignal::new(0);
     let show_download_extension = RwSignal::new(true);
     let email = RwSignal::new("".to_string());
-
     if let Some(a) = auth_status {
         email.set(a.email.clone().unwrap_or_default());
     }
@@ -65,10 +62,8 @@ pub fn NewDashboard() -> impl IntoView {
     }
 
     let resend_verification = create_action({
-        let email = auth.email;
-
         move |_: &()| async move {
-            if verified_email.get() || email.get_untracked().is_empty() {
+            if verified_email.get_untracked() || email.get_untracked().is_empty() {
                 return;
             }
 
