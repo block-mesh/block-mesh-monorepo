@@ -18,11 +18,9 @@ pub async fn start(bot: Bot, _dialogue: MyDialogue, msg: Message) -> HandlerResu
             let _ = get_or_create_usage(&mut transaction, &user.id).await?;
             let _ = get_or_create_user_settings(&mut transaction, &user.id).await?;
             commit_txn(transaction).await?;
-            let response = format!(
-                r#"
+            let response = r#"
                 Welcome to BlockMesh Network AI Privacy bot
-                "#,
-            );
+                "#;
             let _r = bot.send_message(msg.chat.id, response).await;
         }
         None => {
