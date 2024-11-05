@@ -34,8 +34,8 @@ pub async fn ip_address_and_users_ip_bulk_query(
         reverse_calls.insert(ip.clone(), *id);
     });
     let values: Vec<String> = reverse_calls
-        .iter()
-        .map(|(ip, _id)| {
+        .keys()
+        .map(|ip| {
             format!(
                 "(gen_random_uuid(), '{}', '{}'::timestamptz, false)",
                 ip,
