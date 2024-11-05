@@ -1,49 +1,105 @@
-use crate::db_calls::touch_users_ip::touch_users_ip;
 use anyhow::anyhow;
 use block_mesh_common::interfaces::db_messages::UsersIpMessage;
 use chrono::Utc;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
+use flume::Sender;
+use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{PgPool, Row};
 use std::collections::HashMap;
 use tokio::sync::broadcast::error::RecvError;
 use tokio::sync::broadcast::Receiver;
+use tokio::task::JoinHandle;
 use uuid::Uuid;
 
-// TODO: finish this
-#[allow(dead_code)]
-pub async fn ip_address_bulk_query(
+#[derive(Debug, Serialize, Deserialize)]
+pub struct BulkIpData {
+    user_id: Uuid,
+    ip_id: Uuid,
+    ip: String,
+}
+
+#[tracing::instrument(name = "ip_address_and_users_ip_bulk_query", skip_all, err)]
+pub async fn ip_address_and_users_ip_bulk_query(
     pool: &PgPool,
     calls: HashMap<Uuid, String>,
-) -> HashMap<Uuid, Uuid> {
-    let mut output: HashMap<Uuid, Uuid> = HashMap::new();
+) -> anyhow::Result<()> {
+    if calls.len() == 0 {
+        return Ok(());
+    }
+    let now = Utc::now();
+    let mut bulk_data: HashMap<(Uuid, Uuid), BulkIpData> = HashMap::new();
+    let mut reverse_calls: HashMap<String, Uuid> = HashMap::new();
     let values: Vec<String> = calls
         .iter()
-        .map(|(id, value)| format!("'{}'", value))
+        .map(|(id, value)| {
+            reverse_calls.insert(value.clone(), id.clone());
+            format!(
+                "(gen_random_uuid(), '{}', '{}'::timestamptz, false)",
+                value,
+                now.to_rfc3339(),
+            )
+        })
+        .collect();
+    let value_str = values.join(",");
+    let query = format!(
+        // r#"SELECT id, ip from ip_addresses where ip in ({})"#,
+        r#"INSERT
+           INTO ip_addresses
+           (id, ip, created_at, enriched)
+           VALUES {}
+           ON CONFLICT (ip) DO UPDATE SET updated_at = '{}'::timestamptz
+           RETURNING id, ip
+        "#,
+        value_str,
+        now.to_rfc3339(),
+    );
+    let mut transaction = create_txn(&pool).await?;
+    let rows = sqlx::query(&query).fetch_all(&mut *transaction).await?;
+    for row in rows {
+        let ip_id = row.get::<Uuid, _>("id");
+        let ip = row.get::<&str, _>("ip");
+        if let Some(user_id) = reverse_calls.get(ip) {
+            bulk_data.insert(
+                (user_id.clone(), ip_id.clone()),
+                BulkIpData {
+                    ip_id,
+                    ip: ip.to_string(),
+                    user_id: user_id.clone(),
+                },
+            );
+        }
+    }
+    let values: Vec<String> = bulk_data
+        .values()
+        .map(|i| {
+            format!(
+                "(gen_random_uuid(),'{}'::uuid, '{}'::uuid, '{}'::timestamptz, '{}'::timestamptz)",
+                i.user_id,
+                i.ip_id,
+                now.to_rfc3339(),
+                now.to_rfc3339()
+            )
+        })
         .collect();
     let value_str = values.join(",");
     let query = format!(
         r#"
-    SELECT id, ip from ip_addresses where ip in ({})
-    "#,
-        value_str
+            INSERT INTO users_ip (id, user_id, ip_id, created_at, updated_at)
+            VALUES {}
+            ON CONFLICT (user_id, ip_id) DO UPDATE SET updated_at = '{}'::timestamptz
+        "#,
+        value_str,
+        now.to_rfc3339()
     );
-    if let Ok(mut transaction) = create_txn(&pool).await {
-        let rows = sqlx::query(&query).fetch_all(&mut *transaction).await;
-        if let Ok(rows) = rows {
-            for row in rows {
-                tracing::info!("db query execute result: {:?}", row.get::<Uuid, _>("id"));
-                tracing::info!("db query execute result: {:?}", row.get::<&str, _>("ip"));
-            }
-        }
-        let _ = commit_txn(transaction).await;
-    }
-    output
+    let _ = sqlx::query(&query).execute(&mut *transaction).await?;
+    let _ = commit_txn(transaction).await?;
+    Ok(())
 }
-// pub fn users_ip_bulk_insert_query(calls: HashMap<Uuid, String>) -> String {}
 
 #[tracing::instrument(name = "users_ip_aggregator", skip_all, err)]
 pub async fn users_ip_aggregator(
+    joiner_tx: Sender<JoinHandle<()>>,
     pool: PgPool,
     mut rx: Receiver<Value>,
     agg_size: i32,
@@ -63,16 +119,17 @@ pub async fn users_ip_aggregator(
                     let run = diff.num_seconds() > time_limit || count >= agg_size;
                     prev = Utc::now();
                     if run {
-                        tracing::info!("users_ip_aggregator starting txn");
-                        if let Ok(mut transaction) = create_txn(&pool).await {
-                            for pair in calls.iter() {
-                                let _ = touch_users_ip(&mut transaction, pair.0, pair.1).await;
-                            }
-                            let _ = commit_txn(transaction).await;
-                        }
+                        let calls_clone = calls.clone();
+                        let poll_clone = pool.clone();
+                        let handle = tokio::spawn(async move {
+                            tracing::info!("users_ip_aggregator starting txn");
+                            let _ =
+                                ip_address_and_users_ip_bulk_query(&poll_clone, calls_clone).await;
+                            tracing::info!("users_ip_aggregator finished txn");
+                        });
+                        let _ = joiner_tx.send_async(handle).await;
                         count = 0;
                         calls.clear();
-                        tracing::info!("users_ip_aggregator finished txn");
                     }
                 }
             }
