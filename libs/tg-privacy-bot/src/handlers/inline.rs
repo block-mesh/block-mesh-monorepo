@@ -3,6 +3,7 @@ use teloxide::Bot;
 
 use crate::HandlerResult;
 
+#[tracing::instrument(name = "inline_query_handler", skip(_bot, _q))]
 pub async fn inline_query_handler(_bot: Bot, _q: InlineQuery) -> HandlerResult {
     // let choose_debian_version = InlineQueryResultArticle::new(
     //     "0",

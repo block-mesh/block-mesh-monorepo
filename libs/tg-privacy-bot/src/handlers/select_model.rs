@@ -5,6 +5,7 @@ use teloxide::prelude::*;
 use teloxide::types::{InlineKeyboardButton, InlineKeyboardMarkup};
 use teloxide::Bot;
 
+#[tracing::instrument(name = "select_model", skip(bot, _dialogue))]
 pub async fn select_model(bot: Bot, _dialogue: MyDialogue, msg: Message) -> HandlerResult {
     let model_names = all::<ModelName>().collect::<Vec<_>>();
 

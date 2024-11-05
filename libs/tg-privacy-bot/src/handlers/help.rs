@@ -14,6 +14,7 @@ const HELP_TEXT: &str = r#"
 /help - This message
 "#;
 
+#[tracing::instrument(name = "help", skip(bot, _dialogue))]
 pub async fn help(bot: Bot, _dialogue: MyDialogue, msg: Message) -> HandlerResult {
     let _ = bot.send_message(msg.chat.id, HELP_TEXT).await?;
     Ok(())

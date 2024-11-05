@@ -9,6 +9,7 @@ use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use teloxide::prelude::*;
 use teloxide::Bot;
 
+#[tracing::instrument(name = "message_handler", skip(bot))]
 pub async fn message_handler(bot: Bot, msg: Message) -> HandlerResult {
     let pool = get_pg_pool().await;
     let mut transaction = create_txn(&pool).await?;

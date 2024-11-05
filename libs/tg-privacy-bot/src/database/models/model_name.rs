@@ -16,7 +16,7 @@ pub enum ModelName {
 
 impl Default for ModelName {
     fn default() -> Self {
-        Self::Gpt35Turbo
+        Self::Gpt4
     }
 }
 

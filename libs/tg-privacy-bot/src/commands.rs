@@ -9,8 +9,8 @@ pub enum Commands {
     #[default]
     #[command(description = "Start bot")]
     Start,
-    #[command(description = "select_mode")]
-    SelectMode,
+    // #[command(description = "select_mode")]
+    // SelectMode,
     #[command(description = "select_model")]
     SelectModel,
     #[command(description = "info")]
