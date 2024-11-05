@@ -23,7 +23,7 @@ pub async fn assign_tasks_to_users(
     mut redis: MultiplexedConnection,
     task_limit: u64,
     broadcaster: &Broadcaster,
-    mut transaction: &mut Transaction<'_, Postgres>,
+    transaction: &mut Transaction<'_, Postgres>,
     expire: u64,
 ) {
     loop {
@@ -61,8 +61,7 @@ pub async fn assign_tasks_to_users(
                 queue,
             )
             .await;
-        let _ =
-            update_task_assigned(&mut transaction, task.id, user_id, TaskStatus::Assigned).await;
+        let _ = update_task_assigned(transaction, task.id, user_id, TaskStatus::Assigned).await;
         user_limit.tasks += 1;
         TaskLimit::save_user(&mut redis, &user_limit, expire).await;
     }

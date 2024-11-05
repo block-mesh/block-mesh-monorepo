@@ -97,7 +97,7 @@ pub async fn dashboard_data_extractor(
             .collect();
     let points = max(
         calc_total_points(overall_uptime, overall_task_count, &perks).to_u64(),
-        daily_stats.iter().map(|i| i.points).sum().to_u64(),
+        daily_stats.iter().map(|i| i.points).sum::<f64>().to_u64(),
     )
     .unwrap_or_default() as f64;
     let download = get_or_create_aggregate_by_user_and_name(

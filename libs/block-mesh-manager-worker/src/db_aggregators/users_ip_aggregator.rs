@@ -24,7 +24,7 @@ pub async fn ip_address_and_users_ip_bulk_query(
     pool: &PgPool,
     calls: HashMap<Uuid, String>,
 ) -> anyhow::Result<()> {
-    if calls.len() == 0 {
+    if calls.is_empty() {
         return Ok(());
     }
     let now = Utc::now();
@@ -33,7 +33,7 @@ pub async fn ip_address_and_users_ip_bulk_query(
     let values: Vec<String> = calls
         .iter()
         .map(|(id, value)| {
-            reverse_calls.insert(value.clone(), id.clone());
+            reverse_calls.insert(value.clone(), *id);
             format!(
                 "(gen_random_uuid(), '{}', '{}'::timestamptz, false)",
                 value,
@@ -54,18 +54,18 @@ pub async fn ip_address_and_users_ip_bulk_query(
         value_str,
         now.to_rfc3339(),
     );
-    let mut transaction = create_txn(&pool).await?;
+    let mut transaction = create_txn(pool).await?;
     let rows = sqlx::query(&query).fetch_all(&mut *transaction).await?;
     for row in rows {
         let ip_id = row.get::<Uuid, _>("id");
         let ip = row.get::<&str, _>("ip");
         if let Some(user_id) = reverse_calls.get(ip) {
             bulk_data.insert(
-                (user_id.clone(), ip_id.clone()),
+                (*user_id, ip_id),
                 BulkIpData {
                     ip_id,
                     ip: ip.to_string(),
-                    user_id: user_id.clone(),
+                    user_id: *user_id,
                 },
             );
         }
@@ -93,7 +93,7 @@ pub async fn ip_address_and_users_ip_bulk_query(
         now.to_rfc3339()
     );
     let _ = sqlx::query(&query).execute(&mut *transaction).await?;
-    let _ = commit_txn(transaction).await?;
+    commit_txn(transaction).await?;
     Ok(())
 }
 
