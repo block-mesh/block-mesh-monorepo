@@ -39,7 +39,6 @@ pub fn NewDashboard() -> impl IntoView {
     let number_of_users_invited = RwSignal::new(0);
     let show_download_extension = RwSignal::new(true);
     let email = RwSignal::new("".to_string());
-
     if let Some(a) = auth_status {
         email.set(a.email.clone().unwrap_or_default());
     }
@@ -65,10 +64,8 @@ pub fn NewDashboard() -> impl IntoView {
     }
 
     let resend_verification = create_action({
-        let email = auth.email;
-
         move |_: &()| async move {
-            if verified_email.get() || email.get_untracked().is_empty() {
+            if verified_email.get_untracked() || email.get_untracked().is_empty() {
                 return;
             }
 
