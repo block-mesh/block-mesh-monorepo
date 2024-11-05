@@ -15,6 +15,6 @@ pub struct Usage {
 
 impl Usage {
     pub fn over_limit(&self) -> bool {
-        self.usage > self.usage_limit
+        self.usage >= self.usage_limit
     }
 }

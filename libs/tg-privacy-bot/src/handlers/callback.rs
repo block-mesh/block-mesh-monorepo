@@ -16,6 +16,8 @@ use teloxide::Bot;
 ///
 /// **IMPORTANT**: do not send privacy-sensitive data this way!!!
 /// Anyone can read data stored in the callback button.
+///
+#[tracing::instrument(name = "callback_handler", skip(bot, query))]
 pub async fn callback_handler(bot: Bot, query: CallbackQuery) -> HandlerResult {
     let pool = get_pg_pool().await;
     let mut transaction = create_txn(&pool).await?;
