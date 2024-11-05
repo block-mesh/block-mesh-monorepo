@@ -21,7 +21,7 @@ use crate::database::users_ip::get_user_ips::get_user_ips;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
-use crate::utils::points::{calc_points_daily, calc_total_points};
+use crate::utils::points::{calc_one_time_bonus_points, calc_points_daily, calc_total_points};
 use block_mesh_common::feature_flag_client::{get_flag_value_from_map, FlagValue};
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
@@ -95,11 +95,12 @@ pub async fn dashboard_data_extractor(
             })
             .rev()
             .collect();
+    let one_time_bonus_points =
+        calc_one_time_bonus_points(overall_uptime, overall_task_count, &perks) as u64;
     let points = max(
-        calc_total_points(overall_uptime, overall_task_count, &perks).to_u64(),
-        daily_stats.iter().map(|i| i.points).sum::<f64>().to_u64(),
-    )
-    .unwrap_or_default() as f64;
+        calc_total_points(overall_uptime, overall_task_count, &perks) as u64,
+        one_time_bonus_points + daily_stats.iter().map(|i| i.points).sum::<f64>() as u64,
+    );
     let download = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
         AggregateName::Download,
