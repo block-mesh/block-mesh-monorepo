@@ -68,8 +68,8 @@ async fn send_analytics(
     Ok(())
 }
 
-#[tracing::instrument(name = "touch_users_ip", skip_all)]
-async fn touch_users_ip(pool: &PgPool, ip: String, user_id: &Uuid) {
+#[tracing::instrument(name = "send_message_to_touch_users_ip", skip_all)]
+async fn send_message_to_touch_users_ip(pool: &PgPool, ip: String, user_id: &Uuid) {
     let _ = notify_worker(
         pool,
         UsersIpMessage {
@@ -106,7 +106,7 @@ pub async fn report_uptime_content(
     let _ = create_daily_stat(&mut transaction, user.id).await;
     let daily_stat = get_daily_stat_of_user(&mut transaction, user.id).await?;
     let _ = send_analytics(pool, request, &user.id).await;
-    touch_users_ip(pool, ip.clone(), &user.id).await;
+    send_message_to_touch_users_ip(pool, ip.clone(), &user.id).await;
 
     let uptime =
         get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, &user.id)

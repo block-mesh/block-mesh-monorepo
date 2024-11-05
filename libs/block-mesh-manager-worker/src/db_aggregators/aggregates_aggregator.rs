@@ -11,6 +11,7 @@ use tokio::sync::broadcast::Receiver;
 use tokio::task::JoinHandle;
 use uuid::Uuid;
 
+#[tracing::instrument(name = "aggregates_create_bulk_query", skip_all)]
 pub fn aggregates_create_bulk_query(calls: HashMap<Uuid, Value>) -> String {
     let now = Utc::now();
     let values: Vec<String> = calls
