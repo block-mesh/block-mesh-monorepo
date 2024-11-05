@@ -24,7 +24,6 @@ use reqwest::Client;
 pub fn NewDashboard() -> impl IntoView {
     let notifications = expect_context::<NotificationContext>();
     let async_data = use_context::<DashboardResponse>();
-    let auth = expect_context::<AuthContext>();
     let auth_status = use_context::<AuthStatusResponse>();
 
     let connected = RwSignal::new(false);
