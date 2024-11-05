@@ -102,6 +102,7 @@ async fn run() -> anyhow::Result<()> {
         send_to_rx,
     ));
     let db_aggregator_users_ip_task = tokio::spawn(users_ip_aggregator(
+        joiner_tx.clone(),
         db_pool.clone(),
         tx.subscribe(),
         env::var("AGG_SIZE")
