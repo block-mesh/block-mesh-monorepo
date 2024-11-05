@@ -11,6 +11,7 @@ use tokio::sync::broadcast::Receiver;
 use tokio::task::JoinHandle;
 use uuid::Uuid;
 
+#[tracing::instrument(name = "daily_stats_create_bulk_query", skip_all)]
 pub fn daily_stats_create_bulk_query(calls: HashMap<Uuid, f64>) -> String {
     let values: Vec<String> = calls
         .iter()
@@ -65,11 +66,11 @@ pub async fn daily_stats_aggregator(
                                 let _ = sqlx::query(&query).execute(&mut *transaction).await;
                                 let _ = commit_txn(transaction).await;
                             }
+                            tracing::info!("daily_stats_aggregator finished txn");
                         });
                         let _ = joiner_tx.send_async(handle).await;
                         count = 0;
                         calls.clear();
-                        tracing::info!("daily_stats_aggregator finished txn");
                     }
                 }
             }
