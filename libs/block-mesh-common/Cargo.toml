@@ -52,6 +52,7 @@ clap = ["dep:clap"]
 cli = ["dep:clap", "dep:solana-sdk"]
 app-config = ["dep:clap", "dep:solana-sdk"]
 ip-data = ["dep:ipgeolocate", "dep:reqwest"]
+reqwest = ["dep:reqwest"]
 feature-flag = ["dep:reqwest"]
 env = ["dep:dotenv"]
 

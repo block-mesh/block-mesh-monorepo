@@ -11,5 +11,7 @@ pub mod feature_flag_client;
 #[cfg(feature = "http")]
 pub mod http;
 pub mod interfaces;
+#[cfg(feature = "reqwest")]
+pub mod reqwest;
 pub mod routes_enum;
 pub mod tauri_message_channel;

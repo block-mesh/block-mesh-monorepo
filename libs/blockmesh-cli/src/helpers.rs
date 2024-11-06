@@ -7,9 +7,9 @@ use block_mesh_common::interfaces::server_api::{
     SubmitTaskResponse,
 };
 use block_mesh_common::interfaces::server_api::{GetTokenResponse, LoginForm};
+use block_mesh_common::reqwest::http_client;
 use block_mesh_common::routes_enum::RoutesEnum;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue, CONTENT_TYPE};
-use reqwest::{Client, ClientBuilder};
 use serde_json::Value;
 use speed_test::download::test_download;
 use speed_test::latency::test_latency;
@@ -18,20 +18,8 @@ use speed_test::upload::test_upload;
 use speed_test::Metadata;
 use std::cmp;
 use std::str::FromStr;
-use std::time::Duration;
 use tracing::Level;
 use uuid::Uuid;
-
-pub fn http_client() -> Client {
-    ClientBuilder::new()
-        .timeout(Duration::from_secs(3))
-        .cookie_store(true)
-        .user_agent("curl/8.7.1")
-        .no_hickory_dns()
-        .use_rustls_tls()
-        .build()
-        .unwrap_or_default()
-}
 
 #[allow(dead_code)]
 pub async fn dashboard(url: &str, credentials: &DashboardRequest) -> anyhow::Result<()> {
