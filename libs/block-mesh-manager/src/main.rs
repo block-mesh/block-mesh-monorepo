@@ -14,6 +14,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use std::mem;
     use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
     use block_mesh_manager::database::user::create_test_user::create_test_user;
+    use block_mesh_common::reqwest::http_client;
     use block_mesh_common::env::app_env_var::AppEnvVar;
     use block_mesh_common::env::env_var::EnvVar;
     use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
@@ -92,12 +93,7 @@ async fn run() -> anyhow::Result<()> {
         .expect("Failed to migrate database");
     tracing::info!("Database migration complete");
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
-    let client = ClientBuilder::new()
-        .timeout(Duration::from_secs(3))
-        .cookie_store(true)
-        .user_agent("curl/8.7.1")
-        .build()
-        .unwrap_or_default();
+    let client = http_client();
     tracing::info!("Starting to get feature flags");
     let flags = Arc::new(get_all_flags(&client).await?);
     tracing::info!("Finished getting feature flags");

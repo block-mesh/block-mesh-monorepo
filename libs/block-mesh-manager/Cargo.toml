@@ -61,7 +61,7 @@ serde-aux = { workspace = true }
 config = { workspace = true }
 dotenv = { workspace = true }
 enum-iterator = { workspace = true }
-block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env"] }
+block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env", "reqwest"] }
 database-utils = { path = "../database-utils", optional = true }
 tokio = { workspace = true, features = ["full", "tracing"], optional = true }
 axum-login = { workspace = true, optional = true }
