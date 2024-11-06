@@ -1,5 +1,5 @@
 use crate::database::models::message_mode::MessageMode;
-use crate::database::models::model_name::ModelName;
+use ai_interface::models::base::ModelName;
 use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use uuid::Uuid;

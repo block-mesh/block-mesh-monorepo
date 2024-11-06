@@ -302,6 +302,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "ai-interface"
+version = "0.0.340"
+dependencies = [
+ "anyhow",
+ "async-trait",
+ "chrono",
+ "dotenv",
+ "enum-iterator 2.1.0",
+ "reqwest 0.12.7",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "thiserror",
+ "tokio",
+]
+
+[[package]]
 name = "alloc-no-stdlib"
 version = "2.0.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10232,6 +10249,7 @@ checksum = "23d434d3f8967a09480fb04132ebe0a3e088c173e6d0ee7897abbdf4eab0f8b9"
 name = "tg-privacy-bot"
 version = "0.0.340"
 dependencies = [
+ "ai-interface",
  "anyhow",
  "askama",
  "askama_axum",

@@ -1,4 +1,4 @@
-use crate::database::models::model_name::ModelName;
+use ai_interface::models::base::ModelName;
 use anyhow::anyhow;
 use openai_api_rust::chat::{ChatApi, ChatBody};
 use openai_api_rust::{Auth, Message, OpenAI, Role};
