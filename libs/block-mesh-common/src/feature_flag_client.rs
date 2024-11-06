@@ -91,9 +91,7 @@ pub async fn get_flag_value(flag: &str, client: &Client) -> anyhow::Result<Optio
 mod tests {
     use super::*;
     use crate::reqwest::http_client;
-    use reqwest::ClientBuilder;
     use std::sync::Arc;
-    use std::time::Duration;
     use tracing_test::traced_test;
     use uuid::Uuid;
 
