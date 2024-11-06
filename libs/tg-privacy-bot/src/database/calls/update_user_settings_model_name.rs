@@ -1,4 +1,4 @@
-use crate::database::models::model_name::ModelName;
+use ai_interfaces::models::base::ModelName;
 use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;

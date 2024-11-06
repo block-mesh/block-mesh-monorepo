@@ -4,8 +4,8 @@ use crate::database::calls::get_or_create_user_settings::get_or_create_user_sett
 use crate::database::calls::update_user_settings_message_mode::update_user_settings_message_mode;
 use crate::database::calls::update_user_settings_model_name::update_user_settings_model_name;
 use crate::database::models::message_mode::MessageMode;
-use crate::database::models::model_name::ModelName;
 use crate::HandlerResult;
+use ai_interfaces::models::base::ModelName;
 use database_utils::utils::connection::get_pg_pool;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use teloxide::prelude::*;
