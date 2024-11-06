@@ -22,8 +22,6 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use std::env;
     #[allow(unused_imports)]
     use logger_general::tracing::setup_tracing_stdout_only;
-    use std::time::Duration;
-    use reqwest::ClientBuilder;
     use block_mesh_common::feature_flag_client::get_all_flags;
     #[cfg(not(target_env = "msvc"))]
     use tikv_jemallocator::Jemalloc;
