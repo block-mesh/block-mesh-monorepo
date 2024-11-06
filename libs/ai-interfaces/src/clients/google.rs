@@ -75,8 +75,7 @@ impl GeminiClient {
     ) -> anyhow::Result<ChatResponse> {
         let url = format!(
             "https://generativelanguage.googleapis.com/v1beta/models/{}?key={}",
-            model_name.to_string(),
-            self.api_key
+            model_name, self.api_key
         );
         let response = self.client.post(url).json(chat_request).send().await?;
         if response.status().is_success() {
