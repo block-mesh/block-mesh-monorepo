@@ -1,6 +1,6 @@
-use crate::helpers::http_client;
 use crate::login_mode::login_mode;
 use anyhow::anyhow;
+use block_mesh_common::reqwest::http_client;
 use chrono::Utc;
 use once_cell::sync::OnceCell;
 use serde::{Deserialize, Serialize};
