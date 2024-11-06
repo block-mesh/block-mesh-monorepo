@@ -1,5 +1,5 @@
 use crate::{HandlerResult, MyDialogue};
-use ai_interface::models::base::ModelName;
+use ai_interfaces::models::base::ModelName;
 use enum_iterator::all;
 use teloxide::prelude::*;
 use teloxide::types::{InlineKeyboardButton, InlineKeyboardMarkup};

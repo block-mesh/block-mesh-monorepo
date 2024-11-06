@@ -1,6 +1,6 @@
 use crate::database::models::message_mode::MessageMode;
 use crate::database::models::user_settings::UserSettings;
-use ai_interface::models::base::ModelName;
+use ai_interfaces::models::base::ModelName;
 use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;

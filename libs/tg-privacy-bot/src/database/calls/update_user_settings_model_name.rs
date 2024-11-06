@@ -1,4 +1,4 @@
-use ai_interface::models::base::ModelName;
+use ai_interfaces::models::base::ModelName;
 use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
