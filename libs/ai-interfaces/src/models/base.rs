@@ -98,7 +98,7 @@ impl sqlx::Decode<'_, Postgres> for ModelName {
     ) -> Result<Self, Box<dyn Error + 'static + Send + Sync>> {
         let value = <&str as Decode<Postgres>>::decode(value)?;
         let value = value.to_string();
-        match Self::try_from(value) {
+        match Self::try_from_string(value) {
             Ok(value) => Ok(value),
             Err(e) => Err(Box::new(e)),
         }
