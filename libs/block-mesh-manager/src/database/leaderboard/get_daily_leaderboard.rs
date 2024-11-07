@@ -1,9 +1,7 @@
 use block_mesh_common::interfaces::server_api::LeaderBoardUser;
-use chrono::{Duration, NaiveDate, Utc};
-use dashmap::DashMap;
+use chrono::{Duration, Utc};
 use sqlx::{Postgres, Transaction};
 use std::sync::Arc;
-use tokio::sync::OnceCell;
 
 pub async fn get_daily_leaderboard(
     transaction: &mut Transaction<'_, Postgres>,
