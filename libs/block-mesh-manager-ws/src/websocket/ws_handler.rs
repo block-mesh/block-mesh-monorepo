@@ -12,7 +12,6 @@ use std::collections::HashMap;
 use std::env;
 use std::str::FromStr;
 use std::sync::Arc;
-use tracing::{span, Level};
 use uuid::Uuid;
 
 #[tracing::instrument(name = "ws_handler", skip_all)]

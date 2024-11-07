@@ -2,7 +2,7 @@ use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
 use anyhow::Context;
-use axum::extract::{ConnectInfo, Query, Request, State};
+use axum::extract::{Query, Request, State};
 use axum::Json;
 use block_mesh_common::feature_flag_client::{get_flag_value_from_map, FlagValue};
 use block_mesh_common::interfaces::server_api::{
