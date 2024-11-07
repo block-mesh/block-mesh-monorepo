@@ -14,7 +14,7 @@ pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<Json<DailyLeaderboard>, Error> {
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let transaction = pool.begin().await.map_err(Error::from)?;
     let day = Utc::now().date_naive() - Duration::days(1);
     let _user = auth.user.ok_or(Error::UserNotFound)?;
     let leaderboard_users: Vec<LeaderBoardUser> = vec![];
