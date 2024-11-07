@@ -35,8 +35,7 @@ pub async fn handler(
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     let app_env = get_envar("APP_ENVIRONMENT").await;
-
-    let ip = if app_env != "local" {
+    let header_ip = if app_env != "local" {
         headers
             .get("cf-connecting-ip")
             .context("Missing CF-CONNECTING-IP")?
@@ -47,7 +46,7 @@ pub async fn handler(
     };
 
     let mut redis = state.redis.clone();
-    let filter = filter_request(&mut redis, &user.id, ip).await;
+    let filter = filter_request(&mut redis, &user.id, header_ip).await;
     if filter.is_err() || !filter? {
         return Ok(Json(None));
     }
