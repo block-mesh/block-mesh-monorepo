@@ -12,7 +12,6 @@ use std::collections::HashMap;
 use std::env;
 use std::str::FromStr;
 use std::sync::Arc;
-use tracing::{span, Level};
 use uuid::Uuid;
 
 #[tracing::instrument(name = "ws_handler", skip_all)]
@@ -42,19 +41,17 @@ pub async fn ws_handler(
     if user.id != api_token.user_id {
         return Err(Error::from(anyhow!("User Not Found")));
     }
-    let app_environment = env::var("APP_ENVIRONMENT").unwrap_or("production".to_string());
-    let ip = if app_environment != "local" {
-        let span = span!(Level::TRACE, "headers").entered();
-        let value = headers
+    let app_env = env::var("APP_ENVIRONMENT").unwrap_or("production".to_string());
+    let header_ip = if app_env != "local" {
+        headers
             .get("cf-connecting-ip")
-            .ok_or(anyhow!("Missing cf-connecting-ip".to_string()))?
+            .context("Missing CF-CONNECTING-IP")?
             .to_str()
-            .unwrap_or_default()
-            .to_string();
-        span.exit();
-        value
+            .context("Unable to STR CF-CONNECTING-IP")?
     } else {
-        "127.0.0.1".to_string()
-    };
-    Ok(ws.on_upgrade(move |socket| handle_socket(socket, ip, state, user.id)))
+        "127.0.0.1"
+    }
+    .to_string();
+
+    Ok(ws.on_upgrade(move |socket| handle_socket(socket, header_ip, state, user.id)))
 }
