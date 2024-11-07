@@ -1,6 +1,16 @@
 use reqwest::{Client, ClientBuilder};
+#[allow(unused_imports)]
 use std::time::Duration;
 
+#[cfg(target_arch = "wasm32")]
+pub fn http_client() -> Client {
+    ClientBuilder::new()
+        .user_agent(format!("curl/8.7.1; {}", env!("CARGO_PKG_VERSION")))
+        .build()
+        .unwrap_or_default()
+}
+
+#[cfg(not(target_arch = "wasm32"))]
 pub fn http_client() -> Client {
     ClientBuilder::new()
         .timeout(Duration::from_secs(3))
