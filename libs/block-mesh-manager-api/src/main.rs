@@ -5,6 +5,7 @@ use block_mesh_common::env::load_dotenv::load_dotenv;
 use dashmap::DashMap;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
 use sentry_tower::NewSentryLayer;
+use serde_json::Value;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
@@ -13,7 +14,11 @@ use tokio::net::TcpListener;
 
 mod database;
 mod error;
+mod pg_listener;
 mod routes;
+
+use crate::pg_listener::start_listening;
+use block_mesh_common::constants::{BLOCKMESH_PG_NOTIFY_API, BLOCKMESH_PG_NOTIFY_WORKER};
 use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
 use database_utils::utils::connection::get_pg_pool;
 use tower_http::cors::CorsLayer;
@@ -68,8 +73,8 @@ async fn run(is_with_sentry: bool) {
     let app = Router::new()
         .nest("/", router)
         .layer(Extension(db_pool.clone()))
-        .layer(Extension(check_token_map))
-        .layer(Extension(get_token_map))
+        .layer(Extension(check_token_map.clone()))
+        .layer(Extension(get_token_map.clone()))
         .layer(cors);
 
     let app = if timeout_layer {
@@ -94,10 +99,31 @@ async fn run(is_with_sentry: bool) {
         .unwrap();
     tracing::info!("Listening on {}", listener.local_addr().unwrap());
 
+    let (tx, _rx) = tokio::sync::broadcast::channel::<Value>(
+        env::var("BROADCAST_CHANNEL_SIZE")
+            .unwrap_or("5000".to_string())
+            .parse()
+            .unwrap_or(5000),
+    );
+
+    let db_listen_task = tokio::spawn(start_listening(
+        db_pool.clone(),
+        vec![BLOCKMESH_PG_NOTIFY_API],
+        tx.clone(),
+        check_token_map,
+        get_token_map,
+    ));
+    let server_task = run_server(listener, app);
+    tokio::select! {
+        o = server_task => panic!("server task exit {:?}", o),
+        o = db_listen_task => panic!("db_listen_task exit {:?}", o),
+    }
+}
+
+pub async fn run_server(listener: TcpListener, app: Router<()>) -> std::io::Result<()> {
     axum::serve(
         listener,
         app.into_make_service_with_connect_info::<SocketAddr>(),
     )
     .await
-    .unwrap();
 }

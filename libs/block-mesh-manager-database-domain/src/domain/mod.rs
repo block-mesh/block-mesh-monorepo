@@ -14,6 +14,7 @@ pub mod get_user_opt_by_id;
 pub mod increment_tasks_count;
 pub mod increment_uptime;
 pub mod nonce;
+pub mod notify_api;
 pub mod notify_worker;
 pub mod option_uuid;
 pub mod report_uptime_content;

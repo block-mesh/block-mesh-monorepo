@@ -1,7 +1,7 @@
 use crate::db_aggregators::users_ip_aggregator::users_ip_aggregator;
 use crate::pg_listener::start_listening;
 use axum::{Extension, Router};
-use block_mesh_common::constants::BLOCKMESH_PG_NOTIFY;
+use block_mesh_common::constants::BLOCKMESH_PG_NOTIFY_WORKER;
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use database_utils::utils::connection::get_pg_pool;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
@@ -97,7 +97,7 @@ async fn run() -> anyhow::Result<()> {
 
     let db_listen_task = tokio::spawn(start_listening(
         db_pool.clone(),
-        vec![BLOCKMESH_PG_NOTIFY],
+        vec![BLOCKMESH_PG_NOTIFY_WORKER],
         tx.clone(),
         send_to_rx,
     ));
