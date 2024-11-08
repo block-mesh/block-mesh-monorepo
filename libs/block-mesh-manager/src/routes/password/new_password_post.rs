@@ -48,14 +48,7 @@ pub async fn handler(
     transaction.commit().await.map_err(Error::from)?;
     del_from_redis_with_pattern(&email, "-*", &mut redis).await?;
     del_from_redis_with_pattern(&user.id.to_string(), "-*", &mut redis).await?;
-    let _ = notify_api(
-        &state.pool,
-        InvalidateApiCache {
-            user_id,
-            email: user.email,
-        },
-    )
-    .await;
+    let _ = notify_api(&state.pool, InvalidateApiCache { email: user.email }).await;
     Ok(NotificationRedirect::redirect(
         "Password updated",
         "Please use the new password and login",

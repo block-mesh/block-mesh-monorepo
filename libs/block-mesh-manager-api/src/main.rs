@@ -5,7 +5,6 @@ use block_mesh_common::env::load_dotenv::load_dotenv;
 use dashmap::DashMap;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
 use sentry_tower::NewSentryLayer;
-use serde_json::Value;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::time::Duration;
@@ -18,7 +17,7 @@ mod pg_listener;
 mod routes;
 
 use crate::pg_listener::start_listening;
-use block_mesh_common::constants::{BLOCKMESH_PG_NOTIFY_API, BLOCKMESH_PG_NOTIFY_WORKER};
+use block_mesh_common::constants::BLOCKMESH_PG_NOTIFY_API;
 use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
 use database_utils::utils::connection::get_pg_pool;
 use tower_http::cors::CorsLayer;
@@ -98,18 +97,9 @@ async fn run(is_with_sentry: bool) {
         .await
         .unwrap();
     tracing::info!("Listening on {}", listener.local_addr().unwrap());
-
-    let (tx, _rx) = tokio::sync::broadcast::channel::<Value>(
-        env::var("BROADCAST_CHANNEL_SIZE")
-            .unwrap_or("5000".to_string())
-            .parse()
-            .unwrap_or(5000),
-    );
-
     let db_listen_task = tokio::spawn(start_listening(
         db_pool.clone(),
         vec![BLOCKMESH_PG_NOTIFY_API],
-        tx.clone(),
         check_token_map,
         get_token_map,
     ));
