@@ -24,7 +24,8 @@ sqlx migrate run --source migrations
 ensure cargo sqlx prepare
 >&2 echo "Postgres has been migrated, ready to go!"
 cd "${_PWD}"
-cargo run -p block-mesh-manager-api
+#cargo run -p block-mesh-manager-api
+cargo watch --watch libs --shell "cargo run -p block-mesh-manager-api"
 export backend=$!
 function cleanup()
 {
