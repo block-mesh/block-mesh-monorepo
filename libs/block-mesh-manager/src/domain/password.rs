@@ -11,8 +11,10 @@ impl Password {
             Err(anyhow!("Password cannot be empty"))
         } else if s.contains(' ') {
             Err(anyhow!("Password cannot contain spaces"))
-        } else if s.chars().all(char::is_alphanumeric) {
-            Err(anyhow!("Password cannot contain alphanumeric characters"))
+        } else if !s.chars().all(char::is_alphanumeric) {
+            Err(anyhow!(
+                "Password cannot contain non alphanumeric characters"
+            ))
         } else if s.len() < 8 {
             Err(anyhow!("Password cannot contain less than 8 characters"))
         } else {
