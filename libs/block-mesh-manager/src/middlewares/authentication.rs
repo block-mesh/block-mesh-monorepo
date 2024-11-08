@@ -14,8 +14,10 @@ use axum_login::{
 };
 use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
+use futures::StreamExt;
+use futures_time::future::FutureExt;
 use redis::aio::MultiplexedConnection;
-use redis::{AsyncCommands, RedisResult};
+use redis::{AsyncCommands, RedisResult, ScanOptions};
 use secret::Secret;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
@@ -216,4 +218,22 @@ pub async fn save_to_redis(key: &str, session_user: &SessionUser, con: &mut Mult
 #[tracing::instrument(name = "del_from_redis", skip_all)]
 pub async fn del_from_redis(key: &str, con: &mut MultiplexedConnection) {
     let _: RedisResult<()> = con.del(key).await;
+}
+
+#[tracing::instrument(name = "del_from_redis_with_pattern", skip_all)]
+pub async fn del_from_redis_with_pattern(
+    key: &str,
+    pattern: &str,
+    con: &mut MultiplexedConnection,
+) -> anyhow::Result<()> {
+    let opts = ScanOptions::default().with_pattern(format!("{}{}", key, pattern));
+    let values = con.scan_options::<String>(opts).await?;
+    let values: Vec<_> = values
+        .collect()
+        .timeout(futures_time::time::Duration::from_millis(100))
+        .await?;
+    for k in values {
+        let _: RedisResult<()> = con.del(k).await;
+    }
+    Ok(())
 }

@@ -11,7 +11,7 @@ const _CONFIRM_TEMPLATE_ID: &str = "confirmation email";
 const _RESET_TEMPLATE_ID: &str = "reset password";
 const EMAIL: &str = "no-reply@blockmesh.xyz";
 const SUBJECT: &str = "BlockMesh Network";
-const BCC: &str = "bcc-message@blockmesh.xyz";
+const BCC: &str = "support@blockmesh.xyz";
 
 pub struct EmailClient {
     pub client: Client,

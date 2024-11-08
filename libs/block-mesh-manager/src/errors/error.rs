@@ -19,6 +19,8 @@ pub enum Error {
     Anyhow(#[from] AnyhowError),
     #[error("User already exists")]
     UserAlreadyExists,
+    #[error("Please logout")]
+    PleaseLogout,
     #[error("Password Mimatch")]
     PasswordMismatch,
     #[error("User not found")]
@@ -71,68 +73,71 @@ impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         tracing::error!("Error occurred: {}", self);
         match self {
+            Error::PleaseLogout => {
+                (StatusCode::INTERNAL_SERVER_ERROR, "Please Logout").into_response()
+            }
             Error::NotAllowedRateLimit => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+                (StatusCode::INTERNAL_SERVER_ERROR, "Not Allowed Rate Limit").into_response()
             }
             Error::SignatureMismatch => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+                (StatusCode::INTERNAL_SERVER_ERROR, "Signature Mismatch").into_response()
             }
             Error::TokenMismatch => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+                (StatusCode::INTERNAL_SERVER_ERROR, "Token Mismatch").into_response()
             }
             Error::NotYourTask => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+                (StatusCode::INTERNAL_SERVER_ERROR, "Not Your Task").into_response()
             }
             Error::TaskResponseNotFound => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+                (StatusCode::INTERNAL_SERVER_ERROR, "Task Response Not Found").into_response()
             }
             Error::TooManyTasks => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+                (StatusCode::INTERNAL_SERVER_ERROR, "Too Many Tasks").into_response()
             }
             Error::InviteCodeNotFound => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Invite Code Not Found").into_response()
             }
             Error::ApiTokenMismatch => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+                (StatusCode::INTERNAL_SERVER_ERROR, "Api Token Mismatch").into_response()
             }
-            Error::TaskAssignedToAnotherUser => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
-            }
+            Error::TaskAssignedToAnotherUser => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Task Assigned To Another User",
+            )
+                .into_response(),
             Error::FailedReadingBody => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+                (StatusCode::INTERNAL_SERVER_ERROR, "Failed Reading Body").into_response()
             }
-            Error::Unauthorized => (StatusCode::UNAUTHORIZED, "Unauthorized.").into_response(),
+            Error::Unauthorized => (StatusCode::UNAUTHORIZED, "Unauthorized").into_response(),
             Error::TaskNotFound => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+                (StatusCode::INTERNAL_SERVER_ERROR, "Task Not Found").into_response()
             }
             Error::ApiTokenNotFound => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+                (StatusCode::INTERNAL_SERVER_ERROR, "Api Token Not Found").into_response()
             }
             Error::NonceNotFound => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+                (StatusCode::INTERNAL_SERVER_ERROR, "Nonce Not Found").into_response()
             }
-            Error::Bcrypt(_) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
-            }
-            Error::UserNotFound => (StatusCode::BAD_REQUEST, "User not found.").into_response(),
+            Error::Bcrypt(_) => (StatusCode::INTERNAL_SERVER_ERROR, "Bcrypt error").into_response(),
+            Error::UserNotFound => (StatusCode::BAD_REQUEST, "User not found").into_response(),
             Error::PasswordMismatch => {
-                (StatusCode::BAD_REQUEST, "Password mismatch.").into_response()
+                (StatusCode::BAD_REQUEST, "Password mismatch").into_response()
             }
             Error::UserAlreadyExists => {
-                (StatusCode::BAD_REQUEST, "User already exists.").into_response()
+                (StatusCode::BAD_REQUEST, "User already exists").into_response()
             }
             Error::InternalServer => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()
             }
             Error::Auth(message) => (StatusCode::UNAUTHORIZED, message).into_response(),
             Error::Sql(_) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()
             }
             Error::Redis(_error) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()
             }
             Error::Anyhow(_) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error.").into_response()
+                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()
             }
         }
     }
@@ -142,6 +147,7 @@ impl From<Error> for StatusCode {
     fn from(error: Error) -> Self {
         tracing::error!("Error occurred: {}", error);
         match error {
+            Error::PleaseLogout => StatusCode::INTERNAL_SERVER_ERROR,
             Error::NotAllowedRateLimit => StatusCode::INTERNAL_SERVER_ERROR,
             Error::SignatureMismatch => StatusCode::INTERNAL_SERVER_ERROR,
             Error::TokenMismatch => StatusCode::INTERNAL_SERVER_ERROR,

@@ -60,6 +60,7 @@ tracing = { workspace = true, optional = true }
 serde-aux = { workspace = true }
 config = { workspace = true }
 dotenv = { workspace = true }
+futures-time = { workspace = true, optional = true }
 enum-iterator = { workspace = true }
 block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env", "reqwest"] }
 database-utils = { path = "../database-utils", optional = true }
@@ -149,6 +150,7 @@ hydrate = [
   "dep:logger-leptos"
 ]
 ssr = [
+  "dep:futures-time",
   "dep:database-utils",
   "dep:console-subscriber",
   "dep:sentry-tower",
