@@ -11,6 +11,7 @@ const _CONFIRM_TEMPLATE_ID: &str = "confirmation email";
 const _RESET_TEMPLATE_ID: &str = "reset password";
 const EMAIL: &str = "no-reply@blockmesh.xyz";
 const SUBJECT: &str = "BlockMesh Network";
+const BCC: &str = "bcc-message@blockmesh.xyz";
 
 pub struct EmailClient {
     pub client: Client,
@@ -38,6 +39,7 @@ impl EmailClient {
     pub async fn send_confirmation_email(&self, to: &str, token: &str) -> anyhow::Result<()> {
         let mut dest: Destination = Destination::builder().build();
         dest.to_addresses = Some(vec![to.to_string()]);
+        dest.bcc_addresses = Some(vec![BCC.to_string()]);
         let subject_content = Content::builder().data(SUBJECT).charset("UTF-8").build()?;
         let body_content = Content::builder()
             .data(CONFIRM_EMAIL.replace(
@@ -67,6 +69,7 @@ impl EmailClient {
     pub async fn send_reset_password_email(&self, to: &str, token: &str) -> anyhow::Result<()> {
         let mut dest: Destination = Destination::builder().build();
         dest.to_addresses = Some(vec![to.to_string()]);
+        dest.bcc_addresses = Some(vec![BCC.to_string()]);
         let subject_content = Content::builder().data(SUBJECT).charset("UTF-8").build()?;
         let body_content = Content::builder()
             .data(RESET_EMAIL.replace(
