@@ -47,7 +47,7 @@ pub async fn handler(
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     match auth.user {
-        Some(_) => Err(Error::UserAlreadyExists),
+        Some(_) => Err(Error::PleaseLogout),
         None => Ok(NewPasswordTemplate {
             email: user.email.to_ascii_lowercase(),
             token,

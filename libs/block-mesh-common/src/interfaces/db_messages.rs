@@ -35,6 +35,11 @@ pub struct AnalyticsMessage {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct InvalidateApiCache {
+    pub email: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct DailyStatMessage {
     pub id: Uuid,
     pub uptime: f64,

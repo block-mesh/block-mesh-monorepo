@@ -76,6 +76,7 @@ pub async fn handler(
             "/register",
         ));
     }
+
     let user = get_user_opt_by_email(&mut transaction, &email).await?;
     if user.is_some() {
         return Ok(Error::redirect(

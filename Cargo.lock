@@ -138,7 +138,7 @@ dependencies = [
  "futures-core",
  "futures-util",
  "mio 1.0.2",
- "socket2",
+ "socket2 0.5.7",
  "tokio",
  "tracing",
 ]
@@ -201,7 +201,7 @@ dependencies = [
  "serde_json",
  "serde_urlencoded",
  "smallvec",
- "socket2",
+ "socket2 0.5.7",
  "time",
  "url",
 ]
@@ -303,7 +303,7 @@ dependencies = [
 
 [[package]]
 name = "ai-interfaces"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -915,6 +915,35 @@ dependencies = [
 ]
 
 [[package]]
+name = "async-io"
+version = "1.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0fc5b45d93ef0529756f812ca52e44c221b35341892d3dcc34132ac02f3dd2af"
+dependencies = [
+ "async-lock",
+ "autocfg",
+ "cfg-if",
+ "concurrent-queue",
+ "futures-lite",
+ "log",
+ "parking",
+ "polling",
+ "rustix 0.37.27",
+ "slab",
+ "socket2 0.4.10",
+ "waker-fn",
+]
+
+[[package]]
+name = "async-lock"
+version = "2.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "287272293e9d8c41773cec55e365490fe034813a2f172f502d6ddcf75b2f582b"
+dependencies = [
+ "event-listener",
+]
+
+[[package]]
 name = "async-mutex"
 version = "1.4.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1071,7 +1100,7 @@ dependencies = [
  "aws-smithy-types",
  "aws-types",
  "bytes",
- "fastrand",
+ "fastrand 2.1.0",
  "hex",
  "http 0.2.12",
  "hyper 0.14.29",
@@ -1109,7 +1138,7 @@ dependencies = [
  "aws-smithy-types",
  "aws-types",
  "bytes",
- "fastrand",
+ "fastrand 2.1.0",
  "http 0.2.12",
  "http-body 0.4.6",
  "percent-encoding",
@@ -1308,7 +1337,7 @@ dependencies = [
  "aws-smithy-runtime-api",
  "aws-smithy-types",
  "bytes",
- "fastrand",
+ "fastrand 2.1.0",
  "h2 0.3.26",
  "http 0.2.12",
  "http-body 0.4.6",
@@ -1665,7 +1694,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-common"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "borsh 1.5.1",
@@ -1698,7 +1727,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "askama",
@@ -1728,6 +1757,7 @@ dependencies = [
  "flume",
  "form_urlencoded",
  "futures",
+ "futures-time",
  "futures-util",
  "gloo-utils 0.2.0",
  "headers",
@@ -1784,7 +1814,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-api"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "axum",
@@ -1818,7 +1848,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-database-domain"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "axum",
@@ -1840,7 +1870,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-worker"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "axum",
@@ -1876,7 +1906,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-ws"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "axum",
@@ -1907,7 +1937,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-solana-client"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -1938,7 +1968,7 @@ checksum = "8d696c370c750c948ada61c69a0ee2cbbb9c50b1019ddb86d9317157a99c2cae"
 
 [[package]]
 name = "blockmesh-cli"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -1964,7 +1994,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-program"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -2498,7 +2528,7 @@ checksum = "4b82cf0babdbd58558212896d1a4272303a57bdb245c2bf1147185fb45640e70"
 
 [[package]]
 name = "client-node"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -2526,7 +2556,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-affiliate-plan-page"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2542,7 +2572,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-api-token"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2561,7 +2591,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-feature-flags"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2577,7 +2607,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-images-gallery-page"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "askama",
@@ -2595,7 +2625,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-landing-page"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2611,7 +2641,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-privacy-page"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2627,7 +2657,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-cron"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -2644,7 +2674,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-echo-debug"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -2663,7 +2693,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-ip-data"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "block-mesh-common",
  "rustc-hash 1.1.0",
@@ -2678,7 +2708,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-logger-proxy"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -2695,7 +2725,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-logs-queue"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2715,7 +2745,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-solana-relay"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "rustc-hash 1.1.0",
  "serde",
@@ -2731,7 +2761,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-tauri-releases"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "reqwest 0.12.7",
@@ -3306,7 +3336,7 @@ checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 
 [[package]]
 name = "database-utils"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "axum",
@@ -3327,7 +3357,7 @@ dependencies = [
 
 [[package]]
 name = "debug-area"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "tokio",
 ]
@@ -3775,7 +3805,7 @@ dependencies = [
 
 [[package]]
 name = "extension"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -3821,13 +3851,22 @@ dependencies = [
 
 [[package]]
 name = "fastrand"
+version = "1.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e51093e27b0797c359783294ca4f0a911c270184cb10f85783b118614a1501be"
+dependencies = [
+ "instant",
+]
+
+[[package]]
+name = "fastrand"
 version = "2.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9fc0510504f03c51ada170672ac806f1f105a88aa97a5281117e1ddc3368e51a"
 
 [[package]]
 name = "feature-flags-server"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "axum",
@@ -4003,6 +4042,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "a44623e20b9681a318efdd71c299b6b222ed6f231972bfe2f224ebad6311f0c1"
 
 [[package]]
+name = "futures-lite"
+version = "1.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "49a9d51ce47660b1e808d3c990b4709f2f415d928835a17dfd16991515c46bce"
+dependencies = [
+ "fastrand 1.9.0",
+ "futures-core",
+ "futures-io",
+ "memchr",
+ "parking",
+ "pin-project-lite",
+ "waker-fn",
+]
+
+[[package]]
 name = "futures-macro"
 version = "0.3.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4024,6 +4078,18 @@ name = "futures-task"
 version = "0.3.30"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "38d84fa142264698cdce1a9f9172cf383a0c82de1bddcf3092901442c4097004"
+
+[[package]]
+name = "futures-time"
+version = "3.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "6404853a6824881fe5f7d662d147dc4e84ecd2259ba0378f272a71dab600758a"
+dependencies = [
+ "async-channel",
+ "async-io",
+ "futures-core",
+ "pin-project-lite",
+]
 
 [[package]]
 name = "futures-timer"
@@ -4743,7 +4809,7 @@ dependencies = [
  "httpdate",
  "itoa",
  "pin-project-lite",
- "socket2",
+ "socket2 0.5.7",
  "tokio",
  "tower-service",
  "tracing",
@@ -4875,7 +4941,7 @@ dependencies = [
  "http-body 1.0.0",
  "hyper 1.4.0",
  "pin-project-lite",
- "socket2",
+ "socket2 0.5.7",
  "tokio",
  "tower",
  "tower-service",
@@ -4955,6 +5021,12 @@ dependencies = [
  "unicode-bidi",
  "unicode-normalization",
 ]
+
+[[package]]
+name = "if_chain"
+version = "1.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "cb56e1aa765b4b4f3aadfab769793b7087bb03a4ea4920644a6d238e2df5b9ed"
 
 [[package]]
 name = "im"
@@ -5061,6 +5133,17 @@ name = "inventory"
 version = "0.3.15"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f958d3d68f4167080a18141e10381e7634563984a537f2a49a30fd8e53ac5767"
+
+[[package]]
+name = "io-lifetimes"
+version = "1.0.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eae7b9aee968036d54dce06cebaefd919e4472e753296daccd6d344e3e2df0c2"
+dependencies = [
+ "hermit-abi 0.3.9",
+ "libc",
+ "windows-sys 0.48.0",
+]
 
 [[package]]
 name = "ipgeolocate"
@@ -5616,6 +5699,12 @@ checksum = "0717cef1bc8b636c6e1c1bbdefc09e6322da8a9321966e8928ef80d20f7f770f"
 
 [[package]]
 name = "linux-raw-sys"
+version = "0.3.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ef53942eb7bf7ff43a617b3e2c1c4a5ecf5944a7c1bc12d7ee39bbb15e5c1519"
+
+[[package]]
+name = "linux-raw-sys"
 version = "0.4.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "78b3ae25bc7c8c38cec158d1f2757ee79e9b3740fbc7ccf0e59e4b08d793fa89"
@@ -5656,7 +5745,7 @@ checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
 name = "logger-general"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -5676,7 +5765,7 @@ dependencies = [
 
 [[package]]
 name = "logger-leptos"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -6408,6 +6497,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "56d80efc4b6721e8be2a10a5df21a30fa0b470f1539e53d8b4e6e75faf938b63"
 
 [[package]]
+name = "parking"
+version = "2.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f38d5652c16fde515bb1ecef450ab0f6a219d619a7274976324d5e377f7dceba"
+
+[[package]]
 name = "parking_lot"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6640,6 +6735,22 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b4596b6d070b27117e987119b4dac604f3c58cfb0b191112e24771b2faeac1a6"
 
 [[package]]
+name = "polling"
+version = "2.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4b2d323e8ca7996b3e23126511a523f7e62924d93ecd5ae73b333815b0eb3dce"
+dependencies = [
+ "autocfg",
+ "bitflags 1.3.2",
+ "cfg-if",
+ "concurrent-queue",
+ "libc",
+ "log",
+ "pin-project-lite",
+ "windows-sys 0.48.0",
+]
+
+[[package]]
 name = "polyval"
 version = "0.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6818,7 +6929,7 @@ dependencies = [
 
 [[package]]
 name = "proxy-endpoint"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -6847,7 +6958,7 @@ dependencies = [
 
 [[package]]
 name = "proxy-master"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -6954,7 +7065,7 @@ dependencies = [
  "quinn-udp 0.5.4",
  "rustc-hash 2.0.0",
  "rustls 0.23.12",
- "socket2",
+ "socket2 0.5.7",
  "thiserror",
  "tokio",
  "tracing",
@@ -7003,7 +7114,7 @@ checksum = "055b4e778e8feb9f93c4e439f71dc2156ef13360b432b799e179a8c4cdf0b1d7"
 dependencies = [
  "bytes",
  "libc",
- "socket2",
+ "socket2 0.5.7",
  "tracing",
  "windows-sys 0.48.0",
 ]
@@ -7016,7 +7127,7 @@ checksum = "8bffec3605b73c6f1754535084a85229fa8a30f86014e6c81aeec4abb68b0285"
 dependencies = [
  "libc",
  "once_cell",
- "socket2",
+ "socket2 0.5.7",
  "tracing",
  "windows-sys 0.52.0",
 ]
@@ -7204,7 +7315,7 @@ dependencies = [
  "rustls-pki-types",
  "ryu",
  "sha1_smol",
- "socket2",
+ "socket2 0.5.7",
  "tokio",
  "tokio-rustls 0.26.0",
  "tokio-util",
@@ -7600,6 +7711,20 @@ dependencies = [
 
 [[package]]
 name = "rustix"
+version = "0.37.27"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fea8ca367a3a01fe35e6943c400addf443c0f57670e6ec51196f71a4b8762dd2"
+dependencies = [
+ "bitflags 1.3.2",
+ "errno",
+ "io-lifetimes",
+ "libc",
+ "linux-raw-sys 0.3.8",
+ "windows-sys 0.48.0",
+]
+
+[[package]]
+name = "rustix"
 version = "0.38.34"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "70dc5ec042f7a43c4a73241207cecc9873a06d45debb38b329f8541d85c2730f"
@@ -7607,7 +7732,7 @@ dependencies = [
  "bitflags 2.6.0",
  "errno",
  "libc",
- "linux-raw-sys",
+ "linux-raw-sys 0.4.14",
  "windows-sys 0.52.0",
 ]
 
@@ -7783,7 +7908,7 @@ dependencies = [
 
 [[package]]
 name = "secret"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "serde",
  "sqlx",
@@ -8396,6 +8521,16 @@ checksum = "3c5e1a9a646d36c3599cd173a41282daf47c44583ad367b8e6837255952e5c67"
 
 [[package]]
 name = "socket2"
+version = "0.4.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9f7916fc008ca5542385b89a3d3ce689953c143e9304a9bf8beec1de48994c0d"
+dependencies = [
+ "libc",
+ "winapi",
+]
+
+[[package]]
+name = "socket2"
 version = "0.5.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "ce305eb0b4296696835b71df73eb912e0f1ffd2556a501fcede6e0c50349191c"
@@ -8602,7 +8737,7 @@ dependencies = [
  "rand 0.8.5",
  "serde",
  "serde_derive",
- "socket2",
+ "socket2 0.5.7",
  "solana-logger",
  "solana-sdk",
  "solana-version",
@@ -8988,7 +9123,7 @@ dependencies = [
 
 [[package]]
 name = "solana-tiny-client"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "bincode",
@@ -9155,7 +9290,7 @@ dependencies = [
 
 [[package]]
 name = "speed-test"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "chrono",
@@ -10110,8 +10245,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "85b77fafb263dd9d05cbeac119526425676db3784113aa9295c88498cbf8bff1"
 dependencies = [
  "cfg-if",
- "fastrand",
- "rustix",
+ "fastrand 2.1.0",
+ "rustix 0.38.34",
  "windows-sys 0.52.0",
 ]
 
@@ -10126,7 +10261,7 @@ dependencies = [
 
 [[package]]
 name = "test-proxy-endpoint"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "block-mesh-common",
  "bytes",
@@ -10145,7 +10280,7 @@ dependencies = [
 
 [[package]]
 name = "test-proxy-master"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -10247,7 +10382,7 @@ checksum = "23d434d3f8967a09480fb04132ebe0a3e088c173e6d0ee7897abbdf4eab0f8b9"
 
 [[package]]
 name = "tg-privacy-bot"
-version = "0.0.348"
+version = "0.0.349"
 dependencies = [
  "ai-interfaces",
  "anyhow",
@@ -10436,7 +10571,7 @@ dependencies = [
  "parking_lot",
  "pin-project-lite",
  "signal-hook-registry",
- "socket2",
+ "socket2 0.5.7",
  "tokio-macros",
  "tracing",
  "windows-sys 0.48.0",
@@ -10640,7 +10775,7 @@ dependencies = [
  "percent-encoding",
  "pin-project",
  "prost",
- "socket2",
+ "socket2 0.5.7",
  "tokio",
  "tokio-stream",
  "tower",
@@ -11346,6 +11481,33 @@ dependencies = [
  "serde_derive",
  "serde_json",
  "url",
+ "validator_derive",
+]
+
+[[package]]
+name = "validator_derive"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bc44ca3088bb3ba384d9aecf40c6a23a676ce23e09bdaca2073d99c207f864af"
+dependencies = [
+ "if_chain",
+ "lazy_static",
+ "proc-macro-error",
+ "proc-macro2",
+ "quote",
+ "regex",
+ "syn 1.0.109",
+ "validator_types",
+]
+
+[[package]]
+name = "validator_types"
+version = "0.16.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "111abfe30072511849c5910134e8baf8dc05de4c0e5903d681cbd5c9c4d611e3"
+dependencies = [
+ "proc-macro2",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -11383,6 +11545,12 @@ name = "vsimd"
 version = "0.8.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5c3082ca00d5a5ef149bb8b555a72ae84c9c59f7250f013ac822ac2e49b19c64"
+
+[[package]]
+name = "waker-fn"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "317211a0dc0ceedd78fb2ca9a44aed3d7b9b26f81870d485c07122b4350673b7"
 
 [[package]]
 name = "walkdir"
@@ -11991,8 +12159,8 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8da84f1a25939b27f6820d92aed108f83ff920fdf11a7b19366c27c4cda81d4f"
 dependencies = [
  "libc",
- "linux-raw-sys",
- "rustix",
+ "linux-raw-sys 0.4.14",
+ "rustix 0.38.34",
 ]
 
 [[package]]
