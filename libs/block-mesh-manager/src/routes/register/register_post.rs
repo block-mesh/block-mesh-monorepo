@@ -23,6 +23,7 @@ use crate::database::uptime_report::create_uptime_report::create_uptime_report;
 use crate::database::user::create_user::create_user;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::database::user::update_user_invited_by::update_user_invited_by;
+use crate::domain::password::Password;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
 use crate::startup::application::AppState;
@@ -76,6 +77,7 @@ pub async fn handler(
             "/register",
         ));
     }
+
     let user = get_user_opt_by_email(&mut transaction, &email).await?;
     if user.is_some() {
         return Ok(Error::redirect(

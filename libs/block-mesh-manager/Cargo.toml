@@ -44,7 +44,7 @@ reqwest = { workspace = true, default-features = false, features = [
   "cookies",
   "rustls-tls"
 ] }
-validator = { workspace = true }
+validator = { workspace = true, features = ["derive"] }
 sentry = { workspace = true, optional = true }
 url = { workspace = true }
 askama = { workspace = true, features = ["with-axum", "serde-json"] }
