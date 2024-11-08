@@ -41,10 +41,10 @@ pub fn find_check_token_map_key(
     check_token_map: &CheckTokenResponseMap,
     email: &str,
 ) -> Option<(String, Uuid)> {
-    match check_token_map.iter().find(|i| i.key().0 == email) {
-        Some(found) => Some(found.key().clone()),
-        None => None,
-    }
+    check_token_map
+        .iter()
+        .find(|i| i.key().0 == email)
+        .map(|found| found.key().clone())
 }
 
 #[tracing::instrument(name = "find_get_token_map_key", skip_all)]
@@ -52,8 +52,8 @@ pub fn find_get_token_map_key(
     get_token_map: &GetTokenResponseMap,
     email: &str,
 ) -> Option<(String, String)> {
-    match get_token_map.iter().find(|i| i.key().0 == email) {
-        Some(found) => Some(found.key().clone()),
-        None => None,
-    }
+    get_token_map
+        .iter()
+        .find(|i| i.key().0 == email)
+        .map(|found| found.key().clone())
 }
