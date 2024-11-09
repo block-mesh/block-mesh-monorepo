@@ -57,11 +57,6 @@ pub async fn dashboard_data_extractor(
         .await
         .map_err(Error::from)?;
 
-    let uptime =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, &user.id)
-            .await
-            .map_err(Error::from)?;
-
     let interval = get_flag_value_from_map(
         &state.flags,
         "polling_interval",
@@ -71,7 +66,7 @@ pub async fn dashboard_data_extractor(
         <FlagValue as TryInto<f64>>::try_into(interval.to_owned()).unwrap_or_default();
 
     let now = Utc::now();
-    let diff = now - uptime.updated_at;
+    let diff = now - uptime_aggregate.updated_at;
     let limit = 5;
     let user_ips = get_user_ips(&mut transaction, &user_id, limit).await?;
     let connected_buffer = get_envar("CONNECTED_BUFFER").await.parse().unwrap_or(10);

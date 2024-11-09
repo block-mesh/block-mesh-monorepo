@@ -95,7 +95,7 @@ pub async fn submit_task_content(
         query.response_time.unwrap_or_default(),
     )
     .await?;
-    let _ = create_daily_stat(&mut transaction, user.id).await;
+    let _ = create_daily_stat(&mut transaction, &user.id).await;
     let daily_stat = get_daily_stat_of_user(&mut transaction, user.id).await?;
     increment_tasks_count(&mut transaction, daily_stat.id).await?;
     commit_txn(transaction).await?;
