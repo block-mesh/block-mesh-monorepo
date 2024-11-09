@@ -130,12 +130,16 @@ impl IntoResponse for Error {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()
             }
             Error::Auth(message) => (StatusCode::UNAUTHORIZED, message).into_response(),
-            Error::Sql(_) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()
-            }
-            Error::Redis(_error) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()
-            }
+            Error::Sql(_) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Internal SQL server error",
+            )
+                .into_response(),
+            Error::Redis(_error) => (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "Internal REDIS server error",
+            )
+                .into_response(),
             Error::Anyhow(_) => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()
             }

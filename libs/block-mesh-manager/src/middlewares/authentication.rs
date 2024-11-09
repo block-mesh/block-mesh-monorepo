@@ -220,17 +220,23 @@ pub async fn del_from_redis(key: &str, con: &mut MultiplexedConnection) {
     let _: RedisResult<()> = con.del(key).await;
 }
 
-#[tracing::instrument(name = "del_from_redis_with_pattern", skip_all)]
+#[tracing::instrument(name = "del_from_redis_with_pattern", skip_all, err)]
 pub async fn del_from_redis_with_pattern(
     key: &str,
     pattern: &str,
     con: &mut MultiplexedConnection,
 ) -> anyhow::Result<()> {
+    let redis_scan_timeout = get_envar("REDIS_SCAN_TIMEOUT")
+        .await
+        .parse()
+        .unwrap_or(5000);
     let opts = ScanOptions::default().with_pattern(format!("{}{}", key, pattern));
     let values = con.scan_options::<String>(opts).await?;
     let values: Vec<_> = values
         .collect()
-        .timeout(futures_time::time::Duration::from_millis(100))
+        .timeout(futures_time::time::Duration::from_millis(
+            redis_scan_timeout,
+        ))
         .await?;
     for k in values {
         let _: RedisResult<()> = con.del(k).await;
