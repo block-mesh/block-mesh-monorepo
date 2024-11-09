@@ -21,7 +21,7 @@ They often affect relatively low-level/foundational components in one of our app
 * Bypassing the login process, either password or 2FA
 * Access to sensitive production user data or access to internal production systems
 * Accessing another user’s data in the BlockMesh Network Actions service
-* The upper bound for critical vulnerabilities, $30,000, is only a guideline, and BlockMesh Network may reward higher
+* The upper bound for critical vulnerabilities, is only a guideline, and BlockMesh Network may reward higher
   amounts for exceptional reports.
 
 ## High - \$100 - \$150
