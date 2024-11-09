@@ -6,7 +6,7 @@ use uuid::Uuid;
 #[tracing::instrument(name = "create_daily_stat", skip_all)]
 pub async fn create_daily_stat(
     transaction: &mut Transaction<'_, Postgres>,
-    user_id: Uuid,
+    user_id: &Uuid,
 ) -> anyhow::Result<Uuid> {
     let now = Utc::now();
     let day = now.date_naive();

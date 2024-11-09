@@ -17,6 +17,7 @@ pub mod nonce;
 pub mod notify_api;
 pub mod notify_worker;
 pub mod option_uuid;
+pub mod prep_user;
 pub mod report_uptime_content;
 pub mod submit_bandwidth_content;
 pub mod submit_task_content;

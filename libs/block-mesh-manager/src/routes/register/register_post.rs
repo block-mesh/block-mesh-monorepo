@@ -12,6 +12,7 @@ use validator::validate_email;
 
 use block_mesh_common::interfaces::server_api::RegisterForm;
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
+use block_mesh_manager_database_domain::domain::prep_user::prep_user;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use secret::Secret;
 
@@ -96,6 +97,7 @@ pub async fn handler(
     create_api_token(&mut transaction, user_id).await?;
     create_invite_code(&mut transaction, user_id, Uuid::new_v4().to_string()).await?;
     create_uptime_report(&mut transaction, &user_id, &None).await?;
+    prep_user(&mut transaction, &user_id).await?;
     if !form.invite_code.is_empty() {
         match get_user_opt_by_invited_code(&mut transaction, form.invite_code).await? {
             Some(invited_by_user) => {

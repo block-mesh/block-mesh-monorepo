@@ -6,6 +6,7 @@ use axum::extract::{Query, State, WebSocketUpgrade};
 use axum::response::IntoResponse;
 use block_mesh_manager_database_domain::domain::find_token::find_token;
 use block_mesh_manager_database_domain::domain::get_user_opt_by_email::get_user_opt_by_email;
+use block_mesh_manager_database_domain::domain::prep_user::prep_user;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::HeaderMap;
 use std::collections::HashMap;
@@ -37,6 +38,7 @@ pub async fn ws_handler(
     let api_token = find_token(&mut transaction, &api_token)
         .await?
         .ok_or(anyhow!("Api Token Not Found"))?;
+    prep_user(&mut transaction, &user.id).await?;
     commit_txn(transaction).await?;
     if user.id != api_token.user_id {
         return Err(Error::from(anyhow!("User Not Found")));

@@ -77,7 +77,7 @@ pub async fn handler(
         Some(v) => v,
         None => return Ok(Json(None)),
     };
-    let _ = create_daily_stat(&mut transaction, user.id).await?;
+    let _ = create_daily_stat(&mut transaction, &user.id).await?;
     update_task_assigned(&mut transaction, task.id, user.id, TaskStatus::Assigned).await?;
     redis_user.tasks += 1;
     commit_txn(transaction).await?;

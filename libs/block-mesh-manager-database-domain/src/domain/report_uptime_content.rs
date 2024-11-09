@@ -103,7 +103,7 @@ pub async fn report_uptime_content(
         return Err(anyhow!("User Not Found"));
     }
 
-    let _ = create_daily_stat(&mut transaction, user.id).await;
+    let _ = create_daily_stat(&mut transaction, &user.id).await;
     let daily_stat = get_daily_stat_of_user(&mut transaction, user.id).await?;
     let _ = send_analytics(pool, request, &user.id).await;
     send_message_to_touch_users_ip(pool, ip.clone(), &user.id).await;
