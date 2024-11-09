@@ -7,7 +7,7 @@ use uuid::Uuid;
 #[tracing::instrument(name = "ws_bulk_daily_stats", skip_all)]
 pub async fn ws_bulk_daily_stats(
     transaction: &mut Transaction<'_, Postgres>,
-    user_ids: &Vec<Uuid>,
+    user_ids: &[Uuid],
 ) -> anyhow::Result<()> {
     if user_ids.is_empty() {
         return Ok(());

@@ -9,22 +9,15 @@ pub async fn prep_user(
     mut transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
 ) -> anyhow::Result<()> {
-    let _ =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Tasks, user_id)
-            .await?;
-    let _ =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, user_id)
-            .await?;
-    let _ = get_or_create_aggregate_by_user_and_name(
-        &mut transaction,
-        AggregateName::Download,
-        user_id,
-    )
-    .await?;
-    let _ =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Latency, user_id)
-            .await?;
-    let _ = create_daily_stat(&mut transaction, user_id).await;
+    let _ = get_or_create_aggregate_by_user_and_name(transaction, AggregateName::Tasks, user_id)
+        .await?;
+    let _ = get_or_create_aggregate_by_user_and_name(transaction, AggregateName::Uptime, user_id)
+        .await?;
+    let _ = get_or_create_aggregate_by_user_and_name(transaction, AggregateName::Download, user_id)
+        .await?;
+    let _ = get_or_create_aggregate_by_user_and_name(transaction, AggregateName::Latency, user_id)
+        .await?;
+    let _ = create_daily_stat(transaction, user_id).await;
 
     Ok(())
 }
