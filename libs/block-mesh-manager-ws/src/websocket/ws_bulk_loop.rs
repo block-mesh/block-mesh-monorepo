@@ -18,11 +18,17 @@ pub async fn ws_bulk_loop(pool: PgPool, broadcaster: Broadcaster) -> anyhow::Res
     let mut prev_time = Utc::now();
 
     loop {
+        tracing::info!("ws_bulk_loop starting");
         if let Ok(mut transaction) = create_txn(&pool).await {
             let diff = Utc::now() - prev_time;
             let user_ids: Vec<Uuid> = broadcaster.queue.lock().await.iter().map(|i| i.0).collect();
-            let _ = ws_bulk_daily_stats(&mut transaction, &user_ids).await;
-            let _ = ws_bulk_uptime(&mut transaction, &user_ids, diff.num_seconds() as f64).await;
+            tracing::info!("ws_bulk_loop starting user_ids: {}", user_ids.len());
+            let _ = ws_bulk_daily_stats(&mut transaction, &user_ids)
+                .await
+                .map_err(|e| tracing::error!("ws_bulk_daily_stats error: {:?}", e));
+            let _ = ws_bulk_uptime(&mut transaction, &user_ids, diff.num_seconds() as f64)
+                .await
+                .map_err(|e| tracing::error!("ws_bulk_uptime error: {:?}", e));
             let _ = commit_txn(transaction).await;
         }
         prev_time = Utc::now();
