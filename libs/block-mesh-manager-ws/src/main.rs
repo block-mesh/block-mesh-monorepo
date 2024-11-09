@@ -83,7 +83,7 @@ async fn run() -> anyhow::Result<()> {
     // let cron_task = tokio::spawn(ws_task_loop(p, server_user_id, b, s));
     let p = state.pool.clone();
     let b = broadcaster.clone();
-    let cron_task_2 = tokio::spawn(ws_bulk_loop(p, b));
+    let ws_bulk_loop_task = tokio::spawn(ws_bulk_loop(p, b));
     let ping_task = tokio::spawn(ws_keep_alive(broadcaster.clone()));
     let b = broadcaster.clone();
     let base_msg_task = tokio::spawn(ws_base_msg_loop(b));
@@ -94,6 +94,6 @@ async fn run() -> anyhow::Result<()> {
         o = server_task => panic!("server_task {:?}", o),
         // o = settings_task => panic!("settings_task {:?}", o),
         // o = cron_task => panic!("cron_task {:?}", o),
-        o = cron_task_2 => panic!("cron_task_2 {:?}", o)
+        o = ws_bulk_loop_task => panic!("ws_bulk_loop_task {:?}", o)
     }
 }
