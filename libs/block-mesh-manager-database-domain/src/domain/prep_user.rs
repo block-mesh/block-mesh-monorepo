@@ -6,7 +6,7 @@ use uuid::Uuid;
 
 #[tracing::instrument(name = "prep_user", skip_all)]
 pub async fn prep_user(
-    mut transaction: &mut Transaction<'_, Postgres>,
+    transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
 ) -> anyhow::Result<()> {
     let _ = get_or_create_aggregate_by_user_and_name(transaction, AggregateName::Tasks, user_id)
