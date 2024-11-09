@@ -15,6 +15,7 @@ use block_mesh_common::interfaces::db_messages::InvalidateApiCache;
 use block_mesh_common::interfaces::server_api::NewPasswordForm;
 use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager_database_domain::domain::notify_api::notify_api;
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::sync::Arc;
 
@@ -24,7 +25,17 @@ pub async fn handler(
     Form(form): Form<NewPasswordForm>,
 ) -> Result<Redirect, Error> {
     let mut redis = state.redis.clone();
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let mut transaction = match create_txn(&pool).await {
+        Ok(transaction) => transaction,
+        Err(_) => {
+            return Ok(Error::redirect(
+                400,
+                "Server Error",
+                "Please retry",
+                RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
+            ))
+        }
+    };
     let email = form.email.clone().to_ascii_lowercase();
     if form.password_confirm != form.password {
         return Ok(Error::redirect(
@@ -54,7 +65,17 @@ pub async fn handler(
     let hashed_password = hash(form.password.clone(), DEFAULT_COST)?;
     update_user_password(&mut transaction, user.id, hashed_password).await?;
     update_api_token(&mut transaction, user.id).await?;
-    transaction.commit().await.map_err(Error::from)?;
+    match commit_txn(transaction).await {
+        Ok(_) => {}
+        Err(_) => {
+            return Ok(Error::redirect(
+                400,
+                "Server Error",
+                "Please resubmit",
+                RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
+            ))
+        }
+    };
     del_from_redis_with_pattern(&email, "-*", &mut redis).await?;
     del_from_redis_with_pattern(&user.id.to_string(), "-*", &mut redis).await?;
     let _ = notify_api(&state.pool, InvalidateApiCache { email: user.email }).await;

@@ -220,7 +220,7 @@ pub async fn del_from_redis(key: &str, con: &mut MultiplexedConnection) {
     let _: RedisResult<()> = con.del(key).await;
 }
 
-#[tracing::instrument(name = "del_from_redis_with_pattern", skip_all)]
+#[tracing::instrument(name = "del_from_redis_with_pattern", skip_all, err)]
 pub async fn del_from_redis_with_pattern(
     key: &str,
     pattern: &str,

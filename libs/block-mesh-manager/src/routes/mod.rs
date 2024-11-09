@@ -21,3 +21,4 @@ pub mod twitter;
 pub mod uptime_report;
 
 pub mod admin;
+pub mod version;
