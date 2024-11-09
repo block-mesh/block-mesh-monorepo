@@ -5,6 +5,7 @@ pub mod process_message;
 pub mod receiver;
 pub mod settings_loop;
 pub mod ws_base_msg_loop;
+pub mod ws_bulk_loop;
 pub mod ws_handler;
 pub mod ws_keep_alive;
 pub mod ws_task_loop;
