@@ -16,6 +16,16 @@ git checkout -B "release-${NEWVERSION}"
 #git branch --set-upstream-to=origin/release release
 #git pull
 cargo fmt
+export TOML=$(git status -s Cargo.toml | wc -l | sed -e 's/ //g')
+if [ "$TOML" != "1" ]; then
+  echo "Cargo.toml didnt change"
+  exit 1
+fi
+export LOCK=$(git status -s Cargo.lock | wc -l | sed -e 's/ //g')
+if [ "$LOCK" != "1" ]; then
+  echo "Cargo.lock didnt change"
+  exit 1
+fi
 git add Cargo.toml Cargo.lock
 git commit -m "New release ${NEWVERSION}"
 git push
