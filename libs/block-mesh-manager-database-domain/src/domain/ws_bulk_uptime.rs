@@ -5,7 +5,7 @@ use uuid::Uuid;
 #[tracing::instrument(name = "ws_bulk_uptime", skip_all)]
 pub async fn ws_bulk_uptime(
     transaction: &mut Transaction<'_, Postgres>,
-    user_ids: &Vec<Uuid>,
+    user_ids: &[Uuid],
     diff: f64,
 ) -> anyhow::Result<()> {
     if user_ids.is_empty() {
