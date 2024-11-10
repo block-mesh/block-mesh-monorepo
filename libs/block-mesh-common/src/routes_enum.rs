@@ -15,6 +15,8 @@ pub enum RoutesEnum {
     Static_UnAuth_Error,
     Static_UnAuth_RegisterApi,
     Static_UnAuth_Register,
+    Static_UnAuth_Version,
+    Static_UnAuth_Unsubscribe,
     Static_UnAuth_Login,
     Static_UnAuth_HealthCheck,
     Static_UnAuth_Health,
@@ -43,6 +45,7 @@ pub enum RoutesEnum {
 impl Display for RoutesEnum {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match &self {
+            RoutesEnum::Static_UnAuth_Version => write!(f, "/version"),
             RoutesEnum::Static_Auth_Twitter_Login => write!(f, "/twitter/login"),
             RoutesEnum::Static_UnAuth_Map => write!(f, "/map"),
             RoutesEnum::Static_UnAuth_Twitter_Callback => write!(f, "/twitter/callback"),
@@ -81,6 +84,7 @@ impl Display for RoutesEnum {
             RoutesEnum::Api_EMailViaToken => write!(f, "/get_email_via_token"),
             RoutesEnum::Api_Dashboard => write!(f, "/dashboard"),
             RoutesEnum::Api_ReportsQueue => write!(f, "/admin/reports_queue"),
+            RoutesEnum::Static_UnAuth_Unsubscribe => write!(f, "/unsubscribe"),
         }
     }
 }

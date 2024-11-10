@@ -125,6 +125,23 @@ pub const CONFIRM_EMAIL: &str = r#"
             <p style="color:white">Thank you for registering.</p>
             <p style="color:white">Please confirm your email by clicking the following link:</p>
             <a href="{{action_url}}" class="button">Click Here</a>
+            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem;">
+                <a target="_blank"
+                    style="font-family: 'Open Sans', sans-serif; color: cyan; text-decoration: none; margin-bottom: 0.5rem; display: inline-block; vertical-align: baseline; font-size: 0.75rem; font-weight: bold;"
+                    href="https://x.com/blockmesh_xyz">Twitter</a>
+                <a target="_blank"
+                    style="font-family: 'Open Sans', sans-serif; color: cyan; text-decoration: none; margin-bottom: 0.5rem; display: inline-block; vertical-align: baseline; font-size: 0.75rem; font-weight: bold;"
+                    href="https://discord.blockmesh.xyz/">Discord</a>
+                <a target="_blank"
+                    style="font-family: 'Open Sans', sans-serif; color: cyan; text-decoration: none; margin-bottom: 0.5rem; display: inline-block; vertical-align: baseline; font-size: 0.75rem; font-weight: bold;"
+                    href="https://blockmesh.atlassian.net/servicedesk/customer/portals">Support</a>
+            </div>
+            <div style="display: flex; align-items: center; justify-content: center; margin-top: 1.5rem;">
+                <a target="_blank"
+                    style="font-family: 'Open Sans', sans-serif; color: cyan; text-decoration: none; margin-bottom: 0.5rem; display: inline-block; vertical-align: baseline; font-size: 0.75rem; font-weight: bold;"
+                    href="https://blockmesh.xyz/unsubscribe">Unsubscribe
+                </a>
+            </div>
         </div>
         <div class="footer">
             <p>&copy; BlockMesh Network</p>
