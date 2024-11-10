@@ -76,6 +76,10 @@ pub fn get_static_un_auth_router() -> Router<Arc<AppState>> {
             get(routes::twitter::callback::callback),
         )
         .route(
+            RoutesEnum::Static_UnAuth_Version.to_string().as_str(),
+            get(routes::health_check::version::handler),
+        )
+        .route(
             RoutesEnum::Static_UnAuth_HealthCheck.to_string().as_str(),
             get(routes::health_check::get::handler),
         );

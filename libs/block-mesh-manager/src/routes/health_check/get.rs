@@ -1,43 +1,21 @@
-use askama::Template;
+use crate::errors::error::Error;
 use askama_axum::IntoResponse;
 use axum::extract::Query;
-use block_mesh_common::constants::{
-    BLOCK_MESH_APP_SERVER, BLOCK_MESH_CHROME_EXTENSION_LINK, BLOCK_MESH_GITBOOK, BLOCK_MESH_GITHUB,
-    BLOCK_MESH_LANDING_PAGE_IMAGE, BLOCK_MESH_LOGO, BLOCK_MESH_SUPPORT_CHAT,
-    BLOCK_MESH_SUPPORT_EMAIL, BLOCK_MESH_TWITTER,
-};
-use http::Method;
+use axum::Extension;
+use database_utils::utils::health_check::health_check;
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
+use http::{Method, StatusCode};
+use sqlx::PgPool;
 use std::collections::HashMap;
 
-#[allow(dead_code)]
-#[derive(Template)]
-#[template(path = "base.html")]
-struct HealthCheckTemplate {
-    pub chrome_extension_link: String,
-    pub app_server: String,
-    pub github: String,
-    pub twitter: String,
-    pub gitbook: String,
-    pub logo: String,
-    pub image: String,
-    pub support: String,
-    pub chat: String,
-}
-
 pub async fn handler(
+    Extension(pool): Extension<PgPool>,
     method: Method,
     Query(query): Query<HashMap<String, String>>,
-) -> impl IntoResponse {
+) -> Result<impl IntoResponse, Error> {
     tracing::info!("HEALTH-CHECK:: {:#?} - query = {:#?}", method, query);
-    HealthCheckTemplate {
-        chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
-        app_server: BLOCK_MESH_APP_SERVER.to_string(),
-        github: BLOCK_MESH_GITHUB.to_string(),
-        twitter: BLOCK_MESH_TWITTER.to_string(),
-        gitbook: BLOCK_MESH_GITBOOK.to_string(),
-        logo: BLOCK_MESH_LOGO.to_string(),
-        image: BLOCK_MESH_LANDING_PAGE_IMAGE.to_string(),
-        support: BLOCK_MESH_SUPPORT_EMAIL.to_string(),
-        chat: BLOCK_MESH_SUPPORT_CHAT.to_string(),
-    }
+    let mut transaction = create_txn(&pool).await?;
+    health_check(&mut *transaction).await?;
+    commit_txn(transaction).await?;
+    Ok((StatusCode::OK, "OK"))
 }
