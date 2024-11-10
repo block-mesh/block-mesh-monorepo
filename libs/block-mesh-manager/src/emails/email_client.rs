@@ -14,10 +14,14 @@ use std::time::Duration;
 const _BASE_URL: &str = "https://api.mailgun.net/v3/blockmesh.xyz/messages";
 const _CONFIRM_TEMPLATE_ID: &str = "confirmation email";
 const _RESET_TEMPLATE_ID: &str = "reset password";
-const EMAIL: &str = "no-reply@blockmesh.xyz";
+const EMAIL: &str = "support@blockmesh.xyz";
 const GMAIL_FROM: &str = "support@blockmesh.xyz";
-const SUBJECT: &str = "BlockMesh Network";
+const _SUBJECT: &str = "BlockMesh Network";
 const BCC: &str = "support@blockmesh.xyz";
+const REPLY_TO: &str = "support@blockmesh.xyz";
+
+const CONFIRM_SUBJECT: &str = "Confirmation Email from BlockMesh Network";
+const RESET_SUBJECT: &str = "Reset Password from BlockMesh Network";
 
 pub struct EmailClient {
     pub client: Client,
@@ -47,7 +51,10 @@ impl EmailClient {
         let mut dest: Destination = Destination::builder().build();
         dest.to_addresses = Some(vec![to.to_string()]);
         dest.bcc_addresses = Some(vec![BCC.to_string()]);
-        let subject_content = Content::builder().data(SUBJECT).charset("UTF-8").build()?;
+        let subject_content = Content::builder()
+            .data(CONFIRM_SUBJECT)
+            .charset("UTF-8")
+            .build()?;
         let body_content = Content::builder()
             .data(CONFIRM_EMAIL.replace(
                 "{{action_url}}",
@@ -65,6 +72,7 @@ impl EmailClient {
             .aws_client
             .send_email()
             .from_email_address(EMAIL)
+            .reply_to_addresses(REPLY_TO)
             .destination(dest)
             .content(email_content)
             .send()
@@ -83,7 +91,8 @@ impl EmailClient {
         let email = LetterMessage::builder()
             .from(GMAIL_FROM.parse()?)
             .to(to.parse()?)
-            .subject(SUBJECT)
+            .subject(CONFIRM_SUBJECT)
+            .reply_to(REPLY_TO.parse()?)
             .header(ContentType::TEXT_HTML)
             .body(body)?;
         let creds = Credentials::new(GMAIL_FROM.to_owned(), gmail_password.to_owned());
@@ -105,7 +114,10 @@ impl EmailClient {
         let mut dest: Destination = Destination::builder().build();
         dest.to_addresses = Some(vec![to.to_string()]);
         dest.bcc_addresses = Some(vec![BCC.to_string()]);
-        let subject_content = Content::builder().data(SUBJECT).charset("UTF-8").build()?;
+        let subject_content = Content::builder()
+            .data(RESET_SUBJECT)
+            .charset("UTF-8")
+            .build()?;
         let body_content = Content::builder()
             .data(RESET_EMAIL.replace(
                 "{{action_url}}",
@@ -123,6 +135,7 @@ impl EmailClient {
             .aws_client
             .send_email()
             .from_email_address(EMAIL)
+            .reply_to_addresses(REPLY_TO)
             .destination(dest)
             .content(email_content)
             .send()
@@ -145,7 +158,8 @@ impl EmailClient {
         let email = LetterMessage::builder()
             .from(GMAIL_FROM.parse()?)
             .to(to.parse()?)
-            .subject(SUBJECT)
+            .subject(RESET_SUBJECT)
+            .reply_to(BCC.parse()?)
             .header(ContentType::TEXT_HTML)
             .body(body)?;
         let creds = Credentials::new(GMAIL_FROM.to_owned(), gmail_password.to_owned());

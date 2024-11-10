@@ -8,7 +8,7 @@ use http::StatusCode;
 use std::sync::Arc;
 
 #[tracing::instrument(name = "health", skip_all)]
-pub async fn health(State(state): State<Arc<AppState>>) -> Result<impl IntoResponse, Error> {
+pub async fn handler(State(state): State<Arc<AppState>>) -> Result<impl IntoResponse, Error> {
     let pool = state.pool.clone();
     let mut transaction = create_txn(&pool).await?;
     health_check(&mut *transaction).await?;

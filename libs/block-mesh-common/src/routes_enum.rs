@@ -16,6 +16,7 @@ pub enum RoutesEnum {
     Static_UnAuth_RegisterApi,
     Static_UnAuth_Register,
     Static_UnAuth_Version,
+    Static_UnAuth_Unsubscribe,
     Static_UnAuth_Login,
     Static_UnAuth_HealthCheck,
     Static_UnAuth_Health,
@@ -83,6 +84,7 @@ impl Display for RoutesEnum {
             RoutesEnum::Api_EMailViaToken => write!(f, "/get_email_via_token"),
             RoutesEnum::Api_Dashboard => write!(f, "/dashboard"),
             RoutesEnum::Api_ReportsQueue => write!(f, "/admin/reports_queue"),
+            RoutesEnum::Static_UnAuth_Unsubscribe => write!(f, "/unsubscribe"),
         }
     }
 }
