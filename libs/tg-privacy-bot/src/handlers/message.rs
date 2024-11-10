@@ -12,7 +12,7 @@ use teloxide::Bot;
 #[tracing::instrument(name = "message_handler", skip(bot))]
 pub async fn message_handler(bot: Bot, msg: Message) -> HandlerResult {
     let pool = get_pool().await;
-    let mut transaction = create_txn(&pool).await?;
+    let mut transaction = create_txn(pool).await?;
     match msg.from {
         Some(ref from) => {
             let username = from.username.clone().unwrap_or_default();

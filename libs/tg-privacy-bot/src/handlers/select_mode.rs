@@ -13,7 +13,7 @@ use teloxide::Bot;
 #[tracing::instrument(name = "select_mode", skip(bot, _dialogue))]
 pub async fn select_mode(bot: Bot, _dialogue: MyDialogue, msg: Message) -> HandlerResult {
     let pool = get_pool().await;
-    let mut transaction = create_txn(&pool).await?;
+    let mut transaction = create_txn(pool).await?;
 
     match msg.from {
         Some(ref from) => {
