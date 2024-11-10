@@ -105,6 +105,14 @@ function clear_intervals() {
 function recreate_intervals() {
   console.log('Running recreate_intervals')
   clear_intervals()
+  try {
+    create_alarm().then(onSuccess, onError)
+    task_poller().then(onSuccess, onError)
+    report_uptime().then(onSuccess, onError)
+    measure_bandwidth().then(onSuccess, onError)
+  } catch (e) {
+
+  }
   intervals.push(
     setInterval(async () => {
       await create_alarm().then(onSuccess, onError)
