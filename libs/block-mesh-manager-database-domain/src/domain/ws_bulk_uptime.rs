@@ -2,12 +2,13 @@ use anyhow::anyhow;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-#[tracing::instrument(name = "ws_bulk_uptime", skip_all)]
+#[tracing::instrument(name = "ws_bulk_uptime", skip_all, err)]
 pub async fn ws_bulk_uptime(
     transaction: &mut Transaction<'_, Postgres>,
     user_ids: &[Uuid],
     diff: f64,
 ) -> anyhow::Result<()> {
+    tracing::info!("ws_bulk_uptime starting");
     if user_ids.is_empty() {
         return Ok(());
     }
