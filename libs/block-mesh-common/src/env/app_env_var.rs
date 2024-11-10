@@ -7,6 +7,7 @@ pub enum AppEnvVar {
     MailgunSendKey,
     AppEnvironment,
     DatabaseUrl,
+    GmailAppPassword,
 }
 
 impl PartialEq<AppEnvVar> for String {
@@ -23,6 +24,7 @@ impl Deref for AppEnvVar {
             AppEnvVar::AppEnvironment => "APP_ENVIRONMENT",
             AppEnvVar::DatabaseUrl => "DATABASE_URL",
             AppEnvVar::MailgunSendKey => "MAILGUN_SEND_KEY",
+            AppEnvVar::GmailAppPassword => "GMAIL_APP_PASSWORD",
         }
     }
 }
@@ -33,6 +35,7 @@ impl Display for AppEnvVar {
             AppEnvVar::AppEnvironment => write!(f, "APP_ENVIRONMENT"),
             AppEnvVar::DatabaseUrl => write!(f, "DATABASE_URL"),
             AppEnvVar::MailgunSendKey => write!(f, "MAILGUN_SEND_KEY"),
+            AppEnvVar::GmailAppPassword => write!(f, "GMAIL_APP_PASSWORD"),
         }
     }
 }

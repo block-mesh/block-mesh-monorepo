@@ -3,6 +3,7 @@ use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::errors::error::Error;
 use crate::notification::notification_redirect::NotificationRedirect;
 use crate::startup::application::AppState;
+use crate::utils::cache_envar::get_envar;
 use axum::extract::State;
 use axum::response::Redirect;
 use axum::{Extension, Form};
@@ -23,10 +24,18 @@ pub async fn handler(
     let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
         .await?
         .ok_or_else(|| Error::NonceNotFound)?;
-    let _ = state
-        .email_client
-        .send_reset_password_email(&user.email, nonce.nonce.expose_secret())
-        .await;
+    let email_mode = get_envar("EMAIL_MODE").await;
+    if email_mode == "AWS" {
+        let _ = state
+            .email_client
+            .send_reset_password_email_aws(&user.email, nonce.nonce.expose_secret())
+            .await;
+    } else {
+        let _ = state
+            .email_client
+            .send_reset_password_email_gmail(&user.email, nonce.nonce.expose_secret())
+            .await;
+    }
     transaction.commit().await?;
     Ok(NotificationRedirect::redirect(
         "Email Sent",

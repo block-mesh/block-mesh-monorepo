@@ -1,8 +1,13 @@
 use crate::emails::confirm_email::CONFIRM_EMAIL;
 use crate::emails::reset_email::RESET_EMAIL;
+use crate::utils::cache_envar::get_envar;
 use aws_config::meta::region::RegionProviderChain;
 use aws_sdk_sesv2::config::Region;
 use aws_sdk_sesv2::types::{Body, Content, Destination, EmailContent, Message};
+use block_mesh_common::env::app_env_var::AppEnvVar;
+use lettre::message::header::ContentType;
+use lettre::transport::smtp::authentication::Credentials;
+use lettre::{Message as LetterMessage, SmtpTransport, Transport};
 use reqwest::{Client, ClientBuilder};
 use std::time::Duration;
 
@@ -10,6 +15,7 @@ const _BASE_URL: &str = "https://api.mailgun.net/v3/blockmesh.xyz/messages";
 const _CONFIRM_TEMPLATE_ID: &str = "confirmation email";
 const _RESET_TEMPLATE_ID: &str = "reset password";
 const EMAIL: &str = "no-reply@blockmesh.xyz";
+const GMAIL_FROM: &str = "support@blockmesh.xyz";
 const SUBJECT: &str = "BlockMesh Network";
 const BCC: &str = "support@blockmesh.xyz";
 
@@ -36,7 +42,8 @@ impl EmailClient {
             aws_client,
         }
     }
-    pub async fn send_confirmation_email(&self, to: &str, token: &str) -> anyhow::Result<()> {
+    #[tracing::instrument(name = "send_confirmation_email_aws", skip_all, ret, err)]
+    pub async fn send_confirmation_email_aws(&self, to: &str, token: &str) -> anyhow::Result<()> {
         let mut dest: Destination = Destination::builder().build();
         dest.to_addresses = Some(vec![to.to_string()]);
         dest.bcc_addresses = Some(vec![BCC.to_string()]);
@@ -66,7 +73,35 @@ impl EmailClient {
         Ok(())
     }
 
-    pub async fn send_reset_password_email(&self, to: &str, token: &str) -> anyhow::Result<()> {
+    #[tracing::instrument(name = "send_confirmation_email_gmail", skip_all, ret, err)]
+    pub async fn send_confirmation_email_gmail(&self, to: &str, token: &str) -> anyhow::Result<()> {
+        let gmail_password = get_envar(&AppEnvVar::GmailAppPassword.to_string()).await;
+        let body = CONFIRM_EMAIL.replace(
+            "{{action_url}}",
+            &format!("{}/email_confirm?token={}", self.base_url, token),
+        );
+        let email = LetterMessage::builder()
+            .from(GMAIL_FROM.parse()?)
+            .to(to.parse()?)
+            .subject(SUBJECT)
+            .header(ContentType::TEXT_HTML)
+            .body(body)?;
+        let creds = Credentials::new(GMAIL_FROM.to_owned(), gmail_password.to_owned());
+        let mailer = SmtpTransport::relay("smtp.gmail.com")?
+            .credentials(creds)
+            .build();
+        // Send the email
+        match mailer.send(&email) {
+            Ok(result) => {
+                tracing::info!("Email sent: {:?}", result);
+                Ok(())
+            }
+            Err(e) => Err(e.into()),
+        }
+    }
+
+    #[tracing::instrument(name = "send_reset_password_email_aws", skip_all, ret, err)]
+    pub async fn send_reset_password_email_aws(&self, to: &str, token: &str) -> anyhow::Result<()> {
         let mut dest: Destination = Destination::builder().build();
         dest.to_addresses = Some(vec![to.to_string()]);
         dest.bcc_addresses = Some(vec![BCC.to_string()]);
@@ -94,5 +129,36 @@ impl EmailClient {
             .await?;
         tracing::info!("Email sent: {:?}", result);
         Ok(())
+    }
+
+    #[tracing::instrument(name = "send_reset_password_email_gmail", skip_all, ret, err)]
+    pub async fn send_reset_password_email_gmail(
+        &self,
+        to: &str,
+        token: &str,
+    ) -> anyhow::Result<()> {
+        let gmail_password = get_envar(&AppEnvVar::GmailAppPassword.to_string()).await;
+        let body = RESET_EMAIL.replace(
+            "{{action_url}}",
+            &format!("{}/new_password?token={}", self.base_url, token),
+        );
+        let email = LetterMessage::builder()
+            .from(GMAIL_FROM.parse()?)
+            .to(to.parse()?)
+            .subject(SUBJECT)
+            .header(ContentType::TEXT_HTML)
+            .body(body)?;
+        let creds = Credentials::new(GMAIL_FROM.to_owned(), gmail_password.to_owned());
+        let mailer = SmtpTransport::relay("smtp.gmail.com")?
+            .credentials(creds)
+            .build();
+        // Send the email
+        match mailer.send(&email) {
+            Ok(result) => {
+                tracing::info!("Email sent: {:?}", result);
+                Ok(())
+            }
+            Err(e) => Err(e.into()),
+        }
     }
 }

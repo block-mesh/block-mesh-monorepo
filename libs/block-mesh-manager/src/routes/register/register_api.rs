@@ -9,6 +9,7 @@ use crate::database::user::update_user_invited_by::update_user_invited_by;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
 use crate::startup::application::AppState;
+use crate::utils::cache_envar::get_envar;
 use anyhow::anyhow;
 use axum::extract::State;
 use axum::{Extension, Form, Json};
@@ -114,10 +115,18 @@ pub async fn handler(
     auth.login(&session)
         .await
         .map_err(|_| Error::Auth(anyhow!("Login failed").to_string()))?;
-    let _ = state
-        .email_client
-        .send_confirmation_email(&email, nonce_secret.expose_secret())
-        .await;
+    let email_mode = get_envar("EMAIL_MODE").await;
+    if email_mode == "AWS" {
+        let _ = state
+            .email_client
+            .send_confirmation_email_aws(&email, nonce_secret.expose_secret())
+            .await;
+    } else {
+        let _ = state
+            .email_client
+            .send_confirmation_email_gmail(&email, nonce_secret.expose_secret())
+            .await;
+    }
     Ok(Json(RegisterResponse {
         status_code: 200,
         error: None,
