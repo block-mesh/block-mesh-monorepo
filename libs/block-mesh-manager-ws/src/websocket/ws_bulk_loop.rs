@@ -1,4 +1,5 @@
 use crate::websocket::manager::broadcaster::Broadcaster;
+use block_mesh_manager_database_domain::domain::ws_bulk_create_daily_stats::ws_bulk_create_daily_stats;
 use block_mesh_manager_database_domain::domain::ws_bulk_daily_stats::ws_bulk_daily_stats;
 use block_mesh_manager_database_domain::domain::ws_bulk_uptime::ws_bulk_uptime;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
