@@ -79,7 +79,7 @@ async fn run() -> anyhow::Result<()> {
     setup_tracing_stdout_only_with_sentry();
     let configuration = get_configuration().expect("Failed to read configuration");
     tracing::info!("Starting with configuration {:#?}", configuration);
-    let gmail_password = get_env_var_or_panic(AppEnvVar::GmailAppPassword);
+    let _gmail_password = get_env_var_or_panic(AppEnvVar::GmailAppPassword);
     let database_url = get_env_var_or_panic(AppEnvVar::DatabaseUrl);
     let database_url = <EnvVar as AsRef<Secret<String>>>::as_ref(&database_url);
     let mailgun_token = get_env_var_or_panic(AppEnvVar::MailgunSendKey);
