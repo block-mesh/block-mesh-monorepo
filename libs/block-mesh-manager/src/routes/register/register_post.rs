@@ -138,7 +138,7 @@ pub async fn handler(
         .map_err(|_| Error::Auth(anyhow!("Login failed").to_string()))?;
     let _ = state
         .email_client
-        .send_confirmation_email(&email, nonce_secret.expose_secret())
+        .send_confirmation_email_aws(&email, nonce_secret.expose_secret())
         .await;
     Ok(Redirect::to("/ui/dashboard"))
 }
