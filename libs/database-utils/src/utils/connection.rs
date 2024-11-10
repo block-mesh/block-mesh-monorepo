@@ -5,8 +5,9 @@ use std::str::FromStr;
 use std::time::Duration;
 use tracing::log;
 
-pub async fn get_pg_pool() -> PgPool {
-    let settings = PgConnectOptions::from_str(&env::var("DATABASE_URL").unwrap())
+pub async fn get_pg_pool(database_url_envar_name: Option<String>) -> PgPool {
+    let url = database_url_envar_name.unwrap_or("DATABASE_URL".to_string());
+    let settings = PgConnectOptions::from_str(&env::var(url).unwrap())
         .unwrap()
         .log_statements(log::LevelFilter::Trace)
         .options([

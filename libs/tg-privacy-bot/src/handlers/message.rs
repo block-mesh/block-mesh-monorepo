@@ -3,16 +3,16 @@ use crate::database::calls::get_or_create_usage::get_or_create_usage;
 use crate::database::calls::get_or_create_user::get_or_create_user;
 use crate::database::calls::get_or_create_user_settings::get_or_create_user_settings;
 use crate::database::calls::increment_usage::increment_usage;
+use crate::database::db_utils::get_pool;
 use crate::HandlerResult;
-use database_utils::utils::connection::get_pg_pool;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use teloxide::prelude::*;
 use teloxide::Bot;
 
 #[tracing::instrument(name = "message_handler", skip(bot))]
 pub async fn message_handler(bot: Bot, msg: Message) -> HandlerResult {
-    let pool = get_pg_pool().await;
-    let mut transaction = create_txn(&pool).await?;
+    let pool = get_pool().await;
+    let mut transaction = create_txn(pool).await?;
     match msg.from {
         Some(ref from) => {
             let username = from.username.clone().unwrap_or_default();

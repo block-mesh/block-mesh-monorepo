@@ -18,7 +18,7 @@ mod routes;
 async fn main() -> anyhow::Result<()> {
     load_dotenv();
     setup_tracing_stdout_only();
-    let db_pool = get_pg_pool().await;
+    let db_pool = get_pg_pool(None).await;
     let env = env::var("APP_ENVIRONMENT").expect("APP_ENVIRONMENT is not set");
     migrate(&db_pool, env)
         .await

@@ -30,7 +30,7 @@ pub async fn ws_handler(
         .get("api_token")
         .ok_or(anyhow!("Missing token".to_string()))?;
     let api_token = Uuid::from_str(api_token).context("Cannot deserialize UUID")?;
-    let pool = state.pool.clone();
+    let pool = state.follower_pool.clone();
     let mut transaction = create_txn(&pool).await?;
     let user = get_user_opt_by_email(&mut *transaction, &email)
         .await?

@@ -28,7 +28,6 @@ pub async fn ws_bulk_uptime(
         WHERE aggregates.id = updates.id;
         "#
     );
-    tracing::info!("ws_bulk_uptime query = {}", query);
     let r = sqlx::query(&query)
         .execute(&mut **transaction)
         .await
@@ -36,6 +35,9 @@ pub async fn ws_bulk_uptime(
             tracing::error!("ws_bulk_uptime error {} failed to run query {}", e, query);
             anyhow!(e)
         })?;
-    tracing::info!("ws_bulk_uptime finished = {}", r.rows_affected());
+    tracing::info!(
+        "ws_bulk_uptime finished rows_affected = {}",
+        r.rows_affected()
+    );
     Ok(())
 }

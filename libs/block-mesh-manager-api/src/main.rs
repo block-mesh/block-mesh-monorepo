@@ -58,7 +58,7 @@ fn main() -> anyhow::Result<()> {
 }
 
 async fn run(is_with_sentry: bool) {
-    let db_pool = get_pg_pool().await;
+    let db_pool = get_pg_pool(None).await;
     let router = get_router();
     let check_token_map: CheckTokenResponseMap = Arc::new(DashMap::new());
     let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());
