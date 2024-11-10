@@ -3,10 +3,10 @@ use crate::database::calls::get_or_create_user::get_or_create_user;
 use crate::database::calls::get_or_create_user_settings::get_or_create_user_settings;
 use crate::database::calls::update_user_settings_message_mode::update_user_settings_message_mode;
 use crate::database::calls::update_user_settings_model_name::update_user_settings_model_name;
+use crate::database::db_utils::get_pool;
 use crate::database::models::message_mode::MessageMode;
 use crate::HandlerResult;
 use ai_interfaces::models::base::ModelName;
-use database_utils::utils::connection::get_pg_pool;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use teloxide::prelude::*;
 use teloxide::Bot;
@@ -19,7 +19,7 @@ use teloxide::Bot;
 ///
 #[tracing::instrument(name = "callback_handler", skip(bot, query))]
 pub async fn callback_handler(bot: Bot, query: CallbackQuery) -> HandlerResult {
-    let pool = get_pg_pool().await;
+    let pool = get_pool().await;
     let mut transaction = create_txn(&pool).await?;
 
     let from = query.from;

@@ -37,7 +37,6 @@ pub async fn ws_bulk_daily_stats(
         AND day = '{day}'
         "#,
     );
-    tracing::info!("ws_bulk_daily_stats query = {}", query);
     let r = sqlx::query(&query)
         .execute(&mut **transaction)
         .await
@@ -45,6 +44,9 @@ pub async fn ws_bulk_daily_stats(
             tracing::error!("ws_bulk_daily_stats error {} to run query {}", e, query);
             anyhow!(e)
         })?;
-    tracing::info!("ws_bulk_daily_stats finished = {}", r.rows_affected());
+    tracing::info!(
+        "ws_bulk_daily_stats finished rows_affected = {}",
+        r.rows_affected()
+    );
     Ok(())
 }

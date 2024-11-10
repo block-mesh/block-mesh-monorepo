@@ -1,9 +1,9 @@
 use crate::database::calls::get_or_create_usage::get_or_create_usage;
 use crate::database::calls::get_or_create_user::get_or_create_user;
 use crate::database::calls::get_or_create_user_settings::get_or_create_user_settings;
+use crate::database::db_utils::get_pool;
 use crate::database::models::message_mode::MessageMode;
 use crate::{HandlerResult, MyDialogue};
-use database_utils::utils::connection::get_pg_pool;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use teloxide::prelude::*;
 use teloxide::types::{InlineKeyboardButton, InlineKeyboardMarkup};
@@ -12,7 +12,7 @@ use teloxide::Bot;
 #[allow(dead_code)]
 #[tracing::instrument(name = "select_mode", skip(bot, _dialogue))]
 pub async fn select_mode(bot: Bot, _dialogue: MyDialogue, msg: Message) -> HandlerResult {
-    let pool = get_pg_pool().await;
+    let pool = get_pool().await;
     let mut transaction = create_txn(&pool).await?;
 
     match msg.from {

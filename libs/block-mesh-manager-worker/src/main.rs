@@ -79,7 +79,7 @@ async fn run() -> anyhow::Result<()> {
     load_dotenv();
     setup_tracing_stdout_only_with_sentry();
     tracing::info!("Starting worker");
-    let db_pool = get_pg_pool().await;
+    let db_pool = get_pg_pool(None).await;
     // let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
     // let _redis = redis_client.get_multiplexed_async_connection().await?;
     let (joiner_tx, joiner_rx) = flume::bounded::<JoinHandle<()>>(500);

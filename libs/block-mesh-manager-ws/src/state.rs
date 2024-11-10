@@ -9,6 +9,7 @@ use std::str::FromStr;
 #[derive(Clone)]
 pub struct AppState {
     pub pool: PgPool,
+    pub follower_pool: PgPool,
     pub websocket_manager: WebSocketManager,
     pub environment: Environment,
     pub redis: MultiplexedConnection,
@@ -18,7 +19,8 @@ impl AppState {
     pub async fn new() -> Self {
         let environment = std::env::var("APP_ENVIRONMENT").unwrap();
         let environment = Environment::from_str(&environment).unwrap();
-        let pool = get_pg_pool().await;
+        let pool = get_pg_pool(None).await;
+        let follower_pool = get_pg_pool(Some("HEROKU_POSTGRESQL_COPPER_URL".to_string())).await;
         let websocket_manager = WebSocketManager::new();
         let redis_url = env::var("REDIS_URL").unwrap();
         let redis_url = if redis_url.ends_with("#insecure") {
@@ -33,6 +35,7 @@ impl AppState {
             .unwrap();
         Self {
             pool,
+            follower_pool,
             environment,
             websocket_manager,
             redis,
