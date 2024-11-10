@@ -26,5 +26,6 @@ pub mod task_limit;
 pub mod update_aggregate;
 pub mod update_task_assigned;
 pub mod user;
+pub mod ws_bulk_create_daily_stats;
 pub mod ws_bulk_daily_stats;
 pub mod ws_bulk_uptime;

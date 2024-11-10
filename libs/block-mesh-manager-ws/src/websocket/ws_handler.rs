@@ -6,7 +6,6 @@ use axum::extract::{Query, State, WebSocketUpgrade};
 use axum::response::IntoResponse;
 use block_mesh_manager_database_domain::domain::find_token::find_token;
 use block_mesh_manager_database_domain::domain::get_user_opt_by_email::get_user_opt_by_email;
-use block_mesh_manager_database_domain::domain::prep_user::prep_user;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::HeaderMap;
 use std::collections::HashMap;
