@@ -1,7 +1,7 @@
 use crate::env::env_var::EnvVar;
 use std::str::FromStr;
 
-#[derive(Clone)]
+#[derive(Clone, PartialOrd, PartialEq)]
 pub enum Environment {
     Local,
     Staging,

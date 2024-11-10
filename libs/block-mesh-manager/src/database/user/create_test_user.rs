@@ -5,6 +5,7 @@ use bcrypt::{hash, DEFAULT_COST};
 use block_mesh_common::constants::{BLOCKMESH_SERVER_UUID_ENVAR, BLOCK_MESH_SUPPORT_EMAIL};
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
+use block_mesh_manager_database_domain::domain::prep_user::prep_user;
 use chrono::Utc;
 use secret::Secret;
 use sqlx::PgPool;
@@ -18,7 +19,7 @@ pub async fn create_test_user(pool: &PgPool) -> anyhow::Result<()> {
         return Ok(());
     }
     let now = Utc::now();
-    let id = Uuid::parse_str("5fdea056-1128-4659-a606-698acacc4cba").unwrap();
+    let user_id = Uuid::parse_str("5fdea056-1128-4659-a606-698acacc4cba").unwrap();
     let token = Uuid::parse_str("5fdea056-1128-4659-a606-698acacc4cba").unwrap();
     let email = "123@blockmesh.xyz";
     let password = hash("123", DEFAULT_COST)?;
@@ -38,7 +39,7 @@ pub async fn create_test_user(pool: &PgPool) -> anyhow::Result<()> {
         UNION ALL
         SELECT id FROM extant
         "#,
-        id,
+        user_id,
         now,
         None::<String>,
         email,
@@ -48,24 +49,26 @@ pub async fn create_test_user(pool: &PgPool) -> anyhow::Result<()> {
         .await?;
     sqlx::query!(
         r#"INSERT INTO api_tokens (id, created_at, token, status, user_id) VALUES ($1, $2, $3, $4, $5)"#,
-        id,
+        user_id,
         now,
         token,
         ApiTokenStatus::Active.to_string(),
-        id
+        user_id
     )
         .execute(pool)
         .await?;
     let nonce = Nonce::generate_nonce(16);
     let nonce_secret = Secret::from(nonce.clone());
     let mut transaction = pool.begin().await?;
-    create_nonce(&mut transaction, &id, &nonce_secret).await?;
-    create_invite_code(&mut transaction, id, Uuid::new_v4().to_string()).await?;
-    create_uptime_report(&mut transaction, &id, &None).await?;
+    create_nonce(&mut transaction, &user_id, &nonce_secret).await?;
+    create_invite_code(&mut transaction, user_id, Uuid::new_v4().to_string()).await?;
+    create_uptime_report(&mut transaction, &user_id, &None).await?;
+    prep_user(&mut transaction, &user_id).await?;
     transaction.commit().await?;
 
     let now = Utc::now();
-    let id = Uuid::parse_str(env::var(BLOCKMESH_SERVER_UUID_ENVAR).unwrap().as_str()).unwrap();
+    let server_user_id =
+        Uuid::parse_str(env::var(BLOCKMESH_SERVER_UUID_ENVAR).unwrap().as_str()).unwrap();
     let email = BLOCK_MESH_SUPPORT_EMAIL;
     let random = Uuid::new_v4().to_string();
     let password = hash(random, DEFAULT_COST)?;
@@ -85,7 +88,7 @@ pub async fn create_test_user(pool: &PgPool) -> anyhow::Result<()> {
         UNION ALL
         SELECT id FROM extant
         "#,
-        id,
+        server_user_id,
         now,
         None::<String>,
         email,

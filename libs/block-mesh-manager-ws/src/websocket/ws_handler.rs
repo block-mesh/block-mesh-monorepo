@@ -6,7 +6,6 @@ use axum::extract::{Query, State, WebSocketUpgrade};
 use axum::response::IntoResponse;
 use block_mesh_manager_database_domain::domain::find_token::find_token;
 use block_mesh_manager_database_domain::domain::get_user_opt_by_email::get_user_opt_by_email;
-use block_mesh_manager_database_domain::domain::prep_user::prep_user;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::HeaderMap;
 use std::collections::HashMap;
@@ -30,19 +29,23 @@ pub async fn ws_handler(
         .get("api_token")
         .ok_or(anyhow!("Missing token".to_string()))?;
     let api_token = Uuid::from_str(api_token).context("Cannot deserialize UUID")?;
-    let pool = state.follower_pool.clone();
-    let mut transaction = create_txn(&pool).await?;
+    let follower_pool = state.follower_pool.clone();
+    let mut transaction = create_txn(&follower_pool).await?;
     let user = get_user_opt_by_email(&mut *transaction, &email)
         .await?
         .ok_or(anyhow!(String::from("User email is not present in DB")))?;
     let api_token = find_token(&mut transaction, &api_token)
         .await?
         .ok_or(anyhow!("Api Token Not Found"))?;
-    prep_user(&mut transaction, &user.id).await?;
     commit_txn(transaction).await?;
     if user.id != api_token.user_id {
         return Err(Error::from(anyhow!("User Not Found")));
     }
+    // let pool = state.pool.clone();
+    // if let Ok(mut transaction) = create_txn(&pool).await {
+    //     let _ = prep_user(&mut transaction, &user.id).await;
+    //     let _ = commit_txn(transaction).await;
+    // }
     let app_env = env::var("APP_ENVIRONMENT").unwrap_or("production".to_string());
     let header_ip = if app_env != "local" {
         headers
