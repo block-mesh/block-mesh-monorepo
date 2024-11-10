@@ -45,6 +45,6 @@ pub async fn ws_bulk_daily_stats(
             tracing::error!("ws_bulk_daily_stats error {} to run query {}", e, query);
             anyhow!(e)
         })?;
-    tracing::info!("ws_bulk_daily_stats finished = {}", r);
+    tracing::info!("ws_bulk_daily_stats finished = {}", r.rows_affected());
     Ok(())
 }

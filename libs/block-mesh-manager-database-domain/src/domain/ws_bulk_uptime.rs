@@ -36,6 +36,6 @@ pub async fn ws_bulk_uptime(
             tracing::error!("ws_bulk_uptime error {} failed to run query {}", e, query);
             anyhow!(e)
         })?;
-    tracing::info!("ws_bulk_uptime finished = {}", r);
+    tracing::info!("ws_bulk_uptime finished = {}", r.rows_affected());
     Ok(())
 }
