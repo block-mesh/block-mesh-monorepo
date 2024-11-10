@@ -4,11 +4,12 @@ use sqlx::{Postgres, Transaction};
 use std::env;
 use uuid::Uuid;
 
-#[tracing::instrument(name = "ws_bulk_daily_stats", skip_all)]
+#[tracing::instrument(name = "ws_bulk_daily_stats", skip_all, err)]
 pub async fn ws_bulk_daily_stats(
     transaction: &mut Transaction<'_, Postgres>,
     user_ids: &[Uuid],
 ) -> anyhow::Result<()> {
+    tracing::info!("ws_bulk_daily_stats starting");
     if user_ids.is_empty() {
         return Ok(());
     }
