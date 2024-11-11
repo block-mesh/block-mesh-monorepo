@@ -33,7 +33,7 @@ pub async fn ws_bulk_loop(pool: PgPool, broadcaster: Broadcaster) -> anyhow::Res
         tracing::info!("ws_bulk_loop starting user_ids: {}", user_ids.len());
         for chunk in user_ids.chunks(chunk_size) {
             if let Ok(mut transaction) = create_txn(&pool).await {
-                let _ = ws_bulk_create_daily_stats(&mut transaction, &chunk)
+                let _ = ws_bulk_create_daily_stats(&mut transaction, chunk)
                     .await
                     .map_err(|e| tracing::error!("ws_bulk_create_daily_stats error: {:?}", e));
                 let _ = commit_txn(transaction).await;
@@ -41,13 +41,13 @@ pub async fn ws_bulk_loop(pool: PgPool, broadcaster: Broadcaster) -> anyhow::Res
             if let Ok(mut transaction) = create_txn(&pool).await {
                 let diff = Utc::now() - prev_time;
                 let sec_diff = abs(diff.num_seconds());
-                let _ = ws_bulk_uptime(&mut transaction, &chunk, sec_diff as f64)
+                let _ = ws_bulk_uptime(&mut transaction, chunk, sec_diff as f64)
                     .await
                     .map_err(|e| tracing::error!("ws_bulk_uptime error: {:?}", e));
                 let _ = commit_txn(transaction).await;
             }
             if let Ok(mut transaction) = create_txn(&pool).await {
-                let _ = ws_bulk_daily_stats(&mut transaction, &chunk)
+                let _ = ws_bulk_daily_stats(&mut transaction, chunk)
                     .await
                     .map_err(|e| tracing::error!("ws_bulk_daily_stats error: {:?}", e));
                 let _ = commit_txn(transaction).await;
