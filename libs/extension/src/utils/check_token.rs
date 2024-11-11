@@ -12,13 +12,12 @@ pub async fn check_token(
     };
     let url = format!("{}/api{}", blockmesh_url, RoutesEnum::Api_CheckToken);
     let client = reqwest::Client::new();
-    let response = client
+    Ok(client
         .post(&url)
         .header("Content-Type", "application/json")
         .json(&credentials)
         .send()
         .await?
         .json()
-        .await?;
-    Ok(response)
+        .await?)
 }
