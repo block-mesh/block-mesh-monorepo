@@ -41,7 +41,11 @@ pub async fn ws_bulk_daily_stats(
         .execute(&mut **transaction)
         .await
         .map_err(|e| {
-            tracing::error!("ws_bulk_daily_stats error {} to run query {}", e, query);
+            tracing::error!(
+                "ws_bulk_daily_stats error {} to run query size {}",
+                e,
+                user_ids.len()
+            );
             anyhow!(e)
         })?;
     tracing::info!(

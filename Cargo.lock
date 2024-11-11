@@ -1858,6 +1858,7 @@ dependencies = [
  "database-utils",
  "http 1.1.0",
  "http-body-util",
+ "num-traits",
  "rand 0.8.5",
  "redis",
  "secret",
@@ -1921,6 +1922,7 @@ dependencies = [
  "http-body-util",
  "logger-general",
  "matches",
+ "num-traits",
  "redis",
  "reqwest 0.12.7",
  "reqwest-websocket",
@@ -3370,6 +3372,7 @@ dependencies = [
 name = "debug-area"
 version = "0.0.363"
 dependencies = [
+ "anyhow",
  "lettre",
  "tokio",
 ]
