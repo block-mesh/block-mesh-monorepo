@@ -32,7 +32,11 @@ pub async fn ws_bulk_uptime(
         .execute(&mut **transaction)
         .await
         .map_err(|e| {
-            tracing::error!("ws_bulk_uptime error {} failed to run query {}", e, query);
+            tracing::error!(
+                "ws_bulk_uptime error {} failed to run query size {}",
+                e,
+                user_ids.len()
+            );
             anyhow!(e)
         })?;
     tracing::info!(

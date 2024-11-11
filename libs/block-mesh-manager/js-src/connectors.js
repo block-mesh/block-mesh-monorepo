@@ -3,13 +3,13 @@ export function onPostMessage(callback) {
   if (window.message_channel_port?.addEventListener) {
     window.message_channel_port.addEventListener('message', (msg) => {
       const { data } = msg
-      console.log('connectors.js::onPostMessage:: event listener', { msg, data })
+      console.debug('connectors.js::onPostMessage:: event listener', { msg, data })
       callback(data)
     })
   } else {
     window.addEventListener('message', (msg) => {
       const { data } = msg
-      console.log('connectors.js::onPostMessage:: event listener', { msg, data })
+      console.debug('connectors.js::onPostMessage:: event listener', { msg, data })
       callback(data)
     })
   }

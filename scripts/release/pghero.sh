@@ -2,7 +2,7 @@
 set -x
 set -eo pipefail
 
-docker build --platform linux/amd64 -t blockmesh-pghero -f blockmesh-pghero.Dockerfile --load .
+docker build --platform linux/amd64 -t blockmesh-pghero -f docker/blockmesh-pghero.Dockerfile --load .
 docker image tag blockmesh-pghero:latest blockmesh/blockmesh-pghero:latest
 docker image push blockmesh/blockmesh-pghero:latest
 

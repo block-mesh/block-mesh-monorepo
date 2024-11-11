@@ -18,7 +18,9 @@ use chrono::Utc;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::{HeaderValue, StatusCode};
 use http_body_util::BodyExt;
+use num_traits::abs;
 use sqlx::PgPool;
+use std::env;
 use uuid::Uuid;
 
 pub fn resolve_ip(
@@ -116,16 +118,22 @@ pub async fn report_uptime_content(
 
     let now = Utc::now();
     let diff = now - uptime.updated_at;
+    let sec_diff = abs(diff.num_seconds());
+    let connected_buffer = env::var("CONNECTED_BUFFER")
+        .unwrap_or("10".to_string())
+        .parse()
+        .unwrap_or(10);
 
-    let (extra, abs) = if (diff.num_seconds()
-        < ((polling_interval * interval_factor) as i64)
-            .checked_div(1_000)
-            .unwrap_or(240))
+    let (extra, abs) = if (sec_diff
+        < connected_buffer
+            * ((polling_interval * interval_factor) as i64)
+                .checked_div(1_000)
+                .unwrap_or(240))
         || mode == HandlerMode::WebSocket
     {
         (
-            diff.num_seconds() as f64,
-            uptime.value.as_f64().unwrap_or_default() + diff.num_seconds() as f64,
+            sec_diff as f64,
+            uptime.value.as_f64().unwrap_or_default() + sec_diff as f64,
         )
     } else {
         (0.0, uptime.value.as_f64().unwrap_or_default())

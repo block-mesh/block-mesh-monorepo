@@ -42,9 +42,9 @@ pub async fn ws_bulk_create_daily_stats(
         .await
         .map_err(|e| {
             tracing::error!(
-                "ws_bulk_create_daily_stats error {} to run query {}",
+                "ws_bulk_create_daily_stats error {} to run query size {}",
                 e,
-                query
+                user_ids.len()
             );
             anyhow!(e)
         })?;

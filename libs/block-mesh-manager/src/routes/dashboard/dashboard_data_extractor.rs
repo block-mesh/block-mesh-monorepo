@@ -1,4 +1,5 @@
 use chrono::Utc;
+use num_traits::abs;
 use sqlx::PgPool;
 use std::cmp::max;
 use std::sync::Arc;
@@ -67,11 +68,12 @@ pub async fn dashboard_data_extractor(
 
     let now = Utc::now();
     let diff = now - uptime_aggregate.updated_at;
+    let sec_diff = abs(diff.num_seconds());
     let limit = 5;
     let user_ips = get_user_ips(&mut transaction, &user_id, limit).await?;
     let connected_buffer = get_envar("CONNECTED_BUFFER").await.parse().unwrap_or(10);
-    let connected = diff.num_seconds()
-        < connected_buffer * ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240);
+    let connected =
+        sec_diff < connected_buffer * ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240);
     let calls_to_action = get_user_call_to_action(&mut transaction, user_id).await?;
     let perks = get_user_perks(&mut transaction, user_id).await?;
     let daily_stats: Vec<DailyStatForDashboard> =

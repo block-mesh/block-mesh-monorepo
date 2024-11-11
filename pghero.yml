@@ -1,6 +1,12 @@
 databases:
-  main:
+  primary:
     url: <%= ENV["DATABASE_URL"] %>
+  primary-follower:
+    url: <%= ENV["FOLLOWER_DATABASE_URL"] %>
+  feature-flags:
+    url: <%= ENV["FEATURE_FLAGS_DATABASE_URL"] %>
+  tg-bot:
+    url: <%= ENV["TG_BOT_DATABASE_URL"] %>
 
     # System stats
     # aws_db_instance_identifier: my-instance
@@ -33,4 +39,4 @@ databases:
 # visualize_url: https://...
 
 # Time zone
-# time_zone: "Pacific Time (US & Canada)"
+time_zone: "Israel Standard Time"
