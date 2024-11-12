@@ -124,6 +124,11 @@ pub async fn report_uptime_content(
         .parse()
         .unwrap_or(10);
 
+    let uptime_bonus = env::var("UPTIME_BONUS")
+        .unwrap_or("1".to_string())
+        .parse()
+        .unwrap_or(1);
+
     let (extra, abs) = if (sec_diff
         < connected_buffer
             * ((polling_interval * interval_factor) as i64)
@@ -132,7 +137,7 @@ pub async fn report_uptime_content(
         || mode == HandlerMode::WebSocket
     {
         (
-            sec_diff as f64,
+            (uptime_bonus * sec_diff) as f64,
             uptime.value.as_f64().unwrap_or_default() + sec_diff as f64,
         )
     } else {
