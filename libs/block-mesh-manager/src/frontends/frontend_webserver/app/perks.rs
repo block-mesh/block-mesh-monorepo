@@ -9,17 +9,25 @@ use crate::frontends::components::tables::table_header::TableHeader;
 use crate::frontends::components::wallet_selector::WalletSelector;
 use crate::frontends::context::notification_context::NotificationContext;
 use crate::frontends::utils::auth::connect_wallet_in_browser;
-use block_mesh_common::interfaces::server_api::DashboardResponse;
+use block_mesh_common::interfaces::server_api::{AuthStatusResponse, DashboardResponse};
 use leptos::*;
 
 #[component]
 pub fn Perks() -> impl IntoView {
     let async_data = use_context::<DashboardResponse>();
+    let auth_status = use_context::<AuthStatusResponse>();
+
     let notifications = expect_context::<NotificationContext>();
     let show_wallet_modal = RwSignal::new(false);
     let wallet_name = RwSignal::new("".to_string());
     let perks = RwSignal::new(vec![]);
     let button_enabled = RwSignal::new(true);
+    let wallet_address = RwSignal::new("".to_string());
+
+    if let Some(a) = auth_status {
+        wallet_address.set(a.wallet_address.unwrap_or_default());
+    }
+
     if let Some(data) = async_data {
         perks.set(data.perks);
         button_enabled.set(data.wallet_address.is_none());
@@ -49,16 +57,6 @@ pub fn Perks() -> impl IntoView {
         </Modal>
         <div class="flex items-start justify-start gap-4">
             <Heading>Perks</Heading>
-            <button
-                on:click=move |_| on_connect_button_click()
-                class="text-magenta-2 -my-0.5 cursor-pointer relative isolate inline-flex items-center justify-center gap-x-2 rounded-lg border text-base/6 font-semibold px-[calc(theme(spacing[3.5])-1px)] py-[calc(theme(spacing[2.5])-1px)] sm:px-[calc(theme(spacing.3)-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] sm:text-sm/6 focus:outline-none data-[focus]:outline data-[focus]:outline-2 data-[focus]:outline-offset-2 data-[focus]:outline-blue-500 data-[disabled]:opacity-50 [&>[data-slot=icon]]:-mx-0.5 [&>[data-slot=icon]]:my-0.5 [&>[data-slot=icon]]:size-5 [&>[data-slot=icon]]:shrink-0 [&>[data-slot=icon]]:text-[--btn-icon] [&>[data-slot=icon]]:sm:my-1 [&>[data-slot=icon]]:sm:size-4 forced-colors:[--btn-icon:ButtonText] forced-colors:data-[hover]:[--btn-icon:ButtonText] border-transparent bg-[--btn-border] bg-[--btn-bg] before:absolute before:inset-0 before:-z-10 before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-[--btn-bg] before:shadow before:hidden border-white/5 after:absolute after:inset-0 after:-z-10 after:rounded-[calc(theme(borderRadius.lg)-1px)] after:shadow-[shadow:inset_0_1px_theme(colors.white/15%)] after:data-[active]:bg-[--btn-hover-overlay] after:data-[hover]:bg-[--btn-hover-overlay] after:-inset-px after:rounded-lg before:data-[disabled]:shadow-none after:data-[disabled]:shadow-none [--btn-bg:theme(colors.zinc.900)] [--btn-border:theme(colors.zinc.950/90%)] [--btn-hover-overlay:theme(colors.white/10%)] [--btn-bg:theme(colors.zinc.600)] [--btn-hover-overlay:theme(colors.white/5%)] [--btn-icon:theme(colors.zinc.400)] data-[active]:[--btn-icon:theme(colors.zinc.300)] data-[hover]:[--btn-icon:theme(colors.zinc.300)] cursor-default"
-            >
-                <span class="material-symbols-outlined">wallet</span>
-                {move || {
-                    if button_enabled.get() { "Connect Wallet" } else { "Wallet Connected" }
-                }}
-
-            </button>
             <a
                 rel="external"
                 href="/twitter/login"
@@ -75,6 +73,21 @@ pub fn Perks() -> impl IntoView {
                 }}
 
             </a>
+            <button
+                on:click=move |_| on_connect_button_click()
+                class="text-magenta-2 -my-0.5 cursor-pointer relative isolate inline-flex items-center justify-center gap-x-2 rounded-lg border text-base/6 font-semibold px-[calc(theme(spacing[3.5])-1px)] py-[calc(theme(spacing[2.5])-1px)] sm:px-[calc(theme(spacing.3)-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] sm:text-sm/6 focus:outline-none data-[focus]:outline data-[focus]:outline-2 data-[focus]:outline-offset-2 data-[focus]:outline-blue-500 data-[disabled]:opacity-50 [&>[data-slot=icon]]:-mx-0.5 [&>[data-slot=icon]]:my-0.5 [&>[data-slot=icon]]:size-5 [&>[data-slot=icon]]:shrink-0 [&>[data-slot=icon]]:text-[--btn-icon] [&>[data-slot=icon]]:sm:my-1 [&>[data-slot=icon]]:sm:size-4 forced-colors:[--btn-icon:ButtonText] forced-colors:data-[hover]:[--btn-icon:ButtonText] border-transparent bg-[--btn-border] bg-[--btn-bg] before:absolute before:inset-0 before:-z-10 before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-[--btn-bg] before:shadow before:hidden border-white/5 after:absolute after:inset-0 after:-z-10 after:rounded-[calc(theme(borderRadius.lg)-1px)] after:shadow-[shadow:inset_0_1px_theme(colors.white/15%)] after:data-[active]:bg-[--btn-hover-overlay] after:data-[hover]:bg-[--btn-hover-overlay] after:-inset-px after:rounded-lg before:data-[disabled]:shadow-none after:data-[disabled]:shadow-none [--btn-bg:theme(colors.zinc.900)] [--btn-border:theme(colors.zinc.950/90%)] [--btn-hover-overlay:theme(colors.white/10%)] [--btn-bg:theme(colors.zinc.600)] [--btn-hover-overlay:theme(colors.white/5%)] [--btn-icon:theme(colors.zinc.400)] data-[active]:[--btn-icon:theme(colors.zinc.300)] data-[hover]:[--btn-icon:theme(colors.zinc.300)] cursor-default"
+            >
+                <span class="material-symbols-outlined">wallet</span>
+                {move || {
+                    if button_enabled.get() {
+                        "Connect Wallet".to_string()
+                    } else {
+                        format!("Wallet Connected:  {}", wallet_address.get())
+                    }
+                }}
+
+            </button>
+
         </div>
         <Subheading class="mt-14">Perks List</Subheading>
         <Table class="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]">

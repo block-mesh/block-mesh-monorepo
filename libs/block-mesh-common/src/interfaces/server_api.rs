@@ -149,6 +149,18 @@ pub struct GetStatsResponse {
     pub stats: Vec<Stat>,
 }
 
+#[derive(Deserialize, Serialize, Debug, Clone)]
+pub struct SigArray(pub Vec<u8>);
+
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug)]
+pub struct LoginWalletForm {
+    pub pubkey: String,
+    pub signature: String,
+    pub nonce: String,
+    pub password: String,
+}
+
 #[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct LoginForm {
@@ -187,6 +199,17 @@ pub struct NewPasswordForm {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct RegisterForm {
     pub email: String,
+    pub password: String,
+    pub password_confirm: String,
+    pub invite_code: String,
+}
+
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug)]
+pub struct RegisterWalletForm {
+    pub pubkey: String,
+    pub signature: String,
+    pub nonce: String,
     pub password: String,
     pub password_confirm: String,
     pub invite_code: String,

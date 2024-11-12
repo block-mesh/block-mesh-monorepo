@@ -61,6 +61,11 @@ pub fn get_static_un_auth_router() -> Router<Arc<AppState>> {
             get(routes::login::login_form::handler).post(routes::login::login_post::handler),
         )
         .route(
+            RoutesEnum::Static_UnAuth_Login_Wallet.to_string().as_str(),
+            get(routes::login::login_wallet::handler)
+                .post(routes::login::login_wallet_post::handler),
+        )
+        .route(
             RoutesEnum::Static_UnAuth_RegisterApi.to_string().as_str(),
             post(routes::register::register_api::handler),
         )
@@ -68,6 +73,13 @@ pub fn get_static_un_auth_router() -> Router<Arc<AppState>> {
             RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
             get(routes::register::register_form::handler)
                 .post(routes::register::register_post::handler),
+        )
+        .route(
+            RoutesEnum::Static_UnAuth_Register_Wallet
+                .to_string()
+                .as_str(),
+            get(routes::register::register_wallet::handler)
+                .post(routes::register::register_wallet_post::handler),
         )
         .route(
             RoutesEnum::Static_UnAuth_Twitter_Callback
