@@ -1,4 +1,5 @@
 use crate::errors::error::Error;
+use crate::middlewares::rate_limit::filter_request;
 use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
 use anyhow::Context;
