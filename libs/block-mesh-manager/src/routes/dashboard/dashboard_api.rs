@@ -11,6 +11,7 @@ use crate::startup::application::AppState;
 use block_mesh_common::interfaces::server_api::{DashboardRequest, DashboardResponse};
 use block_mesh_manager_database_domain::domain::find_token::find_token;
 use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 
 #[tracing::instrument(name = "dashboard_api", skip_all)]
 pub async fn handler(
@@ -18,7 +19,7 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Json(body): Json<DashboardRequest>,
 ) -> Result<Json<DashboardResponse>, Error> {
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let mut transaction = create_txn(&pool).await?;
     let api_token = find_token(&mut transaction, &body.api_token)
         .await?
         .ok_or(Error::ApiTokenNotFound)?;
@@ -29,7 +30,7 @@ pub async fn handler(
         return Err(Error::UserNotFound);
     }
     let user_id = user.id;
-    transaction.commit().await.map_err(Error::from)?;
+    commit_txn(transaction).await?;
     let data = dashboard_data_extractor(&pool, user_id, state).await?;
     Ok(Json(data))
 }

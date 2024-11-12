@@ -37,6 +37,7 @@ pub async fn assign_tasks_to_users(
         };
         let user_id = queue.0;
 
+        // TODO: in manager it's api_token not user.id
         let mut user_limit = match TaskLimit::get_task_limit(&user_id, &mut redis, task_limit).await
         {
             Ok(l) => l,

@@ -19,10 +19,7 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<Json<DashboardResponse>, Error> {
-    let transaction = pool.begin().await.map_err(Error::from)?;
     let user = auth.user.ok_or(Error::UserNotFound)?;
-    let user_id = user.id;
-    transaction.commit().await.map_err(Error::from)?;
-    let data = dashboard_data_extractor(&pool, user_id, state).await?;
+    let data = dashboard_data_extractor(&pool, user.id, state).await?;
     Ok(Json(data))
 }

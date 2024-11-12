@@ -1,4 +1,5 @@
 use crate::errors::error::Error;
+use crate::middlewares::rate_limit::filter_request;
 use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
 use anyhow::Context;
@@ -20,7 +21,6 @@ pub async fn handler(
     request: Request,
 ) -> Result<Json<ReportUptimeResponse>, Error> {
     let app_env = get_envar("APP_ENVIRONMENT").await;
-
     let header_ip = if app_env != "local" {
         headers
             .get("cf-connecting-ip")
@@ -31,6 +31,11 @@ pub async fn handler(
         "127.0.0.1"
     }
     .to_string();
+    let mut redis = state.redis.clone();
+    let filter = filter_request(&mut redis, &query.api_token, &header_ip).await;
+    if filter.is_err() || !filter? {
+        return Ok(Json(ReportUptimeResponse { status_code: 500 }));
+    }
 
     let polling_interval = get_flag_value_from_map(
         &state.flags,
