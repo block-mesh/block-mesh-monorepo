@@ -8,13 +8,13 @@ use axum::{Extension, Form};
 use axum_login::AuthSession;
 use bcrypt::{hash, DEFAULT_COST};
 use redis::{AsyncCommands, RedisResult};
-use serde::{Deserialize, Serialize};
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Signature;
 use sqlx::PgPool;
 use uuid::Uuid;
 
-use block_mesh_common::interfaces::server_api::RegisterWalletForm;
+use block_mesh_common::interfaces::server_api::{RegisterWalletForm, SigArray};
+use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
 use block_mesh_manager_database_domain::domain::prep_user::prep_user;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
@@ -35,9 +35,6 @@ use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
 use crate::startup::application::AppState;
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
-pub struct SigArray(Vec<u8>);
-
 #[tracing::instrument(name = "register_wallet_post", skip_all)]
 pub async fn handler(
     Extension(pool): Extension<PgPool>,
@@ -55,7 +52,9 @@ pub async fn handler(
                 400,
                 "Error",
                 "Bad Signature",
-                "/register_wallet",
+                RoutesEnum::Static_UnAuth_Register_Wallet
+                    .to_string()
+                    .as_str(),
             ));
         }
     };
@@ -64,7 +63,7 @@ pub async fn handler(
     let pubkey = Pubkey::from_str(form.pubkey.as_str()).unwrap_or_default();
     let form_nonce = form.nonce.clone();
     let message = form.nonce.as_bytes();
-    let email = format!("wallet_{pubkey}@blockmesh.xyz");
+    let email = format!("wallet_{pubkey}@blockmesh.xyz").to_ascii_lowercase();
     let redis_nonce: RedisResult<String> = redis.get(form_nonce.clone()).await;
     match redis_nonce {
         Ok(redis_nonce) => {
@@ -73,7 +72,9 @@ pub async fn handler(
                     400,
                     "Retry please",
                     "Invalid nonce",
-                    "/register_wallet",
+                    RoutesEnum::Static_UnAuth_Register_Wallet
+                        .to_string()
+                        .as_str(),
                 ));
             }
         }
@@ -82,7 +83,9 @@ pub async fn handler(
                 400,
                 "Retry please",
                 "Missing nonce",
-                "/register_wallet",
+                RoutesEnum::Static_UnAuth_Register_Wallet
+                    .to_string()
+                    .as_str(),
             ));
         }
     }
@@ -91,21 +94,27 @@ pub async fn handler(
             400,
             "Invalid Password",
             "Password cannot contain spaces",
-            "/register_wallet",
+            RoutesEnum::Static_UnAuth_Register_Wallet
+                .to_string()
+                .as_str(),
         ));
     } else if form.password.chars().all(char::is_alphanumeric) {
         return Ok(Error::redirect(
             400,
             "Invalid Password",
             "Password must contain a special characters",
-            "/register_wallet",
+            RoutesEnum::Static_UnAuth_Register_Wallet
+                .to_string()
+                .as_str(),
         ));
     } else if form.password.len() < 8 {
         return Ok(Error::redirect(
             400,
             "Invalid Password",
             "Password must be at least 8 characters long",
-            "/register_wallet",
+            RoutesEnum::Static_UnAuth_Register_Wallet
+                .to_string()
+                .as_str(),
         ));
     }
 
@@ -114,7 +123,9 @@ pub async fn handler(
             400,
             "Password Mismatch",
             "Please check if your password and password confirm are the same",
-            "/register_wallet",
+            RoutesEnum::Static_UnAuth_Register_Wallet
+                .to_string()
+                .as_str(),
         ));
     }
 
@@ -124,7 +135,9 @@ pub async fn handler(
             400,
             "User Already Exists",
             "User with this email already exists",
-            "/register_wallet",
+            RoutesEnum::Static_UnAuth_Register_Wallet
+                .to_string()
+                .as_str(),
         ));
     }
 
@@ -167,7 +180,9 @@ pub async fn handler(
                     400,
                     "Invite Code Not Found",
                     "Please check if the invite you insert is correct",
-                    "/register_wallet",
+                    RoutesEnum::Static_UnAuth_Register_Wallet
+                        .to_string()
+                        .as_str(),
                 ))
             }
         }
@@ -176,7 +191,9 @@ pub async fn handler(
             400,
             "Invite Code Not Found",
             "Please add an invite code",
-            "/register_wallet",
+            RoutesEnum::Static_UnAuth_Register_Wallet
+                .to_string()
+                .as_str(),
         ));
     }
     commit_txn(transaction).await?;

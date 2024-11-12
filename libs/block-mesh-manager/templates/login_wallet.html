@@ -1,13 +1,17 @@
 {% extends "base.html" %}
 
-
 {% block content %}
-<form action="/register_wallet" method="post" onsubmit="return validateMyForm();">
+<form action="/login_wallet" method="post" onsubmit="return validateMyForm();">
   <div class="bg-dark-blue flex justify-center items-center h-screen">
     <div class="bg-dark-blue border-cyan border-solid border-2 p-8 rounded-lg shadow-md w-80">
-      <h2 class="font-bebas-neue text-off-white text-2xl font-semibold text-center mb-6">
-        Register
-      </h2>
+      <h2 class="text-white text-2xl font-semibold text-center mb-6">Login</h2>
+      <div class="flex justify-around mb-4">
+        <a
+          class="font-bebas-neue px-4 py-2 rounded font-bold text-sm text-cyan hover:text-orange"
+          href="/register_wallet">
+          Register
+        </a>
+      </div>
       <div class="mb-4">
         <label
           for="wallet_select"
@@ -36,22 +40,10 @@
           type="text" id="pubkey" placeholder="Pubkey" name="pubkey" required readonly />
       </div>
       <div class="mb-4">
-        <label
-          class="font-bebas-neue block text-off-white text-sm font-bold mb-2"
-          for="password">Password</label>
+        <label class="font-bebas-neue block text-off-white text-sm font-bold mb-2" for="password">Password</label>
         <input
-          class="text-black shadow appearance-none border rounded w-full py-2 px-3 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-          type="password" id="password" name="password" placeholder="******************" required />
-      </div>
-      <div class="mb-4">
-        <label
-          class="font-bebas-neue block text-off-white text-sm font-bold mb-2"
-          for="password_confirm">Confirm
-          Password</label>
-        <input
-          class="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-          type="password" id="password_confirm" name="password_confirm"
-          placeholder="******************" required />
+          class="shadow appearance-none border rounded w-full py-2 px-3 text-black mb-3 leading-tight focus:outline-none focus:shadow-outline"
+          type="password" id="password" name="password" placeholder="******************">
       </div>
       <div class="mb-4" style="display: none">
         <label
@@ -69,26 +61,12 @@
           class="text-black shadow appearance-none border rounded w-full py-2 px-3 leading-tight focus:outline-none focus:shadow-outline"
           type="text" id="signature" name="signature" placeholder="Signature" required readonly />
       </div>
-      <div class="mb-4">
-        <label
-          class="font-bebas-neue block text-off-white text-sm font-bold mb-2"
-          for="invite_code">Invite Code</label>
-        <input
-          class="shadow appearance-none border rounded w-full py-2 px-3 mb-3 leading-tight focus:outline-none focus:shadow-outline"
-          type="text" id="invite_code" name="invite_code" required
-          placeholder="Invite Code" />
-      </div>
       <div class="flex items-center justify-between">
         <button
           class="hover:text-orange text-off-white py-2 px-4 border border-orange rounded font-bebas-neue focus:outline-none focus:shadow-outline"
           type="submit">
           Submit
         </button>
-        <a
-          class="font-open-sans mb-2 inline-block align-baseline font-bold text-xs text-cyan hover:text-orange"
-          href="/login_wallet">
-          Login with wallet
-        </a>
       </div>
       <div class="flex items-center justify-between mt-6">
         <a
@@ -116,15 +94,6 @@
     </div>
   </div>
 </form>
-<script>
-  let current_url = new URL(window.location.href)
-  let invite_code = current_url.searchParams.get('invite_code')
-  let invite_code_input = document.getElementById('invite_code')
-  if (invite_code && invite_code_input) {
-    invite_code_input.value = invite_code
-    invite_code_input.readOnly = true
-  }
-</script>
 <script src="https://cdn.jsdelivr.net/npm/base-58@0.0.1/Base58.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bn.js@4.12.1/lib/bn.min.js"></script>
 <!--<script src="https://cdn.jsdelivr.net/npm/buffer@6.0.3/index.min.js"></script>-->

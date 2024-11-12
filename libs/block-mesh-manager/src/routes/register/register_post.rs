@@ -130,6 +130,7 @@ pub async fn handler(
         password: Secret::from(form.password),
         nonce,
     };
+
     let session = auth
         .authenticate(creds)
         .await
