@@ -44,7 +44,7 @@ export TWITTER_CLIENT_SECRET=""
 Install the following:
 
 * `cargo install cargo-leptos --version=0.2.20`
-* `cargo install sqlx-cli --verison=0.7.3`
+* `cargo install sqlx-cli --version=0.7.3`
 * `cargo install wasm-pack --version=0.12.1`
 * `rustup target add wasm32-unknown-unknown`
 * `cargo install bunyan`
