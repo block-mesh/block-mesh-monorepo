@@ -20,7 +20,7 @@ pub async fn get_daily_stats_by_user_id(
         updated_at
         FROM daily_stats
         WHERE user_id = $1
-        ORDER BY created_at DESC
+        ORDER BY day DESC
         "#,
         user_id
     )

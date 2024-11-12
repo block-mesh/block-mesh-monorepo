@@ -42,7 +42,6 @@ pub async fn dashboard_data_extractor(
     let tasks =
         get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Tasks, &user_id)
             .await?;
-    let overall_task_count = tasks.value.as_i64().unwrap_or_default();
     let number_of_users_invited = get_number_of_users_invited(&mut transaction, user_id)
         .await
         .map_err(Error::from)?;
@@ -53,7 +52,7 @@ pub async fn dashboard_data_extractor(
     let referrals = get_user_referrals(&mut transaction, user_id)
         .await
         .map_err(Error::from)?;
-    let overall_uptime = uptime_aggregate.value.as_f64().unwrap_or_default();
+
     let user_invite_code = get_user_latest_invite_code(&mut transaction, user_id)
         .await
         .map_err(Error::from)?;
@@ -89,12 +88,19 @@ pub async fn dashboard_data_extractor(
                     day: i.day,
                 }
             })
-            .rev()
             .collect();
+    let overall_uptime = max(
+        uptime_aggregate.value.as_f64().unwrap_or_default() as u64,
+        daily_stats.iter().map(|i| i.uptime).sum::<f64>() as u64,
+    );
+    let overall_task_count = max(
+        tasks.value.as_i64().unwrap_or_default(),
+        daily_stats.iter().map(|i| i.tasks_count).sum::<i64>(),
+    );
     let one_time_bonus_points =
-        calc_one_time_bonus_points(overall_uptime, overall_task_count, &perks) as u64;
+        calc_one_time_bonus_points(overall_uptime as f64, overall_task_count, &perks) as u64;
     let points = max(
-        calc_total_points(overall_uptime, overall_task_count, &perks) as u64,
+        calc_total_points(overall_uptime as f64, overall_task_count, &perks) as u64,
         one_time_bonus_points + daily_stats.iter().map(|i| i.points).sum::<f64>() as u64,
     ) as f64;
     let download = get_or_create_aggregate_by_user_and_name(
@@ -145,12 +151,12 @@ pub async fn dashboard_data_extractor(
         download: download.value.as_f64().unwrap_or_default(),
         latency: latency.value.as_f64().unwrap_or_default(),
         points,
-        uptime: overall_uptime,
+        uptime: overall_uptime as f64,
         tasks: overall_task_count,
         number_of_users_invited,
         invite_code: user_invite_code.invite_code,
         connected,
-        daily_stats: daily_stats.iter().take(10).cloned().collect(),
+        daily_stats: daily_stats.iter().take(10).rev().cloned().collect(),
         perks: perks
             .into_iter()
             .map(|i| PerkUI {
