@@ -25,7 +25,8 @@ jobs:
           "cloudflare-worker-tauri-releases",
           "cloudflare-worker-logger-proxy",
           "cloudflare-feature-flags",
-          "cloudflare-worker-cron"
+          "cloudflare-worker-cron",
+          "cloudflare-wallet-helper"
         ]
     steps:
       - uses: actions/checkout@v4
