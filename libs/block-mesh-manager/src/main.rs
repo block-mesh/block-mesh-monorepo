@@ -94,7 +94,7 @@ async fn run() -> anyhow::Result<()> {
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
     let client = http_client();
     tracing::info!("Starting to get feature flags");
-    let flags = Arc::new(get_all_flags(&client).await?);
+    let flags = Arc::new(get_all_flags(&client).await.unwrap_or(DashMap::new()));
     tracing::info!("Finished getting feature flags");
     let redis_url = env::var("REDIS_URL")?;
     let redis_url = if redis_url.ends_with("#insecure") {
