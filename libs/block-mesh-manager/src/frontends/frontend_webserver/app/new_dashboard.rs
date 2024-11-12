@@ -104,7 +104,9 @@ pub fn NewDashboard() -> impl IntoView {
         <div class="flex items-start justify-start gap-4">
             <Heading>Dashboard</Heading>
             <div class="text-off-white">{move || email.get().to_string()}</div>
-            <div class="text-off-white">{move || format!("Version: {}",  env!("CARGO_PKG_VERSION"))}</div>
+            <div class="text-off-white">
+                {move || format!("Version: {}", env!("CARGO_PKG_VERSION"))}
+            </div>
             <a
                 rel="external"
                 target="_blank"

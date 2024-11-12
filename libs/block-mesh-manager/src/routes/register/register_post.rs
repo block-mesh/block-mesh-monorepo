@@ -11,6 +11,7 @@ use uuid::Uuid;
 use validator::validate_email;
 
 use block_mesh_common::interfaces::server_api::RegisterForm;
+use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
 use block_mesh_manager_database_domain::domain::prep_user::prep_user;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
@@ -43,7 +44,7 @@ pub async fn handler(
             400,
             "Invalid email",
             "Please check if email you inserted is correct",
-            "/register",
+            RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
         ));
     }
 
@@ -52,21 +53,21 @@ pub async fn handler(
             400,
             "Invalid Password",
             "Password cannot contain spaces",
-            "/register",
+            RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
         ));
     } else if form.password.chars().all(char::is_alphanumeric) {
         return Ok(Error::redirect(
             400,
             "Invalid Password",
             "Password must contain a special characters",
-            "/register",
+            RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
         ));
     } else if form.password.len() < 8 {
         return Ok(Error::redirect(
             400,
             "Invalid Password",
             "Password must be at least 8 characters long",
-            "/register",
+            RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
         ));
     }
 
@@ -75,7 +76,7 @@ pub async fn handler(
             400,
             "Password Mismatch",
             "Please check if your password and password confirm are the same",
-            "/register",
+            RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
         ));
     }
 
@@ -85,7 +86,7 @@ pub async fn handler(
             400,
             "User Already Exists",
             "User with this email already exists",
-            "/register",
+            RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
         ));
     }
     let nonce = Nonce::generate_nonce(16);
@@ -110,7 +111,7 @@ pub async fn handler(
                     400,
                     "Invite Code Not Found",
                     "Please check if the invite you insert is correct",
-                    "/register",
+                    RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
                 ))
             }
         }
@@ -119,7 +120,7 @@ pub async fn handler(
             400,
             "Invite Code Not Found",
             "Please add an invite code",
-            "/register",
+            RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
         ));
     }
     commit_txn(transaction).await?;

@@ -37,7 +37,7 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<impl IntoResponse, Redirect> {
-    return match auth.user {
+    match auth.user {
         Some(_) => Err(Redirect::to(
             RoutesEnum::Static_UnAuth_Login.to_string().as_str(),
         )),
@@ -58,5 +58,5 @@ pub async fn handler(
                 chat: BLOCK_MESH_SUPPORT_CHAT.to_string(),
             })
         }
-    };
+    }
 }
