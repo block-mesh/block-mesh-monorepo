@@ -194,6 +194,17 @@ pub struct RegisterForm {
 
 #[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
+pub struct RegisterWalletForm {
+    pub pubkey: String,
+    pub signature: String,
+    pub nonce: String,
+    pub password: String,
+    pub password_confirm: String,
+    pub invite_code: String,
+}
+
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct RegisterResponse {
     pub status_code: u16,
     pub error: Option<String>,

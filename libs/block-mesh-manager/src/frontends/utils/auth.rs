@@ -75,6 +75,7 @@ pub async fn connect_wallet_in_browser(wallet: String) -> bool {
     let msg = Uuid::new_v4().to_string();
     let key = pubkey(&wallet).await;
     let sign = sign_message(&msg, &wallet).await;
+
     let uint8_array = Uint8Array::new(&sign);
     let mut signature = vec![0; uint8_array.length() as usize];
     uint8_array.copy_to(&mut signature[..]);
