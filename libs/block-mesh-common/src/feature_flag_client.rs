@@ -40,7 +40,15 @@ pub async fn get_all_flags(client: &Client) -> anyhow::Result<DashMap<String, Fl
     let flags: DashMap<String, FlagValue> = DashMap::new();
     for flag in FLAGS {
         tracing::info!("Fetching flag {:?}", flag);
-        let value = get_flag_value(flag, client).await?.unwrap_or(Value::Null);
+        let value = match get_flag_value(flag, client).await {
+            Ok(v) => v,
+            Err(_e) => continue,
+        };
+        let value = match value {
+            Some(v) => v,
+            None => continue,
+        };
+
         tracing::info!("Fetching flag {:?} from http , value = {:?}", flag, value);
         if value.is_boolean() {
             flags.insert(
