@@ -53,7 +53,7 @@ severity issues.
 
 ### For example:
 
-* Disclosing the title of issues in private repositories, which should be be inaccessible
+* Disclosing the title of issues in private repositories, which should be inaccessible
 * Injecting attacker controlled content into BlockMesh Network.com (XSS) but not bypassing CSP or executing sensitive
 * Actions with another user’s session
 * Bypassing CSRF validation for low risk actions, such as starring a repository or unsubscribing from a mailing list
