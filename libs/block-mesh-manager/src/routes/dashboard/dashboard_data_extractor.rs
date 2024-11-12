@@ -150,7 +150,7 @@ pub async fn dashboard_data_extractor(
         number_of_users_invited,
         invite_code: user_invite_code.invite_code,
         connected,
-        daily_stats,
+        daily_stats: daily_stats.iter().take(10).cloned().collect(),
         perks: perks
             .into_iter()
             .map(|i| PerkUI {

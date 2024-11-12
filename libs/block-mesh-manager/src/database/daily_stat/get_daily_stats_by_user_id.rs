@@ -21,7 +21,6 @@ pub async fn get_daily_stats_by_user_id(
         FROM daily_stats
         WHERE user_id = $1
         ORDER BY created_at DESC
-        LIMIT 10
         "#,
         user_id
     )
