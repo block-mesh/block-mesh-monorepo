@@ -5,11 +5,6 @@ use tracing_subscriber::prelude::*;
 use tracing_web::{performance_layer, MakeConsoleWriter};
 use worker::*;
 
-use block_mesh_common::constants::{
-    BLOCK_MESH_GITBOOK, BLOCK_MESH_GITHUB, BLOCK_MESH_LOGO, BLOCK_MESH_SUPPORT_CHAT,
-    BLOCK_MESH_SUPPORT_EMAIL, BLOCK_MESH_TWITTER,
-};
-
 #[event(start)]
 fn start() {
     let fmt_layer = tracing_subscriber::fmt::layer()
