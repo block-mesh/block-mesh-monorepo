@@ -27,13 +27,13 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Json(body): Json<GetTaskRequest>,
 ) -> Result<Json<Option<GetTaskResponse>>, Error> {
-    let mut transaction = create_txn(&pool).await?;
-    let api_token = find_token(&mut transaction, &body.api_token)
-        .await?
-        .ok_or(Error::ApiTokenNotFound)?;
-    let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
-        .await?
-        .ok_or_else(|| Error::UserNotFound)?;
+    let limit = get_envar("TASK_LIMIT").await.parse().unwrap_or(10);
+    let mut redis = state.redis.clone();
+    let mut redis_user = match TaskLimit::get_task_limit(&body.api_token, &mut redis, limit).await {
+        Ok(r) => r,
+        Err(_) => return Ok(Json(None)),
+    };
+
     let app_env = get_envar("APP_ENVIRONMENT").await;
     let header_ip = if app_env != "local" {
         headers
@@ -45,22 +45,22 @@ pub async fn handler(
         "127.0.0.1"
     };
 
-    let mut redis = state.redis.clone();
-    let filter = filter_request(&mut redis, &user.id, header_ip).await;
+    let filter = filter_request(&mut redis, &body.api_token, header_ip).await;
     if filter.is_err() || !filter? {
         return Ok(Json(None));
     }
 
+    let mut transaction = create_txn(&pool).await?;
+    let api_token = find_token(&mut transaction, &body.api_token)
+        .await?
+        .ok_or(Error::ApiTokenNotFound)?;
+    let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
+        .await?
+        .ok_or_else(|| Error::UserNotFound)?;
+
     if user.email.to_ascii_lowercase() != body.email.to_ascii_lowercase() {
         return Err(Error::UserNotFound);
     }
-
-    let limit = get_envar("TASK_LIMIT").await.parse().unwrap_or(10);
-
-    let mut redis_user = match TaskLimit::get_task_limit(&user.id, &mut redis, limit).await {
-        Ok(r) => r,
-        Err(_) => return Ok(Json(None)),
-    };
 
     let task = find_task_assigned_to_user(&mut transaction, &user.id).await?;
     if let Some(task) = task {
@@ -79,7 +79,8 @@ pub async fn handler(
     };
     let _ = create_daily_stat(&mut transaction, &user.id).await?;
     update_task_assigned(&mut transaction, task.id, user.id, TaskStatus::Assigned).await?;
-    redis_user.tasks += 1;
+    let task_bonus = get_envar("TASK_BONUS").await.parse().unwrap_or(0);
+    redis_user.tasks += 1 + task_bonus;
     commit_txn(transaction).await?;
     let expire = 10u64 * Backend::get_expire().await as u64;
     TaskLimit::save_user(&mut redis, &redis_user, expire).await;

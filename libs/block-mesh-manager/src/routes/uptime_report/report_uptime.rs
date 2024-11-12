@@ -20,7 +20,6 @@ pub async fn handler(
     request: Request,
 ) -> Result<Json<ReportUptimeResponse>, Error> {
     let app_env = get_envar("APP_ENVIRONMENT").await;
-
     let header_ip = if app_env != "local" {
         headers
             .get("cf-connecting-ip")
@@ -31,6 +30,11 @@ pub async fn handler(
         "127.0.0.1"
     }
     .to_string();
+    let mut redis = state.redis.clone();
+    let filter = filter_request(&mut redis, &query.api_token, &header_ip).await;
+    if filter.is_err() || !filter? {
+        return Ok(Json(ReportUptimeResponse { status_code: 400 }));
+    }
 
     let polling_interval = get_flag_value_from_map(
         &state.flags,
