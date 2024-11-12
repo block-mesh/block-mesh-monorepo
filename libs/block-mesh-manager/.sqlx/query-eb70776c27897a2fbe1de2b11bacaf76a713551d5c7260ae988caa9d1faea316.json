@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT\n        id,\n        user_id,\n        tasks_count,\n        status,\n        day,\n        created_at,\n        uptime,\n        updated_at\n        FROM daily_stats\n        WHERE user_id = $1\n        ORDER BY created_at DESC\n        LIMIT 10\n        ",
+  "query": "\n        SELECT\n        id,\n        user_id,\n        tasks_count,\n        status,\n        day,\n        created_at,\n        uptime,\n        updated_at\n        FROM daily_stats\n        WHERE user_id = $1\n        ORDER BY day DESC\n        ",
   "describe": {
     "columns": [
       {
@@ -60,5 +60,5 @@
       false
     ]
   },
-  "hash": "a0b20a0976fd0e4a0622e1b3877bfd7efb9c8c231cccd3b843852287f5fe3753"
+  "hash": "eb70776c27897a2fbe1de2b11bacaf76a713551d5c7260ae988caa9d1faea316"
 }
