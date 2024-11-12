@@ -17,7 +17,6 @@ const _RESET_TEMPLATE_ID: &str = "reset password";
 const EMAIL: &str = "support@blockmesh.xyz";
 const GMAIL_FROM: &str = "support@blockmesh.xyz";
 const _SUBJECT: &str = "BlockMesh Network";
-const BCC: &str = "support@blockmesh.xyz";
 const REPLY_TO: &str = "support@blockmesh.xyz";
 
 const CONFIRM_SUBJECT: &str = "Confirmation Email from BlockMesh Network";
@@ -50,7 +49,6 @@ impl EmailClient {
     pub async fn send_confirmation_email_aws(&self, to: &str, token: &str) -> anyhow::Result<()> {
         let mut dest: Destination = Destination::builder().build();
         dest.to_addresses = Some(vec![to.to_string()]);
-        dest.bcc_addresses = Some(vec![BCC.to_string()]);
         let subject_content = Content::builder()
             .data(CONFIRM_SUBJECT)
             .charset("UTF-8")
@@ -113,7 +111,6 @@ impl EmailClient {
     pub async fn send_reset_password_email_aws(&self, to: &str, token: &str) -> anyhow::Result<()> {
         let mut dest: Destination = Destination::builder().build();
         dest.to_addresses = Some(vec![to.to_string()]);
-        dest.bcc_addresses = Some(vec![BCC.to_string()]);
         let subject_content = Content::builder()
             .data(RESET_SUBJECT)
             .charset("UTF-8")
@@ -159,7 +156,7 @@ impl EmailClient {
             .from(GMAIL_FROM.parse()?)
             .to(to.parse()?)
             .subject(RESET_SUBJECT)
-            .reply_to(BCC.parse()?)
+            .reply_to(REPLY_TO.parse()?)
             .header(ContentType::TEXT_HTML)
             .body(body)?;
         let creds = Credentials::new(GMAIL_FROM.to_owned(), gmail_password.to_owned());
