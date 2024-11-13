@@ -8,19 +8,18 @@ use anyhow::{anyhow, Context};
 use axum::extract::Query;
 use axum::response::Redirect;
 use axum::Extension;
-use block_mesh_common::constants::BLOCKMESH_TWITTER_USER_ID;
+use block_mesh_common::constants::{BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID};
+use block_mesh_common::reqwest::http_client;
 use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use http::StatusCode;
-use reqwest::ClientBuilder;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::PgPool;
 use std::collections::HashMap;
 use std::env;
 use std::sync::Arc;
-use std::time::Duration;
 use tokio::sync::Mutex;
 use twitter_v2::oauth2::{AuthorizationCode, CsrfToken};
 use twitter_v2::TwitterApi;
@@ -32,6 +31,7 @@ pub struct CallbackParams {
     state: CsrfToken,
 }
 
+#[tracing::instrument(name = "twitter_callback", skip(ctx, pool))]
 pub async fn callback(
     Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>,
     Extension(pool): Extension<PgPool>,
@@ -40,11 +40,20 @@ pub async fn callback(
     let parts: Vec<&str> = state.secret().split("___").collect();
     let state = CsrfToken::new(parts[0].to_string());
     let user_id = Uuid::parse_str(parts[1]).map_err(|e| anyhow!("Cannot parse UUID - {}", e))?;
-
+    let target = parts[2]
+        .to_string()
+        .parse::<u64>()
+        .map_err(|e| anyhow!("Cannot parse target - {}", e))?;
     let mut transaction = pool.begin().await?;
     let twitter_agg = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
-        AggregateName::Twitter,
+        if target == BLOCKMESH_TWITTER_USER_ID {
+            AggregateName::Twitter
+        } else if target == BLOCKMESH_FOUNDER_TWITTER_USER_ID {
+            AggregateName::FounderTwitter
+        } else {
+            return Err(Error::Auth("Bad follow target".to_string()));
+        },
         &user_id,
     )
     .await?;
@@ -90,12 +99,18 @@ pub async fn callback(
     let api = TwitterApi::new(oauth_token);
     if let Ok(user) = api.get_users_me().send().await {
         let data = user.into_data().unwrap();
-        let follow_data = get_following(data.id.as_u64()).await?;
+        let follow_data = get_following(data.id.as_u64(), target).await?;
         if follow_data.following {
             add_perk_to_user(
                 &mut transaction,
                 user_id.unwrap(),
-                PerkName::Twitter,
+                if target == BLOCKMESH_TWITTER_USER_ID {
+                    PerkName::Twitter
+                } else if target == BLOCKMESH_FOUNDER_TWITTER_USER_ID {
+                    PerkName::FounderTwitter
+                } else {
+                    return Err(Error::Auth("Bad follow target".to_string()));
+                },
                 1.0,
                 500.0,
                 serde_json::to_value(&follow_data).unwrap(),
@@ -154,7 +169,7 @@ pub struct TwitterApiResponse {
     extra_fields: HashMap<String, Value>,
 }
 
-async fn get_following(user_id: u64) -> anyhow::Result<TwitterApiSource> {
+async fn get_following(user_id: u64, target: u64) -> anyhow::Result<TwitterApiSource> {
     #[derive(Serialize, Deserialize, Debug)]
     #[allow(non_snake_case)]
     struct Params {
@@ -163,16 +178,12 @@ async fn get_following(user_id: u64) -> anyhow::Result<TwitterApiSource> {
         apiKey: String,
         resFormat: String,
     }
-
-    let client = ClientBuilder::new()
-        .timeout(Duration::from_millis(3_000))
-        .build()
-        .unwrap();
-    let value: TwitterApiResponse = client
+    let client = http_client();
+    let value: Value = client
         .get(env::var("TWITTER_API_URL").expect("could not find TWITTER_API_URL"))
         .query(&Params {
             apiKey: env::var("TWITTER_API_TOKEN").expect("could not find TWITTER_API_TOKEN"),
-            target_id: BLOCKMESH_TWITTER_USER_ID,
+            target_id: target,
             source_id: user_id,
             resFormat: "json".to_string(),
         })
@@ -188,5 +199,26 @@ async fn get_following(user_id: u64) -> anyhow::Result<TwitterApiSource> {
         .await?
         .json()
         .await?;
+    let value: TwitterApiResponse = serde_json::from_value(value)?;
+    // let value: TwitterApiResponse = client
+    //     .get(env::var("TWITTER_API_URL").expect("could not find TWITTER_API_URL"))
+    //     .query(&Params {
+    //         apiKey: env::var("TWITTER_API_TOKEN").expect("could not find TWITTER_API_TOKEN"),
+    //         target_id: target,
+    //         source_id: user_id,
+    //         resFormat: "json".to_string(),
+    //     })
+    //     .header(
+    //         "x-rapidapi-host",
+    //         env::var("TWITTER_API_HOST").expect("could not find TWITTER_API_HOST"),
+    //     )
+    //     .header(
+    //         "x-rapidapi-key",
+    //         env::var("TWITTER_API_TOKEN_TOKEN").expect("could not find TWITTER_API_TOKEN_TOKEN"),
+    //     )
+    //     .send()
+    //     .await?
+    //     .json()
+    //     .await?;
     Ok(value.data.relationship.source)
 }

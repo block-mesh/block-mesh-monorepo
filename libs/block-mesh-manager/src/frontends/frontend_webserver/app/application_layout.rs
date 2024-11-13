@@ -69,10 +69,10 @@ pub fn ApplicationSidebar() -> impl IntoView {
                         <PerkIcon/>
                         <SidebarLabel>Perks</SidebarLabel>
                     </SidebarItemLink>
-                    // <SidebarItemLink href="/ui/daily_leaderboard">
-                    //     <MedalIcon/>
-                    //     <SidebarLabel>Daily Leaderboard</SidebarLabel>
-                    // </SidebarItemLink>
+                // <SidebarItemLink href="/ui/daily_leaderboard">
+                // <MedalIcon/>
+                // <SidebarLabel>Daily Leaderboard</SidebarLabel>
+                // </SidebarItemLink>
                 </SidebarSection>
 
                 <SidebarSpacer/>

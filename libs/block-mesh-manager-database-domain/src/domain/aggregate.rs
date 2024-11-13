@@ -29,6 +29,7 @@ pub struct AggregateTmp {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub enum AggregateName {
     Twitter,
+    FounderTwitter,
     Uptime,
     Download,
     Upload,
@@ -41,14 +42,15 @@ pub enum AggregateName {
 impl Display for AggregateName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            AggregateName::Twitter => write!(f, "Twitter"),
-            AggregateName::Uptime => write!(f, "Uptime"),
-            AggregateName::Download => write!(f, "Download"),
-            AggregateName::Upload => write!(f, "Upload"),
-            AggregateName::Latency => write!(f, "Latency"),
-            AggregateName::Tasks => write!(f, "Tasks"),
-            AggregateName::Invalid => write!(f, "Invalid"),
-            AggregateName::CronReports => write!(f, "CronReports"),
+            Self::Twitter => write!(f, "Twitter"),
+            Self::FounderTwitter => write!(f, "FounderTwitter"),
+            Self::Uptime => write!(f, "Uptime"),
+            Self::Download => write!(f, "Download"),
+            Self::Upload => write!(f, "Upload"),
+            Self::Latency => write!(f, "Latency"),
+            Self::Tasks => write!(f, "Tasks"),
+            Self::Invalid => write!(f, "Invalid"),
+            Self::CronReports => write!(f, "CronReports"),
         }
     }
 }
@@ -57,21 +59,22 @@ impl From<Option<String>> for AggregateName {
     fn from(s: Option<String>) -> Self {
         match s {
             Some(s) => Self::from(s),
-            None => AggregateName::Invalid,
+            None => Self::Invalid,
         }
     }
 }
 impl From<String> for AggregateName {
     fn from(s: String) -> Self {
         match s.as_str() {
-            "Twitter" => AggregateName::Twitter,
-            "Uptime" => AggregateName::Uptime,
-            "Download" => AggregateName::Download,
-            "Upload" => AggregateName::Upload,
-            "Latency" => AggregateName::Latency,
-            "Tasks" => AggregateName::Tasks,
-            "CronReports" => AggregateName::CronReports,
-            _ => AggregateName::Invalid,
+            "FounderTwitter" => Self::FounderTwitter,
+            "Twitter" => Self::Twitter,
+            "Uptime" => Self::Uptime,
+            "Download" => Self::Download,
+            "Upload" => Self::Upload,
+            "Latency" => Self::Latency,
+            "Tasks" => Self::Tasks,
+            "CronReports" => Self::CronReports,
+            _ => Self::Invalid,
         }
     }
 }
