@@ -116,7 +116,7 @@ impl Broadcaster {
         sink_sender: mpsc::Sender<WsServerMessage>,
     ) -> broadcast::Receiver<WsServerMessage> {
         self.emails.insert(email.clone());
-        self.user_ids.insert(user_id.clone());
+        self.user_ids.insert(user_id);
         let _ = self
             .sockets
             .insert((user_id, ip.clone()), sink_sender.clone());
