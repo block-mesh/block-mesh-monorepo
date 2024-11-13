@@ -16,12 +16,14 @@ use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
+#[allow(unused_imports)]
 use crate::utils::check_token::check_token;
 use crate::utils::connectors::{
     get_storage_value, send_storage_value_to_iframe, set_storage_value, storageOnChange,
 };
 use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageValue};
 use block_mesh_common::constants::DeviceType;
+#[allow(unused_imports)]
 use block_mesh_common::interfaces::server_api::{
     CheckTokenRequest, GetLatestInviteCodeRequest, GetLatestInviteCodeResponse,
 };
