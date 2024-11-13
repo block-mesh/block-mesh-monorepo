@@ -24,7 +24,10 @@ pub async fn ask(question: String, model_name: ModelName) -> anyhow::Result<Stri
         }],
     };
     let rs = openai.chat_completion_create(&body);
-    let choices = rs.unwrap().choices;
+    let choices = match rs {
+        Ok(choices) => choices.choices,
+        Err(e) => return Err(anyhow!("{}", e)),
+    };
     let message = &choices[0].message.as_ref().ok_or(anyhow!("No message"))?;
     Ok(message.content.clone())
 }

@@ -1,5 +1,3 @@
-use crate::database::api_token::get_api_token_by_user_id_and_status::get_api_token_by_usr_and_status;
-use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use axum::extract::State;
@@ -7,7 +5,7 @@ use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{
     CheckTokenRequest, CheckTokenResponseEnum, GetTokenResponse,
 };
-use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
+use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::sync::Arc;
@@ -31,50 +29,49 @@ pub async fn handler(
         };
     }
 
-    let mut trasaction = create_txn(&pool).await?;
-
-    let user = match get_user_opt_by_email(&mut trasaction, &email).await {
-        Ok(user) => match user {
+    let mut transaction = create_txn(&pool).await?;
+    let user_and_api_token = match get_user_and_api_token_by_email(&mut transaction, &email).await {
+        Ok(user_and_api_token) => match user_and_api_token {
             Some(user) => user,
             None => {
                 check_token_map.insert(key, CheckTokenResponseEnum::UserNotFound);
-                commit_txn(trasaction).await?;
+                commit_txn(transaction).await?;
                 return Err(Error::UserNotFound);
             }
         },
         Err(_) => {
             check_token_map.insert(key, CheckTokenResponseEnum::UserNotFound);
-            commit_txn(trasaction).await?;
+            commit_txn(transaction).await?;
             return Err(Error::UserNotFound);
         }
     };
-    let api_token =
-        match get_api_token_by_usr_and_status(&mut trasaction, &user.id, ApiTokenStatus::Active)
-            .await
-        {
-            Ok(api_token) => match api_token {
-                Some(api_token) => api_token,
-                None => {
-                    check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenNotFound);
-                    commit_txn(trasaction).await?;
-                    return Err(Error::ApiTokenNotFound);
-                }
-            },
-            Err(_) => {
-                check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenNotFound);
-                commit_txn(trasaction).await?;
-                return Err(Error::ApiTokenNotFound);
-            }
-        };
-
-    if *api_token.token.as_ref() != body.api_token {
+    // let api_token =
+    //     match get_api_token_by_usr_and_status(&mut trasaction, &user.id, ApiTokenStatus::Active)
+    //         .await
+    //     {
+    //         Ok(api_token) => match api_token {
+    //             Some(api_token) => api_token,
+    //             None => {
+    //                 check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenNotFound);
+    //                 commit_txn(trasaction).await?;
+    //                 return Err(Error::ApiTokenNotFound);
+    //             }
+    //         },
+    //         Err(_) => {
+    //             check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenNotFound);
+    //             commit_txn(trasaction).await?;
+    //             return Err(Error::ApiTokenNotFound);
+    //         }
+    //     };
+    //
+    if *user_and_api_token.token.as_ref() != body.api_token {
         check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenMismatch);
-        commit_txn(trasaction).await?;
+        commit_txn(transaction).await?;
         return Err(Error::ApiTokenMismatch);
     }
 
     let response = GetTokenResponse {
-        api_token: Some(*api_token.token.as_ref()),
+        api_token: Some(*user_and_api_token.token.as_ref()),
         message: None,
     };
     check_token_map.insert(
@@ -82,6 +79,6 @@ pub async fn handler(
         CheckTokenResponseEnum::GetTokenResponse(response.clone()),
     );
 
-    commit_txn(trasaction).await?;
+    commit_txn(transaction).await?;
     Ok(Json(response))
 }
