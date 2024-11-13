@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 set -x
 set -eo pipefail
+export APP_ENVIRONMENT="local"
 export _PWD="$(pwd)"
 export ROOT="$(git rev-parse --show-toplevel)"
 source "${ROOT}/scripts/setup.sh"

@@ -1,3 +1,4 @@
+use block_mesh_common::constants::DeviceType;
 use block_mesh_common::env::app_env_var::AppEnvVar;
 use block_mesh_common::env::env_var::EnvVar;
 use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
@@ -64,7 +65,7 @@ pub async fn spawn_app() -> TestApp {
         .build()
         .unwrap_or_default();
 
-    let flags = Arc::new(get_all_flags(&client).await.unwrap());
+    let flags = Arc::new(get_all_flags(&client, DeviceType::AppServer).await.unwrap());
     let redis_client = redis::Client::open(env::var("REDIS_URL").unwrap()).unwrap();
     let redis = redis_client
         .get_multiplexed_async_connection()

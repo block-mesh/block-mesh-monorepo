@@ -5,12 +5,13 @@ use redis::aio::MultiplexedConnection;
 use sqlx::PgPool;
 use std::env;
 use std::str::FromStr;
+use std::sync::Arc;
 
 #[derive(Clone)]
 pub struct AppState {
     pub pool: PgPool,
     pub follower_pool: PgPool,
-    pub websocket_manager: WebSocketManager,
+    pub websocket_manager: Arc<WebSocketManager>,
     pub environment: Environment,
     pub redis: MultiplexedConnection,
 }
@@ -26,7 +27,7 @@ impl AppState {
             get_pg_pool(Some("HEROKU_POSTGRESQL_COPPER_URL".to_string())).await
         };
 
-        let websocket_manager = WebSocketManager::new();
+        let websocket_manager = Arc::new(WebSocketManager::new());
         let redis_url = env::var("REDIS_URL").unwrap();
         let redis_url = if redis_url.ends_with("#insecure") {
             redis_url

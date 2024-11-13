@@ -1,4 +1,4 @@
-use crate::constants::BLOCK_MESH_FEATURE_FLAGS;
+use crate::constants::{DeviceType, BLOCK_MESH_FEATURE_FLAGS};
 use dashmap::DashMap;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -36,11 +36,14 @@ impl TryInto<f64> for FlagValue {
 }
 
 #[tracing::instrument(name = "get_all_flags", skip_all, ret, err)]
-pub async fn get_all_flags(client: &Client) -> anyhow::Result<DashMap<String, FlagValue>> {
+pub async fn get_all_flags(
+    client: &Client,
+    device_type: DeviceType,
+) -> anyhow::Result<DashMap<String, FlagValue>> {
     let flags: DashMap<String, FlagValue> = DashMap::new();
     for flag in FLAGS {
         tracing::info!("Fetching flag {:?}", flag);
-        let value = match get_flag_value(flag, client).await {
+        let value = match get_flag_value(flag, client, device_type).await {
             Ok(v) => v,
             Err(_e) => continue,
         };
@@ -77,8 +80,15 @@ pub fn get_flag_value_from_map(
 }
 
 #[tracing::instrument(name = "get_flag_value", skip_all, ret, err)]
-pub async fn get_flag_value(flag: &str, client: &Client) -> anyhow::Result<Option<Value>> {
-    let url = format!("{}/read-flag/{}", BLOCK_MESH_FEATURE_FLAGS, flag);
+pub async fn get_flag_value(
+    flag: &str,
+    client: &Client,
+    device_type: DeviceType,
+) -> anyhow::Result<Option<Value>> {
+    let url = format!(
+        "{}/{}/read-flag/{}",
+        BLOCK_MESH_FEATURE_FLAGS, device_type, flag
+    );
     let response: Value = client.get(&url).send().await?.json().await?;
     Ok(Some(response))
 }
@@ -95,7 +105,7 @@ mod tests {
     #[traced_test]
     async fn test_test_boolean_false() {
         let client = http_client();
-        let value = get_flag_value("test_boolean_false", &client).await;
+        let value = get_flag_value("test_boolean_false", &client, DeviceType::Unknown).await;
         assert!(value.is_ok());
         let value = value.unwrap();
         assert!(value.is_some());
@@ -107,7 +117,7 @@ mod tests {
     #[traced_test]
     async fn test_test_boolean_true() {
         let client = http_client();
-        let value = get_flag_value("test_boolean_true", &client).await;
+        let value = get_flag_value("test_boolean_true", &client, DeviceType::Unknown).await;
         assert!(value.is_ok());
         let value = value.unwrap();
         assert!(value.is_some());
@@ -120,7 +130,7 @@ mod tests {
     async fn test_missing_value() {
         let client = http_client();
         let uuid = Uuid::new_v4();
-        let value = get_flag_value(&uuid.to_string(), &client).await;
+        let value = get_flag_value(&uuid.to_string(), &client, DeviceType::Unknown).await;
         assert!(value.is_err());
     }
 
@@ -128,7 +138,7 @@ mod tests {
     #[traced_test]
     async fn test_polling_value() {
         let client = http_client();
-        let value = get_flag_value("polling_interval", &client).await;
+        let value = get_flag_value("polling_interval", &client, DeviceType::Unknown).await;
         assert!(value.is_ok());
         let value = value.unwrap();
         assert!(value.is_some());
@@ -141,7 +151,7 @@ mod tests {
     #[traced_test]
     async fn test_all_values() {
         let client = http_client();
-        let _values = get_all_flags(&client).await.unwrap();
+        let _values = get_all_flags(&client, DeviceType::Unknown).await.unwrap();
     }
 
     #[tokio::test]

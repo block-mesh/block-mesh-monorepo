@@ -2,9 +2,11 @@ use crate::database::pre_populate_db;
 use crate::routes::get_router;
 use axum::{Extension, Router};
 use block_mesh_common::env::load_dotenv::load_dotenv;
+use dashmap::DashMap;
 use database_utils::utils::connection::get_pg_pool;
 use database_utils::utils::migrate::migrate;
 use logger_general::tracing::setup_tracing_stdout_only;
+use serde_json::Value;
 use std::net::SocketAddr;
 use std::{env, process};
 use tokio::net::TcpListener;
@@ -26,9 +28,11 @@ async fn main() -> anyhow::Result<()> {
     let _ = pre_populate_db(&db_pool).await;
     let router = get_router();
     let cors = CorsLayer::permissive();
+    let flags_cache: DashMap<String, Value> = DashMap::new();
     let app = Router::new()
         .nest("/", router)
         .layer(cors)
+        .layer(Extension(flags_cache))
         .layer(Extension(db_pool.clone()));
     let port = env::var("PORT").unwrap_or("8001".to_string());
     let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).await?;

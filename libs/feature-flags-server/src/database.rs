@@ -9,7 +9,7 @@ use uuid::Uuid;
 pub struct Flag {
     pub id: Uuid,
     pub name: String,
-    pub value: serde_json::Value,
+    pub value: Value,
     pub created_at: Option<DateTime<Utc>>,
 }
 
@@ -32,6 +32,7 @@ pub async fn get_flag(
     Ok(flag)
 }
 
+#[allow(dead_code)]
 pub async fn get_flags(transaction: &mut Transaction<'_, Postgres>) -> anyhow::Result<Vec<Flag>> {
     let flags = sqlx::query_as!(
         Flag,
