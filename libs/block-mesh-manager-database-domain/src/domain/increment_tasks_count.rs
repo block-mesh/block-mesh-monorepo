@@ -5,7 +5,7 @@ use uuid::Uuid;
 pub async fn increment_tasks_count(
     transaction: &mut Transaction<'_, Postgres>,
     id: Uuid,
-    value: i64,
+    value: i32,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
         r#"UPDATE daily_stats SET tasks_count = tasks_count + $2 WHERE id = $1"#,

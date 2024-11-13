@@ -1,10 +1,11 @@
 use crate::websocket::manager::broadcaster::Broadcaster;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use std::env;
+use std::sync::Arc;
 use std::time::Duration;
 
 #[tracing::instrument(name = "ws_base_msg_loop", skip_all)]
-pub async fn ws_base_msg_loop(broadcaster: Broadcaster) -> anyhow::Result<()> {
+pub async fn ws_base_msg_loop(broadcaster: Arc<Broadcaster>) -> anyhow::Result<()> {
     let queue_size = env::var("QUEUE_SIZE")
         .unwrap_or("100".to_string())
         .parse()?;

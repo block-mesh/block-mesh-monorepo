@@ -29,6 +29,11 @@ pub async fn ws_handler(
         .get("api_token")
         .ok_or(anyhow!("Missing token".to_string()))?;
     let api_token = Uuid::from_str(api_token).context("Cannot deserialize UUID")?;
+    let websocket_manager = state.websocket_manager.clone();
+    let broadcaster = websocket_manager.broadcaster.clone();
+    if broadcaster.emails.contains(&email) {
+        return Err(Error::from(anyhow!("Already connected")));
+    }
     let follower_pool = state.follower_pool.clone();
     let mut transaction = create_txn(&follower_pool).await?;
     let user = get_user_opt_by_email(&mut *transaction, &email)
@@ -58,5 +63,5 @@ pub async fn ws_handler(
     }
     .to_string();
 
-    Ok(ws.on_upgrade(move |socket| handle_socket(socket, header_ip, state, user.id)))
+    Ok(ws.on_upgrade(move |socket| handle_socket(user.email, socket, header_ip, state, user.id)))
 }

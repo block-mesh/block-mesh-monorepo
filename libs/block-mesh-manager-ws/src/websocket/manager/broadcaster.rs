@@ -1,5 +1,5 @@
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
-use dashmap::DashMap;
+use dashmap::{DashMap, DashSet};
 use futures::future::join_all;
 use std::collections::VecDeque;
 use std::sync::Arc;
@@ -12,6 +12,8 @@ pub struct Broadcaster {
     pub global_transmitter: broadcast::Sender<WsServerMessage>,
     pub sockets: Arc<DashMap<(Uuid, String), mpsc::Sender<WsServerMessage>>>,
     pub queue: Arc<Mutex<VecDeque<(Uuid, String)>>>,
+    pub emails: Arc<DashSet<String>>,
+    pub user_ids: Arc<DashSet<Uuid>>,
 }
 
 impl Default for Broadcaster {
@@ -24,6 +26,8 @@ impl Broadcaster {
     pub fn new() -> Self {
         let (global_transmitter, _) = broadcast::channel(10000);
         Self {
+            emails: Arc::new(DashSet::new()),
+            user_ids: Arc::new(DashSet::new()),
             global_transmitter,
             sockets: Arc::new(DashMap::new()),
             queue: Arc::new(Mutex::new(VecDeque::new())),
@@ -106,10 +110,13 @@ impl Broadcaster {
 
     pub async fn subscribe(
         &self,
+        email: String,
         user_id: Uuid,
         ip: String,
         sink_sender: mpsc::Sender<WsServerMessage>,
     ) -> broadcast::Receiver<WsServerMessage> {
+        self.emails.insert(email.clone());
+        self.user_ids.insert(user_id.clone());
         let _ = self
             .sockets
             .insert((user_id, ip.clone()), sink_sender.clone());
@@ -118,7 +125,9 @@ impl Broadcaster {
         self.global_transmitter.subscribe()
     }
 
-    pub async fn unsubscribe(&self, user_id: Uuid, ip: String) {
+    pub async fn unsubscribe(&self, email: String, user_id: Uuid, ip: String) {
+        self.emails.remove(&email);
+        self.user_ids.remove(&user_id);
         self.sockets.remove(&(user_id, ip.clone()));
         let queue = &mut self.queue.lock().await;
         if let Some(pos) = queue.iter().position(|(a, b)| a == &user_id && b == &ip) {
