@@ -24,7 +24,12 @@ use uuid::Uuid;
 
 #[allow(dead_code)]
 pub async fn dashboard(url: &str, credentials: &DashboardRequest) -> anyhow::Result<()> {
-    let url = format!("{}/api{}", url, RoutesEnum::Api_Dashboard);
+    let url = format!(
+        "{}/{}/api{}",
+        url,
+        DeviceType::Cli,
+        RoutesEnum::Api_Dashboard
+    );
     let client = http_client();
     let response = client.post(&url).json(credentials).send().await?;
     let response: DashboardResponse = response.json().await?;
@@ -62,7 +67,12 @@ pub async fn login_to_network(url: &str, login_form: LoginForm) -> anyhow::Resul
     } else {
         url.to_string()
     };
-    let url = format!("{}/api{}", url, RoutesEnum::Api_GetToken);
+    let url = format!(
+        "{}/{}/api{}",
+        url,
+        DeviceType::Cli,
+        RoutesEnum::Api_GetToken
+    );
     let client = http_client();
     let response: GetTokenResponse = client
         .post(&url)
@@ -100,7 +110,12 @@ pub async fn report_uptime(
         ip: Some(cloudflare_metadata.ip).filter(|ip| !ip.is_empty()),
     };
 
-    let url = format!("{}/api/report_uptime", url);
+    let url = format!(
+        "{}/{}/api{}",
+        url,
+        DeviceType::Cli,
+        RoutesEnum::Api_ReportUptime
+    );
     info!("Reporting uptime on {}", &url);
     if let Ok(response) = http_client()
         .post(url)
@@ -132,7 +147,12 @@ pub async fn get_task(
     };
 
     let response: Option<GetTaskResponse> = http_client()
-        .post(format!("{}/api/get_task", base_url))
+        .post(format!(
+            "{}/{}/api{}",
+            base_url,
+            DeviceType::Cli,
+            RoutesEnum::Api_GetToken
+        ))
         .json(&body)
         .send()
         .await?
@@ -219,7 +239,12 @@ pub async fn submit_task(
         response_body: None,
     };
     let response = http_client()
-        .post(format!("{}/api/submit_task", base_url))
+        .post(format!(
+            "{}/{}/api{}",
+            base_url,
+            DeviceType::Cli,
+            RoutesEnum::Api_SubmitTask
+        ))
         .query(&query)
         .body(response_raw)
         .send()
@@ -313,7 +338,12 @@ pub async fn submit_bandwidth(
     };
 
     let response = http_client()
-        .post(format!("{}/api/submit_bandwidth", url))
+        .post(format!(
+            "{}/{}/api{}",
+            url,
+            DeviceType::Cli,
+            RoutesEnum::Api_SubmitBandwidth
+        ))
         .json(&body)
         .send()
         .await?;
