@@ -79,10 +79,10 @@ pub async fn handler(
     };
     let _ = create_daily_stat(&mut transaction, &user.id).await?;
     update_task_assigned(&mut transaction, task.id, user.id, TaskStatus::Assigned).await?;
-    let task_bonus = get_envar("TASK_BONUS").await.parse().unwrap_or(0);
-    redis_user.tasks += 1 + task_bonus;
     commit_txn(transaction).await?;
+    let task_bonus = get_envar("TASK_BONUS").await.parse().unwrap_or(0);
     let expire = 10u64 * Backend::get_expire().await as u64;
+    redis_user.tasks += 1 + task_bonus;
     TaskLimit::save_user(&mut redis, &redis_user, expire).await;
     Ok(Json(Some(GetTaskResponse {
         id: task.id,

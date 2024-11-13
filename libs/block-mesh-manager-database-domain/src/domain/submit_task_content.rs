@@ -20,6 +20,7 @@ use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::StatusCode;
 use http_body_util::BodyExt;
 use sqlx::PgPool;
+use std::env;
 use tracing::{span, Level};
 
 #[tracing::instrument(name = "extract_body", skip_all)]
@@ -97,7 +98,11 @@ pub async fn submit_task_content(
     .await?;
     let _ = create_daily_stat(&mut transaction, &user.id).await;
     let daily_stat = get_daily_stat_of_user(&mut transaction, user.id).await?;
-    increment_tasks_count(&mut transaction, daily_stat.id).await?;
+    let task_bonus = env::var("TASK_BONUS")
+        .unwrap_or("0".to_string())
+        .parse()
+        .unwrap_or(0);
+    increment_tasks_count(&mut transaction, daily_stat.id, 1 + task_bonus).await?;
     commit_txn(transaction).await?;
 
     if query.response_code.unwrap_or(520) == 200 {
