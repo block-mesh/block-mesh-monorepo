@@ -109,16 +109,16 @@ impl Application {
             .route_layer(login_required!(Backend, login_url = "/login"))
             .nest("/api", api_router.clone())
             .nest(
-                &format!("/api/{}", DeviceType::Extension),
+                &format!("/{}/api", DeviceType::Extension),
                 api_router.clone(),
             )
-            .nest(&format!("/api/{}", DeviceType::Cli), api_router.clone())
-            .nest(&format!("/api/{}", DeviceType::Worker), api_router.clone())
+            .nest(&format!("/{}/api", DeviceType::Cli), api_router.clone())
+            .nest(&format!("/{}/api", DeviceType::Worker), api_router.clone())
             .nest(
-                &format!("/api/{}", DeviceType::AppServer),
+                &format!("/{}/api", DeviceType::AppServer),
                 api_router.clone(),
             )
-            .nest(&format!("/api/{}", DeviceType::Unknown), api_router.clone())
+            .nest(&format!("/{}/api", DeviceType::Unknown), api_router.clone())
             .nest("/", un_auth_router);
 
         let backend = backend
