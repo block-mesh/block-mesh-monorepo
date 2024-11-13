@@ -1,5 +1,4 @@
-use crate::database::api_token::get_api_token_by_user_id_and_status::get_api_token_by_usr_and_status;
-use crate::database::user::get_user_by_email::get_user_opt_by_email;
+use crate::database::user::get_user_and_api_token::get_user_and_api_token_by_email;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use crate::utils::verify_cache::verify_with_cache;
@@ -8,7 +7,6 @@ use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{
     GetTokenRequest, GetTokenResponse, GetTokenResponseEnum,
 };
-use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::sync::Arc;
@@ -33,9 +31,9 @@ pub async fn handler(
     }
     let mut transaction = create_txn(&pool).await?;
 
-    let user = match get_user_opt_by_email(&mut transaction, &email).await {
+    let user_and_api_token = match get_user_and_api_token_by_email(&mut transaction, &email).await {
         Ok(user) => match user {
-            Some(user) => user,
+            Some(user_and_api_token) => user_and_api_token,
             None => {
                 get_token_map.insert(key, GetTokenResponseEnum::UserNotFound);
                 commit_txn(transaction).await?;
@@ -49,33 +47,33 @@ pub async fn handler(
         }
     };
 
-    if !verify_with_cache(body.password.as_ref(), user.password.as_ref()).await {
+    if !verify_with_cache(body.password.as_ref(), user_and_api_token.password.as_ref()).await {
         get_token_map.insert(key, GetTokenResponseEnum::PasswordMismatch);
         commit_txn(transaction).await?;
         return Err(Error::PasswordMismatch);
     }
 
-    let api_token =
-        match get_api_token_by_usr_and_status(&mut transaction, &user.id, ApiTokenStatus::Active)
-            .await
-        {
-            Ok(api_token) => match api_token {
-                Some(api_token) => api_token,
-                None => {
-                    get_token_map.insert(key, GetTokenResponseEnum::ApiTokenNotFound);
-                    commit_txn(transaction).await?;
-                    return Err(Error::ApiTokenNotFound);
-                }
-            },
-            Err(_) => {
-                get_token_map.insert(key, GetTokenResponseEnum::ApiTokenNotFound);
-                commit_txn(transaction).await?;
-                return Err(Error::ApiTokenNotFound);
-            }
-        };
+    // let api_token =
+    //     match get_api_token_by_usr_and_status(&mut transaction, &user.id, ApiTokenStatus::Active)
+    //         .await
+    //     {
+    //         Ok(api_token) => match api_token {
+    //             Some(api_token) => api_token,
+    //             None => {
+    //                 get_token_map.insert(key, GetTokenResponseEnum::ApiTokenNotFound);
+    //                 commit_txn(transaction).await?;
+    //                 return Err(Error::ApiTokenNotFound);
+    //             }
+    //         },
+    //         Err(_) => {
+    //             get_token_map.insert(key, GetTokenResponseEnum::ApiTokenNotFound);
+    //             commit_txn(transaction).await?;
+    //             return Err(Error::ApiTokenNotFound);
+    //         }
+    //     };
 
     let response = GetTokenResponse {
-        api_token: Some(*api_token.token.as_ref()),
+        api_token: Some(*user_and_api_token.token.as_ref()),
         message: None,
     };
 
