@@ -1,3 +1,4 @@
+use block_mesh_common::constants::DeviceType;
 use block_mesh_common::feature_flag_client::{get_all_flags, FlagValue};
 use dashmap::DashMap;
 use reqwest::Client;
@@ -12,7 +13,7 @@ pub async fn feature_flags_loop(client: Client, map: Arc<DashMap<String, FlagVal
         .and_then(|var| var.parse().ok())
         .unwrap_or(60000);
     loop {
-        if let Ok(updated_flags) = get_all_flags(&client).await {
+        if let Ok(updated_flags) = get_all_flags(&client, DeviceType::AppServer).await {
             for flag in updated_flags {
                 map.insert(flag.0, flag.1);
             }
