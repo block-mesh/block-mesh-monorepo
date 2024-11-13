@@ -1,3 +1,4 @@
+use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::CheckTokenRequest;
 use block_mesh_common::routes_enum::RoutesEnum;
 use leptos::logging::log;
@@ -12,7 +13,12 @@ pub async fn check_token(
     } else {
         blockmesh_url.to_string()
     };
-    let url = format!("{}/api{}", blockmesh_url, RoutesEnum::Api_CheckToken);
+    let url = format!(
+        "{}/{}/api{}",
+        blockmesh_url,
+        DeviceType::Extension,
+        RoutesEnum::Api_CheckToken
+    );
     let client = reqwest::Client::new();
     log!("check_token - url = {}", url,);
     let r = client
