@@ -16,12 +16,14 @@ use uuid::Uuid;
 use wasm_bindgen::closure::Closure;
 use wasm_bindgen::JsValue;
 
+#[allow(unused_imports)]
 use crate::utils::check_token::check_token;
 use crate::utils::connectors::{
     get_storage_value, send_storage_value_to_iframe, set_storage_value, storageOnChange,
 };
 use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageValue};
 use block_mesh_common::constants::DeviceType;
+#[allow(unused_imports)]
 use block_mesh_common::interfaces::server_api::{
     CheckTokenRequest, GetLatestInviteCodeRequest, GetLatestInviteCodeResponse,
 };
@@ -149,32 +151,33 @@ impl ExtensionWrapperState {
         send_storage_value_to_iframe(MessageKey::LastUpdate, MessageValue::I64(now));
         if !email.is_empty() && !api_token.is_nil() && api_token != Uuid::default() {
             self.status.update(|v| *v = AuthStatus::LoggedIn);
-            let credentials = CheckTokenRequest {
-                api_token,
-                email: email.clone(),
-            };
-            let result = check_token(&blockmesh_url, &credentials).await;
-            if result.is_ok() {
-                self.email.update(|v| *v = email.clone());
-                self.api_token.update(|v| *v = api_token);
-                send_storage_value_to_iframe(
-                    MessageKey::Email,
-                    MessageValue::String(email.clone()),
-                );
-                send_storage_value_to_iframe(MessageKey::ApiToken, MessageValue::UUID(api_token));
-                self.status.update(|v| *v = AuthStatus::LoggedIn);
-            } else {
-                let api_token = Uuid::default();
-                let email = "".to_string();
-                self.email.update(|v| *v = email.clone());
-                self.api_token.update(|v| *v = api_token);
-                send_storage_value_to_iframe(
-                    MessageKey::Email,
-                    MessageValue::String(email.clone()),
-                );
-                send_storage_value_to_iframe(MessageKey::ApiToken, MessageValue::UUID(api_token));
-                ExtensionWrapperState::store_api_token(api_token).await;
-            }
+            // CANNOT DO CORS inside extension
+            // let credentials = CheckTokenRequest {
+            //     api_token,
+            //     email: email.clone(),
+            // };
+            // let result = check_token(&blockmesh_url, &credentials).await;
+            // if result.is_ok() {
+            //     self.email.update(|v| *v = email.clone());
+            //     self.api_token.update(|v| *v = api_token);
+            //     send_storage_value_to_iframe(
+            //         MessageKey::Email,
+            //         MessageValue::String(email.clone()),
+            //     );
+            //     send_storage_value_to_iframe(MessageKey::ApiToken, MessageValue::UUID(api_token));
+            //     self.status.update(|v| *v = AuthStatus::LoggedIn);
+            // } else {
+            //     let api_token = Uuid::default();
+            //     let email = "".to_string();
+            //     self.email.update(|v| *v = email.clone());
+            //     self.api_token.update(|v| *v = api_token);
+            //     send_storage_value_to_iframe(
+            //         MessageKey::Email,
+            //         MessageValue::String(email.clone()),
+            //     );
+            //     send_storage_value_to_iframe(MessageKey::ApiToken, MessageValue::UUID(api_token));
+            //     ExtensionWrapperState::store_api_token(api_token).await;
+            // }
         };
 
         let callback = Closure::<dyn Fn(JsValue)>::new(move |event: JsValue| {
