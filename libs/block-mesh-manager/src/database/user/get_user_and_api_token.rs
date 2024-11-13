@@ -1,4 +1,3 @@
-use block_mesh_manager_database_domain::domain::api_token::{ApiToken, ApiTokenStatus};
 use secret::Secret;
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, Transaction};
@@ -19,9 +18,10 @@ pub async fn get_user_and_api_token_by_email(
     Ok(sqlx::query_as!(
         UserAndApiToken,
         r#"SELECT
+        users.email as email,
         users.id as user_id,
         api_tokens.token as "token: Secret<Uuid>",
-        users.password as "password: Secret<String>",
+        users.password as "password: Secret<String>"
         FROM users
         JOIN api_tokens ON users.id = api_tokens.user_id
         WHERE users.email = $1
