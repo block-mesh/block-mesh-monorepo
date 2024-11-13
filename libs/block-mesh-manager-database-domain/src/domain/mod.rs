@@ -9,6 +9,7 @@ pub mod find_token;
 pub mod finish_task;
 pub mod get_daily_stat_of_user;
 pub mod get_or_create_aggregate_by_user_and_name;
+pub mod get_user_and_api_token;
 pub mod get_user_opt_by_email;
 pub mod get_user_opt_by_id;
 pub mod increment_tasks_count;
