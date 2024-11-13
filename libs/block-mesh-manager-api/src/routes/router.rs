@@ -11,6 +11,12 @@ pub fn get_router() -> Router {
         .route("/", get(health))
         .route("/health", get(health))
         .route("/version", get(version))
-        .route("/api/check_token", post(check_token).get(ok_handler))
-        .route("/api/get_token", post(get_token).get(ok_handler))
+        .route(
+            "/api/check_token",
+            post(check_token).get(ok_handler).options(ok_handler),
+        )
+        .route(
+            "/api/get_token",
+            post(get_token).get(ok_handler).options(ok_handler),
+        )
 }
