@@ -27,11 +27,8 @@ pub async fn read_flag(
     Extension(pool): Extension<PgPool>,
     Path(flag): Path<String>,
 ) -> Result<Json<Value>, Error> {
-    match flags_cache.get(&flag) {
-        Some(f) => {
-            return Ok(Json(f.value().clone()));
-        }
-        None => {}
+    if let Some(f) = flags_cache.get(&flag) {
+        return Ok(Json(f.value().clone()));
     }
     let mut transaction = create_txn(&pool).await.map_err(Error::from)?;
     let db_flag = get_flag(&mut transaction, &flag)
