@@ -23,6 +23,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use tokio::net::TcpListener;
 
+use block_mesh_common::constants::DeviceType;
 use block_mesh_common::env::app_env_var::AppEnvVar;
 use block_mesh_common::env::env_var;
 use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
@@ -106,7 +107,18 @@ impl Application {
         let backend = Router::new()
             .nest("/", auth_router)
             .route_layer(login_required!(Backend, login_url = "/login"))
-            .nest("/api", api_router)
+            .nest("/api", api_router.clone())
+            .nest(
+                &format!("/api/{}", DeviceType::Extension),
+                api_router.clone(),
+            )
+            .nest(&format!("/api/{}", DeviceType::Cli), api_router.clone())
+            .nest(&format!("/api/{}", DeviceType::Worker), api_router.clone())
+            .nest(
+                &format!("/api/{}", DeviceType::AppServer),
+                api_router.clone(),
+            )
+            .nest(&format!("/api/{}", DeviceType::Unknown), api_router.clone())
             .nest("/", un_auth_router);
 
         let backend = backend
