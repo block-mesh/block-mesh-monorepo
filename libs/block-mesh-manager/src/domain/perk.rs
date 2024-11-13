@@ -10,15 +10,17 @@ use uuid::Uuid;
 pub enum PerkName {
     Wallet,
     Twitter,
+    FounderTwitter,
     Invalid,
 }
 
 impl Display for PerkName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            PerkName::Wallet => write!(f, "wallet"),
-            PerkName::Twitter => write!(f, "twitter"),
-            PerkName::Invalid => write!(f, "invalid"),
+            Self::Wallet => write!(f, "wallet"),
+            Self::Twitter => write!(f, "twitter"),
+            Self::FounderTwitter => write!(f, "founder_twitter"),
+            Self::Invalid => write!(f, "invalid"),
         }
     }
 }
@@ -26,9 +28,10 @@ impl Display for PerkName {
 impl From<String> for PerkName {
     fn from(s: String) -> Self {
         match s.as_str() {
-            "wallet" => PerkName::Wallet,
-            "twitter" => PerkName::Twitter,
-            _ => PerkName::Invalid,
+            "wallet" => Self::Wallet,
+            "twitter" => Self::Twitter,
+            "founder_twitter" => Self::FounderTwitter,
+            _ => Self::Invalid,
         }
     }
 }
@@ -36,8 +39,8 @@ impl From<String> for PerkName {
 impl From<Option<String>> for PerkName {
     fn from(s: Option<String>) -> Self {
         match s {
-            Some(s) => PerkName::from(s),
-            None => PerkName::Invalid,
+            Some(s) => Self::from(s),
+            None => Self::Invalid,
         }
     }
 }

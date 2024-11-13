@@ -2,22 +2,33 @@ use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use crate::routes::twitter::context::{Oauth2Ctx, Oauth2CtxPg};
+use axum::extract::Query;
 use axum::response::Redirect;
 use axum::Extension;
 use axum_login::AuthSession;
+use block_mesh_common::constants::{BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID};
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
+use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
 use std::sync::Arc;
 use tokio::sync::Mutex;
 use twitter_v2::authorization::Scope;
 use twitter_v2::oauth2::{CsrfToken, PkceCodeChallenge};
 
+#[derive(Debug, Serialize, Deserialize)]
+pub struct TwitterParam {
+    pub target: u64,
+}
+
+#[tracing::instrument(name = "twitter_login", skip(pool, ctx, auth))]
 pub async fn login(
     Extension(pool): Extension<PgPool>,
     Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>,
     Extension(auth): Extension<AuthSession<Backend>>,
+    Query(query): Query<TwitterParam>,
 ) -> anyhow::Result<Redirect, Error> {
+    let target = query.target;
     let user = auth.user.ok_or(Error::UserNotFound)?;
     let ctx = ctx.lock().await;
     // create challenge
@@ -33,12 +44,18 @@ pub async fn login(
         ],
     );
 
-    let new_state = CsrfToken::new(format!("{}___{}", state.secret(), user.id));
+    let new_state = CsrfToken::new(format!("{}___{}___{}", state.secret(), user.id, target));
     let url = url.to_string().replace(state.secret(), new_state.secret());
     let mut transaction = pool.begin().await?;
     let twitter_agg = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
-        AggregateName::Twitter,
+        if target == BLOCKMESH_TWITTER_USER_ID {
+            AggregateName::Twitter
+        } else if target == BLOCKMESH_FOUNDER_TWITTER_USER_ID {
+            AggregateName::FounderTwitter
+        } else {
+            return Err(Error::Auth("Bad follow target".to_string()));
+        },
         &user.id,
     )
     .await?;
