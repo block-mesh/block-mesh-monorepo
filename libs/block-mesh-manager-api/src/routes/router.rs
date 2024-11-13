@@ -21,43 +21,43 @@ pub fn get_router() -> Router {
             post(get_token).get(ok_handler).options(ok_handler),
         )
         .route(
-            &format!("{}/api/check_token", DeviceType::Extension),
+            &format!("/{}/api/check_token", DeviceType::Extension),
             post(check_token).get(ok_handler).options(ok_handler),
         )
         .route(
-            &format!("{}/api/get_token", DeviceType::Extension),
+            &format!("/{}/api/get_token", DeviceType::Extension),
             post(get_token).get(ok_handler).options(ok_handler),
         )
         .route(
-            &format!("{}/api/check_token", DeviceType::Cli),
+            &format!("/{}/api/check_token", DeviceType::Cli),
             post(check_token).get(ok_handler).options(ok_handler),
         )
         .route(
-            &format!("{}/api/get_token", DeviceType::Cli),
+            &format!("/{}/api/get_token", DeviceType::Cli),
             post(get_token).get(ok_handler).options(ok_handler),
         )
         .route(
-            &format!("{}/api/check_token", DeviceType::AppServer),
+            &format!("/{}/api/check_token", DeviceType::AppServer),
             post(check_token).get(ok_handler).options(ok_handler),
         )
         .route(
-            &format!("{}/api/get_token", DeviceType::AppServer),
+            &format!("/{}/api/get_token", DeviceType::AppServer),
             post(get_token).get(ok_handler).options(ok_handler),
         )
         .route(
-            &format!("{}/api/check_token", DeviceType::Worker),
+            &format!("/{}/api/check_token", DeviceType::Worker),
             post(check_token).get(ok_handler).options(ok_handler),
         )
         .route(
-            &format!("{}/api/get_token", DeviceType::Worker),
+            &format!("/{}/api/get_token", DeviceType::Worker),
             post(get_token).get(ok_handler).options(ok_handler),
         )
         .route(
-            &format!("{}/api/check_token", DeviceType::Unknown),
+            &format!("/{}/api/check_token", DeviceType::Unknown),
             post(check_token).get(ok_handler).options(ok_handler),
         )
         .route(
-            &format!("{}/api/get_token", DeviceType::Unknown),
+            &format!("/{}/api/get_token", DeviceType::Unknown),
             post(get_token).get(ok_handler).options(ok_handler),
         )
 }
