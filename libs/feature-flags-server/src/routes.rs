@@ -1,10 +1,12 @@
-use crate::database::{get_flag, get_flags};
+use crate::database::get_flag;
 use crate::error::Error;
 use axum::extract::Path;
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::{Extension, Json, Router};
+use block_mesh_common::constants::DeviceType;
+use dashmap::DashMap;
 use database_utils::utils::health_check::health_check;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use serde::{Deserialize, Serialize};
@@ -21,14 +23,22 @@ pub async fn health(Extension(pool): Extension<PgPool>) -> Result<impl IntoRespo
 
 #[tracing::instrument(name = "read_flag", skip_all, level = "trace")]
 pub async fn read_flag(
+    Extension(flags_cache): Extension<DashMap<String, Value>>,
     Extension(pool): Extension<PgPool>,
     Path(flag): Path<String>,
 ) -> Result<Json<Value>, Error> {
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    match flags_cache.get(&flag) {
+        Some(f) => {
+            return Ok(Json(f.value().clone()));
+        }
+        None => {}
+    }
+    let mut transaction = create_txn(&pool).await.map_err(Error::from)?;
     let db_flag = get_flag(&mut transaction, &flag)
         .await
         .map_err(Error::from)?;
-    transaction.commit().await.map_err(Error::from)?;
+    flags_cache.insert(flag, db_flag.value.clone());
+    commit_txn(transaction).await.map_err(Error::from)?;
     Ok(Json(db_flag.value))
 }
 
@@ -38,26 +48,29 @@ pub struct FlagOut {
     value: Value,
 }
 
-#[tracing::instrument(name = "read_flags", skip_all, level = "trace")]
-pub async fn read_flags(Extension(pool): Extension<PgPool>) -> Result<Json<Vec<FlagOut>>, Error> {
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
-    let db_flags = get_flags(&mut transaction).await.map_err(Error::from)?;
-    transaction.commit().await.map_err(Error::from)?;
-    Ok(Json(
-        db_flags
-            .into_iter()
-            .map(|i| FlagOut {
-                name: i.name,
-                value: i.value,
-            })
-            .collect(),
-    ))
-}
-
 pub fn get_router() -> Router {
     Router::new()
         .route("/", get(health))
         .route("/health", get(health))
         .route("/read-flag/:flag", get(read_flag))
-        .route("/read-flags", get(read_flags))
+        .route(
+            &format!("/{}/read-flag/:flag", DeviceType::Extension),
+            get(read_flag),
+        )
+        .route(
+            &format!("/{}/read-flag/:flag", DeviceType::Unknown),
+            get(read_flag),
+        )
+        .route(
+            &format!("/{}/read-flag/:flag", DeviceType::Cli),
+            get(read_flag),
+        )
+        .route(
+            &format!("/{}/read-flag/:flag", DeviceType::AppServer),
+            get(read_flag),
+        )
+        .route(
+            &format!("/{}/read-flag/:flag", DeviceType::Worker),
+            get(read_flag),
+        )
 }

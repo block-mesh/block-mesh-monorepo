@@ -66,6 +66,7 @@ pub enum DeviceType {
     TestProxyEndpoint,
     AppServer,
     Cli,
+    Worker,
 }
 
 impl Display for DeviceType {
@@ -80,6 +81,7 @@ impl Display for DeviceType {
             DeviceType::TestProxyEndpoint => write!(f, "test-proxy-endpoint"),
             DeviceType::AppServer => write!(f, "app-server"),
             DeviceType::Cli => write!(f, "cli"),
+            DeviceType::Worker => write!(f, "worker"),
         }
     }
 }
@@ -96,6 +98,7 @@ impl From<&str> for DeviceType {
             "test-proxy-endpoint" => DeviceType::TestProxyEndpoint,
             "app-server" => DeviceType::AppServer,
             "cli" => DeviceType::Cli,
+            "worker" => DeviceType::Worker,
             _ => DeviceType::Unknown,
         }
     }

@@ -3920,6 +3920,7 @@ dependencies = [
  "axum-extra",
  "block-mesh-common",
  "chrono",
+ "dashmap 6.1.0",
  "database-utils",
  "http-body-util",
  "logger-general",

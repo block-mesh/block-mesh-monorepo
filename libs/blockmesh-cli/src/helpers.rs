@@ -1,4 +1,5 @@
 use anyhow::{anyhow, Context};
+use block_mesh_common::constants::DeviceType;
 use block_mesh_common::feature_flag_client::get_flag_value;
 use block_mesh_common::interfaces::server_api::{
     ClientsMetadata, DashboardRequest, DashboardResponse, GetTaskRequest, GetTaskResponse,
@@ -322,21 +323,21 @@ pub async fn submit_bandwidth(
 
 #[allow(dead_code)]
 pub async fn get_polling_interval() -> f64 {
-    let output = match get_flag_value("polling_interval", &http_client())
+    let output = match get_flag_value("polling_interval", &http_client(), DeviceType::Cli)
         .await
-        .unwrap_or(Some(Value::from(120_000.0)))
+        .unwrap_or(Some(Value::from(600_000.0)))
     {
         Some(polling_interval) => {
             if polling_interval.is_number() {
                 polling_interval.as_f64().unwrap() / 1000.0
             } else {
-                120.0
+                600.0
             }
         }
-        None => 120.0,
+        None => 600.0,
     };
-    if output < 1.0 {
-        30.0
+    if output < 60.0 {
+        600.0
     } else {
         output
     }
