@@ -22,6 +22,7 @@ pub async fn bulk_uptime_bonus(
         WITH updates (id, value) AS (
         	SELECT id,value FROM aggregates
         	WHERE name = 'Uptime'
+        	AND updated_at < now() - interval '5 minutes'
 		    FOR UPDATE SKIP LOCKED
         )
         UPDATE aggregates
