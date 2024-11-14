@@ -126,7 +126,16 @@ pub async fn callback(
             Ok(Error::redirect(
                 500,
                 "ERROR",
-                "You're not following @blockmesh_xyz",
+                &format!(
+                    "You're not following @{}",
+                    if target == BLOCKMESH_TWITTER_USER_ID {
+                        "blockmesh_xyz"
+                    } else if target == BLOCKMESH_FOUNDER_TWITTER_USER_ID {
+                        "__OhadDahan__"
+                    } else {
+                        "blockmesh_xyz"
+                    }
+                ),
                 &format!("/ui{}", RoutesEnum::Static_Auth_Dashboard),
             ))
         }
