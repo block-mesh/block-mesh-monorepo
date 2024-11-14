@@ -1,5 +1,7 @@
 pub mod bulk_delete_old_tasks;
 pub mod bulk_finalize;
+pub mod bulk_task_bonus;
+pub mod bulk_uptime_bonus;
 pub mod create_server_user;
 pub mod create_task;
 pub mod get_all_rpcs;
