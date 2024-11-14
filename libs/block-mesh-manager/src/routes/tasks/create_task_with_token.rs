@@ -2,9 +2,9 @@ use crate::database::task::count_user_tasks_in_period::count_user_tasks_in_perio
 use crate::database::task::create_task::create_task;
 use crate::errors::error::Error;
 use axum::{Extension, Json};
-use block_mesh_manager_database_domain::domain::find_token::find_token;
-use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
+use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
 use block_mesh_manager_database_domain::domain::task::TaskMethod;
+use database_utils::utils::instrument_wrapper::commit_txn;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::PgPool;
@@ -31,24 +31,21 @@ pub async fn handler(
     Json(body): Json<CreateTaskRequest>,
 ) -> Result<Json<CreateTaskResponse>, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
-    let api_token = find_token(&mut transaction, &body.api_token)
-        .await?
-        .ok_or(Error::ApiTokenNotFound)?;
-    let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
+    let user = get_user_and_api_token_by_email(&mut transaction, &body.email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    if user.email.to_ascii_lowercase() != body.email.to_ascii_lowercase() {
-        return Err(Error::UserNotFound);
+    if user.token.as_ref() != &body.api_token {
+        commit_txn(transaction).await?;
+        return Err(Error::ApiTokenNotFound);
     }
-
-    let users_tasks_count = count_user_tasks_in_period(&mut transaction, &user.id, 60).await?;
+    let users_tasks_count = count_user_tasks_in_period(&mut transaction, &user.user_id, 60).await?;
     if users_tasks_count > 50 {
         return Err(Error::TooManyTasks);
     }
 
     let task_id = create_task(
         &mut transaction,
-        &user.id,
+        &user.user_id,
         &body.url,
         &body.method,
         body.headers,

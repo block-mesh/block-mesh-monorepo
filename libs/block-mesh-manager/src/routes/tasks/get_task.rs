@@ -10,8 +10,7 @@ use axum::extract::State;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{GetTaskRequest, GetTaskResponse};
 use block_mesh_manager_database_domain::domain::create_daily_stat::create_daily_stat;
-use block_mesh_manager_database_domain::domain::find_token::find_token;
-use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
+use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
 use block_mesh_manager_database_domain::domain::task::TaskStatus;
 use block_mesh_manager_database_domain::domain::task_limit::TaskLimit;
 use block_mesh_manager_database_domain::domain::update_task_assigned::update_task_assigned;
@@ -49,20 +48,15 @@ pub async fn handler(
     if filter.is_err() || !filter? {
         return Err(Error::NotAllowedRateLimit);
     }
-
     let mut transaction = create_txn(&pool).await?;
-    let api_token = find_token(&mut transaction, &body.api_token)
-        .await?
-        .ok_or(Error::ApiTokenNotFound)?;
-    let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
+    let user = get_user_and_api_token_by_email(&mut transaction, &body.email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-
-    if user.email.to_ascii_lowercase() != body.email.to_ascii_lowercase() {
-        return Err(Error::UserNotFound);
+    if user.token.as_ref() != &body.api_token {
+        commit_txn(transaction).await?;
+        return Err(Error::ApiTokenNotFound);
     }
-
-    let task = find_task_assigned_to_user(&mut transaction, &user.id).await?;
+    let task = find_task_assigned_to_user(&mut transaction, &user.user_id).await?;
     if let Some(task) = task {
         return Ok(Json(Some(GetTaskResponse {
             id: task.id,
@@ -77,8 +71,14 @@ pub async fn handler(
         Some(v) => v,
         None => return Ok(Json(None)),
     };
-    let _ = create_daily_stat(&mut transaction, &user.id).await?;
-    update_task_assigned(&mut transaction, task.id, user.id, TaskStatus::Assigned).await?;
+    let _ = create_daily_stat(&mut transaction, &user.user_id).await?;
+    update_task_assigned(
+        &mut transaction,
+        task.id,
+        user.user_id,
+        TaskStatus::Assigned,
+    )
+    .await?;
     commit_txn(transaction).await?;
     let task_bonus = get_envar("TASK_BONUS").await.parse().unwrap_or(0);
     let expire = 10u64 * Backend::get_expire().await as u64;
