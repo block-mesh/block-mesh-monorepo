@@ -34,7 +34,7 @@ pub async fn handler(
     let mut redis = state.redis.clone();
     let filter = filter_request(&mut redis, &query.api_token, &header_ip).await;
     if filter.is_err() || !filter? {
-        return Ok(Json(ReportUptimeResponse { status_code: 500 }));
+        return Err(Error::NotAllowedRateLimit);
     }
 
     let polling_interval = get_flag_value_from_map(

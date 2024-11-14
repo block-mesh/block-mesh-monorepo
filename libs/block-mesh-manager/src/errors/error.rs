@@ -5,6 +5,8 @@ use url::Url;
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
+    #[error("Task limit")]
+    TaskLimit,
     #[error("Not allowed rate limit")]
     NotAllowedRateLimit,
     #[error("Internal server error")]
@@ -73,11 +75,12 @@ impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         tracing::error!("Error occurred: {}", self);
         match self {
+            Error::TaskLimit => (StatusCode::NOT_MODIFIED, "Task rate limit").into_response(),
             Error::PleaseLogout => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Please Logout").into_response()
             }
             Error::NotAllowedRateLimit => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Not Allowed Rate Limit").into_response()
+                (StatusCode::TOO_MANY_REQUESTS, "Not Allowed Rate Limit").into_response()
             }
             Error::SignatureMismatch => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Signature Mismatch").into_response()
@@ -151,8 +154,9 @@ impl From<Error> for StatusCode {
     fn from(error: Error) -> Self {
         tracing::error!("Error occurred: {}", error);
         match error {
+            Error::TaskLimit => StatusCode::NOT_MODIFIED,
             Error::PleaseLogout => StatusCode::INTERNAL_SERVER_ERROR,
-            Error::NotAllowedRateLimit => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::NotAllowedRateLimit => StatusCode::TOO_MANY_REQUESTS,
             Error::SignatureMismatch => StatusCode::INTERNAL_SERVER_ERROR,
             Error::TokenMismatch => StatusCode::INTERNAL_SERVER_ERROR,
             Error::NotYourTask => StatusCode::INTERNAL_SERVER_ERROR,
