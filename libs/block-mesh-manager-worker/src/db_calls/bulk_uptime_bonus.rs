@@ -1,4 +1,3 @@
-use chrono::{Duration, Utc};
 use sqlx::{Postgres, Transaction};
 
 #[tracing::instrument(
@@ -15,8 +14,6 @@ pub async fn bulk_uptime_bonus(
     if bonus.is_nan() || bonus <= 0.0 || bonus.is_infinite() {
         return Ok(());
     }
-    let now = Utc::now() - Duration::days(1);
-    let day = now.date_naive();
     let r = sqlx::query!(
         r#"
         WITH updates (id, value) AS (

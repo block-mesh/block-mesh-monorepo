@@ -23,6 +23,7 @@ mod routes;
 mod utils;
 
 use crate::call_backs::send_to_rx::send_to_rx;
+use crate::cron_jobs::bulk_task_bonus_cron::bulk_task_bonus_cron;
 use crate::cron_jobs::bulk_uptime_bonus_cron::bulk_uptime_bonus_cron;
 use crate::cron_jobs::clean_old_tasks::clean_old_tasks;
 use crate::cron_jobs::finalize_daily_cron::finalize_daily_cron;
@@ -92,6 +93,7 @@ async fn run() -> anyhow::Result<()> {
             .unwrap_or(5000),
     );
 
+    let bulk_task_bonus_task = tokio::spawn(bulk_task_bonus_cron(un_limited_db_pool.clone()));
     let bulk_uptime_bonus_task = tokio::spawn(bulk_uptime_bonus_cron(un_limited_db_pool));
     let joiner_task = tokio::spawn(joiner_loop(joiner_rx));
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
@@ -157,6 +159,8 @@ async fn run() -> anyhow::Result<()> {
     let server_task = run_server(listener, app);
 
     tokio::select! {
+        o = bulk_uptime_bonus_task => panic!("bulk_uptime_bonus_task exit {:?}", o),
+        o = bulk_task_bonus_task => panic!("bulk_task_bonus_task exit {:?}", o),
         o = db_special_task => panic!("db_special_task exit {:?}", o),
         o = delete_old_tasks_task => panic!("delete_old_tasks_task exit {:?}", o),
         o = joiner_task => panic!("joiner_task exit {:?}", o),

@@ -1,3 +1,4 @@
+pub mod bulk_task_bonus_cron;
 pub mod bulk_uptime_bonus_cron;
 pub mod clean_old_tasks;
 pub mod finalize_daily_cron;

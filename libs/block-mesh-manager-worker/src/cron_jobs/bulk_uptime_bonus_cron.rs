@@ -11,9 +11,9 @@ pub async fn bulk_uptime_bonus_cron(pool: PgPool) -> Result<(), anyhow::Error> {
         .parse()
         .unwrap_or(0f64);
     let sleep = env::var("BULK_UPTIME_CRON_SLEEP")
-        .unwrap_or(String::from("3600"))
+        .unwrap_or(String::from("60000"))
         .parse()
-        .unwrap_or(3600u64);
+        .unwrap_or(60000u64);
     let duration = Duration::from_millis(sleep);
     loop {
         if let Ok(mut transaction) = create_txn(&pool).await {
