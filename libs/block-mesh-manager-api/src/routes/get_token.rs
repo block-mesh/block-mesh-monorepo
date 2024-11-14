@@ -38,15 +38,15 @@ pub async fn get_token(
             }
         },
         Err(_) => {
-            get_token_map.insert(key, GetTokenResponseEnum::UserNotFound);
             commit_txn(transaction).await?;
+            get_token_map.insert(key, GetTokenResponseEnum::UserNotFound);
             return Err(Error::UserNotFound);
         }
     };
 
     if !verify::<&str>(body.password.as_ref(), user.password.as_ref()).unwrap_or(false) {
-        get_token_map.insert(key, GetTokenResponseEnum::PasswordMismatch);
         commit_txn(transaction).await?;
+        get_token_map.insert(key, GetTokenResponseEnum::PasswordMismatch);
         return Err(Error::PasswordMismatch);
     }
 
@@ -73,11 +73,10 @@ pub async fn get_token(
         api_token: Some(*user.token.as_ref()),
         message: None,
     };
-
+    commit_txn(transaction).await?;
     get_token_map.insert(
         key,
         GetTokenResponseEnum::GetTokenResponse(response.clone()),
     );
-    commit_txn(transaction).await?;
     Ok(Json(response))
 }
