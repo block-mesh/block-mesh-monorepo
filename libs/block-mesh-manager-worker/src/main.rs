@@ -3,7 +3,7 @@ use crate::pg_listener::start_listening;
 use axum::{Extension, Router};
 use block_mesh_common::constants::BLOCKMESH_PG_NOTIFY_WORKER;
 use block_mesh_common::env::load_dotenv::load_dotenv;
-use database_utils::utils::connection::get_pg_pool;
+use database_utils::utils::connection::{get_pg_pool, get_unlimited_pg_pool};
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
 use serde_json::Value;
 use std::net::SocketAddr;
@@ -23,6 +23,7 @@ mod routes;
 mod utils;
 
 use crate::call_backs::send_to_rx::send_to_rx;
+use crate::cron_jobs::bulk_uptime_bonus_cron::bulk_uptime_bonus_cron;
 use crate::cron_jobs::clean_old_tasks::clean_old_tasks;
 use crate::cron_jobs::finalize_daily_cron::finalize_daily_cron;
 use crate::cron_jobs::rpc_cron::rpc_worker_loop;
@@ -80,6 +81,7 @@ async fn run() -> anyhow::Result<()> {
     setup_tracing_stdout_only_with_sentry();
     tracing::info!("Starting worker");
     let db_pool = get_pg_pool(None).await;
+    let un_limited_db_pool = get_unlimited_pg_pool(None).await;
     // let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
     // let _redis = redis_client.get_multiplexed_async_connection().await?;
     let (joiner_tx, joiner_rx) = flume::bounded::<JoinHandle<()>>(500);
@@ -90,6 +92,7 @@ async fn run() -> anyhow::Result<()> {
             .unwrap_or(5000),
     );
 
+    let bulk_uptime_bonus_task = tokio::spawn(bulk_uptime_bonus_cron(un_limited_db_pool));
     let joiner_task = tokio::spawn(joiner_loop(joiner_rx));
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
     let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
