@@ -21,7 +21,7 @@ pub async fn handler(
         commit_txn(transaction).await?;
         return Err(Error::ApiTokenNotFound);
     }
-    let user_latest_uptime = get_user_latest_uptime(&mut transaction, user.id).await?;
+    let user_latest_uptime = get_user_latest_uptime(&mut transaction, user.user_id).await?;
     transaction.commit().await.map_err(Error::from)?;
     match user_latest_uptime {
         Some(user_latest_uptime) => Ok(Json(GetUserUptimeResponse {

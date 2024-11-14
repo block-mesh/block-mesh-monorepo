@@ -1,12 +1,10 @@
 use crate::domain::aggregate::AggregateName;
 use crate::domain::create_daily_stat::create_daily_stat;
 use crate::domain::find_task_by_task_id_and_status::find_task_by_task_id_and_status;
-use crate::domain::find_token::find_token;
 use crate::domain::finish_task::finish_task;
 use crate::domain::get_daily_stat_of_user::get_daily_stat_of_user;
 use crate::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::domain::get_user_and_api_token::get_user_and_api_token_by_email;
-use crate::domain::get_user_opt_by_id::get_user_opt_by_id;
 use crate::domain::increment_tasks_count::increment_tasks_count;
 use crate::domain::notify_worker::notify_worker;
 use crate::domain::task::TaskStatus;

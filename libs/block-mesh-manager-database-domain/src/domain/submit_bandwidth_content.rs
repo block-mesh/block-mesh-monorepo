@@ -40,9 +40,12 @@ pub async fn submit_bandwidth_content(
         &user.user_id,
     )
     .await?;
-    let upload =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Upload, &user.id)
-            .await?;
+    let upload = get_or_create_aggregate_by_user_and_name(
+        &mut transaction,
+        AggregateName::Upload,
+        &user.user_id,
+    )
+    .await?;
 
     let latency = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
