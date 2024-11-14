@@ -17,6 +17,8 @@ git checkout -B "release-${NEWVERSION}"
 #git pull
 cargo fmt
 sleep 1
+cargo fmt
+sleep 1
 export TOML=$(git status -s Cargo.toml | wc -l | sed -e 's/ //g')
 if [ "$TOML" != "1" ]; then
   echo "Cargo.toml didnt change"
