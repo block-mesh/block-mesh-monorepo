@@ -16,12 +16,17 @@ use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 
-#[tracing::instrument(name = "health", skip_all)]
-pub async fn health(State(state): State<Arc<AppState>>) -> Result<impl IntoResponse, Error> {
+#[tracing::instrument(name = "db_health", skip_all)]
+pub async fn db_health(State(state): State<Arc<AppState>>) -> Result<impl IntoResponse, Error> {
     let pool = state.pool.clone();
     let mut transaction = create_txn(&pool).await?;
     health_check(&mut *transaction).await?;
     commit_txn(transaction).await?;
+    Ok((StatusCode::OK, "OK"))
+}
+
+#[tracing::instrument(name = "server_health", skip_all)]
+pub async fn server_health() -> Result<impl IntoResponse, Error> {
     Ok((StatusCode::OK, "OK"))
 }
 
@@ -104,8 +109,9 @@ pub async fn stats(State(state): State<Arc<AppState>>) -> Json<StatsResponse> {
 
 pub async fn app(listener: TcpListener, state: Arc<AppState>) {
     let router = Router::new()
-        .route("/", get(health))
-        .route("/health", get(health))
+        .route("/", get(server_health))
+        .route("/server_health", get(server_health))
+        .route("/db_health", get(db_health))
         .route("/health_follower", get(health_follower))
         .route("/version", get(version))
         .route("/stats", get(stats))

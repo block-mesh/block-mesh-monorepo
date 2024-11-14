@@ -1,6 +1,6 @@
 use crate::routes::check_token::check_token;
 use crate::routes::get_token::get_token;
-use crate::routes::health::health;
+use crate::routes::health::{db_health, server_health};
 use crate::routes::ok::ok_handler;
 use crate::routes::version::version;
 use axum::routing::{get, post};
@@ -9,8 +9,9 @@ use block_mesh_common::constants::DeviceType;
 
 pub fn get_router() -> Router {
     Router::new()
-        .route("/", get(health))
-        .route("/health", get(health))
+        .route("/", get(server_health))
+        .route("/server_health", get(server_health))
+        .route("/db_health", get(db_health))
         .route("/version", get(version))
         .route(
             "/api/check_token",
