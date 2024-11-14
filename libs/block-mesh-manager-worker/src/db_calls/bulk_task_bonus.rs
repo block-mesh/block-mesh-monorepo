@@ -1,4 +1,5 @@
 use sqlx::{Postgres, Transaction};
+use tokio::time::Instant;
 
 #[tracing::instrument(name = "bulk_task_bonus", skip(transaction), ret, err, level = "trace")]
 pub async fn bulk_task_bonus(
@@ -8,6 +9,7 @@ pub async fn bulk_task_bonus(
     if bonus <= 0 {
         return Ok(());
     }
+    let now = Instant::now();
     let r = sqlx::query!(
         r#"
         UPDATE daily_stats ds
@@ -22,10 +24,12 @@ pub async fn bulk_task_bonus(
     )
     .execute(&mut **transaction)
     .await?;
+    let elapsed = now.elapsed();
     tracing::info!(
-        "bulk_task_bonus bonus = {} , affected rows = {}",
+        "bulk_task_bonus bonus = {} , affected rows = {}, elapsed = {:?}",
         bonus,
-        r.rows_affected()
+        r.rows_affected(),
+        elapsed
     );
     Ok(())
 }

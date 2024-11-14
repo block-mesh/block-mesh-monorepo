@@ -1,4 +1,5 @@
 use sqlx::{Postgres, Transaction};
+use tokio::time::Instant;
 
 #[tracing::instrument(
     name = "bulk_uptime_bonus",
@@ -14,6 +15,8 @@ pub async fn bulk_uptime_bonus(
     if bonus.is_nan() || bonus <= 0.0 || bonus.is_infinite() {
         return Ok(());
     }
+    let now = Instant::now();
+    let elapsed = now.elapsed();
     let r = sqlx::query!(
         r#"
         WITH updates (id, value) AS (
@@ -33,9 +36,10 @@ pub async fn bulk_uptime_bonus(
     .execute(&mut **transaction)
     .await?;
     tracing::info!(
-        "bulk_uptime_bonus bonus = {} , affected rows = {}",
+        "bulk_uptime_bonus bonus = {} , affected rows = {} , elapsed = {:?}",
         bonus,
-        r.rows_affected()
+        r.rows_affected(),
+        elapsed
     );
     Ok(())
 }
