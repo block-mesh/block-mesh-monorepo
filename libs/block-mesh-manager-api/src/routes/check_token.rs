@@ -32,14 +32,14 @@ pub async fn check_token(
         Ok(user) => match user {
             Some(user) => user,
             None => {
-                check_token_map.insert(key, CheckTokenResponseEnum::UserNotFound);
                 commit_txn(transaction).await?;
+                check_token_map.insert(key, CheckTokenResponseEnum::UserNotFound);
                 return Err(Error::UserNotFound);
             }
         },
         Err(_) => {
-            check_token_map.insert(key, CheckTokenResponseEnum::UserNotFound);
             commit_txn(transaction).await?;
+            check_token_map.insert(key, CheckTokenResponseEnum::UserNotFound);
             return Err(Error::UserNotFound);
         }
     };
@@ -61,8 +61,8 @@ pub async fn check_token(
     //     };
 
     if *user.token.as_ref() != body.api_token {
-        check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenMismatch);
         commit_txn(transaction).await?;
+        check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenMismatch);
         return Err(Error::ApiTokenMismatch);
     }
 
@@ -70,10 +70,10 @@ pub async fn check_token(
         api_token: Some(*user.token.as_ref()),
         message: None,
     };
+    commit_txn(transaction).await?;
     check_token_map.insert(
         key,
         CheckTokenResponseEnum::GetTokenResponse(response.clone()),
     );
-    commit_txn(transaction).await?;
     Ok(Json(response))
 }
