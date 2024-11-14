@@ -136,6 +136,10 @@ impl ExtensionWrapperState {
             MessageKey::BlockMeshWsUrl,
             MessageValue::String(blockmesh_ws_url.clone()),
         );
+        self.email.update(|v| *v = email.clone());
+        send_storage_value_to_iframe(MessageKey::Email, MessageValue::String(email.clone()));
+        self.api_token.update(|v| *v = api_token);
+        send_storage_value_to_iframe(MessageKey::ApiToken, MessageValue::UUID(api_token));
         self.status.update(|v| *v = AuthStatus::LoggedOut);
         self.device_id.update(|v| *v = device_id);
         send_storage_value_to_iframe(MessageKey::DeviceId, MessageValue::UUID(device_id));

@@ -31,7 +31,7 @@ pub async fn handler(
     let mut redis = state.redis.clone();
     let mut redis_user = match TaskLimit::get_task_limit(&body.api_token, &mut redis, limit).await {
         Ok(r) => r,
-        Err(_) => return Ok(Json(None)),
+        Err(_) => return Err(Error::TaskLimit),
     };
 
     let app_env = get_envar("APP_ENVIRONMENT").await;
@@ -47,7 +47,7 @@ pub async fn handler(
 
     let filter = filter_request(&mut redis, &body.api_token, header_ip).await;
     if filter.is_err() || !filter? {
-        return Ok(Json(None));
+        return Err(Error::NotAllowedRateLimit);
     }
 
     let mut transaction = create_txn(&pool).await?;
