@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        WITH updates (id, value) AS (\n        \tSELECT id,value FROM aggregates\n        \tWHERE name = 'Uptime'\n\t\t    FOR UPDATE SKIP LOCKED\n        )\n        UPDATE aggregates\n        SET\n            value = to_jsonb((COALESCE(NULLIF(aggregates.value, 'null'), '0')::text)::double precision + $1),\n            updated_at = now()\n        FROM updates\n        WHERE aggregates.id = updates.id\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Float8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "fd85b92a9db1abc46f2ac708f800779c7c59e2ce26b1a8fade705739a5d42eeb"
+}
