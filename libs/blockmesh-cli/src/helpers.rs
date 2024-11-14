@@ -353,7 +353,7 @@ pub async fn submit_bandwidth(
 
 #[allow(dead_code)]
 pub async fn get_polling_interval() -> f64 {
-    let output = match get_flag_value("polling_interval", &http_client(), DeviceType::Cli)
+    let output = match get_flag_value("cli_polling_interval", &http_client(), DeviceType::Cli)
         .await
         .unwrap_or(Some(Value::from(600_000.0)))
     {
