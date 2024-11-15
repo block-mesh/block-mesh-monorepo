@@ -6,8 +6,7 @@ use crate::errors::error::Error;
 use block_mesh_common::interfaces::server_api::{
     GetLatestInviteCodeRequest, GetLatestInviteCodeResponse,
 };
-use block_mesh_manager_database_domain::domain::find_token::find_token;
-use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
+use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 
 #[tracing::instrument(name = "get_latest_invite_code", skip_all)]
@@ -16,17 +15,14 @@ pub async fn handler(
     Json(body): Json<GetLatestInviteCodeRequest>,
 ) -> Result<Json<GetLatestInviteCodeResponse>, Error> {
     let mut transaction = create_txn(&pool).await?;
-    let api_token = find_token(&mut transaction, &body.api_token)
-        .await?
-        .ok_or(Error::ApiTokenNotFound)?;
-    let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
+    let user = get_user_and_api_token_by_email(&mut transaction, &body.email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    if user.email.to_ascii_lowercase() != body.email.to_ascii_lowercase() {
+    if user.token.as_ref() != &body.api_token {
         commit_txn(transaction).await?;
-        return Err(Error::UserNotFound);
+        return Err(Error::ApiTokenNotFound);
     }
-    let user_invite_code = get_user_latest_invite_code(&mut transaction, user.id)
+    let user_invite_code = get_user_latest_invite_code(&mut transaction, user.user_id)
         .await
         .map_err(Error::from)?;
     commit_txn(transaction).await?;

@@ -1,11 +1,10 @@
 use crate::domain::aggregate::AggregateName;
 use crate::domain::create_daily_stat::create_daily_stat;
 use crate::domain::find_task_by_task_id_and_status::find_task_by_task_id_and_status;
-use crate::domain::find_token::find_token;
 use crate::domain::finish_task::finish_task;
 use crate::domain::get_daily_stat_of_user::get_daily_stat_of_user;
 use crate::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
-use crate::domain::get_user_opt_by_id::get_user_opt_by_id;
+use crate::domain::get_user_and_api_token::get_user_and_api_token_by_email;
 use crate::domain::increment_tasks_count::increment_tasks_count;
 use crate::domain::notify_worker::notify_worker;
 use crate::domain::task::TaskStatus;
@@ -44,21 +43,18 @@ pub async fn submit_task_content(
     mode: HandlerMode,
 ) -> Result<Json<SubmitTaskResponse>, Error> {
     let mut transaction = create_txn(pool).await?;
-    let api_token = find_token(&mut transaction, &query.api_token)
+    let user = get_user_and_api_token_by_email(&mut transaction, &query.email)
         .await?
-        .ok_or(anyhow!("Api Token Not Found".to_string()))?;
-    let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
-        .await?
-        .ok_or_else(|| anyhow!("User Not Found".to_string()))?;
-    if user.email.to_ascii_lowercase() != query.email.to_ascii_lowercase() {
+        .ok_or_else(|| anyhow!("User Not Found"))?;
+    if user.token.as_ref() != &query.api_token {
         commit_txn(transaction).await?;
-        return Err(anyhow!("User Not Found".to_string()));
+        return Err(anyhow!("Api Token Mismatch"));
     }
     let task =
         find_task_by_task_id_and_status(&mut transaction, &query.task_id, TaskStatus::Assigned)
             .await?
             .ok_or(anyhow!("Token Not Found".to_string()))?;
-    if task.assigned_user_id.is_some() && task.assigned_user_id.unwrap() != user.id {
+    if task.assigned_user_id.is_some() && task.assigned_user_id.unwrap() != user.user_id {
         commit_txn(transaction).await?;
         return Err(anyhow!("Task Assigned To Another User".to_string(),));
     }
@@ -96,8 +92,8 @@ pub async fn submit_task_content(
         query.response_time.unwrap_or_default(),
     )
     .await?;
-    let _ = create_daily_stat(&mut transaction, &user.id).await;
-    let daily_stat = get_daily_stat_of_user(&mut transaction, user.id).await?;
+    let _ = create_daily_stat(&mut transaction, &user.user_id).await;
+    let daily_stat = get_daily_stat_of_user(&mut transaction, user.user_id).await?;
     let task_bonus = env::var("TASK_BONUS")
         .unwrap_or("0".to_string())
         .parse()
@@ -110,7 +106,7 @@ pub async fn submit_task_content(
         let tasks = get_or_create_aggregate_by_user_and_name(
             &mut transaction,
             AggregateName::Tasks,
-            &user.id,
+            &user.user_id,
         )
         .await?;
         commit_txn(transaction).await?;

@@ -1,7 +1,6 @@
 use crate::domain::aggregate::AggregateName;
-use crate::domain::find_token::find_token;
 use crate::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
-use crate::domain::get_user_opt_by_id::get_user_opt_by_id;
+use crate::domain::get_user_and_api_token::get_user_and_api_token_by_email;
 use crate::domain::notify_worker::notify_worker;
 use anyhow::{anyhow, Error};
 use axum::Json;
@@ -17,15 +16,12 @@ pub async fn submit_bandwidth_content(
     body: ReportBandwidthRequest,
 ) -> Result<Json<ReportBandwidthResponse>, Error> {
     let mut transaction = create_txn(pool).await?;
-    let api_token = find_token(&mut transaction, &body.api_token)
-        .await?
-        .ok_or(anyhow!("Token Not Found"))?;
-    let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
+    let user = get_user_and_api_token_by_email(&mut transaction, &body.email)
         .await?
         .ok_or_else(|| anyhow!("User Not Found"))?;
-    if user.email.to_ascii_lowercase() != body.email.to_ascii_lowercase() {
+    if user.token.as_ref() != &body.api_token {
         commit_txn(transaction).await?;
-        return Err(anyhow!("User Not Found"));
+        return Err(anyhow!("Api Token Mismatch"));
     }
 
     let download_speed = serde_json::Value::from(body.download_speed)
@@ -41,17 +37,20 @@ pub async fn submit_bandwidth_content(
     let download = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
         AggregateName::Download,
-        &user.id,
+        &user.user_id,
     )
     .await?;
-    let upload =
-        get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Upload, &user.id)
-            .await?;
+    let upload = get_or_create_aggregate_by_user_and_name(
+        &mut transaction,
+        AggregateName::Upload,
+        &user.user_id,
+    )
+    .await?;
 
     let latency = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
         AggregateName::Latency,
-        &user.id,
+        &user.user_id,
     )
     .await?;
 
