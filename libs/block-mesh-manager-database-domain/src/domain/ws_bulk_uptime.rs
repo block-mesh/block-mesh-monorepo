@@ -22,7 +22,7 @@ pub async fn ws_bulk_uptime(
         WITH updates (id, value) AS (SELECT id, value FROM aggregates WHERE name = 'Uptime' AND user_id in ({value_str}))
         UPDATE aggregates
         SET
-            value = to_jsonb(COALESCE(NULLIF(aggregates.value::text, 'null')::double precision, {diff})),
+            value = to_jsonb((COALESCE(NULLIF(aggregates.value, 'null'), '0')::text)::double precision + {diff}),
             updated_at = now()
         FROM updates
         WHERE aggregates.id = updates.id;

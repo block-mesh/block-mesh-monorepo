@@ -18,20 +18,29 @@ pub async fn bulk_uptime_bonus(
     }
 
     let r = sqlx::query!(
+        // r#"
+        // WITH updates (id, value) AS (
+        // 	SELECT id,value FROM aggregates
+        // 	WHERE name = 'Uptime'
+        // 	AND value != 'null'
+        // 	AND updated_at < now() - interval '5 minutes'
+        //     FOR UPDATE SKIP LOCKED
+        // )
+        // UPDATE aggregates
+        // SET
+        //     value = to_jsonb((COALESCE(NULLIF(aggregates.value, 'null'), '0')::text)::double precision + $1),
+        //     updated_at = now()
+        // FROM updates
+        // WHERE aggregates.id = updates.id
+        // "#,
         r#"
-        WITH updates (id, value) AS (
-        	SELECT id,value FROM aggregates
-        	WHERE name = 'Uptime'
-        	AND value != 'null'
-        	AND updated_at < now() - interval '5 minutes'
-		    FOR UPDATE SKIP LOCKED
-        )
-        UPDATE aggregates
-        SET
-            value = to_jsonb((COALESCE(NULLIF(aggregates.value, 'null'), '0')::text)::double precision + $1),
-            updated_at = now()
-        FROM updates
-        WHERE aggregates.id = updates.id
+            UPDATE daily_stats ds
+                SET	uptime = uptime + $1
+            FROM users u
+            WHERE
+                ds.user_id = u.id
+            	AND ds.status = 'OnGoing'
+                AND ds.day = CURRENT_DATE
         "#,
         bonus
     )

@@ -6,6 +6,10 @@ use std::time::Duration;
 
 #[tracing::instrument(name = "ws_base_msg_loop", skip_all)]
 pub async fn ws_base_msg_loop(broadcaster: Arc<Broadcaster>) -> anyhow::Result<()> {
+    let ws_base_msg_loop_enable = env::var("WS_BASE_MSG_LOOP_ENABLE")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
     let queue_size = env::var("QUEUE_SIZE")
         .unwrap_or("100".to_string())
         .parse()?;
@@ -25,12 +29,14 @@ pub async fn ws_base_msg_loop(broadcaster: Arc<Broadcaster>) -> anyhow::Result<(
     );
 
     loop {
-        let iterations = broadcaster.sockets.len() / queue_size + 1;
-        for _ in 0..iterations {
-            broadcaster
-                .queue_multiple(messages.clone(), queue_size)
-                .await;
-            tokio::time::sleep(in_between_iterations).await;
+        if ws_base_msg_loop_enable {
+            let iterations = broadcaster.sockets.len() / queue_size + 1;
+            for _ in 0..iterations {
+                broadcaster
+                    .queue_multiple(messages.clone(), queue_size)
+                    .await;
+                tokio::time::sleep(in_between_iterations).await;
+            }
         }
         tokio::time::sleep(base_msg_sleep).await;
     }
