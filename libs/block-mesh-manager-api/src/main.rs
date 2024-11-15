@@ -64,6 +64,10 @@ async fn run(is_with_sentry: bool) {
     let check_token_map: CheckTokenResponseMap = Arc::new(DashMap::new());
     let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());
     let cors = CorsLayer::permissive();
+    let enable_caching = env::var("ENABLE_CACHING")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
 
     let timeout_layer = env::var("TIMEOUT_LAYER")
         .unwrap_or("false".to_string())
@@ -75,6 +79,7 @@ async fn run(is_with_sentry: bool) {
         .layer(Extension(follower_pool.clone()))
         .layer(Extension(check_token_map.clone()))
         .layer(Extension(get_token_map.clone()))
+        .layer(Extension(enable_caching))
         .layer(cors);
 
     let app = if timeout_layer {

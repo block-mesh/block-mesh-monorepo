@@ -3,6 +3,7 @@ use crate::helpers::{
 };
 use anyhow::anyhow;
 use block_mesh_common::constants::DeviceType;
+use block_mesh_common::feature_flag_client::get_flag_value;
 use block_mesh_common::interfaces::server_api::{
     ClientsMetadata, LoginForm, ReportBandwidthRequest, ReportUptimeRequest, SubmitTaskRequest,
 };
@@ -220,13 +221,9 @@ async fn handle_ws_message(
 }
 async fn is_ws_feature_connection() -> anyhow::Result<bool> {
     let client = reqwest::Client::new();
-    let response = client
-        .get("https://feature-flags.blockmesh.xyz/read-flag/use_websocket")
-        .send()
-        .await?;
-    if response.status().is_success() {
-        let value = response.text().await?;
-        let is_enabled: bool = value.trim().parse()?;
+    let response = get_flag_value("cli_use_websocket", &client, DeviceType::Cli).await?;
+    if let Some(res) = response {
+        let is_enabled = res.as_bool().unwrap_or_default();
         if !is_enabled {
             return Ok(false);
         }
@@ -236,15 +233,11 @@ async fn is_ws_feature_connection() -> anyhow::Result<bool> {
         ));
     }
 
-    let response = client
-        .get("https://feature-flags.blockmesh.xyz/read-flag/use_websocket_percent")
-        .send()
-        .await?;
-    if response.status().is_success() {
-        let value = response.text().await?;
-        let percentage: i32 = value.parse()?;
+    let response = get_flag_value("cli_use_websocket_percent", &client, DeviceType::Cli).await?;
+    if let Some(res) = response {
+        let percentage: u64 = res.as_u64().unwrap_or_default();
         let mut rng = thread_rng();
-        let probe: i32 = rng.gen_range(0..100);
+        let probe: u64 = rng.gen_range(0..100);
         Ok(probe < percentage)
     } else {
         Err(anyhow!(
