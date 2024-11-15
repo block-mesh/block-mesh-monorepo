@@ -46,7 +46,7 @@ pub async fn handler(
     };
 
     if state.rate_limit {
-        let filter = filter_request(&mut redis, &body.api_token, header_ip).await;
+        let filter = filter_request(&mut redis, &body.api_token, header_ip, "get_task").await;
         if filter.is_err() || !filter? {
             return Err(Error::NotAllowedRateLimit);
         }
