@@ -10,6 +10,10 @@ pub async fn bulk_task_bonus_cron(pool: PgPool) -> Result<(), anyhow::Error> {
         .unwrap_or(String::from("0"))
         .parse()
         .unwrap_or(0i32);
+    let limit = env::var("BULK_TASK_LIMIT")
+        .unwrap_or(String::from("50"))
+        .parse()
+        .unwrap_or(50i32);
     let sleep = env::var("BULK_TASK_CRON_SLEEP")
         .unwrap_or(String::from("600000"))
         .parse()
@@ -17,7 +21,7 @@ pub async fn bulk_task_bonus_cron(pool: PgPool) -> Result<(), anyhow::Error> {
     let duration = Duration::from_millis(sleep);
     loop {
         if let Ok(mut transaction) = create_txn(&pool).await {
-            let _ = bulk_task_bonus(&mut transaction, bonus).await;
+            let _ = bulk_task_bonus(&mut transaction, bonus, limit).await;
             let _ = commit_txn(transaction).await;
         }
         tokio::time::sleep(duration).await;
