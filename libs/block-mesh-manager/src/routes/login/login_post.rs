@@ -7,6 +7,7 @@ use axum::{Extension, Form};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::LoginForm;
 use block_mesh_common::routes_enum::RoutesEnum;
+use block_mesh_manager_database_domain::domain::create_daily_stat::create_daily_stat;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use secret::Secret;
 use sqlx::PgPool;
@@ -54,6 +55,7 @@ pub async fn handler(
             ));
         }
     }
+    let _ = create_daily_stat(&mut tranaction, &user.id).await?;
     commit_txn(tranaction).await?;
     Ok(Redirect::to("/ui/dashboard"))
 }
