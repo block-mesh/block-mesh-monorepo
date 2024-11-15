@@ -76,6 +76,8 @@ pub async fn spawn_app() -> TestApp {
     let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());
 
     let app_state = Arc::new(AppState {
+        rate_limit: true,
+        task_limit: true,
         get_token_map,
         email_client,
         pool: db_pool.clone(),
