@@ -52,7 +52,6 @@ pub async fn handler(
             return Err(Error::NotAllowedRateLimit);
         }
     }
-
     let mut transaction = create_txn(&pool).await?;
     let api_token = find_token(&mut transaction, &body.api_token)
         .await?
