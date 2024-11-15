@@ -1,3 +1,5 @@
+use anyhow::anyhow;
+use sqlx::postgres::PgQueryResult;
 use sqlx::{Postgres, Transaction};
 use tokio::time::Instant;
 
@@ -11,12 +13,11 @@ use tokio::time::Instant;
 pub async fn bulk_uptime_bonus(
     transaction: &mut Transaction<'_, Postgres>,
     bonus: f64,
-) -> anyhow::Result<()> {
+) -> anyhow::Result<PgQueryResult> {
     if bonus.is_nan() || bonus <= 0.0 || bonus.is_infinite() {
-        return Ok(());
+        return Err(anyhow!("bulk uptime bonus must be a positive integer"));
     }
-    let now = Instant::now();
-    let elapsed = now.elapsed();
+
     let r = sqlx::query!(
         r#"
         WITH updates (id, value) AS (
@@ -36,11 +37,5 @@ pub async fn bulk_uptime_bonus(
     )
     .execute(&mut **transaction)
     .await?;
-    tracing::info!(
-        "bulk_uptime_bonus bonus = {} , affected rows = {} , elapsed = {:?}",
-        bonus,
-        r.rows_affected(),
-        elapsed
-    );
-    Ok(())
+    Ok(r)
 }
