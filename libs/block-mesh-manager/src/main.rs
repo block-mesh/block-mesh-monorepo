@@ -112,13 +112,20 @@ async fn run() -> anyhow::Result<()> {
     tracing::info!("Found redis client URL");
     let redis = redis_client.get_multiplexed_async_connection().await?;
     tracing::info!("Finished redis client");
-
     let _ = create_test_user(&db_pool).await;
-
     let check_token_map: CheckTokenResponseMap = Arc::new(DashMap::new());
     let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());
-
+    let rate_limit = env::var("APP_RATE_LIMIT")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
+    let task_limit = env::var("APP_TASK_LIMIT")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
     let app_state = Arc::new(AppState {
+        task_limit,
+        rate_limit,
         check_token_map,
         get_token_map,
         email_client,

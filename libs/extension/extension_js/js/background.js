@@ -63,13 +63,13 @@ let intervals = []
 
 async function is_ws_feature_connection() {
   try {
-    const response1 = await fetch('https://feature-flags.blockmesh.xyz/extension/read-flag/use_websocket')
+    const response1 = await fetch('https://feature-flags.blockmesh.xyz/extension/read-flag/extension_use_websocket')
     if (response1.ok) {
       const value = await response1.text()
       const is_enabled = value === 'true'
       if (!is_enabled) return false
     }
-    const response2 = await fetch('https://feature-flags.blockmesh.xyz/extension/read-flag/use_websocket_percent')
+    const response2 = await fetch('https://feature-flags.blockmesh.xyz/extension/read-flag/extension_use_websocket_percent')
     if (response2.ok) {
       const value = await response2.text()
       const percentage = parseInt(value, 10)
@@ -84,7 +84,7 @@ async function is_ws_feature_connection() {
 
 async function get_polling_interval() {
   try {
-    const response = await fetch('https://feature-flags.blockmesh.xyz/extension/read-flag/polling_interval')
+    const response = await fetch('https://feature-flags.blockmesh.xyz/extension/read-flag/extension_polling_interval')
     if (response.ok) {
       const value = await response.text()
       const num = parseFloat(value)

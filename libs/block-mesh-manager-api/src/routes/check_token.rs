@@ -9,6 +9,7 @@ use sqlx::PgPool;
 
 #[tracing::instrument(name = "check_token", skip_all)]
 pub async fn check_token(
+    Extension(enable_caching): Extension<bool>,
     Extension(pool): Extension<PgPool>,
     Extension(check_token_map): Extension<CheckTokenResponseMap>,
     Json(body): Json<CheckTokenRequest>,
@@ -16,13 +17,15 @@ pub async fn check_token(
     let email = body.email.clone().to_ascii_lowercase();
     let key = (email.clone(), body.api_token);
 
-    if let Some(entry) = check_token_map.get(&key) {
-        return match entry.value() {
-            CheckTokenResponseEnum::ApiTokenMismatch => Err(Error::ApiTokenMismatch),
-            CheckTokenResponseEnum::UserNotFound => Err(Error::UserNotFound),
-            CheckTokenResponseEnum::ApiTokenNotFound => Err(Error::ApiTokenNotFound),
-            CheckTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone())),
-        };
+    if enable_caching {
+        if let Some(entry) = check_token_map.get(&key) {
+            return match entry.value() {
+                CheckTokenResponseEnum::ApiTokenMismatch => Err(Error::ApiTokenMismatch),
+                CheckTokenResponseEnum::UserNotFound => Err(Error::UserNotFound),
+                CheckTokenResponseEnum::ApiTokenNotFound => Err(Error::ApiTokenNotFound),
+                CheckTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone())),
+            };
+        }
     }
 
     let mut transaction = create_txn(&pool).await?;

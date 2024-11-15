@@ -24,6 +24,7 @@ use crate::utils::cache_envar::get_envar;
 use crate::utils::points::{calc_one_time_bonus_points, calc_points_daily, calc_total_points};
 use block_mesh_common::feature_flag_client::{get_flag_value_from_map, FlagValue};
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
+use block_mesh_manager_database_domain::domain::create_daily_stat::create_daily_stat;
 use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
@@ -52,7 +53,7 @@ pub async fn dashboard_data_extractor(
     let referrals = get_user_referrals(&mut transaction, user_id)
         .await
         .map_err(Error::from)?;
-
+    let _ = create_daily_stat(&mut transaction, &user_id).await?;
     let user_invite_code = get_user_latest_invite_code(&mut transaction, user_id)
         .await
         .map_err(Error::from)?;

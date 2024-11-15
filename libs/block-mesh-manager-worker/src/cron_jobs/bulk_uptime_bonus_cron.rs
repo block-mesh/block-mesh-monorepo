@@ -3,6 +3,7 @@ use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::env;
 use std::time::Duration;
+use tokio::time::Instant;
 
 #[tracing::instrument(name = "bulk_uptime_bonus_cron", level = "trace", skip(pool))]
 pub async fn bulk_uptime_bonus_cron(pool: PgPool) -> Result<(), anyhow::Error> {
@@ -17,8 +18,19 @@ pub async fn bulk_uptime_bonus_cron(pool: PgPool) -> Result<(), anyhow::Error> {
     let duration = Duration::from_millis(sleep);
     loop {
         if let Ok(mut transaction) = create_txn(&pool).await {
-            let _ = bulk_uptime_bonus(&mut transaction, bonus).await;
+            let now = Instant::now();
+
+            let r = bulk_uptime_bonus(&mut transaction, bonus).await;
             let _ = commit_txn(transaction).await;
+            let elapsed = now.elapsed();
+            if let Ok(r) = r {
+                tracing::info!(
+                    "bulk_uptime_bonus bonus = {} , affected rows = {}, elapsed = {:?}",
+                    bonus,
+                    r.rows_affected(),
+                    elapsed
+                );
+            }
         }
         tokio::time::sleep(duration).await;
     }

@@ -1,69 +1,46 @@
-use crate::middlewares::authentication::Backend;
 use crate::utils::cache_envar::get_envar;
-use chrono::{DateTime, Duration, Utc};
 use redis::aio::MultiplexedConnection;
 use redis::{AsyncCommands, RedisResult};
-use serde::{Deserialize, Serialize};
-use std::cmp::max;
 use uuid::Uuid;
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct RateLimitUser {
-    user_id: Uuid,
-    ip: String,
-    update_at: DateTime<Utc>,
+pub fn next_allowed_key(suffix: &str) -> String {
+    format!("next-allowed-{}", suffix)
 }
 
-impl RateLimitUser {
-    pub fn new(user_id: &Uuid, ip: &str) -> Self {
-        Self {
-            user_id: *user_id,
-            ip: ip.to_string(),
-            update_at: Utc::now(),
-        }
-    }
-}
-
-pub fn get_key(key: &str) -> String {
-    format!("rate-limit-{}", key)
-}
-
-pub fn user_ip_key(user_id: &Uuid, ip: &str) -> String {
-    format!("{}-{}", user_id, ip)
-}
-
-#[tracing::instrument(name = "get_value_from_redis", skip_all)]
-pub async fn get_value_from_redis(
+#[tracing::instrument(name = "get_next_allowed_request", skip_all)]
+pub async fn get_next_allowed_request(
     con: &mut MultiplexedConnection,
-    key: &str,
-    fallback: &RateLimitUser,
-) -> anyhow::Result<RateLimitUser> {
-    let redis_user: String = match con.get(get_key(key)).await {
-        Ok(u) => u,
-        Err(_) => return Ok(fallback.clone()),
+    user_id: &Uuid,
+    ip: &str,
+) -> anyhow::Result<bool> {
+    let r: RedisResult<String> = con.get(next_allowed_key(&user_id.to_string())).await;
+    match r {
+        Ok(_) => return Ok(true),
+        Err(e) => {
+            tracing::error!("create_next_allowed_request e => {e}");
+        }
     };
-    let redis_user = match serde_json::from_str::<RateLimitUser>(&redis_user) {
-        Ok(u) => u,
-        Err(_) => return Ok(fallback.clone()),
+    let r: RedisResult<String> = con.get(next_allowed_key(ip)).await;
+    match r {
+        Ok(_) => return Ok(true),
+        Err(e) => {
+            tracing::error!("create_next_allowed_request e => {e}");
+        }
     };
-    Ok(redis_user)
+    Ok(false)
 }
 
-#[tracing::instrument(name = "touch_redis_value", skip_all)]
-pub async fn touch_redis_value(con: &mut MultiplexedConnection, user_id: &Uuid, ip: &str) {
-    let redis_user = RateLimitUser::new(user_id, ip);
-    if let Ok(redis_user) = serde_json::to_string(&redis_user) {
-        let _: RedisResult<()> = con
-            .set_ex(
-                &get_key(&user_ip_key(user_id, ip)),
-                redis_user.clone(),
-                Backend::get_expire().await as u64,
-            )
-            .await;
-        let _: RedisResult<()> = con
-            .set_ex(get_key(ip), redis_user, Backend::get_expire().await as u64)
-            .await;
-    }
+#[tracing::instrument(name = "create_next_allowed_request", skip_all)]
+pub async fn create_next_allowed_request(
+    con: &mut MultiplexedConnection,
+    user_id: &Uuid,
+    ip: &str,
+    expiry: u64,
+) {
+    let _: RedisResult<()> = con
+        .set_ex(next_allowed_key(&user_id.to_string()), true, expiry)
+        .await;
+    let _: RedisResult<()> = con.set_ex(next_allowed_key(ip), true, expiry).await;
 }
 
 #[tracing::instrument(name = "filter_request", skip_all)]
@@ -72,13 +49,15 @@ pub async fn filter_request(
     user_id: &Uuid,
     ip: &str,
 ) -> anyhow::Result<bool> {
-    let now = Utc::now();
-    let limit = get_envar("FILTER_REQUEST").await.parse().unwrap_or(2500);
-    let diff = now - Duration::milliseconds(limit);
-    let fallback = RateLimitUser::new(user_id, ip);
-    let by_user: RateLimitUser =
-        get_value_from_redis(con, &user_ip_key(user_id, ip), &fallback).await?;
-    let by_ip: RateLimitUser = get_value_from_redis(con, ip, &fallback).await?;
-    touch_redis_value(con, user_id, ip).await;
-    Ok(max(by_user.update_at, by_ip.update_at) < diff)
+    let expiry = get_envar("FILTER_REQUEST_EXPIRY_SECONDS")
+        .await
+        .parse()
+        .unwrap_or(3u64);
+    let exists = get_next_allowed_request(con, user_id, ip).await?;
+    if exists {
+        Ok(false)
+    } else {
+        create_next_allowed_request(con, user_id, ip, expiry).await;
+        Ok(true)
+    }
 }
