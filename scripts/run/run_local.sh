@@ -20,6 +20,7 @@ export TWITTER_CLIENT_ID=""
 export TWITTER_CLIENT_SECRET=""
 export TWITTER_CALLBACK_URL="http://localhost:3000"
 export BLOCKMESH_SERVER_UUID="ff28257b-4ac8-47c2-b26f-d567626a411e"
+export APP_RATE_LIMIT="true"
 if [ -f "${ROOT}/.env" ] ; then
   source "${ROOT}/.env"
 fi

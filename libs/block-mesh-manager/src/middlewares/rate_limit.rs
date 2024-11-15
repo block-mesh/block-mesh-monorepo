@@ -17,14 +17,14 @@ pub async fn get_next_allowed_request(
     match r {
         Ok(_) => return Ok(true),
         Err(e) => {
-            tracing::error!("create_next_allowed_request e => {e}");
+            tracing::trace!("e => {e}");
         }
     };
     let r: RedisResult<String> = con.get(next_allowed_key(ip)).await;
     match r {
         Ok(_) => return Ok(true),
         Err(e) => {
-            tracing::error!("create_next_allowed_request e => {e}");
+            tracing::trace!("e => {e}");
         }
     };
     Ok(false)
@@ -38,9 +38,9 @@ pub async fn create_next_allowed_request(
     expiry: u64,
 ) {
     let _: RedisResult<()> = con
-        .set_ex(next_allowed_key(&user_id.to_string()), true, expiry)
+        .set_ex(next_allowed_key(&user_id.to_string()), "true", expiry)
         .await;
-    let _: RedisResult<()> = con.set_ex(next_allowed_key(ip), true, expiry).await;
+    let _: RedisResult<()> = con.set_ex(next_allowed_key(ip), "true", expiry).await;
 }
 
 #[tracing::instrument(name = "filter_request", skip_all)]
