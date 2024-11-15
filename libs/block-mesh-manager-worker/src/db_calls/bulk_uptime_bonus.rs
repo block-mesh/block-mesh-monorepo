@@ -1,7 +1,6 @@
 use anyhow::anyhow;
 use sqlx::postgres::PgQueryResult;
 use sqlx::{Postgres, Transaction};
-use tokio::time::Instant;
 
 #[tracing::instrument(
     name = "bulk_uptime_bonus",

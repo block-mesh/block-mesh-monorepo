@@ -1,7 +1,6 @@
 use anyhow::anyhow;
 use sqlx::postgres::PgQueryResult;
 use sqlx::{Postgres, Transaction};
-use tokio::time::Instant;
 
 #[tracing::instrument(name = "bulk_task_bonus", skip(transaction), ret, err, level = "trace")]
 pub async fn bulk_task_bonus(

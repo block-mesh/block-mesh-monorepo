@@ -100,18 +100,13 @@ pub async fn report_uptime_content(
     let user = get_user_opt_by_id(&mut transaction, &api_token.user_id)
         .await?
         .ok_or_else(|| anyhow!("User Not Found"))?;
-
-    let _ = create_daily_stat(&mut transaction, &user.id).await?;
-
     if user.email.to_ascii_lowercase() != query.email.to_ascii_lowercase() {
         return Err(anyhow!("User Not Found"));
     }
-
     let _ = create_daily_stat(&mut transaction, &user.id).await;
     let daily_stat = get_daily_stat_of_user(&mut transaction, user.id).await?;
     let _ = send_analytics(pool, request, &user.id).await;
     send_message_to_touch_users_ip(pool, ip.clone(), &user.id).await;
-
     let uptime =
         get_or_create_aggregate_by_user_and_name(&mut transaction, AggregateName::Uptime, &user.id)
             .await
