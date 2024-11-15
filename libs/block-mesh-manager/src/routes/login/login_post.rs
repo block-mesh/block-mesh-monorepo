@@ -18,11 +18,11 @@ pub async fn handler(
     Extension(mut auth): Extension<AuthSession<Backend>>,
     Form(form): Form<LoginForm>,
 ) -> Result<Redirect, Error> {
-    let mut tranaction = create_txn(&pool).await?;
-    let user = get_user_opt_by_email(&mut tranaction, &form.email.to_ascii_lowercase())
+    let mut transaction = create_txn(&pool).await?;
+    let user = get_user_opt_by_email(&mut transaction, &form.email.to_ascii_lowercase())
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    let nonce = get_nonce_by_user_id(&mut tranaction, &user.id)
+    let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
         .await?
         .ok_or_else(|| Error::NonceNotFound)?;
     let creds: Credentials = Credentials {
@@ -33,7 +33,7 @@ pub async fn handler(
     let session = match auth.authenticate(creds).await {
         Ok(Some(user)) => user,
         _ => {
-            commit_txn(tranaction).await?;
+            commit_txn(transaction).await?;
             return Ok(Error::redirect(
                 400,
                 "Authentication failed",
@@ -45,7 +45,7 @@ pub async fn handler(
     match auth.login(&session).await {
         Ok(_) => {}
         Err(e) => {
-            commit_txn(tranaction).await?;
+            commit_txn(transaction).await?;
             tracing::error!("Login failed: {:?} for user {}", e, user.id);
             return Ok(Error::redirect(
                 400,
@@ -55,7 +55,7 @@ pub async fn handler(
             ));
         }
     }
-    let _ = create_daily_stat(&mut tranaction, &user.id).await?;
-    commit_txn(tranaction).await?;
+    let _ = create_daily_stat(&mut transaction, &user.id).await?;
+    commit_txn(transaction).await?;
     Ok(Redirect::to("/ui/dashboard"))
 }

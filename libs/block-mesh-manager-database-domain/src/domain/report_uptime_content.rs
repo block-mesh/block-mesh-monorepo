@@ -101,6 +101,8 @@ pub async fn report_uptime_content(
         .await?
         .ok_or_else(|| anyhow!("User Not Found"))?;
 
+    let _ = create_daily_stat(&mut transaction, &user.id).await?;
+
     if user.email.to_ascii_lowercase() != query.email.to_ascii_lowercase() {
         return Err(anyhow!("User Not Found"));
     }

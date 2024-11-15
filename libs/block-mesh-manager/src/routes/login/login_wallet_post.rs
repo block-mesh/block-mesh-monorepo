@@ -26,16 +26,16 @@ pub async fn handler(
     Form(form): Form<LoginWalletForm>,
 ) -> Result<Redirect, Error> {
     let mut redis = state.redis.clone();
-    let mut tranaction = create_txn(&pool).await?;
+    let mut transaction = create_txn(&pool).await?;
     let pubkey = Pubkey::from_str(form.pubkey.as_str()).unwrap_or_default();
     let email = format!("wallet_{pubkey}@blockmesh.xyz").to_ascii_lowercase();
     tracing::info!("form = {:#?}", form);
     tracing::info!("email = {:#?}", email);
 
-    let user = get_user_opt_by_email(&mut tranaction, &email)
+    let user = get_user_opt_by_email(&mut transaction, &email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    let nonce = get_nonce_by_user_id(&mut tranaction, &user.id)
+    let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
         .await?
         .ok_or_else(|| Error::NonceNotFound)?;
     let creds: Credentials = Credentials {
@@ -88,7 +88,7 @@ pub async fn handler(
     let session = match auth.authenticate(creds).await {
         Ok(Some(user)) => user,
         _ => {
-            commit_txn(tranaction).await?;
+            commit_txn(transaction).await?;
             return Ok(Error::redirect(
                 400,
                 "Authentication failed",
@@ -101,7 +101,7 @@ pub async fn handler(
     match auth.login(&session).await {
         Ok(_) => {}
         Err(e) => {
-            commit_txn(tranaction).await?;
+            commit_txn(transaction).await?;
             tracing::error!("Login failed: {:?} for user {}", e, user.id);
             return Ok(Error::redirect(
                 400,
@@ -111,6 +111,6 @@ pub async fn handler(
             ));
         }
     }
-    commit_txn(tranaction).await?;
+    commit_txn(transaction).await?;
     Ok(Redirect::to("/ui/dashboard"))
 }
