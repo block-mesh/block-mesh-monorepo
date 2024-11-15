@@ -3,6 +3,7 @@ use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::env;
 use std::time::Duration;
+use tokio::time::Instant;
 
 #[tracing::instrument(name = "bulk_task_bonus_cron", level = "trace", skip(pool))]
 pub async fn bulk_task_bonus_cron(pool: PgPool) -> Result<(), anyhow::Error> {
@@ -21,8 +22,19 @@ pub async fn bulk_task_bonus_cron(pool: PgPool) -> Result<(), anyhow::Error> {
     let duration = Duration::from_millis(sleep);
     loop {
         if let Ok(mut transaction) = create_txn(&pool).await {
-            let _ = bulk_task_bonus(&mut transaction, bonus, limit).await;
+            let now = Instant::now();
+            let r = bulk_task_bonus(&mut transaction, bonus, limit).await;
             let _ = commit_txn(transaction).await;
+            let elapsed = now.elapsed();
+            if let Ok(r) = r {
+                tracing::info!(
+                    "bulk_task_bonus bonus = {}, limit = {} , affected rows = {}, elapsed = {:?}",
+                    bonus,
+                    limit,
+                    r.rows_affected(),
+                    elapsed
+                );
+            }
         }
         tokio::time::sleep(duration).await;
     }

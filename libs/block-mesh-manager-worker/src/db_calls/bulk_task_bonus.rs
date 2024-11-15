@@ -1,16 +1,16 @@
+use anyhow::anyhow;
+use sqlx::postgres::PgQueryResult;
 use sqlx::{Postgres, Transaction};
-use tokio::time::Instant;
 
 #[tracing::instrument(name = "bulk_task_bonus", skip(transaction), ret, err, level = "trace")]
 pub async fn bulk_task_bonus(
     transaction: &mut Transaction<'_, Postgres>,
     bonus: i32,
     limit: i32,
-) -> anyhow::Result<()> {
+) -> anyhow::Result<PgQueryResult> {
     if bonus <= 0 || limit <= 0 {
-        return Ok(());
+        return Err(anyhow!("bulk_task_bonus called without a limit and bonus"));
     }
-    let now = Instant::now();
     let r = sqlx::query!(
         r#"
         UPDATE daily_stats ds
@@ -27,12 +27,5 @@ pub async fn bulk_task_bonus(
     )
     .execute(&mut **transaction)
     .await?;
-    let elapsed = now.elapsed();
-    tracing::info!(
-        "bulk_task_bonus bonus = {} , affected rows = {}, elapsed = {:?}",
-        bonus,
-        r.rows_affected(),
-        elapsed
-    );
-    Ok(())
+    Ok(r)
 }
