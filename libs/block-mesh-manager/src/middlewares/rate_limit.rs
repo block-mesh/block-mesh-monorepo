@@ -17,14 +17,14 @@ pub async fn get_next_allowed_request(
     match r {
         Ok(_) => return Ok(true),
         Err(e) => {
-            tracing::error!("e => {e}");
+            tracing::trace!("e => {e}");
         }
     };
     let r: RedisResult<String> = con.get(next_allowed_key(ip)).await;
     match r {
         Ok(_) => return Ok(true),
         Err(e) => {
-            tracing::error!("e => {e}");
+            tracing::trace!("e => {e}");
         }
     };
     Ok(false)
