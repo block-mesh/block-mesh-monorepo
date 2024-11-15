@@ -29,11 +29,12 @@ pub async fn handler(
 ) -> Result<Json<Option<GetTaskResponse>>, Error> {
     let limit = get_envar("TASK_LIMIT").await.parse().unwrap_or(10);
     let mut redis = state.redis.clone();
-    let mut redis_user = match TaskLimit::get_task_limit(&body.api_token, &mut redis, limit).await {
-        Ok(r) => r,
-        Err(_) => return Err(Error::TaskLimit),
-    };
-
+    if state.task_limit {
+        let _ = match TaskLimit::get_task_limit(&body.api_token, &mut redis, limit).await {
+            Ok(r) => r,
+            Err(_) => return Err(Error::TaskLimit),
+        };
+    }
     let app_env = get_envar("APP_ENVIRONMENT").await;
     let header_ip = if app_env != "local" {
         headers
@@ -45,9 +46,11 @@ pub async fn handler(
         "127.0.0.1"
     };
 
-    let filter = filter_request(&mut redis, &body.api_token, header_ip).await;
-    if filter.is_err() || !filter? {
-        return Err(Error::NotAllowedRateLimit);
+    if state.rate_limit {
+        let filter = filter_request(&mut redis, &body.api_token, header_ip).await;
+        if filter.is_err() || !filter? {
+            return Err(Error::NotAllowedRateLimit);
+        }
     }
 
     let mut transaction = create_txn(&pool).await?;
@@ -80,10 +83,17 @@ pub async fn handler(
     let _ = create_daily_stat(&mut transaction, &user.id).await?;
     update_task_assigned(&mut transaction, task.id, user.id, TaskStatus::Assigned).await?;
     commit_txn(transaction).await?;
-    let task_bonus = get_envar("TASK_BONUS").await.parse().unwrap_or(0);
-    let expire = 10u64 * Backend::get_expire().await as u64;
-    redis_user.tasks += 1 + task_bonus;
-    TaskLimit::save_user(&mut redis, &redis_user, expire).await;
+    if state.task_limit {
+        let task_bonus = get_envar("TASK_BONUS").await.parse().unwrap_or(0);
+        let expire = 10u64 * Backend::get_expire().await as u64;
+        let mut redis_user =
+            match TaskLimit::get_task_limit(&body.api_token, &mut redis, limit).await {
+                Ok(r) => r,
+                Err(_) => return Err(Error::TaskLimit),
+            };
+        redis_user.tasks += 1 + task_bonus;
+        TaskLimit::save_user(&mut redis, &redis_user, expire).await;
+    }
     Ok(Json(Some(GetTaskResponse {
         id: task.id,
         url: task.url,

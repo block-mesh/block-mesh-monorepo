@@ -32,9 +32,11 @@ pub async fn handler(
     }
     .to_string();
     let mut redis = state.redis.clone();
-    let filter = filter_request(&mut redis, &query.api_token, &header_ip).await;
-    if filter.is_err() || !filter? {
-        return Err(Error::NotAllowedRateLimit);
+    if state.rate_limit {
+        let filter = filter_request(&mut redis, &query.api_token, &header_ip).await;
+        if filter.is_err() || !filter? {
+            return Err(Error::NotAllowedRateLimit);
+        }
     }
 
     let polling_interval = get_flag_value_from_map(
