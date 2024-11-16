@@ -3331,6 +3331,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "dash-with-expiry"
+version = "0.0.384"
+dependencies = [
+ "chrono",
+ "dashmap 6.1.0",
+]
+
+[[package]]
 name = "dashmap"
 version = "5.5.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"

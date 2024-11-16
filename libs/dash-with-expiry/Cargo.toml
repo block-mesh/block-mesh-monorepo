@@ -1,0 +1,14 @@
+[package]
+name = "dash-with-expiry"
+edition = "2021"
+authors.workspace = true
+version.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+dashmap = { workspace = true }
+chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }
+
+[lints]
+workspace = true
