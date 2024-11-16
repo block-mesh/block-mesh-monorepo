@@ -7,7 +7,7 @@ use axum::{Extension, Form};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::LoginForm;
 use block_mesh_common::routes_enum::RoutesEnum;
-use block_mesh_manager_database_domain::domain::create_daily_stat::create_daily_stat;
+use block_mesh_manager_database_domain::domain::create_daily_stat::get_or_create_daily_stat;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use secret::Secret;
 use sqlx::PgPool;
@@ -37,7 +37,7 @@ pub async fn handler(
             return Ok(Error::redirect(
                 400,
                 "Authentication failed",
-                "Authentication failed. Please try again.",
+                "Authentication failed. Please try again or reset password https://app.blockmesh.xyz/reset_password",
                 RoutesEnum::Static_UnAuth_Login.to_string().as_str(),
             ));
         }
@@ -50,12 +50,12 @@ pub async fn handler(
             return Ok(Error::redirect(
                 400,
                 "Login Failed",
-                "Login failed. Please try again.",
+                "Login failed. Please try again  or reset password https://app.blockmesh.xyz/reset_password",
                 RoutesEnum::Static_UnAuth_Login.to_string().as_str(),
             ));
         }
     }
-    let _ = create_daily_stat(&mut transaction, &user.id).await?;
+    let _ = get_or_create_daily_stat(&mut transaction, &user.id).await?;
     commit_txn(transaction).await?;
     Ok(Redirect::to("/ui/dashboard"))
 }

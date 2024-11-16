@@ -1,3 +1,4 @@
+use crate::domain::option_uuid::OptionUuid;
 use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{Decode, Postgres};
@@ -65,4 +66,16 @@ pub struct DailyStat {
     pub day: NaiveDate,
     pub created_at: DateTime<Utc>,
     pub updated_at: DateTime<Utc>,
+}
+
+#[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
+pub struct DailyStatTmp {
+    pub id: OptionUuid,
+    pub user_id: OptionUuid,
+    pub tasks_count: Option<i32>,
+    pub uptime: Option<f64>,
+    pub status: Option<String>,
+    pub day: Option<NaiveDate>,
+    pub created_at: Option<DateTime<Utc>>,
+    pub updated_at: Option<DateTime<Utc>>,
 }

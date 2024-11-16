@@ -9,7 +9,7 @@ use anyhow::Context;
 use axum::extract::State;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{GetTaskRequest, GetTaskResponse};
-use block_mesh_manager_database_domain::domain::create_daily_stat::create_daily_stat;
+use block_mesh_manager_database_domain::domain::create_daily_stat::get_or_create_daily_stat;
 use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
 use block_mesh_manager_database_domain::domain::task::TaskStatus;
 use block_mesh_manager_database_domain::domain::task_limit::TaskLimit;
@@ -74,7 +74,7 @@ pub async fn handler(
         Some(v) => v,
         None => return Ok(Json(None)),
     };
-    let _ = create_daily_stat(&mut transaction, &user.user_id).await?;
+    let _ = get_or_create_daily_stat(&mut transaction, &user.user_id).await?;
     update_task_assigned(
         &mut transaction,
         task.id,

@@ -1,6 +1,5 @@
 use crate::domain::aggregate::AggregateName;
-use crate::domain::create_daily_stat::create_daily_stat;
-use crate::domain::get_daily_stat_of_user::get_daily_stat_of_user;
+use crate::domain::create_daily_stat::get_or_create_daily_stat;
 use crate::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::domain::get_user_and_api_token::get_user_and_api_token_by_email;
 use crate::domain::notify_worker::notify_worker;
@@ -101,8 +100,7 @@ pub async fn report_uptime_content(
         return Err(anyhow!("Api Token mismatch"));
     }
 
-    let _ = create_daily_stat(&mut transaction, &user.user_id).await;
-    let daily_stat = get_daily_stat_of_user(&mut transaction, user.user_id).await?;
+    let daily_stat = get_or_create_daily_stat(&mut transaction, &user.user_id).await?;
     let _ = send_analytics(pool, request, &user.user_id).await;
     send_message_to_touch_users_ip(pool, ip.clone(), &user.user_id).await;
 
