@@ -41,6 +41,7 @@ pub async fn bulk_uptime_bonus(
                 ds.user_id = u.id
             	AND ds.status = 'OnGoing'
                 AND ds.day = CURRENT_DATE
+                AND ds.updated_at = now()
         "#,
         bonus
     )

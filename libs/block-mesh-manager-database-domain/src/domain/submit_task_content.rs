@@ -1,8 +1,7 @@
 use crate::domain::aggregate::AggregateName;
-use crate::domain::create_daily_stat::create_daily_stat;
+use crate::domain::create_daily_stat::get_or_create_daily_stat;
 use crate::domain::find_task_by_task_id_and_status::find_task_by_task_id_and_status;
 use crate::domain::finish_task::finish_task;
-use crate::domain::get_daily_stat_of_user::get_daily_stat_of_user;
 use crate::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use crate::domain::get_user_and_api_token::get_user_and_api_token_by_email;
 use crate::domain::increment_tasks_count::increment_tasks_count;
@@ -92,8 +91,7 @@ pub async fn submit_task_content(
         query.response_time.unwrap_or_default(),
     )
     .await?;
-    let _ = create_daily_stat(&mut transaction, &user.user_id).await;
-    let daily_stat = get_daily_stat_of_user(&mut transaction, user.user_id).await?;
+    let daily_stat = get_or_create_daily_stat(&mut transaction, &user.user_id).await?;
     let task_bonus = env::var("TASK_BONUS")
         .unwrap_or("0".to_string())
         .parse()

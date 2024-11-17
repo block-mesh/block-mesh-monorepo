@@ -1,5 +1,5 @@
 use crate::domain::aggregate::AggregateName;
-use crate::domain::create_daily_stat::create_daily_stat;
+use crate::domain::create_daily_stat::get_or_create_daily_stat;
 use crate::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
@@ -17,6 +17,6 @@ pub async fn prep_user(
         .await?;
     let _ = get_or_create_aggregate_by_user_and_name(transaction, AggregateName::Latency, user_id)
         .await?;
-    let _ = create_daily_stat(transaction, user_id).await;
+    let _ = get_or_create_daily_stat(transaction, user_id).await;
     Ok(())
 }
