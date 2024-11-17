@@ -18,6 +18,7 @@ use block_mesh_manager_database_domain::domain::notify_api::notify_api;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::sync::Arc;
+use uuid::Uuid;
 
 pub async fn handler(
     State(state): State<Arc<AppState>>,
@@ -76,6 +77,33 @@ pub async fn handler(
             ))
         }
     };
+    let keys: Vec<(String, String)> = state
+        .get_token_map
+        .iter()
+        .find(|r| {
+            let key = r.key();
+            key.0 == user.email
+        })
+        .iter()
+        .map(|i| i.key().clone())
+        .collect();
+    keys.iter().for_each(|key| {
+        state.get_token_map.remove(key);
+    });
+
+    let keys: Vec<(String, Uuid)> = state
+        .check_token_map
+        .iter()
+        .find(|r| {
+            let key = r.key();
+            key.0 == user.email
+        })
+        .iter()
+        .map(|i| i.key().clone())
+        .collect();
+    keys.iter().for_each(|key| {
+        state.check_token_map.remove(key);
+    });
     del_from_redis_with_pattern(&email, "-*", &mut redis).await?;
     del_from_redis_with_pattern(&user.id.to_string(), "-*", &mut redis).await?;
     let _ = notify_api(&state.pool, InvalidateApiCache { email: user.email }).await;
