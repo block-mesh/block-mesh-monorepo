@@ -17,7 +17,9 @@ git checkout -B "release-${NEWVERSION}"
 #git pull
 cargo fmt
 sleep 1
+git status
 cargo fmt
+git status
 sleep 1
 export TOML=$(git status -s Cargo.toml | wc -l | sed -e 's/ //g')
 if [ "$TOML" != "1" ]; then
