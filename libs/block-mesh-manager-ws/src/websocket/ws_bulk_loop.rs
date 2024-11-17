@@ -1,6 +1,7 @@
 use crate::websocket::manager::broadcaster::Broadcaster;
 use block_mesh_manager_database_domain::domain::ws_bulk_create_daily_stats::ws_bulk_create_daily_stats;
 use block_mesh_manager_database_domain::domain::ws_bulk_daily_stats::ws_bulk_daily_stats;
+#[allow(unused_imports)]
 use block_mesh_manager_database_domain::domain::ws_bulk_uptime::ws_bulk_uptime;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use num_traits::abs;
@@ -37,6 +38,8 @@ pub async fn ws_bulk_loop(pool: PgPool, broadcaster: Arc<Broadcaster>) -> anyhow
             let user_ids: Vec<Uuid> = user_ids_hash.into_iter().collect();
             tracing::info!("ws_bulk_loop starting user_ids: {}", user_ids.len());
             for chunk in user_ids.chunks(chunk_size) {
+                let diff = Utc::now() - prev_time;
+                let sec_diff = abs(diff.num_seconds());
                 if let Ok(mut transaction) = create_txn(&pool).await {
                     let _ = ws_bulk_create_daily_stats(&mut transaction, chunk)
                         .await
@@ -44,15 +47,7 @@ pub async fn ws_bulk_loop(pool: PgPool, broadcaster: Arc<Broadcaster>) -> anyhow
                     let _ = commit_txn(transaction).await;
                 }
                 if let Ok(mut transaction) = create_txn(&pool).await {
-                    let diff = Utc::now() - prev_time;
-                    let sec_diff = abs(diff.num_seconds());
-                    let _ = ws_bulk_uptime(&mut transaction, chunk, sec_diff as f64)
-                        .await
-                        .map_err(|e| tracing::error!("ws_bulk_uptime error: {:?}", e));
-                    let _ = commit_txn(transaction).await;
-                }
-                if let Ok(mut transaction) = create_txn(&pool).await {
-                    let _ = ws_bulk_daily_stats(&mut transaction, chunk)
+                    let _ = ws_bulk_daily_stats(&mut transaction, chunk, sec_diff as f64)
                         .await
                         .map_err(|e| tracing::error!("ws_bulk_daily_stats error: {:?}", e));
                     let _ = commit_txn(transaction).await;

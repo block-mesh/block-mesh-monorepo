@@ -1,5 +1,4 @@
 use anyhow::anyhow;
-use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use std::env;
 use uuid::Uuid;
@@ -8,12 +7,12 @@ use uuid::Uuid;
 pub async fn ws_bulk_daily_stats(
     transaction: &mut Transaction<'_, Postgres>,
     user_ids: &[Uuid],
+    diff: f64,
 ) -> anyhow::Result<()> {
     tracing::info!("ws_bulk_daily_stats starting");
     if user_ids.is_empty() {
         return Ok(());
     }
-    let day = Utc::now().date_naive();
     let upper_limit = env::var("WS_BULK_DAILY_STATS_UPPER_LIMIT")
         .unwrap_or("50".to_string())
         .parse::<i32>()
@@ -31,10 +30,15 @@ pub async fn ws_bulk_daily_stats(
         r#"
         UPDATE daily_stats
         SET
-            tasks_count = LEAST(tasks_count + {increment}, {upper_limit}),
+            tasks_count = GREATEST(tasks_count, LEAST(tasks_count + {increment}, {upper_limit})),
+            tasks_count_bonus = GREATEST(tasks_count_bonus, tasks_count_bonus + (LEAST(tasks_count + {increment}, {upper_limit}) - tasks_count)),
+            uptime = uptime + {diff},
+            uptime_bonus = uptime_bonus + {diff},
             updated_at = now()
-        WHERE user_id IN ({value_str})
-        AND day = '{day}'
+        WHERE
+            user_id IN ({value_str})
+            AND status = 'OnGoing'
+            AND day = CURRENT_DATE
         "#,
     );
     let r = sqlx::query(&query)
