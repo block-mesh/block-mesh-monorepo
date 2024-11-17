@@ -1,8 +1,12 @@
+use crate::error::Error;
 use chrono::{DateTime, Utc};
+use dashmap::DashMap;
+use database_utils::utils::instrument_wrapper::create_txn;
 use serde::{Deserialize, Serialize};
 use serde_json::{Number, Value};
 use sqlx::Postgres;
 use sqlx::{PgPool, Transaction};
+use std::sync::Arc;
 use uuid::Uuid;
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
@@ -13,6 +17,7 @@ pub struct Flag {
     pub created_at: Option<DateTime<Utc>>,
 }
 
+#[tracing::instrument(name = "get_flag", skip_all)]
 pub async fn get_flag(
     transaction: &mut Transaction<'_, Postgres>,
     name: &str,
@@ -32,7 +37,7 @@ pub async fn get_flag(
     Ok(flag)
 }
 
-#[allow(dead_code)]
+#[tracing::instrument(name = "get_flags", skip_all)]
 pub async fn get_flags(transaction: &mut Transaction<'_, Postgres>) -> anyhow::Result<Vec<Flag>> {
     let flags = sqlx::query_as!(
         Flag,
@@ -44,6 +49,31 @@ pub async fn get_flags(transaction: &mut Transaction<'_, Postgres>) -> anyhow::R
     .fetch_all(&mut **transaction)
     .await?;
     Ok(flags)
+}
+
+#[tracing::instrument(name = "load_flags", skip_all)]
+pub async fn load_flags(
+    flags_cache: Arc<DashMap<String, Value>>,
+    pool: &PgPool,
+) -> anyhow::Result<()> {
+    let mut transaction = create_txn(&pool).await.map_err(Error::from)?;
+    let flags = get_flags(&mut transaction).await?;
+    for flag in flags {
+        flags_cache.insert(flag.name, flag.value.clone());
+    }
+    Ok(())
+}
+
+#[tracing::instrument(name = "load_flags_cron", skip_all)]
+pub async fn load_flags_cron(
+    flags_cache: Arc<DashMap<String, Value>>,
+    pool: PgPool,
+) -> anyhow::Result<()> {
+    let sleep = std::time::Duration::from_millis(60_000);
+    loop {
+        load_flags(flags_cache.clone(), &pool).await?;
+        tokio::time::sleep(sleep).await;
+    }
 }
 
 pub async fn create_flag(pool: &PgPool, name: &str, value: Value) -> anyhow::Result<()> {

@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE daily_stats ds\n                SET\tuptime = uptime + $1,\n                    uptime_bonus = uptime_bonus + $1\n            FROM users u\n            WHERE\n                ds.user_id = u.id\n            \tAND ds.status = 'OnGoing'\n                AND ds.day = CURRENT_DATE\n                AND ds.updated_at = now()\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Float8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "bfc2a1d343bf934293d305b86daafd52cad0d7f597446933d090f410cf139343"
+}
