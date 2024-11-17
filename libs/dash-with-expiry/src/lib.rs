@@ -7,13 +7,13 @@ pub struct DashMapWithExpiry<K, V> {
     expiry: DashMap<K, DateTime<Utc>>,
 }
 
-impl<'a, K: Eq + Hash + Clone, V: Clone> Default for DashMapWithExpiry<K, V> {
+impl<K: Eq + Hash + Clone, V: Clone> Default for DashMapWithExpiry<K, V> {
     fn default() -> Self {
         Self::new()
     }
 }
 
-impl<'a, K: Eq + Hash + Clone, V: Clone> DashMapWithExpiry<K, V> {
+impl<K: Eq + Hash + Clone, V: Clone> DashMapWithExpiry<K, V> {
     pub fn new() -> Self {
         DashMapWithExpiry {
             map: DashMap::new(),
