@@ -29,18 +29,14 @@ pub fn aggregates_create_bulk_query(calls: HashMap<Uuid, Value>) -> String {
     let value_str = values.join(",");
     format!(
         r#"
--- Temporary table or CTE holding new values
-WITH updates (id, value, updated_at) AS (
-VALUES {}
-)
--- Update statement using the CTE
-UPDATE aggregates
-SET
-    value = updates.value,
-    updated_at = updates.updated_at
-FROM updates
-WHERE aggregates.id = updates.id;
-"#,
+        WITH updates (id, value, updated_at) AS ( VALUES {} )
+        UPDATE aggregates
+            SET
+                value = updates.value,
+                updated_at = updates.updated_at
+        FROM updates
+        WHERE aggregates.id = updates.id;
+        "#,
         value_str
     )
 }

@@ -4,6 +4,7 @@ use crate::utils::extension_wrapper_state::ExtensionWrapperState;
 use block_mesh_common::chrome_storage::AuthStatus;
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
+use block_mesh_common::routes_enum::RoutesEnum;
 use leptos::*;
 use leptos_dom::tracing;
 use logger_leptos::leptos_tracing::setup_leptos_tracing;
@@ -102,7 +103,12 @@ pub async fn submit_bandwidth(
     };
 
     let response = reqwest::Client::new()
-        .post(format!("{}/api/submit_bandwidth", base_url))
+        .post(format!(
+            "{}/{}/api{}",
+            base_url,
+            DeviceType::Extension,
+            RoutesEnum::Api_SubmitBandwidth
+        ))
         .json(&body)
         .send()
         .await?;

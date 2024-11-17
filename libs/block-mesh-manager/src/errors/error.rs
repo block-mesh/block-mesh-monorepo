@@ -143,9 +143,7 @@ impl IntoResponse for Error {
                 "Internal REDIS server error",
             )
                 .into_response(),
-            Error::Anyhow(_) => {
-                (StatusCode::INTERNAL_SERVER_ERROR, "Internal server error").into_response()
-            }
+            Error::Anyhow(s) => (StatusCode::INTERNAL_SERVER_ERROR, s.to_string()).into_response(),
         }
     }
 }

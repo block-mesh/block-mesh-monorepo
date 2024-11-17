@@ -1,7 +1,9 @@
 use anyhow::anyhow;
+use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{
     GetTaskRequest, GetTaskResponse, RunTaskResponse, SubmitTaskRequest, SubmitTaskResponse,
 };
+use block_mesh_common::routes_enum::RoutesEnum;
 use leptos::*;
 use leptos_dom::tracing;
 use reqwest::header::{HeaderMap, HeaderName, HeaderValue};
@@ -22,7 +24,12 @@ pub async fn get_task(
     };
 
     let response: Option<GetTaskResponse> = reqwest::Client::new()
-        .post(format!("{}/api/get_task", base_url))
+        .post(format!(
+            "{}/{}/api{}",
+            base_url,
+            DeviceType::Extension,
+            RoutesEnum::Api_GetToken
+        ))
         .json(&body)
         .send()
         .await?
@@ -106,7 +113,12 @@ pub async fn submit_task(
         response_body: None,
     };
     let response = reqwest::Client::new()
-        .post(format!("{}/api/submit_task", base_url))
+        .post(format!(
+            "{}/{}/api{}",
+            base_url,
+            DeviceType::Extension,
+            RoutesEnum::Api_SubmitTask
+        ))
         .query(&query)
         .body(response_raw)
         .send()

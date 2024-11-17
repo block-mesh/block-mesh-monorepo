@@ -1,7 +1,6 @@
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::CheckTokenRequest;
 use block_mesh_common::routes_enum::RoutesEnum;
-use leptos::logging::log;
 
 #[allow(dead_code)]
 pub async fn check_token(
@@ -20,15 +19,12 @@ pub async fn check_token(
         RoutesEnum::Api_CheckToken
     );
     let client = reqwest::Client::new();
-    log!("check_token - url = {}", url,);
     let r = client
         .post(&url)
         .header("Content-Type", "application/json")
         .json(&credentials)
         .send()
         .await?;
-    log!("check_token - response = {:#?}", r);
-    let j: serde_json::Value = r.json().await?;
-    log!("check_token - json = {:#?}", j);
+    let _: serde_json::Value = r.json().await?;
     Ok(())
 }

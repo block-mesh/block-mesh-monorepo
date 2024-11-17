@@ -52,7 +52,7 @@ pub async fn submit_task_content(
     let task =
         find_task_by_task_id_and_status(&mut transaction, &query.task_id, TaskStatus::Assigned)
             .await?
-            .ok_or(anyhow!("Token Not Found".to_string()))?;
+            .ok_or(anyhow!("Task Not Found".to_string()))?;
     if task.assigned_user_id.is_some() && task.assigned_user_id.unwrap() != user.user_id {
         commit_txn(transaction).await?;
         return Err(anyhow!("Task Assigned To Another User".to_string(),));

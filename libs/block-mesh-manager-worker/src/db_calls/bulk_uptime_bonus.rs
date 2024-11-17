@@ -35,7 +35,8 @@ pub async fn bulk_uptime_bonus(
         // "#,
         r#"
             UPDATE daily_stats ds
-                SET	uptime = uptime + $1
+                SET	uptime = uptime + $1,
+                    uptime_bonus = uptime_bonus + $1
             FROM users u
             WHERE
                 ds.user_id = u.id

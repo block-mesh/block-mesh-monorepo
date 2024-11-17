@@ -444,6 +444,7 @@ impl ExtensionWrapperState {
         send_storage_value_to_iframe(MessageKey::InviteCode, MessageValue::String(invite_code))
     }
 
+    #[allow(dead_code)]
     pub async fn store_uptime(uptime: f64) {
         set_storage_value(&MessageKey::Uptime.to_string(), JsValue::from_f64(uptime)).await;
         send_storage_value_to_iframe(MessageKey::Uptime, MessageValue::F64(uptime));

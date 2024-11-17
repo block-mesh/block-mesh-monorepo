@@ -1702,6 +1702,7 @@ dependencies = [
  "bytes",
  "chrono",
  "clap 4.5.8",
+ "dash-with-expiry",
  "dashmap 6.1.0",
  "dotenv",
  "enum-iterator 2.1.0",

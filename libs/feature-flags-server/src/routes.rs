@@ -12,6 +12,7 @@ use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::PgPool;
+use std::sync::Arc;
 
 #[tracing::instrument(name = "db_health", skip_all)]
 pub async fn db_health(Extension(pool): Extension<PgPool>) -> Result<impl IntoResponse, Error> {
@@ -28,7 +29,7 @@ pub async fn server_health() -> Result<impl IntoResponse, Error> {
 
 #[tracing::instrument(name = "read_flag", skip_all, level = "trace")]
 pub async fn read_flag(
-    Extension(flags_cache): Extension<DashMap<String, Value>>,
+    Extension(flags_cache): Extension<Arc<DashMap<String, Value>>>,
     Extension(pool): Extension<PgPool>,
     Path(flag): Path<String>,
 ) -> Result<Json<Value>, Error> {
