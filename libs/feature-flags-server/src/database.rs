@@ -1,7 +1,7 @@
 use crate::error::Error;
 use chrono::{DateTime, Utc};
 use dashmap::DashMap;
-use database_utils::utils::instrument_wrapper::create_txn;
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use serde::{Deserialize, Serialize};
 use serde_json::{Number, Value};
 use sqlx::Postgres;
@@ -56,11 +56,12 @@ pub async fn load_flags(
     flags_cache: Arc<DashMap<String, Value>>,
     pool: &PgPool,
 ) -> anyhow::Result<()> {
-    let mut transaction = create_txn(&pool).await.map_err(Error::from)?;
+    let mut transaction = create_txn(pool).await.map_err(Error::from)?;
     let flags = get_flags(&mut transaction).await?;
     for flag in flags {
         flags_cache.insert(flag.name, flag.value.clone());
     }
+    commit_txn(transaction).await?;
     Ok(())
 }
 
