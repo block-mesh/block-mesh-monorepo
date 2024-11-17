@@ -13,7 +13,7 @@ impl<K: Eq + Hash + Clone, V: Clone> Default for DashMapWithExpiry<K, V> {
     }
 }
 
-impl<K: Eq + Hash + Clone, V: Clone> DashMapWithExpiry<K, V> {
+impl<'a, K: Eq + Hash + Clone, V: Clone> DashMapWithExpiry<K, V> {
     pub fn new() -> Self {
         DashMapWithExpiry {
             map: DashMap::new(),
@@ -36,7 +36,7 @@ impl<K: Eq + Hash + Clone, V: Clone> DashMapWithExpiry<K, V> {
         self.map.remove(key)
     }
 
-    fn _get(self, key: &K) -> Option<V> {
+    fn _get(&'a self, key: &K) -> Option<V> {
         match self.map.get(key) {
             Some(value) => {
                 let v = value.value().clone();
@@ -46,7 +46,7 @@ impl<K: Eq + Hash + Clone, V: Clone> DashMapWithExpiry<K, V> {
         }
     }
 
-    pub fn get(self, key: &K) -> Option<V> {
+    pub fn get(&'a self, key: &K) -> Option<V> {
         let e = self.expiry.get(key);
         match e {
             Some(expiry) => {
