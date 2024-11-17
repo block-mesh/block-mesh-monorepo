@@ -60,7 +60,42 @@ impl<'a, K: Eq + Hash + Clone, V: Clone> DashMapWithExpiry<K, V> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use chrono::Duration as ChronoDuration;
+    use std::thread;
+    use std::time::Duration;
+
+    // use time::Duration as TimeDuration;
 
     #[test]
-    fn no_expiry() {}
+    fn no_expiry() {
+        let map: DashMapWithExpiry<u64, u64> = DashMapWithExpiry::new();
+        map.insert(10, 10, None);
+        let v = map.get(&10).unwrap();
+        assert_eq!(10, v);
+    }
+
+    #[test]
+    fn with_expiry() {
+        let map: DashMapWithExpiry<u64, u64> = DashMapWithExpiry::new();
+        let date = Utc::now() + ChronoDuration::milliseconds(1000);
+        map.insert(10, 10, Some(date));
+        let v = map.get(&10).unwrap();
+        assert_eq!(10, v);
+
+        let two_sec = Duration::new(2, 0);
+        thread::sleep(two_sec);
+        let v = map.get(&10);
+        assert_eq!(None, v);
+    }
+
+    #[test]
+    fn remove() {
+        let map: DashMapWithExpiry<u64, u64> = DashMapWithExpiry::new();
+        map.insert(10, 10, None);
+        let v = map.get(&10).unwrap();
+        assert_eq!(10, v);
+        map.remove(&10);
+        let v = map.get(&10);
+        assert_eq!(None, v);
+    }
 }

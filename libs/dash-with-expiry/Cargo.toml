@@ -9,6 +9,4 @@ version.workspace = true
 [dependencies]
 dashmap = { workspace = true }
 chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }
-
-[lints]
-workspace = true
+time = { workspace = true, features = ['wasm-bindgen'] }
