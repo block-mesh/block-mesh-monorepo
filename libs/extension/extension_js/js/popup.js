@@ -82,7 +82,15 @@ document.addEventListener('DOMContentLoaded', async function() {
   await initWasmModule().then(onSuccess, onError)
   const iframe = document.createElement('iframe')
   const url = (((await chrome.storage.sync.get('blockmesh_url'))?.blockmesh_url) || 'https://app.blockmesh.xyz')
-  iframe.src = `${url}/ext/login` // "http://localhost:8000/ext/login";
+  const email = ((await chrome.storage.sync.get('email'))?.email || '')
+  const api_token = ((await chrome.storage.sync.get('blockmesh_api_token'))?.blockmesh_api_token || '')
+  if (email && api_token) {
+    console.log('found, going to logged_in : email', email, 'api_token', api_token)
+    iframe.src = `${url}/ext/logged_in`
+  } else {
+    console.log('not found, going to logged_in : email', email, 'api_token', api_token)
+    iframe.src = `${url}/ext/login`
+  }
   iframe.width = '300'
   iframe.height = '400'
   iframe.style = 'border: 0px'
