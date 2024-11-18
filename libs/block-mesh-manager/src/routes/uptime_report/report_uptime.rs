@@ -36,7 +36,7 @@ pub async fn handler(
         let filter =
             filter_request(&mut redis, &query.api_token, &header_ip, "report_uptime").await;
         if filter.is_err() || !filter? {
-            return Err(Error::NotAllowedRateLimit);
+            return Ok(Json(ReportUptimeResponse { status_code: 429 }));
         }
     }
 

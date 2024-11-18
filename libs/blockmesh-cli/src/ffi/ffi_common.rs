@@ -1,5 +1,6 @@
 use crate::login_mode::login_mode;
 use anyhow::anyhow;
+use block_mesh_common::constants::DeviceType;
 use block_mesh_common::reqwest::http_client;
 use chrono::Utc;
 use once_cell::sync::OnceCell;
@@ -148,7 +149,7 @@ pub async fn debug_running(url: &str) {
     set_status(FFIStatus::RUNNING);
     loop {
         let now = Utc::now();
-        let _ = http_client()
+        let _ = http_client(DeviceType::Mobile)
             .get(format!(
                 "{}/health_check?time={}&status={}",
                 url,

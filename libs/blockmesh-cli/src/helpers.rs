@@ -30,7 +30,7 @@ pub async fn dashboard(url: &str, credentials: &DashboardRequest) -> anyhow::Res
         DeviceType::Cli,
         RoutesEnum::Api_Dashboard
     );
-    let client = http_client();
+    let client = http_client(DeviceType::Cli);
     let response = client.post(&url).json(credentials).send().await?;
     let response: DashboardResponse = response.json().await?;
     info!("Dashboard data:");
@@ -44,7 +44,7 @@ pub async fn dashboard(url: &str, credentials: &DashboardRequest) -> anyhow::Res
 #[allow(dead_code)]
 pub async fn register(url: &str, credentials: &RegisterForm) -> anyhow::Result<()> {
     let url = format!("{}{}", url, RoutesEnum::Static_UnAuth_RegisterApi);
-    let client = http_client();
+    let client = http_client(DeviceType::Cli);
     let response = client.post(&url).form(credentials).send().await?;
     let response: RegisterResponse = response.json().await?;
 
@@ -73,7 +73,7 @@ pub async fn login_to_network(url: &str, login_form: LoginForm) -> anyhow::Resul
         DeviceType::Cli,
         RoutesEnum::Api_GetToken
     );
-    let client = http_client();
+    let client = http_client(DeviceType::Cli);
     let response: GetTokenResponse = client
         .post(&url)
         .header(CONTENT_TYPE, "application/json")
@@ -117,7 +117,7 @@ pub async fn report_uptime(
         RoutesEnum::Api_ReportUptime
     );
     info!("Reporting uptime on {}", &url);
-    if let Ok(response) = http_client()
+    if let Ok(response) = http_client(DeviceType::Cli)
         .post(url)
         .query(&query)
         .json(&session_metadata)
@@ -146,7 +146,7 @@ pub async fn get_task(
         api_token: *api_token,
     };
 
-    let response: Option<GetTaskResponse> = http_client()
+    let response: Option<GetTaskResponse> = http_client(DeviceType::Cli)
         .post(format!(
             "{}/{}/api{}",
             base_url,
@@ -168,7 +168,7 @@ pub async fn run_task(
     headers: Option<Value>,
     body: Option<Value>,
 ) -> anyhow::Result<RunTaskResponse> {
-    let client = http_client();
+    let client = http_client(DeviceType::Cli);
     let mut client = match method {
         "GET" => client.get(url),
         "POST" => match body {
@@ -238,7 +238,7 @@ pub async fn submit_task(
         response_time: Option::from(response_time),
         response_body: None,
     };
-    let response = http_client()
+    let response = http_client(DeviceType::Cli)
         .post(format!(
             "{}/{}/api{}",
             base_url,
@@ -337,7 +337,7 @@ pub async fn submit_bandwidth(
         colo: metadata.colo,
     };
 
-    let response = http_client()
+    let response = http_client(DeviceType::Cli)
         .post(format!(
             "{}/{}/api{}",
             url,
@@ -353,9 +353,13 @@ pub async fn submit_bandwidth(
 
 #[allow(dead_code)]
 pub async fn get_polling_interval() -> f64 {
-    let output = match get_flag_value("cli_polling_interval", &http_client(), DeviceType::Cli)
-        .await
-        .unwrap_or(Some(Value::from(600_000.0)))
+    let output = match get_flag_value(
+        "cli_polling_interval",
+        &http_client(DeviceType::Cli),
+        DeviceType::Cli,
+    )
+    .await
+    .unwrap_or(Some(Value::from(600_000.0)))
     {
         Some(polling_interval) => {
             if polling_interval.is_number() {

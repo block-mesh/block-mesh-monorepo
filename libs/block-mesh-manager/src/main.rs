@@ -93,7 +93,7 @@ async fn run() -> anyhow::Result<()> {
         .expect("Failed to migrate database");
     tracing::info!("Database migration complete");
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
-    let client = http_client();
+    let client = http_client(DeviceType::AppServer);
     tracing::info!("Starting to get feature flags");
     let flags = Arc::new(
         get_all_flags(&client, DeviceType::AppServer)

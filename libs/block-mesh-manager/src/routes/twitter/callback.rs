@@ -8,7 +8,9 @@ use anyhow::{anyhow, Context};
 use axum::extract::Query;
 use axum::response::Redirect;
 use axum::Extension;
-use block_mesh_common::constants::{BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID};
+use block_mesh_common::constants::{
+    DeviceType, BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID,
+};
 use block_mesh_common::reqwest::http_client;
 use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
@@ -187,7 +189,7 @@ async fn get_following(user_id: u64, target: u64) -> anyhow::Result<TwitterApiSo
         apiKey: String,
         resFormat: String,
     }
-    let client = http_client();
+    let client = http_client(DeviceType::AppServer);
     let value: Value = client
         .get(env::var("TWITTER_API_URL").expect("could not find TWITTER_API_URL"))
         .query(&Params {
