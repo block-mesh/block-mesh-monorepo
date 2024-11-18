@@ -5,7 +5,8 @@ import initWasmModule, {
   report_uptime,
   start_websocket,
   measure_bandwidth,
-  stop_websocket
+  stop_websocket,
+  read_dom
 } from './wasm/blockmesh_ext.js'
 
 console.log('Background script started')
@@ -187,10 +188,8 @@ function onErrorWithLog(error) {
 // Popup button handler
 // Fetches the data from Spotify using the creds extracted earlier
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
-  console.log(`Popup message received: ${JSON.stringify(request)}, ${JSON.stringify(sender)}`)
   if (request.action === 'send_dom_to_background') {
-    console.log('got message send_dom_to_background')
-    console.log('DOM : ', request.payload)
+    await read_dom(request.payload).then(onSuccess, onError)
   }
   return true
   // chrome.runtime.sendMessage("Missing how many tracks to add param. It's a bug.").then(onSuccess, onError);
