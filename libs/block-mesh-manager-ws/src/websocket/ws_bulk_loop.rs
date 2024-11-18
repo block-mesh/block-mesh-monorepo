@@ -32,11 +32,7 @@ pub async fn ws_bulk_loop(pool: PgPool, broadcaster: Arc<Broadcaster>) -> anyhow
     loop {
         if enable_ws_bulk_loop {
             tracing::info!("ws_bulk_loop starting");
-            let user_ids: Vec<Uuid> = broadcaster
-                .user_ids
-                .iter()
-                .map(|i| i.key().clone())
-                .collect();
+            let user_ids: Vec<Uuid> = broadcaster.user_ids.iter().map(|i| *i.key()).collect();
             tracing::info!("ws_bulk_loop starting user_ids: {}", user_ids.len());
             for chunk in user_ids.chunks(chunk_size) {
                 let diff = Utc::now() - prev_time;

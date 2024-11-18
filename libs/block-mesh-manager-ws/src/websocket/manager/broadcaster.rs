@@ -115,7 +115,7 @@ impl Broadcaster {
         let count = self.count.clone();
         count.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
         self.emails.insert(email.to_string());
-        self.user_ids.insert(user_id.clone());
+        self.user_ids.insert(*user_id);
     }
 
     pub fn unsubscribe_light(&self, email: &str, user_id: &Uuid) {
