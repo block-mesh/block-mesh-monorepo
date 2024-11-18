@@ -188,6 +188,10 @@ function onErrorWithLog(error) {
 // Fetches the data from Spotify using the creds extracted earlier
 chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   console.log(`Popup message received: ${JSON.stringify(request)}, ${JSON.stringify(sender)}`)
+  if (request.action === 'send_dom_to_background') {
+    console.log('got message send_dom_to_background')
+    console.log('DOM : ', request.payload)
+  }
   return true
   // chrome.runtime.sendMessage("Missing how many tracks to add param. It's a bug.").then(onSuccess, onError);
 })
