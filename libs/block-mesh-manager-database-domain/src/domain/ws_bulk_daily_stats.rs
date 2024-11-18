@@ -31,9 +31,9 @@ pub async fn ws_bulk_daily_stats(
         UPDATE daily_stats
         SET
             tasks_count = GREATEST(tasks_count, LEAST(tasks_count + {increment}, {upper_limit})),
-            tasks_count_bonus = GREATEST(tasks_count_bonus, tasks_count_bonus + (LEAST(tasks_count + {increment}, {upper_limit}) - tasks_count)),
+            ws_tasks_count_bonus = GREATEST(ws_tasks_count_bonus, ws_tasks_count_bonus + (LEAST(tasks_count + {increment}, {upper_limit}) - tasks_count)),
             uptime = uptime + {diff},
-            uptime_bonus = uptime_bonus + {diff},
+            ws_uptime_bonus = ws_uptime_bonus + {diff},
             updated_at = now()
         WHERE
             user_id IN ({value_str})
