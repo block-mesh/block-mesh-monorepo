@@ -64,11 +64,8 @@ pub fn ExtensionLogin() -> impl IntoView {
                         state.status.update(|v| *v = AuthStatus::LoggedIn);
                     }
                 }
-                Err(e) => {
-                    notifications.set_error(format!(
-                        "Failed to login, please check your credentials again : {:?}",
-                        e
-                    ));
+                Err(_) => {
+                    notifications.set_error("Failed to login, please check your credentials again or reset password https://app.blockmesh.xyz/reset_password".to_string());
                 }
             }
             set_wait.set(false);

@@ -17,7 +17,6 @@ pub async fn get_token(
 ) -> Result<Json<GetTokenResponse>, Error> {
     let email = body.email.clone().to_ascii_lowercase();
     let key = (email.clone(), body.password.clone());
-
     if enable_caching {
         if let Some(entry) = get_token_map.get(&key) {
             return match entry.value() {
@@ -28,9 +27,7 @@ pub async fn get_token(
             };
         }
     }
-
     let mut transaction = create_txn(&pool).await?;
-
     let user = match get_user_and_api_token_by_email(&mut transaction, &email).await {
         Ok(user) => match user {
             Some(user) => user,
@@ -46,32 +43,11 @@ pub async fn get_token(
             return Err(Error::UserNotFound);
         }
     };
-
     if !verify::<&str>(body.password.as_ref(), user.password.as_ref()).unwrap_or(false) {
         commit_txn(transaction).await?;
         get_token_map.insert(key, GetTokenResponseEnum::PasswordMismatch);
         return Err(Error::PasswordMismatch);
     }
-
-    // let api_token =
-    //     match get_api_token_by_usr_and_status(&mut *transaction, &user.id, ApiTokenStatus::Active)
-    //         .await
-    //     {
-    //         Ok(api_token) => match api_token {
-    //             Some(api_token) => api_token,
-    //             None => {
-    //                 get_token_map.insert(key, GetTokenResponseEnum::ApiTokenNotFound);
-    //                 commit_txn(transaction).await?;
-    //                 return Err(Error::ApiTokenNotFound);
-    //             }
-    //         },
-    //         Err(_) => {
-    //             get_token_map.insert(key, GetTokenResponseEnum::ApiTokenNotFound);
-    //             commit_txn(transaction).await?;
-    //             return Err(Error::ApiTokenNotFound);
-    //         }
-    //     };
-
     let response = GetTokenResponse {
         api_token: Some(*user.token.as_ref()),
         message: None,
