@@ -58,12 +58,6 @@ fn main() {
 async fn run() -> anyhow::Result<()> {
     load_dotenv();
     setup_tracing_stdout_only_with_sentry();
-    // let server_user_id = Uuid::parse_str(
-    //     env::var(BLOCKMESH_SERVER_UUID_ENVAR)
-    //         .context("Could not find SERVER_UUID env var")?
-    //         .as_str(),
-    // )
-    // .context("SERVER_UUID evn var contains invalid UUID value")?;
     let port = env::var("PORT")
         .unwrap_or("8002".to_string())
         .parse()
@@ -72,18 +66,6 @@ async fn run() -> anyhow::Result<()> {
     tracing::info!("Listening on {}", listener.local_addr()?);
     let state = Arc::new(AppState::new().await);
     let broadcaster = state.websocket_manager.broadcaster.clone();
-    // let period = Duration::from_millis(env::var("PERIOD").unwrap_or("60000".to_string()).parse()?);
-    // let window_size = env::var("WINDOW_SIZE")
-    //     .unwrap_or("100".to_string())
-    //     .parse()
-    //     .unwrap_or(100);
-    // let b = broadcaster.clone();
-    // let p = state.pool.clone();
-    // let settings_task = tokio::spawn(settings_loop(p, server_user_id, period, window_size, b));
-    // let p = state.pool.clone();
-    // let b = broadcaster.clone();
-    // let s = state.clone();
-    // let cron_task = tokio::spawn(ws_task_loop(p, server_user_id, b, s));
     let p = state.pool.clone();
     let b = broadcaster.clone();
     let ws_bulk_loop_task = tokio::spawn(ws_bulk_loop(p, b));
@@ -95,8 +77,6 @@ async fn run() -> anyhow::Result<()> {
         o = base_msg_task => panic!("base_msg_task {:?}", o),
         o = ping_task => panic!("ping_task {:?}", o),
         o = server_task => panic!("server_task {:?}", o),
-        // o = settings_task => panic!("settings_task {:?}", o),
-        // o = cron_task => panic!("cron_task {:?}", o),
         o = ws_bulk_loop_task => panic!("ws_bulk_loop_task {:?}", o)
     }
 }

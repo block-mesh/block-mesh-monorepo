@@ -2,6 +2,7 @@ use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use dashmap::{DashMap, DashSet};
 use futures::future::join_all;
 use std::collections::VecDeque;
+use std::sync::atomic::AtomicI64;
 use std::sync::Arc;
 use tokio::sync::broadcast::error::SendError;
 use tokio::sync::{broadcast, mpsc, Mutex};
@@ -9,6 +10,7 @@ use uuid::Uuid;
 
 #[derive(Debug, Clone)]
 pub struct Broadcaster {
+    pub count: Arc<AtomicI64>,
     pub global_transmitter: broadcast::Sender<WsServerMessage>,
     pub sockets: Arc<DashMap<(Uuid, String), mpsc::Sender<WsServerMessage>>>,
     pub queue: Arc<Mutex<VecDeque<(Uuid, String)>>>,
@@ -26,6 +28,7 @@ impl Broadcaster {
     pub fn new() -> Self {
         let (global_transmitter, _) = broadcast::channel(10000);
         Self {
+            count: Arc::new(AtomicI64::new(0)),
             emails: Arc::new(DashSet::new()),
             user_ids: Arc::new(DashSet::new()),
             global_transmitter,
@@ -106,6 +109,20 @@ impl Broadcaster {
         }))
         .await;
         drained
+    }
+
+    pub fn subscribe_light(&self, email: &str, user_id: &Uuid) {
+        let count = self.count.clone();
+        count.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+        self.emails.insert(email.to_string());
+        self.user_ids.insert(user_id.clone());
+    }
+
+    pub fn unsubscribe_light(&self, email: &str, user_id: &Uuid) {
+        let count = self.count.clone();
+        count.fetch_add(-1, std::sync::atomic::Ordering::Relaxed);
+        self.emails.remove(email);
+        self.user_ids.remove(user_id);
     }
 
     pub async fn subscribe(

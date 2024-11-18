@@ -1,7 +1,9 @@
 pub mod handle_socket;
+pub mod handle_socket_light;
 pub mod manager;
 pub mod messenger;
 pub mod process_message;
+pub mod process_message_light;
 pub mod receiver;
 pub mod settings_loop;
 pub mod ws_base_msg_loop;
