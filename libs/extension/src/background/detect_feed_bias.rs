@@ -1,4 +1,3 @@
-use leptos::logging::log;
 use regex::Regex;
 use scraper::{Html, Selector};
 use serde::{Deserialize, Serialize};
@@ -25,13 +24,11 @@ impl FeedElement {
     }
 
     pub fn validate(&mut self) -> bool {
-        if self.user_name.is_none() {
-            false
-        } else if self.link.is_none() {
-            false
-        } else if self.id.is_none() {
-            false
-        } else if self.raw.is_none() {
+        if self.user_name.is_none()
+            || self.link.is_none()
+            || self.id.is_none()
+            || self.raw.is_none()
+        {
             false
         } else {
             self.valid = true;
