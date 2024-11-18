@@ -7,7 +7,6 @@ use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use num_traits::abs;
 use sqlx::types::chrono::Utc;
 use sqlx::PgPool;
-use std::collections::HashSet;
 use std::env;
 use std::sync::Arc;
 use std::time::Duration;
@@ -33,9 +32,7 @@ pub async fn ws_bulk_loop(pool: PgPool, broadcaster: Arc<Broadcaster>) -> anyhow
     loop {
         if enable_ws_bulk_loop {
             tracing::info!("ws_bulk_loop starting");
-            let user_ids: Vec<Uuid> = broadcaster.queue.lock().await.iter().map(|i| i.0).collect();
-            let user_ids_hash: HashSet<Uuid> = HashSet::from_iter(user_ids.into_iter());
-            let user_ids: Vec<Uuid> = user_ids_hash.into_iter().collect();
+            let user_ids: Vec<Uuid> = broadcaster.user_ids.iter().map(|i| *i.key()).collect();
             tracing::info!("ws_bulk_loop starting user_ids: {}", user_ids.len());
             for chunk in user_ids.chunks(chunk_size) {
                 let diff = Utc::now() - prev_time;

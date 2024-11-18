@@ -1,6 +1,6 @@
 use crate::errors::Error;
 use crate::state::AppState;
-use crate::websocket::handle_socket::handle_socket;
+use crate::websocket::handle_socket_light::handle_socket_light;
 use anyhow::{anyhow, Context};
 use axum::extract::{Query, State, WebSocketUpgrade};
 use axum::response::IntoResponse;
@@ -38,9 +38,6 @@ pub async fn ws_handler(
     let user = get_user_and_api_token_by_email(&mut transaction, &email)
         .await?
         .ok_or(anyhow!(String::from("User email is not present in DB")))?;
-    // let api_token = find_token(&mut transaction, &api_token)
-    //     .await?
-    //     .ok_or(anyhow!("Api Token Not Found"))?;
     commit_txn(transaction).await?;
     if user.token.as_ref() != &api_token {
         return Err(Error::from(anyhow!("User Not Found")));
@@ -56,8 +53,7 @@ pub async fn ws_handler(
         "127.0.0.1"
     }
     .to_string();
-
     Ok(ws.on_upgrade(move |socket| {
-        handle_socket(user.email, socket, header_ip, state, user.user_id)
+        handle_socket_light(email, socket, header_ip, state, user.user_id)
     }))
 }

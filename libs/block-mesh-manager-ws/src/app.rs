@@ -13,6 +13,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::env;
 use std::net::SocketAddr;
+use std::sync::atomic::Ordering;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 
@@ -97,14 +98,16 @@ pub async fn version() -> impl IntoResponse {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct StatsResponse {
-    queue: usize,
+    count: i64,
 }
 
 #[tracing::instrument(name = "stats", skip_all)]
 pub async fn stats(State(state): State<Arc<AppState>>) -> Json<StatsResponse> {
     let websocket_manager = &state.websocket_manager;
-    let queue = websocket_manager.broadcaster.queue.lock().await;
-    Json(StatsResponse { queue: queue.len() })
+    let count = websocket_manager.broadcaster.count.clone();
+    Json(StatsResponse {
+        count: count.load(Ordering::Relaxed),
+    })
 }
 
 pub async fn app(listener: TcpListener, state: Arc<AppState>) {
