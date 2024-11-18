@@ -64,7 +64,10 @@ async fn run() -> anyhow::Result<()> {
     //         .as_str(),
     // )
     // .context("SERVER_UUID evn var contains invalid UUID value")?;
-    let port = env::var("PORT").unwrap_or("8002".to_string());
+    let port = env::var("PORT")
+        .unwrap_or("8002".to_string())
+        .parse()
+        .unwrap_or(8002);
     let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
     tracing::info!("Listening on {}", listener.local_addr()?);
     let state = Arc::new(AppState::new().await);
