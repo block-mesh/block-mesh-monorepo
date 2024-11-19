@@ -23,7 +23,7 @@ pub async fn bulk_task_bonus(
             ds.user_id = a.user_id
             AND a.name = 'Uptime'
             AND a.updated_at >= NOW() - INTERVAL '2 hour'
-        	AND ds.status = 'OnGoing'
+            AND ds.status = 'OnGoing'
             AND ds.day = CURRENT_DATE
             AND ds.tasks_count < $2
         "#,
