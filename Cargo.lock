@@ -1750,6 +1750,7 @@ dependencies = [
  "console-subscriber",
  "console_error_panic_hook",
  "console_log 1.0.0",
+ "dash-with-expiry",
  "dashmap 6.1.0",
  "database-utils",
  "dotenv",
@@ -3340,6 +3341,9 @@ dependencies = [
  "chrono",
  "dashmap 6.1.0",
  "time",
+ "tokio",
+ "tracing",
+ "tracing-test",
 ]
 
 [[package]]

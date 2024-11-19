@@ -29,7 +29,7 @@ struct ResendConfirmEmailTemplate {
 pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<impl IntoResponse, Redirect> {
-    return match auth.user {
+    match auth.user {
         Some(_) => Err(Redirect::to(
             RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
         )),
@@ -44,5 +44,5 @@ pub async fn handler(
             support: BLOCK_MESH_SUPPORT_EMAIL.to_string(),
             chat: BLOCK_MESH_SUPPORT_CHAT.to_string(),
         }),
-    };
+    }
 }

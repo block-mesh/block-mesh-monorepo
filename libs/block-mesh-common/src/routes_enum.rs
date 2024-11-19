@@ -9,7 +9,6 @@ pub enum RoutesEnum {
     Static_UnAuth_Notification,
     Static_UnAuth_EmailConfirm,
     Static_UnAuth_ResetPassword,
-    Static_UnAuth_ResendConfirmationEmail,
     Static_UnAuth_NewPassword,
     Static_UnAuth_Root,
     Static_UnAuth_Error,
@@ -22,6 +21,7 @@ pub enum RoutesEnum {
     Static_UnAuth_Login_Wallet,
     Static_UnAuth_DbHealth,
     Static_UnAuth_ServerHealth,
+    Static_Auth_ResendConfirmationEmail,
     Static_Auth_Twitter_Login,
     Static_Auth_Edit_Invite,
     Static_Auth_Call_To_Action,
@@ -58,9 +58,6 @@ impl Display for RoutesEnum {
             RoutesEnum::Static_Auth_Daily_Leaderboard => write!(f, "/daily_leaderboard"),
             RoutesEnum::Static_UnAuth_EmailConfirm => write!(f, "/email_confirm"),
             RoutesEnum::Static_UnAuth_ResetPassword => write!(f, "/reset_password"),
-            RoutesEnum::Static_UnAuth_ResendConfirmationEmail => {
-                write!(f, "/resend_confirmation_email")
-            }
             RoutesEnum::Static_UnAuth_NewPassword => write!(f, "/new_password"),
             RoutesEnum::Static_UnAuth_Root => write!(f, "/"),
             RoutesEnum::Static_UnAuth_Error => write!(f, "/error"),
@@ -71,6 +68,9 @@ impl Display for RoutesEnum {
             RoutesEnum::Static_UnAuth_Login_Wallet => write!(f, "/login_wallet"),
             RoutesEnum::Static_UnAuth_DbHealth => write!(f, "/db_health"),
             RoutesEnum::Static_UnAuth_ServerHealth => write!(f, "/server_health"),
+            RoutesEnum::Static_Auth_ResendConfirmationEmail => {
+                write!(f, "/resend_confirmation_email")
+            }
             RoutesEnum::Static_Auth_Logout => write!(f, "/logout"),
             RoutesEnum::Static_Auth_Dashboard => write!(f, "/dashboard"),
             RoutesEnum::Static_Auth_Edit_Invite => write!(f, "/edit_invite_code"),

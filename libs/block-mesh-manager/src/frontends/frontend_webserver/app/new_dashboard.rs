@@ -78,7 +78,7 @@ pub fn NewDashboard() -> impl IntoView {
                 .post(format!(
                     "{}{}",
                     origin,
-                    RoutesEnum::Static_UnAuth_ResendConfirmationEmail
+                    RoutesEnum::Static_Auth_ResendConfirmationEmail
                 ))
                 .form(&ResendConfirmEmailForm {
                     email: email.get_untracked(),
@@ -86,8 +86,12 @@ pub fn NewDashboard() -> impl IntoView {
                 .send()
                 .await;
             match response {
-                Ok(_) => {
-                    notifications.set_success("Verification email sent");
+                Ok(r) => {
+                    if r.status().as_u16() < 400 {
+                        notifications.set_success("Verification email sent");
+                    } else {
+                        notifications.set_error("Failed to send verification email");
+                    }
                 }
                 Err(_) => {
                     notifications.set_error("Failed to send verification email");

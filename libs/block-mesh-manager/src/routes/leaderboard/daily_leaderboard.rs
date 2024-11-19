@@ -23,6 +23,7 @@ pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<Json<DailyLeaderboard>, Error> {
+    let user = auth.user.ok_or(Error::UserNotFound)?;
     let day = Utc::now().date_naive() - Duration::days(1);
     Ok(Json(DailyLeaderboard {
         leaderboard_users: vec![],
