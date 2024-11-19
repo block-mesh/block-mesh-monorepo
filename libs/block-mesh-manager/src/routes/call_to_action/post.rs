@@ -16,8 +16,8 @@ pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
     Form(form): Form<CallToActionForm>,
 ) -> Result<Redirect, Error> {
-    let mut transaction = create_txn(&pool).await?;
     let user = auth.user.ok_or(Error::UserNotFound)?;
+    let mut transaction = create_txn(&pool).await?;
     get_or_create_call_to_action(
         &mut transaction,
         user.id,

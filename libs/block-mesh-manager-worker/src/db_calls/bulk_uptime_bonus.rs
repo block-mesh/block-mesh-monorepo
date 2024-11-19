@@ -37,14 +37,16 @@ pub async fn bulk_uptime_bonus(
             UPDATE daily_stats ds
                 SET
                     uptime = GREATEST(uptime, LEAST(uptime + $1, 86400.0)),
-                    uptime_bonus = GREATEST(uptime_bonus, LEAST(uptime_bonus + $1, 86400.0))
-            FROM users u
+                    uptime_bonus = GREATEST(uptime_bonus, LEAST(uptime_bonus + $1, 86400.0)),
+                    updated_at = now()
+            FROM aggregates a
             WHERE
-                ds.user_id = u.id
+                ds.user_id = a.user_id
+                AND a.name = 'Uptime'
+                AND a.updated_at >= NOW() - INTERVAL '2 hour'
             	AND ds.status = 'OnGoing'
                 AND ds.day = CURRENT_DATE
                 AND ds.uptime < 86400.0
-                AND ds.updated_at = now()
         "#,
         bonus
     )

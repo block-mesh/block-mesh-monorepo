@@ -21,6 +21,13 @@ pub fn get_static_auth_router() -> Router<Arc<AppState>> {
             post(routes::invite_codes::edit_invite_code_post::handler),
         )
         .route(
+            RoutesEnum::Static_Auth_ResendConfirmationEmail
+                .to_string()
+                .as_str(),
+            get(routes::emails::resend_confirm_email_form::handler)
+                .post(routes::emails::resend_confirm_email_post::handler),
+        )
+        .route(
             RoutesEnum::Static_Auth_Call_To_Action.to_string().as_str(),
             post(routes::call_to_action::post::handler),
         )
