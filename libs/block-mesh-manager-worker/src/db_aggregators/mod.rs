@@ -1,3 +1,4 @@
+pub mod add_to_aggregates_aggregator;
 pub mod aggregates_aggregator;
 pub mod analytics_aggregator;
 pub mod channel;
