@@ -16,7 +16,8 @@ pub async fn bulk_task_bonus(
         UPDATE daily_stats ds
             SET
                 tasks_count = GREATEST(tasks_count, LEAST(tasks_count + $1, $2)),
-                tasks_count_bonus = GREATEST(tasks_count_bonus, tasks_count_bonus + (LEAST(tasks_count + $1, $2) - tasks_count))
+                tasks_count_bonus = GREATEST(tasks_count_bonus, tasks_count_bonus + (LEAST(tasks_count + $1, $2) - tasks_count)),
+                updated_at = now()
         FROM users u
         WHERE
             ds.user_id = u.id
