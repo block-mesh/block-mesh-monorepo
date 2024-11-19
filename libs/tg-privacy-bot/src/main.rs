@@ -149,8 +149,8 @@ async fn run() -> anyhow::Result<()> {
     bot.set_my_commands(Commands::bot_commands()).await?;
     let db_pool = get_pool().await;
     let env = env::var("APP_ENVIRONMENT")?;
-    let unlimited_pg_pool = get_unlimited_pg_pool(None).await?;
-    migrate(unlimited_pg_pool, env).await?;
+    let unlimited_pg_pool = get_unlimited_pg_pool(None).await;
+    migrate(&unlimited_pg_pool, env).await?;
     println!("Dispatching bot");
 
     let router = Router::new()
