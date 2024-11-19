@@ -33,7 +33,7 @@ async fn main() -> anyhow::Result<()> {
     setup_tracing_stdout_only();
     let db_pool = get_pg_pool(None).await;
     let env = env::var("APP_ENVIRONMENT").expect("APP_ENVIRONMENT is not set");
-    let unlimited_pg_pool = get_unlimited_pg_pool(None).await?;
+    let unlimited_pg_pool = get_unlimited_pg_pool(None).await;
     migrate(&unlimited_pg_pool, env)
         .await
         .expect("Failed to migrate database");
