@@ -26,7 +26,7 @@ pub async fn handler(
     let cache = RATE_LIMIT_EMAIL
         .get_or_init(|| async { DashSetWithExpiry::new() })
         .await;
-    if let Some(_) = cache.get(&email) {
+    if cache.get(&email).is_some() {
         return Err(Error::NotAllowedRateLimit);
     }
     let mut transaction = create_txn(&pool).await?;

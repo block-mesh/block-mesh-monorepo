@@ -25,7 +25,7 @@ pub async fn handler(
     let cache = RATE_LIMIT_EMAIL
         .get_or_init(|| async { DashSetWithExpiry::new() })
         .await;
-    if let Some(_) = cache.get(&user.email) {
+    if cache.get(&user.email).is_some() {
         return Err(Error::NotAllowedRateLimit);
     }
     let email_mode = get_envar("EMAIL_MODE").await;
