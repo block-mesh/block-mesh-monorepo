@@ -5,6 +5,7 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use database_utils::utils::connection::get_unlimited_pg_pool;
     use block_mesh_common::constants::DeviceType;
     use block_mesh_manager::worker::update_feature_flags::feature_flags_loop;
     use block_mesh_manager::utils::cache_envar::get_envar;
@@ -88,7 +89,8 @@ async fn run() -> anyhow::Result<()> {
     let db_pool = get_connection_pool(&configuration.database, Option::from(database_url)).await?;
     let env = get_envar("APP_ENVIRONMENT").await;
     tracing::info!("Database migration started");
-    migrate(&db_pool, env)
+    let unlimited_pg_pool = get_unlimited_pg_pool(None).await;
+    migrate(&unlimited_pg_pool, env)
         .await
         .expect("Failed to migrate database");
     tracing::info!("Database migration complete");

@@ -3,7 +3,7 @@ use crate::routes::get_router;
 use axum::{Extension, Router};
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use dashmap::DashMap;
-use database_utils::utils::connection::get_pg_pool;
+use database_utils::utils::connection::{get_pg_pool, get_unlimited_pg_pool};
 use database_utils::utils::migrate::migrate;
 use logger_general::tracing::setup_tracing_stdout_only;
 use serde_json::Value;
@@ -33,7 +33,8 @@ async fn main() -> anyhow::Result<()> {
     setup_tracing_stdout_only();
     let db_pool = get_pg_pool(None).await;
     let env = env::var("APP_ENVIRONMENT").expect("APP_ENVIRONMENT is not set");
-    migrate(&db_pool, env)
+    let unlimited_pg_pool = get_unlimited_pg_pool(None).await;
+    migrate(&unlimited_pg_pool, env)
         .await
         .expect("Failed to migrate database");
     let _ = pre_populate_db(&db_pool).await;
