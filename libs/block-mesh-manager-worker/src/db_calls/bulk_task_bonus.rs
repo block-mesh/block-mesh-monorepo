@@ -18,9 +18,11 @@ pub async fn bulk_task_bonus(
                 tasks_count = GREATEST(tasks_count, LEAST(tasks_count + $1, $2)),
                 tasks_count_bonus = GREATEST(tasks_count_bonus, tasks_count_bonus + (LEAST(tasks_count + $1, $2) - tasks_count)),
                 updated_at = now()
-        FROM users u
+        FROM aggregates a
         WHERE
-            ds.user_id = u.id
+            ds.user_id = a.user_id
+            AND a.name = 'Uptime'
+            AND a.updated_at >= NOW() - INTERVAL '2 hour'
         	AND ds.status = 'OnGoing'
             AND ds.day = CURRENT_DATE
             AND ds.tasks_count < $2
