@@ -10,27 +10,54 @@ use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
 use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
-use anyhow::anyhow;
+use anyhow::{anyhow, Context};
 use axum::extract::State;
 use axum::{Extension, Form, Json};
 use axum_login::AuthSession;
 use bcrypt::{hash, DEFAULT_COST};
 use block_mesh_common::interfaces::server_api::{RegisterForm, RegisterResponse};
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
+use chrono::{Duration, Utc};
+use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
+use http::HeaderMap;
 use secret::Secret;
 use sqlx::PgPool;
 use std::sync::Arc;
+use tokio::sync::OnceCell;
 use uuid::Uuid;
 use validator::validate_email;
 
+static RATE_LIMIT_IP: OnceCell<DashSetWithExpiry<String>> = OnceCell::const_new();
+
 #[tracing::instrument(name = "register_api", skip_all)]
 pub async fn handler(
+    headers: HeaderMap,
     Extension(pool): Extension<PgPool>,
     Extension(mut auth): Extension<AuthSession<Backend>>,
     State(state): State<Arc<AppState>>,
     Form(form): Form<RegisterForm>,
 ) -> Result<Json<RegisterResponse>, Error> {
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let app_env = get_envar("APP_ENVIRONMENT").await;
+    let header_ip = if app_env != "local" {
+        headers
+            .get("cf-connecting-ip")
+            .context("Missing CF-CONNECTING-IP")?
+            .to_str()
+            .context("Unable to STR CF-CONNECTING-IP")?
+    } else {
+        "127.0.0.1"
+    }
+    .to_string();
+
+    let cache = RATE_LIMIT_IP
+        .get_or_init(|| async { DashSetWithExpiry::new() })
+        .await;
+    if cache.get(&header_ip).is_some() {
+        return Err(Error::NotAllowedRateLimit);
+    }
+
+    let mut transaction = create_txn(&pool).await?;
     let email = form.email.clone().to_ascii_lowercase();
     if !validate_email(email.clone()) {
         return Ok(Json(RegisterResponse {
@@ -100,8 +127,9 @@ pub async fn handler(
             error: Some("Please provide an invite code".to_string()),
         }));
     }
-    transaction.commit().await.map_err(Error::from)?;
-
+    commit_txn(transaction).await?;
+    let date = Utc::now() + Duration::milliseconds(60_000);
+    cache.insert(header_ip, Some(date));
     let creds: Credentials = Credentials {
         email: email.clone(),
         password: Secret::from(form.password),
