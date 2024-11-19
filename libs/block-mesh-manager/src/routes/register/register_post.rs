@@ -1,12 +1,15 @@
 use std::sync::Arc;
 
-use anyhow::anyhow;
+use anyhow::{anyhow, Context};
 use axum::extract::State;
 use axum::response::Redirect;
 use axum::{Extension, Form};
 use axum_login::AuthSession;
 use bcrypt::{hash, DEFAULT_COST};
+use chrono::{Duration, Utc};
+use http::HeaderMap;
 use sqlx::PgPool;
+use tokio::sync::OnceCell;
 use uuid::Uuid;
 use validator::validate_email;
 
@@ -14,6 +17,7 @@ use block_mesh_common::interfaces::server_api::RegisterForm;
 use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
 use block_mesh_manager_database_domain::domain::prep_user::prep_user;
+use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use secret::Secret;
 
@@ -30,13 +34,35 @@ use crate::middlewares::authentication::{Backend, Credentials};
 use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
 
+static RATE_LIMIT_IP: OnceCell<DashSetWithExpiry<String>> = OnceCell::const_new();
+
 #[tracing::instrument(name = "register_post", skip_all)]
 pub async fn handler(
+    headers: HeaderMap,
     Extension(pool): Extension<PgPool>,
     Extension(mut auth): Extension<AuthSession<Backend>>,
     State(state): State<Arc<AppState>>,
     Form(form): Form<RegisterForm>,
 ) -> Result<Redirect, Error> {
+    let app_env = get_envar("APP_ENVIRONMENT").await;
+    let header_ip = if app_env != "local" {
+        headers
+            .get("cf-connecting-ip")
+            .context("Missing CF-CONNECTING-IP")?
+            .to_str()
+            .context("Unable to STR CF-CONNECTING-IP")?
+    } else {
+        "127.0.0.1"
+    }
+    .to_string();
+
+    let cache = RATE_LIMIT_IP
+        .get_or_init(|| async { DashSetWithExpiry::new() })
+        .await;
+    if cache.get(&header_ip).is_some() {
+        return Err(Error::NotAllowedRateLimit);
+    }
+
     let mut transaction = create_txn(&pool).await?;
     let email = form.email.clone().to_ascii_lowercase();
     if !validate_email(email.clone()) {
@@ -124,6 +150,8 @@ pub async fn handler(
         ));
     }
     commit_txn(transaction).await?;
+    let date = Utc::now() + Duration::milliseconds(60_000);
+    cache.insert(header_ip, Some(date));
 
     let creds: Credentials = Credentials {
         email: email.clone(),
@@ -141,15 +169,15 @@ pub async fn handler(
         .map_err(|_| Error::Auth(anyhow!("Login failed").to_string()))?;
     let email_mode = get_envar("EMAIL_MODE").await;
     if email_mode == "AWS" {
-        let _ = state
+        state
             .email_client
             .send_confirmation_email_aws(&email, nonce_secret.expose_secret())
-            .await;
+            .await?;
     } else {
-        let _ = state
+        state
             .email_client
             .send_confirmation_email_gmail(&email, nonce_secret.expose_secret())
-            .await;
+            .await?;
     }
     Ok(Redirect::to("/ui/dashboard"))
 }
