@@ -1,6 +1,5 @@
 use block_mesh_common::interfaces::ip_data::{get_ip_info, IPData, Locator, LocatorDe, Service};
 use rustc_hash::FxHashMap;
-use worker::console_log;
 
 static IP_GEO_LOCATE_SERVICES: [Service; 4] = [
     Service::IpWhois,
@@ -32,10 +31,8 @@ pub async fn get_ip_api_is_response(ip_data: &mut IPData) {
     if let Some(ip) = ip {
         let ip = ip.as_ref().unwrap();
         let response = get_ip_info(ip).await;
-        console_log!("35 prepare {:?}", response);
         match response {
             Ok(response) => {
-                console_log!("37 success {:?}", response);
                 ip_data.ip_api_is_response = Some(response);
             }
             Err(e) => {
@@ -44,7 +41,6 @@ pub async fn get_ip_api_is_response(ip_data: &mut IPData) {
         }
         for service in IP_GEO_LOCATE_SERVICES {
             let response = Locator::get(ip, service).await;
-            console_log!("XYZ {} {:?}", service, response);
             match response {
                 Ok(response) => {
                     ip_data.ip_geolocate_response = Some(LocatorDe::new(response));
