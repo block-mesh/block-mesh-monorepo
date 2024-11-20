@@ -1,57 +1,61 @@
 pub use ipgeolocate::{Locator, Service};
 use serde::{Deserialize, Serialize};
 
+static ASN_LIST: [u64; 13] = [
+    51167, 14061, 24940, 40021, 132203, 45102, 215590, 141995, 44477, 213230, 214902, 63473, 16276,
+];
+
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Company {
-    pub name: String,
-    pub abuser_score: String,
-    pub domain: String,
-    pub r#type: String,
-    pub network: String,
-    pub whois: String,
+    pub name: Option<String>,
+    pub abuser_score: Option<String>,
+    pub domain: Option<String>,
+    pub r#type: Option<String>,
+    pub network: Option<String>,
+    pub whois: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct DataCenter {
-    pub datacenter: String,
-    pub network: String,
-    pub country: String,
-    pub region: String,
-    pub city: String,
+    pub datacenter: Option<String>,
+    pub network: Option<String>,
+    pub country: Option<String>,
+    pub region: Option<String>,
+    pub city: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Asn {
     pub asn: u32,
-    pub abuser_score: String,
-    pub route: String,
-    pub descr: String,
-    pub country: String,
-    pub active: bool,
-    pub org: String,
-    pub domain: String,
-    pub abuse: String,
-    pub r#type: String,
+    pub abuser_score: Option<String>,
+    pub route: Option<String>,
+    pub descr: Option<String>,
+    pub country: Option<String>,
+    pub active: Option<bool>,
+    pub org: Option<String>,
+    pub domain: Option<String>,
+    pub abuse: Option<String>,
+    pub r#type: Option<String>,
     pub created: Option<String>,
     pub updated: Option<String>,
-    pub rir: String,
-    pub whois: String,
+    pub rir: Option<String>,
+    pub whois: Option<String>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Location {
-    pub continent: String,
-    pub country: String,
-    pub country_code: String,
-    pub state: String,
-    pub city: String,
-    pub latitude: f64,
-    pub longitude: f64,
-    pub zip: String,
-    pub timezone: String,
-    pub local_time: String,
-    pub local_time_unix: u64,
-    pub is_dst: bool,
+    pub continent: Option<String>,
+    pub country: Option<String>,
+    pub country_code: Option<String>,
+    pub state: Option<String>,
+    pub city: Option<String>,
+    pub latitude: Option<f64>,
+    pub longitude: Option<f64>,
+    pub zip: Option<String>,
+    pub timezone: Option<String>,
+    pub local_time: Option<String>,
+    pub local_time_unix: Option<u64>,
+    pub is_dst: Option<bool>,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -128,10 +132,40 @@ impl IPData {
             None
         }
     }
+
+    pub fn asn(&self) -> Option<u64> {
+        if let Some(ip_api) = &self.ip_api_is_response {
+            if let Some(asn) = &ip_api.asn {
+                return Some(asn.asn as u64);
+            }
+        }
+        None
+    }
+
+    pub fn is_datacenter(&self) -> Option<bool> {
+        if let Some(ip_api) = &self.ip_api_is_response {
+            return Some(ip_api.is_datacenter);
+        }
+        None
+    }
+
+    pub fn is_vps(&self) -> Option<bool> {
+        if let Some(asn) = self.asn() {
+            if ASN_LIST.contains(&asn) {
+                return Some(true);
+            }
+        }
+        if let Some(is_datacenter) = self.is_datacenter() {
+            if is_datacenter {
+                return Some(true);
+            }
+        }
+        None
+    }
 }
 
 #[tracing::instrument(name = "get_ip_info", ret, err)]
-pub async fn get_ip_info(ip: &str) -> Result<IpApiIsResponse, reqwest::Error> {
+pub async fn get_ip_info(ip: &str) -> anyhow::Result<IpApiIsResponse> {
     let url = format!("https://api.ipapi.is?q={}", ip);
     let response_result = reqwest::get(&url).await;
     let response = response_result.map_err(|e| {
