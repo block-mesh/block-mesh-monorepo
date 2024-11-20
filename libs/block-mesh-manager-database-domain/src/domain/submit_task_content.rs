@@ -91,7 +91,7 @@ pub async fn submit_task_content(
         query.response_time.unwrap_or_default(),
     )
     .await?;
-    let daily_stat = get_or_create_daily_stat(&mut transaction, &user.user_id).await?;
+    let daily_stat = get_or_create_daily_stat(&mut transaction, &user.user_id, None).await?;
     let task_bonus = env::var("TASK_BONUS")
         .unwrap_or("0".to_string())
         .parse()
