@@ -1,3 +1,4 @@
+pub mod captcha_check;
 pub mod check_token;
 pub mod connectors;
 pub mod extension_wrapper_state;

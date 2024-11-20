@@ -515,3 +515,9 @@ impl CronReportAggregateEntry {
         }
     }
 }
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct CaptchaResp {
+    pub status: u16,
+    pub message: String,
+}
