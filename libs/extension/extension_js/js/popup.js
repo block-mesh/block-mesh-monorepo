@@ -76,6 +76,22 @@ async function onMessage(e) {
   }
 }
 
+async function check_captcha() {
+  try {
+    const url = 'https://captcha.blockmesh.xyz'
+    const response = await fetch(url)
+    if (response.status !== 200) {
+      return false
+    }
+    const json = await response.json()
+    return json.status === 200
+
+  } catch (error) {
+    console.error('check_captcha', { error })
+    return false
+  }
+}
+
 // Popups cannot have any inline scripts with our security policies.
 // Click handlers should be added when the popup is opened.
 document.addEventListener('DOMContentLoaded', async function() {

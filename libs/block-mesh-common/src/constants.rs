@@ -8,6 +8,7 @@ pub const BLOCKMESH_TWITTER_USER_ID: u64 = 1766124448778784768;
 pub const BLOCKMESH_FOUNDER_TWITTER_USER_ID: u64 = 1778711300127821824;
 pub const BLOCKMESH_PG_NOTIFY_WORKER: &str = "pgchannel";
 pub const BLOCKMESH_PG_NOTIFY_API: &str = "pgchannel_api";
+pub const BLOCKMESH_CAPTCHA: &str = "https://captcha.blockmesh.xyz";
 
 pub fn env_url() -> String {
     static APP_ENVIRONMENT: OnceLock<String> = OnceLock::new();
