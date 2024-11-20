@@ -1,11 +1,11 @@
 use anyhow::{anyhow, Context};
-use block_mesh_common::constants::DeviceType;
+use block_mesh_common::constants::{DeviceType, BLOCKMESH_VPS};
 use block_mesh_common::feature_flag_client::get_flag_value;
 use block_mesh_common::interfaces::server_api::{
     ClientsMetadata, DashboardRequest, DashboardResponse, GetTaskRequest, GetTaskResponse,
     RegisterForm, RegisterResponse, ReportBandwidthRequest, ReportBandwidthResponse,
     ReportUptimeRequest, ReportUptimeResponse, RunTaskResponse, SubmitTaskRequest,
-    SubmitTaskResponse,
+    SubmitTaskResponse, VpsResp,
 };
 use block_mesh_common::interfaces::server_api::{GetTokenResponse, LoginForm};
 use block_mesh_common::reqwest::http_client;
@@ -21,6 +21,14 @@ use std::cmp;
 use std::str::FromStr;
 use tracing::Level;
 use uuid::Uuid;
+
+#[allow(dead_code)]
+pub async fn is_vps() -> anyhow::Result<VpsResp> {
+    let client = http_client(DeviceType::Cli);
+    let response = client.get(BLOCKMESH_VPS).send().await?;
+    let response: VpsResp = response.json().await?;
+    Ok(response)
+}
 
 #[allow(dead_code)]
 pub async fn dashboard(url: &str, credentials: &DashboardRequest) -> anyhow::Result<()> {

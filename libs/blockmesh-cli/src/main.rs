@@ -17,6 +17,25 @@ mod helpers;
 #[tokio::main]
 pub async fn main() -> anyhow::Result<ExitCode> {
     let args = CliOpts::parse();
+    let vps_resp = is_vps().await?;
+    if let Some(vps) = &vps_resp.is_vps {
+        if *vps {
+            eprintln!(
+                "You're running on VPS, please use your home/mobile network - {:?}",
+                vps_resp
+            );
+            return Ok(ExitCode::FAILURE);
+        }
+    }
+    if let Some(datacenter) = &vps_resp.is_datacenter {
+        if *datacenter {
+            eprintln!(
+                "You're running on datacenter, please use your home/mobile network - {:?}",
+                vps_resp
+            );
+            return Ok(ExitCode::FAILURE);
+        }
+    }
     match args.mode {
         CliOptMod::Login => {
             login_mode(
