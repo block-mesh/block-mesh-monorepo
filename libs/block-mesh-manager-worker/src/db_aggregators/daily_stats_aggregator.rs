@@ -20,7 +20,7 @@ pub fn daily_stats_create_bulk_query(calls: HashMap<Uuid, f64>) -> String {
     let value_str = values.join(",");
     let lock_values: Vec<String> = calls
         .iter()
-        .map(|(id, value)| format!("'{}'::uuid", id))
+        .map(|(id, _)| format!("'{}'::uuid", id))
         .collect();
     let lock_str = lock_values.join(",");
     format!(

@@ -2,6 +2,7 @@ use crate::state::AppState;
 use crate::websocket::process_message_light::process_message_light;
 use axum::extract::ws::{Message, WebSocket};
 use block_mesh_common::interfaces::db_messages::{AggregateAddToMessage, DBMessageTypes};
+use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::notify_worker::notify_worker;
 use futures::{SinkExt, StreamExt};
 use sqlx::types::chrono::Utc;
@@ -49,7 +50,7 @@ pub async fn handle_socket_light(
                     msg_type: DBMessageTypes::AggregateAddToMessage,
                     user_id,
                     value: serde_json::Value::from(delta),
-                    name: "Uptime".to_string(),
+                    name: AggregateName::Uptime.to_string(),
                 },
             )
             .await;

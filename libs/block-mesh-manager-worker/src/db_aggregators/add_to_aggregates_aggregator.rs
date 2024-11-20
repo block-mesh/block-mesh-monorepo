@@ -38,7 +38,7 @@ pub fn add_to_aggregates_create_bulk_query(calls: HashMap<Uuid, (String, Value)>
         r#"
         WITH
         locked_rows (user_id, name) AS (
-            SELECT id
+            SELECT user_id, name
             FROM aggregates
             WHERE (user_id, name) IN ( {lock_values_str} )
             FOR UPDATE SKIP LOCKED
