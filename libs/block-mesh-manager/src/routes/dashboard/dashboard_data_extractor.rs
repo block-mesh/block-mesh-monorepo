@@ -53,7 +53,7 @@ pub async fn dashboard_data_extractor(
     let referrals = get_user_referrals(&mut transaction, user_id)
         .await
         .map_err(Error::from)?;
-    let _ = get_or_create_daily_stat(&mut transaction, &user_id).await?;
+    let _ = get_or_create_daily_stat(&mut transaction, &user_id, None).await?;
     let user_invite_code = get_user_latest_invite_code(&mut transaction, user_id)
         .await
         .map_err(Error::from)?;

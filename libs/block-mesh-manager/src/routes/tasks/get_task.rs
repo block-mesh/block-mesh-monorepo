@@ -74,7 +74,7 @@ pub async fn handler(
         Some(v) => v,
         None => return Ok(Json(None)),
     };
-    let _ = get_or_create_daily_stat(&mut transaction, &user.user_id).await?;
+    let _ = get_or_create_daily_stat(&mut transaction, &user.user_id, None).await?;
     update_task_assigned(
         &mut transaction,
         task.id,

@@ -111,7 +111,7 @@ async fn run() -> anyhow::Result<()> {
         joiner_tx.clone(),
         db_pool.clone(),
         tx.subscribe(),
-        env::var("AGG_SIZE")
+        env::var("ADD_TO_AGG_SIZE")
             .unwrap_or("300".to_string())
             .parse()
             .unwrap_or(300),
@@ -121,7 +121,7 @@ async fn run() -> anyhow::Result<()> {
         joiner_tx.clone(),
         db_pool.clone(),
         tx.subscribe(),
-        env::var("AGG_SIZE")
+        env::var("USERS_IP_AGG_SIZE")
             .unwrap_or("300".to_string())
             .parse()
             .unwrap_or(300),
@@ -131,7 +131,7 @@ async fn run() -> anyhow::Result<()> {
         joiner_tx.clone(),
         db_pool.clone(),
         tx.subscribe(),
-        env::var("AGG_SIZE")
+        env::var("AGG_AGG_SIZE")
             .unwrap_or("300".to_string())
             .parse()
             .unwrap_or(300),
@@ -140,7 +140,7 @@ async fn run() -> anyhow::Result<()> {
     let db_analytics_aggregator_task = tokio::spawn(analytics_aggregator(
         db_pool.clone(),
         tx.subscribe(),
-        env::var("AGG_SIZE")
+        env::var("ANALYTICS_AGG_SIZE")
             .unwrap_or("300".to_string())
             .parse()
             .unwrap_or(300),
@@ -150,7 +150,7 @@ async fn run() -> anyhow::Result<()> {
         joiner_tx.clone(),
         db_pool.clone(),
         tx.subscribe(),
-        env::var("AGG_SIZE")
+        env::var("DAILY_STATS_AGG_SIZE")
             .unwrap_or("300".to_string())
             .parse()
             .unwrap_or(300),

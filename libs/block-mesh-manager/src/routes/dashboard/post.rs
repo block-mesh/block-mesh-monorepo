@@ -8,7 +8,10 @@ use axum_login::AuthSession;
 use block_mesh_common::interfaces::db_messages::{AggregateAddToMessage, DBMessageTypes};
 use block_mesh_common::interfaces::server_api::DashboardResponse;
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
+use block_mesh_manager_database_domain::domain::create_daily_stat::get_or_create_daily_stat;
 use block_mesh_manager_database_domain::domain::notify_worker::notify_worker;
+use chrono::{Duration, Utc};
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::sync::Arc;
 #[allow(unused_imports)]
@@ -31,6 +34,13 @@ pub async fn handler(
         },
     )
     .await;
+    let mut transaction = create_txn(&pool).await?;
+    let today = Utc::now().date_naive();
+    for i in 0..14 {
+        let day = today - Duration::days(i);
+        let _ = get_or_create_daily_stat(&mut transaction, &user.id, Some(day)).await?;
+    }
+    commit_txn(transaction).await?;
     let data = dashboard_data_extractor(&pool, user.id, state).await?;
     Ok(Json(data))
 }
