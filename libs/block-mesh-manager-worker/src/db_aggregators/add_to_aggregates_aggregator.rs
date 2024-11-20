@@ -14,7 +14,13 @@ use uuid::Uuid;
 #[tracing::instrument(name = "add_to_aggregates_create_bulk_query", skip_all)]
 pub fn add_to_aggregates_create_bulk_query(calls: HashMap<Uuid, (String, Value)>) -> String {
     let now = Utc::now();
-    let values: Vec<String> = calls
+    let lock_values: Vec<String> = calls
+        .iter()
+        .map(|(user_id, value)| format!("('{}'::uuid, '{}')", user_id, value.0))
+        .collect();
+    let lock_values_str = lock_values.join(",");
+
+    let update_values: Vec<String> = calls
         .iter()
         .map(|(user_id, value)| {
             format!(
@@ -27,20 +33,27 @@ pub fn add_to_aggregates_create_bulk_query(calls: HashMap<Uuid, (String, Value)>
         })
         .collect();
 
-    let value_str = values.join(",");
+    let update_values_str = update_values.join(",");
     format!(
         r#"
-        WITH updates (user_id, value, updated_at, name) AS ( VALUES {} )
+        WITH
+        locked_rows (user_id, name) AS (
+            SELECT user_id, name
+            FROM aggregates
+            WHERE (user_id, name) IN ( {lock_values_str} )
+            FOR UPDATE SKIP LOCKED
+        ),
+        updates (user_id, value, updated_at, name) AS ( VALUES {update_values_str} )
         UPDATE aggregates
             SET
                 value =  to_jsonb((COALESCE(NULLIF(aggregates.value, 'null'), '0')::text)::double precision + updates.value::double precision),
                 updated_at = updates.updated_at
         FROM updates
+        JOIN locked_rows ON locked_rows.user_id = updates.user_id AND locked_rows.name = updates.name
         WHERE
             aggregates.user_id = updates.user_id
             AND aggregates.name = updates.name
-        "#,
-        value_str
+        "#
     )
 }
 

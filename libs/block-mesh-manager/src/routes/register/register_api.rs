@@ -59,7 +59,7 @@ pub async fn handler(
     }
     let date = Utc::now() + Duration::milliseconds(60_000);
     cache.insert(header_ip, Some(date));
-    cache.insert(email, Some(date));
+    cache.insert(email.clone(), Some(date));
     let mut transaction = create_txn(&pool).await?;
     if !validate_email(email.clone()) {
         return Ok(Json(RegisterResponse {

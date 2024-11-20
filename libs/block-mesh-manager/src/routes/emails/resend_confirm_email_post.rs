@@ -48,7 +48,7 @@ pub async fn handler(
         return Err(Error::NotAllowedRateLimit);
     }
     let date = Utc::now() + Duration::milliseconds(60_000);
-    cache.insert(user.email, Some(date));
+    cache.insert(user.email.clone(), Some(date));
     cache.insert(email, Some(date));
     cache.insert(header_ip, Some(date));
     let email_mode = get_envar("EMAIL_MODE").await;
