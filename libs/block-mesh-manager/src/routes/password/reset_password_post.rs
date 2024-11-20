@@ -44,7 +44,7 @@ pub async fn handler(
         return Err(Error::NotAllowedRateLimit);
     }
     let date = Utc::now() + Duration::milliseconds(60_000);
-    cache.insert(email, Some(date));
+    cache.insert(email.clone(), Some(date));
     cache.insert(header_ip, Some(date));
     let mut transaction = create_txn(&pool).await?;
     let user = get_user_opt_by_email(&mut transaction, &email)
