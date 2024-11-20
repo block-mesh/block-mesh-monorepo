@@ -38,6 +38,7 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Form(form): Form<RegisterForm>,
 ) -> Result<Json<RegisterResponse>, Error> {
+    let email = form.email.clone().to_ascii_lowercase();
     let app_env = get_envar("APP_ENVIRONMENT").await;
     let header_ip = if app_env != "local" {
         headers
@@ -53,12 +54,13 @@ pub async fn handler(
     let cache = RATE_LIMIT_IP
         .get_or_init(|| async { DashSetWithExpiry::new() })
         .await;
-    if cache.get(&header_ip).is_some() {
+    if cache.get(&header_ip).is_some() || cache.get(&email).is_some() {
         return Err(Error::NotAllowedRateLimit);
     }
-
+    let date = Utc::now() + Duration::milliseconds(60_000);
+    cache.insert(header_ip, Some(date));
+    cache.insert(email, Some(date));
     let mut transaction = create_txn(&pool).await?;
-    let email = form.email.clone().to_ascii_lowercase();
     if !validate_email(email.clone()) {
         return Ok(Json(RegisterResponse {
             status_code: 400,
@@ -128,8 +130,7 @@ pub async fn handler(
         }));
     }
     commit_txn(transaction).await?;
-    let date = Utc::now() + Duration::milliseconds(60_000);
-    cache.insert(header_ip, Some(date));
+
     let creds: Credentials = Credentials {
         email: email.clone(),
         password: Secret::from(form.password),
