@@ -18,20 +18,22 @@ pub fn daily_stats_create_bulk_query(calls: HashMap<Uuid, f64>) -> String {
         .map(|(id, value)| format!("('{}'::uuid, {})", id, value))
         .collect();
     let value_str = values.join(",");
-
+    let lock_values: Vec<String> = calls
+        .iter()
+        .map(|(id, value)| format!("'{}'::uuid", id))
+        .collect();
+    let lock_str = lock_values.join(",");
     format!(
         r#"
-WITH updates (id, value) AS (
-VALUES {}
-)
--- Update statement using the CTE
+WITH
+updates (id, value) AS (VALUES {value_str}),
+locked_rows (id) AS (SELECT id FROM daily_stats WHERE id in ({lock_str}) FOR UPDATE SKIP LOCKED)
 UPDATE daily_stats
-SET
-    uptime = uptime + updates.value
+SET uptime = uptime + updates.value
 FROM updates
+JOIN locked_rows ON locked_rows.id = updates.id
 WHERE daily_stats.id = updates.id;
-    "#,
-        value_str
+    "#
     )
 }
 
