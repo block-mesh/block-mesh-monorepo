@@ -97,8 +97,9 @@ document.addEventListener('DOMContentLoaded', async function() {
   const email = ((await chrome.storage.sync.get('email'))?.email || '')
   const api_token = ((await chrome.storage.sync.get('blockmesh_api_token'))?.blockmesh_api_token || '')
   if (is_vps_resp?.is_datacenter || is_vps_resp?.is_vps) {
+    const asn = is_vps_resp?.asn || 'unknown'
     console.log('VPS detected, please use your home/mobile network')
-    iframe.src = `https://heroku-pages.blockmesh.xyz/block-mesh-manager-vps.html`
+    iframe.src = `https://heroku-pages.blockmesh.xyz/block-mesh-manager-vps.html?asn=${asn}`
   } else if (email && api_token) {
     console.log('found, going to logged_in : email', email, 'api_token', api_token)
     iframe.src = `${url}/ext/logged_in`
