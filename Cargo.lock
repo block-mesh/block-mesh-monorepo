@@ -2696,6 +2696,8 @@ dependencies = [
  "askama",
  "askama_axum",
  "block-mesh-common",
+ "reqwest 0.12.7",
+ "rustc-hash 1.1.0",
  "serde",
  "serde_json",
  "time",
