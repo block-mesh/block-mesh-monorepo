@@ -1,5 +1,4 @@
 use block_mesh_common::interfaces::server_api::CaptchaResp;
-use serde::{Deserialize, Serialize};
 use tracing_subscriber::fmt::format::Pretty;
 use tracing_subscriber::fmt::time::UtcTime;
 use tracing_subscriber::prelude::*;
