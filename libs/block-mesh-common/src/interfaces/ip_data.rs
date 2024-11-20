@@ -144,9 +144,9 @@ impl IPData {
         None
     }
 
-    pub fn is_vps(&self) -> Option<bool> {
+    pub fn is_vps(&self, asn_list: Vec<u64>) -> Option<bool> {
         if let Some(asn) = self.asn() {
-            if ASN_LIST.contains(&asn) {
+            if asn_list.contains(&asn) {
                 return Some(true);
             }
         }
