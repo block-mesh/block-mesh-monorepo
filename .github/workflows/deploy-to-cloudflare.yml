@@ -26,7 +26,8 @@ jobs:
           "cloudflare-worker-logger-proxy",
           "cloudflare-feature-flags",
           "cloudflare-worker-cron",
-          "cloudflare-wallet-helper"
+          "cloudflare-wallet-helper",
+          "cloudflare-captcha-page"
         ]
     steps:
       - uses: actions/checkout@v4
