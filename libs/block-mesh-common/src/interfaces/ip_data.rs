@@ -1,10 +1,5 @@
 pub use ipgeolocate::{Locator, Service};
 use serde::{Deserialize, Serialize};
-
-static ASN_LIST: [u64; 13] = [
-    51167, 14061, 24940, 40021, 132203, 45102, 215590, 141995, 44477, 213230, 214902, 63473, 16276,
-];
-
 #[derive(Debug, Serialize, Deserialize)]
 pub struct Company {
     pub name: Option<String>,
@@ -149,9 +144,9 @@ impl IPData {
         None
     }
 
-    pub fn is_vps(&self) -> Option<bool> {
+    pub fn is_vps(&self, asn_list: Vec<u64>) -> Option<bool> {
         if let Some(asn) = self.asn() {
-            if ASN_LIST.contains(&asn) {
+            if asn_list.contains(&asn) {
                 return Some(true);
             }
         }

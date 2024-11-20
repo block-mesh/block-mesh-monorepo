@@ -76,15 +76,31 @@ async function onMessage(e) {
   }
 }
 
+async function is_vps() {
+  try {
+    const resp = await fetch('https://vps.blockmesh.xyz')
+    const json = await resp.json()
+    console.log('is_vps json response:', json)
+    return json
+  } catch (error) {
+    console.error('is_vps', error)
+  }
+}
+
 // Popups cannot have any inline scripts with our security policies.
 // Click handlers should be added when the popup is opened.
 document.addEventListener('DOMContentLoaded', async function() {
   await initWasmModule().then(onSuccess, onError)
+  const is_vps_resp = await is_vps()
   const iframe = document.createElement('iframe')
   const url = (((await chrome.storage.sync.get('blockmesh_url'))?.blockmesh_url) || 'https://app.blockmesh.xyz')
   const email = ((await chrome.storage.sync.get('email'))?.email || '')
   const api_token = ((await chrome.storage.sync.get('blockmesh_api_token'))?.blockmesh_api_token || '')
-  if (email && api_token) {
+  if (is_vps_resp?.is_datacenter || is_vps_resp?.is_vps) {
+    const asn = is_vps_resp?.asn || 'unknown'
+    console.log('VPS detected, please use your home/mobile network')
+    iframe.src = `https://heroku-pages.blockmesh.xyz/block-mesh-manager-vps.html?asn=${asn}`
+  } else if (email && api_token) {
     console.log('found, going to logged_in : email', email, 'api_token', api_token)
     iframe.src = `${url}/ext/logged_in`
   } else {

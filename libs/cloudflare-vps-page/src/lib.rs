@@ -24,7 +24,11 @@ fn start() {
 }
 
 #[event(fetch)]
-async fn main(req: Request, _env: Env, _ctx: Context) -> Result<Response> {
+async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
+    let asn_list = env.var("ASN_LIST")?.to_string();
+    let asn_list = serde_json::from_str::<Vec<u64>>(&asn_list)?;
+    console_log!("asn list: {:?}", asn_list);
+
     let mut headers: FxHashMap<String, String> = FxHashMap::default();
     if let Ok(Some(v)) = req.headers().get("cf-connecting-ip") {
         headers.insert("cf-connecting-ip".to_string(), v.clone());
@@ -42,7 +46,7 @@ async fn main(req: Request, _env: Env, _ctx: Context) -> Result<Response> {
         message: "OK".to_string(),
         asn: ip_data.asn(),
         is_datacenter: ip_data.is_datacenter(),
-        is_vps: ip_data.is_vps(),
+        is_vps: ip_data.is_vps(asn_list),
     };
     Response::from_json(&resp)
 }

@@ -89,7 +89,11 @@ pub async fn get_flag_value(
         "{}/{}/read-flag/{}",
         BLOCK_MESH_FEATURE_FLAGS, device_type, flag
     );
-    let response: Value = client.get(&url).send().await?.json().await?;
+    let response = client.get(&url).send().await?;
+    if response.status() != reqwest::StatusCode::OK {
+        return Err(anyhow::anyhow!(response.text().await?));
+    }
+    let response: Value = response.json().await?;
     Ok(Some(response))
 }
 
