@@ -44,7 +44,7 @@ pub async fn get_ip_api_is_response(ip_data: &mut IPData) {
             match response {
                 Ok(response) => {
                     ip_data.ip_geolocate_response = Some(LocatorDe::new(response));
-                    // break;
+                    break;
                 }
                 Err(e) => {
                     tracing::error!("Error getting IP info: {:?}", e);
