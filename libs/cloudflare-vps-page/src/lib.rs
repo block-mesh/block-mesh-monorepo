@@ -33,6 +33,11 @@ async fn main(req: Request, _env: Env, _ctx: Context) -> Result<Response> {
     get_ip_api_is_response(&mut ip_data).await;
     console_log!("ip_data: {:?}", ip_data);
     let resp: VpsResp = VpsResp {
+        ip: req
+            .headers()
+            .get("cf-connecting-ip")
+            .unwrap_or_default()
+            .unwrap_or_default(),
         status: 200,
         message: "OK".to_string(),
         asn: ip_data.asn(),
