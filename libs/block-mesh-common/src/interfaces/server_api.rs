@@ -515,3 +515,25 @@ impl CronReportAggregateEntry {
         }
     }
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct CaptchaResp {
+    pub status: u16,
+    pub message: String,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct VpsResp {
+    pub status: u16,
+    pub ip: String,
+    pub message: String,
+    pub asn: Option<u64>,
+    pub is_datacenter: Option<bool>,
+    pub is_vps: Option<bool>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct OptCreds {
+    pub email: Option<String>,
+    pub api_token: Option<Uuid>,
+}

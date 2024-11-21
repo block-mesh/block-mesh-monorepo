@@ -37,6 +37,7 @@ pub enum AggregateName {
     Tasks,
     Invalid,
     CronReports,
+    WalletChange,
 }
 
 impl Display for AggregateName {
@@ -51,6 +52,7 @@ impl Display for AggregateName {
             Self::Tasks => write!(f, "Tasks"),
             Self::Invalid => write!(f, "Invalid"),
             Self::CronReports => write!(f, "CronReports"),
+            Self::WalletChange => write!(f, "WalletChange"),
         }
     }
 }
@@ -65,6 +67,9 @@ impl From<Option<String>> for AggregateName {
 }
 impl From<String> for AggregateName {
     fn from(s: String) -> Self {
+        if s.starts_with(&Self::WalletChange.to_string()) {
+            return Self::WalletChange;
+        }
         match s.as_str() {
             "FounderTwitter" => Self::FounderTwitter,
             "Twitter" => Self::Twitter,
@@ -74,6 +79,7 @@ impl From<String> for AggregateName {
             "Latency" => Self::Latency,
             "Tasks" => Self::Tasks,
             "CronReports" => Self::CronReports,
+            "WalletChange" => Self::WalletChange,
             _ => Self::Invalid,
         }
     }

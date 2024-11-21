@@ -18,10 +18,10 @@ pub async fn handle_socket(
 ) {
     let is_closing = Arc::new(AtomicBool::new(false));
     let (ws_sink, ws_stream) = socket.split();
-    let (sink_task, sink_tx) = messenger(ws_sink, is_closing.clone());
+    let (mut sink_task, sink_tx) = messenger(ws_sink, is_closing.clone());
     // Using notify to process one task at a time
     let task_scheduler_notifier = Arc::new(Notify::new());
-    let recv_task = receiver(
+    let mut recv_task = receiver(
         ws_stream,
         is_closing.clone(),
         ip.clone(),
@@ -38,7 +38,7 @@ pub async fn handle_socket(
         .await;
     let _task_sink_tx = sink_tx.clone();
     let is_cls = is_closing.clone();
-    let send_task = tokio::spawn(async move {
+    let mut send_task = tokio::spawn(async move {
         loop {
             let Some(task_receiver) = task_scheduler.add_session().await else {
                 if is_cls.load(Ordering::Relaxed) {
@@ -59,7 +59,7 @@ pub async fn handle_socket(
 
     let is_cls = is_closing.clone();
     let task_sink_tx = sink_tx.clone();
-    let broadcast_task = tokio::spawn(async move {
+    let mut broadcast_task = tokio::spawn(async move {
         while let Ok(broadcast_message) = broadcast_receiver.recv().await {
             if let Err(_error) = task_sink_tx.send(broadcast_message).await {
                 if is_cls.load(Ordering::Relaxed) {
@@ -71,10 +71,34 @@ pub async fn handle_socket(
     });
 
     tokio::select! {
-        o = recv_task => tracing::trace!("recv_task dead {:?}", o),
-        o = send_task => tracing::trace!("send_task dead {:?}", o),
-        o = sink_task => tracing::trace!("sink_task dead {:?}", o),
-        o = broadcast_task => tracing::trace!("broadcast_task dead {:?}", o)
+        o = &mut recv_task => {
+            tracing::trace!("recv_task dead {:?}", o);
+            recv_task.abort();
+            send_task.abort();
+            sink_task.abort();
+            broadcast_task.abort();
+            },
+        o = &mut send_task => {
+            tracing::trace!("send_task dead {:?}", o);
+            recv_task.abort();
+            send_task.abort();
+            sink_task.abort();
+            broadcast_task.abort();
+        },
+        o = &mut sink_task => {
+            tracing::trace!("sink_task dead {:?}", o);
+            recv_task.abort();
+            send_task.abort();
+            sink_task.abort();
+            broadcast_task.abort();
+            },
+        o = &mut broadcast_task => {
+            tracing::trace!("broadcast_task dead {:?}", o);
+            recv_task.abort();
+            send_task.abort();
+            sink_task.abort();
+            broadcast_task.abort();
+        }
     }
 
     broadcaster.unsubscribe(email, user_id, ip.clone()).await;

@@ -30,6 +30,7 @@ pub async fn get_task(
             DeviceType::Extension,
             RoutesEnum::Api_GetToken
         ))
+        .query(&body)
         .json(&body)
         .send()
         .await?

@@ -17,6 +17,6 @@ pub async fn prep_user(
         .await?;
     let _ = get_or_create_aggregate_by_user_and_name(transaction, AggregateName::Latency, user_id)
         .await?;
-    let _ = get_or_create_daily_stat(transaction, user_id).await;
+    let _ = get_or_create_daily_stat(transaction, user_id, None).await;
     Ok(())
 }

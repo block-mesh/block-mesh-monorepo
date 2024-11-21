@@ -55,7 +55,7 @@ pub async fn handler(
             ));
         }
     }
-    let _ = get_or_create_daily_stat(&mut transaction, &user.id).await?;
+    let _ = get_or_create_daily_stat(&mut transaction, &user.id, None).await?;
     commit_txn(transaction).await?;
     Ok(Redirect::to("/ui/dashboard"))
 }

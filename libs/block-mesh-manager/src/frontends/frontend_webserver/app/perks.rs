@@ -34,20 +34,21 @@ pub fn Perks() -> impl IntoView {
         button_enabled.set(data.wallet_address.is_none());
     }
     let on_connect_button_click = move || {
-        if button_enabled.get() {
-            show_wallet_modal.set(true);
-        }
+        // if button_enabled.get() {
+        show_wallet_modal.set(true);
+        // }
     };
 
     let connect_action = create_action(move |wallet: &String| {
         let w = wallet.clone();
         async move {
-            if !button_enabled.get_untracked() {
-                notifications.set_error("Wallet already connected");
-                return;
-            }
+            // if !button_enabled.get_untracked() {
+            //     notifications.set_error("Wallet already connected");
+            //     return;
+            // }
             if connect_wallet_in_browser(w).await {
-                button_enabled.set(false)
+                // button_enabled.set(false)
+                notifications.set_success("Wallet connected");
             }
         }
     });

@@ -100,7 +100,7 @@ pub async fn report_uptime_content(
         return Err(anyhow!("Api Token mismatch"));
     }
 
-    let daily_stat = get_or_create_daily_stat(&mut transaction, &user.user_id).await?;
+    let daily_stat = get_or_create_daily_stat(&mut transaction, &user.user_id, None).await?;
     let _ = send_analytics(pool, request, &user.user_id).await;
     send_message_to_touch_users_ip(pool, ip.clone(), &user.user_id).await;
 

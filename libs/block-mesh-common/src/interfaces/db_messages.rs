@@ -7,6 +7,7 @@ use uuid::Uuid;
 pub enum DBMessageTypes {
     UsersIpMessage,
     AggregateMessage,
+    AggregateAddToMessage,
     AnalyticsMessage,
     DailyStatMessage,
 }
@@ -21,6 +22,14 @@ pub struct UsersIpMessage {
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct AggregateMessage {
     pub id: Uuid,
+    pub value: Value,
+    pub msg_type: DBMessageTypes,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct AggregateAddToMessage {
+    pub user_id: Uuid,
+    pub name: String,
     pub value: Value,
     pub msg_type: DBMessageTypes,
 }

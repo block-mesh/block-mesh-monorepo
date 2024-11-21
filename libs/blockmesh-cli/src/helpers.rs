@@ -1,11 +1,11 @@
 use anyhow::{anyhow, Context};
-use block_mesh_common::constants::DeviceType;
+use block_mesh_common::constants::{DeviceType, BLOCKMESH_VPS};
 use block_mesh_common::feature_flag_client::get_flag_value;
 use block_mesh_common::interfaces::server_api::{
     ClientsMetadata, DashboardRequest, DashboardResponse, GetTaskRequest, GetTaskResponse,
-    RegisterForm, RegisterResponse, ReportBandwidthRequest, ReportBandwidthResponse,
+    OptCreds, RegisterForm, RegisterResponse, ReportBandwidthRequest, ReportBandwidthResponse,
     ReportUptimeRequest, ReportUptimeResponse, RunTaskResponse, SubmitTaskRequest,
-    SubmitTaskResponse,
+    SubmitTaskResponse, VpsResp,
 };
 use block_mesh_common::interfaces::server_api::{GetTokenResponse, LoginForm};
 use block_mesh_common::reqwest::http_client;
@@ -23,6 +23,14 @@ use tracing::Level;
 use uuid::Uuid;
 
 #[allow(dead_code)]
+pub async fn is_vps() -> anyhow::Result<VpsResp> {
+    let client = http_client(DeviceType::Cli);
+    let response = client.get(BLOCKMESH_VPS).send().await?;
+    let response: VpsResp = response.json().await?;
+    Ok(response)
+}
+
+#[allow(dead_code)]
 pub async fn dashboard(url: &str, credentials: &DashboardRequest) -> anyhow::Result<()> {
     let url = format!(
         "{}/{}/api{}",
@@ -30,8 +38,17 @@ pub async fn dashboard(url: &str, credentials: &DashboardRequest) -> anyhow::Res
         DeviceType::Cli,
         RoutesEnum::Api_Dashboard
     );
-    let client = http_client();
-    let response = client.post(&url).json(credentials).send().await?;
+    let query: OptCreds = OptCreds {
+        email: Some(credentials.email.clone()),
+        api_token: Some(credentials.api_token),
+    };
+    let client = http_client(DeviceType::Cli);
+    let response = client
+        .post(&url)
+        .query(&query)
+        .json(credentials)
+        .send()
+        .await?;
     let response: DashboardResponse = response.json().await?;
     info!("Dashboard data:");
     println!(
@@ -44,8 +61,17 @@ pub async fn dashboard(url: &str, credentials: &DashboardRequest) -> anyhow::Res
 #[allow(dead_code)]
 pub async fn register(url: &str, credentials: &RegisterForm) -> anyhow::Result<()> {
     let url = format!("{}{}", url, RoutesEnum::Static_UnAuth_RegisterApi);
-    let client = http_client();
-    let response = client.post(&url).form(credentials).send().await?;
+    let query: OptCreds = OptCreds {
+        email: Some(credentials.email.to_string()),
+        api_token: None,
+    };
+    let client = http_client(DeviceType::Cli);
+    let response = client
+        .post(&url)
+        .query(&query)
+        .form(credentials)
+        .send()
+        .await?;
     let response: RegisterResponse = response.json().await?;
 
     if response.status_code == 200 {
@@ -73,9 +99,14 @@ pub async fn login_to_network(url: &str, login_form: LoginForm) -> anyhow::Resul
         DeviceType::Cli,
         RoutesEnum::Api_GetToken
     );
-    let client = http_client();
+    let query: OptCreds = OptCreds {
+        email: Some(login_form.email.to_string()),
+        api_token: None,
+    };
+    let client = http_client(DeviceType::Cli);
     let response: GetTokenResponse = client
         .post(&url)
+        .query(&query)
         .header(CONTENT_TYPE, "application/json")
         .json(&login_form)
         .send()
@@ -117,7 +148,7 @@ pub async fn report_uptime(
         RoutesEnum::Api_ReportUptime
     );
     info!("Reporting uptime on {}", &url);
-    if let Ok(response) = http_client()
+    if let Ok(response) = http_client(DeviceType::Cli)
         .post(url)
         .query(&query)
         .json(&session_metadata)
@@ -146,7 +177,7 @@ pub async fn get_task(
         api_token: *api_token,
     };
 
-    let response: Option<GetTaskResponse> = http_client()
+    let response: Option<GetTaskResponse> = http_client(DeviceType::Cli)
         .post(format!(
             "{}/{}/api{}",
             base_url,
@@ -168,7 +199,7 @@ pub async fn run_task(
     headers: Option<Value>,
     body: Option<Value>,
 ) -> anyhow::Result<RunTaskResponse> {
-    let client = http_client();
+    let client = http_client(DeviceType::Cli);
     let mut client = match method {
         "GET" => client.get(url),
         "POST" => match body {
@@ -238,7 +269,7 @@ pub async fn submit_task(
         response_time: Option::from(response_time),
         response_body: None,
     };
-    let response = http_client()
+    let response = http_client(DeviceType::Cli)
         .post(format!(
             "{}/{}/api{}",
             base_url,
@@ -336,14 +367,19 @@ pub async fn submit_bandwidth(
         asn: metadata.asn,
         colo: metadata.colo,
     };
+    let query: OptCreds = OptCreds {
+        email: Some(email.to_string()),
+        api_token: Some(api_token),
+    };
 
-    let response = http_client()
+    let response = http_client(DeviceType::Cli)
         .post(format!(
             "{}/{}/api{}",
             url,
             DeviceType::Cli,
             RoutesEnum::Api_SubmitBandwidth
         ))
+        .query(&query)
         .json(&body)
         .send()
         .await?;
@@ -353,9 +389,13 @@ pub async fn submit_bandwidth(
 
 #[allow(dead_code)]
 pub async fn get_polling_interval() -> f64 {
-    let output = match get_flag_value("cli_polling_interval", &http_client(), DeviceType::Cli)
-        .await
-        .unwrap_or(Some(Value::from(600_000.0)))
+    let output = match get_flag_value(
+        "cli_polling_interval",
+        &http_client(DeviceType::Cli),
+        DeviceType::Cli,
+    )
+    .await
+    .unwrap_or(Some(Value::from(600_000.0)))
     {
         Some(polling_interval) => {
             if polling_interval.is_number() {

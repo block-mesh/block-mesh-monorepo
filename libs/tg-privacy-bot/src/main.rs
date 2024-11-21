@@ -13,6 +13,7 @@ use askama_axum::IntoResponse;
 use axum::routing::get;
 use axum::{Extension, Router};
 use block_mesh_common::env::load_dotenv::load_dotenv;
+use database_utils::utils::connection::get_unlimited_pg_pool;
 use database_utils::utils::health_check::health_check;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use database_utils::utils::migrate::migrate;
@@ -148,7 +149,8 @@ async fn run() -> anyhow::Result<()> {
     bot.set_my_commands(Commands::bot_commands()).await?;
     let db_pool = get_pool().await;
     let env = env::var("APP_ENVIRONMENT")?;
-    migrate(db_pool, env).await?;
+    let unlimited_pg_pool = get_unlimited_pg_pool(None).await;
+    migrate(&unlimited_pg_pool, env).await?;
     println!("Dispatching bot");
 
     let router = Router::new()

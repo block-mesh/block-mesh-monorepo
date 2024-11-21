@@ -8,6 +8,7 @@ use block_mesh_common::interfaces::server_api::{
     ClientsMetadata, LoginForm, ReportBandwidthRequest, ReportUptimeRequest, SubmitTaskRequest,
 };
 use block_mesh_common::interfaces::ws_api::{WsClientMessage, WsServerMessage};
+use block_mesh_common::reqwest::http_client;
 use futures_util::{SinkExt, StreamExt, TryStreamExt};
 use logger_general::tracing::setup_tracing;
 use rand::{thread_rng, Rng};
@@ -100,7 +101,7 @@ async fn connect_ws(
     _session_metadata: ClientsMetadata,
     stop_notifier: Arc<Notify>,
 ) -> anyhow::Result<()> {
-    let client = reqwest::Client::new();
+    let client = http_client(DeviceType::Cli);
     let url = url
         .replace("http://", "ws://")
         .replace("https://", "wss://");
@@ -220,7 +221,7 @@ async fn handle_ws_message(
     });
 }
 async fn is_ws_feature_connection() -> anyhow::Result<bool> {
-    let client = reqwest::Client::new();
+    let client = http_client(DeviceType::Cli);
     let response = get_flag_value("cli_use_websocket", &client, DeviceType::Cli).await?;
     if let Some(res) = response {
         let is_enabled = res.as_bool().unwrap_or_default();

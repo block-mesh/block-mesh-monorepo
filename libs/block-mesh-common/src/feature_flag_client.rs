@@ -89,7 +89,11 @@ pub async fn get_flag_value(
         "{}/{}/read-flag/{}",
         BLOCK_MESH_FEATURE_FLAGS, device_type, flag
     );
-    let response: Value = client.get(&url).send().await?.json().await?;
+    let response = client.get(&url).send().await?;
+    if response.status() != reqwest::StatusCode::OK {
+        return Err(anyhow::anyhow!(response.text().await?));
+    }
+    let response: Value = response.json().await?;
     Ok(Some(response))
 }
 
@@ -104,7 +108,7 @@ mod tests {
     #[tokio::test]
     #[traced_test]
     async fn test_test_boolean_false() {
-        let client = http_client();
+        let client = http_client(DeviceType::Unknown);
         let value = get_flag_value("test_boolean_false", &client, DeviceType::Unknown).await;
         assert!(value.is_ok());
         let value = value.unwrap();
@@ -116,7 +120,7 @@ mod tests {
     #[tokio::test]
     #[traced_test]
     async fn test_test_boolean_true() {
-        let client = http_client();
+        let client = http_client(DeviceType::Unknown);
         let value = get_flag_value("test_boolean_true", &client, DeviceType::Unknown).await;
         assert!(value.is_ok());
         let value = value.unwrap();
@@ -128,7 +132,7 @@ mod tests {
     #[tokio::test]
     #[traced_test]
     async fn test_missing_value() {
-        let client = http_client();
+        let client = http_client(DeviceType::Unknown);
         let uuid = Uuid::new_v4();
         let value = get_flag_value(&uuid.to_string(), &client, DeviceType::Unknown).await;
         assert!(value.is_err());
@@ -137,7 +141,7 @@ mod tests {
     #[tokio::test]
     #[traced_test]
     async fn test_polling_value() {
-        let client = http_client();
+        let client = http_client(DeviceType::Unknown);
         let value = get_flag_value("polling_interval", &client, DeviceType::Unknown).await;
         assert!(value.is_ok());
         let value = value.unwrap();
@@ -150,7 +154,7 @@ mod tests {
     #[tokio::test]
     #[traced_test]
     async fn test_all_values() {
-        let client = http_client();
+        let client = http_client(DeviceType::Unknown);
         let _values = get_all_flags(&client, DeviceType::Unknown).await.unwrap();
     }
 
