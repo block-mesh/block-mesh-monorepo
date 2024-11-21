@@ -38,8 +38,17 @@ pub async fn dashboard(url: &str, credentials: &DashboardRequest) -> anyhow::Res
         DeviceType::Cli,
         RoutesEnum::Api_Dashboard
     );
+    let query: OptCreds = OptCreds {
+        email: Some(credentials.email.clone()),
+        api_token: Some(credentials.api_token.clone()),
+    };
     let client = http_client(DeviceType::Cli);
-    let response = client.post(&url).json(credentials).send().await?;
+    let response = client
+        .post(&url)
+        .query(&query)
+        .json(credentials)
+        .send()
+        .await?;
     let response: DashboardResponse = response.json().await?;
     info!("Dashboard data:");
     println!(
