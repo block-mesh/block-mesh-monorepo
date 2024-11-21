@@ -3,7 +3,9 @@ use crate::utils::connectors::set_panic_hook;
 use crate::utils::extension_wrapper_state::ExtensionWrapperState;
 use block_mesh_common::chrome_storage::AuthStatus;
 use block_mesh_common::constants::DeviceType;
-use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
+use block_mesh_common::interfaces::server_api::{
+    OptCreds, ReportBandwidthRequest, ReportBandwidthResponse,
+};
 use block_mesh_common::routes_enum::RoutesEnum;
 use leptos::*;
 use leptos_dom::tracing;
@@ -101,6 +103,10 @@ pub async fn submit_bandwidth(
         asn: metadata.asn,
         colo: metadata.colo,
     };
+    let query: OptCreds = OptCreds {
+        email: Some(email.to_string()),
+        api_token: Some(*api_token),
+    };
 
     let response = reqwest::Client::new()
         .post(format!(
@@ -109,6 +115,7 @@ pub async fn submit_bandwidth(
             DeviceType::Extension,
             RoutesEnum::Api_SubmitBandwidth
         ))
+        .query(&query)
         .json(&body)
         .send()
         .await?;

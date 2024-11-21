@@ -3,7 +3,7 @@ use block_mesh_common::constants::{DeviceType, BLOCKMESH_VPS};
 use block_mesh_common::feature_flag_client::get_flag_value;
 use block_mesh_common::interfaces::server_api::{
     ClientsMetadata, DashboardRequest, DashboardResponse, GetTaskRequest, GetTaskResponse,
-    RegisterForm, RegisterResponse, ReportBandwidthRequest, ReportBandwidthResponse,
+    OptCreds, RegisterForm, RegisterResponse, ReportBandwidthRequest, ReportBandwidthResponse,
     ReportUptimeRequest, ReportUptimeResponse, RunTaskResponse, SubmitTaskRequest,
     SubmitTaskResponse, VpsResp,
 };
@@ -52,8 +52,17 @@ pub async fn dashboard(url: &str, credentials: &DashboardRequest) -> anyhow::Res
 #[allow(dead_code)]
 pub async fn register(url: &str, credentials: &RegisterForm) -> anyhow::Result<()> {
     let url = format!("{}{}", url, RoutesEnum::Static_UnAuth_RegisterApi);
+    let query: OptCreds = OptCreds {
+        email: Some(credentials.email.to_string()),
+        api_token: None,
+    };
     let client = http_client(DeviceType::Cli);
-    let response = client.post(&url).form(credentials).send().await?;
+    let response = client
+        .post(&url)
+        .query(&query)
+        .form(credentials)
+        .send()
+        .await?;
     let response: RegisterResponse = response.json().await?;
 
     if response.status_code == 200 {
@@ -81,9 +90,14 @@ pub async fn login_to_network(url: &str, login_form: LoginForm) -> anyhow::Resul
         DeviceType::Cli,
         RoutesEnum::Api_GetToken
     );
+    let query: OptCreds = OptCreds {
+        email: Some(login_form.email.to_string()),
+        api_token: None,
+    };
     let client = http_client(DeviceType::Cli);
     let response: GetTokenResponse = client
         .post(&url)
+        .query(&query)
         .header(CONTENT_TYPE, "application/json")
         .json(&login_form)
         .send()
@@ -344,6 +358,10 @@ pub async fn submit_bandwidth(
         asn: metadata.asn,
         colo: metadata.colo,
     };
+    let query: OptCreds = OptCreds {
+        email: Some(email.to_string()),
+        api_token: Some(api_token),
+    };
 
     let response = http_client(DeviceType::Cli)
         .post(format!(
@@ -352,6 +370,7 @@ pub async fn submit_bandwidth(
             DeviceType::Cli,
             RoutesEnum::Api_SubmitBandwidth
         ))
+        .query(&query)
         .json(&body)
         .send()
         .await?;
