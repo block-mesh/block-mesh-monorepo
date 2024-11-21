@@ -81,7 +81,6 @@ async fn send_message_to_touch_users_ip(pool: &PgPool, ip: String, user_id: &Uui
     .await;
 }
 
-#[allow(too-many-arguments)]
 #[tracing::instrument(name = "report_uptime_content", skip_all)]
 pub async fn report_uptime_content(
     pool: &PgPool,
