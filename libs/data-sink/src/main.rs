@@ -1,14 +1,9 @@
-use axum::{Extension, Router};
-use block_mesh_common::constants::BLOCKMESH_PG_NOTIFY_WORKER;
+use axum::Router;
 use block_mesh_common::env::load_dotenv::load_dotenv;
-use database_utils::utils::connection::{get_pg_pool, get_unlimited_pg_pool};
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
-use serde_json::Value;
 use std::net::SocketAddr;
 use std::{env, mem, process};
 use tokio::net::TcpListener;
-use tokio::task::JoinHandle;
-use tower_http::cors::CorsLayer;
 
 pub async fn run_server(listener: TcpListener, app: Router<()>) -> std::io::Result<()> {
     axum::serve(
