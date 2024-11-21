@@ -64,6 +64,7 @@ async fn process_client_message(
                 WsClientMessage::CompleteTask(query) => {
                     let _ = submit_task_content(
                         &state.pool,
+                        &state.follower_pool,
                         query.clone(),
                         None,
                         HandlerMode::WebSocket,
@@ -76,6 +77,7 @@ async fn process_client_message(
                 WsClientMessage::ReportUptime(query) => {
                     let _ = report_uptime_content(
                         &state.pool,
+                        &state.follower_pool,
                         ip.clone(),
                         query.clone(),
                         None,

@@ -80,10 +80,11 @@ async fn send_message_to_touch_users_ip(pool: &PgPool, ip: String, user_id: &Uui
     )
     .await;
 }
-
+#[allow(clippy::too_many_arguments)]
 #[tracing::instrument(name = "report_uptime_content", skip_all)]
 pub async fn report_uptime_content(
     pool: &PgPool,
+    follower_pool: &PgPool,
     ip: String,
     query: ReportUptimeRequest,
     request: Option<Request>,
@@ -91,19 +92,20 @@ pub async fn report_uptime_content(
     polling_interval: f64,
     interval_factor: f64,
 ) -> Result<Json<ReportUptimeResponse>, Error> {
-    let mut transaction = create_txn(pool).await?;
-    let user = get_user_and_api_token_by_email(&mut transaction, &query.email)
+    let mut follower_transaction = create_txn(follower_pool).await?;
+    let user = get_user_and_api_token_by_email(&mut follower_transaction, &query.email)
         .await?
         .ok_or_else(|| anyhow!("User Not Found"))?;
 
     if user.token.as_ref() != &query.api_token {
         return Err(anyhow!("Api Token mismatch"));
     }
+    commit_txn(follower_transaction).await?;
 
+    let mut transaction = create_txn(pool).await?;
     let daily_stat = get_or_create_daily_stat(&mut transaction, &user.user_id, None).await?;
     let _ = send_analytics(pool, request, &user.user_id).await;
     send_message_to_touch_users_ip(pool, ip.clone(), &user.user_id).await;
-
     let uptime = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
         AggregateName::Uptime,

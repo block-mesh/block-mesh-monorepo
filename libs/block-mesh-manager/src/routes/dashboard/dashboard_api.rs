@@ -18,16 +18,16 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Json(body): Json<DashboardRequest>,
 ) -> Result<Json<DashboardResponse>, Error> {
-    let mut transaction = create_txn(&pool).await?;
-    let user = get_user_and_api_token_by_email(&mut transaction, &body.email)
+    let mut follower_transaction = create_txn(&state.follower_pool).await?;
+    let user = get_user_and_api_token_by_email(&mut follower_transaction, &body.email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     if user.token.as_ref() != &body.api_token {
-        commit_txn(transaction).await?;
+        commit_txn(follower_transaction).await?;
         return Err(Error::ApiTokenNotFound);
     }
     let user_id = user.user_id;
-    commit_txn(transaction).await?;
+    commit_txn(follower_transaction).await?;
     let data = dashboard_data_extractor(&pool, user_id, state).await?;
     Ok(Json(data))
 }

@@ -51,15 +51,15 @@ pub async fn handler(
             return Ok(Json(None));
         }
     }
-    let mut transaction = create_txn(&pool).await?;
-    let user = get_user_and_api_token_by_email(&mut transaction, &body.email)
+    let mut follower_transaction = create_txn(&state.follower_pool).await?;
+    let user = get_user_and_api_token_by_email(&mut follower_transaction, &body.email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     if user.token.as_ref() != &body.api_token {
-        commit_txn(transaction).await?;
+        commit_txn(follower_transaction).await?;
         return Err(Error::ApiTokenNotFound);
     }
-    let task = find_task_assigned_to_user(&mut transaction, &user.user_id).await?;
+    let task = find_task_assigned_to_user(&mut follower_transaction, &user.user_id).await?;
     if let Some(task) = task {
         return Ok(Json(Some(GetTaskResponse {
             id: task.id,
@@ -69,11 +69,13 @@ pub async fn handler(
             body: task.body,
         })));
     }
-    let task = find_task_by_status(&mut transaction, TaskStatus::Pending).await?;
+    let task = find_task_by_status(&mut follower_transaction, TaskStatus::Pending).await?;
     let task = match task {
         Some(v) => v,
         None => return Ok(Json(None)),
     };
+    commit_txn(follower_transaction).await?;
+    let mut transaction = create_txn(&pool).await?;
     let _ = get_or_create_daily_stat(&mut transaction, &user.user_id, None).await?;
     update_task_assigned(
         &mut transaction,

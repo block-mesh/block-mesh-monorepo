@@ -1,8 +1,10 @@
-use axum::{Extension, Json};
-use sqlx::PgPool;
+use axum::extract::State;
+use axum::Json;
+use std::sync::Arc;
 
 use crate::database::invite_code::get_user_latest_invite_code::get_user_latest_invite_code;
 use crate::errors::error::Error;
+use crate::startup::application::AppState;
 use block_mesh_common::interfaces::server_api::{
     GetLatestInviteCodeRequest, GetLatestInviteCodeResponse,
 };
@@ -11,10 +13,10 @@ use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 
 #[tracing::instrument(name = "get_latest_invite_code", skip_all)]
 pub async fn handler(
-    Extension(pool): Extension<PgPool>,
+    State(state): State<Arc<AppState>>,
     Json(body): Json<GetLatestInviteCodeRequest>,
 ) -> Result<Json<GetLatestInviteCodeResponse>, Error> {
-    let mut transaction = create_txn(&pool).await?;
+    let mut transaction = create_txn(&state.follower_pool).await?;
     let user = get_user_and_api_token_by_email(&mut transaction, &body.email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
