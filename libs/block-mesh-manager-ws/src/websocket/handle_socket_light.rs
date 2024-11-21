@@ -31,12 +31,15 @@ pub async fn handle_socket_light(
 
     let ws_connection_manager = state.websocket_manager.clone();
     let broadcaster = ws_connection_manager.broadcaster.clone();
-    broadcaster.subscribe_light(&email, &user_id);
+    let mut redis = state.redis.clone();
+    broadcaster
+        .subscribe_light(&email, &user_id, &mut redis)
+        .await;
 
     let (mut sender, mut receiver) = socket.split();
 
+    let pool = state.pool.clone();
     let mut send_task = tokio::spawn(async move {
-        let pool = state.pool.clone();
         let mut prev = Utc::now();
         // Send to client - keep alive via ping
         loop {
@@ -86,6 +89,9 @@ pub async fn handle_socket_light(
     }
 
     // returning from the handler closes the websocket connection
-    broadcaster.unsubscribe_light(&email, &user_id);
+    let mut redis = state.redis.clone();
+    broadcaster
+        .unsubscribe_light(&email, &user_id, &mut redis)
+        .await;
     tracing::trace!("Websocket context {ip} destroyed");
 }

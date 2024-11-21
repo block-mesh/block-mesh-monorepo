@@ -6,14 +6,15 @@ use axum::http::StatusCode;
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::{Json, Router};
+use block_mesh_common::constants::BLOCKMESH_WS_REDIS_COUNT_KEY;
 use block_mesh_manager_database_domain::domain::task_limit::TaskLimit;
 use database_utils::utils::health_check::health_check;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
+use redis::{AsyncCommands, RedisResult};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::env;
 use std::net::SocketAddr;
-use std::sync::atomic::Ordering;
 use std::sync::Arc;
 use tokio::net::TcpListener;
 
@@ -103,11 +104,12 @@ pub struct StatsResponse {
 
 #[tracing::instrument(name = "stats", skip_all)]
 pub async fn stats(State(state): State<Arc<AppState>>) -> Json<StatsResponse> {
-    let websocket_manager = &state.websocket_manager;
-    let count = websocket_manager.broadcaster.count.clone();
-    Json(StatsResponse {
-        count: count.load(Ordering::Relaxed),
-    })
+    let mut redis = state.redis.clone();
+    let redis_count: RedisResult<i64> = redis.get(BLOCKMESH_WS_REDIS_COUNT_KEY.to_string()).await;
+    match redis_count {
+        Ok(count) => Json(StatsResponse { count }),
+        Err(_) => Json(StatsResponse { count: 0 }),
+    }
 }
 
 pub async fn app(listener: TcpListener, state: Arc<AppState>) {

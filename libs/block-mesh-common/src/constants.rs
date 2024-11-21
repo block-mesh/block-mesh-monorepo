@@ -10,6 +10,8 @@ pub const BLOCKMESH_PG_NOTIFY_WORKER: &str = "pgchannel";
 pub const BLOCKMESH_PG_NOTIFY_API: &str = "pgchannel_api";
 pub const BLOCKMESH_VPS: &str = "https://vps.blockmesh.xyz";
 
+pub const BLOCKMESH_WS_REDIS_COUNT_KEY: &str = "BLOCKMESH_WS_REDIS_COUNT_KEY";
+
 pub fn env_url() -> String {
     static APP_ENVIRONMENT: OnceLock<String> = OnceLock::new();
     let app_environment =
