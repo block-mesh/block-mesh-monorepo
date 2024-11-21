@@ -67,6 +67,7 @@ then
   remove_pg
   start_db block-mesh 5559
   start_db tg-bot 5551
+  start_db data-sink 5552
 
   DOCKERS="$(docker ps -a -q --filter ancestor=redis:alpine3.20 --format="{{.ID}}")"
   if [ -n "$DOCKERS" ]
@@ -115,6 +116,12 @@ echo "create DB"
 ensure sqlx database create
 cd "${ROOT}/libs/tg-privacy-bot" || exit
 echo "migrate DB tg-privacy-bot"
+ensure migrate
+export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:5552/data-sink"
+echo "create DB"
+ensure sqlx database create
+cd "${ROOT}/libs/data-sink" || exit
+echo "migrate DB data-sink"
 ensure migrate
 >&2 echo "Postgres has been migrated, ready to go!"
 cd "${_PWD}"
