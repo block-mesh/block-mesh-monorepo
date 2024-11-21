@@ -3457,6 +3457,7 @@ dependencies = [
  "rand 0.8.5",
  "redis",
  "reqwest 0.12.7",
+ "secret",
  "sentry",
  "serde",
  "serde_json",

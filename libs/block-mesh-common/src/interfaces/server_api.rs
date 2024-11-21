@@ -5,6 +5,7 @@ use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::cmp::Ordering;
+use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 use typeshare::typeshare;
@@ -536,4 +537,51 @@ pub struct VpsResp {
 pub struct OptCreds {
     pub email: Option<String>,
     pub api_token: Option<Uuid>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct FeedElement {
+    pub origin: String,
+    pub user_name: String,
+    pub link: String,
+    pub id: String,
+    pub raw: String,
+}
+
+impl TryFrom<HashMap<String, String>> for FeedElement {
+    type Error = String;
+
+    fn try_from(value: HashMap<String, String>) -> Result<Self, Self::Error> {
+        Ok(FeedElement {
+            origin: value
+                .get("origin")
+                .ok_or("Missing origin".to_string())?
+                .to_string(),
+            user_name: value
+                .get("user_name")
+                .ok_or("Missing UserName".to_string())?
+                .to_string(),
+            link: value
+                .get("link")
+                .ok_or("Missing link".to_string())?
+                .to_string(),
+            id: value.get("id").ok_or("Missing id".to_string())?.to_string(),
+            raw: value
+                .get("raw")
+                .ok_or("Missing raw".to_string())?
+                .to_string(),
+        })
+    }
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct DigestDataRequest {
+    pub email: String,
+    pub api_token: Uuid,
+    pub data: FeedElement,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct DigestDataResponse {
+    pub status_code: u16,
 }
