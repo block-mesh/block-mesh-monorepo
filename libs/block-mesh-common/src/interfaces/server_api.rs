@@ -531,3 +531,9 @@ pub struct VpsResp {
     pub is_datacenter: Option<bool>,
     pub is_vps: Option<bool>,
 }
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct OptCreds {
+    pub email: Option<String>,
+    pub api_token: Option<Uuid>,
+}
