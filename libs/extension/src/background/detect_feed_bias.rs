@@ -5,6 +5,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct FeedElement {
+    origin: Option<String>,
     user_name: Option<String>,
     link: Option<String>,
     id: Option<String>,
@@ -20,6 +21,7 @@ impl FeedElement {
             id: None,
             raw: Some(raw),
             valid: false,
+            origin: None,
         }
     }
 
@@ -28,6 +30,7 @@ impl FeedElement {
             || self.link.is_none()
             || self.id.is_none()
             || self.raw.is_none()
+            || self.origin.is_none()
         {
             false
         } else {
@@ -38,7 +41,7 @@ impl FeedElement {
 }
 
 #[wasm_bindgen]
-pub async fn read_dom(html: String) {
+pub async fn read_dom(html: String, origin: String) {
     let fragment = Html::parse_fragment(&html);
     let href = Selector::parse("[href]").unwrap();
     let re = Regex::new(r"/(?P<username>[^/]+)/status/(?P<id>\d+$)").unwrap();
@@ -53,6 +56,7 @@ pub async fn read_dom(html: String) {
                     feed_element.id = Some(id.as_str().to_string());
                 }
                 feed_element.link = Some(href_value.to_string());
+                feed_element.origin = Some(origin.clone());
             }
         }
     }

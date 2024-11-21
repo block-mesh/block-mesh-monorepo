@@ -10,7 +10,11 @@ function send_dom_to_background(el) {
   const elements = Array.from(document.querySelectorAll('[data-testid="tweet"]:not([data-testmarked="true"])'))
   for (const el of elements) {
     el.setAttribute(MARKED_ID, MARKED_VALUE)
-    chrome.runtime.sendMessage({ action: 'send_dom_to_background', payload: el.outerHTML }, (response) => {
+    chrome.runtime.sendMessage({
+      action: 'send_dom_to_background',
+      payload: el.outerHTML,
+      origin: window.origin
+    }, (response) => {
       console.log('Response from background script:', response)
     })
   }
