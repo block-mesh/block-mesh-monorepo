@@ -1,7 +1,6 @@
 use block_mesh_common::interfaces::server_api::FeedElement;
 use regex::Regex;
 use scraper::{Html, Selector};
-use serde_json::{json, Value};
 use std::collections::HashMap;
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -26,5 +25,5 @@ pub async fn read_dom(html: String, origin: String) {
             }
         }
     }
-    let feed_element = FeedElement::try_from(map);
+    let _feed_element = FeedElement::try_from(map);
 }

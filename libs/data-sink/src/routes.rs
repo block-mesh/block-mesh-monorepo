@@ -15,7 +15,7 @@ use reqwest::StatusCode;
 #[tracing::instrument(name = "db_health", skip_all)]
 pub async fn db_health(State(state): State<AppState>) -> Result<impl IntoResponse, Error> {
     let data_sink_db_pool = &state.data_sink_db_pool;
-    let mut transaction = create_txn(&data_sink_db_pool).await?;
+    let mut transaction = create_txn(data_sink_db_pool).await?;
     health_check(&mut *transaction).await?;
     commit_txn(transaction).await?;
     Ok((StatusCode::OK, "OK"))
@@ -24,7 +24,7 @@ pub async fn db_health(State(state): State<AppState>) -> Result<impl IntoRespons
 #[tracing::instrument(name = "follower_health", skip_all)]
 pub async fn follower_health(State(state): State<AppState>) -> Result<impl IntoResponse, Error> {
     let follower_db_pool = &state.follower_db_pool;
-    let mut transaction = create_txn(&follower_db_pool).await?;
+    let mut transaction = create_txn(follower_db_pool).await?;
     health_check(&mut *transaction).await?;
     commit_txn(transaction).await?;
     Ok((StatusCode::OK, "OK"))
@@ -40,7 +40,7 @@ pub async fn digest_data(
     Json(body): Json<DigestDataRequest>,
 ) -> Result<Json<DigestDataResponse>, Error> {
     let follower_db_pool = &state.follower_db_pool;
-    let mut transaction = create_txn(&follower_db_pool).await?;
+    let mut transaction = create_txn(follower_db_pool).await?;
     let user = get_user_and_api_token_by_email(&mut transaction, &body.email)
         .await?
         .ok_or_else(|| anyhow!("UserNotFound"))?;
@@ -50,7 +50,7 @@ pub async fn digest_data(
     }
     commit_txn(transaction).await?;
     let data_sink_db_pool = &state.data_sink_db_pool;
-    let mut transaction = create_txn(&data_sink_db_pool).await?;
+    let mut transaction = create_txn(data_sink_db_pool).await?;
     DataSink::create_data_sink(&mut transaction, &user.user_id, body.data).await?;
     commit_txn(transaction).await?;
     Ok(Json(DigestDataResponse { status_code: 200 }))
