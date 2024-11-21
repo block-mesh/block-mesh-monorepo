@@ -10,9 +10,7 @@ use axum::{Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::{ConnectWalletRequest, ConnectWalletResponse};
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
-use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::{
-    get_or_create_aggregate_by_user_and_name, get_or_create_aggregate_by_user_and_name_str,
-};
+use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_str;
 use block_mesh_manager_database_domain::domain::update_aggregate::update_aggregate;
 use serde_json::Value;
 use solana_sdk::pubkey::Pubkey;
