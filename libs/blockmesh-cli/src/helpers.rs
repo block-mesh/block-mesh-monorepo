@@ -40,7 +40,7 @@ pub async fn dashboard(url: &str, credentials: &DashboardRequest) -> anyhow::Res
     );
     let query: OptCreds = OptCreds {
         email: Some(credentials.email.clone()),
-        api_token: Some(credentials.api_token.clone()),
+        api_token: Some(credentials.api_token),
     };
     let client = http_client(DeviceType::Cli);
     let response = client

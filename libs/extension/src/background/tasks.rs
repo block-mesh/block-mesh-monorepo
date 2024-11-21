@@ -3,7 +3,6 @@ use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{
     GetTaskRequest, GetTaskResponse, RunTaskResponse, SubmitTaskRequest, SubmitTaskResponse,
 };
-use block_mesh_common::reqwest::http_client;
 use block_mesh_common::routes_enum::RoutesEnum;
 use leptos::*;
 use leptos_dom::tracing;
