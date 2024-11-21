@@ -50,6 +50,7 @@ pub async fn handler(
     let interval_factor = get_envar("INTERVAL_FACTOR").await.parse().unwrap_or(10.0);
     report_uptime_content(
         &state.pool,
+        &state.follower_pool,
         header_ip,
         query,
         Some(request),

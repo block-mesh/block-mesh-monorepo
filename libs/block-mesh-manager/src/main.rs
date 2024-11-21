@@ -3,6 +3,7 @@
 #![deny(unreachable_pub)]
 
 use cfg_if::cfg_if;
+use database_utils::utils::connection::get_pg_pool;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
     use database_utils::utils::connection::get_unlimited_pg_pool;
@@ -125,6 +126,7 @@ async fn run() -> anyhow::Result<()> {
         .unwrap_or("false".to_string())
         .parse()
         .unwrap_or(false);
+    let follower_pool = get_pg_pool(Some("HEROKU_POSTGRESQL_COPPER_URL".to_string())).await;
     let app_state = Arc::new(AppState {
         task_limit,
         rate_limit,
@@ -132,6 +134,7 @@ async fn run() -> anyhow::Result<()> {
         get_token_map,
         email_client,
         pool: db_pool.clone(),
+        follower_pool,
         client: client.clone(),
         flags: flags.clone(),
         redis,

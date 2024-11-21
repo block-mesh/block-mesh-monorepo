@@ -46,6 +46,7 @@ pub struct AppState {
     pub get_token_map: GetTokenResponseMap,
     pub check_token_map: CheckTokenResponseMap,
     pub pool: PgPool,
+    pub follower_pool: PgPool,
     pub email_client: Arc<EmailClient>,
     pub client: Client,
     pub flags: Arc<DashMap<String, FlagValue>>,

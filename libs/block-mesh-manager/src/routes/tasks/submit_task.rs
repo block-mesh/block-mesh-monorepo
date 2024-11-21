@@ -14,7 +14,13 @@ pub async fn handler(
     Query(query): Query<SubmitTaskRequest>,
     request: Request,
 ) -> Result<Json<SubmitTaskResponse>, Error> {
-    submit_task_content(&state.pool, query, Some(request), HandlerMode::Http)
-        .await
-        .map_err(Error::from)
+    submit_task_content(
+        &state.pool,
+        &state.follower_pool,
+        query,
+        Some(request),
+        HandlerMode::Http,
+    )
+    .await
+    .map_err(Error::from)
 }
