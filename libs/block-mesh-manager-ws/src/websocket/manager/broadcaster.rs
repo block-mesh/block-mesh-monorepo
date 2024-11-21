@@ -1,6 +1,9 @@
+use block_mesh_common::constants::BLOCKMESH_WS_REDIS_COUNT_KEY;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use dashmap::{DashMap, DashSet};
 use futures::future::join_all;
+use redis::aio::MultiplexedConnection;
+use redis::{AsyncCommands, RedisResult};
 use std::collections::VecDeque;
 use std::sync::atomic::AtomicI64;
 use std::sync::Arc;
@@ -111,18 +114,32 @@ impl Broadcaster {
         drained
     }
 
-    pub fn subscribe_light(&self, email: &str, user_id: &Uuid) {
-        let count = self.count.clone();
-        count.fetch_add(1, std::sync::atomic::Ordering::Relaxed);
+    pub async fn subscribe_light(
+        &self,
+        email: &str,
+        user_id: &Uuid,
+        redis: &mut MultiplexedConnection,
+    ) {
         self.emails.insert(email.to_string());
         self.user_ids.insert(*user_id);
+        let redis_count: RedisResult<i64> =
+            redis.get(BLOCKMESH_WS_REDIS_COUNT_KEY.to_string()).await;
+        let count = redis_count.unwrap_or_default() + 1;
+        let _: RedisResult<()> = redis.set(BLOCKMESH_WS_REDIS_COUNT_KEY, count).await;
     }
 
-    pub fn unsubscribe_light(&self, email: &str, user_id: &Uuid) {
-        let count = self.count.clone();
-        count.fetch_add(-1, std::sync::atomic::Ordering::Relaxed);
+    pub async fn unsubscribe_light(
+        &self,
+        email: &str,
+        user_id: &Uuid,
+        redis: &mut MultiplexedConnection,
+    ) {
         self.emails.remove(email);
         self.user_ids.remove(user_id);
+        let redis_count: RedisResult<i64> =
+            redis.get(BLOCKMESH_WS_REDIS_COUNT_KEY.to_string()).await;
+        let count = redis_count.unwrap_or_default() - 1;
+        let _: RedisResult<()> = redis.set(BLOCKMESH_WS_REDIS_COUNT_KEY, count).await;
     }
 
     pub async fn subscribe(
