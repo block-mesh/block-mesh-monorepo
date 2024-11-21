@@ -59,6 +59,7 @@ curve25519-dalek = { git = "https://github.com/block-mesh/curve25519-dalek", bra
 
 [workspace.dependencies]
 influxdb = { version = "0.7.2", features = ["derive"] }
+scraper = { version = "0.21.0" }
 lettre = { version = "0.11" }
 axum-server = { version = "0.7.1" }
 futures-time = { version = "3.0.0" }
