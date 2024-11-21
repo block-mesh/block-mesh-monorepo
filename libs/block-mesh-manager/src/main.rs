@@ -3,9 +3,9 @@
 #![deny(unreachable_pub)]
 
 use cfg_if::cfg_if;
-use database_utils::utils::connection::get_pg_pool;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use database_utils::utils::connection::get_pg_pool;
     use database_utils::utils::connection::get_unlimited_pg_pool;
     use block_mesh_common::constants::DeviceType;
     use block_mesh_manager::worker::update_feature_flags::feature_flags_loop;
