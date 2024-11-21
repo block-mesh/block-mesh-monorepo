@@ -8,6 +8,8 @@ authors.workspace = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+regex = { version = "1" }
+scraper = { workspace = true }
 flume = { workspace = true }
 logger-leptos = { path = "../logger-leptos" }
 tracing-subscriber-wasm = { workspace = true }

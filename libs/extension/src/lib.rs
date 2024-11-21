@@ -15,9 +15,9 @@ use pages::*;
 
 mod background;
 mod components;
+mod content;
 mod pages;
 mod utils;
-
 // #[global_allocator]
 // static ALLOC: wee_alloc::WeeAlloc = wee_alloc::WeeAlloc::INIT;
 

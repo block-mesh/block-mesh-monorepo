@@ -27,7 +27,7 @@ pub fn ExtensionNavigator() -> impl IntoView {
                 }
             }
         },
-        1000.0,
+        500.0,
     );
     create_effect(move |_| {
         log!("create_effect {}", state.status.get());

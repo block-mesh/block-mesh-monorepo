@@ -32,6 +32,17 @@
   "options_ui": {
     "page": "js/options.html"
   },
+  "content_scripts": [
+    {
+      "run_at": "document_end",
+      "matches": [
+        "*://*/*"
+      ],
+      "js": [
+        "js/content.js"
+      ]
+    }
+  ],
   "content_security_policy": {
     "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
   },
@@ -44,7 +55,8 @@
   "permissions": [
     "alarms",
     "storage",
-    "background"
+    "background",
+    "scripting"
   ],
   "host_permissions": [
     "https://*/*",
@@ -57,7 +69,9 @@
       ],
       "resources": [
         "js/wasm/blockmesh_ext.js",
-        "js/wasm/blockmesh_ext.wasm"
+        "js/wasm/blockmesh_ext.wasm",
+        "/wasm/blockmesh_ext.js",
+        "/wasm/blockmesh_ext.wasm"
       ]
     }
   ],
