@@ -14,6 +14,7 @@ set +x
 export AGG_SIZE=1
 source "${ROOT}/scripts/setup.sh"
 export DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
+export FOLLOWER_DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
 export REDIS_URL="redis://127.0.0.1:6379"
 export MAILGUN_SEND_KEY=""
 export TWITTER_CLIENT_ID=""

@@ -37,24 +37,29 @@ pub async fn extract_body(request: Request) -> anyhow::Result<String> {
 #[tracing::instrument(name = "submit_task_content", skip_all)]
 pub async fn submit_task_content(
     pool: &PgPool,
+    follower_pool: &PgPool,
     query: SubmitTaskRequest,
     request: Option<Request>,
     mode: HandlerMode,
 ) -> Result<Json<SubmitTaskResponse>, Error> {
-    let mut transaction = create_txn(pool).await?;
-    let user = get_user_and_api_token_by_email(&mut transaction, &query.email)
+    let mut follower_transaction = create_txn(follower_pool).await?;
+
+    let user = get_user_and_api_token_by_email(&mut follower_transaction, &query.email)
         .await?
         .ok_or_else(|| anyhow!("User Not Found"))?;
     if user.token.as_ref() != &query.api_token {
-        commit_txn(transaction).await?;
+        commit_txn(follower_transaction).await?;
         return Err(anyhow!("Api Token Mismatch"));
     }
-    let task =
-        find_task_by_task_id_and_status(&mut transaction, &query.task_id, TaskStatus::Assigned)
-            .await?
-            .ok_or(anyhow!("Task Not Found".to_string()))?;
+    let task = find_task_by_task_id_and_status(
+        &mut follower_transaction,
+        &query.task_id,
+        TaskStatus::Assigned,
+    )
+    .await?
+    .ok_or(anyhow!("Task Not Found".to_string()))?;
     if task.assigned_user_id.is_some() && task.assigned_user_id.unwrap() != user.user_id {
-        commit_txn(transaction).await?;
+        commit_txn(follower_transaction).await?;
         return Err(anyhow!("Task Assigned To Another User".to_string(),));
     }
 
@@ -62,19 +67,20 @@ pub async fn submit_task_content(
         HandlerMode::Http => match request {
             Some(request) => extract_body(request).await?,
             None => {
-                commit_txn(transaction).await?;
+                commit_txn(follower_transaction).await?;
                 return Err(anyhow!("Internal Server Error".to_string()));
             }
         },
         HandlerMode::WebSocket => match query.response_body {
             Some(body) => body,
             None => {
-                commit_txn(transaction).await?;
+                commit_txn(follower_transaction).await?;
                 return Err(anyhow!("Internal Server Error".to_string()));
             }
         },
     };
-
+    commit_txn(follower_transaction).await?;
+    let mut transaction = create_txn(pool).await?;
     finish_task(
         &mut transaction,
         query.task_id,

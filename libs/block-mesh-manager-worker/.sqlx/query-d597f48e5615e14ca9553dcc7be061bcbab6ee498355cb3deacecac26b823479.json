@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        DELETE FROM tasks WHERE id IN (SELECT id from tasks WHERE created_at < $1 LIMIT $2 FOR UPDATE SKIP LOCKED)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Timestamptz",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d597f48e5615e14ca9553dcc7be061bcbab6ee498355cb3deacecac26b823479"
+}

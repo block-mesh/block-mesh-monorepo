@@ -33,8 +33,8 @@ pub async fn ws_handler(
     if broadcaster.emails.contains(&email) {
         return Err(Error::from(anyhow!("Already connected")));
     }
-    let follower_pool = state.follower_pool.clone();
-    let mut transaction = create_txn(&follower_pool).await?;
+    let follower_pool = &state.follower_pool;
+    let mut transaction = create_txn(follower_pool).await?;
     let user = get_user_and_api_token_by_email(&mut transaction, &email)
         .await?
         .ok_or(anyhow!(String::from("User email is not present in DB")))?;

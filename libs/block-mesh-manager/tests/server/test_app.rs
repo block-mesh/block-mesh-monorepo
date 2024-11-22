@@ -81,6 +81,7 @@ pub async fn spawn_app() -> TestApp {
         get_token_map,
         email_client,
         pool: db_pool.clone(),
+        follower_pool: db_pool.clone(),
         client,
         flags,
         redis: redis.clone(),
