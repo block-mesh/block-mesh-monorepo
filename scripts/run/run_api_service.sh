@@ -9,7 +9,7 @@ set +x
 export AGG_SIZE=1
 source "${ROOT}/scripts/setup.sh"
 export DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
-export HEROKU_POSTGRESQL_COPPER_URL="postgres://postgres:password@localhost:5559/block-mesh"
+export FOLLOWER_DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
 export INSTRUMENT_WRAPPER=2500
 export REDIS_URL="redis://127.0.0.1:6379"
 if [ -f "${ROOT}/.env" ] ; then

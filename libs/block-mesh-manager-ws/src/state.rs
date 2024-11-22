@@ -24,7 +24,7 @@ impl AppState {
         let follower_pool = if environment == Environment::Local {
             get_pg_pool(None).await
         } else {
-            get_pg_pool(Some("HEROKU_POSTGRESQL_COPPER_URL".to_string())).await
+            get_pg_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await
         };
 
         let websocket_manager = Arc::new(WebSocketManager::new());

@@ -126,7 +126,7 @@ async fn run() -> anyhow::Result<()> {
         .unwrap_or("false".to_string())
         .parse()
         .unwrap_or(false);
-    let follower_pool = get_pg_pool(Some("HEROKU_POSTGRESQL_COPPER_URL".to_string())).await;
+    let follower_pool = get_pg_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
     let app_state = Arc::new(AppState {
         task_limit,
         rate_limit,
