@@ -45,16 +45,13 @@ pub async fn digest_data(
     }
     let follower_db_pool = &state.follower_db_pool;
     let mut transaction = create_txn(follower_db_pool).await?;
-    tracing::info!("(1)");
     let user = get_user_and_api_token_by_email(&mut transaction, &body.email)
         .await?
         .ok_or_else(|| anyhow!("UserNotFound"))?;
-    tracing::info!("(2) user = {:?}", user);
     if user.token.as_ref() != &body.api_token {
         commit_txn(transaction).await?;
         return Err(Error::from(anyhow!("ApiTokenNotFound")));
     }
-    tracing::info!("(3)");
     commit_txn(transaction).await?;
     let data_sink_db_pool = &state.data_sink_db_pool;
     let mut transaction = create_txn(data_sink_db_pool).await?;
