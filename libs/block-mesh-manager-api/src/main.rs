@@ -59,7 +59,7 @@ fn main() -> anyhow::Result<()> {
 
 async fn run(is_with_sentry: bool) {
     let db_pool = get_pg_pool(None).await;
-    let follower_pool = get_pg_pool(Some("HEROKU_POSTGRESQL_COPPER_URL".to_string())).await;
+    let follower_pool = get_pg_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
     let router = get_router();
     let check_token_map: CheckTokenResponseMap = Arc::new(DashMap::new());
     let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());
