@@ -1,0 +1,19 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            INSERT INTO data_sinks\n            (user_id, origin, origin_id, user_name, link, raw)\n            VALUES\n            ($1, $2, $3, $4, $5, $6)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "80f9c45655a33b8ae5b70975c1e17b2e08f862e3e89edb4d09acbe5f4885642e"
+}
