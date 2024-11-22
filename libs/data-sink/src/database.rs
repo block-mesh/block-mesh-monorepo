@@ -19,11 +19,11 @@ pub async fn get_user_and_api_token_by_email(
         r#"SELECT
         users.email as email,
         users.id as user_id,
-        api_tokens.token as "token: Secret<Uuid>",
-        users.password as "password: Secret<String>"
+        api_tokens.token,
+        users.password
         FROM users
         JOIN api_tokens ON users.id = api_tokens.user_id
-        WHERE users.email = {email}
+        WHERE users.email = '{email}'
         LIMIT 1"#
     ))
     .fetch_optional(&mut **transaction)

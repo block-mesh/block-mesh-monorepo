@@ -11,8 +11,8 @@ source "${ROOT}/scripts/setup.sh"
 if [ -f "${ROOT}/.env" ] ; then
   source "${ROOT}/.env"
 fi
-export POSTGRES_DB="tg-bot"
-ensure "${ROOT}/scripts/init_db.sh"
+#export POSTGRES_DB="data-sink"
+#ensure "${ROOT}/scripts/init_db.sh"
 export DATABASE_URL="postgres://postgres:password@localhost:5552/data-sink"
 export FOLLOWER_DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
 #cargo watch --watch libs --shell "cargo run -p tg-privacy-bot | bunyan &"

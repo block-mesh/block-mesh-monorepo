@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+validator = { workspace = true, features = ["derive"] }
 influxdb = { workspace = true, features = ["derive"] }
 database-utils = { path = "../database-utils" }
 axum-extra = { workspace = true, features = ["typed-header"] }

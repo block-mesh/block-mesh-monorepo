@@ -1,6 +1,6 @@
 CREATE TABLE data_sinks
 (
-    id         uuid PRIMARY KEY,
+    id         uuid PRIMARY KEY     DEFAULT gen_random_uuid(),
     user_id    uuid        NOT NULL,
     origin     TEXT        NOT NULL,
     origin_id  TEXT        NOT NULL,

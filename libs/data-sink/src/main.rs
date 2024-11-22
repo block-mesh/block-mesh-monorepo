@@ -29,7 +29,7 @@ fn main() {
         .unwrap_or("false".to_string())
         .parse()
         .unwrap_or(false);
-    let sentry_url = env::var("SENTRY_DATA_SYNC").unwrap_or_default();
+    let sentry_url = env::var("SENTRY_DATA_SINK").unwrap_or_default();
     let sentry_sample_rate = env::var("SENTRY_SAMPLE_RATE")
         .unwrap_or("0.1".to_string())
         .parse()

@@ -11,6 +11,7 @@ use block_mesh_common::interfaces::server_api::{DigestDataRequest, DigestDataRes
 use database_utils::utils::health_check::health_check;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use reqwest::StatusCode;
+use validator::validate_email;
 
 #[tracing::instrument(name = "db_health", skip_all)]
 pub async fn db_health(State(state): State<AppState>) -> Result<impl IntoResponse, Error> {
@@ -39,15 +40,21 @@ pub async fn digest_data(
     State(state): State<AppState>,
     Json(body): Json<DigestDataRequest>,
 ) -> Result<Json<DigestDataResponse>, Error> {
+    if !validate_email(&body.email) {
+        return Err(Error::from(anyhow!("BadEmail")));
+    }
     let follower_db_pool = &state.follower_db_pool;
     let mut transaction = create_txn(follower_db_pool).await?;
+    tracing::info!("(1)");
     let user = get_user_and_api_token_by_email(&mut transaction, &body.email)
         .await?
         .ok_or_else(|| anyhow!("UserNotFound"))?;
+    tracing::info!("(2) user = {:?}", user);
     if user.token.as_ref() != &body.api_token {
         commit_txn(transaction).await?;
         return Err(Error::from(anyhow!("ApiTokenNotFound")));
     }
+    tracing::info!("(3)");
     commit_txn(transaction).await?;
     let data_sink_db_pool = &state.data_sink_db_pool;
     let mut transaction = create_txn(data_sink_db_pool).await?;
