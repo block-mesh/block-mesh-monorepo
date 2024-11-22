@@ -19,7 +19,7 @@ pub async fn bulk_delete_old_tasks(
         .unwrap_or(300);
     sqlx::query!(
         r#"
-        DELETE FROM tasks WHERE id in (SELECT id from tasks WHERE created_at < $1 LIMIT $2)
+        DELETE FROM tasks WHERE id IN (SELECT id from tasks WHERE created_at < $1 LIMIT $2 FOR UPDATE SKIP LOCKED)
         "#,
         date,
         bulk_delete_limit
