@@ -3439,7 +3439,7 @@ checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 
 [[package]]
 name = "data-sink"
-version = "0.0.393"
+version = "0.0.397"
 dependencies = [
  "anyhow",
  "axum",
