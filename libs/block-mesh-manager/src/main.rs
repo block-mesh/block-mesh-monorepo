@@ -3,11 +3,11 @@
 #![deny(unreachable_pub)]
 
 use cfg_if::cfg_if;
-use database_utils::utils::connection::channel_pool::channel_pool;
-use database_utils::utils::connection::follower_pool::follower_pool;
-use database_utils::utils::connection::unlimited_pool::unlimited_pool;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use database_utils::utils::connection::channel_pool::channel_pool;
+    use database_utils::utils::connection::follower_pool::follower_pool;
+    use database_utils::utils::connection::unlimited_pool::unlimited_pool;
     use block_mesh_common::constants::DeviceType;
     use block_mesh_manager::worker::update_feature_flags::feature_flags_loop;
     use block_mesh_manager::utils::cache_envar::get_envar;
