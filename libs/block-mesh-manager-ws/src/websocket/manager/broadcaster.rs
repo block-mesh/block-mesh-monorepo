@@ -122,10 +122,7 @@ impl Broadcaster {
     ) {
         self.emails.insert(email.to_string());
         self.user_ids.insert(*user_id);
-        let redis_count: RedisResult<i64> =
-            redis.get(BLOCKMESH_WS_REDIS_COUNT_KEY.to_string()).await;
-        let count = redis_count.unwrap_or_default() + 1;
-        let _: RedisResult<()> = redis.set(BLOCKMESH_WS_REDIS_COUNT_KEY, count).await;
+        let _: RedisResult<()> = redis.incr(BLOCKMESH_WS_REDIS_COUNT_KEY, 1).await;
     }
 
     pub async fn unsubscribe_light(
@@ -136,10 +133,7 @@ impl Broadcaster {
     ) {
         self.emails.remove(email);
         self.user_ids.remove(user_id);
-        let redis_count: RedisResult<i64> =
-            redis.get(BLOCKMESH_WS_REDIS_COUNT_KEY.to_string()).await;
-        let count = redis_count.unwrap_or_default() - 1;
-        let _: RedisResult<()> = redis.set(BLOCKMESH_WS_REDIS_COUNT_KEY, count).await;
+        let _: RedisResult<()> = redis.decr(BLOCKMESH_WS_REDIS_COUNT_KEY, 1).await;
     }
 
     pub async fn subscribe(
