@@ -80,6 +80,7 @@ pub async fn spawn_app() -> TestApp {
     let app_state = Arc::new(AppState {
         rate_limit: true,
         task_limit: true,
+        submit_bandwidth_limit: true,
         get_token_map,
         email_client,
         pool: db_pool.clone(),
