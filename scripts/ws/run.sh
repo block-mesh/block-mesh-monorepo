@@ -10,7 +10,7 @@ cleanup() {
 trap cleanup EXIT INT
 
 for i in {1..5000}; do
-  websocat -Un "ws://localhost:8002/ws?email=123@blockmesh.xyz&api_token=321d6243-d111-444a-8bf6-329b573d0ade" &
+  websocat -Un "ws://localhost:8002/ws?email=123@blockmesh.xyz&api_token=5fdea056-1128-4659-a606-698acacc4cba" &
 #  websocat --insecure -Un "wss://localhost:3000" &
 #  read -t 0.05
 done
