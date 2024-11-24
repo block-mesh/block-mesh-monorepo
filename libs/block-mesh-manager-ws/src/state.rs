@@ -1,8 +1,10 @@
 use crate::websocket::manager::WebSocketManager;
 use block_mesh_common::env::environment::Environment;
+use block_mesh_common::interfaces::db_messages::DBMessage;
 use database_utils::utils::connection::channel_pool::channel_pool;
 use database_utils::utils::connection::follower_pool::follower_pool;
 use database_utils::utils::connection::write_pool::write_pool;
+use flume::Sender;
 use redis::aio::MultiplexedConnection;
 use sqlx::PgPool;
 use std::env;
@@ -17,10 +19,11 @@ pub struct AppState {
     pub websocket_manager: Arc<WebSocketManager>,
     pub environment: Environment,
     pub redis: MultiplexedConnection,
+    pub tx: Sender<DBMessage>,
 }
 
 impl AppState {
-    pub async fn new() -> Self {
+    pub async fn new(tx: Sender<DBMessage>) -> Self {
         let environment = env::var("APP_ENVIRONMENT").unwrap();
         let environment = Environment::from_str(&environment).unwrap();
         let pool = write_pool(None).await;
@@ -45,6 +48,7 @@ impl AppState {
             environment,
             websocket_manager,
             redis,
+            tx,
         }
     }
 }

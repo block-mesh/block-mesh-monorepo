@@ -72,7 +72,7 @@ pub async fn submit_bandwidth_content(
             ),
         }),
     ];
-    let _ = notify_worker(channel_pool, messages).await;
+    let _ = notify_worker(channel_pool, &messages).await;
     commit_txn(transaction).await?;
     Ok(Json(ReportBandwidthResponse {
         status_code: u16::from(StatusCode::OK),

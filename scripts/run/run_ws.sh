@@ -8,6 +8,7 @@ export ROOT="$(git rev-parse --show-toplevel)"
 source "${ROOT}/scripts/setup.sh"
 set +x
 export AGG_SIZE=1
+export CHANNEL_AGG_SIZE=1
 source "${ROOT}/scripts/setup.sh"
 export DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
 export FOLLOWER_DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
@@ -18,5 +19,5 @@ if [ -f "${ROOT}/.env" ] ; then
 fi
 #ensure "${ROOT}/scripts/init_db.sh"
 #cargo run -p block-mesh-manager-ws | bunyan
-export RUSTFLAGS="--cfg tokio_unstable"
+#export RUSTFLAGS="--cfg tokio_unstable"
 cargo watch --watch libs --shell "cargo run -p block-mesh-manager-ws"
