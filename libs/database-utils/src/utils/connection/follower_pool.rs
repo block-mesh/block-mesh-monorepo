@@ -13,7 +13,7 @@ pub async fn follower_pool(database_url_envar_name: Option<String>) -> PgPool {
         .options([
             (
                 "statement_timeout",
-                env::var("statement_timeout_follower").unwrap_or("0".to_string()),
+                env::var("statement_timeout_follower").unwrap_or("3000ms".to_string()),
             ),
             (
                 "idle_in_transaction_session_timeout",
