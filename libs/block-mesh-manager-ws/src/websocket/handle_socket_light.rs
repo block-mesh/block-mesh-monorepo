@@ -43,7 +43,6 @@ pub async fn handle_socket_light(
         // Send to client - keep alive via ping
         loop {
             let _ = sender.send(Message::Ping(vec![1, 2, 3])).await;
-            tokio::time::sleep(Duration::from_millis(sleep)).await;
             let now = Utc::now();
             let delta = (now - prev).num_seconds();
             let _ = tx
@@ -55,6 +54,7 @@ pub async fn handle_socket_light(
                 }))
                 .await;
             prev = Utc::now();
+            tokio::time::sleep(Duration::from_millis(sleep)).await;
         }
     });
 

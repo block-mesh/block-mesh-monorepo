@@ -6,7 +6,7 @@ use axum::extract::{Query, State, WebSocketUpgrade};
 use axum::response::IntoResponse;
 use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
-use http::HeaderMap;
+use http::{HeaderMap, StatusCode};
 use std::collections::HashMap;
 use std::env;
 use std::str::FromStr;
@@ -31,7 +31,7 @@ pub async fn ws_handler(
     let websocket_manager = state.websocket_manager.clone();
     let broadcaster = websocket_manager.broadcaster.clone();
     if broadcaster.emails.contains(&email) {
-        return Err(Error::from(anyhow!("Already connected")));
+        return Ok((StatusCode::ALREADY_REPORTED, "Already connected").into_response());
     }
     let follower_pool = &state.follower_pool;
     let mut transaction = create_txn(follower_pool).await?;
