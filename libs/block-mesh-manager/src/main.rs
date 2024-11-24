@@ -5,6 +5,7 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use database_utils::utils::connection::get_pg_pool_for_channel;
     use database_utils::utils::connection::get_pg_pool;
     use database_utils::utils::connection::get_unlimited_pg_pool;
     use block_mesh_common::constants::DeviceType;
@@ -88,6 +89,7 @@ async fn run() -> anyhow::Result<()> {
     let mailgun_token = get_env_var_or_panic(AppEnvVar::MailgunSendKey);
     let _mailgun_token = <EnvVar as AsRef<Secret<String>>>::as_ref(&mailgun_token);
     let db_pool = get_connection_pool(&configuration.database, Option::from(database_url)).await?;
+    let channel_pool = get_pg_pool_for_channel(Some("CHANNEL_DATABASE_URL".to_string())).await;
     let env = get_envar("APP_ENVIRONMENT").await;
     tracing::info!("Database migration started");
     let unlimited_pg_pool = get_unlimited_pg_pool(None).await;
@@ -135,6 +137,7 @@ async fn run() -> anyhow::Result<()> {
         email_client,
         pool: db_pool.clone(),
         follower_pool,
+        channel_pool,
         client: client.clone(),
         flags: flags.clone(),
         redis,

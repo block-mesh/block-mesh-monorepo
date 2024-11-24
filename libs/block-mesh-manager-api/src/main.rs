@@ -19,7 +19,7 @@ mod routes;
 use crate::pg_listener::start_listening;
 use block_mesh_common::constants::BLOCKMESH_PG_NOTIFY_API;
 use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
-use database_utils::utils::connection::get_pg_pool;
+use database_utils::utils::connection::{get_pg_pool, get_pg_pool_for_channel};
 use tower_http::cors::CorsLayer;
 use tower_http::timeout::TimeoutLayer;
 
@@ -58,8 +58,9 @@ fn main() -> anyhow::Result<()> {
 }
 
 async fn run(is_with_sentry: bool) {
-    let db_pool = get_pg_pool(None).await;
+    let _db_pool = get_pg_pool(None).await;
     let follower_pool = get_pg_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
+    let channel_pool = get_pg_pool_for_channel(Some("CHANNEL_DATABASE_URL".to_string())).await;
     let router = get_router();
     let check_token_map: CheckTokenResponseMap = Arc::new(DashMap::new());
     let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());
@@ -104,7 +105,7 @@ async fn run(is_with_sentry: bool) {
         .unwrap();
     tracing::info!("Listening on {}", listener.local_addr().unwrap());
     let db_listen_task = tokio::spawn(start_listening(
-        db_pool.clone(),
+        channel_pool.clone(),
         vec![BLOCKMESH_PG_NOTIFY_API],
         check_token_map,
         get_token_map,

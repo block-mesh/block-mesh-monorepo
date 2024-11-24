@@ -13,17 +13,19 @@ use sqlx::PgPool;
 #[tracing::instrument(name = "submit_bandwidth_content", skip_all)]
 pub async fn submit_bandwidth_content(
     pool: &PgPool,
+    follower_pool: &PgPool,
+    channel_pool: &PgPool,
     body: ReportBandwidthRequest,
 ) -> Result<Json<ReportBandwidthResponse>, Error> {
-    let mut transaction = create_txn(pool).await?;
-    let user = get_user_and_api_token_by_email(&mut transaction, &body.email)
+    let mut follower_transaction = create_txn(follower_pool).await?;
+    let user = get_user_and_api_token_by_email(&mut follower_transaction, &body.email)
         .await?
         .ok_or_else(|| anyhow!("User Not Found"))?;
     if user.token.as_ref() != &body.api_token {
-        commit_txn(transaction).await?;
+        commit_txn(follower_transaction).await?;
         return Err(anyhow!("Api Token Mismatch"));
     }
-
+    let mut transaction = create_txn(pool).await?;
     let download_speed = serde_json::Value::from(body.download_speed)
         .as_f64()
         .unwrap_or_default();
@@ -49,7 +51,7 @@ pub async fn submit_bandwidth_content(
         .ok_or(anyhow!("Download not found"))?;
 
     let _ = notify_worker(
-        pool,
+        channel_pool,
         AggregateMessage {
             msg_type: DBMessageTypes::AggregateMessage,
             id: download.id,
@@ -60,7 +62,7 @@ pub async fn submit_bandwidth_content(
     )
     .await;
     let _ = notify_worker(
-        pool,
+        channel_pool,
         AggregateMessage {
             msg_type: DBMessageTypes::AggregateMessage,
             id: upload.id,
@@ -71,7 +73,7 @@ pub async fn submit_bandwidth_content(
     )
     .await;
     let _ = notify_worker(
-        pool,
+        channel_pool,
         AggregateMessage {
             msg_type: DBMessageTypes::AggregateMessage,
             id: latency.id,

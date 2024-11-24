@@ -38,6 +38,7 @@ pub async fn extract_body(request: Request) -> anyhow::Result<String> {
 pub async fn submit_task_content(
     pool: &PgPool,
     follower_pool: &PgPool,
+    channel_pool: &PgPool,
     query: SubmitTaskRequest,
     request: Option<Request>,
     mode: HandlerMode,
@@ -115,7 +116,7 @@ pub async fn submit_task_content(
         .await?;
         commit_txn(transaction).await?;
         let _ = notify_worker(
-            pool,
+            channel_pool,
             AggregateMessage {
                 msg_type: DBMessageTypes::AggregateMessage,
                 id: tasks.id,

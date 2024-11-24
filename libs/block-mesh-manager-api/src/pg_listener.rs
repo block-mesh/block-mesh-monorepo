@@ -7,7 +7,6 @@ use sqlx::Postgres;
 use tracing::error;
 use uuid::Uuid;
 
-#[allow(dead_code)]
 #[tracing::instrument(name = "start_listening", skip_all, err)]
 pub async fn start_listening(
     pool: Pool<Postgres>,

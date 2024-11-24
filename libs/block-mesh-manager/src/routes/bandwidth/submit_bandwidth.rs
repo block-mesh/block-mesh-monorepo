@@ -11,7 +11,7 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Json(body): Json<ReportBandwidthRequest>,
 ) -> Result<Json<ReportBandwidthResponse>, Error> {
-    submit_bandwidth_content(&state.pool, body)
+    submit_bandwidth_content(&state.pool, &state.follower_pool, &state.channel_pool, body)
         .await
         .map_err(Error::from)
 }
