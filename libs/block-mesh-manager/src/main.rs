@@ -3,11 +3,11 @@
 #![deny(unreachable_pub)]
 
 use cfg_if::cfg_if;
+use database_utils::utils::connection::channel_pool::channel_pool;
+use database_utils::utils::connection::follower_pool::follower_pool;
+use database_utils::utils::connection::unlimited_pool::unlimited_pool;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
-    use database_utils::utils::connection::get_pg_pool_for_channel;
-    use database_utils::utils::connection::get_pg_pool;
-    use database_utils::utils::connection::get_unlimited_pg_pool;
     use block_mesh_common::constants::DeviceType;
     use block_mesh_manager::worker::update_feature_flags::feature_flags_loop;
     use block_mesh_manager::utils::cache_envar::get_envar;
@@ -89,10 +89,10 @@ async fn run() -> anyhow::Result<()> {
     let mailgun_token = get_env_var_or_panic(AppEnvVar::MailgunSendKey);
     let _mailgun_token = <EnvVar as AsRef<Secret<String>>>::as_ref(&mailgun_token);
     let db_pool = get_connection_pool(&configuration.database, Option::from(database_url)).await?;
-    let channel_pool = get_pg_pool_for_channel(Some("CHANNEL_DATABASE_URL".to_string())).await;
+    let channel_pool = channel_pool(Some("CHANNEL_DATABASE_URL".to_string())).await;
     let env = get_envar("APP_ENVIRONMENT").await;
     tracing::info!("Database migration started");
-    let unlimited_pg_pool = get_unlimited_pg_pool(None).await;
+    let unlimited_pg_pool = unlimited_pool(None).await;
     migrate(&unlimited_pg_pool, env)
         .await
         .expect("Failed to migrate database");
@@ -128,7 +128,7 @@ async fn run() -> anyhow::Result<()> {
         .unwrap_or("false".to_string())
         .parse()
         .unwrap_or(false);
-    let follower_pool = get_pg_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
+    let follower_pool = follower_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
     let app_state = Arc::new(AppState {
         task_limit,
         rate_limit,

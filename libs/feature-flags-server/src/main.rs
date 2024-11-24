@@ -3,7 +3,8 @@ use crate::routes::get_router;
 use axum::{Extension, Router};
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use dashmap::DashMap;
-use database_utils::utils::connection::{get_pg_pool, get_unlimited_pg_pool};
+use database_utils::utils::connection::unlimited_pool::unlimited_pool;
+use database_utils::utils::connection::write_pool::write_pool;
 use database_utils::utils::migrate::migrate;
 use logger_general::tracing::setup_tracing_stdout_only;
 use serde_json::Value;
@@ -31,9 +32,9 @@ pub async fn run_server(listener: TcpListener, app: Router<()>) -> std::io::Resu
 async fn main() -> anyhow::Result<()> {
     load_dotenv();
     setup_tracing_stdout_only();
-    let db_pool = get_pg_pool(None).await;
+    let db_pool = write_pool(None).await;
     let env = env::var("APP_ENVIRONMENT").expect("APP_ENVIRONMENT is not set");
-    let unlimited_pg_pool = get_unlimited_pg_pool(None).await;
+    let unlimited_pg_pool = unlimited_pool(None).await;
     migrate(&unlimited_pg_pool, env)
         .await
         .expect("Failed to migrate database");
