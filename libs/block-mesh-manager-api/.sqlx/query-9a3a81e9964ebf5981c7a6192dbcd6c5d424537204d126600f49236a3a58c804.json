@@ -1,0 +1,52 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n        users.email as email,\n        users.id as user_id,\n        api_tokens.token as \"token: Secret<Uuid>\",\n        users.password as \"password: Secret<String>\",\n        users.wallet_address as wallet_address,\n        users.verified_email as verified_email\n        FROM users\n        JOIN api_tokens ON users.id = api_tokens.user_id\n        WHERE users.email = $1\n        LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "email",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "token: Secret<Uuid>",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "password: Secret<String>",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "wallet_address",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "verified_email",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "9a3a81e9964ebf5981c7a6192dbcd6c5d424537204d126600f49236a3a58c804"
+}

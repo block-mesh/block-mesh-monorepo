@@ -9,7 +9,7 @@ struct Id {
 
 pub async fn get_user_call_to_action(
     transaction: &mut Transaction<'_, Postgres>,
-    user_id: Uuid,
+    user_id: &Uuid,
 ) -> anyhow::Result<Vec<CallToAction>> {
     let calls_to_action = query_as!(
         CallToAction,

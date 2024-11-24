@@ -90,8 +90,8 @@ pub async fn add_to_aggregates_aggregator(
                                     .await
                                     .map_err(|e| {
                                         tracing::error!(
-                                            "Failed to execute query: {} , with error {:?}",
-                                            query,
+                                            "add_to_aggregates_create_bulk_query failed to execute query size: {} , with error {:?}",
+                                            count,
                                             e
                                         );
                                     });

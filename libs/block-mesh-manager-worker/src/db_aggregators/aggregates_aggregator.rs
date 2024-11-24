@@ -74,8 +74,8 @@ pub async fn aggregates_aggregator(
                                     .await
                                     .map_err(|e| {
                                         tracing::error!(
-                                            "Failed to execute query: {} , with error {:?}",
-                                            query,
+                                            "aggregates_create_bulk_query failed to execute query size: {} , with error {:?}",
+                                            count,
                                             e
                                         );
                                     });

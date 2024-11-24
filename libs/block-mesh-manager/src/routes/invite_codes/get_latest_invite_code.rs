@@ -24,7 +24,7 @@ pub async fn handler(
         commit_txn(transaction).await?;
         return Err(Error::ApiTokenNotFound);
     }
-    let user_invite_code = get_user_latest_invite_code(&mut transaction, user.user_id)
+    let user_invite_code = get_user_latest_invite_code(&mut transaction, &user.user_id)
         .await
         .map_err(Error::from)?;
     commit_txn(transaction).await?;

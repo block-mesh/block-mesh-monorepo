@@ -61,7 +61,11 @@ pub async fn ip_address_and_users_ip_bulk_query(
         .fetch_all(&mut *transaction)
         .await
         .map_err(|e| {
-            tracing::error!("Failed to execute query: {} , with error {:?}", query, e);
+            tracing::error!(
+                "ip_address_and_users_ip_bulk_query failed to execute query size: {} , with error {:?}",
+                values.len(),
+                e
+            );
             e
         })?;
     for row in rows {
@@ -104,7 +108,7 @@ pub async fn ip_address_and_users_ip_bulk_query(
         .execute(&mut *transaction)
         .await
         .map_err(|e| {
-            tracing::error!("Failed to execute query: {} , with error {:?}", query, e);
+            tracing::error!("ip_address_and_users_ip_bulk_query failed to execute query size: {} , with error {:?}", values.len(), e);
             e
         })?;
     commit_txn(transaction).await?;

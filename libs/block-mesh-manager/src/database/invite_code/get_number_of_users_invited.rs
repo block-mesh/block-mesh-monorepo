@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 pub(crate) async fn get_number_of_users_invited(
     transaction: &mut Transaction<'_, Postgres>,
-    user_id: Uuid,
+    user_id: &Uuid,
 ) -> anyhow::Result<i64> {
     let count: Option<i64> = sqlx::query_scalar!(
         r#"SELECT

@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 pub async fn get_user_referrals(
     transaction: &mut Transaction<'_, Postgres>,
-    user_id: Uuid,
+    user_id: &Uuid,
 ) -> anyhow::Result<Vec<Referral>> {
     let users = sqlx::query_as!(
         Referral,

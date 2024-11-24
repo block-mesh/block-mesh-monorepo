@@ -10,6 +10,7 @@ use block_mesh_common::constants::{
     BLOCK_MESH_LANDING_PAGE_IMAGE, BLOCK_MESH_LOGO, BLOCK_MESH_SUPPORT_CHAT,
     BLOCK_MESH_SUPPORT_EMAIL, BLOCK_MESH_TWITTER,
 };
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 
 #[allow(dead_code)]
@@ -32,12 +33,12 @@ pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<impl IntoResponse, Error> {
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let mut transaction = create_txn(&pool).await?;
     let user = auth.user.ok_or(Error::UserNotFound)?;
-    let user_invite_code = get_user_latest_invite_code(&mut transaction, user.id)
+    let user_invite_code = get_user_latest_invite_code(&mut transaction, &user.id)
         .await
         .map_err(Error::from)?;
-    transaction.commit().await.map_err(Error::from)?;
+    commit_txn(transaction).await?;
     Ok(EditInviteCodeTemplate {
         current_invite_code: user_invite_code.invite_code,
         chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),

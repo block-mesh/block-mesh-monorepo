@@ -26,8 +26,8 @@ pub async fn handler(
         commit_txn(follower_transaction).await?;
         return Err(Error::ApiTokenNotFound);
     }
-    let user_id = user.user_id;
+    let data =
+        dashboard_data_extractor(&pool, &mut follower_transaction, state.clone(), user).await?;
     commit_txn(follower_transaction).await?;
-    let data = dashboard_data_extractor(&pool, user_id, state).await?;
     Ok(Json(data))
 }

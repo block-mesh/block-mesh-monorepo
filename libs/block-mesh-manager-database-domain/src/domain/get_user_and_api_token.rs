@@ -1,14 +1,7 @@
+use crate::domain::user::UserAndApiToken;
 use secret::Secret;
-use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
-#[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
-pub struct UserAndApiToken {
-    pub user_id: Uuid,
-    pub token: Secret<Uuid>,
-    pub email: String,
-    pub password: Secret<String>,
-}
 
 #[tracing::instrument(name = "get_user_and_api_token_by_email", skip_all)]
 pub async fn get_user_and_api_token_by_email(
@@ -21,7 +14,9 @@ pub async fn get_user_and_api_token_by_email(
         users.email as email,
         users.id as user_id,
         api_tokens.token as "token: Secret<Uuid>",
-        users.password as "password: Secret<String>"
+        users.password as "password: Secret<String>",
+        users.wallet_address as wallet_address,
+        users.verified_email as verified_email
         FROM users
         JOIN api_tokens ON users.id = api_tokens.user_id
         WHERE users.email = $1

@@ -4,7 +4,7 @@ use uuid::Uuid;
 
 pub async fn get_user_latest_invite_code(
     transaction: &mut Transaction<'_, Postgres>,
-    user_id: Uuid,
+    user_id: &Uuid,
 ) -> anyhow::Result<InviteCode> {
     Ok(sqlx::query_as!(
         InviteCode,
