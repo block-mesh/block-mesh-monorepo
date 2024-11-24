@@ -4,7 +4,7 @@ use crate::domain::get_user_and_api_token::get_user_and_api_token_by_email;
 use crate::domain::notify_worker::notify_worker;
 use anyhow::{anyhow, Error};
 use axum::Json;
-use block_mesh_common::interfaces::db_messages::{AggregateMessage, DBMessageTypes};
+use block_mesh_common::interfaces::db_messages::{AggregateMessage, DBMessage, DBMessageTypes};
 use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::StatusCode;
@@ -49,40 +49,30 @@ pub async fn submit_bandwidth_content(
         .iter()
         .find(|a| a.name == Download)
         .ok_or(anyhow!("Download not found"))?;
-
-    let _ = notify_worker(
-        channel_pool,
-        AggregateMessage {
+    let messages = vec![
+        DBMessage::AggregateMessage(AggregateMessage {
             msg_type: DBMessageTypes::AggregateMessage,
             id: download.id,
             value: serde_json::Value::from(
                 (download.value.as_f64().unwrap_or_default() + download_speed) / 2.0,
             ),
-        },
-    )
-    .await;
-    let _ = notify_worker(
-        channel_pool,
-        AggregateMessage {
+        }),
+        DBMessage::AggregateMessage(AggregateMessage {
             msg_type: DBMessageTypes::AggregateMessage,
             id: upload.id,
             value: serde_json::Value::from(
                 (upload.value.as_f64().unwrap_or_default() + upload_speed) / 2.0,
             ),
-        },
-    )
-    .await;
-    let _ = notify_worker(
-        channel_pool,
-        AggregateMessage {
+        }),
+        DBMessage::AggregateMessage(AggregateMessage {
             msg_type: DBMessageTypes::AggregateMessage,
             id: latency.id,
             value: serde_json::Value::from(
                 (latency.value.as_f64().unwrap_or_default() + latency_report) / 2.0,
             ),
-        },
-    )
-    .await;
+        }),
+    ];
+    let _ = notify_worker(channel_pool, messages).await;
     commit_txn(transaction).await?;
     Ok(Json(ReportBandwidthResponse {
         status_code: u16::from(StatusCode::OK),

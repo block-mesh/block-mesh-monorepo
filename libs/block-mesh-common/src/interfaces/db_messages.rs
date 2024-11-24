@@ -13,6 +13,15 @@ pub enum DBMessageTypes {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum DBMessage {
+    UsersIpMessage(UsersIpMessage),
+    AggregateMessage(AggregateMessage),
+    AggregateAddToMessage(AggregateAddToMessage),
+    AnalyticsMessage(AnalyticsMessage),
+    DailyStatMessage(DailyStatMessage),
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct UsersIpMessage {
     pub id: Uuid,
     pub ip: String,

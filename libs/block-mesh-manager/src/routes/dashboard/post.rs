@@ -5,7 +5,9 @@ use crate::startup::application::AppState;
 use axum::extract::State;
 use axum::{Extension, Json};
 use axum_login::AuthSession;
-use block_mesh_common::interfaces::db_messages::{AggregateAddToMessage, DBMessageTypes};
+use block_mesh_common::interfaces::db_messages::{
+    AggregateAddToMessage, DBMessage, DBMessageTypes,
+};
 use block_mesh_common::interfaces::server_api::DashboardResponse;
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
@@ -25,12 +27,12 @@ pub async fn handler(
     let user = auth.user.ok_or(Error::UserNotFound)?;
     let _ = notify_worker(
         &state.channel_pool,
-        AggregateAddToMessage {
+        vec![DBMessage::AggregateAddToMessage(AggregateAddToMessage {
             msg_type: DBMessageTypes::AggregateAddToMessage,
             user_id: user.id,
             value: serde_json::Value::from(1),
             name: AggregateName::Uptime.to_string(),
-        },
+        })],
     )
     .await;
     let mut follower_transaction = create_txn(&state.follower_pool).await?;

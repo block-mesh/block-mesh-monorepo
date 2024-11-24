@@ -8,14 +8,13 @@ use std::fmt::Debug;
 use std::future::Future;
 use std::sync::Arc;
 use tokio::sync::broadcast::Sender;
-use tracing::error;
 
 #[tracing::instrument(name = "start_listening", skip_all, err)]
 pub async fn start_listening<T, F, R, Fut>(
     pool: Pool<Postgres>,
     channels: Vec<&str>,
     tx: Sender<Value>,
-    call_back: F,
+    _call_back: F,
 ) -> Result<(), Error>
 where
     T: DeserializeOwned + Sized + Debug,
@@ -27,12 +26,15 @@ where
     let tx = Arc::new(tx);
     loop {
         while let Ok(Some(notification)) = listener.try_recv().await {
-            let tx = tx.clone();
             let string = notification.payload().to_owned();
-            if let Ok(payload) = serde_json::from_str::<T>(&string) {
-                call_back(payload, tx).await;
+            if let Ok(mut payloads) = serde_json::from_str::<Value>(&string) {
+                if let Some(array) = payloads.as_array_mut() {
+                    for payload in array.drain(..) {
+                        let _ = tx.send(payload);
+                    }
+                }
             } else {
-                error!("Failed to deserialize {:?}", string);
+                tracing::error!("Failed to deserialize {:?}", string);
             }
         }
     }
