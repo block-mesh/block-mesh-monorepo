@@ -120,6 +120,10 @@ async fn run() -> anyhow::Result<()> {
     let _ = create_test_user(&db_pool).await;
     let check_token_map: CheckTokenResponseMap = Arc::new(DashMap::new());
     let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());
+    let submit_bandwidth_limit = env::var("APP_BW_LIMIT")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
     let rate_limit = env::var("APP_RATE_LIMIT")
         .unwrap_or("false".to_string())
         .parse()
@@ -130,6 +134,7 @@ async fn run() -> anyhow::Result<()> {
         .unwrap_or(false);
     let follower_pool = follower_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
     let app_state = Arc::new(AppState {
+        submit_bandwidth_limit,
         task_limit,
         rate_limit,
         check_token_map,

@@ -43,6 +43,7 @@ pub struct Application {
 pub struct AppState {
     pub task_limit: bool,
     pub rate_limit: bool,
+    pub submit_bandwidth_limit: bool,
     pub get_token_map: GetTokenResponseMap,
     pub check_token_map: CheckTokenResponseMap,
     pub pool: PgPool,
