@@ -131,7 +131,7 @@ pub async fn report_uptime_content(
         id: uptime.id,
         value: serde_json::Value::from(abs),
     }));
-    let _ = notify_worker(&channel_pool, messages).await;
+    let _ = notify_worker(channel_pool, messages).await;
     Ok(Json(ReportUptimeResponse {
         status_code: u16::from(StatusCode::OK),
     }))
