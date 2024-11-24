@@ -19,7 +19,8 @@ mod routes;
 use crate::pg_listener::start_listening;
 use block_mesh_common::constants::BLOCKMESH_PG_NOTIFY_API;
 use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
-use database_utils::utils::connection::{get_pg_pool, get_pg_pool_for_channel};
+use database_utils::utils::connection::channel_pool::channel_pool;
+use database_utils::utils::connection::follower_pool::follower_pool;
 use tower_http::cors::CorsLayer;
 use tower_http::timeout::TimeoutLayer;
 
@@ -58,9 +59,9 @@ fn main() -> anyhow::Result<()> {
 }
 
 async fn run(is_with_sentry: bool) {
-    let _db_pool = get_pg_pool(None).await;
-    let follower_pool = get_pg_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
-    let channel_pool = get_pg_pool_for_channel(Some("CHANNEL_DATABASE_URL".to_string())).await;
+    // let _db_pool = write_pool(None).await;
+    let follower_pool = follower_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
+    let channel_pool = channel_pool(Some("CHANNEL_DATABASE_URL".to_string())).await;
     let router = get_router();
     let check_token_map: CheckTokenResponseMap = Arc::new(DashMap::new());
     let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());

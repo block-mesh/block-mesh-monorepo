@@ -1,4 +1,4 @@
-use database_utils::utils::connection::get_pg_pool;
+use database_utils::utils::connection::write_pool::write_pool;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -10,7 +10,7 @@ use uuid::Uuid;
 async fn main() -> anyhow::Result<()> {
     setup_tracing_stdout_only_with_sentry();
 
-    let pg_pool = get_pg_pool(None).await;
+    let pg_pool = write_pool(None).await;
     let listen_task = tokio::spawn(listen(pg_pool.clone()));
     let notify_loop_task = tokio::spawn(notify_loop(pg_pool.clone()));
 

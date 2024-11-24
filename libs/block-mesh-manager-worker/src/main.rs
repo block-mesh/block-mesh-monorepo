@@ -3,9 +3,9 @@ use crate::pg_listener::start_listening;
 use axum::{Extension, Router};
 use block_mesh_common::constants::BLOCKMESH_PG_NOTIFY_WORKER;
 use block_mesh_common::env::load_dotenv::load_dotenv;
-use database_utils::utils::connection::{
-    get_pg_pool, get_pg_pool_for_channel, get_unlimited_pg_pool,
-};
+use database_utils::utils::connection::channel_pool::channel_pool;
+use database_utils::utils::connection::unlimited_pool::unlimited_pool;
+use database_utils::utils::connection::write_pool::write_pool;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
 use serde_json::Value;
 use std::net::SocketAddr;
@@ -84,8 +84,8 @@ async fn run() -> anyhow::Result<()> {
     load_dotenv();
     setup_tracing_stdout_only_with_sentry();
     tracing::info!("Starting worker");
-    let db_pool = get_pg_pool(None).await;
-    let un_limited_db_pool = get_unlimited_pg_pool(None).await;
+    let db_pool = write_pool(None).await;
+    let un_limited_db_pool = unlimited_pool(None).await;
     // let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
     // let _redis = redis_client.get_multiplexed_async_connection().await?;
     let (joiner_tx, joiner_rx) = flume::bounded::<JoinHandle<()>>(500);
@@ -102,7 +102,7 @@ async fn run() -> anyhow::Result<()> {
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
     let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
     let delete_old_tasks_task = tokio::spawn(clean_old_tasks(db_pool.clone()));
-    let channel_pool = get_pg_pool_for_channel(Some("CHANNEL_DATABASE_URL".to_string())).await;
+    let channel_pool = channel_pool(Some("CHANNEL_DATABASE_URL".to_string())).await;
 
     let db_listen_task = tokio::spawn(start_listening(
         channel_pool,

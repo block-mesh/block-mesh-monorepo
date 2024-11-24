@@ -7,7 +7,8 @@ use crate::routes::get_router;
 use axum::Router;
 use block_mesh_common::env::environment::Environment;
 use block_mesh_common::env::load_dotenv::load_dotenv;
-use database_utils::utils::connection::get_pg_pool;
+use database_utils::utils::connection::follower_pool::follower_pool;
+use database_utils::utils::connection::write_pool::write_pool;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
 use sqlx::PgPool;
 use std::net::SocketAddr;
@@ -66,8 +67,8 @@ pub struct AppState {
 
 impl AppState {
     pub async fn new() -> Self {
-        let data_sink_db_pool = get_pg_pool(None).await;
-        let follower_db_pool = get_pg_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
+        let data_sink_db_pool = write_pool(None).await;
+        let follower_db_pool = follower_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
         let environment = env::var("APP_ENVIRONMENT").unwrap();
         let environment = Environment::from_str(&environment).unwrap();
         Self {

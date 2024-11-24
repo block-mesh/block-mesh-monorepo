@@ -1,9 +1,10 @@
 use crate::state::AppState;
 use crate::websocket::process_message_light::process_message_light;
 use axum::extract::ws::{Message, WebSocket};
-use block_mesh_common::interfaces::db_messages::{AggregateAddToMessage, DBMessageTypes};
+use block_mesh_common::interfaces::db_messages::{
+    AggregateAddToMessage, DBMessage, DBMessageTypes,
+};
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
-use block_mesh_manager_database_domain::domain::notify_worker::notify_worker;
 use futures::{SinkExt, StreamExt};
 use sqlx::types::chrono::Utc;
 use std::env;
@@ -35,10 +36,8 @@ pub async fn handle_socket_light(
     broadcaster
         .subscribe_light(&email, &user_id, &mut redis)
         .await;
-
     let (mut sender, mut receiver) = socket.split();
-
-    let channel_pool = state.channel_pool.clone();
+    let tx = state.tx.clone();
     let mut send_task = tokio::spawn(async move {
         let mut prev = Utc::now();
         // Send to client - keep alive via ping
@@ -47,16 +46,14 @@ pub async fn handle_socket_light(
             tokio::time::sleep(Duration::from_millis(sleep)).await;
             let now = Utc::now();
             let delta = (now - prev).num_seconds();
-            let _ = notify_worker(
-                &channel_pool,
-                AggregateAddToMessage {
+            let _ = tx
+                .send_async(DBMessage::AggregateAddToMessage(AggregateAddToMessage {
                     msg_type: DBMessageTypes::AggregateAddToMessage,
                     user_id,
                     value: serde_json::Value::from(delta),
                     name: AggregateName::Uptime.to_string(),
-                },
-            )
-            .await;
+                }))
+                .await;
             prev = Utc::now();
         }
     });

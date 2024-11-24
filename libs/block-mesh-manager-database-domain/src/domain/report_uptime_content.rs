@@ -7,7 +7,7 @@ use anyhow::{anyhow, Error};
 use axum::extract::Request;
 use axum::Json;
 use block_mesh_common::interfaces::db_messages::{
-    AggregateMessage, AnalyticsMessage, DBMessageTypes, DailyStatMessage, UsersIpMessage,
+    AggregateMessage, AnalyticsMessage, DBMessage, DBMessageTypes, DailyStatMessage, UsersIpMessage,
 };
 use block_mesh_common::interfaces::server_api::{
     ClientsMetadata, HandlerMode, ReportUptimeRequest, ReportUptimeResponse,
@@ -19,7 +19,6 @@ use http_body_util::BodyExt;
 use num_traits::abs;
 use sqlx::PgPool;
 use std::env;
-use uuid::Uuid;
 
 pub fn resolve_ip(
     query_ip: &Option<String>,
@@ -33,39 +32,6 @@ pub fn resolve_ip(
     } else {
         addr_ip
     }
-}
-
-#[tracing::instrument(name = "send_analytics", skip_all)]
-async fn send_analytics(
-    channel_pool: &PgPool,
-    request: Option<Request>,
-    user_id: &Uuid,
-) -> Result<(), Error> {
-    if let Some(request) = request {
-        let (_parts, body) = request.into_parts();
-        let bytes = body
-            .collect()
-            .await
-            .map_err(|_| anyhow!("Failed Reading Body"))?
-            .to_bytes();
-        let body_raw = String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from(""));
-        if !body_raw.is_empty() {
-            if let Ok(metadata) = serde_json::from_str::<ClientsMetadata>(&body_raw) {
-                let _ = notify_worker(
-                    channel_pool,
-                    AnalyticsMessage {
-                        msg_type: DBMessageTypes::AnalyticsMessage,
-                        user_id: *user_id,
-                        depin_aggregator: metadata.depin_aggregator.unwrap_or_default(),
-                        version: metadata.version.unwrap_or_default(),
-                        device_type: metadata.device_type,
-                    },
-                )
-                .await;
-            }
-        }
-    }
-    Ok(())
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -90,20 +56,34 @@ pub async fn report_uptime_content(
         return Err(anyhow!("Api Token mismatch"));
     }
     commit_txn(follower_transaction).await?;
-
+    let mut messages: Vec<DBMessage> = Vec::with_capacity(10);
     let mut transaction = create_txn(pool).await?;
     let daily_stat = get_or_create_daily_stat(&mut transaction, &user.user_id, None).await?;
-    let _ = send_analytics(channel_pool, request, &user.user_id).await;
-    let _ = notify_worker(
-        channel_pool,
-        UsersIpMessage {
-            msg_type: DBMessageTypes::UsersIpMessage,
-            id: user.user_id,
-            ip: ip.clone(),
-        },
-    )
-    .await;
-
+    if let Some(request) = request {
+        let (_parts, body) = request.into_parts();
+        let bytes = body
+            .collect()
+            .await
+            .map_err(|_| anyhow!("Failed Reading Body"))?
+            .to_bytes();
+        let body_raw = String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from(""));
+        if !body_raw.is_empty() {
+            if let Ok(metadata) = serde_json::from_str::<ClientsMetadata>(&body_raw) {
+                messages.push(DBMessage::AnalyticsMessage(AnalyticsMessage {
+                    msg_type: DBMessageTypes::AnalyticsMessage,
+                    user_id: user.user_id,
+                    depin_aggregator: metadata.depin_aggregator.unwrap_or_default(),
+                    version: metadata.version.unwrap_or_default(),
+                    device_type: metadata.device_type,
+                }))
+            }
+        }
+    }
+    messages.push(DBMessage::UsersIpMessage(UsersIpMessage {
+        msg_type: DBMessageTypes::UsersIpMessage,
+        id: user.user_id,
+        ip: ip.clone(),
+    }));
     let uptime = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
         AggregateName::Uptime,
@@ -112,7 +92,6 @@ pub async fn report_uptime_content(
     .await
     .map_err(Error::from)?;
     commit_txn(transaction).await?;
-
     let now = Utc::now();
     let diff = now - uptime.updated_at;
     let sec_diff = abs(diff.num_seconds());
@@ -120,7 +99,6 @@ pub async fn report_uptime_content(
         .unwrap_or("10".to_string())
         .parse()
         .unwrap_or(10);
-
     let uptime_bonus = env::var("UPTIME_BONUS")
         .unwrap_or("1".to_string())
         .parse()
@@ -142,25 +120,18 @@ pub async fn report_uptime_content(
     };
 
     if extra > 0.0 {
-        let _ = notify_worker(
-            channel_pool,
-            DailyStatMessage {
-                msg_type: DBMessageTypes::DailyStatMessage,
-                id: daily_stat.id,
-                uptime: extra,
-            },
-        )
-        .await;
+        messages.push(DBMessage::DailyStatMessage(DailyStatMessage {
+            msg_type: DBMessageTypes::DailyStatMessage,
+            id: daily_stat.id,
+            uptime: extra,
+        }));
     }
-    let _ = notify_worker(
-        channel_pool,
-        AggregateMessage {
-            msg_type: DBMessageTypes::AggregateMessage,
-            id: uptime.id,
-            value: serde_json::Value::from(abs),
-        },
-    )
-    .await;
+    messages.push(DBMessage::AggregateMessage(AggregateMessage {
+        msg_type: DBMessageTypes::AggregateMessage,
+        id: uptime.id,
+        value: serde_json::Value::from(abs),
+    }));
+    let _ = notify_worker(channel_pool, &messages).await;
     Ok(Json(ReportUptimeResponse {
         status_code: u16::from(StatusCode::OK),
     }))

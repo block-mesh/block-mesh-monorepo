@@ -14,7 +14,7 @@ use block_mesh_manager::emails::email_client::EmailClient;
 use block_mesh_manager::startup::application::{AppState, Application};
 use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
 use dashmap::DashMap;
-use database_utils::utils::connection::get_pg_pool_for_channel;
+use database_utils::utils::connection::channel_pool::channel_pool;
 use database_utils::utils::migrate::migrate;
 use logger_general::tracing::setup_tracing_stdout_only;
 use redis;
@@ -56,7 +56,7 @@ pub async fn spawn_app() -> TestApp {
     let db_pool = get_connection_pool(&configuration.database.clone(), Option::from(database_url))
         .await
         .unwrap();
-    let channel_pool = get_pg_pool_for_channel(Some("CHANNEL_DATABASE_URL".to_string())).await;
+    let channel_pool = channel_pool(Some("CHANNEL_DATABASE_URL".to_string())).await;
 
     migrate(&db_pool, "test".to_string())
         .await
@@ -80,6 +80,7 @@ pub async fn spawn_app() -> TestApp {
     let app_state = Arc::new(AppState {
         rate_limit: true,
         task_limit: true,
+        submit_bandwidth_limit: true,
         get_token_map,
         email_client,
         pool: db_pool.clone(),
