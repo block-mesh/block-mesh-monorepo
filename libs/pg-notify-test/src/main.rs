@@ -55,7 +55,7 @@ pub async fn notify_loop(pool: PgPool) -> anyhow::Result<()> {
             id: Uuid::new_v4(),
             value: Value::Null,
         };
-        let _ = notify(&msg, &pool).await?;
+        notify(&msg, &pool).await?;
         count += 1;
         if count % 100 == 0 {
             tracing::info!("loop count = {}", count);
