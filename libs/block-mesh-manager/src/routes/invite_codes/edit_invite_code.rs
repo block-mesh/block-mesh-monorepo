@@ -33,8 +33,8 @@ pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<impl IntoResponse, Error> {
-    let mut transaction = create_txn(&pool).await?;
     let user = auth.user.ok_or(Error::UserNotFound)?;
+    let mut transaction = create_txn(&pool).await?;
     let user_invite_code = get_user_latest_invite_code(&mut transaction, &user.id)
         .await
         .map_err(Error::from)?;
