@@ -7,7 +7,7 @@ use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::routing::{get, post};
 use axum::{Json, Router};
-use block_mesh_common::interfaces::server_api::{DigestDataRequest, DigestDataResponse};
+use block_mesh_common::interfaces::server_api::DigestDataRequest;
 use database_utils::utils::health_check::health_check;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use reqwest::StatusCode;
@@ -39,7 +39,7 @@ pub async fn server_health() -> Result<impl IntoResponse, Error> {
 pub async fn digest_data(
     State(state): State<AppState>,
     Json(body): Json<DigestDataRequest>,
-) -> Result<Json<DigestDataResponse>, Error> {
+) -> Result<impl IntoResponse, Error> {
     if !validate_email(&body.email) {
         return Err(Error::from(anyhow!("BadEmail")));
     }
@@ -55,9 +55,17 @@ pub async fn digest_data(
     commit_txn(transaction).await?;
     let data_sink_db_pool = &state.data_sink_db_pool;
     let mut transaction = create_txn(data_sink_db_pool).await?;
-    DataSink::create_data_sink(&mut transaction, &user.user_id, body.data).await?;
+    let result = DataSink::create_data_sink(&mut transaction, &user.user_id, body.data).await;
+    if let Err(error) = result {
+        if error
+            .to_string()
+            .contains("duplicate key value violates unique constraint")
+        {
+            return Ok((StatusCode::ALREADY_REPORTED, "Already reported"));
+        }
+    }
     commit_txn(transaction).await?;
-    Ok(Json(DigestDataResponse { status_code: 200 }))
+    Ok((StatusCode::OK, "OK"))
 }
 
 #[tracing::instrument(name = "version", skip_all)]
