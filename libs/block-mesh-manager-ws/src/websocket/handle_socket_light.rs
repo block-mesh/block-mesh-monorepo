@@ -38,7 +38,7 @@ pub async fn handle_socket_light(
 
     let (mut sender, mut receiver) = socket.split();
 
-    let pool = state.pool.clone();
+    let channel_pool = state.channel_pool.clone();
     let mut send_task = tokio::spawn(async move {
         let mut prev = Utc::now();
         // Send to client - keep alive via ping
@@ -48,7 +48,7 @@ pub async fn handle_socket_light(
             let now = Utc::now();
             let delta = (now - prev).num_seconds();
             let _ = notify_worker(
-                &pool,
+                &channel_pool,
                 AggregateAddToMessage {
                     msg_type: DBMessageTypes::AggregateAddToMessage,
                     user_id,

@@ -51,6 +51,7 @@ pub async fn handler(
     report_uptime_content(
         &state.pool,
         &state.follower_pool,
+        &state.channel_pool,
         header_ip,
         query,
         Some(request),

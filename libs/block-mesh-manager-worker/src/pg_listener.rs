@@ -10,7 +10,6 @@ use std::sync::Arc;
 use tokio::sync::broadcast::Sender;
 use tracing::error;
 
-#[allow(dead_code)]
 #[tracing::instrument(name = "start_listening", skip_all, err)]
 pub async fn start_listening<T, F, R, Fut>(
     pool: Pool<Postgres>,

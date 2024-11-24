@@ -17,6 +17,7 @@ pub async fn handler(
     submit_task_content(
         &state.pool,
         &state.follower_pool,
+        &state.channel_pool,
         query,
         Some(request),
         HandlerMode::Http,

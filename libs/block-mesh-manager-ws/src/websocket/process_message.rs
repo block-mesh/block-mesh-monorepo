@@ -65,6 +65,7 @@ async fn process_client_message(
                     let _ = submit_task_content(
                         &state.pool,
                         &state.follower_pool,
+                        &state.channel_pool,
                         query.clone(),
                         None,
                         HandlerMode::WebSocket,
@@ -72,12 +73,19 @@ async fn process_client_message(
                     .await;
                 }
                 WsClientMessage::ReportBandwidth(body) => {
-                    let _ = submit_bandwidth_content(&state.pool, body.clone()).await;
+                    let _ = submit_bandwidth_content(
+                        &state.pool,
+                        &state.follower_pool,
+                        &state.channel_pool,
+                        body.clone(),
+                    )
+                    .await;
                 }
                 WsClientMessage::ReportUptime(query) => {
                     let _ = report_uptime_content(
                         &state.pool,
                         &state.follower_pool,
+                        &state.channel_pool,
                         ip.clone(),
                         query.clone(),
                         None,

@@ -37,7 +37,7 @@ pub fn resolve_ip(
 
 #[tracing::instrument(name = "send_analytics", skip_all)]
 async fn send_analytics(
-    pool: &PgPool,
+    channel_pool: &PgPool,
     request: Option<Request>,
     user_id: &Uuid,
 ) -> Result<(), Error> {
@@ -52,7 +52,7 @@ async fn send_analytics(
         if !body_raw.is_empty() {
             if let Ok(metadata) = serde_json::from_str::<ClientsMetadata>(&body_raw) {
                 let _ = notify_worker(
-                    pool,
+                    channel_pool,
                     AnalyticsMessage {
                         msg_type: DBMessageTypes::AnalyticsMessage,
                         user_id: *user_id,
@@ -68,23 +68,12 @@ async fn send_analytics(
     Ok(())
 }
 
-#[tracing::instrument(name = "send_message_to_touch_users_ip", skip_all)]
-async fn send_message_to_touch_users_ip(pool: &PgPool, ip: String, user_id: &Uuid) {
-    let _ = notify_worker(
-        pool,
-        UsersIpMessage {
-            msg_type: DBMessageTypes::UsersIpMessage,
-            id: *user_id,
-            ip: ip.clone(),
-        },
-    )
-    .await;
-}
 #[allow(clippy::too_many_arguments)]
 #[tracing::instrument(name = "report_uptime_content", skip_all)]
 pub async fn report_uptime_content(
     pool: &PgPool,
     follower_pool: &PgPool,
+    channel_pool: &PgPool,
     ip: String,
     query: ReportUptimeRequest,
     request: Option<Request>,
@@ -104,8 +93,17 @@ pub async fn report_uptime_content(
 
     let mut transaction = create_txn(pool).await?;
     let daily_stat = get_or_create_daily_stat(&mut transaction, &user.user_id, None).await?;
-    let _ = send_analytics(pool, request, &user.user_id).await;
-    send_message_to_touch_users_ip(pool, ip.clone(), &user.user_id).await;
+    let _ = send_analytics(channel_pool, request, &user.user_id).await;
+    let _ = notify_worker(
+        channel_pool,
+        UsersIpMessage {
+            msg_type: DBMessageTypes::UsersIpMessage,
+            id: user.user_id,
+            ip: ip.clone(),
+        },
+    )
+    .await;
+
     let uptime = get_or_create_aggregate_by_user_and_name(
         &mut transaction,
         AggregateName::Uptime,
@@ -145,7 +143,7 @@ pub async fn report_uptime_content(
 
     if extra > 0.0 {
         let _ = notify_worker(
-            pool,
+            channel_pool,
             DailyStatMessage {
                 msg_type: DBMessageTypes::DailyStatMessage,
                 id: daily_stat.id,
@@ -155,7 +153,7 @@ pub async fn report_uptime_content(
         .await;
     }
     let _ = notify_worker(
-        pool,
+        channel_pool,
         AggregateMessage {
             msg_type: DBMessageTypes::AggregateMessage,
             id: uptime.id,

@@ -26,7 +26,7 @@ pub async fn handler(
 ) -> Result<Json<DashboardResponse>, Error> {
     let user = auth.user.ok_or(Error::UserNotFound)?;
     let _ = notify_worker(
-        &pool,
+        &state.channel_pool,
         AggregateAddToMessage {
             msg_type: DBMessageTypes::AggregateAddToMessage,
             user_id: user.id,
