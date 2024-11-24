@@ -31,7 +31,7 @@ pub async fn ws_handler(
     let websocket_manager = state.websocket_manager.clone();
     let broadcaster = websocket_manager.broadcaster.clone();
     if broadcaster.emails.contains(&email) {
-        return Ok((StatusCode::ALREADY_REPORTED, "Already connected"));
+        return Ok((StatusCode::ALREADY_REPORTED, "Already connected").into_response());
     }
     let follower_pool = &state.follower_pool;
     let mut transaction = create_txn(follower_pool).await?;
