@@ -9,6 +9,7 @@ use block_mesh_common::interfaces::db_messages::{AggregateAddToMessage, DBMessag
 use block_mesh_common::interfaces::server_api::DashboardResponse;
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::create_daily_stat::get_or_create_daily_stat;
+use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
 use block_mesh_manager_database_domain::domain::notify_worker::notify_worker;
 use chrono::{Duration, Utc};
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
@@ -41,6 +42,12 @@ pub async fn handler(
         let _ = get_or_create_daily_stat(&mut transaction, &user.id, Some(day)).await?;
     }
     commit_txn(transaction).await?;
-    let data = dashboard_data_extractor(&pool, user.id, state).await?;
+    let mut follower_transaction = create_txn(&state.follower_pool).await?;
+    let user = get_user_and_api_token_by_email(&mut follower_transaction, &user.email)
+        .await?
+        .ok_or_else(|| Error::UserNotFound)?;
+    let data =
+        dashboard_data_extractor(&pool, &mut follower_transaction, state.clone(), user).await?;
+    commit_txn(follower_transaction).await?;
     Ok(Json(data))
 }

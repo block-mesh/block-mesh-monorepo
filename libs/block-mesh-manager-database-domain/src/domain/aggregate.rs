@@ -26,7 +26,7 @@ pub struct AggregateTmp {
     pub updated_at: Option<DateTime<Utc>>,
 }
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum AggregateName {
     Twitter,
     FounderTwitter,

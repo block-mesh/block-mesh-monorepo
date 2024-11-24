@@ -9,7 +9,7 @@ struct Id {
 
 pub async fn get_user_perks(
     transaction: &mut Transaction<'_, Postgres>,
-    user_id: Uuid,
+    user_id: &Uuid,
 ) -> anyhow::Result<Vec<Perk>> {
     let perks = query_as!(
         Perk,

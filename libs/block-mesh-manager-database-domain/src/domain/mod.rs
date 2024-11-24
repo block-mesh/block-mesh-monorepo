@@ -1,5 +1,6 @@
 pub mod aggregate;
 pub mod api_token;
+pub mod bulk_get_or_create_aggregate_by_user_and_name;
 pub mod create_daily_stat;
 pub mod daily_stat;
 pub mod fetch_latest_cron_settings;

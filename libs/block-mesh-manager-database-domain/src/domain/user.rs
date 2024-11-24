@@ -77,3 +77,13 @@ pub struct User {
     pub invited_by: OptionUuid,
     pub verified_email: bool,
 }
+
+#[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
+pub struct UserAndApiToken {
+    pub user_id: Uuid,
+    pub token: Secret<Uuid>,
+    pub email: String,
+    pub password: Secret<String>,
+    pub wallet_address: Option<String>,
+    pub verified_email: bool,
+}
