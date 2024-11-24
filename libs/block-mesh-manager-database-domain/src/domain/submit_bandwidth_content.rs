@@ -1,5 +1,5 @@
-use crate::domain::aggregate::AggregateName;
-use crate::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
+use crate::domain::aggregate::AggregateName::{Download, Latency, Upload};
+use crate::domain::bulk_get_or_create_aggregate_by_user_and_name::bulk_get_or_create_aggregate_by_user_and_name;
 use crate::domain::get_user_and_api_token::get_user_and_api_token_by_email;
 use crate::domain::notify_worker::notify_worker;
 use anyhow::{anyhow, Error};
@@ -33,26 +33,20 @@ pub async fn submit_bandwidth_content(
     let latency_report = serde_json::Value::from(body.latency)
         .as_f64()
         .unwrap_or_default();
-
-    let download = get_or_create_aggregate_by_user_and_name(
-        &mut transaction,
-        AggregateName::Download,
-        &user.user_id,
-    )
-    .await?;
-    let upload = get_or_create_aggregate_by_user_and_name(
-        &mut transaction,
-        AggregateName::Upload,
-        &user.user_id,
-    )
-    .await?;
-
-    let latency = get_or_create_aggregate_by_user_and_name(
-        &mut transaction,
-        AggregateName::Latency,
-        &user.user_id,
-    )
-    .await?;
+    let aggregates =
+        bulk_get_or_create_aggregate_by_user_and_name(&mut transaction, &user.user_id).await?;
+    let upload = aggregates
+        .iter()
+        .find(|a| a.name == Upload)
+        .ok_or(anyhow!("Upload not found"))?;
+    let latency = aggregates
+        .iter()
+        .find(|a| a.name == Latency)
+        .ok_or(anyhow!("Latency not found"))?;
+    let download = aggregates
+        .iter()
+        .find(|a| a.name == Download)
+        .ok_or(anyhow!("Download not found"))?;
 
     let _ = notify_worker(
         pool,
