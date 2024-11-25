@@ -26,7 +26,12 @@ pub fn Perks() -> impl IntoView {
     let wallet_address = RwSignal::new("".to_string());
 
     if let Some(a) = auth_status {
-        wallet_address.set(a.wallet_address.unwrap_or_default());
+        let wallet = a.wallet_address.unwrap_or_default();
+        let (first_4, last_4) = (
+            &wallet[..wallet.len().min(4)],
+            &wallet[wallet.len().saturating_sub(4)..],
+        );
+        wallet_address.set(format!("{}...{}", first_4, last_4));
     }
 
     if let Some(data) = async_data {

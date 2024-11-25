@@ -9,25 +9,28 @@ use wasm_bindgen::prelude::*;
 use web_sys::{CloseEvent, ErrorEvent, MessageEvent};
 
 pub fn on_message_handler(
-    _ws: web_sys::WebSocket,
+    ws: web_sys::WebSocket,
     _app_state: ExtensionWrapperState,
 ) -> Closure<dyn FnMut(MessageEvent)> {
     Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
         log!("on_message_handle => {:#?}", e);
+        log!("on_message_handle e.data() => {:#?}", e.data());
         if let Ok(txt) = e.data().dyn_into::<js_sys::JsString>() {
-            match serde_json::from_str::<WsServerMessage>(
-                &txt.as_string()
-                    .unwrap_or("Couldn't covert Js String to String".to_string()),
-            ) {
+            if txt == "ping" {
+                let _ = ws.send_with_str("pong");
+            }
+            match WsServerMessage::try_from(txt.as_string().unwrap_or_default()) {
                 Ok(msg) => {
-                    log!("msg => {:#?}", msg);
+                    log!("on_message msg => {:#?}", msg);
                     if let Some(tx) = get_tx() {
                         if let Ok(tx) = tx.lock() {
                             let _ = tx.try_send(msg);
                         }
                     }
                 }
-                Err(_error) => {}
+                Err(error) => {
+                    log_error!("on_message_handle js error => {:#?}", error);
+                }
             }
         } else {
             log_error!("message event, received Unknown: {:?}", e.data());

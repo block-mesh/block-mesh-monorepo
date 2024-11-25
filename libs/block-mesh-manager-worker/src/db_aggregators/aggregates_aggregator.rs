@@ -1,5 +1,5 @@
 use anyhow::anyhow;
-use block_mesh_common::interfaces::db_messages::AggregateMessage;
+use block_mesh_common::interfaces::db_messages::DBMessage;
 use chrono::Utc;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use flume::Sender;
@@ -55,7 +55,9 @@ pub async fn aggregates_aggregator(
     loop {
         match rx.recv().await {
             Ok(message) => {
-                if let Ok(message) = serde_json::from_value::<AggregateMessage>(message) {
+                if let Ok(DBMessage::AggregateMessage(message)) =
+                    serde_json::from_value::<DBMessage>(message)
+                {
                     calls.insert(message.id, message.value);
                     count += 1;
                     let now = Utc::now();
@@ -70,15 +72,15 @@ pub async fn aggregates_aggregator(
                             if let Ok(mut transaction) = create_txn(&poll_clone).await {
                                 let query = aggregates_create_bulk_query(calls_clone);
                                 let r = sqlx::query(&query)
-                                    .execute(&mut *transaction)
-                                    .await
-                                    .map_err(|e| {
-                                        tracing::error!(
-                                            "aggregates_create_bulk_query failed to execute query size: {} , with error {:?}",
-                                            count,
-                                            e
-                                        );
-                                    });
+                                        .execute(&mut *transaction)
+                                        .await
+                                        .map_err(|e| {
+                                            tracing::error!(
+                                                "aggregates_create_bulk_query failed to execute query size: {} , with error {:?}",
+                                                count,
+                                                e
+                                            );
+                                        });
                                 if let Ok(r) = r {
                                     tracing::info!(
                                         "aggregates_create_bulk_query rows_affected : {}",

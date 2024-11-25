@@ -11,8 +11,8 @@ use tokio::sync::broadcast::Receiver;
 use tokio::task::JoinHandle;
 use uuid::Uuid;
 
-#[tracing::instrument(name = "add_to_aggregates_create_bulk_query", skip_all)]
-pub fn add_to_aggregates_create_bulk_query(calls: HashMap<Uuid, (String, Value)>) -> String {
+#[tracing::instrument(name = "set_to_aggregates_create_bulk_query", skip_all)]
+pub fn set_to_aggregates_create_bulk_query(calls: HashMap<Uuid, (String, Value)>) -> String {
     let now = Utc::now();
     let lock_values: Vec<String> = calls
         .iter()
@@ -46,7 +46,7 @@ pub fn add_to_aggregates_create_bulk_query(calls: HashMap<Uuid, (String, Value)>
         updates (user_id, value, updated_at, name) AS ( VALUES {update_values_str} )
         UPDATE aggregates
             SET
-                value =  to_jsonb((COALESCE(NULLIF(aggregates.value, 'null'), '0')::text)::double precision + updates.value::double precision),
+                value =  to_jsonb(updates.value::double precision),
                 updated_at = updates.updated_at
         FROM updates
         JOIN locked_rows ON locked_rows.user_id = updates.user_id AND locked_rows.name = updates.name
@@ -57,8 +57,8 @@ pub fn add_to_aggregates_create_bulk_query(calls: HashMap<Uuid, (String, Value)>
     )
 }
 
-#[tracing::instrument(name = "add_to_aggregates_aggregator", skip_all, err)]
-pub async fn add_to_aggregates_aggregator(
+#[tracing::instrument(name = "set_to_aggregates_aggregator", skip_all, err)]
+pub async fn set_to_aggregates_aggregator(
     joiner_tx: Sender<JoinHandle<()>>,
     pool: PgPool,
     mut rx: Receiver<Value>,
@@ -71,7 +71,7 @@ pub async fn add_to_aggregates_aggregator(
     loop {
         match rx.recv().await {
             Ok(message) => {
-                if let Ok(DBMessage::AggregateAddToMessage(message)) =
+                if let Ok(DBMessage::AggregateSetToMessage(message)) =
                     serde_json::from_value::<DBMessage>(message)
                 {
                     calls.insert(message.user_id, (message.name, message.value));
@@ -84,27 +84,27 @@ pub async fn add_to_aggregates_aggregator(
                         let calls_clone = calls.clone();
                         let poll_clone = pool.clone();
                         let handle = tokio::spawn(async move {
-                            tracing::info!("add_to_aggregates_create_bulk_query starting txn");
+                            tracing::info!("set_to_aggregates_create_bulk_query starting txn");
                             if let Ok(mut transaction) = create_txn(&poll_clone).await {
-                                let query = add_to_aggregates_create_bulk_query(calls_clone);
+                                let query = set_to_aggregates_create_bulk_query(calls_clone);
                                 let r = sqlx::query(&query)
-                                            .execute(&mut *transaction)
-                                            .await
-                                            .map_err(|e| {
-                                                tracing::error!(
-                                                    "add_to_aggregates_create_bulk_query failed to execute query size: {} , with error {:?}",
-                                                    count,
-                                                    e
-                                                );
-                                            });
+                                    .execute(&mut *transaction)
+                                    .await
+                                    .map_err(|e| {
+                                        tracing::error!(
+                                            "set_to_aggregates_create_bulk_query failed to execute query size: {} , with error {:?}",
+                                            count,
+                                            e
+                                        );
+                                    });
                                 if let Ok(r) = r {
                                     tracing::info!(
-                                        "add_to_aggregates_create_bulk_query rows_affected : {}",
+                                        "set_to_aggregates_create_bulk_query rows_affected : {}",
                                         r.rows_affected()
                                     );
                                 }
                                 let _ = commit_txn(transaction).await;
-                                tracing::info!("add_to_aggregates_create_bulk_query finished txn");
+                                tracing::info!("set_to_aggregates_create_bulk_query finished txn");
                             }
                         });
                         let _ = joiner_tx.send_async(handle).await;
@@ -115,11 +115,11 @@ pub async fn add_to_aggregates_aggregator(
             }
             Err(e) => match e {
                 RecvError::Closed => {
-                    tracing::error!("add_to_aggregates_aggregator error recv: {:?}", e);
-                    return Err(anyhow!("add_to_aggregates_aggregator error recv: {:?}", e));
+                    tracing::error!("set_to_aggregates_aggregator error recv: {:?}", e);
+                    return Err(anyhow!("set_to_aggregates_aggregator error recv: {:?}", e));
                 }
                 RecvError::Lagged(_) => {
-                    tracing::error!("add_to_aggregates_aggregator error recv: {:?}", e);
+                    tracing::error!("set_to_aggregates_aggregator error recv: {:?}", e);
                 }
             },
         }

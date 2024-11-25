@@ -1,6 +1,6 @@
 use crate::db_calls::get_or_create_analytics::get_or_create_analytics;
 use anyhow::anyhow;
-use block_mesh_common::interfaces::db_messages::AnalyticsMessage;
+use block_mesh_common::interfaces::db_messages::DBMessage;
 use chrono::Utc;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use serde_json::Value;
@@ -22,7 +22,9 @@ pub async fn analytics_aggregator(
     loop {
         match rx.recv().await {
             Ok(message) => {
-                if let Ok(message) = serde_json::from_value::<AnalyticsMessage>(message) {
+                if let Ok(DBMessage::AnalyticsMessage(message)) =
+                    serde_json::from_value::<DBMessage>(message)
+                {
                     calls.insert(message.user_id, message.clone());
                     count += 1;
                     let now = Utc::now();

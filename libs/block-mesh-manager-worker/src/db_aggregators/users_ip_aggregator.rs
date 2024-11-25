@@ -1,5 +1,5 @@
 use anyhow::anyhow;
-use block_mesh_common::interfaces::db_messages::UsersIpMessage;
+use block_mesh_common::interfaces::db_messages::DBMessage;
 use chrono::Utc;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use flume::Sender;
@@ -129,7 +129,9 @@ pub async fn users_ip_aggregator(
     loop {
         match rx.recv().await {
             Ok(message) => {
-                if let Ok(message) = serde_json::from_value::<UsersIpMessage>(message) {
+                if let Ok(DBMessage::UsersIpMessage(message)) =
+                    serde_json::from_value::<DBMessage>(message)
+                {
                     calls.insert(message.id, message.ip);
                     count += 1;
                     let now = Utc::now();
