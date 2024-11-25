@@ -9,6 +9,7 @@ source "${ROOT}/scripts/setup.sh"
 set +x
 export AGG_SIZE=1
 export CHANNEL_AGG_SIZE=1
+export ADMIN_PARAM="test"
 source "${ROOT}/scripts/setup.sh"
 export DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
 export FOLLOWER_DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"

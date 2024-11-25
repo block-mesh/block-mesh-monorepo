@@ -17,6 +17,7 @@ use std::env;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use tokio::net::TcpListener;
+use uuid::Uuid;
 
 #[tracing::instrument(name = "db_health", skip_all)]
 pub async fn db_health(State(state): State<Arc<AppState>>) -> Result<impl IntoResponse, Error> {
@@ -46,6 +47,8 @@ pub async fn health_follower(
 #[derive(Deserialize)]
 pub struct AdminParam {
     code: String,
+    user_id: Option<Uuid>,
+    email: Option<String>,
 }
 
 pub async fn summary(
@@ -63,6 +66,30 @@ pub async fn summary(
             .map(|i| i.key().0.clone().to_string())
             .collect();
         Ok(Json(Value::from(sockets)))
+    }
+}
+
+pub async fn status(
+    State(state): State<Arc<AppState>>,
+    Query(admin_param): Query<AdminParam>,
+) -> Result<Json<Value>, Error> {
+    if admin_param.code != env::var("ADMIN_PARAM").unwrap_or_default() {
+        Err(Error::InternalServer("Bad admin param".to_string()))
+    } else {
+        let mut output: Vec<String> = Vec::new();
+        if let Some(user_id) = admin_param.user_id {
+            let user = &state.websocket_manager.broadcaster.user_ids.get(&user_id);
+            if let Some(user) = user {
+                output.push(user.key().clone().to_string());
+            }
+        }
+        if let Some(email) = admin_param.email {
+            let user_email = &state.websocket_manager.broadcaster.emails.get(&email);
+            if let Some(email) = user_email {
+                output.push(email.key().clone());
+            }
+        }
+        Ok(Json(Value::from(output)))
     }
 }
 
