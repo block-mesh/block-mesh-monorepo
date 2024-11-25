@@ -40,7 +40,7 @@ pub async fn ws_handler(
         .ok_or(anyhow!(String::from("User email is not present in DB")))?;
     commit_txn(transaction).await?;
     if user.token.as_ref() != &api_token {
-        return Err(Error::from(anyhow!("User Not Found")));
+        return Err(Error::from(anyhow!("Api Token Mismatch")));
     }
     let app_env = env::var("APP_ENVIRONMENT").unwrap_or("production".to_string());
     let header_ip = if app_env != "local" {
