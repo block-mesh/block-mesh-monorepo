@@ -12,6 +12,7 @@ export AGG_SIZE=1
 export ADD_TO_AGG_SIZE=1
 export USERS_IP_AGG_SIZE=1
 export AGG_AGG_SIZE=1
+export SET_TO_AGG_SIZE=1
 exrpot ANALYTICS_AGG_SIZE=1
 export DAILY_STATS_AGG_SIZE=1
 source "${ROOT}/scripts/setup.sh"
