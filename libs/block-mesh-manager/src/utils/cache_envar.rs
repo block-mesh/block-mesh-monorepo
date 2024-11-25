@@ -1,3 +1,4 @@
+use dashmap::try_result::TryResult::Present;
 use dashmap::DashMap;
 use std::sync::Arc;
 use tokio::sync::OnceCell;
@@ -16,7 +17,7 @@ pub async fn get_cache<'a>() -> &'a EnvVarMap {
 #[tracing::instrument(name = "get_envar", skip_all)]
 pub async fn get_envar(name: &str) -> String {
     let cache = get_cache().await;
-    if let Some(entry) = cache.get(name) {
+    if let Present(entry) = cache.try_get(name) {
         return entry.value().clone();
     }
     let value = std::env::var(name).unwrap_or_default();

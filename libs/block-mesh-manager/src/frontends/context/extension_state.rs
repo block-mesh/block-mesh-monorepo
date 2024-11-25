@@ -49,6 +49,9 @@ impl Default for ExtensionContext {
             device_id: RwSignal::new(Uuid::default()),
             blockmesh_url: RwSignal::new("https://app.blockmesh.xyz".to_string()),
             blockmesh_ws_url: RwSignal::new("https://ws.blockmesh.xyz".to_string()),
+            blockmesh_data_sink_url: create_rw_signal(
+                "https://data-sink.blockmesh.xyz".to_string(),
+            ),
             status: RwSignal::new(AuthStatus::LoggedOut),
             uptime: RwSignal::new(0.0),
             invite_code: RwSignal::new(String::default()),

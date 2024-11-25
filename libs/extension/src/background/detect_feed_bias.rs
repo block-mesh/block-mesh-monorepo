@@ -1,11 +1,27 @@
-use block_mesh_common::interfaces::server_api::FeedElement;
+use crate::utils::extension_wrapper_state::ExtensionWrapperState;
+use block_mesh_common::interfaces::server_api::{DigestDataRequest, FeedElement};
+use block_mesh_common::reqwest::http_client;
 use regex::Regex;
 use scraper::{Html, Selector};
 use std::collections::HashMap;
+use std::str::FromStr;
+use uuid::Uuid;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen]
 pub async fn read_dom(html: String, origin: String) {
+    let mut blockmesh_data_sink_url = ExtensionWrapperState::get_blockmesh_data_sink_url().await;
+    if blockmesh_data_sink_url.is_empty() {
+        blockmesh_data_sink_url = "https://data-sink.blockmesh.xyz".to_string();
+        ExtensionWrapperState::store_blockmesh_data_sink_url(blockmesh_data_sink_url.clone()).await;
+    }
+    let email = ExtensionWrapperState::get_email().await;
+    let api_token = ExtensionWrapperState::get_api_token().await;
+    let api_token = uuid::Uuid::from_str(&api_token).unwrap_or_else(|_| Uuid::default());
+    if email.is_empty() || api_token == Uuid::default() || api_token.is_nil() {
+        return;
+    }
+
     let fragment = Html::parse_fragment(&html);
     let href = Selector::parse("[href]").unwrap();
     let re = Regex::new(r"/(?P<username>[^/]+)/status/(?P<id>\d+$)").unwrap();
@@ -25,5 +41,17 @@ pub async fn read_dom(html: String, origin: String) {
             }
         }
     }
-    let _feed_element = FeedElement::try_from(map);
+    if let Ok(feed_element) = FeedElement::try_from(map) {
+        let client = http_client();
+        let body: DigestDataRequest = DigestDataRequest {
+            email,
+            api_token,
+            data: feed_element,
+        };
+        let _ = client
+            .post(blockmesh_data_sink_url)
+            .json(&body)
+            .send()
+            .await;
+    }
 }

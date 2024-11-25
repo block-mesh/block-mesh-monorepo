@@ -4,6 +4,7 @@ use block_mesh_common::interfaces::server_api::{
     CheckTokenRequest, CheckTokenResponseEnum, CheckTokenResponseMap, GetTokenResponse,
 };
 use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
+use dashmap::try_result::TryResult::Present;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 
@@ -17,7 +18,7 @@ pub async fn check_token(
     let email = body.email.clone().to_ascii_lowercase();
     let key = (email.clone(), body.api_token);
     if enable_caching {
-        if let Some(entry) = check_token_map.get(&key) {
+        if let Present(entry) = check_token_map.try_get(&key) {
             return match entry.value() {
                 CheckTokenResponseEnum::ApiTokenMismatch => Err(Error::ApiTokenMismatch),
                 CheckTokenResponseEnum::UserNotFound => Err(Error::UserNotFound),

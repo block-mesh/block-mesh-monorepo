@@ -7,6 +7,7 @@ use block_mesh_common::interfaces::server_api::{
     GetTokenRequest, GetTokenResponse, GetTokenResponseEnum,
 };
 use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
+use dashmap::try_result::TryResult::Present;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::sync::Arc;
@@ -20,7 +21,7 @@ pub async fn handler(
     let email = body.email.clone().to_ascii_lowercase();
     let key = (email.clone(), body.password.clone());
     let get_token_map = &state.get_token_map;
-    if let Some(entry) = get_token_map.get(&key) {
+    if let Present(entry) = get_token_map.try_get(&key) {
         return match entry.value() {
             GetTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone())),
             GetTokenResponseEnum::UserNotFound => Err(Error::UserNotFound),
