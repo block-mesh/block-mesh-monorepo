@@ -148,6 +148,7 @@ pub async fn app(listener: TcpListener, state: Arc<AppState>) {
         .route("/version", get(version))
         .route("/stats", get(stats))
         .route("/summary", get(summary))
+        .route("/status", get(status))
         .route("/detailed_summary", get(detailed_summary))
         .route("/ws", get(ws_handler))
         .with_state(state);
