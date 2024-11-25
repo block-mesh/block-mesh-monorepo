@@ -9,12 +9,15 @@ use wasm_bindgen::prelude::*;
 use web_sys::{CloseEvent, ErrorEvent, MessageEvent};
 
 pub fn on_message_handler(
-    _ws: web_sys::WebSocket,
+    ws: web_sys::WebSocket,
     _app_state: ExtensionWrapperState,
 ) -> Closure<dyn FnMut(MessageEvent)> {
     Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
         log!("on_message_handle => {:#?}", e);
         if let Ok(txt) = e.data().dyn_into::<js_sys::JsString>() {
+            if txt == "ping" {
+                let _ = ws.send_with_str("pong");
+            }
             match serde_json::from_str::<WsServerMessage>(
                 &txt.as_string()
                     .unwrap_or("Couldn't covert Js String to String".to_string()),

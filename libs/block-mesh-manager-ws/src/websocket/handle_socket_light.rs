@@ -54,6 +54,7 @@ pub async fn handle_socket_light(
                 }))
                 .await;
             prev = Utc::now();
+            let _ = sender.send(Message::Text("ping".to_string())).await;
             tokio::time::sleep(Duration::from_millis(sleep)).await;
         }
     });
