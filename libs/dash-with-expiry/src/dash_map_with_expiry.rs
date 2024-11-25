@@ -109,4 +109,17 @@ mod tests {
         let v = map.get(&10);
         assert_eq!(None, v);
     }
+
+    #[tokio::test]
+    #[traced_test]
+    async fn try_get_base() {
+        let map: DashMap<String, String> = DashMap::new();
+        map.insert("10".to_string(), "10".to_string());
+        let v = { map.try_get("10").unwrap().value().clone() };
+        assert_eq!("10".to_string(), v);
+        map.insert("11".to_string(), "11".to_string());
+        let v = { map.try_get("11").unwrap().value().clone() };
+        assert_eq!("11".to_string(), v);
+        map.remove("10");
+    }
 }
