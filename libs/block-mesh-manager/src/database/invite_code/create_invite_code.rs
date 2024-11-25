@@ -5,7 +5,7 @@ use uuid::Uuid;
 pub async fn create_invite_code(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,
-    invite_code: String,
+    invite_code: &str,
 ) -> anyhow::Result<Uuid> {
     let now = Utc::now();
     let id = Uuid::new_v4();

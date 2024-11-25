@@ -9,6 +9,7 @@ use block_mesh_common::env::environment::Environment;
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use database_utils::utils::connection::follower_pool::follower_pool;
 use database_utils::utils::connection::write_pool::write_pool;
+use database_utils::utils::migrate::migrate;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
 use sqlx::PgPool;
 use std::net::SocketAddr;
@@ -85,6 +86,10 @@ async fn run() -> anyhow::Result<()> {
     setup_tracing_stdout_only_with_sentry();
     tracing::info!("Starting worker");
     let state = AppState::new().await;
+    let env = env::var("APP_ENVIRONMENT").expect("APP_ENVIRONMENT is not set");
+    migrate(&state.data_sink_db_pool, env)
+        .await
+        .expect("Failed to migrate database");
     let router = get_router(state);
     let cors = CorsLayer::permissive();
     let app = Router::new().nest("/", router).layer(cors);
@@ -92,7 +97,6 @@ async fn run() -> anyhow::Result<()> {
     let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
     tracing::info!("Listening on {}", listener.local_addr()?);
     let server_task = run_server(listener, app);
-
     tokio::select! {
         o = server_task => panic!("server task exit {:?}", o)
     }

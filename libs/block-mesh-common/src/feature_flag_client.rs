@@ -1,4 +1,5 @@
 use crate::constants::{DeviceType, BLOCK_MESH_FEATURE_FLAGS};
+use dashmap::try_result::TryResult::Present;
 use dashmap::DashMap;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
@@ -73,9 +74,9 @@ pub fn get_flag_value_from_map(
     flag: &str,
     default: FlagValue,
 ) -> FlagValue {
-    match map.get(flag) {
-        Some(value) => value.value().clone(),
-        None => default,
+    match map.try_get(flag) {
+        Present(value) => value.value().clone(),
+        _ => default,
     }
 }
 

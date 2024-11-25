@@ -1,11 +1,11 @@
-use std::str::FromStr;
-
 use crate::database::perks::add_perk_to_user::add_perk_to_user;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::database::user::update_user_wallet::update_user_wallet;
 use crate::domain::perk::PerkName;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
+use crate::startup::application::AppState;
+use axum::extract::State;
 use axum::{Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::{ConnectWalletRequest, ConnectWalletResponse};
@@ -16,10 +16,13 @@ use serde_json::Value;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Signature;
 use sqlx::PgPool;
+use std::str::FromStr;
+use std::sync::Arc;
 use uuid::Uuid;
 
-#[tracing::instrument(name = "connect_wallet", skip(pool, auth))]
+#[tracing::instrument(name = "connect_wallet", skip_all)]
 pub async fn handler(
+    State(state): State<Arc<AppState>>,
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,
     Json(body): Json<ConnectWalletRequest>,
@@ -45,7 +48,10 @@ pub async fn handler(
                     serde_json::from_str("{}").unwrap(),
                 )
                 .await?;
-                update_user_wallet(&mut transaction, user.id, body.pubkey).await?
+                update_user_wallet(&mut transaction, user.id, &body.pubkey).await?;
+                state
+                    .wallet_addresses
+                    .insert(user.email.clone(), Some(body.pubkey));
             }
             Some(wallet_address) => {
                 let name = format!("{}_{}", AggregateName::WalletChange, Uuid::new_v4());
@@ -57,7 +63,10 @@ pub async fn handler(
                 .await?;
                 let _ = update_aggregate(&mut transaction, &agg.id, &Value::from(wallet_address))
                     .await?;
-                update_user_wallet(&mut transaction, user.id, body.pubkey).await?
+                update_user_wallet(&mut transaction, user.id, &body.pubkey).await?;
+                state
+                    .wallet_addresses
+                    .insert(user.email.clone(), Some(body.pubkey));
             }
         }
     } else {

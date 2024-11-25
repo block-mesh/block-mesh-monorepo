@@ -61,7 +61,7 @@ pub async fn create_test_user(pool: &PgPool) -> anyhow::Result<()> {
     let nonce_secret = Secret::from(nonce.clone());
     let mut transaction = pool.begin().await?;
     create_nonce(&mut transaction, &user_id, &nonce_secret).await?;
-    create_invite_code(&mut transaction, user_id, Uuid::new_v4().to_string()).await?;
+    create_invite_code(&mut transaction, user_id, &Uuid::new_v4().to_string()).await?;
     create_uptime_report(&mut transaction, &user_id, &None).await?;
     prep_user(&mut transaction, &user_id).await?;
     transaction.commit().await?;

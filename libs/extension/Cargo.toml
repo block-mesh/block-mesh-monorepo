@@ -33,7 +33,7 @@ reqwest = { workspace = true, default-features = false, features = [
   "json",
   "cookies"
 ] }
-block-mesh-common = { path = "../block-mesh-common" }
+block-mesh-common = { path = "../block-mesh-common", features = ["reqwest"] }
 speed-test = { path = "../speed-test" }
 thiserror = { workspace = true }
 chrono = { workspace = true, features = ["wasmbind"] }

@@ -1,4 +1,5 @@
 use bcrypt::verify;
+use dashmap::try_result::TryResult::Present;
 use dashmap::DashMap;
 use std::sync::Arc;
 use tokio::sync::OnceCell;
@@ -18,7 +19,7 @@ pub async fn get_cache<'a>() -> &'a VerifyMap {
 pub async fn verify_with_cache(password: &str, hash: &str) -> bool {
     let key = (password.to_string(), hash.to_string());
     let cache = get_cache().await;
-    if let Some(entry) = cache.get(&key) {
+    if let Present(entry) = cache.try_get(&key) {
         return *entry.value();
     }
     if let Ok(result) = verify::<&str>(password, hash) {

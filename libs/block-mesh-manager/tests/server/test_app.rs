@@ -76,8 +76,12 @@ pub async fn spawn_app() -> TestApp {
 
     let check_token_map: CheckTokenResponseMap = Arc::new(DashMap::new());
     let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());
+    let wallet_addresses = Arc::new(DashMap::new());
+    let invite_codes = Arc::new(DashMap::new());
 
     let app_state = Arc::new(AppState {
+        invite_codes,
+        wallet_addresses,
         rate_limit: true,
         task_limit: true,
         submit_bandwidth_limit: true,

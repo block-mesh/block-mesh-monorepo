@@ -149,7 +149,7 @@ pub async fn handler(
         .map_err(Error::from)?;
     create_nonce(&mut transaction, &user_id, &nonce_secret).await?;
     create_api_token(&mut transaction, user_id).await?;
-    create_invite_code(&mut transaction, user_id, Uuid::new_v4().to_string()).await?;
+    create_invite_code(&mut transaction, user_id, &Uuid::new_v4().to_string()).await?;
     create_uptime_report(&mut transaction, &user_id, &None).await?;
     prep_user(&mut transaction, &user_id).await?;
 
@@ -163,7 +163,10 @@ pub async fn handler(
             serde_json::from_str("{}").unwrap(),
         )
         .await?;
-        update_user_wallet(&mut transaction, user_id, form.pubkey).await?
+        update_user_wallet(&mut transaction, user_id, &form.pubkey).await?;
+        state
+            .wallet_addresses
+            .insert(email.clone(), Some(form.pubkey));
     } else {
         tracing::error!("Signature verification failed.");
         return Err(Error::SignatureMismatch);
