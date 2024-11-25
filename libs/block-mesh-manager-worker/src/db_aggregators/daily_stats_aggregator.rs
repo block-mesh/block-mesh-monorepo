@@ -49,22 +49,21 @@ pub async fn daily_stats_aggregator(
         match rx.recv().await {
             Ok(message) => {
                 if let Ok(message) = serde_json::from_value::<DBMessage>(message) {
-                    match message {
-                        DBMessage::DailyStatMessage(message) => {
-                            calls.insert(message.id, message.uptime);
-                            count += 1;
-                            let now = Utc::now();
-                            let diff = now - prev;
-                            let run = diff.num_seconds() > time_limit || count >= agg_size;
-                            prev = Utc::now();
-                            if run {
-                                let calls_clone = calls.clone();
-                                let poll_clone = pool.clone();
-                                let handle = tokio::spawn(async move {
-                                    tracing::info!("daily_stats_create_bulk_query starting txn");
-                                    if let Ok(mut transaction) = create_txn(&poll_clone).await {
-                                        let query = daily_stats_create_bulk_query(calls_clone);
-                                        let r = sqlx::query(&query)
+                    if let DBMessage::DailyStatMessage(message) = message {
+                        calls.insert(message.id, message.uptime);
+                        count += 1;
+                        let now = Utc::now();
+                        let diff = now - prev;
+                        let run = diff.num_seconds() > time_limit || count >= agg_size;
+                        prev = Utc::now();
+                        if run {
+                            let calls_clone = calls.clone();
+                            let poll_clone = pool.clone();
+                            let handle = tokio::spawn(async move {
+                                tracing::info!("daily_stats_create_bulk_query starting txn");
+                                if let Ok(mut transaction) = create_txn(&poll_clone).await {
+                                    let query = daily_stats_create_bulk_query(calls_clone);
+                                    let r = sqlx::query(&query)
                                     .execute(&mut *transaction)
                                     .await
                                     .map_err(|e| {
@@ -74,24 +73,20 @@ pub async fn daily_stats_aggregator(
                                             e
                                         );
                                     });
-                                        if let Ok(r) = r {
-                                            tracing::info!(
-                                                "daily_stats_create_bulk_query rows_affected : {}",
-                                                r.rows_affected()
-                                            );
-                                        }
-                                        let _ = commit_txn(transaction).await;
+                                    if let Ok(r) = r {
                                         tracing::info!(
-                                            "daily_stats_create_bulk_query finished txn"
+                                            "daily_stats_create_bulk_query rows_affected : {}",
+                                            r.rows_affected()
                                         );
                                     }
-                                });
-                                let _ = joiner_tx.send_async(handle).await;
-                                count = 0;
-                                calls.clear();
-                            }
+                                    let _ = commit_txn(transaction).await;
+                                    tracing::info!("daily_stats_create_bulk_query finished txn");
+                                }
+                            });
+                            let _ = joiner_tx.send_async(handle).await;
+                            count = 0;
+                            calls.clear();
                         }
-                        _ => {}
                     }
                 }
             }

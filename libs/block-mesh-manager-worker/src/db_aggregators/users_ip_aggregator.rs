@@ -130,30 +130,25 @@ pub async fn users_ip_aggregator(
         match rx.recv().await {
             Ok(message) => {
                 if let Ok(message) = serde_json::from_value::<DBMessage>(message) {
-                    match message {
-                        DBMessage::UsersIpMessage(message) => {
-                            calls.insert(message.id, message.ip);
-                            count += 1;
-                            let now = Utc::now();
-                            let diff = now - prev;
-                            let run = diff.num_seconds() > time_limit || count >= agg_size;
-                            prev = Utc::now();
-                            if run {
-                                let calls_clone = calls.clone();
-                                let poll_clone = pool.clone();
-                                let handle = tokio::spawn(async move {
-                                    let _ = ip_address_and_users_ip_bulk_query(
-                                        &poll_clone,
-                                        calls_clone,
-                                    )
-                                    .await;
-                                });
-                                let _ = joiner_tx.send_async(handle).await;
-                                count = 0;
-                                calls.clear();
-                            }
+                    if let DBMessage::UsersIpMessage(message) = message {
+                        calls.insert(message.id, message.ip);
+                        count += 1;
+                        let now = Utc::now();
+                        let diff = now - prev;
+                        let run = diff.num_seconds() > time_limit || count >= agg_size;
+                        prev = Utc::now();
+                        if run {
+                            let calls_clone = calls.clone();
+                            let poll_clone = pool.clone();
+                            let handle = tokio::spawn(async move {
+                                let _ =
+                                    ip_address_and_users_ip_bulk_query(&poll_clone, calls_clone)
+                                        .await;
+                            });
+                            let _ = joiner_tx.send_async(handle).await;
+                            count = 0;
+                            calls.clear();
                         }
-                        _ => {}
                     }
                 }
             }
