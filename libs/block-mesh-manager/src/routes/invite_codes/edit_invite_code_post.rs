@@ -10,6 +10,7 @@ use block_mesh_common::interfaces::server_api::EditInviteCodeForm;
 use sqlx::PgPool;
 use std::sync::Arc;
 
+#[tracing::instrument(name = "edit_invite_code_post", skip_all)]
 pub async fn handler(
     State(state): State<Arc<AppState>>,
     Extension(pool): Extension<PgPool>,
@@ -29,6 +30,6 @@ pub async fn handler(
     };
     transaction.commit().await.map_err(Error::from)?;
     let email = user.email.clone();
-    &state.invite_codes.insert(email, form.new_invite_code);
+    state.invite_codes.insert(email, form.new_invite_code);
     Ok(Redirect::to("/ui/dashboard"))
 }

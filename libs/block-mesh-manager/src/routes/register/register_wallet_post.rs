@@ -163,7 +163,10 @@ pub async fn handler(
             serde_json::from_str("{}").unwrap(),
         )
         .await?;
-        update_user_wallet(&mut transaction, user_id, form.pubkey).await?
+        update_user_wallet(&mut transaction, user_id, &form.pubkey).await?;
+        state
+            .wallet_addresses
+            .insert(email.clone(), Some(form.pubkey));
     } else {
         tracing::error!("Signature verification failed.");
         return Err(Error::SignatureMismatch);

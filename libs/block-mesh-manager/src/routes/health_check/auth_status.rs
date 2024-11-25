@@ -6,6 +6,7 @@ use axum::{Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::AuthStatusResponse;
 use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
+use dashmap::try_result::TryResult::Present;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use std::sync::Arc;
 
@@ -14,12 +15,31 @@ pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<Json<AuthStatusResponse>, Error> {
     let user = auth.user.ok_or(Error::UserNotFound)?;
+    if let Present(entry) = state.wallet_addresses.try_get(&user.email) {
+        return Ok(match entry.value().clone() {
+            Some(wallet_address) => Json(AuthStatusResponse {
+                email: Some(user.email.to_ascii_lowercase()),
+                status_code: 200,
+                logged_in: true,
+                wallet_address: Some(wallet_address),
+            }),
+            None => Json(AuthStatusResponse {
+                email: None,
+                status_code: 404,
+                logged_in: false,
+                wallet_address: None,
+            }),
+        });
+    }
     let mut transaction = create_txn(&state.follower_pool).await?;
     let db_user = get_user_opt_by_id(&mut transaction, &user.id)
         .await
         .map_err(Error::from)?;
     commit_txn(transaction).await?;
     if let Some(db_user) = db_user {
+        state
+            .wallet_addresses
+            .insert(user.email.clone(), db_user.wallet_address.clone());
         return Ok(Json(AuthStatusResponse {
             email: Some(user.email.to_ascii_lowercase()),
             status_code: 200,

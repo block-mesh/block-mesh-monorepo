@@ -47,6 +47,7 @@ pub struct AppState {
     pub get_token_map: GetTokenResponseMap,
     pub check_token_map: CheckTokenResponseMap,
     pub invite_codes: Arc<DashMap<String, String>>,
+    pub wallet_addresses: Arc<DashMap<String, Option<String>>>,
     pub pool: PgPool,
     pub follower_pool: PgPool,
     pub channel_pool: PgPool,

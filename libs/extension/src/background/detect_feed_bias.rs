@@ -1,4 +1,5 @@
 use crate::utils::extension_wrapper_state::ExtensionWrapperState;
+use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{DigestDataRequest, FeedElement};
 use block_mesh_common::reqwest::http_client;
 use regex::Regex;
@@ -42,7 +43,7 @@ pub async fn read_dom(html: String, origin: String) {
         }
     }
     if let Ok(feed_element) = FeedElement::try_from(map) {
-        let client = http_client();
+        let client = http_client(DeviceType::Extension);
         let body: DigestDataRequest = DigestDataRequest {
             email,
             api_token,
