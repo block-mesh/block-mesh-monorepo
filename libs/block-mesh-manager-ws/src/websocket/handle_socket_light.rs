@@ -1,9 +1,9 @@
 use crate::state::AppState;
-use crate::websocket::process_message_light::process_message_light;
 use axum::extract::ws::{Message, WebSocket};
 use block_mesh_common::interfaces::db_messages::{
-    AggregateAddToMessage, DBMessage, DBMessageTypes,
+    AggregateAddToMessage, AggregateSetToMessage, DBMessage, DBMessageTypes,
 };
+use block_mesh_common::interfaces::ws_api::{WsClientMessage, WsServerMessage};
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use futures::{SinkExt, StreamExt};
 use sqlx::types::chrono::Utc;
@@ -37,15 +37,21 @@ pub async fn handle_socket_light(
         .subscribe_light(&email, &user_id, &mut redis)
         .await;
     let (mut sender, mut receiver) = socket.split();
-    let tx = state.tx.clone();
+    let tx_c = state.tx.clone();
+
     let mut send_task = tokio::spawn(async move {
+        let _ = sender
+            .send(Message::Text(
+                WsServerMessage::RequestBandwidthReport.to_string(),
+            ))
+            .await;
         let mut prev = Utc::now();
         // Send to client - keep alive via ping
         loop {
             let _ = sender.send(Message::Ping(vec![1, 2, 3])).await;
             let now = Utc::now();
             let delta = (now - prev).num_seconds();
-            let _ = tx
+            let _ = tx_c
                 .send_async(DBMessage::AggregateAddToMessage(AggregateAddToMessage {
                     msg_type: DBMessageTypes::AggregateAddToMessage,
                     user_id,
@@ -59,12 +65,54 @@ pub async fn handle_socket_light(
         }
     });
 
-    let ip_c = ip.clone();
+    let tx_c = state.tx.clone();
     let mut recv_task = tokio::spawn(async move {
         // Receive from client
         while let Some(Ok(msg)) = receiver.next().await {
-            if process_message_light(msg, &ip_c).is_break() {
-                break;
+            match msg {
+                Message::Text(txt) => {
+                    if let Ok(msg) = serde_json::from_str::<WsClientMessage>(&txt) {
+                        match msg {
+                            WsClientMessage::ReportBandwidth(report) => {
+                                let mut messages: Vec<DBMessage> = Vec::with_capacity(10);
+                                messages.push(DBMessage::AggregateSetToMessage(
+                                    AggregateSetToMessage {
+                                        msg_type: DBMessageTypes::AggregateSetToMessage,
+                                        user_id,
+                                        value: serde_json::Value::from(report.download_speed),
+                                        name: AggregateName::Download.to_string(),
+                                    },
+                                ));
+                                messages.push(DBMessage::AggregateSetToMessage(
+                                    AggregateSetToMessage {
+                                        msg_type: DBMessageTypes::AggregateSetToMessage,
+                                        user_id,
+                                        value: serde_json::Value::from(report.upload_speed),
+                                        name: AggregateName::Upload.to_string(),
+                                    },
+                                ));
+                                messages.push(DBMessage::AggregateSetToMessage(
+                                    AggregateSetToMessage {
+                                        msg_type: DBMessageTypes::AggregateSetToMessage,
+                                        user_id,
+                                        value: serde_json::Value::from(report.latency),
+                                        name: AggregateName::Latency.to_string(),
+                                    },
+                                ));
+                                for message in messages {
+                                    let _ = tx_c.send_async(message).await;
+                                }
+                            }
+                            _ => continue,
+                        }
+                    }
+                }
+                Message::Close(_c) => {
+                    break;
+                }
+                _ => {
+                    continue;
+                }
             }
         }
     });

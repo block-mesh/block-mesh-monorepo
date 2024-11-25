@@ -36,6 +36,7 @@ use crate::db_aggregators::aggregates_aggregator::aggregates_aggregator;
 use crate::db_aggregators::analytics_aggregator::analytics_aggregator;
 use crate::db_aggregators::daily_stats_aggregator::daily_stats_aggregator;
 use crate::db_aggregators::joiner_loop::joiner_loop;
+use crate::db_aggregators::set_to_aggregates_aggregator::set_to_aggregates_aggregator;
 use crate::routes::get_router;
 
 pub async fn run_server(listener: TcpListener, app: Router<()>) -> std::io::Result<()> {
@@ -110,6 +111,16 @@ async fn run() -> anyhow::Result<()> {
         tx.clone(),
         send_to_rx,
     ));
+    let db_aggregator_set = tokio::spawn(set_to_aggregates_aggregator(
+        joiner_tx.clone(),
+        db_pool.clone(),
+        tx.subscribe(),
+        env::var("SET_TO_AGG_SIZE")
+            .unwrap_or("300".to_string())
+            .parse()
+            .unwrap_or(300),
+        5,
+    ));
     let db_aggregator_add = tokio::spawn(add_to_aggregates_aggregator(
         joiner_tx.clone(),
         db_pool.clone(),
@@ -173,6 +184,7 @@ async fn run() -> anyhow::Result<()> {
     let server_task = run_server(listener, app);
 
     tokio::select! {
+        o = db_aggregator_set => panic!("db_aggregator_set exit {:?}", o),
         o = db_aggregator_add => panic!("db_aggregator_add exit {:?}", o),
         o = bulk_uptime_bonus_task => panic!("bulk_uptime_bonus_task exit {:?}", o),
         o = bulk_task_bonus_task => panic!("bulk_task_bonus_task exit {:?}", o),

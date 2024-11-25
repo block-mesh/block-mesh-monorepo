@@ -10,6 +10,7 @@ pub enum DBMessageTypes {
     AggregateAddToMessage,
     AnalyticsMessage,
     DailyStatMessage,
+    AggregateSetToMessage,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -19,6 +20,7 @@ pub enum DBMessage {
     AggregateAddToMessage(AggregateAddToMessage),
     AnalyticsMessage(AnalyticsMessage),
     DailyStatMessage(DailyStatMessage),
+    AggregateSetToMessage(AggregateSetToMessage),
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -37,6 +39,14 @@ pub struct AggregateMessage {
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub struct AggregateAddToMessage {
+    pub user_id: Uuid,
+    pub name: String,
+    pub value: Value,
+    pub msg_type: DBMessageTypes,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct AggregateSetToMessage {
     pub user_id: Uuid,
     pub name: String,
     pub value: Value,

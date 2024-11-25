@@ -1,6 +1,6 @@
 use crate::db_calls::get_or_create_analytics::get_or_create_analytics;
 use anyhow::anyhow;
-use block_mesh_common::interfaces::db_messages::AnalyticsMessage;
+use block_mesh_common::interfaces::db_messages::DBMessage;
 use chrono::Utc;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use serde_json::Value;
@@ -22,31 +22,36 @@ pub async fn analytics_aggregator(
     loop {
         match rx.recv().await {
             Ok(message) => {
-                if let Ok(message) = serde_json::from_value::<AnalyticsMessage>(message) {
-                    calls.insert(message.user_id, message.clone());
-                    count += 1;
-                    let now = Utc::now();
-                    let diff = now - prev;
-                    let run = diff.num_seconds() > time_limit || count >= agg_size;
-                    prev = Utc::now();
-                    if run {
-                        tracing::info!("analytics_aggregator starting txn");
-                        if let Ok(mut transaction) = create_txn(&pool).await {
-                            for pair in calls.iter() {
-                                let _ = get_or_create_analytics(
-                                    &mut transaction,
-                                    pair.0,
-                                    &pair.1.depin_aggregator,
-                                    &pair.1.device_type,
-                                    &pair.1.version,
-                                )
-                                .await;
+                if let Ok(message) = serde_json::from_value::<DBMessage>(message) {
+                    match message {
+                        DBMessage::AnalyticsMessage(message) => {
+                            calls.insert(message.user_id, message.clone());
+                            count += 1;
+                            let now = Utc::now();
+                            let diff = now - prev;
+                            let run = diff.num_seconds() > time_limit || count >= agg_size;
+                            prev = Utc::now();
+                            if run {
+                                tracing::info!("analytics_aggregator starting txn");
+                                if let Ok(mut transaction) = create_txn(&pool).await {
+                                    for pair in calls.iter() {
+                                        let _ = get_or_create_analytics(
+                                            &mut transaction,
+                                            pair.0,
+                                            &pair.1.depin_aggregator,
+                                            &pair.1.device_type,
+                                            &pair.1.version,
+                                        )
+                                        .await;
+                                    }
+                                    let _ = commit_txn(transaction).await;
+                                    count = 0;
+                                    calls.clear();
+                                    tracing::info!("analytics_aggregator finished txn");
+                                }
                             }
-                            let _ = commit_txn(transaction).await;
-                            count = 0;
-                            calls.clear();
-                            tracing::info!("analytics_aggregator finished txn");
                         }
+                        _ => {}
                     }
                 }
             }
