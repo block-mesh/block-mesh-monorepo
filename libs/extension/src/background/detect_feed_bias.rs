@@ -2,6 +2,7 @@ use crate::utils::extension_wrapper_state::ExtensionWrapperState;
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::{DigestDataRequest, FeedElement};
 use block_mesh_common::reqwest::http_client;
+use leptos::logging::log;
 use regex::Regex;
 use scraper::{Html, Selector};
 use std::collections::HashMap;
@@ -19,7 +20,17 @@ pub async fn read_dom(html: String, origin: String) {
     let email = ExtensionWrapperState::get_email().await;
     let api_token = ExtensionWrapperState::get_api_token().await;
     let api_token = uuid::Uuid::from_str(&api_token).unwrap_or_else(|_| Uuid::default());
-    if email.is_empty() || api_token == Uuid::default() || api_token.is_nil() {
+    if blockmesh_data_sink_url.is_empty()
+        || email.is_empty()
+        || api_token == Uuid::default()
+        || api_token.is_nil()
+    {
+        log!(
+            "early return from read_dom => url = {} , email = {} , api_token = {}",
+            blockmesh_data_sink_url,
+            email,
+            api_token
+        );
         return;
     }
 
@@ -27,7 +38,7 @@ pub async fn read_dom(html: String, origin: String) {
     let href = Selector::parse("[href]").unwrap();
     let re = Regex::new(r"/(?P<username>[^/]+)/status/(?P<id>\d+$)").unwrap();
     let mut map: HashMap<String, String> = HashMap::new();
-
+    map.insert("raw".to_owned(), html);
     for element in fragment.select(&href) {
         if let Some(href_value) = element.value().attr("href") {
             if let Some(caps) = re.captures(href_value) {
@@ -42,17 +53,22 @@ pub async fn read_dom(html: String, origin: String) {
             }
         }
     }
-    if let Ok(feed_element) = FeedElement::try_from(map) {
-        let client = http_client(DeviceType::Extension);
-        let body: DigestDataRequest = DigestDataRequest {
-            email,
-            api_token,
-            data: feed_element,
-        };
-        let _ = client
-            .post(blockmesh_data_sink_url)
-            .json(&body)
-            .send()
-            .await;
+    match FeedElement::try_from(map) {
+        Ok(feed_element) => {
+            let client = http_client(DeviceType::Extension);
+            let body: DigestDataRequest = DigestDataRequest {
+                email,
+                api_token,
+                data: feed_element,
+            };
+            let _ = client
+                .post(format!("{}/digest_data", blockmesh_data_sink_url))
+                .json(&body)
+                .send()
+                .await;
+        }
+        Err(e) => {
+            log!("error = {:?}", e);
+        }
     }
 }

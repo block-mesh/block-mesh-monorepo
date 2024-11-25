@@ -400,6 +400,8 @@ impl ExtensionWrapperState {
             .update(|v| *v = "https://app.blockmesh.xyz".to_string());
         self.blockmesh_ws_url
             .update(|v| *v = "https://ws.blockmesh.xyz".to_string());
+        self.blockmesh_data_sink_url
+            .update(|v| *v = "https://data-sink.blockmesh.xyz".to_string());
         self.email.update(|v| *v = "".to_string());
         self.api_token.update(|v| *v = Uuid::default());
         self.status.update(|v| *v = AuthStatus::LoggedOut);
@@ -407,6 +409,10 @@ impl ExtensionWrapperState {
         ExtensionWrapperState::store_email("".to_string()).await;
         ExtensionWrapperState::store_blockmesh_url("https://app.blockmesh.xyz".to_string()).await;
         ExtensionWrapperState::store_blockmesh_ws_url("https://ws.blockmesh.xyz".to_string()).await;
+        ExtensionWrapperState::store_blockmesh_data_sink_url(
+            "https://data-sink.blockmesh.xyz".to_string(),
+        )
+        .await;
     }
 
     pub async fn store_blockmesh_url(blockmesh_url: String) {
