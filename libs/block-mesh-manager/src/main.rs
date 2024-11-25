@@ -133,7 +133,9 @@ async fn run() -> anyhow::Result<()> {
         .parse()
         .unwrap_or(false);
     let follower_pool = follower_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
+    let invite_codes = Arc::new(DashMap::new());
     let app_state = Arc::new(AppState {
+        invite_codes,
         submit_bandwidth_limit,
         task_limit,
         rate_limit,

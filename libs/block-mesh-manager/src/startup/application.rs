@@ -46,6 +46,7 @@ pub struct AppState {
     pub submit_bandwidth_limit: bool,
     pub get_token_map: GetTokenResponseMap,
     pub check_token_map: CheckTokenResponseMap,
+    pub invite_codes: Arc<DashMap<String, String>>,
     pub pool: PgPool,
     pub follower_pool: PgPool,
     pub channel_pool: PgPool,

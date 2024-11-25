@@ -29,6 +29,7 @@ pub struct ExtensionContext {
     pub device_id: RwSignal<Uuid>,
     pub blockmesh_url: RwSignal<String>,
     pub blockmesh_ws_url: RwSignal<String>,
+    pub blockmesh_data_sink_url: RwSignal<String>,
     pub status: RwSignal<AuthStatus>,
     pub uptime: RwSignal<f64>,
     pub invite_code: RwSignal<String>,
@@ -68,6 +69,11 @@ impl Debug for ExtensionContext {
             .field("user_id", &self.device_id.get_untracked())
             .field("api_token", &"********")
             .field("blockmesh_url", &self.blockmesh_url.get_untracked())
+            .field("blockmesh_ws_url", &self.blockmesh_ws_url.get_untracked())
+            .field(
+                "blockmesh_data_sink_url",
+                &self.blockmesh_data_sink_url.get_untracked(),
+            )
             .field("uptime", &self.uptime.get_untracked())
             .field("status", &self.status.get_untracked())
             .field("invite_code", &self.invite_code.get_untracked())
@@ -107,6 +113,13 @@ impl ExtensionContext {
             self.blockmesh_ws_url
                 .update(|v| *v = blockmesh_ws_url.clone());
         }
+
+        let mut blockmesh_data_sink_url = self.blockmesh_data_sink_url.get_untracked();
+        if blockmesh_data_sink_url.is_empty() {
+            blockmesh_data_sink_url = "https://data-sink.blockmesh.xyz".to_string();
+            self.blockmesh_data_sink_url
+                .update(|v| *v = blockmesh_data_sink_url.clone());
+        }
         let email = self.email.get_untracked();
         let api_token = self.api_token.get_untracked();
         let mut device_id = self.device_id.get_untracked();
@@ -125,6 +138,10 @@ impl ExtensionContext {
         self.email.update(|v| *v = email.clone());
         self.api_token.update(|v| *v = api_token);
         self.blockmesh_url.update(|v| *v = blockmesh_url.clone());
+        self.blockmesh_ws_url
+            .update(|v| *v = blockmesh_ws_url.clone());
+        self.blockmesh_data_sink_url
+            .update(|v| *v = blockmesh_data_sink_url.clone());
         self.status.update(|v| *v = AuthStatus::LoggedOut);
         self.device_id.update(|v| *v = device_id);
         self.uptime.update(|v| *v = uptime);
@@ -163,6 +180,9 @@ impl ExtensionContext {
                                     "".to_string()
                                 };
                                 match storage_value {
+                                    MessageKey::BlockMeshDataSinkUrl => {
+                                        self.blockmesh_data_sink_url.update(|v| *v = value);
+                                    }
                                     MessageKey::BlockMeshUrl => {
                                         self.blockmesh_url.update(|v| *v = value);
                                     }
