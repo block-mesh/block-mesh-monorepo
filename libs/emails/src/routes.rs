@@ -9,9 +9,7 @@ use block_mesh_common::interfaces::server_api::SendEmail;
 use database_utils::utils::health_check::health_check;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use reqwest::StatusCode;
-use serde::{Deserialize, Serialize};
 use std::env;
-use uuid::Uuid;
 
 #[tracing::instrument(name = "db_health", skip_all)]
 pub async fn db_health(State(state): State<AppState>) -> Result<impl IntoResponse, Error> {
