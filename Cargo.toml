@@ -14,7 +14,7 @@ exclude = ["libs/installers", "libs/md-book", "libs/react-native-app", "libs/blo
 resolver = "2"
 
 [workspace.lints.rust]
-unexpected_cfgs = { level = "warn", check-cfg = ['cfg(web_sys_unstable_apis)'], priority = 10 }
+unexpected_cfgs = { level = "allow", check-cfg = ['cfg(web_sys_unstable_apis)'], priority = 10 }
 panic = "forbid"
 unsafe_code = "forbid"
 unused = "forbid"
