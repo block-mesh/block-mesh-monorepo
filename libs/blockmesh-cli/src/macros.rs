@@ -1,7 +1,7 @@
 #[macro_export]
-#[allow(clippy::macro_metavars_in_unsafe)]
 macro_rules! char_to_str {
     ($ptr:expr, $name:literal) => {
+        #[allow(clippy::macro_metavars_in_unsafe)]
         match unsafe { std::ffi::CStr::from_ptr($ptr) }.to_str() {
             Ok(s) => s,
             Err(e) => {

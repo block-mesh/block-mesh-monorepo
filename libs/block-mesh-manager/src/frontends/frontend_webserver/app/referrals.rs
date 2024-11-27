@@ -32,6 +32,7 @@ pub fn Referrals() -> impl IntoView {
     }
 
     let copy_to_clipboard = move |_| {
+        #[allow(unexpected_cfgs)]
         #[cfg(all(web_sys_unstable_apis, feature = "hydrate"))]
         {
             use crate::frontends::context::notification_context::NotificationContext;
@@ -50,6 +51,7 @@ pub fn Referrals() -> impl IntoView {
                 notifications.set_error("Failed to copy invite code");
             }
         }
+        #[allow(unexpected_cfgs)]
         #[cfg(not(web_sys_unstable_apis))]
         {}
     };
