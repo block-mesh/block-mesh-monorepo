@@ -1,3 +1,4 @@
+#![allow(unexpected_cfgs)]
 use crate::frontends::components::edit_invite_code::EditInviteCode;
 use crate::frontends::components::heading::Heading;
 use crate::frontends::components::modal::Modal;
@@ -51,7 +52,7 @@ pub fn Referrals() -> impl IntoView {
                 notifications.set_error("Failed to copy invite code");
             }
         }
-        #[allow(unexpected_cfgs)]
+
         #[cfg(not(web_sys_unstable_apis))]
         {}
     };
