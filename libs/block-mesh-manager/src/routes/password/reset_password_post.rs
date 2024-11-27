@@ -8,12 +8,15 @@ use anyhow::Context;
 use axum::extract::State;
 use axum::response::Redirect;
 use axum::{Extension, Form};
-use block_mesh_common::interfaces::server_api::ResetPasswordForm;
+use block_mesh_common::constants::{DeviceType, BLOCK_MESH_EMAILS};
+use block_mesh_common::interfaces::server_api::{ResetPasswordForm, SendEmail};
+use block_mesh_common::reqwest::http_client;
 use chrono::{Duration, Utc};
 use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::HeaderMap;
 use sqlx::PgPool;
+use std::env;
 use std::sync::Arc;
 use tokio::sync::OnceCell;
 
@@ -59,6 +62,20 @@ pub async fn handler(
             .email_client
             .send_reset_password_email_aws(&user.email, nonce.nonce.expose_secret())
             .await?;
+    } else if email_mode == "SERVICE" {
+        let client = http_client(DeviceType::AppServer);
+        client
+            .get(format!("{}/send_email", BLOCK_MESH_EMAILS))
+            .query(&SendEmail {
+                code: env::var("EMAILS_CODE").unwrap_or_default(),
+                user_id: user.id,
+                email_type: "reset_password".to_string(),
+                email_address: user.email,
+                nonce: nonce.nonce.expose_secret().clone(),
+            })
+            .send()
+            .await
+            .map_err(Error::from)?;
     } else {
         state
             .email_client

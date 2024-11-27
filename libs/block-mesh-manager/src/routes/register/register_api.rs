@@ -15,7 +15,9 @@ use axum::extract::State;
 use axum::{Extension, Form, Json};
 use axum_login::AuthSession;
 use bcrypt::{hash, DEFAULT_COST};
-use block_mesh_common::interfaces::server_api::{RegisterForm, RegisterResponse};
+use block_mesh_common::constants::{DeviceType, BLOCK_MESH_EMAILS};
+use block_mesh_common::interfaces::server_api::{RegisterForm, RegisterResponse, SendEmail};
+use block_mesh_common::reqwest::http_client;
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
 use chrono::{Duration, Utc};
 use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
@@ -23,6 +25,7 @@ use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::HeaderMap;
 use secret::Secret;
 use sqlx::PgPool;
+use std::env;
 use std::sync::Arc;
 use tokio::sync::OnceCell;
 use uuid::Uuid;
@@ -150,6 +153,20 @@ pub async fn handler(
             .email_client
             .send_confirmation_email_aws(&email, nonce_secret.expose_secret())
             .await;
+    } else if email_mode == "SERVICE" {
+        let client = http_client(DeviceType::AppServer);
+        client
+            .get(format!("{}/send_email", BLOCK_MESH_EMAILS))
+            .query(&SendEmail {
+                code: env::var("EMAILS_CODE").unwrap_or_default(),
+                user_id: session.id,
+                email_type: "confirm_email".to_string(),
+                email_address: session.email,
+                nonce: session.nonce,
+            })
+            .send()
+            .await
+            .map_err(Error::from)?;
     } else {
         let _ = state
             .email_client

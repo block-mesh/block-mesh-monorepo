@@ -5,6 +5,7 @@ use axum::extract::{Query, State};
 use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::Router;
+use block_mesh_common::interfaces::server_api::SendEmail;
 use database_utils::utils::health_check::health_check;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use reqwest::StatusCode;
@@ -26,15 +27,6 @@ pub async fn server_health() -> Result<impl IntoResponse, Error> {
     Ok((StatusCode::OK, "OK"))
 }
 
-#[derive(Debug, Deserialize, Serialize)]
-pub struct SendEmail {
-    code: String,
-    user_id: Uuid,
-    email_type: EmailType,
-    email_address: String,
-    nonce: String,
-}
-
 #[tracing::instrument(name = "send_email", skip_all)]
 pub async fn send_email(
     State(state): State<AppState>,
@@ -45,7 +37,8 @@ pub async fn send_email(
     {
         Err(Error::InternalServer("Bad admin param".to_string()))
     } else {
-        match send_params.email_type {
+        let email_type = EmailType::from(send_params.email_type);
+        match email_type {
             EmailType::ConfirmEmail => {
                 let mut transaction = create_txn(&state.emails_db_pool).await?;
                 let result = state
@@ -55,7 +48,7 @@ pub async fn send_email(
                 Email::create_email(
                     &mut transaction,
                     &send_params.user_id,
-                    &send_params.email_type,
+                    &email_type,
                     &send_params.email_address,
                     &result.message_id.unwrap_or_default(),
                 )
@@ -72,7 +65,7 @@ pub async fn send_email(
                 Email::create_email(
                     &mut transaction,
                     &send_params.user_id,
-                    &send_params.email_type,
+                    &email_type,
                     &send_params.email_address,
                     &result.message_id.unwrap_or_default(),
                 )

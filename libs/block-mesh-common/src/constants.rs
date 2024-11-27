@@ -24,6 +24,7 @@ pub fn env_url() -> String {
     }
 }
 pub static BLOCK_MESH_SUPPORT_CHAT: &str = "https://blockmesh.xyz/support-chat";
+pub static BLOCK_MESH_EMAILS: &str = "https://emails.blockmesh.xyz";
 
 pub static BLOCK_MESH_FEATURE_FLAGS: &str = "https://feature-flags.blockmesh.xyz";
 pub static BLOCK_MESH_SUPPORT_EMAIL: &str = "support@blockmesh.xyz";
