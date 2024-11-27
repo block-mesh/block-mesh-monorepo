@@ -2,8 +2,9 @@
 
 #[macro_export]
 macro_rules! char_to_str {
-    ($ptr:expr, $name:literal) => {
+    ($ptr:expr, $name:literal) => {{
         let var = unsafe { std::ffi::CStr::from_ptr($ptr) }.to_str();
+
         match var {
             Ok(s) => s,
             Err(e) => {
@@ -11,7 +12,7 @@ macro_rules! char_to_str {
                 return -1;
             }
         }
-    };
+    }};
 }
 
 #[macro_export]
