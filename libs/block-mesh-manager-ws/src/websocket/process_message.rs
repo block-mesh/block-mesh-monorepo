@@ -1,4 +1,4 @@
-use crate::state::AppState;
+use crate::state::WsAppState;
 use axum::extract::ws::Message;
 use block_mesh_common::interfaces::server_api::HandlerMode;
 use block_mesh_common::interfaces::ws_api::WsClientMessage;
@@ -13,7 +13,7 @@ use std::sync::Arc;
 pub async fn process_message(
     msg: Message,
     ip: String,
-    state: Arc<AppState>,
+    state: Arc<WsAppState>,
 ) -> ControlFlow<(), Option<WsClientMessage>> {
     match msg {
         Message::Text(text) => {
@@ -53,7 +53,7 @@ pub async fn process_message(
 async fn process_client_message(
     text: &str,
     ip: String,
-    state: Arc<AppState>,
+    state: Arc<WsAppState>,
 ) -> Option<WsClientMessage> {
     if text == "pong" {
         return Some(WsClientMessage::Ping);
