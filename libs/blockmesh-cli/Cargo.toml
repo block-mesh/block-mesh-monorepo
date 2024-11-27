@@ -5,7 +5,7 @@ authors.workspace = true
 version.workspace = true
 
 [package.metadata]
-rustflags = ["-A", "clippy::macro_metavars_in_unsafe"]
+rustflags = ["-A", "clippy::macro-metavars-in-unsafe"]
 
 [dependencies]
 jni = { workspace = true }
