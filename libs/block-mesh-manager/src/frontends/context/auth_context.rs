@@ -120,7 +120,7 @@ impl AuthContext {
     pub async fn load_account_data() -> Result<AuthStatusResponse, reqwest::Error> {
         let client = reqwest::Client::new();
         let response = client
-            .get(&format!("{}/auth_status", window().origin()))
+            .get(format!("{}/auth_status", window().origin()))
             .send()
             .await?;
 

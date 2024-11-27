@@ -39,6 +39,8 @@ impl Broadcaster {
             queue: Arc::new(Mutex::new(VecDeque::new())),
         }
     }
+
+    #[allow(clippy::result_large_err)]
     pub fn broadcast(&self, message: WsServerMessage) -> Result<usize, SendError<WsServerMessage>> {
         let subscribers = self.global_transmitter.send(message.clone())?;
         tracing::info!("Sent {message:?} to {subscribers} subscribers");

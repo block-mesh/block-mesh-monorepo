@@ -111,7 +111,7 @@ pub fn ApplicationLayout(children: ChildrenFn) -> impl IntoView {
             let origin = window().origin();
             let client = reqwest::Client::new();
 
-            if let Ok(response) = client.get(&format!("{}/auth_status", origin)).send().await {
+            if let Ok(response) = client.get(format!("{}/auth_status", origin)).send().await {
                 if let Ok(json) = response.json::<AuthStatusResponse>().await {
                     provide_context(json);
                 } else {
@@ -121,7 +121,7 @@ pub fn ApplicationLayout(children: ChildrenFn) -> impl IntoView {
                 navigate_to_external_url(format!("{}/logout", origin));
             }
 
-            if let Ok(response) = client.post(&format!("{}/dashboard", origin)).send().await {
+            if let Ok(response) = client.post(format!("{}/dashboard", origin)).send().await {
                 match response.json::<DashboardResponse>().await {
                     Ok(json) => provide_context(json),
                     Err(e) => log!("dashboard json error {:#?}", e),
@@ -129,7 +129,7 @@ pub fn ApplicationLayout(children: ChildrenFn) -> impl IntoView {
             }
 
             if let Ok(response) = client
-                .post(&format!(
+                .post(format!(
                     "{}{}",
                     origin,
                     RoutesEnum::Static_Auth_Daily_Leaderboard
