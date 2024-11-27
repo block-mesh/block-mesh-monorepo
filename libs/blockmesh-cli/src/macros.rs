@@ -1,14 +1,7 @@
-#[allow(clippy::macro_metavars_in_unsafe)]
-
-fn cstr_to_str(ptr: *const std::os::raw::c_char) -> Result<&'static str, std::str::Utf8Error> {
-    // Unsafe block is isolated in a function
-    unsafe { std::ffi::CStr::from_ptr(ptr).to_str() }
-}
-
 #[macro_export]
 macro_rules! char_to_str {
     ($ptr:expr, $name:literal) => {
-        match cstr_to_str($ptr) {
+        match unsafe { std::ffi::CStr::from_ptr($ptr) }.to_str() {
             Ok(s) => s,
             Err(e) => {
                 eprintln!("Failed to load {} {}", stringify!($name), e);

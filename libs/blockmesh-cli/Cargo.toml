@@ -4,7 +4,8 @@ edition = "2021"
 authors.workspace = true
 version.workspace = true
 
-# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+[package.metadata]
+rustflags = ["-A", "clippy::macro_metavars_in_unsafe"]
 
 [dependencies]
 jni = { workspace = true }
