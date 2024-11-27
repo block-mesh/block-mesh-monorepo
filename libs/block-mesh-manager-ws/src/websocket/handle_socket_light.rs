@@ -16,7 +16,7 @@ pub async fn handle_socket_light(
     email: String,
     mut socket: WebSocket,
     ip: String,
-    state: Arc<AppState>,
+    state: Arc<WsAppState>,
     user_id: Uuid,
 ) {
     let sleep = env::var("WS_KEEP_ALIVE")
@@ -30,12 +30,7 @@ pub async fn handle_socket_light(
         return;
     }
 
-    let ws_connection_manager = state.websocket_manager.clone();
-    let broadcaster = ws_connection_manager.broadcaster.clone();
-    let mut redis = state.redis.clone();
-    broadcaster
-        .subscribe_light(&email, &user_id, &mut redis)
-        .await;
+    state.subscribe_light(&email, &user_id).await;
     let (mut sender, mut receiver) = socket.split();
     let tx_c = state.tx.clone();
 
@@ -135,9 +130,6 @@ pub async fn handle_socket_light(
     }
 
     // returning from the handler closes the websocket connection
-    let mut redis = state.redis.clone();
-    broadcaster
-        .unsubscribe_light(&email, &user_id, &mut redis)
-        .await;
+    state.unsubscribe_light(&email, &user_id).await;
     tracing::trace!("Websocket context {ip} destroyed");
 }

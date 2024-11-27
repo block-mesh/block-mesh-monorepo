@@ -15,7 +15,7 @@ pub async fn receiver(
     is_cls: Arc<AtomicBool>,
     ip: String,
     task_scheduler_notifier: Arc<Notify>,
-    state: Arc<AppState>,
+    state: Arc<WsAppState>,
 ) -> JoinHandle<()> {
     tokio::spawn(async move {
         while let Some(Ok(msg)) = ws_stream.next().await {
