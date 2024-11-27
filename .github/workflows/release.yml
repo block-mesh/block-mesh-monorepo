@@ -85,6 +85,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs:
       - "prep-env"
+      - "get-tag"
     strategy:
       matrix:
         include:
@@ -126,6 +127,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs:
       - "prep-env"
+      - "get-tag"
     strategy:
       matrix:
         include:
@@ -164,6 +166,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs:
       - "prep-env"
+      - "get-tag"
     strategy:
       matrix:
         include:
@@ -202,6 +205,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs:
       - "prep-env"
+      - "get-tag"
     strategy:
       matrix:
         include:
@@ -240,6 +244,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs:
       - "prep-env"
+      - "get-tag"
     strategy:
       matrix:
         include:
@@ -278,6 +283,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs:
       - "prep-env"
+      - "get-tag"
     strategy:
       matrix:
         include:
@@ -316,6 +322,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs:
       - "prep-env"
+      - "get-tag"
     strategy:
       matrix:
         include:
@@ -354,6 +361,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs:
       - "prep-env"
+      - "get-tag"
     strategy:
       matrix:
         include:
