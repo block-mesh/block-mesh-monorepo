@@ -129,7 +129,7 @@ pub fn ApplicationLayout(children: ChildrenFn) -> impl IntoView {
             }
 
             if let Ok(response) = client
-                .post(&format!(
+                .post(format!(
                     "{}{}",
                     origin,
                     RoutesEnum::Static_Auth_Daily_Leaderboard
