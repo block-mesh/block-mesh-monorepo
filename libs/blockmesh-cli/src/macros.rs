@@ -3,7 +3,8 @@
 #[macro_export]
 macro_rules! char_to_str {
     ($ptr:expr, $name:literal) => {
-        match unsafe { std::ffi::CStr::from_ptr($ptr) }.to_str() {
+        let var = unsafe { std::ffi::CStr::from_ptr($ptr) }.to_str();
+        match var {
             Ok(s) => s,
             Err(e) => {
                 eprintln!("Failed to load {} {}", stringify!($name), e);
