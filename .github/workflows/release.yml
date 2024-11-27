@@ -92,6 +92,24 @@ jobs:
             os: "ubuntu-latest"
     runs-on: ${{ matrix.os }}
     steps:
+      - name: "Check out the repo"
+        uses: actions/checkout@v4
+      - name: "Install deps"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config openssl libssl-dev
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          targets: wasm32-unknown-unknown
+      - name: "Cache"
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: upload-assets-manager-${{ matrix.target }}
+          cache-all-crates: true
+      - name: "Install Cargo Leptos"
+        run: |
+          cargo install cargo-leptos --version=${{ vars.LEPTOS_VERSION }} --locked
       - name: "Build Manager"
         run: |
           cargo leptos build --project block-mesh-manager --release
@@ -108,6 +126,21 @@ jobs:
             os: "ubuntu-latest"
     runs-on: ${{ matrix.os }}
     steps:
+      - name: "Check out the repo"
+        uses: actions/checkout@v4
+      - name: "Install deps"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config openssl libssl-dev
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          targets: wasm32-unknown-unknown
+      - name: "Cache"
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: upload-assets-worker-${{ matrix.target }}
+          cache-all-crates: true
       - name: "Build Worker"
         run: |
           cargo build -p block-mesh-manager-worker --release
@@ -124,6 +157,21 @@ jobs:
             os: "ubuntu-latest"
     runs-on: ${{ matrix.os }}
     steps:
+      - name: "Check out the repo"
+        uses: actions/checkout@v4
+      - name: "Install deps"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config openssl libssl-dev
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          targets: wasm32-unknown-unknown
+      - name: "Cache"
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: upload-assets-api-${{ matrix.target }}
+          cache-all-crates: true
       - name: "Build API"
         run: |
           cargo build -p block-mesh-manager-api --release
@@ -140,6 +188,21 @@ jobs:
             os: "ubuntu-latest"
     runs-on: ${{ matrix.os }}
     steps:
+      - name: "Check out the repo"
+        uses: actions/checkout@v4
+      - name: "Install deps"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config openssl libssl-dev
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          targets: wasm32-unknown-unknown
+      - name: "Cache"
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: upload-assets-ws-${{ matrix.target }}
+          cache-all-crates: true
       - name: "Build WS"
         run: |
           cargo build -p block-mesh-manager-ws --release
@@ -156,6 +219,21 @@ jobs:
             os: "ubuntu-latest"
     runs-on: ${{ matrix.os }}
     steps:
+      - name: "Check out the repo"
+        uses: actions/checkout@v4
+      - name: "Install deps"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config openssl libssl-dev
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          targets: wasm32-unknown-unknown
+      - name: "Cache"
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: upload-assets-feature-flag-${{ matrix.target }}
+          cache-all-crates: true
       - name: "Build Feature Flags Server"
         run: |
           cargo build -p feature-flags-server --release
@@ -172,6 +250,21 @@ jobs:
             os: "ubuntu-latest"
     runs-on: ${{ matrix.os }}
     steps:
+      - name: "Check out the repo"
+        uses: actions/checkout@v4
+      - name: "Install deps"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config openssl libssl-dev
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          targets: wasm32-unknown-unknown
+      - name: "Cache"
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: upload-assets-tg-${{ matrix.target }}
+          cache-all-crates: true
       - name: "Build TG bot"
         run: |
           cargo build -p tg-privacy-bot --release
@@ -188,6 +281,21 @@ jobs:
             os: "ubuntu-latest"
     runs-on: ${{ matrix.os }}
     steps:
+      - name: "Check out the repo"
+        uses: actions/checkout@v4
+      - name: "Install deps"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config openssl libssl-dev
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          targets: wasm32-unknown-unknown
+      - name: "Cache"
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: upload-assets-data-sink-${{ matrix.target }}
+          cache-all-crates: true
       - name: "Build Data-Sink"
         run: |
           cargo build -p data-sink --release
@@ -204,6 +312,21 @@ jobs:
             os: "ubuntu-latest"
     runs-on: ${{ matrix.os }}
     steps:
+      - name: "Check out the repo"
+        uses: actions/checkout@v4
+      - name: "Install deps"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config openssl libssl-dev
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          targets: wasm32-unknown-unknown
+      - name: "Cache"
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: upload-assets-emails-${{ matrix.target }}
+          cache-all-crates: true
       - name: "Build Email"
         run: |
           cargo build -p emails --release
