@@ -2,7 +2,7 @@
 #[macro_export]
 macro_rules! char_to_str {
     ($ptr:expr, $name:literal) => {
-        let x = unsafe { std::ffi::CStr::from_ptr($ptr) };
+        let x = unsafe { std::ffi::CStr::from_ptr($ptr) }
         match unsafe { std::ffi::CStr::from_ptr($ptr) }.to_str() {
             Ok(s) => s,
             Err(e) => {
