@@ -8,7 +8,7 @@ fn cstr_to_str(ptr: *const std::os::raw::c_char) -> Result<&'static str, std::st
 #[macro_export]
 macro_rules! char_to_str {
     ($ptr:expr, $name:literal) => {
-        match $crate::cstr_to_str($ptr) {
+        match cstr_to_str($ptr) {
             Ok(s) => s,
             Err(e) => {
                 eprintln!("Failed to load {} {}", stringify!($name), e);
