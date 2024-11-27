@@ -585,3 +585,12 @@ pub struct DigestDataRequest {
 pub struct DigestDataResponse {
     pub status_code: u16,
 }
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct SendEmail {
+    pub code: String,
+    pub user_id: Uuid,
+    pub email_type: String,
+    pub email_address: String,
+    pub nonce: String,
+}

@@ -5,6 +5,7 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use block_mesh_common::email_client::client::EmailClient;
     use database_utils::utils::connection::channel_pool::channel_pool;
     use database_utils::utils::connection::follower_pool::follower_pool;
     use database_utils::utils::connection::unlimited_pool::unlimited_pool;
@@ -33,7 +34,6 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     #[global_allocator]
     static GLOBAL: Jemalloc = Jemalloc;
     use block_mesh_manager::configuration::get_configuration::get_configuration;
-    use block_mesh_manager::emails::email_client::EmailClient;
     use block_mesh_manager::startup::application::{AppState, Application};
     use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
     use secret::Secret;

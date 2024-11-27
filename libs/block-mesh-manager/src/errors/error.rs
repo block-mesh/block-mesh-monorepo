@@ -18,6 +18,8 @@ pub enum Error {
     #[error(transparent)]
     Redis(#[from] redis::RedisError),
     #[error(transparent)]
+    Reqwest(#[from] reqwest::Error),
+    #[error(transparent)]
     Anyhow(#[from] AnyhowError),
     #[error("User already exists")]
     UserAlreadyExists,
@@ -75,6 +77,7 @@ impl IntoResponse for Error {
     fn into_response(self) -> axum::response::Response {
         tracing::error!("Error occurred: {}", self);
         match self {
+            Error::Reqwest(e) => (StatusCode::INTERNAL_SERVER_ERROR, e.to_string()).into_response(),
             Error::TaskLimit => (StatusCode::NOT_MODIFIED, "Task rate limit").into_response(),
             Error::PleaseLogout => {
                 (StatusCode::INTERNAL_SERVER_ERROR, "Please Logout").into_response()
@@ -177,6 +180,7 @@ impl From<Error> for StatusCode {
             Error::Sql(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Redis(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Anyhow(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::Reqwest(_) => StatusCode::INTERNAL_SERVER_ERROR,
         }
     }
 }

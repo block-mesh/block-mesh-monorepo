@@ -8,14 +8,18 @@ use axum::extract::State;
 use axum::response::Redirect;
 use axum::{Extension, Form};
 use axum_login::AuthSession;
-use block_mesh_common::interfaces::server_api::ResendConfirmEmailForm;
+use block_mesh_common::constants::{DeviceType, BLOCK_MESH_EMAILS};
+use block_mesh_common::interfaces::server_api::{ResendConfirmEmailForm, SendEmail};
+use block_mesh_common::reqwest::http_client;
 use block_mesh_common::routes_enum::RoutesEnum;
 use chrono::Duration;
 use chrono::Utc;
 use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
 use http::HeaderMap;
+use std::env;
 use std::sync::Arc;
 use tokio::sync::OnceCell;
+
 static RATE_LIMIT_EMAIL: OnceCell<DashSetWithExpiry<String>> = OnceCell::const_new();
 
 pub async fn handler(
@@ -57,10 +61,24 @@ pub async fn handler(
             .email_client
             .send_confirmation_email_aws(&user.email, &user.nonce)
             .await?;
+    } else if email_mode == "SERVICE" {
+        let client = http_client(DeviceType::AppServer);
+        client
+            .get(format!("{}/send_email", BLOCK_MESH_EMAILS))
+            .query(&SendEmail {
+                code: env::var("EMAILS_CODE").unwrap_or_default(),
+                user_id: user.id,
+                email_type: "confirm_email".to_string(),
+                email_address: user.email,
+                nonce: user.nonce,
+            })
+            .send()
+            .await
+            .map_err(Error::from)?;
     } else {
         state
             .email_client
-            .send_confirmation_email_gmail(&user.email, &user.nonce)
+            .send_confirmation_email_smtp(&user.email, &user.nonce)
             .await?;
     }
     Ok(NotificationRedirect::redirect(

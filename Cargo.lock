@@ -1697,6 +1697,8 @@ name = "block-mesh-common"
 version = "0.0.403"
 dependencies = [
  "anyhow",
+ "aws-config",
+ "aws-sdk-sesv2",
  "borsh 1.5.1",
  "bs58 0.5.1",
  "bytes",
@@ -1709,6 +1711,7 @@ dependencies = [
  "http-body-util",
  "hyper 1.4.0",
  "ipgeolocate",
+ "lettre",
  "once_cell",
  "rand 0.8.5",
  "reqwest 0.12.7",
@@ -3857,6 +3860,29 @@ name = "email_address"
 version = "0.2.9"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e079f19b08ca6239f47f8ba8509c11cf3ea30095831f7fed61441475edd8c449"
+
+[[package]]
+name = "emails"
+version = "0.0.403"
+dependencies = [
+ "anyhow",
+ "axum",
+ "block-mesh-common",
+ "chrono",
+ "database-utils",
+ "logger-general",
+ "reqwest 0.12.7",
+ "sentry",
+ "serde",
+ "sqlx",
+ "thiserror",
+ "tokio",
+ "tower",
+ "tower-http",
+ "tracing",
+ "url",
+ "uuid",
+]
 
 [[package]]
 name = "encode_unicode"

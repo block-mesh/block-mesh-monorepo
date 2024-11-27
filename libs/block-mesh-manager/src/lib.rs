@@ -8,7 +8,6 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     pub mod database;
     pub mod domain;
     pub mod errors;
-    pub mod emails;
     pub mod middlewares;
     pub mod notification;
     pub mod routes;

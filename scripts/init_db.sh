@@ -68,6 +68,7 @@ then
   start_db block-mesh 5559
   start_db tg-bot 5551
   start_db data-sink 5552
+  start_db emails 5553
 
   DOCKERS="$(docker ps -a -q --filter ancestor=redis:alpine3.20 --format="{{.ID}}")"
   if [ -n "$DOCKERS" ]
@@ -122,6 +123,12 @@ echo "create DB"
 ensure sqlx database create
 cd "${ROOT}/libs/data-sink" || exit
 echo "migrate DB data-sink"
+ensure migrate
+export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:5553/emails"
+echo "create DB"
+ensure sqlx database create
+cd "${ROOT}/libs/emails" || exit
+echo "migrate DB emails"
 ensure migrate
 >&2 echo "Postgres has been migrated, ready to go!"
 cd "${_PWD}"

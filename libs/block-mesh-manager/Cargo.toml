@@ -10,7 +10,7 @@ fake = { workspace = true, features = ["derive"] }
 
 [dependencies]
 dash-with-expiry = { path = "../dash-with-expiry" }
-lettre = { version = "0.11", optional = true }
+lettre = { workspace = true, optional = true }
 reqwest-websocket = { workspace = true }
 flume = { workspace = true, default-features = false, features = ["async", "select"] }
 headers = { workspace = true }
@@ -64,7 +64,7 @@ config = { workspace = true }
 dotenv = { workspace = true }
 futures-time = { workspace = true, optional = true }
 enum-iterator = { workspace = true }
-block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env", "reqwest"] }
+block-mesh-common = { path = "../block-mesh-common", default-features = false, optional = true }
 database-utils = { path = "../database-utils", optional = true }
 tokio = { workspace = true, features = ["full", "tracing"], optional = true }
 axum-login = { workspace = true, optional = true }
@@ -146,12 +146,14 @@ crate-type = ["cdylib", "rlib"]
 
 [features]
 hydrate = [
+  "block-mesh-common/hydrate",
   "leptos/hydrate",
   "leptos_meta/hydrate",
   "leptos_router/hydrate",
   "dep:logger-leptos"
 ]
 ssr = [
+  "block-mesh-common/ssr",
   "dep:lettre",
   "dep:futures-time",
   "dep:database-utils",

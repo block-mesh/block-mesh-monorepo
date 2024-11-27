@@ -8,6 +8,7 @@ pub const BLOCKMESH_TWITTER_USER_ID: u64 = 1766124448778784768;
 pub const BLOCKMESH_FOUNDER_TWITTER_USER_ID: u64 = 1778711300127821824;
 pub const BLOCKMESH_PG_NOTIFY_WORKER: &str = "pgchannel";
 pub const BLOCKMESH_PG_NOTIFY_API: &str = "pgchannel_api";
+pub const BLOCKMESH_PG_NOTIFY_EMAIL: &str = "pgchannel_email";
 pub const BLOCKMESH_VPS: &str = "https://vps.blockmesh.xyz";
 
 pub const BLOCKMESH_WS_REDIS_COUNT_KEY: &str = "BLOCKMESH_WS_REDIS_COUNT_KEY";
@@ -23,6 +24,7 @@ pub fn env_url() -> String {
     }
 }
 pub static BLOCK_MESH_SUPPORT_CHAT: &str = "https://blockmesh.xyz/support-chat";
+pub static BLOCK_MESH_EMAILS: &str = "https://emails.blockmesh.xyz";
 
 pub static BLOCK_MESH_FEATURE_FLAGS: &str = "https://feature-flags.blockmesh.xyz";
 pub static BLOCK_MESH_SUPPORT_EMAIL: &str = "support@blockmesh.xyz";

@@ -13,7 +13,7 @@ app_name = "block-mesh-manager"
 command = "cargo install -q worker-build && worker-build --release"
 
 [triggers]
-crons = ["0/5 * * * *"]
+crons = ["0/30 * * * *"]
 
 [env.dev.triggers]
 crons = ["* * * * *"]
