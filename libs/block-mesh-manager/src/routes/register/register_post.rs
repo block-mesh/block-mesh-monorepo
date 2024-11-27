@@ -178,7 +178,7 @@ pub async fn handler(
     } else {
         state
             .email_client
-            .send_confirmation_email_gmail(&email, nonce_secret.expose_secret())
+            .send_reset_password_email_smtp(&email, nonce_secret.expose_secret())
             .await?;
     }
     Ok(Redirect::to("/ui/dashboard"))

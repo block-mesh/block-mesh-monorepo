@@ -60,7 +60,7 @@ pub async fn handler(
     } else {
         state
             .email_client
-            .send_confirmation_email_gmail(&user.email, &user.nonce)
+            .send_confirmation_email_smtp(&user.email, &user.nonce)
             .await?;
     }
     Ok(NotificationRedirect::redirect(

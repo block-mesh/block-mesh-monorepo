@@ -153,7 +153,7 @@ pub async fn handler(
     } else {
         let _ = state
             .email_client
-            .send_confirmation_email_gmail(&email, nonce_secret.expose_secret())
+            .send_confirmation_email_smtp(&email, nonce_secret.expose_secret())
             .await;
     }
     Ok(Json(RegisterResponse {

@@ -1,4 +1,5 @@
 use block_mesh_common::constants::DeviceType;
+use block_mesh_common::email_client::client::EmailClient;
 use block_mesh_common::env::app_env_var::AppEnvVar;
 use block_mesh_common::env::env_var::EnvVar;
 use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
@@ -10,7 +11,6 @@ use block_mesh_common::interfaces::server_api::{
 use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager::configuration::get_configuration::get_configuration;
 use block_mesh_manager::configuration::settings::Settings;
-use block_mesh_manager::emails::email_client::EmailClient;
 use block_mesh_manager::startup::application::{AppState, Application};
 use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
 use dashmap::DashMap;

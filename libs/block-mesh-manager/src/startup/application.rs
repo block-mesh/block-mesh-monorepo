@@ -1,5 +1,4 @@
 use crate::configuration::settings::Settings;
-use crate::emails::email_client::EmailClient;
 use crate::middlewares::authentication::{authentication_layer, Backend};
 use crate::routes::twitter::context::Oauth2Ctx;
 use crate::startup::routers::api_router::get_api_router;
@@ -24,6 +23,7 @@ use std::time::Duration;
 use tokio::net::TcpListener;
 
 use block_mesh_common::constants::DeviceType;
+use block_mesh_common::email_client::client::EmailClient;
 use block_mesh_common::env::app_env_var::AppEnvVar;
 use block_mesh_common::env::env_var;
 use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;

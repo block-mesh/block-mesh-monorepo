@@ -55,7 +55,9 @@ pub async fn summary(
     State(state): State<Arc<AppState>>,
     Query(admin_param): Query<AdminParam>,
 ) -> Result<Json<Value>, Error> {
-    if admin_param.code != env::var("ADMIN_PARAM").unwrap_or_default() {
+    if admin_param.code.is_empty()
+        || admin_param.code != env::var("ADMIN_PARAM").unwrap_or_default()
+    {
         Err(Error::InternalServer("Bad admin param".to_string()))
     } else {
         let sockets: Vec<String> = state
@@ -73,7 +75,9 @@ pub async fn status(
     State(state): State<Arc<AppState>>,
     Query(admin_param): Query<AdminParam>,
 ) -> Result<Json<Value>, Error> {
-    if admin_param.code != env::var("ADMIN_PARAM").unwrap_or_default() {
+    if admin_param.code.is_empty()
+        || admin_param.code != env::var("ADMIN_PARAM").unwrap_or_default()
+    {
         Err(Error::InternalServer("Bad admin param".to_string()))
     } else {
         let mut output: Vec<String> = Vec::new();

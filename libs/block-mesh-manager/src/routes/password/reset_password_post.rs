@@ -62,7 +62,7 @@ pub async fn handler(
     } else {
         state
             .email_client
-            .send_reset_password_email_gmail(&user.email, nonce.nonce.expose_secret())
+            .send_reset_password_email_smtp(&user.email, nonce.nonce.expose_secret())
             .await?;
     }
     commit_txn(transaction).await?;

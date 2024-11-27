@@ -10,7 +10,7 @@ fake = { workspace = true, features = ["derive"] }
 
 [dependencies]
 dash-with-expiry = { path = "../dash-with-expiry" }
-lettre = { version = "0.11", optional = true }
+lettre = { workspace = true, optional = true }
 reqwest-websocket = { workspace = true }
 flume = { workspace = true, default-features = false, features = ["async", "select"] }
 headers = { workspace = true }
