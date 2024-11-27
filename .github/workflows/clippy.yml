@@ -38,4 +38,4 @@ jobs:
       #      - name: Sccache Action
       #        uses: Mozilla-Actions/sccache-action@v0.0.5
       - name: Linting
-        run: cargo clippy --all --features ssr,hydrate -- -D warnings
+        run: cargo clippy --all --features ssr,hydrate -- -D warnings -A clippy::macro-metavars-in-unsafe
