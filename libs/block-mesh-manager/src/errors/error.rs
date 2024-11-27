@@ -17,8 +17,8 @@ pub enum Error {
     Sql(#[from] sqlx::Error),
     #[error(transparent)]
     Redis(#[from] redis::RedisError),
+    #[error(transparent)]
     Reqwest(#[from] reqwest::Error),
-    #[error("Reqwest error: {0}")]
     #[error(transparent)]
     Anyhow(#[from] AnyhowError),
     #[error("User already exists")]
