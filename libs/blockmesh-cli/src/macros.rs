@@ -1,8 +1,9 @@
-#[allow(clippy::macro_metavars_in_unsafe)]
 #[macro_export]
 macro_rules! char_to_str {
     ($ptr:expr, $name:literal) => {
-        match unsafe { std::ffi::CStr::from_ptr($ptr) }.to_str() {
+        match #[allow(clippy::macro_metavars_in_unsafe)]
+        unsafe { std::ffi::CStr::from_ptr($ptr) }.to_str()
+        {
             Ok(s) => s,
             Err(e) => {
                 eprintln!("Failed to load {} {}", stringify!($name), e);
