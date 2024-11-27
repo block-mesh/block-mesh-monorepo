@@ -1,4 +1,4 @@
-use crate::state::AppState;
+use crate::state::WsAppState;
 use axum::extract::ws::{Message, WebSocket};
 use block_mesh_common::interfaces::db_messages::{
     AggregateAddToMessage, AggregateSetToMessage, DBMessage, DBMessageTypes,

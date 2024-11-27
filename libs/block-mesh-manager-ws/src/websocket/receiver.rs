@@ -1,4 +1,4 @@
-use crate::state::AppState;
+use crate::state::WsAppState;
 use crate::websocket::process_message::process_message;
 use axum::extract::ws::WebSocket;
 use block_mesh_common::interfaces::ws_api::WsClientMessage;
