@@ -48,9 +48,8 @@ jobs:
         shell: "bash"
         run: |
           echo PKG_VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g') >> $GITHUB_OUTPUT
-  upload-assets:
-    name: "Upload assets to Github releases"
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+  prep-env:
+    name: "Prep env"
     needs:
       - "get-tag"
     strategy:
@@ -77,43 +76,156 @@ jobs:
         with:
           key: release-upload-${{ matrix.target }}
           cache-all-crates: true
-      #      - name: Sccache Action
-      #        uses: Mozilla-Actions/sccache-action@v0.0.5
       - name: "Install Cargo Leptos"
         run: |
           cargo install cargo-leptos --version=${{ vars.LEPTOS_VERSION }} --locked
-      - name: "Run Cargo Leptos"
+  upload-assets-manager:
+    name: "Upload assets to Github releases - manager"
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs:
+      - "prep-env"
+    strategy:
+      matrix:
+        include:
+          - target: "x86_64-unknown-linux-gnu"
+            os: "ubuntu-latest"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: "Build Manager"
         run: |
           cargo leptos build --project block-mesh-manager --release
           tar acf block-mesh-manager-${{ matrix.target }}.tar.gz target/release/block-mesh-manager target/release/hash.txt target/site
+  upload-assets-worker:
+    name: "Upload assets to Github releases - worker"
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs:
+      - "prep-env"
+    strategy:
+      matrix:
+        include:
+          - target: "x86_64-unknown-linux-gnu"
+            os: "ubuntu-latest"
+    runs-on: ${{ matrix.os }}
+    steps:
       - name: "Build Worker"
         run: |
           cargo build -p block-mesh-manager-worker --release
           tar acf block-mesh-manager-worker-${{ matrix.target }}.tar.gz target/release/block-mesh-manager-worker
+  upload-assets-api:
+    name: "Upload assets to Github releases - api"
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs:
+      - "prep-env"
+    strategy:
+      matrix:
+        include:
+          - target: "x86_64-unknown-linux-gnu"
+            os: "ubuntu-latest"
+    runs-on: ${{ matrix.os }}
+    steps:
       - name: "Build API"
         run: |
           cargo build -p block-mesh-manager-api --release
           tar acf block-mesh-manager-api-${{ matrix.target }}.tar.gz target/release/block-mesh-manager-api
+  upload-assets-ws:
+    name: "Upload assets to Github releases - ws"
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs:
+      - "prep-env"
+    strategy:
+      matrix:
+        include:
+          - target: "x86_64-unknown-linux-gnu"
+            os: "ubuntu-latest"
+    runs-on: ${{ matrix.os }}
+    steps:
       - name: "Build WS"
         run: |
           cargo build -p block-mesh-manager-ws --release
           tar acf block-mesh-manager-ws-${{ matrix.target }}.tar.gz target/release/block-mesh-manager-ws
+  upload-assets-feature-flag:
+    name: "Upload assets to Github releases - feature flag"
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs:
+      - "prep-env"
+    strategy:
+      matrix:
+        include:
+          - target: "x86_64-unknown-linux-gnu"
+            os: "ubuntu-latest"
+    runs-on: ${{ matrix.os }}
+    steps:
       - name: "Build Feature Flags Server"
         run: |
           cargo build -p feature-flags-server --release
           tar acf feature-flags-server-${{ matrix.target }}.tar.gz target/release/feature-flags-server
+  upload-assets-tg:
+    name: "Upload assets to Github releases - tg"
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs:
+      - "prep-env"
+    strategy:
+      matrix:
+        include:
+          - target: "x86_64-unknown-linux-gnu"
+            os: "ubuntu-latest"
+    runs-on: ${{ matrix.os }}
+    steps:
       - name: "Build TG bot"
         run: |
           cargo build -p tg-privacy-bot --release
           tar acf tg-privacy-bot-${{ matrix.target }}.tar.gz target/release/tg-privacy-bot
+  upload-assets-data-sink:
+    name: "Upload assets to Github releases - data-sink"
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs:
+      - "prep-env"
+    strategy:
+      matrix:
+        include:
+          - target: "x86_64-unknown-linux-gnu"
+            os: "ubuntu-latest"
+    runs-on: ${{ matrix.os }}
+    steps:
       - name: "Build Data-Sink"
         run: |
           cargo build -p data-sink --release
           tar acf data-sink-${{ matrix.target }}.tar.gz target/release/data-sink
+  upload-assets-emails:
+    name: "Upload assets to Github releases - emails"
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs:
+      - "prep-env"
+    strategy:
+      matrix:
+        include:
+          - target: "x86_64-unknown-linux-gnu"
+            os: "ubuntu-latest"
+    runs-on: ${{ matrix.os }}
+    steps:
       - name: "Build Email"
         run: |
           cargo build -p emails --release
           tar acf emails-${{ matrix.target }}.tar.gz target/release/emails
+  upload-assets-final:
+    name: "Upload assets to Github releases - emails"
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs:
+      - "prep-env"
+      - "upload-assets-final"
+      - "upload-assets-emails"
+      - "upload-assets-final-manager"
+      - "upload-assets-final-worker"
+      - "upload-assets-final-ws"
+      - "upload-assets-final-api"
+      - "upload-assets-feature-flag"
+    strategy:
+      matrix:
+        include:
+          - target: "x86_64-unknown-linux-gnu"
+            os: "ubuntu-latest"
+    runs-on: ${{ matrix.os }}
+    steps:
       - name: Release
         uses: softprops/action-gh-release@v2
         #if: startsWith(github.ref, 'refs/tags/')
