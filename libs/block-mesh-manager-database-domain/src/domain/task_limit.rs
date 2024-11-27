@@ -57,7 +57,7 @@ impl TaskLimit {
         if let Ok(redis_user) = serde_json::to_string(&user) {
             let _: RedisResult<()> = con
                 .set_ex(
-                    &Self::get_key(&user.user_id),
+                    Self::get_key(&user.user_id),
                     redis_user.clone(),
                     expire, // 10u64 * Backend::get_expire().await as u64,
                 )
