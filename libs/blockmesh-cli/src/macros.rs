@@ -1,5 +1,4 @@
-#![allow(clippy::macro_metavars_in_unsafe)]
-
+#[allow(clippy::macro_metavars_in_unsafe)]
 #[macro_export]
 macro_rules! char_to_str {
     ($ptr:expr, $name:literal) => {
