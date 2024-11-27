@@ -214,12 +214,12 @@ jobs:
     needs:
       - "get-tag"
       - "prep-env"
-      - "upload-assets-final-manager"
-      - "upload-assets-final-worker"
-      - "upload-assets-final-api"
-      - "upload-assets-final-ws"
+      - "upload-assets-manager"
+      - "upload-assets-worker"
+      - "upload-assets-api"
+      - "upload-assets-ws"
       - "upload-assets-feature-flag"
-      - "upload-assets-feature-tg"
+      - "upload-assets-tg"
       - "upload-assets-emails"
       - "upload-assets-data-sink"
     strategy:
@@ -247,7 +247,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs:
       - "get-tag"
-      - "upload-assets"
+      - "upload-assets-final"
     runs-on: "ubuntu-latest"
     steps:
       - name: "Check out the repo"
