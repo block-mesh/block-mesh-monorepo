@@ -20,6 +20,7 @@ unused = "forbid"
 dead_code = "forbid"
 
 [workspace.lints.clippy]
+macro_metavars_in_unsafe = { level = "allow" }
 #all = { level = "deny", priority = 5 }
 ## cargo = { level = "warn", priority = 5 }
 #pedantic = { level = "deny", priority = 5 }
