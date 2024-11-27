@@ -219,7 +219,7 @@ jobs:
       - "upload-assets-api"
       - "upload-assets-ws"
       - "upload-assets-feature-flag"
-      - "upload-assets-feature-tg"
+      - "upload-assets-tg"
       - "upload-assets-emails"
       - "upload-assets-data-sink"
     strategy:
@@ -247,7 +247,7 @@ jobs:
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
     needs:
       - "get-tag"
-      - "upload-assets"
+      - "upload-assets-final"
     runs-on: "ubuntu-latest"
     steps:
       - name: "Check out the repo"
