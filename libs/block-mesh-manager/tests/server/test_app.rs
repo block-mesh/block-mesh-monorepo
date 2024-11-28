@@ -80,6 +80,9 @@ pub async fn spawn_app() -> TestApp {
     let invite_codes = Arc::new(DashMap::new());
 
     let app_state = Arc::new(AppState {
+        cf_enforce: false,
+        cf_site_key: "1".to_string(),
+        cf_secret_key: "2".to_string(),
         invite_codes,
         wallet_addresses,
         rate_limit: true,
