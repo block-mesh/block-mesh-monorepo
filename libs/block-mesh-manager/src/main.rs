@@ -136,7 +136,11 @@ async fn run() -> anyhow::Result<()> {
     let follower_pool = follower_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
     let invite_codes = Arc::new(DashMap::new());
     let wallet_addresses = Arc::new(DashMap::new());
+    let cf_site_key = env::var("CF_SITE_KEY")?;
+    let cf_secret_key = env::var("CF_SECRET_KEY")?;
     let app_state = Arc::new(AppState {
+        cf_secret_key,
+        cf_site_key,
         wallet_addresses,
         invite_codes,
         submit_bandwidth_limit,

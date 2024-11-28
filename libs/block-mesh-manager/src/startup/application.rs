@@ -41,6 +41,8 @@ pub struct Application {
 }
 
 pub struct AppState {
+    pub cf_secret_key: String,
+    pub cf_site_key: String,
     pub task_limit: bool,
     pub rate_limit: bool,
     pub submit_bandwidth_limit: bool,

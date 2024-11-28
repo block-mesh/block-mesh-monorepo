@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+#![allow(unused_variables)]
 use crate::frontends::context::auth_context::AuthContext;
 use crate::frontends::context::notification_context::NotificationContext;
 use crate::frontends::utils::auth::register;
@@ -20,49 +22,51 @@ pub fn TauriRegister() -> impl IntoView {
     let submit_action_resource = create_local_resource(
         move || (),
         move |_| async move {
-            if wait.get_untracked()
-                || email.get_untracked().is_empty()
-                || password.get_untracked().is_empty()
-                || password_confirm.get_untracked().is_empty()
-                || invite_code.get_untracked().is_empty()
-            {
-                return;
-            }
-            if password.get_untracked() != password_confirm.get_untracked() {
-                notifications.set_error("Password doesnt match confirmation");
-                return;
-            }
-            set_wait.set(true);
-            let credentials = RegisterForm {
-                email: email.get_untracked(),
-                password: password.get_untracked(),
-                password_confirm: password.get_untracked(),
-                invite_code: invite_code.get_untracked(),
-            };
-            let result = register(&state.blockmesh_url.get_untracked(), &credentials).await;
-            match result {
-                Ok(_) => {
-                    state.api_token.update(|t| *t = uuid::Uuid::default());
-                    send_message_channel(
-                        MessageType::SET,
-                        MessageKey::ApiToken,
-                        Option::from(MessageValue::UUID(uuid::Uuid::default())),
-                    )
-                    .await;
-                    state
-                        .status
-                        .update(|v| *v = AuthStatus::WaitingEmailVerification);
-                    notifications.set_success("Please confirm email and login");
-                }
-                Err(err) => {
-                    tracing::error!(
-                        "Unable to register new account for {}: {err}",
-                        credentials.email
-                    );
-                    notifications.set_error(err.to_string());
-                }
-            }
             set_wait.set(false);
+            return;
+            //if wait.get_untracked()
+            //    || email.get_untracked().is_empty()
+            //    || password.get_untracked().is_empty()
+            //    || password_confirm.get_untracked().is_empty()
+            //    || invite_code.get_untracked().is_empty()
+            //{
+            //    return;
+            //}
+            //if password.get_untracked() != password_confirm.get_untracked() {
+            //    notifications.set_error("Password doesnt match confirmation");
+            //    return;
+            //}
+            //set_wait.set(true);
+            //let credentials = RegisterForm {
+            //    email: email.get_untracked(),
+            //    password: password.get_untracked(),
+            //    password_confirm: password.get_untracked(),
+            //    invite_code: invite_code.get_untracked(),
+            //};
+            //let result = register(&state.blockmesh_url.get_untracked(), &credentials).await;
+            //match result {
+            //    Ok(_) => {
+            //        state.api_token.update(|t| *t = uuid::Uuid::default());
+            //        send_message_channel(
+            //            MessageType::SET,
+            //            MessageKey::ApiToken,
+            //            Option::from(MessageValue::UUID(uuid::Uuid::default())),
+            //        )
+            //        .await;
+            //        state
+            //            .status
+            //            .update(|v| *v = AuthStatus::WaitingEmailVerification);
+            //        notifications.set_success("Please confirm email and login");
+            //    }
+            //    Err(err) => {
+            //        tracing::error!(
+            //            "Unable to register new account for {}: {err}",
+            //            credentials.email
+            //        );
+            //        notifications.set_error(err.to_string());
+            //    }
+            //}
+            //set_wait.set(false);
         },
     );
 

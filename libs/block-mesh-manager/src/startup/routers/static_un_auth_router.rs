@@ -1,6 +1,6 @@
 use crate::routes;
 use crate::startup::application::AppState;
-use axum::routing::{get, post};
+use axum::routing::get;
 use axum::Router;
 use block_mesh_common::routes_enum::RoutesEnum;
 use std::sync::Arc;

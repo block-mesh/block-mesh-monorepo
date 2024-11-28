@@ -35,6 +35,7 @@ use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
 use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
+use crate::utils::cftoken::check_cf_token;
 
 static RATE_LIMIT_IP: OnceCell<DashSetWithExpiry<String>> = OnceCell::const_new();
 
@@ -68,6 +69,15 @@ pub async fn handler(
     let date = Utc::now() + Duration::milliseconds(60_000);
     cache.insert(header_ip, Some(date));
     cache.insert(email.clone(), Some(date));
+
+    if let Err(e) = check_cf_token(form.cftoken, &state.cf_secret_key).await {
+        return Ok(Error::redirect(
+            400,
+            "Error in human validation",
+            &format!("The following error occured: {}", e),
+            RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
+        ));
+    }
 
     let mut transaction = create_txn(&pool).await?;
 

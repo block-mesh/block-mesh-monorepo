@@ -203,6 +203,7 @@ pub struct RegisterForm {
     pub password: String,
     pub password_confirm: String,
     pub invite_code: String,
+    pub cftoken: String,
 }
 
 #[typeshare]
@@ -214,6 +215,7 @@ pub struct RegisterWalletForm {
     pub password: String,
     pub password_confirm: String,
     pub invite_code: String,
+    pub cftoken: String,
 }
 
 #[typeshare]
@@ -593,4 +595,10 @@ pub struct SendEmail {
     pub email_type: String,
     pub email_address: String,
     pub nonce: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct TurnStile {
+    pub secret: String,
+    pub response: String,
 }

@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+#![allow(unused_variables)]
 use crate::frontends::context::extension_state::ExtensionContext;
 use crate::frontends::context::notification_context::NotificationContext;
 use crate::frontends::frontend_extension::components::logo::Logo;
@@ -15,49 +17,50 @@ pub fn ExtensionRegister() -> impl IntoView {
     let (password, set_password) = create_signal(String::new());
     let (email, set_email) = create_signal(String::new());
     let (invite_code, set_invite_code) = create_signal(String::new());
-    let (wait, set_wait) = create_signal(false);
+    let (wait, _set_wait) = create_signal(false);
 
     let submit_action_resource = create_local_resource(
         move || (),
         move |_| async move {
-            if wait.get_untracked()
-                || email.get_untracked().is_empty()
-                || password.get_untracked().is_empty()
-                || invite_code.get_untracked().is_empty()
-            {
-                return;
-            }
-            set_wait.set(true);
-            let credentials = RegisterForm {
-                email: email.get_untracked(),
-                password: password.get_untracked(),
-                password_confirm: password.get_untracked(),
-                invite_code: invite_code.get_untracked(),
-            };
-            let result = register(&state.blockmesh_url.get_untracked(), &credentials).await;
-            match result {
-                Ok(_) => {
-                    state.api_token.update(|t| *t = uuid::Uuid::default());
-                    send_message_channel(
-                        MessageType::SET,
-                        MessageKey::ApiToken,
-                        Option::from(MessageValue::UUID(uuid::Uuid::default())),
-                    )
-                    .await;
-                    state
-                        .status
-                        .update(|v| *v = AuthStatus::WaitingEmailVerification);
-                    notifications.set_success("Please confirm email and login");
-                }
-                Err(err) => {
-                    tracing::error!(
-                        "Unable to register new account for {}: {err}",
-                        credentials.email
-                    );
-                    notifications.set_error(err.to_string());
-                }
-            }
-            set_wait.set(false);
+            return;
+            // if wait.get_untracked()
+            //     || email.get_untracked().is_empty()
+            //     || password.get_untracked().is_empty()
+            //     || invite_code.get_untracked().is_empty()
+            // {
+            //     return;
+            // }
+            //set_wait.set(true);
+            //let credentials = RegisterForm {
+            //    email: email.get_untracked(),
+            //    password: password.get_untracked(),
+            //    password_confirm: password.get_untracked(),
+            //    invite_code: invite_code.get_untracked(),
+            //};
+            //let result = register(&state.blockmesh_url.get_untracked(), &credentials).await;
+            //match result {
+            //    Ok(_) => {
+            //        state.api_token.update(|t| *t = uuid::Uuid::default());
+            //        send_message_channel(
+            //            MessageType::SET,
+            //            MessageKey::ApiToken,
+            //            Option::from(MessageValue::UUID(uuid::Uuid::default())),
+            //        )
+            //        .await;
+            //        state
+            //            .status
+            //            .update(|v| *v = AuthStatus::WaitingEmailVerification);
+            //        notifications.set_success("Please confirm email and login");
+            //    }
+            //    Err(err) => {
+            //        tracing::error!(
+            //            "Unable to register new account for {}: {err}",
+            //            credentials.email
+            //        );
+            //        notifications.set_error(err.to_string());
+            //    }
+            //}
+            // set_wait.set(false);
         },
     );
 

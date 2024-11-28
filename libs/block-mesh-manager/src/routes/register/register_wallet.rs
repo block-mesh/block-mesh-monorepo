@@ -30,6 +30,7 @@ struct RegisterTemplate {
     pub support: String,
     pub chat: String,
     pub nonce: String,
+    pub cf_site_key: String,
 }
 
 #[tracing::instrument(name = "register_wallet", skip_all)]
@@ -46,6 +47,7 @@ pub async fn handler(
             let nonce = Nonce::generate_nonce(16);
             let _: RedisResult<()> = redis.set_ex(&nonce, &nonce, 600).await;
             Ok(RegisterTemplate {
+                cf_site_key: state.cf_site_key.clone(),
                 nonce,
                 chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
                 app_server: BLOCK_MESH_APP_SERVER.to_string(),
