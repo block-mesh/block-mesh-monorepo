@@ -1,3 +1,5 @@
+#![allow(unused_imports)]
+#![allow(unused_variables)]
 use crate::frontends::context::extension_state::ExtensionContext;
 use crate::frontends::context::notification_context::NotificationContext;
 use crate::frontends::frontend_extension::components::logo::Logo;
@@ -7,6 +9,37 @@ use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType, Mes
 use block_mesh_common::interfaces::server_api::RegisterForm;
 use leptos::*;
 use leptos_dom::tracing;
+use wasm_bindgen::prelude::wasm_bindgen;
+use wasm_bindgen::JsCast;
+use wasm_bindgen::JsValue;
+use web_sys::HtmlInputElement;
+
+#[wasm_bindgen(inline_js = r#"
+    export async function render_turnstile() {
+        try {
+            const sitekey = window.location.origin.includes("localhost") ? "3x00000000000000000000FF" : "0x4AAAAAAA1Depgrun_GLCjW";
+            turnstile.render('#myWidget', {
+                sitekey: sitekey,
+                theme: 'dark',
+                callback: (token) => {
+                    let el = document.getElementById('cf-overlay')
+                    if (el) {
+                      el.style.display = 'none'
+                    }
+                    let cftoken = document.getElementById('cftoken')
+                    if (cftoken) {
+                      cftoken.value = token
+                    }
+                }
+            })
+        } catch (error) {
+            console.error("render_turnstile", error);
+        }
+    }
+"#)]
+extern "C" {
+    pub async fn render_turnstile();
+}
 
 #[component]
 pub fn ExtensionRegister() -> impl IntoView {
@@ -16,6 +49,14 @@ pub fn ExtensionRegister() -> impl IntoView {
     let (email, set_email) = create_signal(String::new());
     let (invite_code, set_invite_code) = create_signal(String::new());
     let (wait, set_wait) = create_signal(false);
+    let (cf_token_loaded, set_cf_token_loaded) = create_signal(false);
+
+    create_effect(move |_| {
+        spawn_local(async move {
+            render_turnstile().await;
+            set_cf_token_loaded.set(true)
+        })
+    });
 
     let submit_action_resource = create_local_resource(
         move || (),
@@ -28,8 +69,17 @@ pub fn ExtensionRegister() -> impl IntoView {
                 return;
             }
             set_wait.set(true);
+
+            let document = web_sys::window().unwrap().document().unwrap();
+            let input_element = document
+                .get_element_by_id("cftoken")
+                .unwrap()
+                .dyn_into::<HtmlInputElement>()
+                .unwrap(); // Cast to HtmlInputElement
+            let cftoken = input_element.value();
             let credentials = RegisterForm {
                 email: email.get_untracked(),
+                cftoken,
                 password: password.get_untracked(),
                 password_confirm: password.get_untracked(),
                 invite_code: invite_code.get_untracked(),
@@ -63,6 +113,15 @@ pub fn ExtensionRegister() -> impl IntoView {
 
     view! {
         <div class="auth-card">
+            <div
+                id="cf-overlay"
+                class="fixed inset-0 bg-dark-blue bg-opacity-50 flex items-center justify-center z-50"
+            >
+                <div class="bg-dark-blue p-8 rounded shadow-lg border-solid border-2 border-orange">
+                    <h1 class="text-lg text-off-white font-bold">Please verify you are human</h1>
+                    <div id="myWidget"></div>
+                </div>
+            </div>
             <img
                 class="background-image"
                 src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/0e42f33d-48e0-4f17-5ae0-9249a41bb200/public"
@@ -73,6 +132,14 @@ pub fn ExtensionRegister() -> impl IntoView {
             <div class="auth-card-body">
                 <Logo/>
                 <form on:submit=|ev| ev.prevent_default()>
+                    <input
+                        style="display: none"
+                        type="text"
+                        id="cftoken"
+                        name="cftoken"
+                        required
+                        readonly
+                    />
                     <div class="auth-card-input-container">
                         <input
                             type="text"

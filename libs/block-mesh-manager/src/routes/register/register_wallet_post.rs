@@ -34,6 +34,7 @@ use crate::domain::perk::PerkName;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
 use crate::startup::application::AppState;
+use crate::utils::cftoken::check_cf_token;
 
 #[tracing::instrument(name = "register_wallet_post", skip_all)]
 pub async fn handler(
@@ -42,7 +43,16 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Form(form): Form<RegisterWalletForm>,
 ) -> Result<Redirect, Error> {
-    tracing::info!("form = {:#?}", form);
+    if state.cf_enforce {
+        if let Err(e) = check_cf_token(form.cftoken, &state.cf_secret_key).await {
+            return Ok(Error::redirect(
+                400,
+                "Error in human validation",
+                &format!("The following error occurred: {}", e),
+                RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
+            ));
+        }
+    }
     let mut redis = state.redis.clone();
     let mut transaction = create_txn(&pool).await?;
     let sig_array: SigArray = match serde_json::from_str(&form.signature) {

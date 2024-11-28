@@ -1,8 +1,10 @@
 use crate::database::task::get_tasks_by_user_id::get_tasks_by_user_id;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
+use crate::startup::application::AppState;
 use askama::Template;
 use askama_axum::IntoResponse;
+use axum::extract::State;
 use axum::Extension;
 use axum_login::AuthSession;
 use block_mesh_common::constants::{
@@ -16,6 +18,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::PgPool;
 use std::fmt::Display;
+use std::sync::Arc;
 use uuid::Uuid;
 
 #[allow(dead_code)]
@@ -32,6 +35,7 @@ struct TasksTableTemplate {
     pub image: String,
     pub support: String,
     pub chat: String,
+    pub cf_site_key: String,
 }
 
 #[derive(Serialize, Deserialize)]
@@ -83,6 +87,7 @@ impl From<Task> for TaskForTemplate {
 
 #[tracing::instrument(name = "tasks_table", skip_all)]
 pub async fn handler(
+    State(state): State<Arc<AppState>>,
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<impl IntoResponse, Error> {
@@ -97,6 +102,7 @@ pub async fn handler(
 
     Ok(TasksTableTemplate {
         tasks,
+        cf_site_key: state.cf_site_key.to_string(),
         chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
         app_server: BLOCK_MESH_APP_SERVER.to_string(),
         github: BLOCK_MESH_GITHUB.to_string(),

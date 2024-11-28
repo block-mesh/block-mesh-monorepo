@@ -9,6 +9,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use database_utils::utils::connection::channel_pool::channel_pool;
     use database_utils::utils::connection::follower_pool::follower_pool;
     use database_utils::utils::connection::unlimited_pool::unlimited_pool;
+
     use block_mesh_common::constants::DeviceType;
     use block_mesh_manager::worker::update_feature_flags::feature_flags_loop;
     use block_mesh_manager::utils::cache_envar::get_envar;
@@ -135,7 +136,16 @@ async fn run() -> anyhow::Result<()> {
     let follower_pool = follower_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
     let invite_codes = Arc::new(DashMap::new());
     let wallet_addresses = Arc::new(DashMap::new());
+    let cf_site_key = env::var("CF_SITE_KEY")?;
+    let cf_secret_key = env::var("CF_SECRET_KEY")?;
+    let cf_enforce = env::var("CF_ENFORCE")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
     let app_state = Arc::new(AppState {
+        cf_enforce,
+        cf_secret_key,
+        cf_site_key,
         wallet_addresses,
         invite_codes,
         submit_bandwidth_limit,

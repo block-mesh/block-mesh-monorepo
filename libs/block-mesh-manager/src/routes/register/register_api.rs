@@ -10,6 +10,7 @@ use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
 use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
+use crate::utils::cftoken::check_cf_token;
 use anyhow::{anyhow, Context};
 use axum::extract::State;
 use axum::{Extension, Form, Json};
@@ -63,6 +64,16 @@ pub async fn handler(
     let date = Utc::now() + Duration::milliseconds(60_000);
     cache.insert(header_ip, Some(date));
     cache.insert(email.clone(), Some(date));
+
+    if state.cf_enforce {
+        if let Err(e) = check_cf_token(form.cftoken, &state.cf_secret_key).await {
+            return Ok(Json(RegisterResponse {
+                status_code: 400,
+                error: Some(format!("The following error occurred: {}", e)),
+            }));
+        }
+    }
+
     let mut transaction = create_txn(&pool).await?;
     if !validate_email(email.clone()) {
         return Ok(Json(RegisterResponse {

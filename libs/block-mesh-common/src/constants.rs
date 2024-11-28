@@ -12,6 +12,7 @@ pub const BLOCKMESH_PG_NOTIFY_EMAIL: &str = "pgchannel_email";
 pub const BLOCKMESH_VPS: &str = "https://vps.blockmesh.xyz";
 
 pub const BLOCKMESH_WS_REDIS_COUNT_KEY: &str = "BLOCKMESH_WS_REDIS_COUNT_KEY";
+pub const CF_TURNSTILE: &str = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
 
 pub fn env_url() -> String {
     static APP_ENVIRONMENT: OnceLock<String> = OnceLock::new();

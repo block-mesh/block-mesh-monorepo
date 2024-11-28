@@ -1,13 +1,15 @@
 use askama::Template;
 use askama_axum::IntoResponse;
-use axum::extract::Query;
+use axum::extract::{Query, State};
 use axum::Extension;
 use axum_login::AuthSession;
 use sqlx::PgPool;
+use std::sync::Arc;
 
 use crate::database::nonce::get_nonce_by_nonce::get_nonce_by_nonce;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
+use crate::startup::application::AppState;
 use block_mesh_common::constants::{
     BLOCK_MESH_APP_SERVER, BLOCK_MESH_CHROME_EXTENSION_LINK, BLOCK_MESH_GITBOOK, BLOCK_MESH_GITHUB,
     BLOCK_MESH_LANDING_PAGE_IMAGE, BLOCK_MESH_LOGO, BLOCK_MESH_SUPPORT_CHAT,
@@ -31,9 +33,11 @@ struct NewPasswordTemplate {
     pub image: String,
     pub support: String,
     pub chat: String,
+    pub cf_site_key: String,
 }
 
 pub async fn handler(
+    State(state): State<Arc<AppState>>,
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,
     Query(query): Query<NewPasswordQuery>,
@@ -49,6 +53,7 @@ pub async fn handler(
     match auth.user {
         Some(_) => Err(Error::PleaseLogout),
         None => Ok(NewPasswordTemplate {
+            cf_site_key: state.cf_site_key.to_string(),
             email: user.email.to_ascii_lowercase(),
             token,
             chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),

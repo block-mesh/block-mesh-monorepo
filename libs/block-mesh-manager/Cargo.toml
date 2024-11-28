@@ -216,7 +216,7 @@ assets-dir = "public"
 site-addr = "127.0.0.1:8000"
 
 js-dir = "js-src"
-watch-additional-files = ["js-src/connectors.js"]
+watch-additional-files = ["js-src/connectors.js", "templates/base.html"]
 
 # The port to use for automatic reload monitoring
 reload-port = 3001
