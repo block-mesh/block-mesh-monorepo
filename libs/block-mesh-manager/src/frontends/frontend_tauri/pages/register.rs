@@ -23,7 +23,7 @@ pub fn TauriRegister() -> impl IntoView {
         move || (),
         move |_| async move {
             set_wait.set(false);
-            return;
+            // return;
             //if wait.get_untracked()
             //    || email.get_untracked().is_empty()
             //    || password.get_untracked().is_empty()
