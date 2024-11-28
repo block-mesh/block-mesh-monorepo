@@ -203,7 +203,7 @@ pub struct RegisterForm {
     pub password: String,
     pub password_confirm: String,
     pub invite_code: String,
-    pub cftoken: String,
+    pub cftoken: Option<String>,
 }
 
 #[typeshare]
@@ -215,7 +215,7 @@ pub struct RegisterWalletForm {
     pub password: String,
     pub password_confirm: String,
     pub invite_code: String,
-    pub cftoken: String,
+    pub cftoken: Option<String>,
 }
 
 #[typeshare]
