@@ -16,6 +16,9 @@ export _PWD="$(pwd)"
 export ROOT="$(git rev-parse --show-toplevel)"
 export VERSION=$(grep -m 1 '^version' Cargo.toml | sed -e 's/^version\s*=\s*//' | sed -e 's/"//g')
 source "${ROOT}/scripts/setup.sh"
+if [ -f "${ROOT}/.env" ] ; then
+  source "${ROOT}/.env"
+fi
 cd "${ROOT}/libs/extension" || exit 1
 
 ## --release or --dev - exclude/include debug info

@@ -6,7 +6,8 @@ import initWasmModule, {
   start_websocket,
   measure_bandwidth,
   stop_websocket,
-  read_dom
+  read_dom,
+  feed_setup
 } from './wasm/blockmesh_ext.js'
 
 console.log('Background script started')
@@ -143,7 +144,7 @@ async function init_background() {
   await chrome.alarms.create('stayAlive', {
     periodInMinutes: 0.55
   })
-
+  await feed_setup()
   await main_interval()
   setInterval(async () => {
     await main_interval()

@@ -33,9 +33,9 @@ pub async fn channel_pool(database_url_envar_name: Option<String>) -> PgPool {
         ))
         .max_lifetime(Duration::from_millis(
             env::var("MAX_LIFETIME_FOR_CHANNEL")
-                .unwrap_or("0".to_string())
+                .unwrap_or("1000000000000".to_string())
                 .parse()
-                .unwrap_or(0),
+                .unwrap_or(1000000000000),
         ))
         .test_before_acquire(true)
         .connect_with(settings.clone())

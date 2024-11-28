@@ -112,6 +112,11 @@ document.addEventListener('DOMContentLoaded', async function() {
   iframe.style = 'border: 0px'
   iframe.addEventListener('load', (_) => onLoad(iframe))
   const body = document.body
+  let spinner = document.getElementById('loading_spinner')
+  if (spinner) {
+    let parent = spinner.parentNode
+    parent.removeChild(spinner)
+  }
   body.appendChild(iframe)
 })
 

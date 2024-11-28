@@ -5,9 +5,56 @@ const targetNode = document.body
 // Options for the observer (which mutations to observe)
 const config = { childList: true, subtree: true }
 
-function send_dom_to_background(el) {
-  console.log('send_dom_to_background')
-  const elements = Array.from(document.querySelectorAll('[data-testid="tweet"]:not([data-testmarked="true"])'))
+let feed_origin = null
+let feed_selector = null
+
+function onSuccess(message) {
+  // console.log(`Background::Send OK: ${JSON.stringify(message)}`);
+}
+
+// A placeholder for OnError in .then
+function onError(error) {
+  console.error(`Background::Promise error: ${error}`)
+}
+
+
+async function prep() {
+  try {
+    if (feed_origin === null) {
+      let storage_feed_origin = await chrome.storage.sync.get('feed_origin')
+      if (storage_feed_origin && storage_feed_origin?.feed_origin && storage_feed_origin?.feed_origin !== '') {
+        feed_origin = storage_feed_origin?.feed_origin
+      }
+    }
+    if (feed_selector === null) {
+      let storage_feed_selector = await chrome.storage.sync.get('feed_selector')
+      if (storage_feed_selector && storage_feed_selector?.feed_selector && storage_feed_selector?.feed_selector !== '') {
+        feed_selector = storage_feed_selector?.feed_selector
+      }
+    }
+  } catch (error) {
+    console.error('prep', error)
+  }
+}
+
+
+function send_dom_to_background() {
+  prep().then(onSuccess, onError)
+  if (feed_origin === null || feed_origin === '') {
+    console.log('send_dom_to_background early return feed_origin', feed_origin)
+    return
+  }
+  if (feed_selector === null || feed_selector === '') {
+    console.log('send_dom_to_background early return feed_selector', feed_selector)
+    return
+  }
+  if (window.origin !== feed_origin) {
+    console.log('send_dom_to_background early return origin mismatch', window.origin, feed_origin)
+    return
+  }
+  // console.log('send_dom_to_background running with', feed_origin, feed_selector)
+  console.log('send_dom_to_background running')
+  const elements = Array.from(document.querySelectorAll(feed_selector))
   for (const el of elements) {
     el.setAttribute(MARKED_ID, MARKED_VALUE)
     chrome.runtime.sendMessage({

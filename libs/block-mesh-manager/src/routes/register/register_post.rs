@@ -71,7 +71,8 @@ pub async fn handler(
     cache.insert(email.clone(), Some(date));
 
     if state.cf_enforce {
-        if let Err(e) = check_cf_token(form.cftoken, &state.cf_secret_key).await {
+        if let Err(e) = check_cf_token(form.cftoken.unwrap_or_default(), &state.cf_secret_key).await
+        {
             return Ok(Error::redirect(
                 400,
                 "Error in human validation",

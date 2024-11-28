@@ -15,6 +15,7 @@ async fn test_register_user() {
         password: password.clone(),
         password_confirm: password.clone(),
         invite_code: "123".to_string(),
+        cftoken: Option::from("test".to_string()),
     })
     .await
     .unwrap();

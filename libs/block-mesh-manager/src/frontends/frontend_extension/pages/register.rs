@@ -79,7 +79,7 @@ pub fn ExtensionRegister() -> impl IntoView {
             let cftoken = input_element.value();
             let credentials = RegisterForm {
                 email: email.get_untracked(),
-                cftoken,
+                cftoken: Some(cftoken),
                 password: password.get_untracked(),
                 password_confirm: password.get_untracked(),
                 invite_code: invite_code.get_untracked(),
