@@ -138,7 +138,12 @@ async fn run() -> anyhow::Result<()> {
     let wallet_addresses = Arc::new(DashMap::new());
     let cf_site_key = env::var("CF_SITE_KEY")?;
     let cf_secret_key = env::var("CF_SECRET_KEY")?;
+    let cf_enforce = env::var("CF_ENFORCE")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
     let app_state = Arc::new(AppState {
+        cf_enforce,
         cf_secret_key,
         cf_site_key,
         wallet_addresses,

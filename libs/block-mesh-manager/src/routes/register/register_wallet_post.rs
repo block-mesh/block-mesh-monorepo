@@ -43,13 +43,15 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Form(form): Form<RegisterWalletForm>,
 ) -> Result<Redirect, Error> {
-    if let Err(e) = check_cf_token(form.cftoken, &state.cf_secret_key).await {
-        return Ok(Error::redirect(
-            400,
-            "Error in human validation",
-            &format!("The following error occured: {}", e),
-            RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
-        ));
+    if state.cf_enforce {
+        if let Err(e) = check_cf_token(form.cftoken, &state.cf_secret_key).await {
+            return Ok(Error::redirect(
+                400,
+                "Error in human validation",
+                &format!("The following error occurred: {}", e),
+                RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
+            ));
+        }
     }
     let mut redis = state.redis.clone();
     let mut transaction = create_txn(&pool).await?;

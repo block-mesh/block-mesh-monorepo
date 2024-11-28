@@ -1,6 +1,6 @@
 use crate::routes;
 use crate::startup::application::AppState;
-use axum::routing::get;
+use axum::routing::{get, post};
 use axum::Router;
 use block_mesh_common::routes_enum::RoutesEnum;
 use std::sync::Arc;
@@ -61,6 +61,10 @@ pub fn get_static_un_auth_router() -> Router<Arc<AppState>> {
             RoutesEnum::Static_UnAuth_Login_Wallet.to_string().as_str(),
             get(routes::login::login_wallet::handler)
                 .post(routes::login::login_wallet_post::handler),
+        )
+        .route(
+            RoutesEnum::Static_UnAuth_RegisterApi.to_string().as_str(),
+            post(routes::register::register_api::handler),
         )
         .route(
             RoutesEnum::Static_UnAuth_Register.to_string().as_str(),

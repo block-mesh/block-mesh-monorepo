@@ -70,13 +70,15 @@ pub async fn handler(
     cache.insert(header_ip, Some(date));
     cache.insert(email.clone(), Some(date));
 
-    if let Err(e) = check_cf_token(form.cftoken, &state.cf_secret_key).await {
-        return Ok(Error::redirect(
-            400,
-            "Error in human validation",
-            &format!("The following error occured: {}", e),
-            RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
-        ));
+    if state.cf_enforce {
+        if let Err(e) = check_cf_token(form.cftoken, &state.cf_secret_key).await {
+            return Ok(Error::redirect(
+                400,
+                "Error in human validation",
+                &format!("The following error occurred: {}", e),
+                RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
+            ));
+        }
     }
 
     let mut transaction = create_txn(&pool).await?;

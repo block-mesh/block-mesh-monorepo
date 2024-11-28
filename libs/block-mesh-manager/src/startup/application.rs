@@ -41,6 +41,7 @@ pub struct Application {
 }
 
 pub struct AppState {
+    pub cf_enforce: bool,
     pub cf_secret_key: String,
     pub cf_site_key: String,
     pub task_limit: bool,

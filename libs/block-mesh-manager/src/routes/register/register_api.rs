@@ -65,11 +65,13 @@ pub async fn handler(
     cache.insert(header_ip, Some(date));
     cache.insert(email.clone(), Some(date));
 
-    if let Err(e) = check_cf_token(form.cftoken, &state.cf_secret_key).await {
-        return Ok(Json(RegisterResponse {
-            status_code: 400,
-            error: Some(format!("The following error occured: {}", e)),
-        }));
+    if state.cf_enforce {
+        if let Err(e) = check_cf_token(form.cftoken, &state.cf_secret_key).await {
+            return Ok(Json(RegisterResponse {
+                status_code: 400,
+                error: Some(format!("The following error occurred: {}", e)),
+            }));
+        }
     }
 
     let mut transaction = create_txn(&pool).await?;
