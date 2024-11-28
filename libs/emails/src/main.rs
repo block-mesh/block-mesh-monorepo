@@ -69,9 +69,10 @@ pub struct AppState {
 impl AppState {
     pub async fn new() -> Self {
         let data_sink_db_pool = write_pool(None).await;
+        let base_url = env::var("BASE_URL").unwrap();
         let environment = env::var("APP_ENVIRONMENT").unwrap();
         let environment = Environment::from_str(&environment).unwrap();
-        let email_client = Arc::new(EmailClient::new("https://blockmesh.xyz".to_string()).await);
+        let email_client = Arc::new(EmailClient::new(base_url).await);
         Self {
             emails_db_pool: data_sink_db_pool,
             environment,
