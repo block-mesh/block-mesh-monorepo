@@ -2,8 +2,8 @@ use std::process::ExitCode;
 
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::cli::{CliOptMod, CliOpts};
-use block_mesh_common::interfaces::server_api::{DashboardRequest, LoginForm, RegisterForm};
-use blockmesh_cli::helpers::{dashboard, is_vps, login_to_network, register};
+use block_mesh_common::interfaces::server_api::{DashboardRequest, LoginForm};
+use blockmesh_cli::helpers::{dashboard, is_vps, login_to_network};
 use blockmesh_cli::login_mode::login_mode;
 use clap::Parser;
 use logger_general::tracing::setup_tracing;

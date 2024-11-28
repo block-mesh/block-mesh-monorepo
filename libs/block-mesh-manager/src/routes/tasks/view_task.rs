@@ -1,9 +1,10 @@
 use crate::database::task::get_task_by_id::get_task_by_user_id;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
+use crate::startup::application::AppState;
 use askama::Template;
 use askama_axum::IntoResponse;
-use axum::extract::Query;
+use axum::extract::{Query, State};
 use axum::Extension;
 use axum_login::AuthSession;
 use block_mesh_common::constants::{
@@ -13,6 +14,7 @@ use block_mesh_common::constants::{
 };
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
+use std::sync::Arc;
 use uuid::Uuid;
 
 #[allow(dead_code)]
@@ -29,6 +31,7 @@ struct ViewTaskTemplate {
     pub image: String,
     pub support: String,
     pub chat: String,
+    pub cf_site_key: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -38,6 +41,7 @@ pub struct ViewTaskParams {
 
 #[tracing::instrument(name = "view_task", skip_all)]
 pub async fn handler(
+    State(state): State<Arc<AppState>>,
     Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,
     Query(query): Query<ViewTaskParams>,
@@ -59,6 +63,7 @@ pub async fn handler(
         return Err(Error::TaskResponseNotFound);
     }
     Ok(ViewTaskTemplate {
+        cf_site_key: state.cf_site_key.to_string(),
         raw_html: task.response_raw.unwrap(),
         chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
         app_server: BLOCK_MESH_APP_SERVER.to_string(),

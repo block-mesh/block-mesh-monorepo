@@ -23,10 +23,9 @@
     function _turnstileCb() {
       console.debug('_turnstileCb called')
       turnstile.render('#myWidget', {
-        sitekey: '3x00000000000000000000FF',
+        sitekey: '{{ cf_site_key }}',
         theme: 'dark',
         callback: (token) => {
-          console.log('here 29', token)
           let el = document.getElementById('cf-overlay')
           if (el) {
             el.style.display = 'none'

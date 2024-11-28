@@ -1,5 +1,6 @@
 use askama::Template;
 use askama_axum::IntoResponse;
+use axum::extract::State;
 use axum::response::Redirect;
 use axum::Extension;
 use axum_login::AuthSession;
@@ -8,8 +9,10 @@ use block_mesh_common::constants::{
     BLOCK_MESH_LANDING_PAGE_IMAGE, BLOCK_MESH_LOGO, BLOCK_MESH_SUPPORT_CHAT,
     BLOCK_MESH_SUPPORT_EMAIL, BLOCK_MESH_TWITTER,
 };
+use std::sync::Arc;
 
 use crate::middlewares::authentication::Backend;
+use crate::startup::application::AppState;
 
 #[allow(dead_code)]
 #[derive(Template)]
@@ -24,15 +27,18 @@ struct LoginTemplate {
     pub image: String,
     pub support: String,
     pub chat: String,
+    pub cf_site_key: String,
 }
 
 #[tracing::instrument(name = "login_form", skip_all)]
 pub async fn handler(
+    State(state): State<Arc<AppState>>,
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<impl IntoResponse, Redirect> {
     match auth.user {
         Some(_) => Err(Redirect::to("/ui/dashboard")),
         None => Ok(LoginTemplate {
+            cf_site_key: state.cf_site_key.clone(),
             chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
             app_server: BLOCK_MESH_APP_SERVER.to_string(),
             github: BLOCK_MESH_GITHUB.to_string(),

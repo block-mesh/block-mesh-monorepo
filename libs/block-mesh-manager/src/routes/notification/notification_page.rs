@@ -1,13 +1,15 @@
 use crate::errors::error::Error;
+use crate::startup::application::AppState;
 use askama::Template;
 use askama_axum::IntoResponse;
-use axum::extract::Query;
+use axum::extract::{Query, State};
 use block_mesh_common::constants::{
     BLOCK_MESH_APP_SERVER, BLOCK_MESH_CHROME_EXTENSION_LINK, BLOCK_MESH_GITBOOK, BLOCK_MESH_GITHUB,
     BLOCK_MESH_LANDING_PAGE_IMAGE, BLOCK_MESH_LOGO, BLOCK_MESH_SUPPORT_CHAT,
     BLOCK_MESH_SUPPORT_EMAIL, BLOCK_MESH_TWITTER,
 };
 use serde::{Deserialize, Serialize};
+use std::sync::Arc;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub struct NotificationQueryParams {
@@ -31,10 +33,15 @@ pub struct NotificationTemplate {
     pub image: String,
     pub support: String,
     pub chat: String,
+    pub cf_site_key: String,
 }
 
-pub async fn handler(error: Query<NotificationQueryParams>) -> Result<impl IntoResponse, Error> {
+pub async fn handler(
+    State(state): State<Arc<AppState>>,
+    error: Query<NotificationQueryParams>,
+) -> Result<impl IntoResponse, Error> {
     let notification_template = NotificationTemplate {
+        cf_site_key: state.cf_site_key.to_string(),
         summary: error.summary.clone(),
         detailed: error.detailed.clone(),
         go_to: error.go_to.clone(),

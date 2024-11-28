@@ -31,6 +31,7 @@ struct EditInviteCodeTemplate {
     pub image: String,
     pub support: String,
     pub chat: String,
+    pub cf_site_key: String,
 }
 
 #[tracing::instrument(name = "edit_invite_code", skip_all)]
@@ -43,6 +44,7 @@ pub async fn handler(
     if let Present(invite_code) = state.invite_codes.try_get(&user.email) {
         let code = invite_code.value().clone();
         return Ok(EditInviteCodeTemplate {
+            cf_site_key: state.cf_site_key.clone(),
             current_invite_code: code,
             chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
             app_server: BLOCK_MESH_APP_SERVER.to_string(),
@@ -64,6 +66,7 @@ pub async fn handler(
         .invite_codes
         .insert(user.email.clone(), user_invite_code.invite_code.clone());
     Ok(EditInviteCodeTemplate {
+        cf_site_key: state.cf_site_key.clone(),
         current_invite_code: user_invite_code.invite_code,
         chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
         app_server: BLOCK_MESH_APP_SERVER.to_string(),

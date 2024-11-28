@@ -16,7 +16,11 @@ use leptos::*;
 use uuid::Uuid;
 
 pub async fn register(blockmesh_url: &str, credentials: &RegisterForm) -> anyhow::Result<()> {
-    let url = format!("{}/register_api", blockmesh_url);
+    let url = format!(
+        "{}{}",
+        blockmesh_url,
+        RoutesEnum::Static_UnAuth_RegisterApi.to_string()
+    );
     let client = reqwest::Client::new();
     let response = client.post(&url).form(credentials).send().await?;
     let response: RegisterResponse = response.json().await?;

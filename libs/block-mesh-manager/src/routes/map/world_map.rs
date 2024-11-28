@@ -1,8 +1,10 @@
 use askama::Template;
 use askama_axum::IntoResponse;
+use axum::extract::State;
 use axum::Extension;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
+use std::sync::Arc;
 
 use block_mesh_common::constants::{
     BLOCK_MESH_APP_SERVER, BLOCK_MESH_CHROME_EXTENSION_LINK, BLOCK_MESH_GITBOOK, BLOCK_MESH_GITHUB,
@@ -12,6 +14,7 @@ use block_mesh_common::constants::{
 
 use crate::database::uptime_report::world_map_markers::world_map_markers;
 use crate::errors::error::Error;
+use crate::startup::application::AppState;
 
 #[allow(dead_code)]
 #[derive(Template)]
@@ -28,6 +31,7 @@ struct MapTemplate {
     pub chat: String,
     pub mapbox_api: String,
     pub markers: Vec<MapMarker>,
+    pub cf_site_key: String,
 }
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -49,7 +53,10 @@ pub struct MapMarker {
     geometry: MapMarkerGeometry,
 }
 
-pub async fn handler(Extension(pool): Extension<PgPool>) -> Result<impl IntoResponse, Error> {
+pub async fn handler(
+    State(state): State<Arc<AppState>>,
+    Extension(pool): Extension<PgPool>,
+) -> Result<impl IntoResponse, Error> {
     let mut transaction = pool.begin().await.map_err(Error::from)?;
     let markers = world_map_markers(&mut transaction)
         .await
@@ -73,6 +80,7 @@ pub async fn handler(Extension(pool): Extension<PgPool>) -> Result<impl IntoResp
     transaction.commit().await.map_err(Error::from)?;
 
     Ok(MapTemplate {
+        cf_site_key: state.cf_site_key.to_string(),
         mapbox_api: std::env::var("MAPBOX").unwrap_or_default(),
         chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
         app_server: BLOCK_MESH_APP_SERVER.to_string(),

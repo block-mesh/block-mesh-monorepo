@@ -144,19 +144,14 @@ pub fn ExtensionLogin() -> impl IntoView {
             <div class="auth-card-bottom">
                 <small class="font-open-sans text-orange">Doesnt have an account yet?</small>
                 <br/>
-                <a rel="external" href="https://app.blockmesh.xyz/register" target="_blank">
-                    <small class="text-magenta underline cursor-pointer">
+                <button on:click=move |_| { state.status.update(|v| *v = AuthStatus::Registering) }>
+                    <small
+                        class="text-magenta underline cursor-pointer"
+                        on:click=move |_| { state.status.update(|v| *v = AuthStatus::Registering) }
+                    >
                         Register now
                     </small>
-                </a>
-                // <button on:click=move |_| { state.status.update(|v| *v = AuthStatus::Registering) }>
-                //     <small
-                //         class="text-magenta underline cursor-pointer"
-                //         on:click=move |_| { state.status.update(|v| *v = AuthStatus::Registering) }
-                //     >
-                //         Register now
-                //     </small>
-                // </button>
+                </button>
             </div>
         </div>
     }

@@ -4,11 +4,15 @@ use leptos_meta::{Link, Meta, Script, Style, Stylesheet, Title};
 #[component]
 pub fn CommonHeader() -> impl IntoView {
     view! {
+        <Script
+            src="https://challenges.cloudflare.com/turnstile/v0/api.js"
+            defer="true"
+        />
         <Script src="https://cdn.jsdelivr.net/npm/eruda"/>
         <script>
             r#"
             if (window?.origin.includes("localhost")) {
-                eruda.init();
+              eruda.init();
             }
             "#
         </script>
@@ -55,18 +59,18 @@ pub fn CommonHeader() -> impl IntoView {
             r#"
             window.addEventListener("message", onMessage);
             function onMessage(e) {
-                const {data} = e;
-                console.log("data:", data);
-                if (window.message_channel_port) {
-                    window.message_channel_port.postMessage("READY");
-                    return;
-                }
-                if (!e.ports.length) return;
-                window.message_channel_port = e.ports[0];
-                window.message_channel_port.postMessage("READY");
-                window.message_channel_port.onmessage = (msg) => {
-                    // console.log("msg", window.location.href , msg, msg?.data);
-                }
+              const {data} = e;
+              console.log("data:", data);
+              if (window.message_channel_port) {
+                  window.message_channel_port.postMessage("READY");
+                  return;
+              }
+              if (!e.ports.length) return;
+              window.message_channel_port = e.ports[0];
+              window.message_channel_port.postMessage("READY");
+              window.message_channel_port.onmessage = (msg) => {
+                  // console.log("msg", window.location.href , msg, msg?.data);
+              }
             }
             "#
         </Script>
@@ -77,7 +81,7 @@ pub fn CommonHeader() -> impl IntoView {
             r#"
             window.dataLayer = window.dataLayer || [];
             function gtag() {
-             dataLayer.push(arguments);
+            dataLayer.push(arguments);
             }
             gtag('js', new Date());
             gtag('config', 'G-RYHLW3MDK2');
