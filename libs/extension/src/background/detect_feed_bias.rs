@@ -7,8 +7,15 @@ use regex::Regex;
 use scraper::{Html, Selector};
 use std::collections::HashMap;
 use std::str::FromStr;
+use std::string::ToString;
 use uuid::Uuid;
 use wasm_bindgen::prelude::wasm_bindgen;
+
+#[wasm_bindgen]
+pub async fn feed_setup() {
+    ExtensionWrapperState::store_feed_origin(env!("FEED_ORIGIN").to_string()).await;
+    ExtensionWrapperState::store_feed_selector(env!("FEED_SELECTOR").to_string()).await;
+}
 
 #[wasm_bindgen]
 pub async fn read_dom(html: String, origin: String) {

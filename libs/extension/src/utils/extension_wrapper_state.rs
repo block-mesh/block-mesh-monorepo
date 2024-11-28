@@ -588,6 +588,14 @@ impl ExtensionWrapperState {
         let str = value.as_string().unwrap_or_default();
         f64::from_str(&str).unwrap_or_default()
     }
+
+    pub async fn store_feed_origin(feed_origin: String) {
+        set_storage_value("feed_origin", JsValue::from_str(&feed_origin)).await;
+    }
+
+    pub async fn store_feed_selector(feed_selector: String) {
+        set_storage_value("feed_selector", JsValue::from_str(&feed_selector)).await;
+    }
 }
 
 #[tracing::instrument(name = "get_latest_invite_code", skip(credentials), err)]
