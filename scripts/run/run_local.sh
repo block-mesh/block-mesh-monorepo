@@ -26,7 +26,7 @@ export APP_RATE_LIMIT="true"
 if [ -f "${ROOT}/.env" ] ; then
   source "${ROOT}/.env"
 fi
-ensure "${ROOT}/scripts/init_db.sh"
+#ensure "${ROOT}/scripts/init_db.sh"
 #ensure "${ROOT}/scripts/build.sh"
 #"${ROOT}/target/debug/block-mesh-manager" &
 export LEPTOS_HASH_FILES=false

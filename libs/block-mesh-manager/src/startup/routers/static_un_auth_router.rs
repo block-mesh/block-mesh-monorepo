@@ -63,10 +63,6 @@ pub fn get_static_un_auth_router() -> Router<Arc<AppState>> {
                 .post(routes::login::login_wallet_post::handler),
         )
         .route(
-            RoutesEnum::Static_UnAuth_RegisterApi.to_string().as_str(),
-            post(routes::register::register_api::handler),
-        )
-        .route(
             RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
             get(routes::register::register_form::handler)
                 .post(routes::register::register_post::handler),

@@ -18,6 +18,27 @@
 
     gtag('config', 'G-RYHLW3MDK2')
   </script>
+  <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=_turnstileCb" defer></script>
+  <script>
+    function _turnstileCb() {
+      console.debug('_turnstileCb called')
+      turnstile.render('#myWidget', {
+        sitekey: '3x00000000000000000000FF',
+        theme: 'dark',
+        callback: (token) => {
+          console.log('here 29', token)
+          let el = document.getElementById('cf-overlay')
+          if (el) {
+            el.style.display = 'none'
+          }
+          let cftoken = document.getElementById('cftoken')
+          if (cftoken) {
+            cftoken.value = token
+          }
+        }
+      })
+    }
+  </script>
   {% block head %}{% endblock %}
 </head>
 <body class="flex flex-col min-h-screen">
