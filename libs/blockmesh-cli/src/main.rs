@@ -48,16 +48,17 @@ pub async fn main() -> anyhow::Result<ExitCode> {
         }
         CliOptMod::Register => {
             setup_tracing(Uuid::default(), DeviceType::Cli);
-            register(
-                &args.url,
-                &RegisterForm {
-                    email: args.email,
-                    password: args.password.clone(),
-                    password_confirm: args.password,
-                    invite_code: args.invite_code,
-                },
-            )
-            .await?;
+            tracing::info!("Please register via https://app.blockmesh.xyz/register");
+            //register(
+            //    &args.url,
+            //    &RegisterForm {
+            //        email: args.email,
+            //        password: args.password.clone(),
+            //        password_confirm: args.password,
+            //        invite_code: args.invite_code,
+            //    },
+            //)
+            //.await?;
         }
         CliOptMod::Dashboard => {
             setup_tracing(Uuid::default(), DeviceType::Cli);
