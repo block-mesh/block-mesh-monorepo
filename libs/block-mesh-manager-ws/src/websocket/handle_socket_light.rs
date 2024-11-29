@@ -47,6 +47,7 @@ pub async fn handle_socket_light(
     state.subscribe_light(&email, &user_id).await;
     let (mut sender, mut receiver) = socket.split();
 
+    let tx_c = state.tx.clone();
     let mut send_task = tokio::spawn(async move {
         let _ = sender
             .send(Message::Text(
@@ -140,10 +141,10 @@ pub async fn handle_socket_light(
             }
             send_task.abort();
         },
-        rv_c = create_daily_state_task => {
+        _ = create_daily_state_task => {
             recv_task.abort();
             send_task.abort();
-           tracing::trace!("create_daily_state_task done {ip}"),
+            tracing::trace!("create_daily_state_task done {ip}");
         }
     }
 
