@@ -34,6 +34,7 @@ use crate::cron_jobs::special_task_cron::special_worker_loop;
 use crate::db_aggregators::add_to_aggregates_aggregator::add_to_aggregates_aggregator;
 use crate::db_aggregators::aggregates_aggregator::aggregates_aggregator;
 use crate::db_aggregators::analytics_aggregator::analytics_aggregator;
+use crate::db_aggregators::create_daily_stats_aggregator::create_daily_stats_aggregator;
 use crate::db_aggregators::daily_stats_aggregator::daily_stats_aggregator;
 use crate::db_aggregators::joiner_loop::joiner_loop;
 use crate::db_aggregators::set_to_aggregates_aggregator::set_to_aggregates_aggregator;
@@ -170,6 +171,16 @@ async fn run() -> anyhow::Result<()> {
             .unwrap_or(300),
         5,
     ));
+    let db_create_daily_stats_aggregator_task = tokio::spawn(create_daily_stats_aggregator(
+        joiner_tx.clone(),
+        db_pool.clone(),
+        tx.subscribe(),
+        env::var("CREATE_DAILY_STATS_AGG_SIZE")
+            .unwrap_or("300".to_string())
+            .parse()
+            .unwrap_or(300),
+        5,
+    ));
     let db_special_task = tokio::spawn(special_worker_loop(db_pool.clone()));
 
     let router = get_router();
@@ -184,6 +195,7 @@ async fn run() -> anyhow::Result<()> {
     let server_task = run_server(listener, app);
 
     tokio::select! {
+        o = db_create_daily_stats_aggregator_task => panic!("db_create_daily_stats_aggregator_task exit {:?}", o),
         o = db_aggregator_set => panic!("db_aggregator_set exit {:?}", o),
         o = db_aggregator_add => panic!("db_aggregator_add exit {:?}", o),
         o = bulk_uptime_bonus_task => panic!("bulk_uptime_bonus_task exit {:?}", o),

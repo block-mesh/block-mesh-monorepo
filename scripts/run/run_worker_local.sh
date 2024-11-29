@@ -13,8 +13,9 @@ export ADD_TO_AGG_SIZE=1
 export USERS_IP_AGG_SIZE=1
 export AGG_AGG_SIZE=1
 export SET_TO_AGG_SIZE=1
-exrpot ANALYTICS_AGG_SIZE=1
+export ANALYTICS_AGG_SIZE=1
 export DAILY_STATS_AGG_SIZE=1
+export CREATE_DAILY_STATS_AGG_SIZE=1
 source "${ROOT}/scripts/setup.sh"
 export DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
 export FOLLOWER_DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"

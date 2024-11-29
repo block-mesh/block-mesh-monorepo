@@ -4,6 +4,7 @@ use crate::websocket::handle_socket_light::handle_socket_light;
 use anyhow::{anyhow, Context};
 use axum::extract::{Query, State, WebSocketUpgrade};
 use axum::response::IntoResponse;
+use block_mesh_common::interfaces::db_messages::{DBMessage, DBMessageTypes, UsersIpMessage};
 use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
 use block_mesh_manager_database_domain::domain::user::UserAndApiToken;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
@@ -77,6 +78,15 @@ pub async fn ws_handler(
         },
     };
     drop(creds_cache);
+    let tx_c = state.tx.clone();
+    let _ = tx_c
+        .send_async(DBMessage::UsersIpMessage(UsersIpMessage {
+            msg_type: DBMessageTypes::UsersIpMessage,
+            id: user.user_id,
+            ip: header_ip.clone(),
+        }))
+        .await;
+
     Ok(ws.on_upgrade(move |socket| {
         handle_socket_light(email, socket, header_ip, state, user.user_id)
     }))

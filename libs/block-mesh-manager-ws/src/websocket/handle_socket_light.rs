@@ -1,7 +1,7 @@
 use crate::state::WsAppState;
 use axum::extract::ws::{Message, WebSocket};
 use block_mesh_common::interfaces::db_messages::{
-    AggregateAddToMessage, AggregateSetToMessage, DBMessage, DBMessageTypes,
+    AggregateAddToMessage, AggregateSetToMessage, CreateDailyStatMessage, DBMessage, DBMessageTypes,
 };
 use block_mesh_common::interfaces::ws_api::{WsClientMessage, WsServerMessage};
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
@@ -30,10 +30,24 @@ pub async fn handle_socket_light(
         return;
     }
 
-    state.subscribe_light(&email, &user_id).await;
-    let (mut sender, mut receiver) = socket.split();
     let tx_c = state.tx.clone();
 
+    let create_daily_state_task = tokio::spawn(async move {
+        loop {
+            let _ = tx_c
+                .send_async(DBMessage::CreateDailyStatMessage(CreateDailyStatMessage {
+                    msg_type: DBMessageTypes::CreateDailyStatMessage,
+                    user_id,
+                }))
+                .await;
+            tokio::time::sleep(Duration::from_secs(60 * 60 * 12)).await;
+        }
+    });
+
+    state.subscribe_light(&email, &user_id).await;
+    let (mut sender, mut receiver) = socket.split();
+
+    let tx_c = state.tx.clone();
     let mut send_task = tokio::spawn(async move {
         let _ = sender
             .send(Message::Text(
@@ -126,6 +140,11 @@ pub async fn handle_socket_light(
                 Err(e) => tracing::trace!("recv_task error {e}")
             }
             send_task.abort();
+        },
+        _ = create_daily_state_task => {
+            recv_task.abort();
+            send_task.abort();
+            tracing::trace!("create_daily_state_task done {ip}");
         }
     }
 
