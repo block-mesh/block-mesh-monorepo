@@ -11,6 +11,7 @@ pub enum DBMessageTypes {
     AnalyticsMessage,
     DailyStatMessage,
     AggregateSetToMessage,
+    CreateDailyStatMessage,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -20,6 +21,7 @@ pub enum DBMessage {
     AggregateAddToMessage(AggregateAddToMessage),
     AnalyticsMessage(AnalyticsMessage),
     DailyStatMessage(DailyStatMessage),
+    CreateDailyStatMessage(CreateDailyStatMessage),
     AggregateSetToMessage(AggregateSetToMessage),
 }
 
@@ -71,5 +73,11 @@ pub struct InvalidateApiCache {
 pub struct DailyStatMessage {
     pub id: Uuid,
     pub uptime: f64,
+    pub msg_type: DBMessageTypes,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct CreateDailyStatMessage {
+    pub user_id: Uuid,
     pub msg_type: DBMessageTypes,
 }
