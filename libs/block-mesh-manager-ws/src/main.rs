@@ -6,6 +6,7 @@ use block_mesh_common::constants::BLOCKMESH_WS_REDIS_COUNT_KEY;
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use block_mesh_common::interfaces::db_messages::DBMessage;
 use block_mesh_manager_ws::app::app;
+use block_mesh_manager_ws::joiner_loop::joiner_loop;
 use block_mesh_manager_ws::message_aggregator::collect_messages;
 use block_mesh_manager_ws::state::WsAppState;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
@@ -15,6 +16,7 @@ use std::sync::Arc;
 use std::time::Duration;
 use std::{env, mem, process};
 use tokio::net::TcpListener;
+use tokio::task::JoinHandle;
 #[allow(unused_imports)]
 use uuid::Uuid;
 
@@ -66,7 +68,10 @@ async fn run() -> anyhow::Result<()> {
     let mut redis = state.redis.clone();
     let _: RedisResult<()> = redis.set(BLOCKMESH_WS_REDIS_COUNT_KEY, 0).await;
     let server_task = app(listener, state);
+    let (joiner_tx, joiner_rx) = flume::bounded::<JoinHandle<()>>(10_000);
+    let joiner_task = tokio::spawn(joiner_loop(joiner_rx));
     let collect_messages_task = tokio::spawn(collect_messages(
+        joiner_tx,
         rx,
         channel_pool,
         env::var("CHANNEL_AGG_SIZE")
@@ -76,6 +81,7 @@ async fn run() -> anyhow::Result<()> {
         5,
     ));
     tokio::select! {
+        o = joiner_task => panic!("joiner_task {:?}", o),
         o = server_task => panic!("server_task {:?}", o),
         o = collect_messages_task => panic!("collect_messages_task {:?}", o)
     }
