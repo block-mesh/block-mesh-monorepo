@@ -155,7 +155,7 @@ async function main_interval() {
   const is_ws_enabled = await is_ws_feature_connection()
   const new_value = ((await get_polling_interval()) || polling_interval)
   if (new_value !== polling_interval || intervals.length === 0) {
-    polling_interval = new_value
+    polling_interval = new_value * (1 + Math.random())
   }
   if (is_ws_enabled) {
     console.log('Using WebSocket')
