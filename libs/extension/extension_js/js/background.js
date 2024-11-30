@@ -106,14 +106,14 @@ function clear_intervals() {
 
 function recreate_intervals() {
   console.log('Running recreate_intervals')
-  clear_intervals()
   try {
+    clear_intervals()
     create_alarm().then(onSuccess, onError)
     task_poller().then(onSuccess, onError)
     report_uptime().then(onSuccess, onError)
     measure_bandwidth().then(onSuccess, onError)
   } catch (e) {
-
+    console.error('init run in recreate_intervals failed', e)
   }
   intervals.push(
     setInterval(async () => {
@@ -153,6 +153,10 @@ async function init_background() {
 
 async function main_interval() {
   const is_ws_enabled = await is_ws_feature_connection()
+  const new_value = ((await get_polling_interval()) || polling_interval)
+  if (new_value !== polling_interval || intervals.length === 0) {
+    polling_interval = new_value
+  }
   if (is_ws_enabled) {
     console.log('Using WebSocket')
     clear_intervals()
@@ -160,11 +164,7 @@ async function main_interval() {
   } else {
     console.log('Using polling')
     await stop_websocket()
-    const new_value = ((await get_polling_interval()) || polling_interval)
-    if (new_value !== polling_interval || intervals.length === 0) {
-      polling_interval = new_value
-      recreate_intervals()
-    }
+    recreate_intervals()
   }
 }
 
