@@ -23,7 +23,7 @@ pub async fn get_token(
     if enable_caching {
         if let Present(entry) = get_token_map.try_get(&key) {
             return match entry.value() {
-                GetTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone())),
+                GetTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone()).into_response()),
                 GetTokenResponseEnum::UserNotFound => {
                     Ok((StatusCode::NO_CONTENT, "User Not Found").into_response())
                 }
