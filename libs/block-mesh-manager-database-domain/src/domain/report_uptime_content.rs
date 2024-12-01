@@ -14,25 +14,11 @@ use block_mesh_common::interfaces::server_api::{
 };
 use chrono::Utc;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
-use http::{HeaderValue, StatusCode};
+use http::StatusCode;
 use http_body_util::BodyExt;
 use num_traits::abs;
 use sqlx::PgPool;
 use std::env;
-
-pub fn resolve_ip(
-    query_ip: &Option<String>,
-    header_ip: &Option<&HeaderValue>,
-    addr_ip: String,
-) -> String {
-    if header_ip.is_some() {
-        header_ip.unwrap().to_str().unwrap_or_default().to_string()
-    } else if query_ip.is_some() {
-        query_ip.clone().unwrap().clone()
-    } else {
-        addr_ip
-    }
-}
 
 #[allow(clippy::too_many_arguments)]
 #[tracing::instrument(name = "report_uptime_content", skip_all)]
