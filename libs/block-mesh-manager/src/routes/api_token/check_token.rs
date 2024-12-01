@@ -33,7 +33,7 @@ pub async fn handler(
             CheckTokenResponseEnum::ApiTokenNotFound => {
                 Ok((StatusCode::NO_CONTENT, "Api Token Not Found").into_response())
             }
-            CheckTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone())),
+            CheckTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone()).into_response()),
         };
     }
     let mut transaction = create_txn(&pool).await?;
@@ -66,5 +66,5 @@ pub async fn handler(
         key,
         CheckTokenResponseEnum::GetTokenResponse(response.clone()),
     );
-    Ok(Json(response))
+    Ok(Json(response).into_response())
 }
