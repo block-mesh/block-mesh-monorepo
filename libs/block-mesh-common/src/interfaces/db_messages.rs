@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub enum DBMessageTypes {
     UsersIpMessage,
     AggregateMessage,
@@ -14,7 +14,7 @@ pub enum DBMessageTypes {
     CreateDailyStatMessage,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub enum DBMessage {
     UsersIpMessage(UsersIpMessage),
     AggregateMessage(AggregateMessage),
@@ -25,21 +25,21 @@ pub enum DBMessage {
     AggregateSetToMessage(AggregateSetToMessage),
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct UsersIpMessage {
     pub id: Uuid,
     pub ip: String,
     pub msg_type: DBMessageTypes,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct AggregateMessage {
     pub id: Uuid,
     pub value: Value,
     pub msg_type: DBMessageTypes,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct AggregateAddToMessage {
     pub user_id: Uuid,
     pub name: String,
@@ -47,7 +47,7 @@ pub struct AggregateAddToMessage {
     pub msg_type: DBMessageTypes,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct AggregateSetToMessage {
     pub user_id: Uuid,
     pub name: String,
@@ -55,7 +55,7 @@ pub struct AggregateSetToMessage {
     pub msg_type: DBMessageTypes,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct AnalyticsMessage {
     pub user_id: Uuid,
     pub depin_aggregator: String,
@@ -64,19 +64,19 @@ pub struct AnalyticsMessage {
     pub msg_type: DBMessageTypes,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct InvalidateApiCache {
     pub email: String,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct DailyStatMessage {
     pub id: Uuid,
     pub uptime: f64,
     pub msg_type: DBMessageTypes,
 }
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 pub struct CreateDailyStatMessage {
     pub user_id: Uuid,
     pub msg_type: DBMessageTypes,
