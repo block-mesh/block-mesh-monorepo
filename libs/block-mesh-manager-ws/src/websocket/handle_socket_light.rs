@@ -66,6 +66,8 @@ pub async fn handle_socket_light(
             let _ = sender.send(Message::Ping(vec![1, 2, 3])).await;
             let now = Utc::now();
             let delta = (now - prev).num_seconds();
+            accumulator += delta;
+            counter += 1;
             if counter >= counter_period {
                 let _ = tx_c
                     .send_async(DBMessage::AggregateAddToMessage(AggregateAddToMessage {
@@ -77,9 +79,6 @@ pub async fn handle_socket_light(
                     .await;
                 accumulator = 0;
                 counter = 0;
-            } else {
-                accumulator += delta;
-                counter += 1;
             }
             prev = Utc::now();
             let _ = sender.send(Message::Text("ping".to_string())).await;
