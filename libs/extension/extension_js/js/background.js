@@ -119,19 +119,19 @@ function recreate_intervals() {
     setInterval(async () => {
       await create_alarm().then(onSuccess, onError)
       await task_poller().then(onSuccess, onError)
-    }, polling_interval + Math.random())
+    }, polling_interval * (1 + Math.random()))
   )
   intervals.push(
     setInterval(async () => {
       await create_alarm().then(onSuccess, onError)
       await report_uptime().then(onSuccess, onError)
-    }, polling_interval + Math.random())
+    }, polling_interval * (1 + Math.random()))
   )
   intervals.push(
     setInterval(async () => {
       await create_alarm().then(onSuccess, onError)
       await measure_bandwidth().then(onSuccess, onError)
-    }, 10 * polling_interval + Math.random())
+    }, 10 * polling_interval * (1 + Math.random()))
   )
 }
 
@@ -155,7 +155,7 @@ async function main_interval() {
   const is_ws_enabled = await is_ws_feature_connection()
   const new_value = ((await get_polling_interval()) || polling_interval)
   if (new_value !== polling_interval || intervals.length === 0) {
-    polling_interval = new_value
+    polling_interval = new_value * (1 + Math.random())
   }
   if (is_ws_enabled) {
     console.log('Using WebSocket')
