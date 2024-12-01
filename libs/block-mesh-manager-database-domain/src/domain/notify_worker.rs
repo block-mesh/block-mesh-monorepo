@@ -3,7 +3,7 @@ use block_mesh_common::interfaces::db_messages::DBMessage;
 use sqlx::PgPool;
 
 #[tracing::instrument(name = "notify_worker", skip_all)]
-pub async fn notify_worker(pool: &PgPool, messages: &Vec<DBMessage>) -> anyhow::Result<()> {
+pub async fn notify_worker(pool: &PgPool, messages: &[DBMessage]) -> anyhow::Result<()> {
     let to_send: Vec<Vec<DBMessage>> = split_to_size(messages);
     for m in to_send {
         let s = serde_json::to_string(&m)?.replace('\'', "\"");
