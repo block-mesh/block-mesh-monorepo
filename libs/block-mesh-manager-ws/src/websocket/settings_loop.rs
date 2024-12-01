@@ -50,7 +50,7 @@ pub async fn settings_loop(
         let new_period = settings.period;
         let new_messages = settings.messages;
         let new_window_size = settings.window_size;
-        let new_queue_size = broadcaster.queue.lock().await.len();
+        let new_queue_size = broadcaster.queue.read().await.len();
         let mut transaction = match create_txn(&pool).await {
             Ok(transaction) => transaction,
             Err(e) => {

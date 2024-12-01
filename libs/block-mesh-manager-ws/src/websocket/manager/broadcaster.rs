@@ -8,7 +8,7 @@ use std::collections::VecDeque;
 use std::sync::atomic::AtomicI64;
 use std::sync::Arc;
 use tokio::sync::broadcast::error::SendError;
-use tokio::sync::{broadcast, mpsc, Mutex};
+use tokio::sync::{broadcast, mpsc, RwLock};
 use uuid::Uuid;
 
 #[derive(Debug, Clone)]
@@ -16,7 +16,7 @@ pub struct Broadcaster {
     pub count: Arc<AtomicI64>,
     pub global_transmitter: broadcast::Sender<WsServerMessage>,
     pub sockets: Arc<DashMap<(Uuid, String), mpsc::Sender<WsServerMessage>>>,
-    pub queue: Arc<Mutex<VecDeque<(Uuid, String)>>>,
+    pub queue: Arc<RwLock<VecDeque<(Uuid, String)>>>,
     pub emails: Arc<DashSet<String>>,
     pub user_ids: Arc<DashSet<Uuid>>,
 }
@@ -36,7 +36,7 @@ impl Broadcaster {
             user_ids: Arc::new(DashSet::new()),
             global_transmitter,
             sockets: Arc::new(DashMap::new()),
-            queue: Arc::new(Mutex::new(VecDeque::new())),
+            queue: Arc::new(RwLock::new(VecDeque::new())),
         }
     }
 
@@ -66,7 +66,7 @@ impl Broadcaster {
     }
 
     pub async fn move_queue(&self, count: usize) -> Vec<(Uuid, String)> {
-        let queue = &mut self.queue.lock().await;
+        let queue = &mut self.queue.write().await;
         let count = count.min(queue.len());
         let drained: Vec<(Uuid, String)> = queue.drain(0..count).collect();
         queue.extend(drained.clone());
@@ -150,7 +150,7 @@ impl Broadcaster {
         let _ = self
             .sockets
             .insert((user_id, ip.clone()), sink_sender.clone());
-        let queue = &mut self.queue.lock().await;
+        let queue = &mut self.queue.write().await;
         queue.push_back((user_id, ip));
         self.global_transmitter.subscribe()
     }
@@ -159,7 +159,7 @@ impl Broadcaster {
         self.emails.remove(&email);
         self.user_ids.remove(&user_id);
         self.sockets.remove(&(user_id, ip.clone()));
-        let queue = &mut self.queue.lock().await;
+        let queue = &mut self.queue.write().await;
         if let Some(pos) = queue.iter().position(|(a, b)| a == &user_id && b == &ip) {
             queue.remove(pos);
         } else {

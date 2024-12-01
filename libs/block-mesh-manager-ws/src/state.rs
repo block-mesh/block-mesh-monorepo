@@ -14,7 +14,7 @@ use std::collections::{HashMap, HashSet};
 use std::env;
 use std::str::FromStr;
 use std::sync::Arc;
-use tokio::sync::Mutex;
+use tokio::sync::RwLock;
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -32,25 +32,25 @@ pub struct WsAppState {
     pub environment: Environment,
     pub redis: MultiplexedConnection,
     pub tx: Sender<DBMessage>,
-    pub emails: Arc<Mutex<HashSet<String>>>,
-    pub user_ids: Arc<Mutex<HashSet<Uuid>>>,
-    pub creds_cache: Arc<Mutex<HashMap<(String, Uuid), WsCredsCache>>>,
+    pub emails: Arc<RwLock<HashSet<String>>>,
+    pub user_ids: Arc<RwLock<HashSet<Uuid>>>,
+    pub creds_cache: Arc<RwLock<HashMap<(String, Uuid), WsCredsCache>>>,
 }
 
 impl WsAppState {
     pub async fn subscribe_light(&self, email: &str, user_id: &Uuid) {
-        let mut emails = self.emails.lock().await;
+        let mut emails = self.emails.write().await;
         emails.insert(email.to_string());
-        let mut user_ids = self.user_ids.lock().await;
+        let mut user_ids = self.user_ids.write().await;
         user_ids.insert(*user_id);
         let mut redis = self.redis.clone();
         let _: RedisResult<()> = redis.incr(BLOCKMESH_WS_REDIS_COUNT_KEY, 1).await;
     }
 
     pub async fn unsubscribe_light(&self, email: &str, user_id: &Uuid) {
-        let mut emails = self.emails.lock().await;
+        let mut emails = self.emails.write().await;
         emails.remove(email);
-        let mut user_ids = self.user_ids.lock().await;
+        let mut user_ids = self.user_ids.write().await;
         user_ids.remove(user_id);
         let mut redis = self.redis.clone();
         let _: RedisResult<()> = redis.decr(BLOCKMESH_WS_REDIS_COUNT_KEY, 1).await;
@@ -76,9 +76,9 @@ impl WsAppState {
             .await
             .unwrap();
         Self {
-            creds_cache: Arc::new(Mutex::new(HashMap::new())),
-            emails: Arc::new(Mutex::new(HashSet::new())),
-            user_ids: Arc::new(Mutex::new(HashSet::new())),
+            creds_cache: Arc::new(RwLock::new(HashMap::new())),
+            emails: Arc::new(RwLock::new(HashSet::new())),
+            user_ids: Arc::new(RwLock::new(HashSet::new())),
             pool,
             follower_pool,
             channel_pool,

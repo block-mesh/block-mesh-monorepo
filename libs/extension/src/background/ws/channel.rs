@@ -12,25 +12,25 @@ use flume::{Receiver, Sender};
 use leptos::{spawn_local, SignalGetUntracked};
 use once_cell::sync::OnceCell;
 use std::cmp;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, RwLock};
 use web_sys::WebSocket;
 
-pub static RX: OnceCell<Arc<Mutex<Receiver<WsServerMessage>>>> = OnceCell::new();
-pub static TX: OnceCell<Arc<Mutex<Sender<WsServerMessage>>>> = OnceCell::new();
+pub static RX: OnceCell<Arc<RwLock<Receiver<WsServerMessage>>>> = OnceCell::new();
+pub static TX: OnceCell<Arc<RwLock<Sender<WsServerMessage>>>> = OnceCell::new();
 
 pub fn set_tx(tx: Sender<WsServerMessage>) {
-    let t = TX.get_or_init(|| Arc::new(Mutex::new(tx.clone())));
-    *t.lock().unwrap() = tx.clone()
+    let t = TX.get_or_init(|| Arc::new(RwLock::new(tx.clone())));
+    *t.write().unwrap() = tx.clone()
 }
 
-pub fn get_tx() -> Option<Arc<Mutex<Sender<WsServerMessage>>>> {
+pub fn get_tx() -> Option<Arc<RwLock<Sender<WsServerMessage>>>> {
     TX.get().cloned()
 }
 
 pub fn set_rx(rx: Receiver<WsServerMessage>, ws: WebSocket) {
     {
-        let r = RX.get_or_init(|| Arc::new(Mutex::new(rx.clone())));
-        *r.lock().unwrap() = rx.clone();
+        let r = RX.get_or_init(|| Arc::new(RwLock::new(rx.clone())));
+        *r.write().unwrap() = rx.clone();
     }
 
     spawn_local(async move {
