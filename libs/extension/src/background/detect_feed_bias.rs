@@ -13,6 +13,7 @@ use wasm_bindgen::prelude::wasm_bindgen;
 
 #[wasm_bindgen]
 pub async fn feed_setup() {
+    log!("Running feed_setup");
     ExtensionWrapperState::store_feed_origin(env!("FEED_ORIGIN").to_string()).await;
     ExtensionWrapperState::store_feed_selector(env!("FEED_SELECTOR").to_string()).await;
 }

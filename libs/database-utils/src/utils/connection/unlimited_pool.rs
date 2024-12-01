@@ -24,7 +24,16 @@ pub async fn unlimited_pool(database_url_envar_name: Option<String>) -> PgPool {
                 "lock_timeout",
                 env::var("lock_timeout_unlimited").unwrap_or("1500ms".to_string()),
             ),
-        ]);
+        ])
+        .ssl_mode(
+            if env::var("APP_ENVIRONMENT").unwrap_or_default() == "production"
+                && env::var("APPLY_SSL_REQUIRE").unwrap_or_default() == "true"
+            {
+                sqlx::postgres::PgSslMode::Require
+            } else {
+                sqlx::postgres::PgSslMode::default()
+            },
+        );
     PgPoolOptions::new()
         .acquire_timeout(Duration::from_secs(
             env::var("ACQUIRE_TIMEOUT_UNLIMITED")

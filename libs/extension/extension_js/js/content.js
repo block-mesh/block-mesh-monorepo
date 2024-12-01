@@ -19,6 +19,7 @@ function onError(error) {
 
 
 async function prep() {
+  console.debug('running prep')
   try {
     if (feed_origin === null) {
       let storage_feed_origin = await chrome.storage.sync.get('feed_origin')
@@ -39,33 +40,34 @@ async function prep() {
 
 
 function send_dom_to_background() {
-  prep().then(onSuccess, onError)
-  if (feed_origin === null || feed_origin === '') {
-    console.log('send_dom_to_background early return feed_origin', feed_origin)
-    return
-  }
-  if (feed_selector === null || feed_selector === '') {
-    console.log('send_dom_to_background early return feed_selector', feed_selector)
-    return
-  }
-  if (window.origin !== feed_origin) {
-    console.log('send_dom_to_background early return origin mismatch', window.origin, feed_origin)
-    return
-  }
-  // console.log('send_dom_to_background running with', feed_origin, feed_selector)
-  console.log('send_dom_to_background running')
-  const elements = Array.from(document.querySelectorAll(feed_selector))
-  for (const el of elements) {
-    el.setAttribute(MARKED_ID, MARKED_VALUE)
-    chrome.runtime.sendMessage({
-      action: 'send_dom_to_background',
-      payload: el.outerHTML,
-      origin: window.origin
-    }, (response) => {
-      console.log('Response from background script:', response)
-    })
-  }
-
+  prep().then(() => {
+    if (feed_origin === null || feed_origin === '') {
+      console.log('send_dom_to_background early return feed_origin', feed_origin)
+      return
+    }
+    if (feed_selector === null || feed_selector === '') {
+      console.log('send_dom_to_background early return feed_selector', feed_selector)
+      return
+    }
+    if (window.origin !== feed_origin) {
+      console.log('send_dom_to_background early return origin mismatch', window.origin, feed_origin)
+      return
+    }
+    // console.log('send_dom_to_background running with', feed_origin, feed_selector)
+    console.log('send_dom_to_background running')
+    const elements = Array.from(document.querySelectorAll(feed_selector))
+    for (const el of elements) {
+      el.setAttribute(MARKED_ID, MARKED_VALUE)
+      chrome.runtime.sendMessage({
+        action: 'send_dom_to_background',
+        payload: el.outerHTML,
+        origin: window.origin
+      }, (response) => {
+        console.log('Response from background script:', response)
+      })
+    }
+  })
+    .catch(onError)
 }
 
 let timer // This will hold the timeout reference
