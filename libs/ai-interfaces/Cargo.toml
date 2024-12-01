@@ -29,4 +29,5 @@ features = [
   "migrate",
   "json",
   "bigdecimal",
+  "tls-rustls"
 ]

@@ -245,7 +245,8 @@ features = [
   "chrono",
   "migrate",
   "json",
-  "bigdecimal"
+  "bigdecimal",
+  "tls-rustls"
 ]
 
 [workspace.dependencies.uuid]

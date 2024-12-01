@@ -129,6 +129,7 @@ features = [
   "migrate",
   "json",
   "bigdecimal",
+  "tls-rustls"
 ]
 
 [dependencies.uuid]

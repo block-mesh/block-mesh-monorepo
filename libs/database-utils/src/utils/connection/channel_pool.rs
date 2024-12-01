@@ -10,7 +10,16 @@ pub async fn channel_pool(database_url_envar_name: Option<String>) -> PgPool {
     let url = database_url_envar_name.unwrap_or("DATABASE_URL".to_string());
     let settings = PgConnectOptions::from_str(&env::var(url).unwrap())
         .unwrap()
-        .log_statements(log::LevelFilter::Trace);
+        .log_statements(log::LevelFilter::Trace)
+        .ssl_mode(
+            if env::var("APP_ENVIRONMENT").unwrap_or_default() == "production"
+                && env::var("APPLY_SSL_REQUIRE").unwrap_or_default() == "true"
+            {
+                sqlx::postgres::PgSslMode::Require
+            } else {
+                sqlx::postgres::PgSslMode::default()
+            },
+        );
     PgPoolOptions::new()
         .acquire_timeout(Duration::from_secs(
             env::var("ACQUIRE_TIMEOUT_FOR_CHANNEL")

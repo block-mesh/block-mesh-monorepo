@@ -3510,8 +3510,11 @@ name = "debug-area"
 version = "0.0.416"
 dependencies = [
  "anyhow",
+ "database-utils",
  "lettre",
+ "sqlx",
  "tokio",
+ "uuid",
 ]
 
 [[package]]

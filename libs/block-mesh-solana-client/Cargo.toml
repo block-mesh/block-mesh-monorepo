@@ -38,6 +38,7 @@ features = [
   "uuid",
   "chrono",
   "migrate",
+  "tls-rustls"
 ]
 
 [features]
