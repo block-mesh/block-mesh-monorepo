@@ -25,7 +25,7 @@ pub async fn handler(
     let get_token_map = &state.get_token_map;
     if let Present(entry) = get_token_map.try_get(&key) {
         return match entry.value() {
-            GetTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone())),
+            GetTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone()).into_response()),
             GetTokenResponseEnum::UserNotFound => {
                 Ok((StatusCode::NO_CONTENT, "User Not Found").into_response())
             }
@@ -67,5 +67,5 @@ pub async fn handler(
         key,
         GetTokenResponseEnum::GetTokenResponse(response.clone()),
     );
-    Ok(Json(response))
+    Ok(Json(response).into_response())
 }
