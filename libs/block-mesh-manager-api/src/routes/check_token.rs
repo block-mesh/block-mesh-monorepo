@@ -65,5 +65,5 @@ pub async fn check_token(
         key,
         CheckTokenResponseEnum::GetTokenResponse(response.clone()),
     );
-    Ok(Json(response))
+    Ok(Json(response).into_response())
 }
