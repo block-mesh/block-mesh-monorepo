@@ -61,7 +61,7 @@ pub async fn summary(
     } else {
         let sockets: Vec<String> = state
             .emails
-            .lock()
+            .read()
             .await
             .iter()
             .map(|i| i.to_string())
@@ -81,12 +81,12 @@ pub async fn status(
     } else {
         let mut output: Vec<String> = Vec::new();
         if let Some(user_id) = admin_param.user_id {
-            if let Some(user) = state.user_ids.lock().await.get(&user_id) {
+            if let Some(user) = state.user_ids.read().await.get(&user_id) {
                 output.push(user.to_string());
             }
         }
         if let Some(email) = admin_param.email {
-            if let Some(email) = state.emails.lock().await.get(&email) {
+            if let Some(email) = state.emails.read().await.get(&email) {
                 output.push(email.to_string());
             }
         }

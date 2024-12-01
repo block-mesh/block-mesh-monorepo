@@ -119,19 +119,19 @@ function recreate_intervals() {
     setInterval(async () => {
       await create_alarm().then(onSuccess, onError)
       await task_poller().then(onSuccess, onError)
-    }, polling_interval + Math.random())
+    }, polling_interval * (1 + Math.random()))
   )
   intervals.push(
     setInterval(async () => {
       await create_alarm().then(onSuccess, onError)
       await report_uptime().then(onSuccess, onError)
-    }, polling_interval + Math.random())
+    }, polling_interval * (1 + Math.random()))
   )
   intervals.push(
     setInterval(async () => {
       await create_alarm().then(onSuccess, onError)
       await measure_bandwidth().then(onSuccess, onError)
-    }, 10 * polling_interval + Math.random())
+    }, 10 * polling_interval * (1 + Math.random()))
   )
 }
 

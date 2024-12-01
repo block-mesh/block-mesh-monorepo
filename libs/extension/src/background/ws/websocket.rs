@@ -9,28 +9,28 @@ use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use leptos::SignalGetUntracked;
 use logger_leptos::leptos_tracing::setup_leptos_tracing;
 use once_cell::sync::OnceCell;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, RwLock};
 use wasm_bindgen::prelude::*;
 use web_sys::WebSocket;
 
-pub static WEB_SOCKET_STATUS: OnceCell<Arc<Mutex<WebSocketReadyState>>> = OnceCell::new();
+pub static WEB_SOCKET_STATUS: OnceCell<Arc<RwLock<WebSocketReadyState>>> = OnceCell::new();
 
 pub fn get_ws_status() -> WebSocketReadyState {
     let ws_status =
-        WEB_SOCKET_STATUS.get_or_init(|| Arc::new(Mutex::new(WebSocketReadyState::CLOSED)));
-    ws_status.lock().unwrap().clone()
+        WEB_SOCKET_STATUS.get_or_init(|| Arc::new(RwLock::new(WebSocketReadyState::CLOSED)));
+    ws_status.read().unwrap().clone()
 }
 
 pub fn set_ws_status(status: &WebSocketReadyState) {
     let ws_status =
-        WEB_SOCKET_STATUS.get_or_init(|| Arc::new(Mutex::new(WebSocketReadyState::CLOSED)));
-    *ws_status.lock().unwrap() = status.clone();
+        WEB_SOCKET_STATUS.get_or_init(|| Arc::new(RwLock::new(WebSocketReadyState::CLOSED)));
+    *ws_status.write().unwrap() = status.clone();
 }
 
 #[wasm_bindgen]
 pub async fn stop_websocket() {
     if let Some(tx) = get_tx() {
-        let _ = tx.lock().unwrap().send(WsServerMessage::CloseConnection);
+        let _ = tx.read().unwrap().send(WsServerMessage::CloseConnection);
     }
 }
 

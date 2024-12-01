@@ -17,7 +17,7 @@ pub async fn get_or_create_daily_stat(
         INSERT INTO daily_stats
         (id, created_at, user_id, tasks_count, status, day, uptime, updated_at)
         VALUES ($1, $2, $3, $4, $5, $6, $7, $8)
-        ON CONFLICT (day, user_id) DO UPDATE SET updated_at = $8
+        ON CONFLICT (status, day, user_id) DO UPDATE SET updated_at = $8
         RETURNING id, created_at, user_id, tasks_count, status, day, uptime, updated_at
         "#,
         id,

@@ -117,7 +117,7 @@ pub async fn submit_task_content(
         commit_txn(transaction).await?;
         let _ = notify_worker(
             channel_pool,
-            &vec![DBMessage::AggregateMessage(AggregateMessage {
+            &[DBMessage::AggregateMessage(AggregateMessage {
                 msg_type: DBMessageTypes::AggregateMessage,
                 id: tasks.id,
                 value: serde_json::Value::from(tasks.value.as_i64().unwrap_or_default() + 1),

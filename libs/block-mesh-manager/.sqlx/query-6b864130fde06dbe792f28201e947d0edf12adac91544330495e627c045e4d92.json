@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        INSERT INTO daily_stats\n        (id, created_at, user_id, tasks_count, status, day, uptime, updated_at)\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\n        ON CONFLICT (day, user_id) DO UPDATE SET updated_at = $8\n        RETURNING id, created_at, user_id, tasks_count, status, day, uptime, updated_at\n        ",
+  "query": "\n        INSERT INTO daily_stats\n        (id, created_at, user_id, tasks_count, status, day, uptime, updated_at)\n        VALUES ($1, $2, $3, $4, $5, $6, $7, $8)\n        ON CONFLICT (status, day, user_id) DO UPDATE SET updated_at = $8\n        RETURNING id, created_at, user_id, tasks_count, status, day, uptime, updated_at\n        ",
   "describe": {
     "columns": [
       {
@@ -67,5 +67,5 @@
       false
     ]
   },
-  "hash": "0ab712ab87f2d2b427a2b8bf290d8e3793800e0a422fc73142daee4e4eacbe4b"
+  "hash": "6b864130fde06dbe792f28201e947d0edf12adac91544330495e627c045e4d92"
 }

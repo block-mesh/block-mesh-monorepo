@@ -1,4 +1,5 @@
 use crate::error::Error;
+use axum::response::IntoResponse;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{
     CheckTokenRequest, CheckTokenResponseEnum, CheckTokenResponseMap, GetTokenResponse,
@@ -6,6 +7,7 @@ use block_mesh_common::interfaces::server_api::{
 use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
 use dashmap::try_result::TryResult::Present;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
+use http::StatusCode;
 use sqlx::PgPool;
 
 #[tracing::instrument(name = "check_token", skip_all)]
@@ -14,16 +16,22 @@ pub async fn check_token(
     Extension(pool): Extension<PgPool>,
     Extension(check_token_map): Extension<CheckTokenResponseMap>,
     Json(body): Json<CheckTokenRequest>,
-) -> Result<Json<GetTokenResponse>, Error> {
+) -> Result<impl IntoResponse, Error> {
     let email = body.email.clone().to_ascii_lowercase();
     let key = (email.clone(), body.api_token);
     if enable_caching {
         if let Present(entry) = check_token_map.try_get(&key) {
             return match entry.value() {
-                CheckTokenResponseEnum::ApiTokenMismatch => Err(Error::ApiTokenMismatch),
-                CheckTokenResponseEnum::UserNotFound => Err(Error::UserNotFound),
-                CheckTokenResponseEnum::ApiTokenNotFound => Err(Error::ApiTokenNotFound),
-                CheckTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone())),
+                CheckTokenResponseEnum::ApiTokenMismatch => {
+                    Ok((StatusCode::OK, "Api Token Mismatch").into_response())
+                }
+                CheckTokenResponseEnum::UserNotFound => {
+                    Ok((StatusCode::OK, "User Not Found").into_response())
+                }
+                CheckTokenResponseEnum::ApiTokenNotFound => {
+                    Ok((StatusCode::OK, "Api Token Not Found").into_response())
+                }
+                CheckTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone()).into_response()),
             };
         }
     }
@@ -34,19 +42,19 @@ pub async fn check_token(
             None => {
                 commit_txn(transaction).await?;
                 check_token_map.insert(key, CheckTokenResponseEnum::UserNotFound);
-                return Err(Error::UserNotFound);
+                return Ok((StatusCode::OK, "User Not Found").into_response());
             }
         },
         Err(_) => {
             commit_txn(transaction).await?;
             check_token_map.insert(key, CheckTokenResponseEnum::UserNotFound);
-            return Err(Error::UserNotFound);
+            return Ok((StatusCode::OK, "User Not Found").into_response());
         }
     };
     if *user.token.as_ref() != body.api_token {
         commit_txn(transaction).await?;
         check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenMismatch);
-        return Err(Error::ApiTokenMismatch);
+        return Ok((StatusCode::OK, "Api Token Mismatch").into_response());
     }
     let response = GetTokenResponse {
         api_token: Some(*user.token.as_ref()),
@@ -57,5 +65,5 @@ pub async fn check_token(
         key,
         CheckTokenResponseEnum::GetTokenResponse(response.clone()),
     );
-    Ok(Json(response))
+    Ok(Json(response).into_response())
 }

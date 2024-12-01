@@ -23,7 +23,7 @@ pub fn on_message_handler(
                 Ok(msg) => {
                     log!("on_message msg => {:#?}", msg);
                     if let Some(tx) = get_tx() {
-                        if let Ok(tx) = tx.lock() {
+                        if let Ok(tx) = tx.read() {
                             let _ = tx.try_send(msg);
                         }
                     }

@@ -54,3 +54,7 @@ features = [
 
 [lib]
 crate-type = ["cdylib", "rlib"]
+
+[dev-dependencies]
+tracing = { workspace = true }
+tracing-test = { workspace = true }
