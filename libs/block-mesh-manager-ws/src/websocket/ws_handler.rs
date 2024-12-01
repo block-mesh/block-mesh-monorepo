@@ -51,28 +51,31 @@ pub async fn ws_handler(
         None => {
             let follower_pool = &state.follower_pool;
             let mut transaction = create_txn(follower_pool).await?;
-            let user = get_user_and_api_token_by_email(&mut transaction, &email)
-                .await?
-                .ok_or({
+            let user = match get_user_and_api_token_by_email(&mut transaction, &email).await? {
+                Some(user) => user,
+                None => {
                     creds_cache.insert(creds_key.clone(), WsCredsCache::UserNotFound);
-                    anyhow!(String::from("User email is not present in DB"))
-                })?;
+                    return Ok(
+                        (StatusCode::NO_CONTENT, "User email is not present in DB").into_response()
+                    );
+                }
+            };
             commit_txn(transaction).await?;
             if user.token.as_ref() != &api_token {
                 creds_cache.insert(creds_key, WsCredsCache::TokenMismatch);
-                return Err(Error::from(anyhow!("Api Token Mismatch")));
+                return Ok((StatusCode::NO_CONTENT, "Api Token Mismatch").into_response());
             }
             creds_cache.insert(creds_key, WsCredsCache::Found(user.clone()));
             user
         }
         Some(v) => match v {
             WsCredsCache::UserNotFound => {
-                return Err(Error::from(anyhow!(String::from(
-                    "User email is not present in DB"
-                ))));
+                return Ok(
+                    (StatusCode::NO_CONTENT, "User email is not present in DB").into_response()
+                );
             }
             WsCredsCache::TokenMismatch => {
-                return Err(Error::from(anyhow!("Api Token Mismatch")));
+                return Ok((StatusCode::NO_CONTENT, "Api Token Mismatch").into_response());
             }
             WsCredsCache::Found(u) => u.clone(),
         },
