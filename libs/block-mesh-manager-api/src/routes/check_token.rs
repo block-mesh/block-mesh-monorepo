@@ -23,13 +23,13 @@ pub async fn check_token(
         if let Present(entry) = check_token_map.try_get(&key) {
             return match entry.value() {
                 CheckTokenResponseEnum::ApiTokenMismatch => {
-                    Ok((StatusCode::NO_CONTENT, "Api Token Mismatch").into_response())
+                    Ok((StatusCode::OK, "Api Token Mismatch").into_response())
                 }
                 CheckTokenResponseEnum::UserNotFound => {
-                    Ok((StatusCode::NO_CONTENT, "User Not Found").into_response())
+                    Ok((StatusCode::OK, "User Not Found").into_response())
                 }
                 CheckTokenResponseEnum::ApiTokenNotFound => {
-                    Ok((StatusCode::NO_CONTENT, "Api Token Not Found").into_response())
+                    Ok((StatusCode::OK, "Api Token Not Found").into_response())
                 }
                 CheckTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone()).into_response()),
             };
@@ -42,19 +42,19 @@ pub async fn check_token(
             None => {
                 commit_txn(transaction).await?;
                 check_token_map.insert(key, CheckTokenResponseEnum::UserNotFound);
-                return Ok((StatusCode::NO_CONTENT, "User Not Found").into_response());
+                return Ok((StatusCode::OK, "User Not Found").into_response());
             }
         },
         Err(_) => {
             commit_txn(transaction).await?;
             check_token_map.insert(key, CheckTokenResponseEnum::UserNotFound);
-            return Ok((StatusCode::NO_CONTENT, "User Not Found").into_response());
+            return Ok((StatusCode::OK, "User Not Found").into_response());
         }
     };
     if *user.token.as_ref() != body.api_token {
         commit_txn(transaction).await?;
         check_token_map.insert(key, CheckTokenResponseEnum::ApiTokenMismatch);
-        return Ok((StatusCode::NO_CONTENT, "Api Token Mismatch").into_response());
+        return Ok((StatusCode::OK, "Api Token Mismatch").into_response());
     }
     let response = GetTokenResponse {
         api_token: Some(*user.token.as_ref()),

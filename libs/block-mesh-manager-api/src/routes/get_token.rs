@@ -25,13 +25,13 @@ pub async fn get_token(
             return match entry.value() {
                 GetTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone()).into_response()),
                 GetTokenResponseEnum::UserNotFound => {
-                    Ok((StatusCode::NO_CONTENT, "User Not Found").into_response())
+                    Ok((StatusCode::OK, "User Not Found").into_response())
                 }
                 GetTokenResponseEnum::PasswordMismatch => {
-                    Ok((StatusCode::NO_CONTENT, "Password Mismatch").into_response())
+                    Ok((StatusCode::OK, "Password Mismatch").into_response())
                 }
                 GetTokenResponseEnum::ApiTokenNotFound => {
-                    Ok((StatusCode::NO_CONTENT, "Api Token Not Found").into_response())
+                    Ok((StatusCode::OK, "Api Token Not Found").into_response())
                 }
             };
         }
@@ -43,19 +43,19 @@ pub async fn get_token(
             None => {
                 commit_txn(transaction).await?;
                 get_token_map.insert(key, GetTokenResponseEnum::UserNotFound);
-                return Ok((StatusCode::NO_CONTENT, "User Not Found").into_response());
+                return Ok((StatusCode::OK, "User Not Found").into_response());
             }
         },
         Err(_) => {
             commit_txn(transaction).await?;
             get_token_map.insert(key, GetTokenResponseEnum::UserNotFound);
-            return Ok((StatusCode::NO_CONTENT, "User Not Found").into_response());
+            return Ok((StatusCode::OK, "User Not Found").into_response());
         }
     };
     if !verify::<&str>(body.password.as_ref(), user.password.as_ref()).unwrap_or(false) {
         commit_txn(transaction).await?;
         get_token_map.insert(key, GetTokenResponseEnum::PasswordMismatch);
-        return Ok((StatusCode::NO_CONTENT, "Password Mismatch").into_response());
+        return Ok((StatusCode::OK, "Password Mismatch").into_response());
     }
     let response = GetTokenResponse {
         api_token: Some(*user.token.as_ref()),
