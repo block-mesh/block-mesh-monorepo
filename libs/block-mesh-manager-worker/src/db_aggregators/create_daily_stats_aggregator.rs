@@ -32,7 +32,7 @@ INSERT INTO daily_stats (id, user_id, status, tasks_count, day, created_at, upti
 		NOW()
 	FROM users u
 	WHERE u.id IN ({value_str})
-	) ON CONFLICT (user_id, day)
+	) ON CONFLICT (status, user_id, day)
 	DO NOTHING
     "#
     )
