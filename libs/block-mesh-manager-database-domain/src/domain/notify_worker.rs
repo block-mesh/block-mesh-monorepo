@@ -14,7 +14,7 @@ pub async fn notify_worker(pool: &PgPool, messages: &Vec<DBMessage>) -> anyhow::
 }
 
 #[tracing::instrument(name = "split_to_size", skip_all)]
-pub fn split_to_size(messages: &[DBMessage]) -> Vec<Vec<DBMessage>> {
+pub fn split_to_size(messages: &Vec<DBMessage>) -> Vec<Vec<DBMessage>> {
     let mut input_messages = messages.clone();
     let mut output: Vec<Vec<DBMessage>> = Vec::with_capacity(100);
     let mut current_vector: Vec<DBMessage> = Vec::with_capacity(100);
