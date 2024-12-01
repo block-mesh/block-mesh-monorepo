@@ -31,7 +31,7 @@ pub async fn check_token(
                 CheckTokenResponseEnum::ApiTokenNotFound => {
                     Ok((StatusCode::NO_CONTENT, "Api Token Not Found").into_response())
                 }
-                CheckTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone())),
+                CheckTokenResponseEnum::GetTokenResponse(r) => Ok(Json(r.clone()).into_response()),
             };
         }
     }
