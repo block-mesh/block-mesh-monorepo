@@ -1872,6 +1872,7 @@ dependencies = [
  "sqlx",
  "tokio",
  "tracing",
+ "tracing-test",
  "uuid",
 ]
 
