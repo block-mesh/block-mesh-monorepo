@@ -27,7 +27,7 @@ pub async fn handler(
     let user = auth.user.ok_or(Error::UserNotFound)?;
     let _ = notify_worker(
         &state.channel_pool,
-        &vec![DBMessage::AggregateAddToMessage(AggregateAddToMessage {
+        &[DBMessage::AggregateAddToMessage(AggregateAddToMessage {
             msg_type: DBMessageTypes::AggregateAddToMessage,
             user_id: user.id,
             value: serde_json::Value::from(1),
