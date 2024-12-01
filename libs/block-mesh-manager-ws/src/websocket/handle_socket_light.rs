@@ -19,6 +19,10 @@ pub async fn handle_socket_light(
     state: Arc<WsAppState>,
     user_id: Uuid,
 ) {
+    let counter_period = env::var("COUNTER_PERIOD")
+        .ok()
+        .and_then(|var| var.parse().ok())
+        .unwrap_or(50u64);
     let sleep = env::var("WS_KEEP_ALIVE")
         .ok()
         .and_then(|var| var.parse().ok())
@@ -49,6 +53,8 @@ pub async fn handle_socket_light(
 
     let tx_c = state.tx.clone();
     let mut send_task = tokio::spawn(async move {
+        let mut accumulator = 0i64;
+        let mut counter = 0u64;
         let _ = sender
             .send(Message::Text(
                 WsServerMessage::RequestBandwidthReport.to_string(),
@@ -60,14 +66,21 @@ pub async fn handle_socket_light(
             let _ = sender.send(Message::Ping(vec![1, 2, 3])).await;
             let now = Utc::now();
             let delta = (now - prev).num_seconds();
-            let _ = tx_c
-                .send_async(DBMessage::AggregateAddToMessage(AggregateAddToMessage {
-                    msg_type: DBMessageTypes::AggregateAddToMessage,
-                    user_id,
-                    value: serde_json::Value::from(delta),
-                    name: AggregateName::Uptime.to_string(),
-                }))
-                .await;
+            if counter >= counter_period {
+                let _ = tx_c
+                    .send_async(DBMessage::AggregateAddToMessage(AggregateAddToMessage {
+                        msg_type: DBMessageTypes::AggregateAddToMessage,
+                        user_id,
+                        value: serde_json::Value::from(accumulator),
+                        name: AggregateName::Uptime.to_string(),
+                    }))
+                    .await;
+                accumulator = 0;
+                counter = 0;
+            } else {
+                accumulator += delta;
+                counter += 1;
+            }
             prev = Utc::now();
             let _ = sender.send(Message::Text("ping".to_string())).await;
             tokio::time::sleep(Duration::from_millis(sleep)).await;

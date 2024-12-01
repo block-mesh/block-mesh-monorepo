@@ -41,11 +41,11 @@ pub async fn ws_handler(
         .get("api_token")
         .ok_or(anyhow!("Missing token".to_string()))?;
     let api_token = Uuid::from_str(api_token).context("Cannot deserialize UUID")?;
-    if state.emails.lock().await.contains(&email) {
+    if state.emails.read().await.contains(&email) {
         return Ok((StatusCode::ALREADY_REPORTED, "Already connected").into_response());
     }
     let creds_key = (email.clone(), api_token);
-    let mut creds_cache = state.creds_cache.lock().await;
+    let mut creds_cache = state.creds_cache.write().await;
     let cached_value = creds_cache.get(&creds_key);
     let user: UserAndApiToken = match cached_value {
         None => {
