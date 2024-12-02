@@ -6,5 +6,6 @@ pub mod password;
 pub mod perk;
 pub mod provider_master_status;
 pub mod proxy_master;
+pub mod spam_email;
 pub mod uptime_report;
 pub mod users_ip;
