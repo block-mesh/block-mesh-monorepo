@@ -57,7 +57,7 @@ pub async fn connect_wallet(
     connect_wallet_request: ConnectWalletRequest,
 ) -> anyhow::Result<ConnectWalletResponse> {
     let client = reqwest::Client::new();
-    let response = client
+    let response: ConnectWalletResponse = client
         .post(format!("{}/api/connect_wallet", origin))
         .header("Content-Type", "application/json")
         .json(&connect_wallet_request)
@@ -65,7 +65,11 @@ pub async fn connect_wallet(
         .await?
         .json()
         .await?;
-    Ok(response)
+    if response.status != 200 {
+        Err(anyhow!("Error {}", response.status))
+    } else {
+        Ok(response)
+    }
 }
 
 pub async fn connect_wallet_in_browser(wallet: String) -> bool {
