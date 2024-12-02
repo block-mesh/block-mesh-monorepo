@@ -27,10 +27,12 @@ use crate::database::api_token::create_api_token::create_api_token;
 use crate::database::invite_code::create_invite_code::create_invite_code;
 use crate::database::invite_code::get_user_opt_by_invited_code::get_user_opt_by_invited_code;
 use crate::database::nonce::create_nonce::create_nonce;
+use crate::database::spam_email::get_spam_emails::get_spam_emails;
 use crate::database::uptime_report::create_uptime_report::create_uptime_report;
 use crate::database::user::create_user::create_user;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::database::user::update_user_invited_by::update_user_invited_by;
+use crate::domain::spam_email::SpamEmail;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
 use crate::startup::application::AppState;
@@ -83,6 +85,28 @@ pub async fn handler(
     }
 
     let mut transaction = create_txn(&pool).await?;
+    let spam_emails = get_spam_emails(&mut transaction).await?;
+
+    let email_domain = match email.split('@').last() {
+        Some(d) => d.to_string(),
+        None => {
+            return Ok(Error::redirect(
+                400,
+                "Invalid email domain",
+                "Please check if email you inserted is correct",
+                RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
+            ));
+        }
+    };
+
+    if let Err(_) = SpamEmail::check_domains(&email_domain, spam_emails) {
+        return Ok(Error::redirect(
+            400,
+            "Invalid email domain",
+            "Please check if email you inserted is correct",
+            RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
+        ));
+    }
 
     if !validate_email(email.clone()) {
         return Ok(Error::redirect(

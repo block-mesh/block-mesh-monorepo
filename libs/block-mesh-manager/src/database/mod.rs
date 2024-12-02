@@ -10,6 +10,7 @@ pub mod leaderboard;
 pub mod nonce;
 pub mod perks;
 pub mod proxy_master;
+pub mod spam_email;
 pub mod task;
 pub mod uptime_report;
 pub mod user;
