@@ -40,7 +40,7 @@ pub async fn handler(
     if signature.verify(pubkey.as_ref(), message) {
         match db_user.wallet_address {
             None => {
-                if let Err(_) = add_perk_to_user(
+                if add_perk_to_user(
                     &mut transaction,
                     user.id,
                     PerkName::Wallet,
@@ -49,10 +49,14 @@ pub async fn handler(
                     serde_json::from_str("{}").unwrap(),
                 )
                 .await
+                .is_err()
                 {
                     return Ok(Json(ConnectWalletResponse { status: 52 }));
                 }
-                if let Err(_) = update_user_wallet(&mut transaction, user.id, &body.pubkey).await {
+                if update_user_wallet(&mut transaction, user.id, &body.pubkey)
+                    .await
+                    .is_err()
+                {
                     return Ok(Json(ConnectWalletResponse { status: 56 }));
                 }
                 state
@@ -73,12 +77,16 @@ pub async fn handler(
                         return Ok(Json(ConnectWalletResponse { status: 72 }));
                     }
                 };
-                if let Err(_) =
-                    update_aggregate(&mut transaction, &agg.id, &Value::from(wallet_address)).await
+                if update_aggregate(&mut transaction, &agg.id, &Value::from(wallet_address))
+                    .await
+                    .is_err()
                 {
                     return Ok(Json(ConnectWalletResponse { status: 77 }));
                 }
-                if let Err(_) = update_user_wallet(&mut transaction, user.id, &body.pubkey).await {
+                if update_user_wallet(&mut transaction, user.id, &body.pubkey)
+                    .await
+                    .is_err()
+                {
                     return Ok(Json(ConnectWalletResponse { status: 82 }));
                 }
                 state
