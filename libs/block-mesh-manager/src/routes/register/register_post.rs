@@ -99,7 +99,7 @@ pub async fn handler(
         }
     };
 
-    if let Err(_) = SpamEmail::check_domains(&email_domain, spam_emails) {
+    if SpamEmail::check_domains(&email_domain, spam_emails).is_err() {
         return Ok(Error::redirect(
             400,
             "Invalid email domain",
