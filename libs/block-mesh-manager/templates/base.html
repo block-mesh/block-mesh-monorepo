@@ -21,11 +21,12 @@
   <script src="https://challenges.cloudflare.com/turnstile/v0/api.js?onload=_turnstileCb" defer></script>
   <script>
     function _turnstileCb() {
-      console.debug('_turnstileCb called')
+      console.log('_turnstileCb called')
       turnstile.render('#myWidget', {
         sitekey: '{{ cf_site_key }}',
         theme: 'dark',
         callback: (token) => {
+          console.log('_turnstileCb token => ', token)
           let el = document.getElementById('cf-overlay')
           if (el) {
             el.style.display = 'none'

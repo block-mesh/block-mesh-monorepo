@@ -150,11 +150,11 @@ impl IPData {
                 return Some(true);
             }
         }
-        if let Some(is_datacenter) = self.is_datacenter() {
-            if is_datacenter {
-                return Some(true);
-            }
-        }
+        // if let Some(is_datacenter) = self.is_datacenter() {
+        //     if is_datacenter {
+        //         return Some(true);
+        //     }
+        // }
         None
     }
 }

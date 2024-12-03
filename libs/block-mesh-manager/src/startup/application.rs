@@ -41,6 +41,12 @@ pub struct Application {
 }
 
 pub struct AppState {
+    pub hcaptcha_site_key: String,
+    pub hcaptcha_secret_key: String,
+    pub recaptcha_site_key_v2: String,
+    pub recaptcha_secret_key_v2: String,
+    pub recaptcha_site_key_v3: String,
+    pub recaptcha_secret_key_v3: String,
     pub cf_enforce: bool,
     pub cf_secret_key: String,
     pub cf_site_key: String,

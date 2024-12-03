@@ -1,0 +1,105 @@
+{% extends "base.html" %}
+
+{% block content %}
+<script src="https://www.google.com/recaptcha/api.js?onload=_recaptcha_v2Cb&render=explicit"></script>
+<script
+  src="https://js.hcaptcha.com/1/api.js?hl=es&onload=_hcaptcchaCb&render=explicit"
+></script>
+<script>
+  function _hcaptcchaCb() {
+    console.log('_hcaptcchaCb')
+    hcaptcha.render('hcaptcha_widget', {
+      sitekey: '{{ hcaptcha_site_key }}',
+      theme: 'dark',
+      callback: (token) => {
+        console.log('_hcaptcchaCb token => ', token)
+        const hcaptcha = document.getElementById('hcaptcha')
+        if (hcaptcha) {
+          hcaptcha.value = token
+        }
+      }
+    })
+  }
+
+
+  function _recaptcha_v2Cb() {
+    console.log('_recaptcha_v2Cb')
+    grecaptcha.render('recaptcha_v2_widget', {
+      sitekey: '{{ recaptcha_site_key_v2 }}',
+      theme: 'dark',
+      callback: (token) => {
+        console.log('_recaptcha_v2Cb token => ', token)
+        const recaptcha_v2 = document.getElementById('recaptcha_v2')
+        if (recaptcha_v2) {
+          recaptcha_v2.value = token
+        }
+      }
+    })
+  }
+
+  function handleSubmit(event) {
+    console.log('entering handleSubmit')
+    const cftoken = document.getElementById('cftoken')
+    if (!cftoken) {
+      console.error('cftoken missing')
+      alert('Please complete Cloudflare captcha')
+      return false
+    }
+    if (!cftoken.value) {
+      console.error('cftoken.value missing', cftoken.value)
+      alert('Please complete Cloudflare captcha')
+      return false
+    }
+    const recaptcha_v2 = document.getElementById('recaptcha_v2')
+    if (!recaptcha_v2) {
+      console.error('recaptcha_v2 missing')
+      alert('Please complete Google captcha')
+      return false
+    }
+    if (!recaptcha_v2.value) {
+      console.error('recaptcha_v2.value is missing', recaptcha_v2.value)
+      alert('Please complete Google captcha')
+      return false
+    }
+    const hcaptcha = document.getElementById('hcaptcha')
+    if (!hcaptcha) {
+      console.error('hcaptcha missing')
+      alert('Please complete h-captcha captcha')
+      return false
+    }
+    if (!hcaptcha.value) {
+      console.error('hcaptcha.value is missing', hcaptcha.value)
+      alert('Please complete h-captcha captcha')
+      return false
+    }
+    return true
+  }
+</script>
+
+<form action="/proof_of_human" method="post" onsubmit="return handleSubmit(event)">
+  <div class="bg-dark-blue flex justify-center items-center h-screen">
+    <div class="bg-dark-blue border-cyan border-solid border-2 p-8 rounded-lg shadow-md w-100">
+      <h2 class="font-bebas-neue text-off-white text-2xl font-semibold text-center mb-6">
+        PROOF OF HUMANITY
+      </h2>
+      <div id="myWidget"></div>
+      <div id="recaptcha_v2_widget" class="g-recaptcha" data-sitekey="{{ recaptcha_site_key_v2 }}"></div>
+      <div id="hcaptcha_widget" class="g-recaptcha" data-sitekey="{{ hcaptcha_site_key }}"></div>
+      <label for="hcaptcha"></label>
+      <input style="display: none" type="text" id="hcaptcha" name="hcaptcha" required readonly />
+      <label for="recaptcha_v2"></label>
+      <input style="display: none" type="text" id="recaptcha_v2" name="recaptcha_v2" required readonly />
+      <label for="cftoken"></label>
+      <input style="display: none" type="text" id="cftoken" name="cftoken" required readonly />
+      <div class="flex items-center justify-between">
+        <button
+          class="hover:text-orange text-off-white py-2 px-4 border border-orange rounded font-bebas-neue focus:outline-none focus:shadow-outline"
+          type="submit">
+          Submit
+        </button>
+      </div>
+    </div>
+  </div>
+</form>
+
+{% endblock %}

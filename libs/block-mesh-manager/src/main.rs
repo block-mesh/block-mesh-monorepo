@@ -142,7 +142,20 @@ async fn run() -> anyhow::Result<()> {
         .unwrap_or("false".to_string())
         .parse()
         .unwrap_or(false);
+    let recaptcha_site_key_v2 = env::var("RECAPTCHA_SITE_KEY_V2")?;
+    let recaptcha_secret_key_v2 = env::var("RECAPTCHA_SECRET_KEY_V2")?;
+    let recaptcha_site_key_v3 = env::var("RECAPTCHA_SITE_KEY_V3")?;
+    let recaptcha_secret_key_v3 = env::var("RECAPTCHA_SECRET_KEY_V3")?;
+    let hcaptcha_site_key = env::var("HCAPTCHA_SITE_KEY")?;
+    let hcaptcha_secret_key = env::var("HCAPTCHA_SECRET_KEY")?;
+
     let app_state = Arc::new(AppState {
+        hcaptcha_site_key,
+        hcaptcha_secret_key,
+        recaptcha_site_key_v2,
+        recaptcha_secret_key_v2,
+        recaptcha_site_key_v3,
+        recaptcha_secret_key_v3,
         cf_enforce,
         cf_secret_key,
         cf_site_key,

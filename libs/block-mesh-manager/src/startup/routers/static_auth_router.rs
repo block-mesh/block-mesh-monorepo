@@ -9,6 +9,11 @@ use block_mesh_common::routes_enum::RoutesEnum;
 pub fn get_static_auth_router() -> Router<Arc<AppState>> {
     let auth_router = Router::new()
         .route(
+            RoutesEnum::Static_Auth_Proof_Of_Human.to_string().as_str(),
+            get(routes::proof_of_human::proof_of_human_get::handler)
+                .post(routes::proof_of_human::proof_of_human_post::handler),
+        )
+        .route(
             RoutesEnum::Static_Auth_Logout.to_string().as_str(),
             get(routes::logout::get::handler),
         )

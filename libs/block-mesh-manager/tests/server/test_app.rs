@@ -81,6 +81,10 @@ pub async fn spawn_app() -> TestApp {
 
     let app_state = Arc::new(AppState {
         cf_enforce: false,
+        recaptcha_secret_key_v2: "v2".to_string(),
+        recaptcha_secret_key_v3: "v3".to_string(),
+        recaptcha_site_key_v2: "v2".to_string(),
+        recaptcha_site_key_v3: "v3".to_string(),
         cf_site_key: "1".to_string(),
         cf_secret_key: "2".to_string(),
         invite_codes,
