@@ -41,6 +41,7 @@ pub struct Application {
 }
 
 pub struct AppState {
+    pub enable_proof_of_humanity: bool,
     pub hcaptcha_site_key: String,
     pub hcaptcha_secret_key: String,
     pub recaptcha_site_key_v2: String,
