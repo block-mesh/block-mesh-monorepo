@@ -21,7 +21,7 @@ pub enum RoutesEnum {
     Static_UnAuth_Login_Wallet,
     Static_UnAuth_DbHealth,
     Static_UnAuth_ServerHealth,
-    Static_Auth_Proof_Of_Human,
+    Static_Auth_Proof_Of_Humanity,
     Static_Auth_ResendConfirmationEmail,
     Static_Auth_Twitter_Login,
     Static_Auth_Edit_Invite,
@@ -48,7 +48,7 @@ pub enum RoutesEnum {
 impl Display for RoutesEnum {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match &self {
-            RoutesEnum::Static_Auth_Proof_Of_Human => write!(f, "/proof_of_human"),
+            RoutesEnum::Static_Auth_Proof_Of_Humanity => write!(f, "/proof_of_humanity"),
             RoutesEnum::Static_UnAuth_Version => write!(f, "/version"),
             RoutesEnum::Static_Auth_Twitter_Login => write!(f, "/twitter/login"),
             RoutesEnum::Static_UnAuth_Map => write!(f, "/map"),

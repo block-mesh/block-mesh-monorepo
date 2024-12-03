@@ -21,5 +21,5 @@ pub mod twitter;
 pub mod uptime_report;
 
 pub mod admin;
-pub mod proof_of_human;
+pub mod proof_of_humanity;
 pub mod version;

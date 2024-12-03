@@ -28,7 +28,7 @@
       sitekey: '{{ recaptcha_site_key_v2 }}',
       theme: 'dark',
       callback: (token) => {
-        console.log('_recaptcha_v2Cb token => ', token)
+        // console.log('_recaptcha_v2Cb token => ', token)
         const recaptcha_v2 = document.getElementById('recaptcha_v2')
         if (recaptcha_v2) {
           recaptcha_v2.value = token
@@ -76,7 +76,7 @@
   }
 </script>
 
-<form action="/proof_of_human" method="post" onsubmit="return handleSubmit(event)">
+<form action="/proof_of_humanity" method="post" onsubmit="return handleSubmit(event)">
   <div class="bg-dark-blue flex justify-center items-center h-screen">
     <div class="bg-dark-blue border-cyan border-solid border-2 p-8 rounded-lg shadow-md w-100">
       <h2 class="font-bebas-neue text-off-white text-2xl font-semibold text-center mb-6">

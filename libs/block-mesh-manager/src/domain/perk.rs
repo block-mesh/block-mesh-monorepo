@@ -12,6 +12,7 @@ pub enum PerkName {
     Twitter,
     FounderTwitter,
     Invalid,
+    ProofOfHumanity,
 }
 
 impl Display for PerkName {
@@ -20,6 +21,7 @@ impl Display for PerkName {
             Self::Wallet => write!(f, "wallet"),
             Self::Twitter => write!(f, "twitter"),
             Self::FounderTwitter => write!(f, "founder_twitter"),
+            Self::ProofOfHumanity => write!(f, "proof_of_humanity"),
             Self::Invalid => write!(f, "invalid"),
         }
     }
@@ -31,6 +33,7 @@ impl From<String> for PerkName {
             "wallet" => Self::Wallet,
             "twitter" => Self::Twitter,
             "founder_twitter" => Self::FounderTwitter,
+            "proof_of_humanity" => Self::ProofOfHumanity,
             _ => Self::Invalid,
         }
     }

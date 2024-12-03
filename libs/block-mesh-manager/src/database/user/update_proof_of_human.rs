@@ -7,7 +7,7 @@ pub async fn update_proof_of_human(
     proof_of_human: bool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
-        r#"UPDATE users SET proof_of_human = $1 WHERE id = $2"#,
+        r#"UPDATE users SET proof_of_humanity = $1 WHERE id = $2"#,
         proof_of_human,
         user_id
     )

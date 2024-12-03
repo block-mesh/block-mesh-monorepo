@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "UPDATE users SET proof_of_human = $1 WHERE id = $2",
+  "query": "UPDATE users SET proof_of_humanity = $1 WHERE id = $2",
   "describe": {
     "columns": [],
     "parameters": {
@@ -11,5 +11,5 @@
     },
     "nullable": []
   },
-  "hash": "ceca7fa77dd753a6641b148851d022d937062f47d28b732690ec0f319e568b72"
+  "hash": "125a7b7f7bfeb3d054bfc961ccd3ac822ce13ea6e18ea6a6eb25cf9eff0c67b4"
 }

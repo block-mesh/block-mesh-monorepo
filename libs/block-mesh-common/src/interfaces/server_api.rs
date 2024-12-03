@@ -363,6 +363,7 @@ pub struct ConnectWalletRequest {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConnectWalletResponse {
     pub status: i32,
+    pub message: Option<String>,
 }
 
 #[typeshare]

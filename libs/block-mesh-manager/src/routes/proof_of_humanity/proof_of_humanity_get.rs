@@ -15,7 +15,7 @@ use std::sync::Arc;
 
 #[allow(dead_code)]
 #[derive(Template)]
-#[template(path = "proof_of_human.html")]
+#[template(path = "proof_of_humanity.html")]
 struct ProofOfHumanTemplate {
     pub chrome_extension_link: String,
     pub app_server: String,
@@ -32,7 +32,7 @@ struct ProofOfHumanTemplate {
     pub hcaptcha_site_key: String,
 }
 
-#[tracing::instrument(name = "proof_of_human_get", skip_all)]
+#[tracing::instrument(name = "proof_of_humanity_get", skip_all)]
 pub async fn handler(
     State(state): State<Arc<AppState>>,
     Extension(auth): Extension<AuthSession<Backend>>,
