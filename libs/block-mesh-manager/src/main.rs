@@ -148,8 +148,12 @@ async fn run() -> anyhow::Result<()> {
     let recaptcha_secret_key_v3 = env::var("RECAPTCHA_SECRET_KEY_V3")?;
     let hcaptcha_site_key = env::var("HCAPTCHA_SITE_KEY")?;
     let hcaptcha_secret_key = env::var("HCAPTCHA_SECRET_KEY")?;
-
+    let enable_proof_of_humanity = env::var("ENABLE_PROOF_OF_HUMANITY")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
     let app_state = Arc::new(AppState {
+        enable_proof_of_humanity,
         hcaptcha_site_key,
         hcaptcha_secret_key,
         recaptcha_site_key_v2,

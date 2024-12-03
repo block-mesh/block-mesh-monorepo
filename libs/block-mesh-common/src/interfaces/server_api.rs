@@ -342,6 +342,7 @@ pub struct AuthStatusResponse {
     pub logged_in: bool,
     pub wallet_address: Option<String>,
     pub email: Option<String>,
+    pub enable_proof_of_humanity: bool,
 }
 
 #[typeshare]

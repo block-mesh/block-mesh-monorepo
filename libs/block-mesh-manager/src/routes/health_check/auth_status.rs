@@ -33,6 +33,7 @@ pub async fn handler(
             }
             None => {
                 return Ok(Json(AuthStatusResponse {
+                    enable_proof_of_humanity: state.enable_proof_of_humanity,
                     email: None,
                     status_code: 404,
                     logged_in: false,
@@ -42,6 +43,7 @@ pub async fn handler(
         }
     };
     Ok(Json(AuthStatusResponse {
+        enable_proof_of_humanity: state.enable_proof_of_humanity,
         email: Some(user.email.to_ascii_lowercase()),
         status_code: 200,
         logged_in: true,
