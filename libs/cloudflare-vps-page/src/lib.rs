@@ -45,7 +45,8 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
         status: 200,
         message: "OK".to_string(),
         asn: ip_data.asn(),
-        is_datacenter: ip_data.is_datacenter(),
+        // is_datacenter: ip_data.is_datacenter(),
+        is_datacenter: Some(false),
         is_vps: ip_data.is_vps(asn_list),
     };
     Response::from_json(&resp)

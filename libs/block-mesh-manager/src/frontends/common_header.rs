@@ -4,10 +4,7 @@ use leptos_meta::{Link, Meta, Script, Style, Stylesheet, Title};
 #[component]
 pub fn CommonHeader() -> impl IntoView {
     view! {
-        <Script
-            src="https://challenges.cloudflare.com/turnstile/v0/api.js"
-            defer="true"
-        />
+        <Script src="https://challenges.cloudflare.com/turnstile/v0/api.js" defer="true"/>
         <Script src="https://cdn.jsdelivr.net/npm/eruda"/>
         <script>
             r#"

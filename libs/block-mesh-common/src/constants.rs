@@ -13,6 +13,8 @@ pub const BLOCKMESH_VPS: &str = "https://vps.blockmesh.xyz";
 
 pub const BLOCKMESH_WS_REDIS_COUNT_KEY: &str = "BLOCKMESH_WS_REDIS_COUNT_KEY";
 pub const CF_TURNSTILE: &str = "https://challenges.cloudflare.com/turnstile/v0/siteverify";
+pub const RECAPTCHA: &str = "https://www.google.com/recaptcha/api/siteverify";
+pub const HCAPTCHA: &str = "https://api.hcaptcha.com/siteverify";
 
 pub fn env_url() -> String {
     static APP_ENVIRONMENT: OnceLock<String> = OnceLock::new();

@@ -65,11 +65,7 @@ pub async fn connect_wallet(
         .await?
         .json()
         .await?;
-    if response.status != 200 {
-        Err(anyhow!("Error {}", response.status))
-    } else {
-        Ok(response)
-    }
+    Ok(response)
 }
 
 pub async fn connect_wallet_in_browser(wallet: String) -> bool {
@@ -100,11 +96,19 @@ pub async fn connect_wallet_in_browser(wallet: String) -> bool {
     )
     .await
     {
-        Ok(_) => {
-            let auth = expect_context::<AuthContext>();
-            auth.wallet_address.set(Some(pubkey));
-            notifications.set_success("Connected successfully");
-            true
+        Ok(response) => {
+            if response.status != 200 {
+                notifications.set_error(format!(
+                    "Failed to connect wallet due to error: {}",
+                    response.message.unwrap_or_default()
+                ));
+                false
+            } else {
+                let auth = expect_context::<AuthContext>();
+                auth.wallet_address.set(Some(pubkey));
+                notifications.set_success("Connected successfully");
+                true
+            }
         }
         Err(_) => {
             notifications.set_error("Failed to connect");

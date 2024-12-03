@@ -51,13 +51,19 @@ pub async fn handler(
                 .await
                 .is_err()
                 {
-                    return Ok(Json(ConnectWalletResponse { status: 52 }));
+                    return Ok(Json(ConnectWalletResponse {
+                        status: 52,
+                        message: Some("(52) Cannot add perk".to_string()),
+                    }));
                 }
                 if update_user_wallet(&mut transaction, user.id, &body.pubkey)
                     .await
                     .is_err()
                 {
-                    return Ok(Json(ConnectWalletResponse { status: 56 }));
+                    return Ok(Json(ConnectWalletResponse {
+                        status: 56,
+                        message: Some("(56) Cannot update user wallet".to_string()),
+                    }));
                 }
                 state
                     .wallet_addresses
@@ -74,20 +80,29 @@ pub async fn handler(
                 {
                     Ok(a) => a,
                     Err(_) => {
-                        return Ok(Json(ConnectWalletResponse { status: 72 }));
+                        return Ok(Json(ConnectWalletResponse {
+                            status: 72,
+                            message: Some("(72) Cannot find agg".to_string()),
+                        }));
                     }
                 };
                 if update_aggregate(&mut transaction, &agg.id, &Value::from(wallet_address))
                     .await
                     .is_err()
                 {
-                    return Ok(Json(ConnectWalletResponse { status: 77 }));
+                    return Ok(Json(ConnectWalletResponse {
+                        status: 77,
+                        message: Some("(77) Cannot update agg".to_string()),
+                    }));
                 }
                 if update_user_wallet(&mut transaction, user.id, &body.pubkey)
                     .await
                     .is_err()
                 {
-                    return Ok(Json(ConnectWalletResponse { status: 82 }));
+                    return Ok(Json(ConnectWalletResponse {
+                        status: 82,
+                        message: Some("(82) Cannot update user wallet".to_string()),
+                    }));
                 }
                 state
                     .wallet_addresses
@@ -95,8 +110,14 @@ pub async fn handler(
             }
         }
     } else {
-        return Ok(Json(ConnectWalletResponse { status: 90 }));
+        return Ok(Json(ConnectWalletResponse {
+            status: 90,
+            message: Some("(90) Cannot verify signature".to_string()),
+        }));
     }
     commit_txn(transaction).await?;
-    Ok(Json(ConnectWalletResponse { status: 200 }))
+    Ok(Json(ConnectWalletResponse {
+        status: 200,
+        message: None,
+    }))
 }

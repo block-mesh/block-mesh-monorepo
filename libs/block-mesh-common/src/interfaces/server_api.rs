@@ -363,6 +363,7 @@ pub struct ConnectWalletRequest {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConnectWalletResponse {
     pub status: i32,
+    pub message: Option<String>,
 }
 
 #[typeshare]
@@ -599,6 +600,26 @@ pub struct SendEmail {
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct TurnStile {
+    pub secret: String,
+    pub response: String,
+}
+
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug)]
+pub struct ProofOfHumanForm {
+    pub cftoken: String,
+    pub recaptcha_v2: String,
+    pub hcaptcha: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct ReCaptchaV2 {
+    pub secret: String,
+    pub response: String,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct HCaptcha {
     pub secret: String,
     pub response: String,
 }
