@@ -23,6 +23,7 @@
     function _turnstileCb() {
       console.log('_turnstileCb called')
       turnstile.render('#myWidget', {
+        language: 'en',
         sitekey: '{{ cf_site_key }}',
         theme: 'dark',
         callback: (token) => {

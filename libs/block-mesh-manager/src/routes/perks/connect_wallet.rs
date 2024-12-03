@@ -56,13 +56,15 @@ pub async fn handler(
                         message: Some("(52) Cannot add perk".to_string()),
                     }));
                 }
-                if update_user_wallet(&mut transaction, user.id, &body.pubkey)
-                    .await
-                    .is_err()
-                {
+                if let Err(e) = update_user_wallet(&mut transaction, user.id, &body.pubkey).await {
+                    let msg = if e.to_string().contains("violates unique constraint") {
+                        "Wallet address already connected to a different user"
+                    } else {
+                        "(56) Cannot update user wallet"
+                    };
                     return Ok(Json(ConnectWalletResponse {
                         status: 56,
-                        message: Some("(56) Cannot update user wallet".to_string()),
+                        message: Some(msg.to_string()),
                     }));
                 }
                 state
@@ -95,13 +97,15 @@ pub async fn handler(
                         message: Some("(77) Cannot update agg".to_string()),
                     }));
                 }
-                if update_user_wallet(&mut transaction, user.id, &body.pubkey)
-                    .await
-                    .is_err()
-                {
+                if let Err(e) = update_user_wallet(&mut transaction, user.id, &body.pubkey).await {
+                    let msg = if e.to_string().contains("violates unique constraint") {
+                        "(82) Wallet address already connected to a different user"
+                    } else {
+                        "(82) Cannot update user wallet "
+                    };
                     return Ok(Json(ConnectWalletResponse {
                         status: 82,
-                        message: Some("(82) Cannot update user wallet".to_string()),
+                        message: Some(msg.to_string()),
                     }));
                 }
                 state
