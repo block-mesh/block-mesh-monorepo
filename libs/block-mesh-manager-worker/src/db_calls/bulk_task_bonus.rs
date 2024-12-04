@@ -1,4 +1,5 @@
 use anyhow::anyhow;
+use rand::Rng;
 use sqlx::postgres::PgQueryResult;
 use sqlx::{Postgres, Transaction};
 
@@ -11,6 +12,10 @@ pub async fn bulk_task_bonus(
     if bonus <= 0 || limit <= 0 {
         return Err(anyhow!("bulk_task_bonus called without a limit and bonus"));
     }
+    let r_limit = {
+        let mut rng = rand::thread_rng();
+        rng.gen_range(1..limit)
+    };
     let r = sqlx::query!(
         r#"
         UPDATE daily_stats ds
@@ -28,7 +33,7 @@ pub async fn bulk_task_bonus(
             AND ds.tasks_count < $2
         "#,
         bonus,
-        limit
+        limit + r_limit
     )
     .execute(&mut **transaction)
     .await?;

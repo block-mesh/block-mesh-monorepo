@@ -8,8 +8,15 @@ use crate::startup::routers::static_un_auth_router::get_static_un_auth_router;
 use axum::extract::Request;
 use axum::{Extension, Router};
 use axum_login::login_required;
+use block_mesh_common::constants::DeviceType;
+use block_mesh_common::email_client::client::EmailClient;
+use block_mesh_common::env::app_env_var::AppEnvVar;
+use block_mesh_common::env::env_var;
+use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
 use block_mesh_common::feature_flag_client::FlagValue;
+use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
 use dashmap::DashMap;
+use http::{header, HeaderValue};
 use leptos::leptos_config::get_config_from_env;
 use redis::aio::MultiplexedConnection;
 use reqwest::Client;
@@ -21,17 +28,11 @@ use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::net::TcpListener;
-
-use block_mesh_common::constants::DeviceType;
-use block_mesh_common::email_client::client::EmailClient;
-use block_mesh_common::env::app_env_var::AppEnvVar;
-use block_mesh_common::env::env_var;
-use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
-use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
 use tokio::sync::Mutex;
 use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
+use tower_http::set_header::SetResponseHeaderLayer;
 use tower_http::timeout::TimeoutLayer;
 use twitter_v2::authorization::Oauth2Client;
 
@@ -214,12 +215,23 @@ impl Application {
             app
         };
 
+        let mut csp = String::default();
+        csp.push_str("default-src 'self';");
+        csp.push_str("style-src 'self' 'unsafe-inline';");
+        csp.push_str("script-src-elem 'self' 'unsafe-eval' 'unsafe-inline';");
+        csp.push_str("script-src 'self' 'unsafe-eval' 'unsafe-inline' chrome-extension://ceaogammpdhppmdaajjdjkdgcdeghjki");
+        let csp_header = HeaderValue::from_str(&csp).unwrap();
+
         let app = app
             .nest("/", leptos_router)
             .nest("/", backend)
             .nest("/", leptos_pkg)
             .layer(Extension(Arc::new(Mutex::new(oauth_ctx))))
-            .layer(auth_layer);
+            .layer(auth_layer)
+            .layer(SetResponseHeaderLayer::overriding(
+                header::CONTENT_SECURITY_POLICY,
+                csp_header,
+            ));
 
         let listener = TcpListener::bind(settings.application.address())
             .await

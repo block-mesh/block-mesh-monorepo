@@ -7,7 +7,6 @@ use crate::routes::twitter::context::{Oauth2Ctx, Oauth2CtxPg};
 use anyhow::{anyhow, Context};
 use askama_axum::IntoResponse;
 use axum::extract::Query;
-use axum::response::Redirect;
 use axum::Extension;
 use block_mesh_common::constants::{
     DeviceType, BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID,
