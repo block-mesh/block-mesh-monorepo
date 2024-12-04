@@ -237,6 +237,7 @@ impl Application {
                 .replace("'unsafe-inline'", "")
         ));
         csp.push_str(&format!("child-src {} ;", permissions));
+        csp.push_str(&format!("worker-src {} ;", permissions));
         let csp_header = HeaderValue::from_str(&csp).unwrap();
         let enforce_csp = env::var("ENFORCE_CSP")
             .unwrap_or("false".to_string())
