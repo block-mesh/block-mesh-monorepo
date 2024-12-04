@@ -215,24 +215,47 @@ impl Application {
             app
         };
 
+        let permissions = "'self' 'unsafe-eval' 'unsafe-inline' data: https://fonts.gstatic.com https://fonts.googleapis.com https://rsms.me https://opencollective.com https://cdn.jsdelivr.net https://*.cloudflare.com https://*.blockmesh.xyz https://*.googletagmanager.com https://imagedelivery.net https://*.google-analytics.com chrome-extension://ceaogammpdhppmdaajjdjkdgcdeghjki".to_string();
         let mut csp = String::default();
-        csp.push_str("default-src 'self';");
-        csp.push_str("style-src 'self' 'unsafe-inline';");
-        csp.push_str("script-src-elem 'self' 'unsafe-eval' 'unsafe-inline';");
-        csp.push_str("script-src 'self' 'unsafe-eval' 'unsafe-inline' chrome-extension://ceaogammpdhppmdaajjdjkdgcdeghjki");
+        csp.push_str("default-src 'self' ;");
+        csp.push_str(&format!("style-src {} ;", permissions));
+        csp.push_str(&format!("script-src-elem {} ;", permissions));
+        csp.push_str(&format!("script-src {} ;", permissions));
+        csp.push_str(&format!("img-src {} ;", permissions));
+        csp.push_str(&format!(
+            "connect-src {} ;",
+            permissions
+                .replace("'unsafe-eval'", "")
+                .replace("'unsafe-inline'", "")
+        ));
+        csp.push_str(&format!("font-src {} ;", permissions));
+        csp.push_str(&format!("frame-src {} ;", permissions));
+        csp.push_str(&format!(
+            "frame-ancestors {} ;",
+            permissions
+                .replace("'unsafe-eval'", "")
+                .replace("'unsafe-inline'", "")
+        ));
+        csp.push_str(&format!("child-src {} ;", permissions));
         let csp_header = HeaderValue::from_str(&csp).unwrap();
-
+        let enforce_csp = env::var("ENFORCE_CSP")
+            .unwrap_or("false".to_string())
+            .parse()
+            .unwrap_or(false);
         let app = app
             .nest("/", leptos_router)
             .nest("/", backend)
             .nest("/", leptos_pkg)
             .layer(Extension(Arc::new(Mutex::new(oauth_ctx))))
-            .layer(auth_layer)
-            .layer(SetResponseHeaderLayer::overriding(
+            .layer(auth_layer);
+        let app = if enforce_csp {
+            app.layer(SetResponseHeaderLayer::overriding(
                 header::CONTENT_SECURITY_POLICY,
                 csp_header,
-            ));
-
+            ))
+        } else {
+            app
+        };
         let listener = TcpListener::bind(settings.application.address())
             .await
             .unwrap();
