@@ -5,8 +5,8 @@ use crate::errors::error::Error;
 use crate::notification::notification_redirect::NotificationRedirect;
 use crate::routes::twitter::context::{Oauth2Ctx, Oauth2CtxPg};
 use anyhow::{anyhow, Context};
+use askama_axum::IntoResponse;
 use axum::extract::Query;
-use axum::response::Redirect;
 use axum::Extension;
 use block_mesh_common::constants::{
     DeviceType, BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID,
@@ -38,7 +38,7 @@ pub async fn callback(
     Extension(ctx): Extension<Arc<Mutex<Oauth2Ctx>>>,
     Extension(pool): Extension<PgPool>,
     Query(CallbackParams { code, state }): Query<CallbackParams>,
-) -> Result<Redirect, Error> {
+) -> Result<impl IntoResponse, Error> {
     let parts: Vec<&str> = state.secret().split("___").collect();
     let state = CsrfToken::new(parts[0].to_string());
     let user_id = Uuid::parse_str(parts[1]).map_err(|e| anyhow!("Cannot parse UUID - {}", e))?;
@@ -54,7 +54,12 @@ pub async fn callback(
         } else if target == BLOCKMESH_FOUNDER_TWITTER_USER_ID {
             AggregateName::FounderTwitter
         } else {
-            return Err(Error::Auth("Bad follow target".to_string()));
+            return Ok(Error::redirect(
+                500,
+                "ERROR",
+                "Invalid follow target",
+                &format!("/ui{}", RoutesEnum::Static_Auth_Dashboard),
+            ));
         },
         &user_id,
     )
@@ -70,28 +75,46 @@ pub async fn callback(
         let ctx = ctx.lock().await;
         if state.secret() != saved_state.secret() {
             update_aggregate(&mut transaction, &twitter_agg.id, &Value::Null).await?;
-            return Err(Error::InternalServer);
+            return Ok(Error::redirect(
+                500,
+                "ERROR",
+                "State error",
+                &format!("/ui{}", RoutesEnum::Static_Auth_Dashboard),
+            ));
         }
         // // get verifier from ctx
-        let verifier = pg
-            .verifier
-            .take()
-            .ok_or_else(|| {
-                (
-                    StatusCode::INTERNAL_SERVER_ERROR,
-                    "No PKCE verifier found".to_string(),
-                )
-            })
-            .map_err(|_| Error::InternalServer)?;
+        let verifier = match pg.verifier.take().ok_or_else(|| {
+            (
+                StatusCode::INTERNAL_SERVER_ERROR,
+                "No PKCE verifier found".to_string(),
+            )
+        }) {
+            Ok(v) => v,
+            Err(_) => {
+                return Ok(Error::redirect(
+                    500,
+                    "ERROR",
+                    "No PKCE verifier found",
+                    &format!("/ui{}", RoutesEnum::Static_Auth_Dashboard),
+                ));
+            }
+        };
         let client = ctx.client.clone();
         (client, verifier)
     };
 
     // request oauth2 token
-    let oauth_token = client
-        .request_token(code.clone(), verifier)
-        .await
-        .map_err(|_| Error::InternalServer)?;
+    let oauth_token = match client.request_token(code.clone(), verifier).await {
+        Ok(o) => o,
+        Err(_) => {
+            return Ok(Error::redirect(
+                500,
+                "ERROR",
+                "No Oauth token",
+                &format!("/ui{}", RoutesEnum::Static_Auth_Dashboard),
+            ));
+        }
+    };
     // set context for use with twitter API
     // ctx.lock().await.token = Some(token);
 

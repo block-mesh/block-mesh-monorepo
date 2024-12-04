@@ -149,9 +149,15 @@ pub fn ExtensionLogin() -> impl IntoView {
                         class="text-magenta underline cursor-pointer"
                         on:click=move |_| { state.status.update(|v| *v = AuthStatus::Registering) }
                     >
-                        Register now
+                        Register here
                     </small>
                 </button>
+                <br/>
+                <a href="https://app.blockmesh.xyz/register" target="_blank" rel="external">
+                    <small class="text-magenta underline cursor-pointer">
+                        Register via app
+                    </small>
+                </a>
             </div>
         </div>
     }

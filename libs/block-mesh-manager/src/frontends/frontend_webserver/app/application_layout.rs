@@ -111,7 +111,11 @@ pub fn ApplicationLayout(children: ChildrenFn) -> impl IntoView {
             let origin = window().origin();
             let client = reqwest::Client::new();
 
-            if let Ok(response) = client.get(format!("{}/auth_status", origin)).send().await {
+            if let Ok(response) = client
+                .get(format!("{}/auth_status?perks_page=true", origin))
+                .send()
+                .await
+            {
                 if let Ok(json) = response.json::<AuthStatusResponse>().await {
                     provide_context(json);
                 } else {

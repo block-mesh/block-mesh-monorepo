@@ -8,8 +8,15 @@ use crate::startup::routers::static_un_auth_router::get_static_un_auth_router;
 use axum::extract::Request;
 use axum::{Extension, Router};
 use axum_login::login_required;
+use block_mesh_common::constants::DeviceType;
+use block_mesh_common::email_client::client::EmailClient;
+use block_mesh_common::env::app_env_var::AppEnvVar;
+use block_mesh_common::env::env_var;
+use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
 use block_mesh_common::feature_flag_client::FlagValue;
+use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
 use dashmap::DashMap;
+use http::{header, HeaderValue};
 use leptos::leptos_config::get_config_from_env;
 use redis::aio::MultiplexedConnection;
 use reqwest::Client;
@@ -21,17 +28,11 @@ use std::path::Path;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::net::TcpListener;
-
-use block_mesh_common::constants::DeviceType;
-use block_mesh_common::email_client::client::EmailClient;
-use block_mesh_common::env::app_env_var::AppEnvVar;
-use block_mesh_common::env::env_var;
-use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
-use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
 use tokio::sync::Mutex;
 use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
 use tower_http::cors::CorsLayer;
 use tower_http::services::ServeDir;
+use tower_http::set_header::SetResponseHeaderLayer;
 use tower_http::timeout::TimeoutLayer;
 use twitter_v2::authorization::Oauth2Client;
 
@@ -214,13 +215,48 @@ impl Application {
             app
         };
 
+        let permissions = "'self' 'unsafe-eval' 'unsafe-inline' data: https://fonts.gstatic.com https://fonts.googleapis.com https://rsms.me https://opencollective.com https://cdn.jsdelivr.net https://*.cloudflare.com https://*.blockmesh.xyz https://*.googletagmanager.com https://imagedelivery.net https://*.google-analytics.com chrome-extension://ceaogammpdhppmdaajjdjkdgcdeghjki".to_string();
+        let mut csp = String::default();
+        csp.push_str("default-src 'self' ;");
+        csp.push_str(&format!("style-src {} ;", permissions));
+        csp.push_str(&format!("script-src-elem {} ;", permissions));
+        csp.push_str(&format!("script-src {} ;", permissions));
+        csp.push_str(&format!("img-src {} ;", permissions));
+        csp.push_str(&format!(
+            "connect-src {} ;",
+            permissions
+                .replace("'unsafe-eval'", "")
+                .replace("'unsafe-inline'", "")
+        ));
+        csp.push_str(&format!("font-src {} ;", permissions));
+        csp.push_str(&format!("frame-src {} ;", permissions));
+        csp.push_str(&format!(
+            "frame-ancestors {} ;",
+            permissions
+                .replace("'unsafe-eval'", "")
+                .replace("'unsafe-inline'", "")
+        ));
+        csp.push_str(&format!("child-src {} ;", permissions));
+        csp.push_str(&format!("worker-src {} ;", permissions));
+        let csp_header = HeaderValue::from_str(&csp).unwrap();
+        let enforce_csp = env::var("ENFORCE_CSP")
+            .unwrap_or("false".to_string())
+            .parse()
+            .unwrap_or(false);
         let app = app
             .nest("/", leptos_router)
             .nest("/", backend)
             .nest("/", leptos_pkg)
             .layer(Extension(Arc::new(Mutex::new(oauth_ctx))))
             .layer(auth_layer);
-
+        let app = if enforce_csp {
+            app.layer(SetResponseHeaderLayer::overriding(
+                header::CONTENT_SECURITY_POLICY,
+                csp_header,
+            ))
+        } else {
+            app
+        };
         let listener = TcpListener::bind(settings.application.address())
             .await
             .unwrap();

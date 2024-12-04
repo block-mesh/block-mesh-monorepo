@@ -624,3 +624,8 @@ pub struct HCaptcha {
     pub secret: String,
     pub response: String,
 }
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct AuthStatusParams {
+    pub perks_page: Option<bool>,
+}

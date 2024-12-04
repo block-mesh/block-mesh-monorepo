@@ -72,7 +72,7 @@ tower-sessions-sqlx-store = { workspace = true, features = ["postgres"], optiona
 axum = { workspace = true, features = ["ws", "macros"], optional = true }
 tower = { workspace = true, features = ["util"], optional = true }
 serde_json = { workspace = true, features = ["raw_value"] }
-tower-http = { workspace = true, features = ["fs", "trace", "request-id", "util", "cors", "add-extension", "timeout"], optional = true }
+tower-http = { workspace = true, features = ["fs", "trace", "request-id", "util", "cors", "add-extension", "timeout", "set-header"], optional = true }
 async-trait = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
 tracing-appender = { workspace = true }

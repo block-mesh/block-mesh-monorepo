@@ -67,8 +67,7 @@ pub fn Perks() -> impl IntoView {
         </Modal>
         <div class="flex items-start justify-start gap-4">
             <Heading>Perks</Heading>
-            <Show when=move || enable_proof_of_humanity.get()
-                  fallback=|| view! {}>
+            <Show when=move || enable_proof_of_humanity.get() fallback=|| view! {}>
                 <a
                     rel="external"
                     href="/proof_of_humanity"

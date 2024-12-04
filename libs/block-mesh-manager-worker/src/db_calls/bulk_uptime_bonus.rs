@@ -1,4 +1,5 @@
 use anyhow::anyhow;
+use rand::Rng;
 use sqlx::postgres::PgQueryResult;
 use sqlx::{Postgres, Transaction};
 
@@ -16,7 +17,10 @@ pub async fn bulk_uptime_bonus(
     if bonus.is_nan() || bonus <= 0.0 || bonus.is_infinite() {
         return Err(anyhow!("bulk uptime bonus must be a positive integer"));
     }
-
+    let r_limit = {
+        let mut rng = rand::thread_rng();
+        rng.gen_range(1..86400)
+    };
     let r = sqlx::query!(
         // r#"
         // WITH updates (id, value) AS (
@@ -36,8 +40,8 @@ pub async fn bulk_uptime_bonus(
         r#"
             UPDATE daily_stats ds
                 SET
-                    uptime = GREATEST(uptime, LEAST(uptime + $1, 86400.0)),
-                    uptime_bonus = GREATEST(uptime_bonus, LEAST(uptime_bonus + $1, 86400.0)),
+                    uptime = GREATEST(uptime, LEAST(uptime + $1, $2)),
+                    uptime_bonus = GREATEST(uptime_bonus, LEAST(uptime_bonus + $1, $2)),
                     updated_at = now()
             FROM aggregates a
             WHERE
@@ -46,9 +50,10 @@ pub async fn bulk_uptime_bonus(
                 AND a.updated_at >= NOW() - INTERVAL '2 hour'
             	AND ds.status = 'OnGoing'
                 AND ds.day = CURRENT_DATE
-                AND ds.uptime < 86400.0
+                AND ds.uptime < $2
         "#,
-        bonus
+        bonus,
+        86400.0 + r_limit as f64
     )
     .execute(&mut **transaction)
     .await?;
