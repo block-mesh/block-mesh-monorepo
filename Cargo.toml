@@ -10,7 +10,7 @@ incremental = false
 
 [workspace]
 members = ["libs/*", "programs/*"]
-exclude = ["libs/installers", "libs/md-book", "libs/react-native-app", "libs/blockmesh-bin", "libs/blockmesh-bin/src-tauri"]
+exclude = ["libs/cloudflare-page-react-on-chain-tooling", "libs/installers", "libs/md-book", "libs/react-native-app", "libs/blockmesh-bin", "libs/blockmesh-bin/src-tauri"]
 resolver = "2"
 
 [workspace.lints.rust]
