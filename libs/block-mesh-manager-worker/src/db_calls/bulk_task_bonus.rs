@@ -1,10 +1,7 @@
 use crate::utils::rand::rand_factor;
 use anyhow::anyhow;
-use chrono::{Datelike, Utc};
-use rand::Rng;
 use sqlx::postgres::PgQueryResult;
 use sqlx::{Postgres, Transaction};
-use std::env;
 
 #[tracing::instrument(name = "bulk_task_bonus", skip(transaction), ret, err, level = "trace")]
 pub async fn bulk_task_bonus(

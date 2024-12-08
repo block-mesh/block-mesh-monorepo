@@ -1,6 +1,5 @@
 use crate::utils::rand::rand_factor;
 use anyhow::anyhow;
-use rand::Rng;
 use sqlx::postgres::PgQueryResult;
 use sqlx::{Postgres, Transaction};
 
