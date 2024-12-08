@@ -395,6 +395,45 @@ jobs:
           tag_name: v${{ needs.get-tag.outputs.pkg-version }}
           files: |
             emails-${{ matrix.target }}.tar.gz
+  upload-assets-logs-drain:
+    name: "Upload assets to Github releases - logs-drain"
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs:
+      - "prep-env"
+      - "get-tag"
+    strategy:
+      matrix:
+        include:
+          - target: "x86_64-unknown-linux-gnu"
+            os: "ubuntu-latest"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: "Check out the repo"
+        uses: actions/checkout@v4
+      - name: "Install deps"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config openssl libssl-dev
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          targets: wasm32-unknown-unknown
+      - name: "Cache"
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: upload-assets-logs-drain-${{ matrix.target }}
+          cache-all-crates: true
+      - name: "Build Logs Drain"
+        run: |
+          cargo build -p logs-drain --release
+          tar acf logs-drain-${{ matrix.target }}.tar.gz target/release/logs-drain
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        #if: startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: v${{ needs.get-tag.outputs.pkg-version }}
+          files: |
+            logs-drain-${{ matrix.target }}.tar.gz
   push-to-registry:
     name: "Push Docker image to Docker Hub"
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -409,6 +448,7 @@ jobs:
       - "upload-assets-feature-flag"
       - "upload-assets-tg"
       - "upload-assets-emails"
+      - "upload-assets-logs-drain"
       - "upload-assets-data-sink"
     runs-on: "ubuntu-latest"
     steps:
@@ -509,5 +549,14 @@ jobs:
           file: docker/emails.Dockerfile
           push: true
           tags: blockmesh/emails:latest,blockmesh/emails:v${{ needs.get-tag.outputs.pkg-version }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: "Build and push logs-drain"
+        uses: "docker/build-push-action@v5"
+        with:
+          context: .
+          platforms: linux/amd64
+          file: docker/logs-drain.Dockerfile
+          push: true
+          tags: blockmesh/logs-drain:latest,blockmesh/logs-drain:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
 # https://codingpackets.com/blog/rust-binary-and-docker-releases-using-github-actions/
