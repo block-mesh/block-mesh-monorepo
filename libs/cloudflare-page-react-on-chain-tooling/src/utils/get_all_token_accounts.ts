@@ -13,6 +13,11 @@ export type TokenAccountDetails = {
   lamports: number;
 }
 
+const filter = [
+  'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v',
+  'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB'
+]
+
 export async function get_all_token_accounts(connection: Connection, owner: PublicKey, metaplex: Metaplex): Promise<TokenAccountDetails[]> {
   const output: TokenAccountDetails[] = []
   const response = await connection.getParsedTokenAccountsByOwner(owner, {
@@ -21,6 +26,9 @@ export async function get_all_token_accounts(connection: Connection, owner: Publ
   for (const account of response.value) {
     try {
       const mint = new PublicKey(account.account.data.parsed.info?.mint)
+      if (filter.includes(mint.toBase58())) {
+        continue
+      }
       const metadata = await metaplex.nfts().findByMint({ mintAddress: mint })
       const token_account: TokenAccountDetails = {
         lamports: account.account.lamports,
