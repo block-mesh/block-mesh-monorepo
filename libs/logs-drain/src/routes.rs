@@ -30,13 +30,7 @@ pub async fn digest_logs(
     State(state): State<LogsDrainAppState>,
     request: Request,
 ) -> Result<impl IntoResponse, Error> {
-    if let Some(content_type) = headers.get("Content-Type") {
-        tracing::info!(
-            "Content-Type: {}",
-            content_type.to_str().unwrap_or_default()
-        );
-    }
-    tracing::info!("METHOD = {:#?}", request.method());
+    let method = request.method().clone();
     let (_parts, body) = request.into_parts();
     let bytes = body
         .collect()
@@ -55,6 +49,13 @@ pub async fn digest_logs(
     if let Ok(message) = parse_message(&body) {
         tracing::info!("RFC MESSAGE => {:#?}", message);
     }
+    if let Some(content_type) = headers.get("Content-Type") {
+        tracing::info!(
+            "Content-Type: {}",
+            content_type.to_str().unwrap_or_default()
+        );
+    }
+    tracing::info!("METHOD = {:#?}", method);
     if let Ok(message) = RegularParser::parse(&body).map_err(|e| e.to_string()) {
         tracing::info!("REGULAR MESSAGE => {:#?}", message);
     } else if let Ok(message) = HerokuParser::parse(&body).map_err(|e| e.to_string()) {
