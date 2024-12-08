@@ -13,6 +13,7 @@ use reqwest::StatusCode;
 use rsyslog::parser::msg::{HerokuRouter, Raw};
 use rsyslog::parser::{Skip, StructuredData};
 use rsyslog::Message;
+use std::env;
 use syslog_rfc5424::parse_message;
 
 #[tracing::instrument(name = "server_health", skip_all)]
@@ -43,6 +44,13 @@ pub async fn digest_logs(
         .map_err(|e| anyhow!(e.to_string()))?
         .to_bytes();
     let body = String::from_utf8(bytes.to_vec()).unwrap_or_else(|_| String::from(""));
+    if body.contains("host heroku router") || body.contains("host app web") {
+        return Ok((StatusCode::OK, "OK"));
+    }
+    let extra_filter = env::var("EXTRA_FILTER").unwrap_or_default();
+    if !extra_filter.is_empty() && body.contains(&extra_filter) {
+        return Ok((StatusCode::OK, "OK"));
+    }
     let mut transaction = create_txn(&state.logs_drain_pool).await?;
     if let Ok(message) = parse_message(&body) {
         tracing::info!("RFC MESSAGE => {:#?}", message);
