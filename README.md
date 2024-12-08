@@ -11,7 +11,6 @@
 
 ## Links
 
-* [BlockMesh GitBoook](https://gitbook.blockmesh.xyz/)
 * [BlockMesh Twitter](https://twitter.com/blockmesh_xyz)
 
 ## Setup
