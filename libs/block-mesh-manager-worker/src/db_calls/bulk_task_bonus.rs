@@ -1,7 +1,10 @@
+use crate::utils::rand::rand_factor;
 use anyhow::anyhow;
+use chrono::{Datelike, Utc};
 use rand::Rng;
 use sqlx::postgres::PgQueryResult;
 use sqlx::{Postgres, Transaction};
+use std::env;
 
 #[tracing::instrument(name = "bulk_task_bonus", skip(transaction), ret, err, level = "trace")]
 pub async fn bulk_task_bonus(
@@ -12,10 +15,7 @@ pub async fn bulk_task_bonus(
     if bonus <= 0 || limit <= 0 {
         return Err(anyhow!("bulk_task_bonus called without a limit and bonus"));
     }
-    let r_limit = {
-        let mut rng = rand::thread_rng();
-        rng.gen_range(1..limit)
-    };
+    let r_limit = rand_factor(limit);
     let r = sqlx::query!(
         r#"
         UPDATE daily_stats ds
