@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        INSERT\n        INTO log_entries\n        (raw)\n        VALUES\n        ($1)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "a9bba1b2a040a761cba57dea45b3f646e9cd9225951e968d9561dfa740c716f2"
+}
