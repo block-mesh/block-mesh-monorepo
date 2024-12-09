@@ -13,6 +13,7 @@ use tokio::sync::RwLock;
 use tokio::task::JoinHandle;
 use uuid::Uuid;
 
+#[tracing::instrument(name = "process_job", skip_all)]
 pub async fn process_job(
     pool: PgPool,
     user_id: Uuid,
@@ -40,6 +41,7 @@ pub async fn process_job(
     Ok(())
 }
 
+#[tracing::instrument(name = "ref_bonus_cron", skip_all)]
 pub async fn ref_bonus_cron(
     pool: PgPool,
     joiner_tx: Sender<JoinHandle<()>>,

@@ -3,7 +3,7 @@ use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::time::Duration;
 
-#[tracing::instrument(name = "finalize_daily_cron", level = "trace", skip(pool))]
+#[tracing::instrument(name = "finalize_daily_cron", skip_all)]
 pub async fn finalize_daily_cron(pool: PgPool) -> Result<(), anyhow::Error> {
     loop {
         if let Ok(mut transaction) = create_txn(&pool).await {

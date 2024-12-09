@@ -9,7 +9,7 @@ use tokio::sync::broadcast::Receiver;
 use tokio::sync::RwLock;
 use uuid::Uuid;
 
-#[tracing::instrument(name = "queue_ref_bonus", level = "trace", skip_all)]
+#[tracing::instrument(name = "queue_ref_bonus", skip_all)]
 pub async fn queue_ref_bonus(
     mut rx: Receiver<Value>,
     queue: Arc<RwLock<HashSet<(Uuid, Uuid, NaiveDate)>>>,
