@@ -3,6 +3,7 @@ pub mod chrome_icon;
 pub mod clipboard_icon;
 pub mod edit_icon;
 pub mod home_icon;
+pub mod info_icon;
 pub mod link_icon;
 pub mod logout_icon;
 pub mod medal_icon;
