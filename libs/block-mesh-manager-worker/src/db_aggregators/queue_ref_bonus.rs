@@ -1,15 +1,12 @@
 use anyhow::anyhow;
 use block_mesh_common::interfaces::db_messages::DBMessage;
 use chrono::NaiveDate;
-use flume::Sender;
 use serde_json::Value;
-use sqlx::PgPool;
 use std::collections::HashSet;
 use std::sync::Arc;
 use tokio::sync::broadcast::error::RecvError;
 use tokio::sync::broadcast::Receiver;
 use tokio::sync::RwLock;
-use tokio::task::JoinHandle;
 use uuid::Uuid;
 
 #[tracing::instrument(name = "queue_ref_bonus", level = "trace", skip_all)]

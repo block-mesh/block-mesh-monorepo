@@ -41,7 +41,7 @@ pub async fn ref_bonus_cron(
     loop {
         if let Some(item) = queue.write().await.iter().next() {
             let poll_clone = pool.clone();
-            let item_clone = item.clone();
+            let item_clone = *item;
             let handle = tokio::spawn(async move {
                 let _ = process_job(poll_clone, item_clone.0, item_clone.1, item_clone.2).await;
             });
