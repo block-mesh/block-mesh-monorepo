@@ -2,8 +2,6 @@
 use crate::database::leaderboard::get_daily_leaderboard::get_daily_leaderboard;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
-#[allow(unused_imports)]
-use crate::utils::points::{TASKS_FACTOR, UPTIME_FACTOR};
 use axum::{Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::{DailyLeaderboard, LeaderBoardUser};

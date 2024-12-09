@@ -1,4 +1,5 @@
 use crate::constants::DeviceType;
+use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use uuid::Uuid;
@@ -12,6 +13,7 @@ pub enum DBMessageTypes {
     DailyStatMessage,
     AggregateSetToMessage,
     CreateDailyStatMessage,
+    DailyStatRefBonus,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -23,6 +25,14 @@ pub enum DBMessage {
     DailyStatMessage(DailyStatMessage),
     CreateDailyStatMessage(CreateDailyStatMessage),
     AggregateSetToMessage(AggregateSetToMessage),
+    DailyStatRefBonus(DailyStatRefBonus),
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
+pub struct DailyStatRefBonus {
+    pub user_id: Uuid,
+    pub daily_stat_id: Uuid,
+    pub day: NaiveDate,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]

@@ -22,4 +22,5 @@ pub mod uptime_report;
 
 pub mod admin;
 pub mod proof_of_humanity;
+pub mod referrals;
 pub mod version;

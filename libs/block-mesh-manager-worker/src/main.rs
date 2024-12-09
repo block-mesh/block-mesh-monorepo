@@ -3,16 +3,21 @@ use crate::pg_listener::start_listening;
 use axum::{Extension, Router};
 use block_mesh_common::constants::BLOCKMESH_PG_NOTIFY_WORKER;
 use block_mesh_common::env::load_dotenv::load_dotenv;
+use chrono::NaiveDate;
 use database_utils::utils::connection::channel_pool::channel_pool;
 use database_utils::utils::connection::unlimited_pool::unlimited_pool;
 use database_utils::utils::connection::write_pool::write_pool;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
 use serde_json::Value;
+use std::collections::HashSet;
 use std::net::SocketAddr;
+use std::sync::Arc;
 use std::{env, mem, process};
 use tokio::net::TcpListener;
+use tokio::sync::RwLock;
 use tokio::task::JoinHandle;
 use tower_http::cors::CorsLayer;
+use uuid::Uuid;
 
 mod call_backs;
 mod cron_jobs;
@@ -37,6 +42,7 @@ use crate::db_aggregators::analytics_aggregator::analytics_aggregator;
 use crate::db_aggregators::create_daily_stats_aggregator::create_daily_stats_aggregator;
 use crate::db_aggregators::daily_stats_aggregator::daily_stats_aggregator;
 use crate::db_aggregators::joiner_loop::joiner_loop;
+use crate::db_aggregators::queue_ref_bonus::queue_ref_bonus;
 use crate::db_aggregators::set_to_aggregates_aggregator::set_to_aggregates_aggregator;
 use crate::routes::get_router;
 
@@ -98,6 +104,10 @@ async fn run() -> anyhow::Result<()> {
             .unwrap_or(5000),
     );
 
+    let queue: Arc<RwLock<HashSet<(Uuid, Uuid, NaiveDate)>>> =
+        Arc::new(RwLock::new(HashSet::new()));
+
+    let queue_ref_bonus_task = tokio::spawn(queue_ref_bonus(tx.subscribe(), queue.clone()));
     let bulk_task_bonus_task = tokio::spawn(bulk_task_bonus_cron(un_limited_db_pool.clone()));
     let bulk_uptime_bonus_task = tokio::spawn(bulk_uptime_bonus_cron(un_limited_db_pool));
     let joiner_task = tokio::spawn(joiner_loop(joiner_rx));
@@ -195,6 +205,7 @@ async fn run() -> anyhow::Result<()> {
     let server_task = run_server(listener, app);
 
     tokio::select! {
+        o = queue_ref_bonus_task => panic!("queue_ref_bonus_task exit {:?}", o),
         o = db_create_daily_stats_aggregator_task => panic!("db_create_daily_stats_aggregator_task exit {:?}", o),
         o = db_aggregator_set => panic!("db_aggregator_set exit {:?}", o),
         o = db_aggregator_add => panic!("db_aggregator_add exit {:?}", o),

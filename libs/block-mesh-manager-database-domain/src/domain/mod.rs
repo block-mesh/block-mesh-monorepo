@@ -1,5 +1,6 @@
 pub mod aggregate;
 pub mod api_token;
+pub mod apply_ref_bonus_for_daily_stat;
 pub mod bulk_get_or_create_aggregate_by_user_and_name;
 pub mod create_daily_stat;
 pub mod daily_stat;
@@ -8,6 +9,7 @@ pub mod find_pending_tasks_with_limit;
 pub mod find_task_by_task_id_and_status;
 pub mod find_token;
 pub mod finish_task;
+pub mod get_affiliate_tree_per_day;
 pub mod get_daily_stat_of_user;
 pub mod get_or_create_aggregate_by_user_and_name;
 pub mod get_user_and_api_token;

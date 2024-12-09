@@ -17,7 +17,9 @@ pub async fn get_daily_stats_by_user_id(
         day,
         created_at,
         uptime,
-        updated_at
+        updated_at,
+        ref_bonus,
+        ref_bonus_applied
         FROM daily_stats
         WHERE user_id = $1
         ORDER BY day DESC
