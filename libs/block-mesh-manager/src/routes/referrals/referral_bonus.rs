@@ -45,7 +45,7 @@ pub async fn handler(
             })
         })
         .collect();
-    let channel_pool = &state.channel_pool.close();
+    let channel_pool = &state.channel_pool.clone();
     notify_worker(&channel_pool, &messages).await?;
     Ok((StatusCode::OK, "OK").into_response())
 }
