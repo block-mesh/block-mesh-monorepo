@@ -10,10 +10,10 @@ pub async fn get_user_referrals_summary(
         TmpReferralSummary,
         r#"
         SELECT
-            count(*) as total_invites,
-        	COUNT(*) FILTER (WHERE verified_email = TRUE) AS total_verified_email,
-            COUNT(*) FILTER (WHERE proof_of_humanity = TRUE) AS total_verified_human,
-            COUNT(*) FILTER (WHERE proof_of_humanity = TRUE AND verified_email = TRUE) AS total_eligible
+           COUNT(*) as total_invites,
+           COUNT(*) FILTER (WHERE verified_email = TRUE) AS total_verified_email,
+           COUNT(*) FILTER (WHERE proof_of_humanity = TRUE) AS total_verified_human,
+           COUNT(*) FILTER (WHERE proof_of_humanity = TRUE AND verified_email = TRUE) AS total_eligible
         FROM users
         WHERE invited_by = $1
         "#,
