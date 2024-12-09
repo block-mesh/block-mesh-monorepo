@@ -299,7 +299,7 @@ pub struct DashboardResponse {
     pub daily_stats: Vec<DailyStatForDashboard>,
     pub perks: Vec<PerkUI>,
     pub calls_to_action: Vec<CallToActionUI>,
-    pub referrals: Vec<Referral>,
+    pub referral_summary: ReferralSummary,
     pub verified_email: bool,
     pub user_ips: Vec<UserIpInfo>,
     pub wallet_address: Option<String>,
@@ -628,4 +628,20 @@ pub struct HCaptcha {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AuthStatusParams {
     pub perks_page: Option<bool>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, Default, PartialEq)]
+pub struct ReferralSummary {
+    pub total_invites: i64,
+    pub total_verified_email: i64,
+    pub total_verified_human: i64,
+    pub total_eligible: i64,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct TmpReferralSummary {
+    pub total_invites: Option<i64>,
+    pub total_verified_email: Option<i64>,
+    pub total_verified_human: Option<i64>,
+    pub total_eligible: Option<i64>,
 }

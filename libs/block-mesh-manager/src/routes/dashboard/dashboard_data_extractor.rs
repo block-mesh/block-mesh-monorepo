@@ -8,14 +8,14 @@ use std::sync::Arc;
 use tracing::Level;
 
 use block_mesh_common::interfaces::server_api::{
-    CallToActionUI, DailyStatForDashboard, DashboardResponse, PerkUI, Referral,
+    CallToActionUI, DailyStatForDashboard, DashboardResponse, PerkUI,
 };
 
 use crate::database::call_to_action::get_user_calls_to_action::get_user_call_to_action;
 use crate::database::daily_stat::get_daily_stats_by_user_id::get_daily_stats_by_user_id;
 use crate::database::invite_code::get_number_of_users_invited::get_number_of_users_invited;
+use crate::database::invite_code::get_referral_summary::get_user_referrals_summary;
 use crate::database::invite_code::get_user_latest_invite_code::get_user_latest_invite_code;
-use crate::database::invite_code::get_user_referrals::get_user_referrals;
 use crate::database::perks::get_user_perks::get_user_perks;
 use crate::database::users_ip::get_user_ips::get_user_ips;
 use crate::errors::error::Error;
@@ -30,7 +30,6 @@ use block_mesh_manager_database_domain::domain::bulk_get_or_create_aggregate_by_
 use block_mesh_manager_database_domain::domain::create_daily_stat::get_or_create_daily_stat;
 use block_mesh_manager_database_domain::domain::user::UserAndApiToken;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
-use regex::Regex;
 
 #[tracing::instrument(name = "dashboard_data_extractor", skip_all)]
 pub async fn dashboard_data_extractor(
@@ -47,7 +46,7 @@ pub async fn dashboard_data_extractor(
         .await
         .map_err(Error::from)?;
     let user_ips = get_user_ips(follower_transaction, &user.user_id, ip_limit).await?;
-    let referrals = get_user_referrals(follower_transaction, &user.user_id)
+    let referral_summary = get_user_referrals_summary(follower_transaction, &user.user_id)
         .await
         .map_err(Error::from)?;
     let perks = get_user_perks(follower_transaction, &user.user_id).await?;
@@ -135,19 +134,20 @@ pub async fn dashboard_data_extractor(
             })
             .collect(),
         verified_email: user.verified_email,
-        referrals: referrals
-            .into_iter()
-            .map(|i| Referral {
-                created_at: i.created_at,
-                verified_email: i.verified_email,
-                email: {
-                    let s: Vec<&str> = i.email.split('@').collect();
-                    let re = Regex::new(r"[A-Za-z]").unwrap();
-                    let result = re.replace_all(s[0], "x");
-                    format!("{}@{}", result, s[1])
-                },
-            })
-            .collect(),
+        referral_summary,
+        // referrals: referrals
+        //     .into_iter()
+        //     .map(|i| Referral {
+        //         created_at: i.created_at,
+        //         verified_email: i.verified_email,
+        //         email: {
+        //             let s: Vec<&str> = i.email.split('@').collect();
+        //             let re = Regex::new(r"[A-Za-z]").unwrap();
+        //             let result = re.replace_all(s[0], "x");
+        //             format!("{}@{}", result, s[1])
+        //         },
+        //     })
+        //     .collect(),
         upload: upload.value.as_f64().unwrap_or_default(),
         download: download.value.as_f64().unwrap_or_default(),
         latency: latency.value.as_f64().unwrap_or_default(),
