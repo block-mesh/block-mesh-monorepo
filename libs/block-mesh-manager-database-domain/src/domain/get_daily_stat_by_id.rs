@@ -1,12 +1,12 @@
-use block_mesh_manager_database_domain::domain::daily_stat::DailyStat;
+use crate::domain::daily_stat::DailyStat;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 
-pub async fn get_daily_stats_by_user_id(
+pub async fn get_daily_stats_by_id(
     transaction: &mut Transaction<'_, Postgres>,
-    user_id: &Uuid,
-) -> anyhow::Result<Vec<DailyStat>> {
-    let daily_stats = sqlx::query_as!(
+    id: &Uuid,
+) -> anyhow::Result<DailyStat> {
+    let daily_stat = sqlx::query_as!(
         DailyStat,
         r#"
         SELECT
@@ -21,12 +21,12 @@ pub async fn get_daily_stats_by_user_id(
         ref_bonus,
         ref_bonus_applied
         FROM daily_stats
-        WHERE user_id = $1
-        ORDER BY day DESC
+        WHERE id = $1
+        LIMIT 1
         "#,
-        user_id
+        id
     )
-    .fetch_all(&mut **transaction)
+    .fetch_one(&mut **transaction)
     .await?;
-    Ok(daily_stats)
+    Ok(daily_stat)
 }

@@ -645,3 +645,27 @@ pub struct TmpReferralSummary {
     pub total_verified_human: Option<i64>,
     pub total_eligible: Option<i64>,
 }
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UserAffiliate {
+    pub user_id: Uuid,
+    pub email: String,
+    pub invited_by: Uuid,
+    pub verified_email: bool,
+    pub proof_of_humanity: bool,
+    pub level: i32,
+    pub uptime: f64,
+    pub tasks_count: i32,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct TmpUserAffiliate {
+    pub user_id: Option<Uuid>,
+    pub email: Option<String>,
+    pub invited_by: Option<Uuid>,
+    pub verified_email: Option<bool>,
+    pub proof_of_humanity: Option<bool>,
+    pub level: Option<i32>,
+    pub uptime: Option<f64>,
+    pub tasks_count: Option<i32>,
+}

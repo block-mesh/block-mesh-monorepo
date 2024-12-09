@@ -5,5 +5,6 @@ pub mod channel;
 pub mod create_daily_stats_aggregator;
 pub mod daily_stats_aggregator;
 pub mod joiner_loop;
+pub mod queue_ref_bonus;
 pub mod set_to_aggregates_aggregator;
 pub mod users_ip_aggregator;

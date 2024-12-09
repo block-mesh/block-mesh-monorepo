@@ -3,16 +3,21 @@ use crate::pg_listener::start_listening;
 use axum::{Extension, Router};
 use block_mesh_common::constants::BLOCKMESH_PG_NOTIFY_WORKER;
 use block_mesh_common::env::load_dotenv::load_dotenv;
+use chrono::NaiveDate;
 use database_utils::utils::connection::channel_pool::channel_pool;
 use database_utils::utils::connection::unlimited_pool::unlimited_pool;
 use database_utils::utils::connection::write_pool::write_pool;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
 use serde_json::Value;
+use std::collections::HashSet;
 use std::net::SocketAddr;
+use std::sync::Arc;
 use std::{env, mem, process};
 use tokio::net::TcpListener;
+use tokio::sync::RwLock;
 use tokio::task::JoinHandle;
 use tower_http::cors::CorsLayer;
+use uuid::Uuid;
 
 mod call_backs;
 mod cron_jobs;
@@ -29,6 +34,7 @@ use crate::cron_jobs::bulk_task_bonus_cron::bulk_task_bonus_cron;
 use crate::cron_jobs::bulk_uptime_bonus_cron::bulk_uptime_bonus_cron;
 use crate::cron_jobs::clean_old_tasks::clean_old_tasks;
 use crate::cron_jobs::finalize_daily_cron::finalize_daily_cron;
+use crate::cron_jobs::ref_bonus_cron::ref_bonus_cron;
 use crate::cron_jobs::rpc_cron::rpc_worker_loop;
 use crate::cron_jobs::special_task_cron::special_worker_loop;
 use crate::db_aggregators::add_to_aggregates_aggregator::add_to_aggregates_aggregator;
@@ -37,6 +43,7 @@ use crate::db_aggregators::analytics_aggregator::analytics_aggregator;
 use crate::db_aggregators::create_daily_stats_aggregator::create_daily_stats_aggregator;
 use crate::db_aggregators::daily_stats_aggregator::daily_stats_aggregator;
 use crate::db_aggregators::joiner_loop::joiner_loop;
+use crate::db_aggregators::queue_ref_bonus::queue_ref_bonus;
 use crate::db_aggregators::set_to_aggregates_aggregator::set_to_aggregates_aggregator;
 use crate::routes::get_router;
 
@@ -91,6 +98,7 @@ async fn run() -> anyhow::Result<()> {
     // let redis_client = redis::Client::open(env::var("REDIS_URL")?)?;
     // let _redis = redis_client.get_multiplexed_async_connection().await?;
     let (joiner_tx, joiner_rx) = flume::bounded::<JoinHandle<()>>(500);
+    let (joiner_tx_ref, joiner_rx_ref) = flume::bounded::<JoinHandle<()>>(500);
     let (tx, _rx) = tokio::sync::broadcast::channel::<Value>(
         env::var("BROADCAST_CHANNEL_SIZE")
             .unwrap_or("5000".to_string())
@@ -98,9 +106,19 @@ async fn run() -> anyhow::Result<()> {
             .unwrap_or(5000),
     );
 
+    let queue: Arc<RwLock<HashSet<(Uuid, Uuid, NaiveDate)>>> =
+        Arc::new(RwLock::new(HashSet::new()));
+
+    let ref_bonus_cron_task = tokio::spawn(ref_bonus_cron(
+        db_pool.clone(),
+        joiner_tx_ref.clone(),
+        queue.clone(),
+    ));
+    let queue_ref_bonus_task = tokio::spawn(queue_ref_bonus(tx.subscribe(), queue.clone()));
     let bulk_task_bonus_task = tokio::spawn(bulk_task_bonus_cron(un_limited_db_pool.clone()));
     let bulk_uptime_bonus_task = tokio::spawn(bulk_uptime_bonus_cron(un_limited_db_pool));
     let joiner_task = tokio::spawn(joiner_loop(joiner_rx));
+    let joiner_task_ref = tokio::spawn(joiner_loop(joiner_rx_ref));
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
     let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
     let delete_old_tasks_task = tokio::spawn(clean_old_tasks(db_pool.clone()));
@@ -195,6 +213,9 @@ async fn run() -> anyhow::Result<()> {
     let server_task = run_server(listener, app);
 
     tokio::select! {
+        o = joiner_task_ref => panic!("joiner_task_ref exit {:?}", o),
+        o = ref_bonus_cron_task => panic!("ref_bonus_cron_task exit {:?}", o),
+        o = queue_ref_bonus_task => panic!("queue_ref_bonus_task exit {:?}", o),
         o = db_create_daily_stats_aggregator_task => panic!("db_create_daily_stats_aggregator_task exit {:?}", o),
         o = db_aggregator_set => panic!("db_aggregator_set exit {:?}", o),
         o = db_aggregator_add => panic!("db_aggregator_add exit {:?}", o),

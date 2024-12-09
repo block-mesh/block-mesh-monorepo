@@ -30,6 +30,7 @@ pub enum RoutesEnum {
     Static_Auth_Dashboard,
     Static_Auth_Daily_Leaderboard,
     Static_UnAuth_Twitter_Callback,
+    Api_ReferralBonus,
     Api_ApplyRanking,
     Api_ConnectWallet,
     Api_ReportUptime,
@@ -49,6 +50,7 @@ pub enum RoutesEnum {
 impl Display for RoutesEnum {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match &self {
+            RoutesEnum::Api_ReferralBonus => write!(f, "/referral_bonus"),
             RoutesEnum::Static_Auth_Proof_Of_Humanity => write!(f, "/proof_of_humanity"),
             RoutesEnum::Static_UnAuth_Version => write!(f, "/version"),
             RoutesEnum::Static_Auth_Twitter_Login => write!(f, "/twitter/login"),
