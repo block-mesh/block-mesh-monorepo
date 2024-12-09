@@ -154,9 +154,7 @@ pub fn ExtensionLogin() -> impl IntoView {
                 </button>
                 <br/>
                 <a href="https://app.blockmesh.xyz/register" target="_blank" rel="external">
-                    <small class="text-magenta underline cursor-pointer">
-                        Register via app
-                    </small>
+                    <small class="text-magenta underline cursor-pointer">Register via app</small>
                 </a>
             </div>
         </div>
