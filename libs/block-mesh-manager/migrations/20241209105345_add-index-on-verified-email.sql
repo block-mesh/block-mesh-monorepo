@@ -1,0 +1,1 @@
+CREATE INDEX users_verified_verified_email ON users (verified_email);
