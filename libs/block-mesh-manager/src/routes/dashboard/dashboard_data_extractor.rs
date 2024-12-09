@@ -59,7 +59,7 @@ pub async fn dashboard_data_extractor(
             .await?
             .into_iter()
             .map(|i| {
-                let points = calc_points_daily(i.uptime, i.tasks_count, &perks);
+                let points = calc_points_daily(i.uptime, i.tasks_count, i.ref_bonus, &perks);
                 DailyStatForDashboard {
                     tasks_count: i.tasks_count,
                     uptime: i.uptime,
@@ -107,6 +107,7 @@ pub async fn dashboard_data_extractor(
     let connected_buffer = get_envar("CONNECTED_BUFFER").await.parse().unwrap_or(10);
     let connected =
         sec_diff < connected_buffer * ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240);
+
     let overall_uptime = max(
         uptime.value.as_f64().unwrap_or_default() as u64,
         daily_stats.iter().map(|i| i.uptime).sum::<f64>() as u64,
@@ -116,9 +117,9 @@ pub async fn dashboard_data_extractor(
         daily_stats.iter().map(|i| i.tasks_count).sum::<i64>(),
     );
     let one_time_bonus_points =
-        calc_one_time_bonus_points(overall_uptime as f64, overall_task_count, &perks) as u64;
+        calc_one_time_bonus_points(overall_uptime as f64, overall_task_count, 0.0, &perks) as u64;
     let points = max(
-        calc_total_points(overall_uptime as f64, overall_task_count, &perks) as u64,
+        calc_total_points(overall_uptime as f64, overall_task_count, 0.0, &perks) as u64,
         one_time_bonus_points + daily_stats.iter().map(|i| i.points).sum::<f64>() as u64,
     ) as f64;
     commit_txn(write_transaction).await?;

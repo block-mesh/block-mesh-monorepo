@@ -30,7 +30,8 @@ pub async fn handler(
     if cache.get(&user.id).is_some() {
         return Ok((StatusCode::TOO_MANY_REQUESTS, "Rate limited").into_response());
     }
-    let date = Utc::now() + Duration::milliseconds(60_000);
+    // let date = Utc::now() + Duration::milliseconds(600_000);
+    let date = Utc::now() + Duration::milliseconds(600);
     cache.insert(user.id, Some(date));
     let mut follower_transaction = create_txn(&state.follower_pool).await?;
     let to_do_days = get_daily_stats_bonus_not_applied(&mut follower_transaction, &user.id).await?;

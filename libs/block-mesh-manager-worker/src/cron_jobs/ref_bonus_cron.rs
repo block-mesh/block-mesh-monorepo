@@ -7,6 +7,7 @@ use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use flume::Sender;
 use sqlx::PgPool;
 use std::collections::HashSet;
+use std::env;
 use std::sync::Arc;
 use std::time::Duration;
 use tokio::sync::RwLock;
@@ -29,11 +30,11 @@ pub async fn process_job(
     let mut sum = 0f64;
     aff_tree.iter().for_each(|i| {
         if i.level == 1 {
-            sum += 0.2 * raw_points(i.uptime, i.tasks_count as i64);
+            sum += 0.2 * raw_points(i.uptime, i.tasks_count as i64, 0.0);
         } else if i.level == 2 {
-            sum += 0.1 * raw_points(i.uptime, i.tasks_count as i64);
+            sum += 0.1 * raw_points(i.uptime, i.tasks_count as i64, 0.0);
         } else if i.level == 3 {
-            sum += 0.05 * raw_points(i.uptime, i.tasks_count as i64);
+            sum += 0.05 * raw_points(i.uptime, i.tasks_count as i64, 0.0);
         }
     });
     apply_ref_bonus_for_dail_stat(&mut transaction, &daily_stat_id, sum).await?;
@@ -47,23 +48,31 @@ pub async fn ref_bonus_cron(
     joiner_tx: Sender<JoinHandle<()>>,
     queue: Arc<RwLock<HashSet<(Uuid, Uuid, NaiveDate)>>>,
 ) -> Result<(), anyhow::Error> {
+    let enable = env::var("REF_BONUS_CRON_ENABLE")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
     let zero_duration = Duration::from_millis(1_000);
     let non_zero_duration = Duration::from_millis(100);
     loop {
-        if let Some(item) = queue.read().await.iter().next() {
-            let poll_clone = pool.clone();
-            let item_clone = *item;
-            let handle = tokio::spawn(async move {
-                let _ = process_job(poll_clone, item_clone.0, item_clone.1, item_clone.2).await;
-            });
-            let _ = joiner_tx.send_async(handle).await;
-            queue.write().await.remove(item);
-        }
-        let size = queue.read().await.len();
-        if size == 0 {
-            tokio::time::sleep(zero_duration).await;
+        if enable {
+            if let Some(item) = queue.read().await.iter().next() {
+                let poll_clone = pool.clone();
+                let item_clone = *item;
+                let handle = tokio::spawn(async move {
+                    let _ = process_job(poll_clone, item_clone.0, item_clone.1, item_clone.2).await;
+                });
+                let _ = joiner_tx.send_async(handle).await;
+                queue.write().await.remove(item);
+            }
+            let size = queue.read().await.len();
+            if size == 0 {
+                tokio::time::sleep(zero_duration).await;
+            } else {
+                tokio::time::sleep(non_zero_duration).await;
+            }
         } else {
-            tokio::time::sleep(non_zero_duration).await;
+            tokio::time::sleep(zero_duration).await;
         }
     }
 }
