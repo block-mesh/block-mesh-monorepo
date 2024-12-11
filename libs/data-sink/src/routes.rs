@@ -1,4 +1,4 @@
-use crate::data_sink::DataSink;
+use crate::data_sink::{now_backup, DataSink, DataSinkClickHouse};
 use crate::database::get_user_and_api_token_by_email;
 use crate::errors::Error;
 use crate::DataSinkAppState;
@@ -8,11 +8,14 @@ use axum::response::IntoResponse;
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use block_mesh_common::interfaces::server_api::DigestDataRequest;
-use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
+use chrono::Utc;
 use database_utils::utils::health_check::health_check;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use reqwest::StatusCode;
-use tokio::sync::OnceCell;
+use std::collections::HashSet;
+use std::sync::Arc;
+use tokio::sync::{OnceCell, RwLock};
+use uuid::Uuid;
 use validator::validate_email;
 
 #[tracing::instrument(name = "db_health", skip_all)]
@@ -40,7 +43,7 @@ pub async fn server_health() -> Result<impl IntoResponse, Error> {
     Ok((StatusCode::OK, "OK"))
 }
 
-static CACHE: OnceCell<DashSetWithExpiry<(String, String)>> = OnceCell::const_new();
+static CACHE: OnceCell<Arc<RwLock<HashSet<(String, String)>>>> = OnceCell::const_new();
 
 pub async fn digest_data(
     State(state): State<DataSinkAppState>,
@@ -61,30 +64,26 @@ pub async fn digest_data(
     commit_txn(transaction).await?;
     if state.use_clickhouse {
         let cache = CACHE
-            .get_or_init(|| async { DashSetWithExpiry::new() })
+            .get_or_init(|| async { Arc::new(RwLock::new(HashSet::new())) })
             .await;
         let key = (body.data.origin.clone(), body.data.id.clone());
-        if cache.get(&key).is_some() {
+        if cache.read().await.get(&key).is_some() {
             return Ok((StatusCode::ALREADY_REPORTED, "Already reported"));
         }
-
-        let result = DataSink::dup_exists_clickhouse(
-            &state.clickhouse_client,
-            &body.data.origin,
-            &body.data.id,
-        )
-        .await?;
-        if result {
-            cache.insert(key, None);
-            return Ok((StatusCode::ALREADY_REPORTED, "Already reported"));
-        }
-        let _ = DataSink::create_data_sink_clickhouse(
-            &state.clickhouse_client,
-            &user.user_id,
-            body.data,
-        )
-        .await;
-        cache.insert(key, None);
+        let now = Utc::now().timestamp_nanos_opt().unwrap_or(now_backup());
+        let row = DataSinkClickHouse {
+            id: Uuid::new_v4(),
+            user_id: user.user_id,
+            raw: body.data.raw,
+            origin: body.data.origin,
+            origin_id: body.data.id,
+            user_name: body.data.user_name,
+            link: body.data.link,
+            created_at: now as u64,
+            updated_at: now as u64,
+        };
+        let _ = state.tx.send_async(row).await;
+        cache.write().await.insert(key);
     } else {
         let data_sink_db_pool = &state.data_sink_db_pool;
         let mut transaction = create_txn(data_sink_db_pool).await?;
