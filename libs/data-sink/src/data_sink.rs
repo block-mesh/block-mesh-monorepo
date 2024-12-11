@@ -7,7 +7,7 @@ use sqlx::{Postgres, Transaction};
 use std::time::UNIX_EPOCH;
 use uuid::Uuid;
 
-const CLICKHOUSE_TABLE_NAME: &str = "data_sinks_clickhouse";
+pub const CLICKHOUSE_TABLE_NAME: &str = "data_sinks_clickhouse";
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone, clickhouse::Row)]
 pub struct DataSink {
     pub id: Uuid,
