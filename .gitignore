@@ -1,4 +1,5 @@
 docker-target/*
+db_logs
 !docker-target/.gitkeep
 tailwind.css.gz
 tmp_ext/chrome

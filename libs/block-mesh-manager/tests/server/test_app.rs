@@ -80,6 +80,8 @@ pub async fn spawn_app() -> TestApp {
     let invite_codes = Arc::new(DashMap::new());
 
     let app_state = Arc::new(AppState {
+        enable_hcaptcha: false,
+        enable_recaptcha: false,
         enable_proof_of_humanity: false,
         hcaptcha_site_key: "h".to_string(),
         hcaptcha_secret_key: "h".to_string(),
