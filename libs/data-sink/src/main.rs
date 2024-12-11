@@ -73,20 +73,29 @@ pub struct DataSinkAppState {
 
 impl DataSinkAppState {
     pub async fn new() -> Self {
+        let environment = env::var("APP_ENVIRONMENT").unwrap();
         let use_clickhouse = env::var("USE_CLICKHOUSE")
             .unwrap_or("false".to_string())
             .parse()
             .unwrap_or(false);
-        let clickhouse_client = Client::default()
-            .with_url(env::var("CLICKHOUSE_URL").unwrap())
-            // https://clickhouse.com/docs/en/operations/settings/settings#async-insert
-            .with_option("async_insert", "1")
-            // https://clickhouse.com/docs/en/operations/settings/settings#wait-for-async-insert
-            .with_option("wait_for_async_insert", "0");
+        let environment = Environment::from_str(&environment).unwrap();
+        // https://clickhouse.com/docs/en/operations/settings/settings#async-insert
+        // https://clickhouse.com/docs/en/operations/settings/settings#wait-for-async-insert
+        let clickhouse_client = if environment == Environment::Production {
+            Client::default()
+                .with_url(env::var("CLICKHOUSE_URL").unwrap())
+                .with_user(env::var("CLICKHOUSE_USER").unwrap())
+                .with_password(env::var("CLICKHOUSE_PASSWORD").unwrap())
+                .with_option("async_insert", "1")
+                .with_option("wait_for_async_insert", "0")
+        } else {
+            Client::default()
+                .with_url(env::var("CLICKHOUSE_URL").unwrap())
+                .with_option("async_insert", "1")
+                .with_option("wait_for_async_insert", "0")
+        };
         let data_sink_db_pool = write_pool(None).await;
         let follower_db_pool = follower_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
-        let environment = env::var("APP_ENVIRONMENT").unwrap();
-        let environment = Environment::from_str(&environment).unwrap();
         Self {
             use_clickhouse,
             clickhouse_client,
