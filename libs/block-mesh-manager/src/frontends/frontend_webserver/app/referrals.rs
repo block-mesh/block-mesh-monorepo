@@ -31,18 +31,13 @@ pub fn Referrals() -> impl IntoView {
     let grandmaster = RwSignal::new(false);
     let legend = RwSignal::new(false);
     if let Some(data) = async_data {
-        novice.set(data.perks.iter().find(|i| i.name == "novice").is_some());
-        apprentice.set(data.perks.iter().find(|i| i.name == "apprentice").is_some());
-        journeyman.set(data.perks.iter().find(|i| i.name == "journeyman").is_some());
-        expert.set(data.perks.iter().find(|i| i.name == "expert").is_some());
-        master.set(data.perks.iter().find(|i| i.name == "master").is_some());
-        grandmaster.set(
-            data.perks
-                .iter()
-                .find(|i| i.name == "grandmaster")
-                .is_some(),
-        );
-        legend.set(data.perks.iter().find(|i| i.name == "legend").is_some());
+        novice.set(data.perks.iter().any(|i| i.name == "novice"));
+        apprentice.set(data.perks.iter().any(|i| i.name == "apprentice"));
+        journeyman.set(data.perks.iter().any(|i| i.name == "journeyman"));
+        expert.set(data.perks.iter().any(|i| i.name == "expert"));
+        master.set(data.perks.iter().any(|i| i.name == "master"));
+        grandmaster.set(data.perks.iter().any(|i| i.name == "grandmaster"));
+        legend.set(data.perks.iter().any(|i| i.name == "legend"));
         referrals_summary.set(data.referral_summary);
         invite_code.set(data.invite_code);
     }
