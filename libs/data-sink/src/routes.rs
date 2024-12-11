@@ -8,9 +8,11 @@ use axum::response::IntoResponse;
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use block_mesh_common::interfaces::server_api::DigestDataRequest;
+use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
 use database_utils::utils::health_check::health_check;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use reqwest::StatusCode;
+use tokio::sync::OnceCell;
 use validator::validate_email;
 
 #[tracing::instrument(name = "db_health", skip_all)]
@@ -38,6 +40,8 @@ pub async fn server_health() -> Result<impl IntoResponse, Error> {
     Ok((StatusCode::OK, "OK"))
 }
 
+static CACHE: OnceCell<DashSetWithExpiry<(String, String)>> = OnceCell::const_new();
+
 pub async fn digest_data(
     State(state): State<DataSinkAppState>,
     Json(body): Json<DigestDataRequest>,
@@ -56,6 +60,14 @@ pub async fn digest_data(
     }
     commit_txn(transaction).await?;
     if state.use_clickhouse {
+        let cache = CACHE
+            .get_or_init(|| async { DashSetWithExpiry::new() })
+            .await;
+        let key = (body.data.origin.clone(), body.data.id.clone());
+        if cache.get(&key).is_some() {
+            return Ok((StatusCode::ALREADY_REPORTED, "Already reported"));
+        }
+
         let result = DataSink::dup_exists_clickhouse(
             &state.clickhouse_client,
             &body.data.origin,
@@ -63,6 +75,7 @@ pub async fn digest_data(
         )
         .await?;
         if result {
+            cache.insert(key, None);
             return Ok((StatusCode::ALREADY_REPORTED, "Already reported"));
         }
         let _ = DataSink::create_data_sink_clickhouse(
@@ -71,6 +84,7 @@ pub async fn digest_data(
             body.data,
         )
         .await;
+        cache.insert(key, None);
     } else {
         let data_sink_db_pool = &state.data_sink_db_pool;
         let mut transaction = create_txn(data_sink_db_pool).await?;

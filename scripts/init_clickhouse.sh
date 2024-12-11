@@ -5,7 +5,7 @@ export _PWD="$(pwd)"
 export ROOT="$(git rev-parse --show-toplevel)"
 source "${ROOT}/scripts/setup.sh"
 
-DOCKERS="$(docker ps -a -q --filter clickhouse/clickhouse-server --format="{{.ID}}")"
+DOCKERS="$(docker ps -a -q --filter ancestor=clickhouse/clickhouse-server --format="{{.ID}}")"
 if [ -n "$DOCKERS" ]
 then
   ensure docker rm --force --volumes $DOCKERS
