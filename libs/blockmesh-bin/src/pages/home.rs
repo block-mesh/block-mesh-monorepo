@@ -36,7 +36,7 @@ pub fn Home() -> impl IntoView {
                                     <A href="https://app.blockmesh.xyz" target="_blank">
                                         <img
                                             class="w-24 h-24"
-                                            src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"
+                                            src="https://r2-images.blockmesh.xyz/ebe1a44f-2f67-44f2-cdec-7f13632b7c00.png"
                                         />
                                     </A>
                                 </div>

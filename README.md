@@ -1,7 +1,7 @@
 # BlockMesh
 
 <p align="center" width="100%">
-    <img width="33%" src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/e4f3cdc0-c2ba-442d-3e48-e2f31c0dc100/public"> 
+    <img width="33%" src="https://r2-images.blockmesh.xyz/e4f3cdc0-c2ba-442d-3e48-e2f31c0dc100.png"> 
 </p>
 
 [![Tag](https://github.com/block-mesh/block-mesh-monorepo/actions/workflows/tag.yml/badge.svg)](https://github.com/block-mesh/block-mesh-monorepo/actions/workflows/tag.yml)

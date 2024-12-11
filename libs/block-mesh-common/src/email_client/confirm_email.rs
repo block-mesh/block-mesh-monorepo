@@ -117,7 +117,7 @@ pub const CONFIRM_EMAIL: &str = r#"
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/3ef1afb4-e176-4423-7bd3-3eed38102b00/public" alt="BlockMesh Network" width="128" height="128" />
+            <img src="https://r2-images.blockmesh.xyz/3ef1afb4-e176-4423-7bd3-3eed38102b00.png" alt="BlockMesh Network" width="128" height="128" />
             <h1>BlockMesh - Confirmation Email</h1>
         </div>
         <div class="content">
