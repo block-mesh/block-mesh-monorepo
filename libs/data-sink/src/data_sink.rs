@@ -102,12 +102,6 @@ impl DataSink {
             .bind(origin_id)
             .fetch_optional::<DataSinkClickHouse>()
             .await?;
-        tracing::info!(
-            "result = {:#?} - origin {} origin_id {}",
-            result,
-            origin,
-            origin_id
-        );
         Ok(result.is_some())
     }
 }
