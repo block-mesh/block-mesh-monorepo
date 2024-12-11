@@ -43,7 +43,8 @@ pub async fn server_health() -> Result<impl IntoResponse, Error> {
     Ok((StatusCode::OK, "OK"))
 }
 
-static CACHE: OnceCell<Arc<RwLock<HashSet<(String, String)>>>> = OnceCell::const_new();
+type CacheType = OnceCell<Arc<RwLock<HashSet<(String, String)>>>>;
+static CACHE: CacheType = OnceCell::const_new();
 
 pub async fn digest_data(
     State(state): State<DataSinkAppState>,
