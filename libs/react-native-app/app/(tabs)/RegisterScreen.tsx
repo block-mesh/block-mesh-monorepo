@@ -41,7 +41,7 @@ export default function RegisterScreen() {
       headerBackgroundColor={{ light: colors['dark-blue'], dark: colors['dark-blue'] }}
       headerImage={
         <Image
-          source={{ uri: 'https://r2-images.blockmesh.xyz/3RKw_J_fJQ_4KpJP3_YgXA/3ef1afb4-e176-4423-7bd3-3eed38102b00.png' }}
+          source={{ uri: 'https://r2-images.blockmesh.xyz/3ef1afb4-e176-4423-7bd3-3eed38102b00.png' }}
           style={styles.logo}
         />
       }>

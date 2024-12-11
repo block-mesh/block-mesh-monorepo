@@ -58,7 +58,7 @@ module.exports = {
         semibold: 600 // Define semibold weight
       },
       backgroundImage: theme => ({
-        'bandwidth-card': 'url(\'https://r2-images.blockmesh.xyz/3RKw_J_fJQ_4KpJP3_YgXA/4c23603d-d4af-40bb-19b2-91db0b51ff00/.png\')'
+        'bandwidth-card': 'url(\'https://r2-images.blockmesh.xyz/4c23603d-d4af-40bb-19b2-91db0b51ff00.png\')'
       }),
       rotate: {
         '180': '180deg'

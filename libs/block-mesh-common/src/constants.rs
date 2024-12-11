@@ -32,10 +32,10 @@ pub static BLOCK_MESH_EMAILS: &str = "https://emails.blockmesh.xyz";
 pub static BLOCK_MESH_FEATURE_FLAGS: &str = "https://feature-flags.blockmesh.xyz";
 pub static BLOCK_MESH_SUPPORT_EMAIL: &str = "support@blockmesh.xyz";
 pub static BLOCK_MESH_LOGO: &str =
-    "https://r2-images.blockmesh.xyz/3RKw_J_fJQ_4KpJP3_YgXA/d68dc689-b8ad-492b-ffc4-8f1478685800/.png";
+    "https://r2-images.blockmesh.xyz/d68dc689-b8ad-492b-ffc4-8f1478685800.png";
 
 pub static BLOCK_MESH_LANDING_PAGE_IMAGE: &str =
-    "https://r2-images.blockmesh.xyz/3RKw_J_fJQ_4KpJP3_YgXA/dfda0dd2-a321-4c75-cbbe-5521b2355f00/.png";
+    "https://r2-images.blockmesh.xyz/dfda0dd2-a321-4c75-cbbe-5521b2355f00.png";
 pub static BLOCK_MESH_IP_WORKER: &str = "https://cloudflare-worker-ip-data.blockmesh.xyz/";
 pub static BLOCK_MESH_PROGRAM_ID: &str = "FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ";
 // pub static BLOCK_MESH_LOGGER: &str = "https://cloudflare-worker-logs-queue.blockmesh.xyz";

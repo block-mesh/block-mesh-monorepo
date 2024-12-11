@@ -76,7 +76,7 @@ pub fn ExtensionLogin() -> impl IntoView {
         <div class="auth-card">
             <img
                 class="background-image"
-                src="https://r2-images.blockmesh.xyz/3RKw_J_fJQ_4KpJP3_YgXA/2f6630f8-f48a-47ed-753b-4445c9399e00/.png"
+                src="https://r2-images.blockmesh.xyz/2f6630f8-f48a-47ed-753b-4445c9399e00.png"
                 alt="background"
             />
             <div class="auth-card-frame"></div>

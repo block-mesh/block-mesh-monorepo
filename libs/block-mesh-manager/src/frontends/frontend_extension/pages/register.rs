@@ -124,7 +124,7 @@ pub fn ExtensionRegister() -> impl IntoView {
             </div>
             <img
                 class="background-image"
-                src="https://r2-images.blockmesh.xyz/3RKw_J_fJQ_4KpJP3_YgXA/0e42f33d-48e0-4f17-5ae0-9249a41bb200/.png"
+                src="https://r2-images.blockmesh.xyz/0e42f33d-48e0-4f17-5ae0-9249a41bb200.png"
                 alt="background"
             />
             <div class="auth-card-frame"></div>
