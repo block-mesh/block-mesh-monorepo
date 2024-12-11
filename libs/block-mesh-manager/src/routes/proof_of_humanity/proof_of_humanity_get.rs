@@ -30,6 +30,8 @@ struct ProofOfHumanTemplate {
     pub recaptcha_site_key_v2: String,
     pub recaptcha_site_key_v3: String,
     pub hcaptcha_site_key: String,
+    pub enable_hcaptcha: bool,
+    pub enable_recaptcha: bool,
 }
 
 #[tracing::instrument(name = "proof_of_humanity_get", skip_all)]
@@ -39,6 +41,8 @@ pub async fn handler(
 ) -> Result<impl IntoResponse, Error> {
     let _ = auth.user.ok_or(Error::UserNotFound)?;
     Ok(ProofOfHumanTemplate {
+        enable_recaptcha: state.enable_recaptcha,
+        enable_hcaptcha: state.enable_hcaptcha,
         hcaptcha_site_key: state.hcaptcha_site_key.clone(),
         recaptcha_site_key_v2: state.recaptcha_site_key_v2.clone(),
         recaptcha_site_key_v3: state.recaptcha_site_key_v3.clone(),

@@ -35,27 +35,31 @@ pub async fn handler(
                 .as_str(),
         ));
     }
-    if let Err(e) = recaptcha_v2(form.recaptcha_v2, &state.recaptcha_secret_key_v2).await {
-        tracing::info!("ReCaptcha V2 Failed {}", e);
-        return Ok(Error::redirect(
-            500,
-            "ReCaptcha V2 Error",
-            "Failed to prove you are human",
-            RoutesEnum::Static_Auth_Proof_Of_Humanity
-                .to_string()
-                .as_str(),
-        ));
+    if state.enable_recaptcha {
+        if let Err(e) = recaptcha_v2(form.recaptcha_v2, &state.recaptcha_secret_key_v2).await {
+            tracing::info!("ReCaptcha V2 Failed {}", e);
+            return Ok(Error::redirect(
+                500,
+                "ReCaptcha V2 Error",
+                "Failed to prove you are human",
+                RoutesEnum::Static_Auth_Proof_Of_Humanity
+                    .to_string()
+                    .as_str(),
+            ));
+        }
     }
-    if let Err(e) = hcaptcha(form.hcaptcha, &state.hcaptcha_secret_key).await {
-        tracing::info!("HCaptcha  Failed {}", e);
-        return Ok(Error::redirect(
-            500,
-            "HCaptcha Error",
-            "Failed to prove you are human",
-            RoutesEnum::Static_Auth_Proof_Of_Humanity
-                .to_string()
-                .as_str(),
-        ));
+    if state.enable_hcaptcha {
+        if let Err(e) = hcaptcha(form.hcaptcha, &state.hcaptcha_secret_key).await {
+            tracing::info!("HCaptcha  Failed {}", e);
+            return Ok(Error::redirect(
+                500,
+                "HCaptcha Error",
+                "Failed to prove you are human",
+                RoutesEnum::Static_Auth_Proof_Of_Humanity
+                    .to_string()
+                    .as_str(),
+            ));
+        }
     }
     let mut transaction = create_txn(&state.pool).await?;
     update_proof_of_human(&mut transaction, user.id, true).await?;

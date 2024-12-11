@@ -1,10 +1,15 @@
 {% extends "base.html" %}
 
 {% block content %}
+
+{% if enable_recaptcha %}
 <script src="https://www.google.com/recaptcha/api.js?onload=_recaptcha_v2Cb&render=explicit&hl=en"></script>
+{% endif %}
+{% if enable_hcaptcha %}
 <script
   src="https://js.hcaptcha.com/1/api.js?hl=es&onload=_hcaptcchaCb&render=explicit&hl=en"
 ></script>
+{% endif %}
 <script>
   function _hcaptcchaCb() {
     console.log('_hcaptcchaCb')
@@ -50,6 +55,7 @@
       alert('Please complete Cloudflare captcha')
       return false
     }
+    {% if enable_recaptcha %}
     const recaptcha_v2 = document.getElementById('recaptcha_v2')
     if (!recaptcha_v2) {
       console.error('recaptcha_v2 missing')
@@ -61,6 +67,8 @@
       alert('Please complete Google captcha')
       return false
     }
+    {% endif %}
+    {% if enable_hcaptcha %}
     const hcaptcha = document.getElementById('hcaptcha')
     if (!hcaptcha) {
       console.error('hcaptcha missing')
@@ -72,6 +80,7 @@
       alert('Please complete h-captcha captcha')
       return false
     }
+    {% endif %}
     return true
   }
 </script>
@@ -89,8 +98,12 @@
           here for help</a>
       </div>
       <div id="myWidget"></div>
+      {% if enable_recaptcha %}
       <div id="recaptcha_v2_widget" class="g-recaptcha" data-sitekey="{{ recaptcha_site_key_v2 }}"></div>
+      {% endif %}
+      {% if enable_hcaptcha %}
       <div id="hcaptcha_widget" class="g-recaptcha" data-sitekey="{{ hcaptcha_site_key }}"></div>
+      {% endif %}
       <label for="hcaptcha"></label>
       <input style="display: none" type="text" id="hcaptcha" name="hcaptcha" required readonly />
       <label for="recaptcha_v2"></label>
