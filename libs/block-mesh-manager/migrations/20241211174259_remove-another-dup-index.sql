@@ -1,0 +1,2 @@
+DROP INDEX daily_stats_default_status;
+DROP INDEX daily_stats_finalized_status;
