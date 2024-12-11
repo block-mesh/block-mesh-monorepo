@@ -50,7 +50,7 @@ pub fn CommonHeader() -> impl IntoView {
 
         <Link
             rel="icon"
-            href="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/e4f3cdc0-c2ba-442d-3e48-e2f31c0dc100/public"
+            href="https://r2-images.blockmesh.xyz/3RKw_J_fJQ_4KpJP3_YgXA/e4f3cdc0-c2ba-442d-3e48-e2f31c0dc100/.png"
         />
         <Script>
             r#"
