@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+clickhouse = { workspace = true, features = ["native-tls", "uuid", "time", "inserter"] }
 validator = { workspace = true, features = ["derive"] }
 influxdb = { workspace = true, features = ["derive"] }
 database-utils = { path = "../database-utils" }
@@ -38,6 +39,9 @@ chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }
 block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env"] }
 serde_json = { workspace = true, features = ["raw_value"] }
 secret = { path = "../secret" }
+
+[dev-dependencies]
+clickhouse = { workspace = true, features = ["test-util"] }
 
 [dependencies.rand]
 workspace = true

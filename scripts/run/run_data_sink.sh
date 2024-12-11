@@ -13,7 +13,9 @@ if [ -f "${ROOT}/.env" ] ; then
 fi
 #export POSTGRES_DB="data-sink"
 #ensure "${ROOT}/scripts/init_db.sh"
+ensure "${ROOT}/scripts/init_clickhouse.sh"
 export DATABASE_URL="postgres://postgres:password@localhost:5552/data-sink"
+export CLICKHOUSE_URL="http://127.0.0.1:8123"
 export FOLLOWER_DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
 #cargo watch --watch libs --shell "cargo run -p tg-privacy-bot | bunyan &"
 cargo watch --watch libs --shell "cargo run -p data-sink"

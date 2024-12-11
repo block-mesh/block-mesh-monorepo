@@ -1,7 +1,7 @@
 use crate::data_sink::DataSink;
 use crate::database::get_user_and_api_token_by_email;
 use crate::errors::Error;
-use crate::AppState;
+use crate::DataSinkAppState;
 use anyhow::anyhow;
 use axum::extract::State;
 use axum::response::IntoResponse;
@@ -14,7 +14,7 @@ use reqwest::StatusCode;
 use validator::validate_email;
 
 #[tracing::instrument(name = "db_health", skip_all)]
-pub async fn db_health(State(state): State<AppState>) -> Result<impl IntoResponse, Error> {
+pub async fn db_health(State(state): State<DataSinkAppState>) -> Result<impl IntoResponse, Error> {
     let data_sink_db_pool = &state.data_sink_db_pool;
     let mut transaction = create_txn(data_sink_db_pool).await?;
     health_check(&mut *transaction).await?;
@@ -23,7 +23,9 @@ pub async fn db_health(State(state): State<AppState>) -> Result<impl IntoRespons
 }
 
 #[tracing::instrument(name = "follower_health", skip_all)]
-pub async fn follower_health(State(state): State<AppState>) -> Result<impl IntoResponse, Error> {
+pub async fn follower_health(
+    State(state): State<DataSinkAppState>,
+) -> Result<impl IntoResponse, Error> {
     let follower_db_pool = &state.follower_db_pool;
     let mut transaction = create_txn(follower_db_pool).await?;
     health_check(&mut *transaction).await?;
@@ -37,7 +39,7 @@ pub async fn server_health() -> Result<impl IntoResponse, Error> {
 }
 
 pub async fn digest_data(
-    State(state): State<AppState>,
+    State(state): State<DataSinkAppState>,
     Json(body): Json<DigestDataRequest>,
 ) -> Result<impl IntoResponse, Error> {
     if !validate_email(&body.email) {
@@ -53,18 +55,36 @@ pub async fn digest_data(
         return Err(Error::from(anyhow!("ApiTokenNotFound")));
     }
     commit_txn(transaction).await?;
-    let data_sink_db_pool = &state.data_sink_db_pool;
-    let mut transaction = create_txn(data_sink_db_pool).await?;
-    let result = DataSink::create_data_sink(&mut transaction, &user.user_id, body.data).await;
-    if let Err(error) = result {
-        if error
-            .to_string()
-            .contains("duplicate key value violates unique constraint")
-        {
+    if state.use_clickhouse {
+        let result = DataSink::dup_exists_clickhouse(
+            &state.clickhouse_client,
+            &body.data.origin,
+            &body.data.id,
+        )
+        .await?;
+        if result {
             return Ok((StatusCode::ALREADY_REPORTED, "Already reported"));
         }
+        let _ = DataSink::create_data_sink_clickhouse(
+            &state.clickhouse_client,
+            &user.user_id,
+            body.data,
+        )
+        .await;
+    } else {
+        let data_sink_db_pool = &state.data_sink_db_pool;
+        let mut transaction = create_txn(data_sink_db_pool).await?;
+        let result = DataSink::create_data_sink(&mut transaction, &user.user_id, body.data).await;
+        if let Err(error) = result {
+            if error
+                .to_string()
+                .contains("duplicate key value violates unique constraint")
+            {
+                return Ok((StatusCode::ALREADY_REPORTED, "Already reported"));
+            }
+        }
+        commit_txn(transaction).await?;
     }
-    commit_txn(transaction).await?;
     Ok((StatusCode::OK, "OK"))
 }
 
@@ -72,7 +92,7 @@ pub async fn digest_data(
 pub async fn version() -> impl IntoResponse {
     (StatusCode::OK, env!("CARGO_PKG_VERSION"))
 }
-pub fn get_router(state: AppState) -> Router {
+pub fn get_router(state: DataSinkAppState) -> Router {
     Router::new()
         .route("/", get(server_health))
         .route("/server_health", get(server_health))
