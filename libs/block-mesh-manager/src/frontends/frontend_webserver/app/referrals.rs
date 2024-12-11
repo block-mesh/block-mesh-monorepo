@@ -23,7 +23,26 @@ pub fn Referrals() -> impl IntoView {
     let referrals_summary = RwSignal::new(ReferralSummary::default());
     let invite_code = RwSignal::new("".to_string());
     let show_invite_code = RwSignal::new(false);
+    let novice = RwSignal::new(false);
+    let apprentice = RwSignal::new(false);
+    let journeyman = RwSignal::new(false);
+    let expert = RwSignal::new(false);
+    let master = RwSignal::new(false);
+    let grandmaster = RwSignal::new(false);
+    let legend = RwSignal::new(false);
     if let Some(data) = async_data {
+        novice.set(data.perks.iter().find(|i| i.name == "novice").is_some());
+        apprentice.set(data.perks.iter().find(|i| i.name == "apprentice").is_some());
+        journeyman.set(data.perks.iter().find(|i| i.name == "journeyman").is_some());
+        expert.set(data.perks.iter().find(|i| i.name == "expert").is_some());
+        master.set(data.perks.iter().find(|i| i.name == "master").is_some());
+        grandmaster.set(
+            data.perks
+                .iter()
+                .find(|i| i.name == "grandmaster")
+                .is_some(),
+        );
+        legend.set(data.perks.iter().find(|i| i.name == "legend").is_some());
         referrals_summary.set(data.referral_summary);
         invite_code.set(data.invite_code);
     }
@@ -168,45 +187,45 @@ pub fn Referrals() -> impl IntoView {
                     <ol role="list" class="rounded-md xl:flex xl:rounded-none ">
                         <RefererRank
                             title="Novice"
-                            description="100,000 points and 25 invites"
+                            description="25 invites"
                             step=1
-                            is_complete=false
+                            is_complete=novice.get_untracked()
                         />
                         <RefererRank
                             title="Apprentice"
-                            description="500,000 points and 50 invites"
+                            description="50 invites"
                             step=2
-                            is_complete=false
+                            is_complete=apprentice.get_untracked()
                         />
                         <RefererRank
                             title="Journeyman"
-                            description="1,000,000 points and 100 invites"
+                            description="100 invites"
                             step=3
-                            is_complete=false
+                            is_complete=journeyman.get_untracked()
                         />
                         <RefererRank
                             title="Expert"
-                            description="2,500,000 points and 200 invites"
+                            description="200 invites"
                             step=4
-                            is_complete=false
+                            is_complete=expert.get_untracked()
                         />
                         <RefererRank
                             title="Master"
-                            description="5,000,000 points and 500 invites"
+                            description="500 invites"
                             step=5
-                            is_complete=false
+                            is_complete=master.get_untracked()
                         />
                         <RefererRank
                             title="Grandmaster"
-                            description="10,000,000 points and 750 invites"
+                            description="750 invites"
                             step=6
-                            is_complete=false
+                            is_complete=grandmaster.get_untracked()
                         />
                         <RefererRank
                             title="Legend"
                             description="25,000,000 points and 1,000 invites"
                             step=7
-                            is_complete=false
+                            is_complete=legend.get_untracked()
                         />
                     </ol>
                 </nav>

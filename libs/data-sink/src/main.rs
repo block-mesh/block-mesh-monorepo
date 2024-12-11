@@ -1,12 +1,15 @@
 mod data_sink;
 mod database;
 mod errors;
+mod migrate_clickhouse;
 mod routes;
 
+use crate::migrate_clickhouse::migrate_clickhouse;
 use crate::routes::get_router;
 use axum::Router;
 use block_mesh_common::env::environment::Environment;
 use block_mesh_common::env::load_dotenv::load_dotenv;
+use clickhouse::Client;
 use database_utils::utils::connection::follower_pool::follower_pool;
 use database_utils::utils::connection::write_pool::write_pool;
 use database_utils::utils::migrate::migrate;
@@ -60,19 +63,33 @@ fn main() {
 }
 
 #[derive(Clone)]
-pub struct AppState {
+pub struct DataSinkAppState {
+    pub clickhouse_client: Client,
     pub data_sink_db_pool: PgPool,
     pub follower_db_pool: PgPool,
     pub environment: Environment,
+    pub use_clickhouse: bool,
 }
 
-impl AppState {
+impl DataSinkAppState {
     pub async fn new() -> Self {
+        let use_clickhouse = env::var("USE_CLICKHOUSE")
+            .unwrap_or("false".to_string())
+            .parse()
+            .unwrap_or(false);
+        let clickhouse_client = Client::default()
+            .with_url(env::var("CLICKHOUSE_URL").unwrap())
+            // https://clickhouse.com/docs/en/operations/settings/settings#async-insert
+            .with_option("async_insert", "1")
+            // https://clickhouse.com/docs/en/operations/settings/settings#wait-for-async-insert
+            .with_option("wait_for_async_insert", "0");
         let data_sink_db_pool = write_pool(None).await;
         let follower_db_pool = follower_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
         let environment = env::var("APP_ENVIRONMENT").unwrap();
         let environment = Environment::from_str(&environment).unwrap();
         Self {
+            use_clickhouse,
+            clickhouse_client,
             data_sink_db_pool,
             follower_db_pool,
             environment,
@@ -85,11 +102,14 @@ async fn run() -> anyhow::Result<()> {
     load_dotenv();
     setup_tracing_stdout_only_with_sentry();
     tracing::info!("Starting worker");
-    let state = AppState::new().await;
+    let state = DataSinkAppState::new().await;
     let env = env::var("APP_ENVIRONMENT").expect("APP_ENVIRONMENT is not set");
     migrate(&state.data_sink_db_pool, env)
         .await
         .expect("Failed to migrate database");
+    migrate_clickhouse(&state.clickhouse_client)
+        .await
+        .expect("Failed to migrate clickhouse");
     let router = get_router(state);
     let cors = CorsLayer::permissive();
     let app = Router::new().nest("/", router).layer(cors);
