@@ -22,7 +22,7 @@ pub async fn get_user_from_db(
 ) -> anyhow::Result<Option<UserAndApiToken>> {
     let follower_pool = &follower_pool;
     let mut transaction = create_txn(follower_pool).await?;
-    let user = get_user_and_api_token_by_email(&mut transaction, &email).await?;
+    let user = get_user_and_api_token_by_email(&mut transaction, email).await?;
     commit_txn(transaction).await?;
     Ok(user)
 }
