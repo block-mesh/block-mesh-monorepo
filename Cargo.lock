@@ -2755,6 +2755,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "cloudflare-team-page"
+version = "0.0.432"
+dependencies = [
+ "askama",
+ "askama_axum",
+ "block-mesh-common",
+ "serde",
+ "serde_json",
+ "time",
+ "tracing",
+ "tracing-subscriber",
+ "tracing-web",
+ "worker",
+]
+
+[[package]]
 name = "cloudflare-vps-page"
 version = "0.0.432"
 dependencies = [
