@@ -53,6 +53,7 @@ pub struct SubmitTaskRequest {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConfirmEmailRequest {
     pub token: String,
+    pub email: String,
 }
 
 #[typeshare]
@@ -380,6 +381,12 @@ pub struct Referral {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EditInviteCodeForm {
     pub new_invite_code: String,
+}
+
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug)]
+pub struct EditEmailForm {
+    pub new_email: String,
 }
 
 #[typeshare]
