@@ -1,7 +1,5 @@
 use crate::frontends::context::notification_context::NotificationContext;
-use block_mesh_common::interfaces::server_api::{
-    AuthStatusResponse, DashboardResponse, EditEmailForm,
-};
+use block_mesh_common::interfaces::server_api::{AuthStatusResponse, EditEmailForm};
 use block_mesh_common::routes_enum::RoutesEnum;
 use leptos::*;
 use reqwest::Client;
@@ -9,7 +7,6 @@ use reqwest::Client;
 #[component]
 pub fn EditEmail() -> impl IntoView {
     let notifications = expect_context::<NotificationContext>();
-    let async_data = use_context::<DashboardResponse>();
     let auth_status = use_context::<AuthStatusResponse>();
     let new_email = RwSignal::new("".to_string());
 
