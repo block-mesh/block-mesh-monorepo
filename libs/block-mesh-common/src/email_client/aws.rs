@@ -20,7 +20,10 @@ impl EmailClient {
         let body_content = Content::builder()
             .data(CONFIRM_EMAIL.replace(
                 "{{action_url}}",
-                &format!("{}/email_confirm?token={}", self.base_url, token),
+                &format!(
+                    "{}/email_confirm?token={}&email={}",
+                    self.base_url, token, to
+                ),
             ))
             .charset("UTF-8")
             .build()?;
