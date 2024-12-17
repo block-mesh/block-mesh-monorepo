@@ -1,0 +1,1 @@
+CREATE INDEX users_ip_user_id_updated_at ON users_ip (user_id, updated_at DESC);

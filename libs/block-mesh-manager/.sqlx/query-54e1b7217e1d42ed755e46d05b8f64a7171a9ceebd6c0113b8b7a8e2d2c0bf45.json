@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        SELECT\n        ip_addresses.ip, ip_addresses.country, users_ip.updated_at\n        FROM users_ip\n        JOIN ip_addresses ON users_ip.ip_id = ip_addresses.id\n        WHERE users_ip.user_id = $1\n        ORDER BY users_ip.updated_at DESC\n        LIMIT $2\n        ",
+  "query": "\n        WITH user_ip_data (ip_id, updated_at) AS (\n           SELECT ip_id, updated_at\n           FROM users_ip\n           WHERE user_id = $1\n           ORDER BY updated_at DESC\n           LIMIT $2\n        )\n        SELECT ip_addresses.ip, ip_addresses.country, user_ip_data.updated_at\n        FROM ip_addresses\n        JOIN user_ip_data ON ip_addresses.id = user_ip_data.ip_id\n        ",
   "describe": {
     "columns": [
       {
@@ -31,5 +31,5 @@
       false
     ]
   },
-  "hash": "6ebf45759567513f177da2aa5cfbb96b5c41550599ee362a076924528760c45a"
+  "hash": "54e1b7217e1d42ed755e46d05b8f64a7171a9ceebd6c0113b8b7a8e2d2c0bf45"
 }
