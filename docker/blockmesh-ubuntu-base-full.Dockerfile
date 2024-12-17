@@ -8,6 +8,7 @@ ARG WASM_PACK=0.12.1
 RUN apt-get update
 RUN apt-get install curl gzip git-all -y
 RUN apt-get install build-essential -y
+RUN apt-get install libc6 -y
 RUN apt-get install -y pkg-config openssl libssl-dev
 RUN curl https://sh.rustup.rs -sSf | bash -s -- -y
 RUN echo 'source $HOME/.cargo/env' >> $HOME/.bashrc
