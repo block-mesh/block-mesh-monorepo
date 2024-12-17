@@ -286,6 +286,8 @@ pub struct ReportBandwidthResponse {
 #[typeshare]
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
 pub struct DashboardResponse {
+    pub true_count: i64,
+    pub false_count: i64,
     pub upload: f64,
     pub download: f64,
     pub latency: f64,

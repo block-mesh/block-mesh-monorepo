@@ -14,6 +14,7 @@ use block_mesh_common::interfaces::server_api::{
 
 use crate::database::call_to_action::get_user_calls_to_action::get_user_call_to_action;
 use crate::database::daily_stat::get_daily_stats_by_user_id::get_daily_stats_by_user_id;
+use crate::database::daily_stat::get_daily_stats_status::get_daily_stats_ref_status_by_user_id;
 use crate::database::invite_code::get_number_of_users_invited::get_number_of_users_invited;
 use crate::database::invite_code::get_referral_summary::get_user_referrals_summary;
 use crate::database::invite_code::get_user_latest_invite_code::get_user_latest_invite_code;
@@ -62,6 +63,8 @@ pub async fn dashboard_data_extractor(
     let cache = RATE_LIMIT
         .get_or_init(|| async { DashMapWithExpiry::new() })
         .await;
+    let daily_stats_count =
+        get_daily_stats_ref_status_by_user_id(follower_transaction, &user.user_id).await?;
     let daily_stats = match cache.get(&user.email) {
         Some(vec) => vec,
         None => {
@@ -140,6 +143,8 @@ pub async fn dashboard_data_extractor(
     ) as f64;
     commit_txn(write_transaction).await?;
     Ok(DashboardResponse {
+        true_count: daily_stats_count.true_count,
+        false_count: daily_stats_count.false_count,
         wallet_address: user.wallet_address,
         user_ips,
         calls_to_action: calls_to_action

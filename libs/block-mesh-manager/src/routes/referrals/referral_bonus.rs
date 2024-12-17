@@ -6,8 +6,7 @@ use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::Extension;
 use axum_login::AuthSession;
-use block_mesh_common::interfaces::db_messages::{DBMessage, DailyStatRefBonus};
-use block_mesh_manager_database_domain::domain::notify_worker::notify_worker;
+use block_mesh_manager_database_domain::domain::daily_stat_background_job::DailyStatsBackgroundJob;
 use chrono::{Duration, Utc};
 use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
@@ -30,22 +29,27 @@ pub async fn handler(
     if cache.get(&user.id).is_some() {
         return Ok((StatusCode::TOO_MANY_REQUESTS, "Rate limited").into_response());
     }
-    let date = Utc::now() + Duration::milliseconds(600_000);
+    // let date = Utc::now() + Duration::milliseconds(600_000);
+    let date = Utc::now() + Duration::milliseconds(1_000);
     cache.insert(user.id, Some(date));
     let mut follower_transaction = create_txn(&state.follower_pool).await?;
     let to_do_days = get_daily_stats_bonus_not_applied(&mut follower_transaction, &user.id).await?;
+    let to_do_days_len = to_do_days.len();
     commit_txn(follower_transaction).await?;
-    let messages: Vec<DBMessage> = to_do_days
-        .into_iter()
-        .map(|i| {
-            DBMessage::DailyStatRefBonus(DailyStatRefBonus {
-                user_id: i.user_id,
-                daily_stat_id: i.id,
-                day: i.day,
-            })
-        })
-        .collect();
-    let channel_pool = &state.channel_pool.clone();
-    notify_worker(channel_pool, &messages).await?;
-    Ok((StatusCode::OK, "OK").into_response())
+    let mut write_transaction = create_txn(&state.pool).await?;
+    DailyStatsBackgroundJob::create_jobs(&mut write_transaction, to_do_days).await?;
+    commit_txn(write_transaction).await?;
+    // let messages: Vec<DBMessage> = to_do_days
+    //     .into_iter()
+    //     .map(|i| {
+    //         DBMessage::DailyStatRefBonus(DailyStatRefBonus {
+    //             user_id: i.user_id,
+    //             daily_stat_id: i.id,
+    //             day: i.day,
+    //         })
+    //     })
+    //     .collect();
+    // let channel_pool = &state.channel_pool.clone();
+    // notify_worker(channel_pool, &messages).await?;
+    Ok((StatusCode::OK, format!("to_do_days {}", to_do_days_len)).into_response())
 }

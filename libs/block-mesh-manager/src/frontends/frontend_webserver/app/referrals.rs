@@ -30,7 +30,11 @@ pub fn Referrals() -> impl IntoView {
     let master = RwSignal::new(false);
     let grandmaster = RwSignal::new(false);
     let legend = RwSignal::new(false);
+    let true_count = RwSignal::new(0i64);
+    let false_count = RwSignal::new(0i64);
     if let Some(data) = async_data {
+        true_count.set(data.true_count);
+        false_count.set(data.false_count);
         novice.set(data.perks.iter().any(|i| i.name == "novice"));
         apprentice.set(data.perks.iter().any(|i| i.name == "apprentice"));
         journeyman.set(data.perks.iter().any(|i| i.name == "journeyman"));
@@ -143,7 +147,7 @@ pub fn Referrals() -> impl IntoView {
                 class=BUTTON_CLASS
                 on:click=move |_| apply_ref_action.dispatch(())
             >
-                Apply Ref Bonus
+                {move || format!("Apply Ref Bonus {}/{}", false_count.get_untracked(), false_count.get_untracked() + true_count.get_untracked()) }
             </button>
             <a
                 rel="external"

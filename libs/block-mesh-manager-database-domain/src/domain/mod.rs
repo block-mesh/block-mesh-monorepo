@@ -11,6 +11,7 @@ pub mod find_task_by_task_id_and_status;
 pub mod find_token;
 pub mod finish_task;
 pub mod get_affiliate_tree_per_day;
+pub mod get_daily_stat_by_day;
 pub mod get_daily_stat_by_id;
 pub mod get_daily_stat_of_user;
 pub mod get_or_create_aggregate_by_user_and_name;
