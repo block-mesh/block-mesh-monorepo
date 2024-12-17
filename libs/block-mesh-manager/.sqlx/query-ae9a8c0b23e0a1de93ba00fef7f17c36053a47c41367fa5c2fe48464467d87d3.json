@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            COUNT(*) FILTER  (WHERE ref_bonus_applied = TRUE)  AS true_count,\n            COUNT(*) FILTER  (WHERE ref_bonus_applied = FALSE) AS false_count\n        FROM daily_stats\n        WHERE user_id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "true_count",
+        "type_info": "Int8"
+      },
+      {
+        "ordinal": 1,
+        "name": "false_count",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null,
+      null
+    ]
+  },
+  "hash": "ae9a8c0b23e0a1de93ba00fef7f17c36053a47c41367fa5c2fe48464467d87d3"
+}

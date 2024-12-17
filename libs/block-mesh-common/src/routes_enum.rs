@@ -2,6 +2,7 @@ use std::fmt::{Display, Formatter};
 
 #[allow(non_camel_case_types)]
 pub enum RoutesEnum {
+    Static_Admin_Referral,
     Static_UnAuth_Map,
     Static_UnAuth_AuthStatus,
     Static_UnAuth_RpcDashboard,
@@ -51,6 +52,7 @@ pub enum RoutesEnum {
 impl Display for RoutesEnum {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match &self {
+            RoutesEnum::Static_Admin_Referral => write!(f, "/admin_referral"),
             RoutesEnum::Api_ReferralBonus => write!(f, "/referral_bonus"),
             RoutesEnum::Static_Auth_Proof_Of_Humanity => write!(f, "/proof_of_humanity"),
             RoutesEnum::Static_UnAuth_Version => write!(f, "/version"),

@@ -34,6 +34,7 @@ use crate::cron_jobs::bulk_task_bonus_cron::bulk_task_bonus_cron;
 use crate::cron_jobs::bulk_uptime_bonus_cron::bulk_uptime_bonus_cron;
 use crate::cron_jobs::clean_old_tasks::clean_old_tasks;
 use crate::cron_jobs::finalize_daily_cron::finalize_daily_cron;
+use crate::cron_jobs::ref_bonus_bg_table_cron::ref_bonus_bg_table_cron;
 use crate::cron_jobs::ref_bonus_cron::ref_bonus_cron;
 use crate::cron_jobs::rpc_cron::rpc_worker_loop;
 use crate::cron_jobs::special_task_cron::special_worker_loop;
@@ -115,6 +116,7 @@ async fn run() -> anyhow::Result<()> {
         queue.clone(),
     ));
     let queue_ref_bonus_task = tokio::spawn(queue_ref_bonus(tx.subscribe(), queue.clone()));
+    let ref_bonus_bg_table_cron_task = tokio::spawn(ref_bonus_bg_table_cron(db_pool.clone()));
     let bulk_task_bonus_task = tokio::spawn(bulk_task_bonus_cron(un_limited_db_pool.clone()));
     let bulk_uptime_bonus_task = tokio::spawn(bulk_uptime_bonus_cron(un_limited_db_pool));
     let joiner_task = tokio::spawn(joiner_loop(joiner_rx));
@@ -213,6 +215,7 @@ async fn run() -> anyhow::Result<()> {
     let server_task = run_server(listener, app);
 
     tokio::select! {
+        o = ref_bonus_bg_table_cron_task => panic!("ref_bonus_bg_table_cron_task exit {:?}", o),
         o = joiner_task_ref => panic!("joiner_task_ref exit {:?}", o),
         o = ref_bonus_cron_task => panic!("ref_bonus_cron_task exit {:?}", o),
         o = queue_ref_bonus_task => panic!("queue_ref_bonus_task exit {:?}", o),

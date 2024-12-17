@@ -2,6 +2,7 @@
 set -x
 # tokio-console:
 #export RUSTFLAGS="--cfg tokio_unstable"
+export ADMIN_PARAM="test"
 export APP_ENVIRONMENT="local"
 export SENTRY_LAYER="true"
 export SENTRY_SAMPLE_RATE="1.0"

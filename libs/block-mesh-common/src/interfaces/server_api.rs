@@ -286,6 +286,8 @@ pub struct ReportBandwidthResponse {
 #[typeshare]
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
 pub struct DashboardResponse {
+    pub true_count: i64,
+    pub false_count: i64,
     pub upload: f64,
     pub download: f64,
     pub latency: f64,
@@ -675,4 +677,10 @@ pub struct TmpUserAffiliate {
     pub level: Option<i32>,
     pub uptime: Option<f64>,
     pub tasks_count: Option<i32>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct AdminReferral {
+    pub email: String,
+    pub code: String,
 }
