@@ -147,7 +147,7 @@ pub fn Referrals() -> impl IntoView {
                 class=BUTTON_CLASS
                 on:click=move |_| apply_ref_action.dispatch(())
             >
-                {move || format!("Apply Ref Bonus {}/{}", false_count.get_untracked(), false_count.get_untracked() + true_count.get_untracked()) }
+                {move || format!("Apply Ref Bonus {}/{}", true_count.get_untracked(), false_count.get_untracked() + true_count.get_untracked()) }
             </button>
             <a
                 rel="external"
