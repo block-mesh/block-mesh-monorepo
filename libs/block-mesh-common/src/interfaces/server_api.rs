@@ -676,3 +676,9 @@ pub struct TmpUserAffiliate {
     pub uptime: Option<f64>,
     pub tasks_count: Option<i32>,
 }
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct AdminReferral {
+    pub email: String,
+    pub code: String,
+}

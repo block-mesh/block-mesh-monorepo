@@ -4,6 +4,7 @@ pub mod apply_ref_bonus_for_daily_stat;
 pub mod bulk_get_or_create_aggregate_by_user_and_name;
 pub mod create_daily_stat;
 pub mod daily_stat;
+pub mod daily_stat_background_job;
 pub mod fetch_latest_cron_settings;
 pub mod find_pending_tasks_with_limit;
 pub mod find_task_by_task_id_and_status;
