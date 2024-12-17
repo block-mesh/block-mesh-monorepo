@@ -1,9 +1,10 @@
 use anyhow::anyhow;
-use chrono::Utc;
+use chrono::{Duration, Utc};
 use num_traits::abs;
 use sqlx::{PgPool, Postgres, Transaction};
 use std::cmp::max;
 use std::sync::Arc;
+use tokio::sync::OnceCell;
 #[allow(unused_imports)]
 use tracing::Level;
 
@@ -29,7 +30,11 @@ use block_mesh_manager_database_domain::domain::aggregate::AggregateName::{
 use block_mesh_manager_database_domain::domain::bulk_get_or_create_aggregate_by_user_and_name::bulk_get_or_create_aggregate_by_user_and_name;
 use block_mesh_manager_database_domain::domain::create_daily_stat::get_or_create_daily_stat;
 use block_mesh_manager_database_domain::domain::user::UserAndApiToken;
+use dash_with_expiry::dash_map_with_expiry::DashMapWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
+
+static RATE_LIMIT: OnceCell<DashMapWithExpiry<String, Vec<DailyStatForDashboard>>> =
+    OnceCell::const_new();
 
 #[tracing::instrument(name = "dashboard_data_extractor", skip_all)]
 pub async fn dashboard_data_extractor(
@@ -54,21 +59,32 @@ pub async fn dashboard_data_extractor(
     let number_of_users_invited = get_number_of_users_invited(follower_transaction, &user.user_id)
         .await
         .map_err(Error::from)?;
-    let daily_stats: Vec<DailyStatForDashboard> =
-        get_daily_stats_by_user_id(follower_transaction, &user.user_id)
-            .await?
-            .into_iter()
-            .map(|i| {
-                let points = calc_points_daily(i.uptime, i.tasks_count, i.ref_bonus, &perks);
-                DailyStatForDashboard {
-                    tasks_count: i.tasks_count,
-                    uptime: i.uptime,
-                    points,
-                    day: i.day,
-                }
-            })
-            .collect();
-
+    let cache = RATE_LIMIT
+        .get_or_init(|| async { DashMapWithExpiry::new() })
+        .await;
+    let daily_stats = match cache.get(&user.email) {
+        Some(vec) => vec,
+        None => {
+            let result: Vec<DailyStatForDashboard> =
+                get_daily_stats_by_user_id(follower_transaction, &user.user_id)
+                    .await?
+                    .into_iter()
+                    .map(|i| {
+                        let points =
+                            calc_points_daily(i.uptime, i.tasks_count, i.ref_bonus, &perks);
+                        DailyStatForDashboard {
+                            tasks_count: i.tasks_count,
+                            uptime: i.uptime,
+                            points,
+                            day: i.day,
+                        }
+                    })
+                    .collect();
+            let date = Utc::now() + Duration::milliseconds(300_000);
+            cache.insert(user.email.clone(), result.clone(), Some(date));
+            result
+        }
+    };
     let mut write_transaction = create_txn(write_pool).await?;
     let _ = get_or_create_daily_stat(&mut write_transaction, &user.user_id, None).await?;
     let interval = get_flag_value_from_map(
