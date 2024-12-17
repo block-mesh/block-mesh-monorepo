@@ -7,7 +7,7 @@ use std::time::Duration;
 
 #[tracing::instrument(name = "pool", skip_all)]
 pub async fn run_loop(pool: &PgPool) -> Result<(), anyhow::Error> {
-    let mut transaction = create_txn(&pool).await?;
+    let mut transaction = create_txn(pool).await?;
     let job = match DailyStatsBackgroundJob::get_job(&mut transaction).await? {
         Some(job) => job,
         None => return Ok(()),
@@ -22,7 +22,7 @@ pub async fn run_loop(pool: &PgPool) -> Result<(), anyhow::Error> {
         daily_stat.day,
     )
     .await?;
-    let mut transaction = create_txn(&pool).await?;
+    let mut transaction = create_txn(pool).await?;
     DailyStatsBackgroundJob::delete_job(&mut transaction, &job.id).await?;
     commit_txn(transaction).await?;
     Ok(())
