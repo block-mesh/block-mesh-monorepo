@@ -6,6 +6,7 @@ RUN echo "BUILDPLATFORM = $BUILDPLATFORM"
 RUN echo "TARGETPLATFORM = $TARGETPLATFORM"
 RUN apt-get update
 RUN apt-get install curl gzip git-all -y
+RUN apt-get install libc6 -y
 FROM base AS build
 WORKDIR /opt/
 RUN curl -sLO https://github.com/block-mesh/block-mesh-monorepo/releases/latest/download/blockmesh-cli-x86_64-unknown-linux-gnu.tar.gz \
