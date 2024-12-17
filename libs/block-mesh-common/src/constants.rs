@@ -129,16 +129,16 @@ pub enum RankBonus {
     Legend,
 }
 
-impl Into<f64> for RankBonus {
-    fn into(self) -> f64 {
-        match self {
-            Self::Novice => 25_000.0,
-            Self::Apprentice => 50_000.0,
-            Self::Journeyman => 100_000.0,
-            Self::Expert => 200_000.0,
-            Self::Master => 500_000.0,
-            Self::Grandmaster => 800_000.0,
-            Self::Legend => 1_000_000.0,
+impl From<RankBonus> for f64 {
+    fn from(val: RankBonus) -> f64 {
+        match val {
+            RankBonus::Novice => 25_000.0,
+            RankBonus::Apprentice => 50_000.0,
+            RankBonus::Journeyman => 100_000.0,
+            RankBonus::Expert => 200_000.0,
+            RankBonus::Master => 500_000.0,
+            RankBonus::Grandmaster => 800_000.0,
+            RankBonus::Legend => 1_000_000.0,
         }
     }
 }
