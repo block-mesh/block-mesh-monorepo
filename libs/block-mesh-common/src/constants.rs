@@ -118,3 +118,27 @@ impl From<String> for DeviceType {
         DeviceType::from(value.as_str())
     }
 }
+
+pub enum RankBonus {
+    Novice,
+    Apprentice,
+    Journeyman,
+    Expert,
+    Master,
+    Grandmaster,
+    Legend,
+}
+
+impl From<RankBonus> for f64 {
+    fn from(val: RankBonus) -> f64 {
+        match val {
+            RankBonus::Novice => 25_000.0,
+            RankBonus::Apprentice => 50_000.0,
+            RankBonus::Journeyman => 100_000.0,
+            RankBonus::Expert => 200_000.0,
+            RankBonus::Master => 500_000.0,
+            RankBonus::Grandmaster => 800_000.0,
+            RankBonus::Legend => 1_000_000.0,
+        }
+    }
+}

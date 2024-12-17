@@ -8,6 +8,7 @@ use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::Extension;
 use axum_login::AuthSession;
+use block_mesh_common::constants::RankBonus;
 use chrono::{Duration, Utc};
 use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
@@ -46,7 +47,7 @@ pub async fn handler(
             user.id,
             PerkName::Novice,
             1.0,
-            100.0,
+            RankBonus::Novice.into(),
             serde_json::from_str("{}").unwrap(),
         )
         .await;
@@ -59,7 +60,7 @@ pub async fn handler(
             user.id,
             PerkName::Apprentice,
             1.0,
-            375.0,
+            RankBonus::Apprentice.into(),
             serde_json::from_str("{}").unwrap(),
         )
         .await;
@@ -72,7 +73,7 @@ pub async fn handler(
             user.id,
             PerkName::Journeyman,
             1.0,
-            750.0,
+            RankBonus::Journeyman.into(),
             serde_json::from_str("{}").unwrap(),
         )
         .await;
@@ -85,7 +86,7 @@ pub async fn handler(
             user.id,
             PerkName::Expert,
             1.0,
-            1500.0,
+            RankBonus::Expert.into(),
             serde_json::from_str("{}").unwrap(),
         )
         .await;
@@ -98,7 +99,7 @@ pub async fn handler(
             user.id,
             PerkName::Master,
             1.0,
-            3000.0,
+            RankBonus::Master.into(),
             serde_json::from_str("{}").unwrap(),
         )
         .await;
@@ -111,7 +112,7 @@ pub async fn handler(
             user.id,
             PerkName::Grandmaster,
             1.0,
-            6000.0,
+            RankBonus::Grandmaster.into(),
             serde_json::from_str("{}").unwrap(),
         )
         .await;
@@ -124,7 +125,7 @@ pub async fn handler(
             user.id,
             PerkName::Legend,
             1.0,
-            12000.0,
+            RankBonus::Legend.into(),
             serde_json::from_str("{}").unwrap(),
         )
         .await;
