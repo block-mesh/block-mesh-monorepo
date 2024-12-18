@@ -7,7 +7,7 @@ use std::time::Duration;
 use tracing::log;
 
 pub async fn channel_pool(database_url_envar_name: Option<String>) -> PgPool {
-    let url = database_url_envar_name.unwrap_or("DATABASE_URL".to_string());
+    let url = database_url_envar_name.unwrap_or("CHANNEL_DATABASE_URL".to_string());
     let settings = PgConnectOptions::from_str(&env::var(url).unwrap())
         .unwrap()
         .log_statements(log::LevelFilter::Trace)
