@@ -4,6 +4,11 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills'
 
 // https://vite.dev/config/
 export default defineConfig({
+  build: {
+    sourcemap: false,
+    minify: true,
+    cssMinify: true
+  },
   server: {
     watch: {
       usePolling: true
