@@ -221,7 +221,7 @@ pub fn Referrals() -> impl IntoView {
                         />
                         <RefererRank
                             title="Legend"
-                            description="25,000,000 points and 1,000 invites"
+                            description="1,000 invites"
                             step=7
                             is_complete=legend.get_untracked()
                         />

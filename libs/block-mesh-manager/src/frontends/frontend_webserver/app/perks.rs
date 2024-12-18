@@ -13,6 +13,7 @@ use crate::frontends::context::notification_context::NotificationContext;
 use crate::frontends::utils::auth::connect_wallet_in_browser;
 use block_mesh_common::constants::{
     BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID, BUTTON_CLASS,
+    XENO_TWITTER_USER_ID,
 };
 use block_mesh_common::interfaces::server_api::{AuthStatusResponse, DashboardResponse};
 use leptos::*;
@@ -68,7 +69,7 @@ pub fn Perks() -> impl IntoView {
         <Modal show=show_wallet_modal show_close_button=true>
             <WalletSelector show=show_wallet_modal wallet_name=wallet_name connect=connect_action/>
         </Modal>
-        <div class="flex items-start justify-start gap-4">
+        <div class="lg:flex items-start justify-start gap-4">
             <Heading>Perks</Heading>
             <Show when=move || enable_proof_of_humanity.get() fallback=|| view! {}>
                 <a
@@ -87,6 +88,26 @@ pub fn Perks() -> impl IntoView {
                     <InfoIcon/>
                 </a>
             </Show>
+            <button
+                on:click=move |_| on_connect_button_click()
+                class=BUTTON_CLASS
+            >
+                <span class="material-symbols-outlined">wallet</span>
+                {move || {
+                    if button_enabled.get() {
+                        "Connect Wallet".to_string()
+                    } else {
+                        format!("Wallet Connected:  {}", wallet_address.get())
+                    }
+                }}
+            </button>
+               <a
+                rel="external"
+                target="_blank"
+                href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/CONNECT_WALLET.md"
+            >
+                <InfoIcon/>
+            </a>
             <a
                 rel="external"
                 href=format!("/twitter/login?target={}", BLOCKMESH_TWITTER_USER_ID)
@@ -101,7 +122,6 @@ pub fn Perks() -> impl IntoView {
                         "Connect Twitter"
                     }
                 }}
-
             </a>
             <a
                 rel="external"
@@ -116,7 +136,6 @@ pub fn Perks() -> impl IntoView {
                 class=BUTTON_CLASS
             >
                 <TwitterIcon/>
-
                 {move || {
                     if perks.get().iter().any(|i| i.name == "founder_twitter") {
                         "Foundered Followed"
@@ -124,7 +143,6 @@ pub fn Perks() -> impl IntoView {
                         "Follow Founder"
                     }
                 }}
-
             </a>
             <a
                 rel="external"
@@ -133,24 +151,26 @@ pub fn Perks() -> impl IntoView {
             >
                 <InfoIcon/>
             </a>
-            <button
-                on:click=move |_| on_connect_button_click()
+                <a
+                rel="external"
+                href=format!("/twitter/login?target={}", XENO_TWITTER_USER_ID)
                 class=BUTTON_CLASS
             >
-                <span class="material-symbols-outlined">wallet</span>
+                <TwitterIcon/>
+
                 {move || {
-                    if button_enabled.get() {
-                        "Connect Wallet".to_string()
+                    if perks.get().iter().any(|i| i.name == "xeno_twitter") {
+                        "Xenopus Followed"
                     } else {
-                        format!("Wallet Connected:  {}", wallet_address.get())
+                        "Follow Xenopus"
                     }
                 }}
 
-            </button>
+            </a>
             <a
                 rel="external"
                 target="_blank"
-                href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/CONNECT_WALLET.md"
+                href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
             >
                 <InfoIcon/>
             </a>
