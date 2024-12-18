@@ -33,7 +33,6 @@ though they may still grant an attacker extensive access.
 
 ### For example:
 
-* Injecting attacker controlled content into BlockMesh Network.com (XSS) that bypasses CSP
 * Bypassing authorization logic to grant a repository or package collaborator more access than intended
 * Discovering sensitive user or BlockMesh Network data in a publicly exposed resource, such as an S3 bucket
 * Overwriting a customer repository or package that should be inaccessible

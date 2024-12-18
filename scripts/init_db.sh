@@ -69,6 +69,7 @@ then
   start_db tg-bot 5551
   start_db data-sink 5552
   start_db emails 5553
+  start_db logs-drain 5554
 
   DOCKERS="$(docker ps -a -q --filter ancestor=redis:alpine3.20 --format="{{.ID}}")"
   if [ -n "$DOCKERS" ]
@@ -129,6 +130,12 @@ echo "create DB"
 ensure sqlx database create
 cd "${ROOT}/libs/emails" || exit
 echo "migrate DB emails"
+ensure migrate
+export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:5554/logs-drain"
+echo "create DB"
+ensure sqlx database create
+cd "${ROOT}/libs/logs-drain" || exit
+echo "migrate DB logs-drain"
 ensure migrate
 >&2 echo "Postgres has been migrated, ready to go!"
 cd "${_PWD}"

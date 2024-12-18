@@ -8,7 +8,7 @@ pub async fn get_user_ips(
     limit: i64,
 ) -> anyhow::Result<Vec<UserIpInfo>> {
     let ips = sqlx::query!(
-        r#"
+        /*
         SELECT
         ip_addresses.ip, ip_addresses.country, users_ip.updated_at
         FROM users_ip
@@ -16,6 +16,18 @@ pub async fn get_user_ips(
         WHERE users_ip.user_id = $1
         ORDER BY users_ip.updated_at DESC
         LIMIT $2
+         */
+        r#"
+        WITH user_ip_data (ip_id, updated_at) AS (
+           SELECT ip_id, updated_at
+           FROM users_ip
+           WHERE user_id = $1
+           ORDER BY updated_at DESC
+           LIMIT $2
+        )
+        SELECT ip_addresses.ip, ip_addresses.country, user_ip_data.updated_at
+        FROM ip_addresses
+        JOIN user_ip_data ON ip_addresses.id = user_ip_data.ip_id
         "#,
         user_id,
         limit

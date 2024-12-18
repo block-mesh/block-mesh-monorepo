@@ -9,11 +9,23 @@ use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user
 use block_mesh_manager_database_domain::domain::user::UserAndApiToken;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::{HeaderMap, StatusCode};
+use sqlx::PgPool;
 use std::collections::HashMap;
 use std::env;
 use std::str::FromStr;
 use std::sync::Arc;
 use uuid::Uuid;
+
+pub async fn get_user_from_db(
+    follower_pool: &PgPool,
+    email: &str,
+) -> anyhow::Result<Option<UserAndApiToken>> {
+    let follower_pool = &follower_pool;
+    let mut transaction = create_txn(follower_pool).await?;
+    let user = get_user_and_api_token_by_email(&mut transaction, email).await?;
+    commit_txn(transaction).await?;
+    Ok(user)
+}
 
 #[tracing::instrument(name = "ws_handler", skip_all)]
 pub async fn ws_handler(
@@ -48,26 +60,27 @@ pub async fn ws_handler(
     let mut creds_cache = state.creds_cache.write().await;
     let cached_value = creds_cache.get(&creds_key);
     let user: UserAndApiToken = match cached_value {
-        None => {
-            let follower_pool = &state.follower_pool;
-            let mut transaction = create_txn(follower_pool).await?;
-            let user = match get_user_and_api_token_by_email(&mut transaction, &email).await? {
-                Some(user) => user,
-                None => {
-                    creds_cache.insert(creds_key.clone(), WsCredsCache::UserNotFound);
-                    return Ok(
-                        (StatusCode::NO_CONTENT, "User email is not present in DB").into_response()
-                    );
+        None => match get_user_from_db(&state.follower_pool, &email).await {
+            Ok(opt_user) => {
+                let user = match opt_user {
+                    Some(user) => user,
+                    None => {
+                        creds_cache.insert(creds_key.clone(), WsCredsCache::UserNotFound);
+                        return Ok((StatusCode::NO_CONTENT, "User email is not present in DB")
+                            .into_response());
+                    }
+                };
+                if user.token.as_ref() != &api_token {
+                    creds_cache.insert(creds_key, WsCredsCache::TokenMismatch);
+                    return Ok((StatusCode::NO_CONTENT, "Api Token Mismatch").into_response());
                 }
-            };
-            commit_txn(transaction).await?;
-            if user.token.as_ref() != &api_token {
-                creds_cache.insert(creds_key, WsCredsCache::TokenMismatch);
-                return Ok((StatusCode::NO_CONTENT, "Api Token Mismatch").into_response());
+                creds_cache.insert(creds_key, WsCredsCache::Found(user.clone()));
+                user
             }
-            creds_cache.insert(creds_key, WsCredsCache::Found(user.clone()));
-            user
-        }
+            Err(_) => {
+                return Ok((StatusCode::NO_CONTENT, "DB Error").into_response());
+            }
+        },
         Some(v) => match v {
             WsCredsCache::UserNotFound => {
                 return Ok(

@@ -1,21 +1,23 @@
 use anyhow::anyhow;
-use chrono::Utc;
+use chrono::{Duration, Utc};
 use num_traits::abs;
 use sqlx::{PgPool, Postgres, Transaction};
 use std::cmp::max;
 use std::sync::Arc;
+use tokio::sync::OnceCell;
 #[allow(unused_imports)]
 use tracing::Level;
 
 use block_mesh_common::interfaces::server_api::{
-    CallToActionUI, DailyStatForDashboard, DashboardResponse, PerkUI, Referral,
+    CallToActionUI, DailyStatForDashboard, DashboardResponse, PerkUI,
 };
 
 use crate::database::call_to_action::get_user_calls_to_action::get_user_call_to_action;
 use crate::database::daily_stat::get_daily_stats_by_user_id::get_daily_stats_by_user_id;
+use crate::database::daily_stat::get_daily_stats_status::get_daily_stats_ref_status_by_user_id;
 use crate::database::invite_code::get_number_of_users_invited::get_number_of_users_invited;
+use crate::database::invite_code::get_referral_summary::get_user_referrals_summary;
 use crate::database::invite_code::get_user_latest_invite_code::get_user_latest_invite_code;
-use crate::database::invite_code::get_user_referrals::get_user_referrals;
 use crate::database::perks::get_user_perks::get_user_perks;
 use crate::database::users_ip::get_user_ips::get_user_ips;
 use crate::errors::error::Error;
@@ -29,8 +31,11 @@ use block_mesh_manager_database_domain::domain::aggregate::AggregateName::{
 use block_mesh_manager_database_domain::domain::bulk_get_or_create_aggregate_by_user_and_name::bulk_get_or_create_aggregate_by_user_and_name;
 use block_mesh_manager_database_domain::domain::create_daily_stat::get_or_create_daily_stat;
 use block_mesh_manager_database_domain::domain::user::UserAndApiToken;
+use dash_with_expiry::dash_map_with_expiry::DashMapWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
-use regex::Regex;
+
+static RATE_LIMIT: OnceCell<DashMapWithExpiry<String, Vec<DailyStatForDashboard>>> =
+    OnceCell::const_new();
 
 #[tracing::instrument(name = "dashboard_data_extractor", skip_all)]
 pub async fn dashboard_data_extractor(
@@ -47,7 +52,7 @@ pub async fn dashboard_data_extractor(
         .await
         .map_err(Error::from)?;
     let user_ips = get_user_ips(follower_transaction, &user.user_id, ip_limit).await?;
-    let referrals = get_user_referrals(follower_transaction, &user.user_id)
+    let referral_summary = get_user_referrals_summary(follower_transaction, &user.user_id)
         .await
         .map_err(Error::from)?;
     let perks = get_user_perks(follower_transaction, &user.user_id).await?;
@@ -55,21 +60,34 @@ pub async fn dashboard_data_extractor(
     let number_of_users_invited = get_number_of_users_invited(follower_transaction, &user.user_id)
         .await
         .map_err(Error::from)?;
-    let daily_stats: Vec<DailyStatForDashboard> =
-        get_daily_stats_by_user_id(follower_transaction, &user.user_id)
-            .await?
-            .into_iter()
-            .map(|i| {
-                let points = calc_points_daily(i.uptime, i.tasks_count, &perks);
-                DailyStatForDashboard {
-                    tasks_count: i.tasks_count,
-                    uptime: i.uptime,
-                    points,
-                    day: i.day,
-                }
-            })
-            .collect();
-
+    let cache = RATE_LIMIT
+        .get_or_init(|| async { DashMapWithExpiry::new() })
+        .await;
+    let daily_stats_count =
+        get_daily_stats_ref_status_by_user_id(follower_transaction, &user.user_id).await?;
+    let daily_stats = match cache.get(&user.email) {
+        Some(vec) => vec,
+        None => {
+            let result: Vec<DailyStatForDashboard> =
+                get_daily_stats_by_user_id(follower_transaction, &user.user_id)
+                    .await?
+                    .into_iter()
+                    .map(|i| {
+                        let points =
+                            calc_points_daily(i.uptime, i.tasks_count, i.ref_bonus, &perks);
+                        DailyStatForDashboard {
+                            tasks_count: i.tasks_count,
+                            uptime: i.uptime,
+                            points,
+                            day: i.day,
+                        }
+                    })
+                    .collect();
+            let date = Utc::now() + Duration::milliseconds(300_000);
+            cache.insert(user.email.clone(), result.clone(), Some(date));
+            result
+        }
+    };
     let mut write_transaction = create_txn(write_pool).await?;
     let _ = get_or_create_daily_stat(&mut write_transaction, &user.user_id, None).await?;
     let interval = get_flag_value_from_map(
@@ -108,6 +126,7 @@ pub async fn dashboard_data_extractor(
     let connected_buffer = get_envar("CONNECTED_BUFFER").await.parse().unwrap_or(10);
     let connected =
         sec_diff < connected_buffer * ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240);
+
     let overall_uptime = max(
         uptime.value.as_f64().unwrap_or_default() as u64,
         daily_stats.iter().map(|i| i.uptime).sum::<f64>() as u64,
@@ -117,13 +136,15 @@ pub async fn dashboard_data_extractor(
         daily_stats.iter().map(|i| i.tasks_count).sum::<i64>(),
     );
     let one_time_bonus_points =
-        calc_one_time_bonus_points(overall_uptime as f64, overall_task_count, &perks) as u64;
+        calc_one_time_bonus_points(overall_uptime as f64, overall_task_count, 0.0, &perks) as u64;
     let points = max(
-        calc_total_points(overall_uptime as f64, overall_task_count, &perks) as u64,
+        calc_total_points(overall_uptime as f64, overall_task_count, 0.0, &perks) as u64,
         one_time_bonus_points + daily_stats.iter().map(|i| i.points).sum::<f64>() as u64,
     ) as f64;
     commit_txn(write_transaction).await?;
     Ok(DashboardResponse {
+        true_count: daily_stats_count.true_count,
+        false_count: daily_stats_count.false_count,
         wallet_address: user.wallet_address,
         user_ips,
         calls_to_action: calls_to_action
@@ -135,19 +156,20 @@ pub async fn dashboard_data_extractor(
             })
             .collect(),
         verified_email: user.verified_email,
-        referrals: referrals
-            .into_iter()
-            .map(|i| Referral {
-                created_at: i.created_at,
-                verified_email: i.verified_email,
-                email: {
-                    let s: Vec<&str> = i.email.split('@').collect();
-                    let re = Regex::new(r"[A-Za-z]").unwrap();
-                    let result = re.replace_all(s[0], "x");
-                    format!("{}@{}", result, s[1])
-                },
-            })
-            .collect(),
+        referral_summary,
+        // referrals: referrals
+        //     .into_iter()
+        //     .map(|i| Referral {
+        //         created_at: i.created_at,
+        //         verified_email: i.verified_email,
+        //         email: {
+        //             let s: Vec<&str> = i.email.split('@').collect();
+        //             let re = Regex::new(r"[A-Za-z]").unwrap();
+        //             let result = re.replace_all(s[0], "x");
+        //             format!("{}@{}", result, s[1])
+        //         },
+        //     })
+        //     .collect(),
         upload: upload.value.as_f64().unwrap_or_default(),
         download: download.value.as_f64().unwrap_or_default(),
         latency: latency.value.as_f64().unwrap_or_default(),

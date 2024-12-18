@@ -42,6 +42,8 @@ pub struct Application {
 }
 
 pub struct AppState {
+    pub enable_hcaptcha: bool,
+    pub enable_recaptcha: bool,
     pub enable_proof_of_humanity: bool,
     pub hcaptcha_site_key: String,
     pub hcaptcha_secret_key: String,
@@ -215,9 +217,16 @@ impl Application {
             app
         };
 
-        let permissions = "'self' 'unsafe-eval' 'unsafe-inline' data: https://fonts.gstatic.com https://fonts.googleapis.com https://rsms.me https://opencollective.com https://cdn.jsdelivr.net https://*.cloudflare.com https://*.blockmesh.xyz https://*.googletagmanager.com https://imagedelivery.net https://*.google-analytics.com chrome-extension://ceaogammpdhppmdaajjdjkdgcdeghjki".to_string();
+        let permissions = "'self' 'unsafe-eval' 'unsafe-inline' 'wasm-unsafe-eval' data: https://fonts.gstatic.com https://fonts.googleapis.com https://rsms.me https://opencollective.com https://cdn.jsdelivr.net https://*.cloudflare.com https://*.blockmesh.xyz https://*.googletagmanager.com https://r2-images.blockmesh.xyz https://imagedelivery.net https://*.google-analytics.com chrome-extension://obfhoiefijlolgdmphcekifedagnkfjp ".to_string();
+        let permissions = format!("{} {} ", permissions, "https://*.google.com https://*.hcaptcha.com https://*.cloudflareinsights.com https://*.hcaptcha.com https://*.gstatic.com https://*.cloudflare.com");
+        let permissions = format!(
+            "{} {} ",
+            permissions,
+            env::var("EXTRA_CSP").unwrap_or_default()
+        );
         let mut csp = String::default();
         csp.push_str("default-src 'self' ;");
+        csp.push_str(&format!("object-src {} ;", permissions));
         csp.push_str(&format!("style-src {} ;", permissions));
         csp.push_str(&format!("script-src-elem {} ;", permissions));
         csp.push_str(&format!("script-src {} ;", permissions));

@@ -53,6 +53,7 @@ pub struct SubmitTaskRequest {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct ConfirmEmailRequest {
     pub token: String,
+    pub email: String,
 }
 
 #[typeshare]
@@ -285,6 +286,8 @@ pub struct ReportBandwidthResponse {
 #[typeshare]
 #[derive(Serialize, Deserialize, Debug, Clone, Default, PartialEq)]
 pub struct DashboardResponse {
+    pub true_count: i64,
+    pub false_count: i64,
     pub upload: f64,
     pub download: f64,
     pub latency: f64,
@@ -299,7 +302,7 @@ pub struct DashboardResponse {
     pub daily_stats: Vec<DailyStatForDashboard>,
     pub perks: Vec<PerkUI>,
     pub calls_to_action: Vec<CallToActionUI>,
-    pub referrals: Vec<Referral>,
+    pub referral_summary: ReferralSummary,
     pub verified_email: bool,
     pub user_ips: Vec<UserIpInfo>,
     pub wallet_address: Option<String>,
@@ -380,6 +383,12 @@ pub struct Referral {
 #[derive(Serialize, Deserialize, Debug)]
 pub struct EditInviteCodeForm {
     pub new_invite_code: String,
+}
+
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug)]
+pub struct EditEmailForm {
+    pub new_email: String,
 }
 
 #[typeshare]
@@ -628,4 +637,50 @@ pub struct HCaptcha {
 #[derive(Debug, Deserialize, Serialize)]
 pub struct AuthStatusParams {
     pub perks_page: Option<bool>,
+}
+
+#[derive(Debug, Deserialize, Serialize, Clone, Default, PartialEq)]
+pub struct ReferralSummary {
+    pub total_invites: i64,
+    pub total_verified_email: i64,
+    pub total_verified_human: i64,
+    pub total_eligible: i64,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct TmpReferralSummary {
+    pub total_invites: Option<i64>,
+    pub total_verified_email: Option<i64>,
+    pub total_verified_human: Option<i64>,
+    pub total_eligible: Option<i64>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct UserAffiliate {
+    pub user_id: Uuid,
+    pub email: String,
+    pub invited_by: Uuid,
+    pub verified_email: bool,
+    pub proof_of_humanity: bool,
+    pub level: i32,
+    pub uptime: f64,
+    pub tasks_count: i32,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct TmpUserAffiliate {
+    pub user_id: Option<Uuid>,
+    pub email: Option<String>,
+    pub invited_by: Option<Uuid>,
+    pub verified_email: Option<bool>,
+    pub proof_of_humanity: Option<bool>,
+    pub level: Option<i32>,
+    pub uptime: Option<f64>,
+    pub tasks_count: Option<i32>,
+}
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct AdminReferral {
+    pub email: String,
+    pub code: String,
 }

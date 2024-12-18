@@ -18,3 +18,4 @@ pub mod tauri_message_channel;
 
 #[cfg(feature = "email-client")]
 pub mod email_client;
+pub mod points;

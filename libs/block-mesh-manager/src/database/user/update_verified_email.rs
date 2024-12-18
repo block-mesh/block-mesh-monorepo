@@ -3,7 +3,7 @@ use uuid::Uuid;
 
 pub async fn update_verified_email(
     transaction: &mut Transaction<'_, Postgres>,
-    user_id: Uuid,
+    user_id: &Uuid,
     verified_email: bool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(

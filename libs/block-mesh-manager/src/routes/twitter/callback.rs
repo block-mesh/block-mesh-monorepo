@@ -9,7 +9,7 @@ use askama_axum::IntoResponse;
 use axum::extract::Query;
 use axum::Extension;
 use block_mesh_common::constants::{
-    DeviceType, BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID,
+    DeviceType, BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID, XENO_TWITTER_USER_ID,
 };
 use block_mesh_common::reqwest::http_client;
 use block_mesh_common::routes_enum::RoutesEnum;
@@ -53,6 +53,8 @@ pub async fn callback(
             AggregateName::Twitter
         } else if target == BLOCKMESH_FOUNDER_TWITTER_USER_ID {
             AggregateName::FounderTwitter
+        } else if target == XENO_TWITTER_USER_ID {
+            AggregateName::XenoTwitter
         } else {
             return Ok(Error::redirect(
                 500,
@@ -133,6 +135,8 @@ pub async fn callback(
                     PerkName::Twitter
                 } else if target == BLOCKMESH_FOUNDER_TWITTER_USER_ID {
                     PerkName::FounderTwitter
+                } else if target == XENO_TWITTER_USER_ID {
+                    PerkName::XenoTwitter
                 } else {
                     return Err(Error::Auth("Bad follow target".to_string()));
                 },
@@ -157,6 +161,8 @@ pub async fn callback(
                         "blockmesh_xyz"
                     } else if target == BLOCKMESH_FOUNDER_TWITTER_USER_ID {
                         "__OhadDahan__"
+                    } else if target == XENO_TWITTER_USER_ID {
+                        "Xenopus_v1"
                     } else {
                         "blockmesh_xyz"
                     }

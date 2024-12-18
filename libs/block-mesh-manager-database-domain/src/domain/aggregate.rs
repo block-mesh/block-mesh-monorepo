@@ -30,6 +30,7 @@ pub struct AggregateTmp {
 pub enum AggregateName {
     Twitter,
     FounderTwitter,
+    XenoTwitter,
     Uptime,
     Download,
     Upload,
@@ -45,6 +46,7 @@ impl Display for AggregateName {
         match self {
             Self::Twitter => write!(f, "Twitter"),
             Self::FounderTwitter => write!(f, "FounderTwitter"),
+            Self::XenoTwitter => write!(f, "XenoTwitter"),
             Self::Uptime => write!(f, "Uptime"),
             Self::Download => write!(f, "Download"),
             Self::Upload => write!(f, "Upload"),
@@ -71,6 +73,7 @@ impl From<String> for AggregateName {
             return Self::WalletChange;
         }
         match s.as_str() {
+            "XenoTwitter" => Self::XenoTwitter,
             "FounderTwitter" => Self::FounderTwitter,
             "Twitter" => Self::Twitter,
             "Uptime" => Self::Uptime,

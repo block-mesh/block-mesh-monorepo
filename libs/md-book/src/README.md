@@ -1,7 +1,7 @@
 # BlockMesh Network
 
 <p align="center" width="100%">
-    <img width="33%" src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/ebe1a44f-2f67-44f2-cdec-7f13632b7c00/public"> 
+    <img width="33%" src="https://r2-images.blockmesh.xyz/ebe1a44f-2f67-44f2-cdec-7f13632b7c00.png"> 
 </p>
 
 ## What is BlockMesh Network?

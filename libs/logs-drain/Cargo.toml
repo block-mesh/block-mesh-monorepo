@@ -1,0 +1,73 @@
+[package]
+name = "logs-drain"
+edition = "2021"
+authors.workspace = true
+version = { workspace = true }
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+validator = { workspace = true, features = ["derive"] }
+influxdb = { workspace = true, features = ["derive"] }
+database-utils = { path = "../database-utils" }
+axum-extra = { workspace = true, features = ["typed-header"] }
+axum = { workspace = true, features = ["ws", "macros"] }
+http-body-util = { workspace = true }
+tower = { workspace = true, features = ["util"] }
+tower-http = { workspace = true, features = ["fs", "trace", "request-id", "util", "cors", "add-extension", "timeout"] }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+tracing-appender = { workspace = true }
+tracing-bunyan-formatter = { workspace = true }
+sentry = { workspace = true }
+dashmap = { workspace = true }
+bcrypt = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["full"] }
+flume = { workspace = true, default-features = false, features = ["async", "select"] }
+futures = { workspace = true }
+redis = { workspace = true, features = ["tokio-comp", "tokio-rustls-comp", "tls-rustls-insecure"] }
+reqwest = { workspace = true, default-features = false, features = [
+  "multipart",
+  "json",
+] }
+logger-general = { path = "../logger-general", features = ["sentry"] }
+url = { workspace = true }
+tracing = { workspace = true }
+chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }
+block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env"] }
+serde_json = { workspace = true, features = ["raw_value"] }
+secret = { path = "../secret" }
+rsyslog = { workspace = true }
+syslog_rfc5424 = { workspace = true }
+
+[dependencies.rand]
+workspace = true
+features = ["min_const_gen"]
+
+[dependencies.sqlx]
+workspace = true
+default-features = false
+features = [
+  "any",
+  "runtime-tokio-rustls",
+  "macros",
+  "postgres",
+  "uuid",
+  "chrono",
+  "migrate",
+  "json",
+  "bigdecimal",
+  "tls-rustls"
+]
+
+[dependencies.uuid]
+workspace = true
+features = [
+  "v4", # Lets you generate random UUIDs
+  "fast-rng", # Use a faster (but still sufficiently random) RNG
+  "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
+  "serde", # Enable serialization/deserialization of UUIDs
+  "js"
+]

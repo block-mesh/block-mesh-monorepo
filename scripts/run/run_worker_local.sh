@@ -16,10 +16,12 @@ export SET_TO_AGG_SIZE=1
 export ANALYTICS_AGG_SIZE=1
 export DAILY_STATS_AGG_SIZE=1
 export CREATE_DAILY_STATS_AGG_SIZE=1
+export REF_BONUS_CRON_ENABLE="true"
 source "${ROOT}/scripts/setup.sh"
 export DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
 export FOLLOWER_DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
 export CHANNEL_DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
+export REF_BONUS_BG_CRON_ENABLE=true
 export REDIS_URL="redis://127.0.0.1:6379"
 if [ -f "${ROOT}/.env" ] ; then
   source "${ROOT}/.env"

@@ -6,6 +6,8 @@ use std::sync::OnceLock;
 pub const DEV_ENV: [&str; 3] = ["dev", "development", "local"];
 pub const BLOCKMESH_TWITTER_USER_ID: u64 = 1766124448778784768;
 pub const BLOCKMESH_FOUNDER_TWITTER_USER_ID: u64 = 1778711300127821824;
+
+pub const XENO_TWITTER_USER_ID: u64 = 1851306491732709376;
 pub const BLOCKMESH_PG_NOTIFY_WORKER: &str = "pgchannel";
 pub const BLOCKMESH_PG_NOTIFY_API: &str = "pgchannel_api";
 pub const BLOCKMESH_PG_NOTIFY_EMAIL: &str = "pgchannel_email";
@@ -32,10 +34,10 @@ pub static BLOCK_MESH_EMAILS: &str = "https://emails.blockmesh.xyz";
 pub static BLOCK_MESH_FEATURE_FLAGS: &str = "https://feature-flags.blockmesh.xyz";
 pub static BLOCK_MESH_SUPPORT_EMAIL: &str = "support@blockmesh.xyz";
 pub static BLOCK_MESH_LOGO: &str =
-    "https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/d68dc689-b8ad-492b-ffc4-8f1478685800/public";
+    "https://r2-images.blockmesh.xyz/d68dc689-b8ad-492b-ffc4-8f1478685800.png";
 
 pub static BLOCK_MESH_LANDING_PAGE_IMAGE: &str =
-    "https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/dfda0dd2-a321-4c75-cbbe-5521b2355f00/public";
+    "https://r2-images.blockmesh.xyz/dfda0dd2-a321-4c75-cbbe-5521b2355f00.png";
 pub static BLOCK_MESH_IP_WORKER: &str = "https://cloudflare-worker-ip-data.blockmesh.xyz/";
 pub static BLOCK_MESH_PROGRAM_ID: &str = "FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ";
 // pub static BLOCK_MESH_LOGGER: &str = "https://cloudflare-worker-logs-queue.blockmesh.xyz";
@@ -118,3 +120,29 @@ impl From<String> for DeviceType {
         DeviceType::from(value.as_str())
     }
 }
+
+pub enum RankBonus {
+    Novice,
+    Apprentice,
+    Journeyman,
+    Expert,
+    Master,
+    Grandmaster,
+    Legend,
+}
+
+impl From<RankBonus> for f64 {
+    fn from(val: RankBonus) -> f64 {
+        match val {
+            RankBonus::Novice => 25_000.0,
+            RankBonus::Apprentice => 50_000.0,
+            RankBonus::Journeyman => 100_000.0,
+            RankBonus::Expert => 200_000.0,
+            RankBonus::Master => 500_000.0,
+            RankBonus::Grandmaster => 800_000.0,
+            RankBonus::Legend => 1_000_000.0,
+        }
+    }
+}
+
+pub const BUTTON_CLASS: &str ="text-magenta-2 -my-0.5 cursor-pointer relative isolate inline-flex items-center justify-center gap-x-2 rounded-lg border text-base/6 font-semibold px-[calc(theme(spacing[3.5])-1px)] py-[calc(theme(spacing[2.5])-1px)] sm:px-[calc(theme(spacing.3)-1px)] sm:py-[calc(theme(spacing[1.5])-1px)] sm:text-sm/6 focus:outline-none data-[focus]:outline data-[focus]:outline-2 data-[focus]:outline-offset-2 data-[focus]:outline-blue-500 data-[disabled]:opacity-50 [&>[data-slot=icon]]:-mx-0.5 [&>[data-slot=icon]]:my-0.5 [&>[data-slot=icon]]:size-5 [&>[data-slot=icon]]:shrink-0 [&>[data-slot=icon]]:text-[--btn-icon] [&>[data-slot=icon]]:sm:my-1 [&>[data-slot=icon]]:sm:size-4 forced-colors:[--btn-icon:ButtonText] forced-colors:data-[hover]:[--btn-icon:ButtonText] border-transparent bg-[--btn-border] bg-[--btn-bg] before:absolute before:inset-0 before:-z-10 before:rounded-[calc(theme(borderRadius.lg)-1px)] before:bg-[--btn-bg] before:shadow before:hidden border-white/5 after:absolute after:inset-0 after:-z-10 after:rounded-[calc(theme(borderRadius.lg)-1px)] after:shadow-[shadow:inset_0_1px_theme(colors.white/15%)] after:data-[active]:bg-[--btn-hover-overlay] after:data-[hover]:bg-[--btn-hover-overlay] after:-inset-px after:rounded-lg before:data-[disabled]:shadow-none after:data-[disabled]:shadow-none [--btn-bg:theme(colors.zinc.900)] [--btn-border:theme(colors.zinc.950/90%)] [--btn-hover-overlay:theme(colors.white/10%)] [--btn-bg:theme(colors.zinc.600)] [--btn-hover-overlay:theme(colors.white/5%)] [--btn-icon:theme(colors.zinc.400)] data-[active]:[--btn-icon:theme(colors.zinc.300)] data-[hover]:[--btn-icon:theme(colors.zinc.300)] cursor-default";

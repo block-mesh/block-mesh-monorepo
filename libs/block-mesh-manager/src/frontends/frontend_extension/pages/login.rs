@@ -76,7 +76,7 @@ pub fn ExtensionLogin() -> impl IntoView {
         <div class="auth-card">
             <img
                 class="background-image"
-                src="https://imagedelivery.net/3RKw_J_fJQ_4KpJP3_YgXA/2f6630f8-f48a-47ed-753b-4445c9399e00/public"
+                src="https://r2-images.blockmesh.xyz/2f6630f8-f48a-47ed-753b-4445c9399e00.png"
                 alt="background"
             />
             <div class="auth-card-frame"></div>
@@ -154,9 +154,7 @@ pub fn ExtensionLogin() -> impl IntoView {
                 </button>
                 <br/>
                 <a href="https://app.blockmesh.xyz/register" target="_blank" rel="external">
-                    <small class="text-magenta underline cursor-pointer">
-                        Register via app
-                    </small>
+                    <small class="text-magenta underline cursor-pointer">Register via app</small>
                 </a>
             </div>
         </div>

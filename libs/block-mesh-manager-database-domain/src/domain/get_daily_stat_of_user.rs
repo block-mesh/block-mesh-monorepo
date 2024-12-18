@@ -14,7 +14,7 @@ pub async fn get_daily_stat_of_user(
         DailyStat,
         r#"
         SELECT
-        id, created_at, user_id, tasks_count, status, day, uptime, updated_at
+        id, created_at, user_id, tasks_count, status, day, uptime, updated_at, ref_bonus, ref_bonus_applied
         FROM daily_stats
         WHERE user_id = $1 AND day = $2
         LIMIT 1"#,

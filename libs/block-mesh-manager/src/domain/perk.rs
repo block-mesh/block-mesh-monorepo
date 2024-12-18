@@ -11,8 +11,16 @@ pub enum PerkName {
     Wallet,
     Twitter,
     FounderTwitter,
+    XenoTwitter,
     Invalid,
     ProofOfHumanity,
+    Novice,
+    Apprentice,
+    Journeyman,
+    Expert,
+    Master,
+    Grandmaster,
+    Legend,
 }
 
 impl Display for PerkName {
@@ -21,7 +29,15 @@ impl Display for PerkName {
             Self::Wallet => write!(f, "wallet"),
             Self::Twitter => write!(f, "twitter"),
             Self::FounderTwitter => write!(f, "founder_twitter"),
+            Self::XenoTwitter => write!(f, "xeno_twitter"),
             Self::ProofOfHumanity => write!(f, "proof_of_humanity"),
+            Self::Novice => write!(f, "novice"),
+            Self::Apprentice => write!(f, "apprentice"),
+            Self::Journeyman => write!(f, "journeyman"),
+            Self::Expert => write!(f, "expert"),
+            Self::Master => write!(f, "master"),
+            Self::Grandmaster => write!(f, "grandmaster"),
+            Self::Legend => write!(f, "legend"),
             Self::Invalid => write!(f, "invalid"),
         }
     }
@@ -33,7 +49,15 @@ impl From<String> for PerkName {
             "wallet" => Self::Wallet,
             "twitter" => Self::Twitter,
             "founder_twitter" => Self::FounderTwitter,
+            "xeno_twitter" => Self::XenoTwitter,
             "proof_of_humanity" => Self::ProofOfHumanity,
+            "novice" => Self::Novice,
+            "apprentice" => Self::Apprentice,
+            "journeyman" => Self::Journeyman,
+            "expert" => Self::Expert,
+            "master" => Self::Master,
+            "grandmaster" => Self::Grandmaster,
+            "legend" => Self::Legend,
             _ => Self::Invalid,
         }
     }

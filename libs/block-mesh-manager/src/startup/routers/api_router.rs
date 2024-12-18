@@ -8,6 +8,14 @@ use std::sync::Arc;
 pub fn get_api_router() -> Router<Arc<AppState>> {
     let api_router = Router::new()
         .route(
+            RoutesEnum::Api_ReferralBonus.to_string().as_str(),
+            post(routes::referrals::referral_bonus::handler),
+        )
+        .route(
+            RoutesEnum::Api_ApplyRanking.to_string().as_str(),
+            post(routes::perks::apply_ranking::handler),
+        )
+        .route(
             RoutesEnum::Api_ConnectWallet.to_string().as_str(),
             post(routes::perks::connect_wallet::handler),
         )

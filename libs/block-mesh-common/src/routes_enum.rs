@@ -2,6 +2,7 @@ use std::fmt::{Display, Formatter};
 
 #[allow(non_camel_case_types)]
 pub enum RoutesEnum {
+    Static_Admin_Referral,
     Static_UnAuth_Map,
     Static_UnAuth_AuthStatus,
     Static_UnAuth_RpcDashboard,
@@ -25,11 +26,14 @@ pub enum RoutesEnum {
     Static_Auth_ResendConfirmationEmail,
     Static_Auth_Twitter_Login,
     Static_Auth_Edit_Invite,
+    Static_Auth_Edit_Email,
     Static_Auth_Call_To_Action,
     Static_Auth_Logout,
     Static_Auth_Dashboard,
     Static_Auth_Daily_Leaderboard,
     Static_UnAuth_Twitter_Callback,
+    Api_ReferralBonus,
+    Api_ApplyRanking,
     Api_ConnectWallet,
     Api_ReportUptime,
     Api_SubmitBandwidth,
@@ -48,6 +52,8 @@ pub enum RoutesEnum {
 impl Display for RoutesEnum {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         match &self {
+            RoutesEnum::Static_Admin_Referral => write!(f, "/admin_referral"),
+            RoutesEnum::Api_ReferralBonus => write!(f, "/referral_bonus"),
             RoutesEnum::Static_Auth_Proof_Of_Humanity => write!(f, "/proof_of_humanity"),
             RoutesEnum::Static_UnAuth_Version => write!(f, "/version"),
             RoutesEnum::Static_Auth_Twitter_Login => write!(f, "/twitter/login"),
@@ -76,7 +82,9 @@ impl Display for RoutesEnum {
             RoutesEnum::Static_Auth_Logout => write!(f, "/logout"),
             RoutesEnum::Static_Auth_Dashboard => write!(f, "/dashboard"),
             RoutesEnum::Static_Auth_Edit_Invite => write!(f, "/edit_invite_code"),
+            RoutesEnum::Static_Auth_Edit_Email => write!(f, "/edit_email"),
             RoutesEnum::Static_Auth_Call_To_Action => write!(f, "/call_to_action"),
+            RoutesEnum::Api_ApplyRanking => write!(f, "/apply_ranking"),
             RoutesEnum::Api_ConnectWallet => write!(f, "/connect_wallet"),
             RoutesEnum::Api_ReportUptime => write!(f, "/report_uptime"),
             RoutesEnum::Api_SubmitBandwidth => write!(f, "/submit_bandwidth"),

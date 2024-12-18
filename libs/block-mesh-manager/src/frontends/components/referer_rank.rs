@@ -31,9 +31,9 @@ pub fn RefererRank(
                                 }
                             >
 
-                                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-blue">
+                                <span class="flex h-10 w-10 items-center justify-center rounded-full bg-blue border-2 border-magenta">
                                     <svg
-                                        class="h-6 w-6 text-dark"
+                                        class="h-6 w-6 text-cyan"
                                         viewBox="0 0 24 24"
                                         fill="currentColor"
                                         aria-hidden="true"

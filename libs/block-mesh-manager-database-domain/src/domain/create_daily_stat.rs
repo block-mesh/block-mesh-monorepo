@@ -19,17 +19,17 @@ pub async fn get_or_create_daily_stat(
         r#"
            WITH
             extant AS (
-                SELECT id, created_at, user_id, tasks_count, status, day, uptime, updated_at FROM daily_stats WHERE user_id = $3 AND day = $6
+                SELECT id, created_at, user_id, tasks_count, status, day, uptime, updated_at, ref_bonus, ref_bonus_applied FROM daily_stats WHERE user_id = $3 AND day = $6
             ),
             inserted AS (
-                INSERT INTO daily_stats (id, created_at, user_id, tasks_count, status, day, uptime, updated_at)
-                SELECT $1, $2, $3, $4, $5, $6, $7, $8
+                INSERT INTO daily_stats (id, created_at, user_id, tasks_count, status, day, uptime, updated_at, ref_bonus, ref_bonus_applied)
+                SELECT $1, $2, $3, $4, $5, $6, $7, $8, $9 , $10
                 WHERE NOT EXISTS (SELECT FROM extant)
-                RETURNING id, created_at, user_id, tasks_count, status, day, uptime, updated_at
+                RETURNING id, created_at, user_id, tasks_count, status, day, uptime, updated_at, ref_bonus, ref_bonus_applied
             )
-        SELECT id, created_at, user_id, tasks_count, status, day, uptime, updated_at FROM inserted
+        SELECT id, created_at, user_id, tasks_count, status, day, uptime, updated_at, ref_bonus, ref_bonus_applied FROM inserted
         UNION ALL
-        SELECT id, created_at, user_id, tasks_count, status, day, uptime, updated_at FROM extant
+        SELECT id, created_at, user_id, tasks_count, status, day, uptime, updated_at, ref_bonus, ref_bonus_applied FROM extant
         "#,
         id,
         now.clone(),
@@ -38,7 +38,9 @@ pub async fn get_or_create_daily_stat(
         DailyStatStatus::OnGoing.to_string(),
         day,
         0.0,
-        now
+        now,
+        0.0,
+        false
     )
     .fetch_one(&mut **transaction)
     .await?;
@@ -51,6 +53,10 @@ pub async fn get_or_create_daily_stat(
         day: daily_stat.day.expect("MISSING Day"),
         created_at: daily_stat.created_at.expect("MISSING Time Created"),
         updated_at: daily_stat.updated_at.expect("MISSING Time Updated"),
+        ref_bonus: daily_stat.ref_bonus.expect("MISSING ref_bonus"),
+        ref_bonus_applied: daily_stat
+            .ref_bonus_applied
+            .expect("MISSING ref_bonus_applied"),
     };
     Ok(daily_stat)
 }

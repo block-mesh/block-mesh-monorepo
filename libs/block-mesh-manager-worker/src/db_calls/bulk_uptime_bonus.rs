@@ -1,5 +1,5 @@
+use crate::utils::rand::rand_factor;
 use anyhow::anyhow;
-use rand::Rng;
 use sqlx::postgres::PgQueryResult;
 use sqlx::{Postgres, Transaction};
 
@@ -17,10 +17,7 @@ pub async fn bulk_uptime_bonus(
     if bonus.is_nan() || bonus <= 0.0 || bonus.is_infinite() {
         return Err(anyhow!("bulk uptime bonus must be a positive integer"));
     }
-    let r_limit = {
-        let mut rng = rand::thread_rng();
-        rng.gen_range(1..86400)
-    };
+    let r_limit = rand_factor(86400);
     let r = sqlx::query!(
         // r#"
         // WITH updates (id, value) AS (
