@@ -144,33 +144,40 @@ const TokensTable: FC = () => {
           </div>
         </Case>
         <Case condition={rows.length > 0}>
-          <table className={'table-auto w-full divide-y divide-gray-400'}>
+          <table
+            className={'table-auto w-full divide-y divide-gray-400 border-collapse border border-slate-500 rounded'}>
             <thead>
             <tr>
-              <th className={'p-1'}>Select</th>
-              <th className={'p-1'}>Name</th>
-              <th className={'p-1'}>Mint</th>
-              <th className={'p-1'}>Amount</th>
-              <th className={'p-1'}>$SOL</th>
-              <th className={'p-1'}>$USD</th>
+              <th className={'bg-gray-400 p-1 border border-slate-500'}>Select</th>
+              <th className={'bg-gray-400 p-1 border border-slate-500'}>Name</th>
+              <th className={'bg-gray-400 p-1 border border-slate-500'}>Mint</th>
+              <th className={'bg-gray-400 p-1 border border-slate-500'}>Amount</th>
+              <th className={'bg-gray-400 p-1 border border-slate-500'}>$SOL</th>
+              <th className={'bg-gray-400 p-1 border border-slate-500'}>$USD</th>
             </tr>
             </thead>
-            <tbody className={'divide-y divide-gray-600'}>
+            <tbody className={'divide-y divide-gray-600 border border-slate-600'}>
             {
               rows.map(i =>
                 <tr>
-                  <td className={'p-1'}>
+                  <td className={'p-1 border border-slate-600 text-center'}>
                     <input
                       className="rounded border border-gray-300 bg-white checked:border-indigo-600 checked:bg-indigo-600 indeterminate:border-indigo-600 indeterminate:bg-indigo-600 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-indigo-600 disabled:border-gray-300 disabled:bg-gray-100 disabled:checked:bg-gray-100 forced-colors:appearance-auto"
                       type={'checkbox'} checked={selected[i.mint] !== undefined}
                       onClick={() => selectMint(i, i.mint, (priceUsd || 0) * i.lamports / LAMPORTS_PER_SOL, i.lamports / LAMPORTS_PER_SOL)}
                     />
                   </td>
-                  <td>{i.name}</td>
-                  <td>{i.mint}</td>
-                  <td>{i.amount}</td>
-                  <td>{(i.lamports / LAMPORTS_PER_SOL).toFixed(3)}</td>
-                  <td>{((priceUsd || 0) * (i.lamports / LAMPORTS_PER_SOL)).toFixed(3)}</td>
+                  <td className={'p-1 border border-slate-600 text-center'}>{i.name}</td>
+                  <td className={'p-1 border border-slate-600 text-center'}>
+                    <a href={`https://explorer.solana.com/address/${i.mint}`} target={'_blank'}>
+                      {i.mint}
+                    </a>
+                  </td>
+                  <td className={'p-1 border border-slate-600 text-center'}>{i.amount}</td>
+                  <td
+                    className={'p-1 border border-slate-600 text-center'}>{(i.lamports / LAMPORTS_PER_SOL).toFixed(3)}</td>
+                  <td
+                    className={'p-1 border border-slate-600 text-center'}>{((priceUsd || 0) * (i.lamports / LAMPORTS_PER_SOL)).toFixed(3)}</td>
                 </tr>
               )
             }
