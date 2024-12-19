@@ -4,7 +4,7 @@ use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::database::user::update_user_password::update_user_password;
 use crate::domain::password::Password;
 use crate::errors::error::Error;
-use crate::middlewares::authentication::del_from_redis_with_pattern;
+use crate::middlewares::authentication::del_from_cache_with_pattern;
 use crate::notification::notification_redirect::NotificationRedirect;
 use crate::startup::application::AppState;
 use axum::extract::State;
@@ -25,7 +25,6 @@ pub async fn handler(
     Extension(pool): Extension<PgPool>,
     Form(form): Form<NewPasswordForm>,
 ) -> Result<Redirect, Error> {
-    let mut redis = state.redis.clone();
     let mut transaction = match create_txn(&pool).await {
         Ok(transaction) => transaction,
         Err(_) => {
@@ -104,8 +103,8 @@ pub async fn handler(
     keys.iter().for_each(|key| {
         state.check_token_map.remove(key);
     });
-    del_from_redis_with_pattern(&email, "-*", &mut redis).await?;
-    del_from_redis_with_pattern(&user.id.to_string(), "-*", &mut redis).await?;
+    del_from_cache_with_pattern(&email).await?;
+    del_from_cache_with_pattern(&user.id.to_string()).await?;
     let _ = notify_api(
         &state.channel_pool,
         InvalidateApiCache { email: user.email },

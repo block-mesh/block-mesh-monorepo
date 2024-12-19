@@ -21,7 +21,7 @@
 
 <script>
   function go_to() {
-    window.location.href = window.origin + '/' + '{{ go_to }}'
+    window.location.href = window.origin + ('/' + '/ui/dashboard').replace('//', '/')
   }
 
   let detailed = '{{ detailed }}'

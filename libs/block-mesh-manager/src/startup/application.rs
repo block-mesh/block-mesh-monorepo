@@ -15,6 +15,8 @@ use block_mesh_common::env::env_var;
 use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
 use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
+use dash_with_expiry::dash_map_with_expiry::DashMapWithExpiry;
+use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
 use dashmap::DashMap;
 use http::{header, HeaderValue};
 use leptos::leptos_config::get_config_from_env;
@@ -42,6 +44,8 @@ pub struct Application {
 }
 
 pub struct AppState {
+    pub wallet_login_nonce: Arc<DashMapWithExpiry<String, String>>,
+    pub rate_limiter: Arc<DashSetWithExpiry<String>>,
     pub enable_hcaptcha: bool,
     pub enable_recaptcha: bool,
     pub enable_proof_of_humanity: bool,

@@ -9,7 +9,8 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use database_utils::utils::connection::channel_pool::channel_pool;
     use database_utils::utils::connection::follower_pool::follower_pool;
     use database_utils::utils::connection::unlimited_pool::unlimited_pool;
-
+    use dash_with_expiry::dash_map_with_expiry::DashMapWithExpiry;
+    use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
     use block_mesh_common::constants::DeviceType;
     use block_mesh_manager::worker::update_feature_flags::feature_flags_loop;
     use block_mesh_manager::utils::cache_envar::get_envar;
@@ -161,6 +162,8 @@ async fn run() -> anyhow::Result<()> {
         .parse()
         .unwrap_or(false);
     let app_state = Arc::new(AppState {
+        wallet_login_nonce: Arc::new(DashMapWithExpiry::new()),
+        rate_limiter: Arc::new(DashSetWithExpiry::new()),
         enable_hcaptcha,
         enable_recaptcha,
         enable_proof_of_humanity,
