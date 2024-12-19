@@ -2,10 +2,9 @@ use crate::database::nonce::get_nonce_by_nonce::get_nonce_by_nonce;
 use crate::database::user::update_email::update_email;
 use crate::database::user::update_verified_email::update_verified_email;
 use crate::errors::error::Error;
-use crate::middlewares::authentication::{del_from_redis, Backend};
+use crate::middlewares::authentication::{del_from_cache, Backend};
 use crate::notification::notification_redirect::NotificationRedirect;
-use crate::startup::application::AppState;
-use axum::extract::{Query, State};
+use axum::extract::Query;
 use axum::response::Redirect;
 use axum::Extension;
 use axum_login::AuthSession;
@@ -13,10 +12,8 @@ use block_mesh_common::interfaces::server_api::ConfirmEmailRequest;
 use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
 use sqlx::PgPool;
-use std::sync::Arc;
 
 pub async fn handler(
-    State(state): State<Arc<AppState>>,
     Extension(pool): Extension<PgPool>,
     Extension(mut auth): Extension<AuthSession<Backend>>,
     Query(query): Query<ConfirmEmailRequest>,
@@ -62,9 +59,8 @@ pub async fn handler(
                     auth.logout()
                         .await
                         .map_err(|e| Error::Auth(e.to_string()))?;
-                    let mut redis = state.redis.clone();
                     let key = Backend::authenticate_key_with_user_id(&user.id);
-                    del_from_redis(&key, &mut redis).await;
+                    del_from_cache(&key).await;
                 }
                 transaction.commit().await.map_err(Error::from)?;
                 Ok(NotificationRedirect::redirect(

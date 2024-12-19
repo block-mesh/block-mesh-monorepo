@@ -1,5 +1,4 @@
 use crate::errors::error::Error;
-use crate::middlewares::rate_limit::filter_request;
 use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
 use anyhow::Context;
@@ -7,6 +6,7 @@ use axum::extract::State;
 use axum::Json;
 use block_mesh_common::interfaces::server_api::{ReportBandwidthRequest, ReportBandwidthResponse};
 use block_mesh_manager_database_domain::domain::submit_bandwidth_content::submit_bandwidth_content;
+use chrono::{Duration, Utc};
 use http::HeaderMap;
 use std::sync::Arc;
 
@@ -27,13 +27,22 @@ pub async fn handler(
         "127.0.0.1"
     }
     .to_string();
-    let mut redis = state.redis.clone();
     if state.submit_bandwidth_limit {
-        let filter =
-            filter_request(&mut redis, &body.api_token, &header_ip, "submit_bandwidth").await;
-        if filter.is_err() || !filter? {
+        let expiry = get_envar("FILTER_REQUEST_EXPIRY_SECONDS")
+            .await
+            .parse()
+            .unwrap_or(3u64);
+        let date = Utc::now() + Duration::milliseconds(expiry as i64);
+        let key = format!("submit_bandwidth_{}", header_ip);
+        if state.rate_limiter.get(&key).is_some() {
             return Ok(Json(ReportBandwidthResponse { status_code: 429 }));
         }
+        state.rate_limiter.insert(key, Some(date));
+        let key = format!("submit_bandwidth_{}", body.api_token);
+        if state.rate_limiter.get(&key).is_some() {
+            return Ok(Json(ReportBandwidthResponse { status_code: 429 }));
+        }
+        state.rate_limiter.insert(key, Some(date));
     }
     submit_bandwidth_content(&state.pool, &state.follower_pool, &state.channel_pool, body)
         .await
