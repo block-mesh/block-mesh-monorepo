@@ -4114,6 +4114,7 @@ dependencies = [
  "serde_json",
  "speed-test",
  "url",
+ "urlencoding",
  "uuid",
  "wasm-bindgen",
  "wasm-bindgen-futures",
