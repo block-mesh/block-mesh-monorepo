@@ -5,6 +5,7 @@ use crate::utils::log::log;
 use chrono::NaiveDate;
 use urlencoding::encode;
 
+#[allow(dead_code)]
 pub fn create_search_url(user_name: &str, until: NaiveDate, since: NaiveDate) -> String {
     let org = format!("(from:{}) until:{} since:{}", user_name, until, since);
     let org_encoded = encode(&org).to_string();
