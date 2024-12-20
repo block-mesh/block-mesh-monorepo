@@ -13,6 +13,8 @@ use block_mesh_manager::configuration::get_configuration::get_configuration;
 use block_mesh_manager::configuration::settings::Settings;
 use block_mesh_manager::startup::application::{AppState, Application};
 use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
+use dash_with_expiry::dash_map_with_expiry::DashMapWithExpiry;
+use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
 use dashmap::DashMap;
 use database_utils::utils::connection::channel_pool::channel_pool;
 use database_utils::utils::migrate::migrate;
@@ -80,6 +82,8 @@ pub async fn spawn_app() -> TestApp {
     let invite_codes = Arc::new(DashMap::new());
 
     let app_state = Arc::new(AppState {
+        rate_limiter: Arc::new(DashSetWithExpiry::new()),
+        wallet_login_nonce: Arc::new(DashMapWithExpiry::new()),
         enable_hcaptcha: false,
         enable_recaptcha: false,
         enable_proof_of_humanity: false,

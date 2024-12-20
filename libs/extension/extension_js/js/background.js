@@ -51,8 +51,10 @@ setInterval(async () => {
 }, 30_000)
 
 
-chrome.runtime.onConnect.addListener(async function() {
-  console.log('onConnect')
+chrome.runtime.onConnect.addListener(async function(msg) {
+  console.log('onConnect', msg)
+  console.log('onConnect', msg.sender)
+  console.log('onConnect', msg.sender())
 })
 
 chrome.runtime.onStartup.addListener(async function() {
