@@ -90,7 +90,7 @@ async fn run() -> anyhow::Result<()> {
     let database_url = <EnvVar as AsRef<Secret<String>>>::as_ref(&database_url);
     let mailgun_token = get_env_var_or_panic(AppEnvVar::MailgunSendKey);
     let _mailgun_token = <EnvVar as AsRef<Secret<String>>>::as_ref(&mailgun_token);
-    let db_pool = write_pool(None).await?;
+    let db_pool = write_pool(None).await;
     let channel_pool = channel_pool(Some("CHANNEL_DATABASE_URL".to_string())).await;
     let env = get_envar("APP_ENVIRONMENT").await;
     tracing::info!("Database migration started");
