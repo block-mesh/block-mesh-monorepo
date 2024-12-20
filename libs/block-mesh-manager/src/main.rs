@@ -5,6 +5,7 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use database_utils::utils::connection::write_pool::write_pool;
     use block_mesh_common::email_client::client::EmailClient;
     use database_utils::utils::connection::channel_pool::channel_pool;
     use database_utils::utils::connection::follower_pool::follower_pool;
@@ -37,7 +38,6 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     static GLOBAL: Jemalloc = Jemalloc;
     use block_mesh_manager::configuration::get_configuration::get_configuration;
     use block_mesh_manager::startup::application::{AppState, Application};
-    use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
     use secret::Secret;
     use std::sync::Arc;
 }}
@@ -87,10 +87,10 @@ async fn run() -> anyhow::Result<()> {
     tracing::info!("Starting with configuration {:#?}", configuration);
     let _gmail_password = get_env_var_or_panic(AppEnvVar::GmailAppPassword);
     let database_url = get_env_var_or_panic(AppEnvVar::DatabaseUrl);
-    let database_url = <EnvVar as AsRef<Secret<String>>>::as_ref(&database_url);
+    let _database_url = <EnvVar as AsRef<Secret<String>>>::as_ref(&database_url);
     let mailgun_token = get_env_var_or_panic(AppEnvVar::MailgunSendKey);
     let _mailgun_token = <EnvVar as AsRef<Secret<String>>>::as_ref(&mailgun_token);
-    let db_pool = get_connection_pool(&configuration.database, Option::from(database_url)).await?;
+    let db_pool = write_pool(None).await;
     let channel_pool = channel_pool(Some("CHANNEL_DATABASE_URL".to_string())).await;
     let env = get_envar("APP_ENVIRONMENT").await;
     tracing::info!("Database migration started");

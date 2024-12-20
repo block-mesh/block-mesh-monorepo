@@ -12,6 +12,7 @@ export CHANNEL_AGG_SIZE=1
 export ADMIN_PARAM="test"
 source "${ROOT}/scripts/setup.sh"
 export DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
+export WRITE_DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
 export FOLLOWER_DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
 export CHANNEL_DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
 export REDIS_URL="redis://127.0.0.1:6379"

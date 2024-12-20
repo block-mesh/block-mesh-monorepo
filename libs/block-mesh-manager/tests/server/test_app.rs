@@ -12,9 +12,9 @@ use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager::configuration::get_configuration::get_configuration;
 use block_mesh_manager::configuration::settings::Settings;
 use block_mesh_manager::startup::application::{AppState, Application};
-use block_mesh_manager::startup::get_connection_pool::get_connection_pool;
 use dashmap::DashMap;
 use database_utils::utils::connection::channel_pool::channel_pool;
+use database_utils::utils::connection::write_pool::write_pool;
 use database_utils::utils::migrate::migrate;
 use logger_general::tracing::setup_tracing_stdout_only;
 use redis;
@@ -51,11 +51,8 @@ pub async fn spawn_app() -> TestApp {
     };
     tracing::info!("Starting with configuration {:#?}", configuration);
     let database_url = get_env_var_or_panic(AppEnvVar::DatabaseUrl);
-    let database_url = <EnvVar as AsRef<Secret<String>>>::as_ref(&database_url);
-
-    let db_pool = get_connection_pool(&configuration.database.clone(), Option::from(database_url))
-        .await
-        .unwrap();
+    let _database_url = <EnvVar as AsRef<Secret<String>>>::as_ref(&database_url);
+    let db_pool = write_pool(None).await;
     let channel_pool = channel_pool(Some("CHANNEL_DATABASE_URL".to_string())).await;
 
     migrate(&db_pool, "test".to_string())

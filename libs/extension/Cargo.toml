@@ -8,6 +8,7 @@ authors.workspace = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+urlencoding = { workspace = true }
 wee_alloc = { workspace = true }
 regex = { version = "1" }
 scraper = { workspace = true }

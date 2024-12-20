@@ -228,6 +228,11 @@ impl Application {
             permissions,
             env::var("EXTRA_CSP").unwrap_or_default()
         );
+        let permissions = if app_env == "local" {
+            format!("{} chrome-extension://*", permissions)
+        } else {
+            permissions
+        };
         let mut csp = String::default();
         csp.push_str("default-src 'self' ;");
         csp.push_str(&format!("object-src {} ;", permissions));
