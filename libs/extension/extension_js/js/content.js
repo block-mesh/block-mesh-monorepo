@@ -96,3 +96,11 @@ function callback(mutationsList, observer) {
 
 const observer = new MutationObserver(callback)
 observer.observe(targetNode, config)
+
+chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+  console.log('content script got a message', message)
+  return true
+})
+
+chrome.runtime.connect()
+chrome.runtime.sendMessage({ msg: 'Hello' })
