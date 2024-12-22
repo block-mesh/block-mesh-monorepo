@@ -12,7 +12,6 @@ use block_mesh_common::interfaces::server_api::{
 };
 use block_mesh_common::routes_enum::RoutesEnum;
 use js_sys::Uint8Array;
-use leptos::logging::log;
 use leptos::*;
 use uuid::Uuid;
 
