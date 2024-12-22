@@ -1,5 +1,4 @@
 use crate::errors::error::Error;
-use crate::middlewares::rate_limit::filter_request;
 use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
 use anyhow::Context;
@@ -10,6 +9,7 @@ use block_mesh_common::interfaces::server_api::{
     HandlerMode, ReportUptimeRequest, ReportUptimeResponse,
 };
 use block_mesh_manager_database_domain::domain::report_uptime_content::report_uptime_content;
+use chrono::{Duration, Utc};
 use http::HeaderMap;
 use std::sync::Arc;
 
@@ -31,13 +31,22 @@ pub async fn handler(
         "127.0.0.1"
     }
     .to_string();
-    let mut redis = state.redis.clone();
     if state.rate_limit {
-        let filter =
-            filter_request(&mut redis, &query.api_token, &header_ip, "report_uptime").await;
-        if filter.is_err() || !filter? {
+        let expiry = get_envar("FILTER_REQUEST_EXPIRY_SECONDS")
+            .await
+            .parse()
+            .unwrap_or(3u64);
+        let date = Utc::now() + Duration::milliseconds(expiry as i64);
+        let key = format!("report_uptime_{}", header_ip);
+        if state.rate_limiter.get(&key).is_some() {
             return Ok(Json(ReportUptimeResponse { status_code: 429 }));
         }
+        state.rate_limiter.insert(key, Some(date));
+        let key = format!("report_uptime_{}", query.api_token);
+        if state.rate_limiter.get(&key).is_some() {
+            return Ok(Json(ReportUptimeResponse { status_code: 429 }));
+        }
+        state.rate_limiter.insert(key, Some(date));
     }
 
     let polling_interval = get_flag_value_from_map(

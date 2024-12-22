@@ -10,7 +10,6 @@ use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::{LoginWalletForm, SigArray};
 use block_mesh_common::routes_enum::RoutesEnum;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
-use redis::{AsyncCommands, RedisResult};
 use secret::Secret;
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Signature;
@@ -25,7 +24,6 @@ pub async fn handler(
     Extension(mut auth): Extension<AuthSession<Backend>>,
     Form(form): Form<LoginWalletForm>,
 ) -> Result<Redirect, Error> {
-    let mut redis = state.redis.clone();
     let mut transaction = create_txn(&pool).await?;
     let pubkey = Pubkey::from_str(form.pubkey.as_str()).unwrap_or_default();
     let email = format!("wallet_{pubkey}@blockmesh.xyz").to_ascii_lowercase();
@@ -56,13 +54,12 @@ pub async fn handler(
     };
     let signature =
         Signature::try_from(sig_array.0.as_slice()).map_err(|_| Error::InternalServer)?;
-
     let form_nonce = form.nonce.clone();
     let message = form.nonce.as_bytes();
-    let redis_nonce: RedisResult<String> = redis.get(form_nonce.clone()).await;
-    match redis_nonce {
-        Ok(redis_nonce) => {
-            if redis_nonce != form_nonce {
+    let mem_nonce = state.wallet_login_nonce.get(&form_nonce);
+    match mem_nonce {
+        Some(mem_nonce) => {
+            if mem_nonce != form_nonce {
                 return Ok(Error::redirect(
                     400,
                     "Retry please",
@@ -71,7 +68,7 @@ pub async fn handler(
                 ));
             }
         }
-        Err(_) => {
+        None => {
             return Ok(Error::redirect(
                 400,
                 "Retry please",

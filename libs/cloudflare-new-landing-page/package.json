@@ -1,0 +1,13 @@
+{
+  "name": "cloudflare-new-landing-page",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev --local"
+  },
+  "devDependencies": {
+    "undici": "5.28.4",
+    "wrangler": "^3.55.0"
+  }
+}

@@ -15,10 +15,12 @@ use axum_login::{
 use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use redis::aio::MultiplexedConnection;
-use redis::{AsyncCommands, RedisResult};
 use secret::Secret;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
+use std::collections::HashMap;
+use std::sync::Arc;
+use tokio::sync::{OnceCell, RwLock};
 use tower_sessions_sqlx_store::PostgresStore;
 use uuid::Uuid;
 
@@ -32,14 +34,17 @@ pub struct Credentials {
 }
 
 #[derive(Debug, Clone)]
+#[allow(dead_code)]
 pub struct Backend {
     db: PgPool,
     con: MultiplexedConnection,
 }
 
+static CACHE: OnceCell<Arc<RwLock<HashMap<String, SessionUser>>>> = OnceCell::const_new();
+
 impl Backend {
     pub async fn get_expire() -> i64 {
-        get_envar("REDIS_EXPIRE").await.parse().unwrap_or(86400)
+        get_envar("CACHE_EXPIRE").await.parse().unwrap_or(86400)
     }
     pub fn new(db: PgPool, con: MultiplexedConnection) -> Self {
         Self { db, con }
@@ -76,16 +81,15 @@ impl AuthnBackend for Backend {
         creds: Self::Credentials,
     ) -> Result<Option<Self::User>, Self::Error> {
         let key = Backend::authenticate_key_with_password(&creds.email, &creds.password);
-        let mut c = self.con.clone();
-        if let Ok(redis_user) = get_user_from_redis(&key, &c).await {
-            return Ok(Some(redis_user));
+        if let Ok(cache_user) = get_user_from_cache(&key).await {
+            return Ok(Some(cache_user));
         }
         let pool = self.db.clone();
         let mut transaction = create_txn(&pool).await?;
         let user = match get_user_opt_by_email(&mut transaction, &creds.email).await {
             Ok(u) => u,
             Err(e) => {
-                del_from_redis(&key, &mut c).await;
+                del_from_cache(&key).await;
                 return Err(Error::Auth(e.to_string()));
             }
         };
@@ -94,7 +98,7 @@ impl AuthnBackend for Backend {
         let user = match user {
             Some(u) => u,
             None => {
-                del_from_redis(&key, &mut c).await;
+                del_from_cache(&key).await;
                 return Err(Error::Auth("User not found".to_string()));
             }
         };
@@ -106,23 +110,22 @@ impl AuthnBackend for Backend {
             nonce: creds.nonce,
             email: user.email,
         };
-        save_to_redis(&key, &session_user, &mut c).await;
+        save_to_cache(&key, &session_user).await;
         Ok(Option::from(session_user))
     }
 
     #[tracing::instrument(name = "get_user", skip_all)]
     async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {
         let key = Backend::authenticate_key_with_user_id(user_id);
-        let mut c = self.con.clone();
-        if let Ok(redis_user) = get_user_from_redis(&user_id.to_string(), &c).await {
-            return Ok(Some(redis_user));
+        if let Ok(cache_user) = get_user_from_cache(&user_id.to_string()).await {
+            return Ok(Some(cache_user));
         }
         let pool = self.db.clone();
         let mut transaction = create_txn(&pool).await?;
         let user = match get_user_opt_by_id(&mut transaction, user_id).await {
             Ok(u) => u,
             Err(e) => {
-                del_from_redis(&key, &mut c).await;
+                del_from_cache(&key).await;
                 return Err(Error::Auth(e.to_string()));
             }
         };
@@ -130,7 +133,7 @@ impl AuthnBackend for Backend {
         let user = match user {
             Some(u) => u,
             None => {
-                del_from_redis(&key, &mut c).await;
+                del_from_cache(&key).await;
                 return Err(Error::Auth("User not found".to_string()));
             }
         };
@@ -143,7 +146,7 @@ impl AuthnBackend for Backend {
             email: user.email.clone(),
             nonce: nonce.nonce.as_ref().to_string(),
         };
-        save_to_redis(&key, &session_user, &mut c).await;
+        save_to_cache(&key, &session_user).await;
         commit_txn(transaction).await?;
         Ok(Option::from(session_user))
     }
@@ -185,48 +188,47 @@ pub async fn authentication_layer(
     AuthManagerLayerBuilder::new(backend, session_layer).build()
 }
 
-#[tracing::instrument(name = "get_user_from_redis", skip_all)]
-pub async fn get_user_from_redis(
-    key: &str,
-    con: &MultiplexedConnection,
-) -> anyhow::Result<SessionUser> {
-    let mut c = con.clone();
-    let redis_user: RedisResult<String> = c.get(key.to_string()).await;
-    match redis_user {
-        Ok(redis_user) => {
-            if let Ok(value) = serde_json::from_str::<SessionUser>(&redis_user) {
-                Ok(value)
-            } else {
-                Err(anyhow!("Cant deserialize user from redis".to_string()))
-            }
-        }
-        Err(_) => Err(anyhow!("User not found".to_string())),
+#[tracing::instrument(name = "get_user_from_cache", skip_all)]
+pub async fn get_user_from_cache(key: &str) -> anyhow::Result<SessionUser> {
+    let cache = CACHE
+        .get_or_init(|| async { Arc::new(RwLock::new(HashMap::new())) })
+        .await;
+    match cache.read().await.get(key) {
+        Some(user) => Ok(user.clone()),
+        None => Err(anyhow!("User not found".to_string())),
     }
 }
 
-#[tracing::instrument(name = "save_to_redis", skip_all)]
-pub async fn save_to_redis(key: &str, session_user: &SessionUser, con: &mut MultiplexedConnection) {
-    if let Ok(session_user) = serde_json::to_string(session_user) {
-        let _: RedisResult<()> = con
-            .set_ex(key, session_user, Backend::get_expire().await as u64)
-            .await;
-    }
+#[tracing::instrument(name = "save_to_cache", skip_all)]
+pub async fn save_to_cache(key: &str, session_user: &SessionUser) {
+    let cache = CACHE
+        .get_or_init(|| async { Arc::new(RwLock::new(HashMap::new())) })
+        .await;
+    cache
+        .write()
+        .await
+        .insert(key.to_string(), session_user.clone());
 }
 
-#[tracing::instrument(name = "del_from_redis", skip_all)]
-pub async fn del_from_redis(key: &str, con: &mut MultiplexedConnection) {
-    let _: RedisResult<()> = con.del(key).await;
+#[tracing::instrument(name = "del_from_cache", skip_all)]
+pub async fn del_from_cache(key: &str) {
+    let cache = CACHE
+        .get_or_init(|| async { Arc::new(RwLock::new(HashMap::new())) })
+        .await;
+    cache.write().await.remove(key);
 }
 
-#[tracing::instrument(name = "del_from_redis_with_pattern", skip_all, err)]
-pub async fn del_from_redis_with_pattern(
-    key: &str,
-    pattern: &str,
-    con: &mut MultiplexedConnection,
-) -> anyhow::Result<()> {
-    let keys: Vec<String> = con.keys(format!("{}{}", key, pattern)).await?;
+#[tracing::instrument(name = "del_from_cache_with_pattern", skip_all, err)]
+pub async fn del_from_cache_with_pattern(key: &str) -> anyhow::Result<()> {
+    let cache = CACHE
+        .get_or_init(|| async { Arc::new(RwLock::new(HashMap::new())) })
+        .await;
+    let c = cache.read().await;
+    let keys = c.keys();
     for k in keys {
-        let _: RedisResult<()> = con.del(k).await;
+        if k.starts_with(key) {
+            cache.write().await.remove(k);
+        }
     }
     Ok(())
 }

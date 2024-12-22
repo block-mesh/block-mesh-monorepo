@@ -7,7 +7,6 @@ use axum::response::Redirect;
 use axum::{Extension, Form};
 use axum_login::AuthSession;
 use bcrypt::{hash, DEFAULT_COST};
-use redis::{AsyncCommands, RedisResult};
 use solana_sdk::pubkey::Pubkey;
 use solana_sdk::signature::Signature;
 use sqlx::PgPool;
@@ -54,7 +53,6 @@ pub async fn handler(
             ));
         }
     }
-    let mut redis = state.redis.clone();
     let mut transaction = create_txn(&pool).await?;
     let sig_array: SigArray = match serde_json::from_str(&form.signature) {
         Ok(sig_array) => sig_array,
@@ -75,10 +73,10 @@ pub async fn handler(
     let form_nonce = form.nonce.clone();
     let message = form.nonce.as_bytes();
     let email = format!("wallet_{pubkey}@blockmesh.xyz").to_ascii_lowercase();
-    let redis_nonce: RedisResult<String> = redis.get(form_nonce.clone()).await;
-    match redis_nonce {
-        Ok(redis_nonce) => {
-            if redis_nonce != form_nonce {
+    let mem_nonce = state.wallet_login_nonce.get(&form_nonce);
+    match mem_nonce {
+        Some(mem_nonce) => {
+            if mem_nonce != form_nonce {
                 return Ok(Error::redirect(
                     400,
                     "Retry please",
@@ -89,7 +87,7 @@ pub async fn handler(
                 ));
             }
         }
-        Err(_) => {
+        None => {
             return Ok(Error::redirect(
                 400,
                 "Retry please",

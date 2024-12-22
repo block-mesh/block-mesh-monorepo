@@ -12,7 +12,7 @@ use block_mesh_common::constants::{
     BLOCK_MESH_SUPPORT_EMAIL, BLOCK_MESH_TWITTER,
 };
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
-use redis::{AsyncCommands, RedisResult};
+use chrono::{Duration, Utc};
 use std::sync::Arc;
 
 #[allow(dead_code)]
@@ -40,9 +40,11 @@ pub async fn handler(
     match auth.user {
         Some(_) => Err(Redirect::to("/ui/dashboard")),
         None => {
-            let mut redis = state.redis.clone();
             let nonce = Nonce::generate_nonce(16);
-            let _: RedisResult<()> = redis.set_ex(&nonce, &nonce, 600).await;
+            let date = Utc::now() + Duration::milliseconds(600_000);
+            state
+                .wallet_login_nonce
+                .insert(nonce.clone(), nonce.clone(), Some(date));
             Ok(LoginTemplate {
                 cf_site_key: state.cf_site_key.to_string(),
                 nonce,

@@ -13,7 +13,7 @@ use block_mesh_common::constants::{
 };
 use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
-use redis::{AsyncCommands, RedisResult};
+use chrono::{Duration, Utc};
 use std::sync::Arc;
 
 #[allow(dead_code)]
@@ -43,9 +43,11 @@ pub async fn handler(
             RoutesEnum::Static_UnAuth_Login.to_string().as_str(),
         )),
         None => {
-            let mut redis = state.redis.clone();
             let nonce = Nonce::generate_nonce(16);
-            let _: RedisResult<()> = redis.set_ex(&nonce, &nonce, 600).await;
+            let date = Utc::now() + Duration::milliseconds(600_000);
+            state
+                .wallet_login_nonce
+                .insert(nonce.clone(), nonce.clone(), Some(date));
             Ok(RegisterTemplate {
                 cf_site_key: state.cf_site_key.clone(),
                 nonce,
