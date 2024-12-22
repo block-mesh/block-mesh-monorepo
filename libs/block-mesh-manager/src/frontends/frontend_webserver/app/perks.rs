@@ -54,13 +54,13 @@ pub fn Perks() -> impl IntoView {
     let connect_action = create_action(move |wallet: &String| {
         let w = wallet.clone();
         async move {
-            // if !button_enabled.get_untracked() {
-            //     notifications.set_error("Wallet already connected");
-            //     return;
-            // }
-            if connect_wallet_in_browser(w).await {
-                // button_enabled.set(false)
-                notifications.set_success("Wallet connected");
+            match connect_wallet_in_browser(w).await {
+                Ok(_) => {
+                    notifications.set_success("Wallet connected");
+                }
+                Err(e) => {
+                    notifications.set_error(e.to_string());
+                }
             }
         }
     });

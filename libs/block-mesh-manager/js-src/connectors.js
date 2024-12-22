@@ -45,7 +45,9 @@ export async function sign_message(msg, wallet) {
     await window[wallet].connect()
     const message = new TextEncoder().encode(msg)
     const out = await window[wallet].signMessage(message)
-    return out.signature
+    const sig = out.signature
+    console.log('sig_message sig = ', sig)
+    return sig
   } catch (e) {
     console.error('sign_message error:', e)
     return ''
