@@ -82,13 +82,7 @@ pub async fn connect_wallet_in_browser(wallet: String) -> anyhow::Result<()> {
     if sign.is_string() {
         return Err(anyhow!("Failed to sign"));
     }
-    let uint8_array = match Uint8Array::try_from(sign.clone()) {
-        Ok(v) => {
-            log!("v => {:?}", v);
-            v
-        }
-        Err(e) => return Err(anyhow!("Can't sign due to {}", e.to_string())),
-    };
+    let uint8_array = Uint8Array::new(&sign.clone());
     let mut signature = vec![0; uint8_array.length() as usize];
     uint8_array.copy_to(&mut signature[..]);
     let origin = window().origin();
