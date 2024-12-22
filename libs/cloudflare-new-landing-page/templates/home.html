@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>BlockMesh</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Open+Sans:ital,wght@0,300..800;1,300..800&display=swap" rel="stylesheet">
+  <!-- fetch separately for low priority -->
+  <link href="https://fonts.googleapis.com/css2?family=EB+Garamond&family=Inter:opsz,wght@14..32,400..700&family=JetBrains+Mono&family=Roboto:wght@400;700&family=Work+Sans:wght@100..900&display=swap" rel="stylesheet" fetchpriority="low">
+  <link rel="stylesheet" href="https://landing-page-assets.blockmesh.xyz/network.css">
+  <link rel="icon" href="https://landing-page-assets.blockmesh.xyz/logo-symbol.svg">
+  <script defer src="https://landing-page-assets.blockmesh.xyz/neon-rain.js"></script>
+  <script defer src="https://landing-page-assets.blockmesh.xyz/animations.js"></script>
+  <script type="importmap">
+    {
+        "imports": {
+            "three": "https://cdn.jsdelivr.net/npm/three@0.171.0/build/three.module.js",
+            "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.171.0/examples/jsm/"
+        }
+    }
+  </script>
+  <script type="module" src="https://landing-page-assets.blockmesh.xyz/network-gadget.js"></script>
+</head>
+<body>
+<header>
+
+</header>
+<section id="intro">
+  <canvas id="neon-rain"></canvas>
+  <div class="column section">
+    <img src="https://landing-page-assets.blockmesh.xyz/logo-wordmark.svg" alt="BlockMesh logo" class="logo anim anim-active pop-in">
+    <div class="text-blur">
+      <h1 class="anim anim-active slide-up">Decentralised Data Network</h1>
+      <p class="anim anim-active slide-up">
+        Of the People, by the People , for the People
+      </p>
+    </div>
+    <div class="actions anim anim-active slide-up">
+      <a class="button" href="https://extension.blockmesh.xyz/" target="_blank">Earn</a>
+      <a class="button secondary" href="https://github.blockmesh.xyz" target="_blank">Build</a>
+    </div>
+  </div>
+</section>
+<img aria-hidden="true" src="https://landing-page-assets.blockmesh.xyz/hero.png" class="hero-image">
+<section class="section" id="how-it-works">
+  <hgroup>
+    <p>Contribute & Earn</p>
+    <h2>How it Works</h2>
+  </hgroup>
+  <div class="gadget-layout">
+    <div>
+      <p class="anim anim-scroll slide-up">BlockMesh is a decentralized data network where participants can earn by contributing data.</p>
+      <p class="anim anim-scroll slide-up">The data is used for AI Training, bias analysis, trend detection, market prediction and more.</p>
+      <p class="anim anim-scroll slide-up">Joining in is simple - just install a browser extension and make an account.</p>
+      <div class="cta">
+        <a class="button" href="https://extension.blockmesh.xyz" target="_blank">Get Started</a>
+      </div>
+    </div>
+    <div class="network-gadget-box">
+      <canvas id="network-gadget"></canvas>
+      <div class="verified-nodes">
+        <div class="number" onclick="window.open('https://extension.blockmesh.xyz')" style="cursor: pointer" >500k+</div>
+        <div class="description">Verified Nodes</div>
+      </div>
+    </div>
+  </div>
+</section>
+<section class="column section" id="use-cases">
+  <h2>Use Cases</h2>
+  <div class="use-case-box">
+    <div class="use-case" style="--phase: 0deg">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="" viewBox="0 0 16 16">
+        <path d="M6 12.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5M3 8.062C3 6.76 4.235 5.765 5.53 5.886a26.6 26.6 0 0 0 4.94 0C11.765 5.765 13 6.76 13 8.062v1.157a.93.93 0 0 1-.765.935c-.845.147-2.34.346-4.235.346s-3.39-.2-4.235-.346A.93.93 0 0 1 3 9.219zm4.542-.827a.25.25 0 0 0-.217.068l-.92.9a25 25 0 0 1-1.871-.183.25.25 0 0 0-.068.495c.55.076 1.232.149 2.02.193a.25.25 0 0 0 .189-.071l.754-.736.847 1.71a.25.25 0 0 0 .404.062l.932-.97a25 25 0 0 0 1.922-.188.25.25 0 0 0-.068-.495c-.538.074-1.207.145-1.98.189a.25.25 0 0 0-.166.076l-.754.785-.842-1.7a.25.25 0 0 0-.182-.135"></path>
+        <path d="M8.5 1.866a1 1 0 1 0-1 0V3h-2A4.5 4.5 0 0 0 1 7.5V8a1 1 0 0 0-1 1v2a1 1 0 0 0 1 1v1a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-1a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1v-.5A4.5 4.5 0 0 0 10.5 3h-2zM14 7.5V13a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V7.5A3.5 3.5 0 0 1 5.5 4h5A3.5 3.5 0 0 1 14 7.5"></path>
+      </svg>
+      <div class="bar"></div>
+      <span class="title">Ultra-personalized AI personas</span>
+    </div>
+    <div class="use-case" style="--phase: 60deg">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M0 0h1v15h15v1H0zm10 3.5a.5.5 0 0 1 .5-.5h4a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-1 0V4.9l-3.613 4.417a.5.5 0 0 1-.74.037L7.06 6.767l-3.656 5.027a.5.5 0 0 1-.808-.588l4-5.5a.5.5 0 0 1 .758-.06l2.609 2.61L13.445 4H10.5a.5.5 0 0 1-.5-.5"></path>
+      </svg>
+      <div class="bar"></div>
+      <span class="title">Trend analysis</span>
+    </div>
+    <div class="use-case" style="--phase: 120deg">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-heart-pulse size-8 text-orange" viewBox="0 0 16 16">
+        <path d="m8 2.748-.717-.737C5.6.281 2.514.878 1.4 3.053.918 3.995.78 5.323 1.508 7H.43c-2.128-5.697 4.165-8.83 7.394-5.857q.09.083.176.171a3 3 0 0 1 .176-.17c3.23-2.974 9.522.159 7.394 5.856h-1.078c.728-1.677.59-3.005.108-3.947C13.486.878 10.4.28 8.717 2.01zM2.212 10h1.315C4.593 11.183 6.05 12.458 8 13.795c1.949-1.337 3.407-2.612 4.473-3.795h1.315c-1.265 1.566-3.14 3.25-5.788 5-2.648-1.75-4.523-3.434-5.788-5"></path>
+        <path d="M10.464 3.314a.5.5 0 0 0-.945.049L7.921 8.956 6.464 5.314a.5.5 0 0 0-.88-.091L3.732 8H.5a.5.5 0 0 0 0 1H4a.5.5 0 0 0 .416-.223l1.473-2.209 1.647 4.118a.5.5 0 0 0 .945-.049l1.598-5.593 1.457 3.642A.5.5 0 0 0 12 9h3.5a.5.5 0 0 0 0-1h-3.162z"></path>
+      </svg>
+      <div class="bar"></div>
+      <span class="title">Sentiment analysis</span>
+    </div>
+    <div class="use-case" style="--phase: 180deg">
+      <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" class="bi bi-zoom-in size-8 text-orange" viewBox="0 0 16 16">
+        <path fill-rule="evenodd" d="M6.5 12a5.5 5.5 0 1 0 0-11 5.5 5.5 0 0 0 0 11M13 6.5a6.5 6.5 0 1 1-13 0 6.5 6.5 0 0 1 13 0"></path>
+        <path d="M10.344 11.742q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1 6.5 6.5 0 0 1-1.398 1.4z"></path>
+        <path fill-rule="evenodd" d="M6.5 3a.5.5 0 0 1 .5.5V6h2.5a.5.5 0 0 1 0 1H7v2.5a.5.5 0 0 1-1 0V7H3.5a.5.5 0 0 1 0-1H6V3.5a.5.5 0 0 1 .5-.5"></path>
+      </svg>
+      <div class="bar"></div>
+      <span class="title">Alpha trends</span>
+    </div>
+    <div class="use-case" style="--phase: 240deg">
+      <img src="https://landing-page-assets.blockmesh.xyz/logo-symbol.svg" aria-hidden="true">
+      <div class="bar"></div>
+      <span class="title">AI trading bots</span>
+    </div>
+    <div class="use-case" style="--phase: 300deg">
+      <img src="https://landing-page-assets.blockmesh.xyz/logo-symbol.svg" aria-hidden="true">
+      <div class="bar"></div>
+      <span class="title">and others</span>
+    </div>
+  </div>
+  </div>
+</section>
+<section class="column section" id="media-coverage">
+  <hgroup>
+    <p>Media Coverage</p>
+    <h2>We are working with thousands of amazing people</h2>
+  </hgroup>
+  <div class="media-coverage-grid">
+    <a class="colosseum grid-item anim anim-scroll slide-up" href="https://blog.colosseum.org/introducing-colosseum-accelerator-cohort-1/" target="_blank">
+      <div class="platform"><img src="https://landing-page-assets.blockmesh.xyz/colosseum-wordmark.svg" alt="Colosseum"></div>
+      <div class="accelerator">Colosseum Accelerator Cohort 1</div>
+      <div class="hackathon">First place on DePIN track</div>
+    </a>
+    <div class="column-1">
+      <a class="forbes-article grid-item anim anim-scroll slide-up" href="https://www.forbes.com/sites/digital-assets/2024/11/26/how-to-get-first-funding-for-web3/" target="_blank">
+        <div class="platform"><img src="https://landing-page-assets.blockmesh.xyz/forbes-wordmark.svg" alt="Forbes logo"></div>
+        <div class="content">
+          <div class="title">How To Get First Funding For Web3</div>
+          <div class="author">Interview by <strong>Andrey Sergeenkov</strong></div>
+        </div>
+      </a>
+      <a class="chrome-extension grid-item anim anim-scroll slide-up" href="https://extension.blockmesh.xyz" target="_blank">
+        <div class="platform"><img src="https://landing-page-assets.blockmesh.xyz/chrome-web-store.svg" aria-hidden><span>chrome web store</span></div>
+        <div class="logo-row"><img src="https://landing-page-assets.blockmesh.xyz/web-store-logo.svg" aria-hidden><span>BlockMesh Network</span></div>
+        <div class="stats">
+          <strong>4.7 ★</strong>
+          <div class="divider"></div>
+          <span>500,000+ users</span>
+        </div>
+      </a>
+    </div>
+    <div class="column-2">
+      <a class="rivalz-ai grid-item anim anim-scroll slide-up" href="https://blog.rivalz.ai/introducing-rivalz-alliance-building-the-agentic-future/" target="_blank">
+        <div class="platform"><img src="https://landing-page-assets.blockmesh.xyz/rivalz-ai.jpeg" aria-hidden><span>Rivalz AI</span></div>
+        <div class="content">
+          Member of Rivalz Alliance
+        </div>
+      </a>
+      <a class="twitter grid-item anim anim-scroll slide-up" href="https://twitter.com/blockmesh_xyz" target="_blank">
+        <div class="platform"><img src="https://landing-page-assets.blockmesh.xyz/twitter-mark-black.svg" aria-hidden><span>Twitter</span></div>
+        <div class="profile">
+          <img src="https://landing-page-assets.blockmesh.xyz/twitter-pfp.svg" alt="BlockMesh Twitter profile picture" class="profile-picture">
+          <div class="stacked">
+            <div class="profile-name">BlockMesh Network</div>
+            <div class="handle">@blockmesh_xyz</div>
+          </div>
+        </div>
+        <div><strong class="follower-count">180,000+</strong><span class="follower-label"> followers</span></div>
+      </a>
+    </div>
+  </div>
+</section>
+<footer class="column">
+  <div class="logo-row">
+    <img src="https://landing-page-assets.blockmesh.xyz/logo-wordmark.svg" alt="BlockMesh logo" class="footer-logo">
+    <div class="spacer"></div>
+    <div class="socials">
+      <a href="https://github.blockmesh.xyz" class="button" target="_blank"><img src="https://landing-page-assets.blockmesh.xyz/github-mark-white.svg" alt="GitHub"></a>
+      <a href="https://discord.blockmesh.xyz" class="button" target="_blank"><img src="https://landing-page-assets.blockmesh.xyz/discord-mark-white.svg" alt="Discord"></a>
+      <a href="https://twitter.com/blockmesh_xyz" class="button" target="_blank"><img src="https://landing-page-assets.blockmesh.xyz/twitter-mark-white.svg" alt="Twitter"></a>
+    </div>
+  </div>
+  <div class="links-row">
+    <a href="https://blockmesh.atlassian.net/servicedesk/customer/portals" target="_blank">Submit support ticket</a>
+    <span class="separator" aria-hidden> &bull; </span>
+    <a href="https://github.com/block-mesh/block-mesh-support-faq/tree/main" target="_blank">Guides</a>
+    <div class="spacer"></div>
+    <a href="https://privacy.blockmesh.xyz/" target="_blank">Privacy Policy</a>
+  </div>
+</footer>
+</body>
+</html>
