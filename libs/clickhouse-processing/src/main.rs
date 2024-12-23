@@ -93,12 +93,9 @@ async fn main() -> anyhow::Result<()> {
         index += 1;
     }
 
-    let mut index = 0;
-    for job in jobs {
+    for (index, job) in jobs.into_iter().enumerate() {
         let _ = job.await;
         println!("Finished index = {}", index);
-        index += 1;
     }
-
     Ok(())
 }
