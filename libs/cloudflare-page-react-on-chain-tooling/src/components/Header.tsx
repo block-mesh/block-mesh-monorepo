@@ -1,67 +1,43 @@
-import { FC, useState } from 'react'
-import HowItWorks from './HowItWorks.tsx'
+import { FC } from 'react'
+import { WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import { Navbar } from "flowbite-react";
 
 const Header: FC = () => {
-  const [modal, setModal] = useState(false)
   return (
-    <>
-      <HowItWorks modal={modal} setModal={setModal} />
-      <nav className="bg-gray-800">
-        <div className="mx-auto max-w-7xl px-2 sm:px-6 lg:px-8">
-          <div className="relative flex h-16 items-center justify-between">
-            <div className="flex flex-1 items-center justify-center sm:items-stretch sm:justify-start">
-              <div className="flex shrink-0 items-center">
-                <img className="h-8 w-auto" src="https://r2-images.blockmesh.xyz/recyclo-no-bg.png"
-                     alt="CYCOIN" />
-              </div>
-              <div className="hidden sm:ml-6 sm:block">
-                <div className="flex space-x-4">
-                  <a href="https://dexscreener.com/solana/Db7ZUaWTThwZy7bVhjn5Dda8D3fbbAhihcxPV4m9pump"
-                     target={'_blank'}
-                     className="rounded-md hover:bg-gray-900 px-3 py-2 text-sm font-medium text-white"
-                     aria-current="page">dexscreener</a>
-                  <a href="https://x.com/_cycoin_" target={'_blank'}
-                     className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-900 hover:text-white">
-                    twitter</a>
-                  <a href="https://dune.com/ohad/solana-token-accounts" target={'_blank'}
-                     className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-900 hover:text-white">
-                    dune</a>
-                  <div
-                    className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-900 hover:text-white"
-                    onClick={() => setModal(value => !value)}
-                  >
-                    how it works
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <div className="sm:hidden" id="mobile-menu">
-          <div className="space-y-1 px-2 pb-3 pt-2">
-            <div className="flex space-x-4">
-              <a href="https://dexscreener.com/solana/Db7ZUaWTThwZy7bVhjn5Dda8D3fbbAhihcxPV4m9pump"
-                 target={'_blank'}
-                 className="rounded-md hover:bg-gray-900 px-3 py-2 text-sm font-medium text-white"
-                 aria-current="page">dexscreener</a>
-              <a href="https://x.com/_cycoin_" target={'_blank'}
-                 className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-900 hover:text-white">
-                twitter</a>
-              <a href="https://dune.com/ohad/solana-token-accounts" target={'_blank'}
-                 className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-900 hover:text-white">
-                dune</a>
-              <div
-                className="rounded-md px-3 py-2 text-sm font-medium text-gray-300 hover:bg-gray-900 hover:text-white"
-                onClick={() => setModal(value => !value)}
-              >
-                how it works
-              </div>
-            </div>
-          </div>
-        </div>
-      </nav>
-    </>
+    <Navbar fluid>
+      <Navbar.Brand href="/">
+        <img src="https://r2-images.blockmesh.xyz/recyclo-no-bg.png" className="mr-3 h-6 sm:h-9" alt="CYCOIN" />
+        <span className="self-center whitespace-nowrap text-xl font-semibold dark:text-white">CYCOIN</span>
+      </Navbar.Brand>
+      <div className="flex md:order-2">
+        <WalletMultiButton />
+        <Navbar.Toggle />
+      </div>
+      <Navbar.Collapse>
+        {/* <Navbar.Link href="#" active>
+          Home
+        </Navbar.Link> */}
+        <Navbar.Link target='_blank' href="https://dexscreener.com/solana/Db7ZUaWTThwZy7bVhjn5Dda8D3fbbAhihcxPV4m9pump" className='flex gap-1 items-center'>
+          <svg xmlns="http://www.w3.org/2000/svg" fill="currentColor" fillRule="evenodd" viewBox="0 0 252 300" focusable="false" className="chakra-icon custom-euf446 h-6"><path d="M151.818 106.866c9.177-4.576 20.854-11.312 32.545-20.541 2.465 5.119 2.735 9.586 1.465 13.193-.9 2.542-2.596 4.753-4.826 6.512-2.415 1.901-5.431 3.285-8.765 4.033-6.326 1.425-13.712.593-20.419-3.197m1.591 46.886l12.148 7.017c-24.804 13.902-31.547 39.716-39.557 64.859-8.009-25.143-14.753-50.957-39.556-64.859l12.148-7.017a5.95 5.95 0 003.84-5.845c-1.113-23.547 5.245-33.96 13.821-40.498 3.076-2.342 6.434-3.518 9.747-3.518s6.671 1.176 9.748 3.518c8.576 6.538 14.934 16.951 13.821 40.498a5.95 5.95 0 003.84 5.845zM126 0c14.042.377 28.119 3.103 40.336 8.406 8.46 3.677 16.354 8.534 23.502 14.342 3.228 2.622 5.886 5.155 8.814 8.071 7.897.273 19.438-8.5 24.796-16.709-9.221 30.23-51.299 65.929-80.43 79.589-.012-.005-.02-.012-.029-.018-5.228-3.992-11.108-5.988-16.989-5.988s-11.76 1.996-16.988 5.988c-.009.005-.017.014-.029.018-29.132-13.66-71.209-49.359-80.43-79.589 5.357 8.209 16.898 16.982 24.795 16.709 2.929-2.915 5.587-5.449 8.814-8.071C69.31 16.94 77.204 12.083 85.664 8.406 97.882 3.103 111.959.377 126 0m-25.818 106.866c-9.176-4.576-20.854-11.312-32.544-20.541-2.465 5.119-2.735 9.586-1.466 13.193.901 2.542 2.597 4.753 4.826 6.512 2.416 1.901 5.432 3.285 8.766 4.033 6.326 1.425 13.711.593 20.418-3.197"></path><path d="M197.167 75.016c6.436-6.495 12.107-13.684 16.667-20.099l2.316 4.359c7.456 14.917 11.33 29.774 11.33 46.494l-.016 26.532.14 13.754c.54 33.766 7.846 67.929 24.396 99.193l-34.627-27.922-24.501 39.759-25.74-24.231L126 299.604l-41.132-66.748-25.739 24.231-24.501-39.759L0 245.25c16.55-31.264 23.856-65.427 24.397-99.193l.14-13.754-.016-26.532c0-16.721 3.873-31.578 11.331-46.494l2.315-4.359c4.56 6.415 10.23 13.603 16.667 20.099l-2.01 4.175c-3.905 8.109-5.198 17.176-2.156 25.799 1.961 5.554 5.54 10.317 10.154 13.953 4.48 3.531 9.782 5.911 15.333 7.161 3.616.814 7.3 1.149 10.96 1.035-.854 4.841-1.227 9.862-1.251 14.978L53.2 160.984l25.206 14.129a41.926 41.926 0 015.734 3.869c20.781 18.658 33.275 73.855 41.861 100.816 8.587-26.961 21.08-82.158 41.862-100.816a41.865 41.865 0 015.734-3.869l25.206-14.129-32.665-18.866c-.024-5.116-.397-10.137-1.251-14.978 3.66.114 7.344-.221 10.96-1.035 5.551-1.25 10.854-3.63 15.333-7.161 4.613-3.636 8.193-8.399 10.153-13.953 3.043-8.623 1.749-17.689-2.155-25.799l-2.01-4.175z"></path></svg>
+          <span>DexScreener</span>
+        </Navbar.Link>
+        <Navbar.Link target='_blank' href="https://x.com/_cycoin_" className='flex gap-1 items-center'>
+          <svg className="size-6" fill="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+            <path
+              d="M13.6823 10.6218L20.2391 3H18.6854L12.9921 9.61788L8.44486 3H3.2002L10.0765 13.0074L3.2002 21H4.75404L10.7663 14.0113L15.5685 21H20.8131L13.6819 10.6218H13.6823ZM11.5541 13.0956L10.8574 12.0991L5.31391 4.16971H7.70053L12.1742 10.5689L12.8709 11.5655L18.6861 19.8835H16.2995L11.5541 13.096V13.0956Z" />
+          </svg>
+          <span>Twitter</span>
+        </Navbar.Link>
+        <Navbar.Link target='_blank' href="https://dune.com/ohad/solana-token-accounts" className='flex gap-1 items-center'>
+          <svg className='h-6' viewBox="0 0 35 35" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
+            <path d="M17.5345 34.7553C27.2174 34.7553 35.067 26.9751 35.067 17.3777C35.067 7.78024 27.2174 0 17.5345 0C7.85153 0 0.00195312 7.78024 0.00195312 17.3777C0.00195312 26.9751 7.85153 34.7553 17.5345 34.7553Z" fill="#F06040"/>
+            <path d="M27.7615 3.26411C24.9452 1.25889 21.5923 0.126448 18.1266 0.00998315C14.661 -0.106482 11.2384 0.798261 8.29158 2.6098C5.34475 4.42134 3.00607 7.05832 1.57127 10.1873C0.136473 13.3162 -0.329994 16.7966 0.230855 20.1883C0.791705 23.58 2.35468 26.7307 4.72214 29.242C7.08959 31.7533 10.1552 33.5123 13.5313 34.2967C16.9074 35.0811 20.4423 34.8556 23.6891 33.6487C26.9359 32.4418 29.7487 30.3077 31.7718 27.5164C33.1151 25.6629 34.0769 23.5654 34.6024 21.3436C35.1278 19.1217 35.2066 16.819 34.8342 14.567C34.4618 12.315 33.6456 10.1577 32.432 8.21833C31.2185 6.27898 29.6314 4.59553 27.7615 3.26411V3.26411Z" fill="#F1603F"/>
+            <path d="M3.05176 27.18C3.05176 27.18 14.6374 23.4181 35.0566 16.8181C35.0566 16.8181 36.1751 27.6265 24.8716 33.2643C24.8716 33.2643 19.2976 35.9125 13.1824 34.2137C13.1824 34.2137 7.09314 33.0744 3.05176 27.18Z" fill="#2B286C"/>
+          </svg>
+          <span>Dune</span>
+        </Navbar.Link>
+      </Navbar.Collapse>
+    </Navbar>
   )
 }
 
