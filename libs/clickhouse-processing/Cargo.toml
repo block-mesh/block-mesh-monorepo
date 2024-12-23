@@ -1,0 +1,46 @@
+[package]
+name = "clickhouse-processing"
+edition = "2021"
+authors.workspace = true
+version.workspace = true
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+rayon = { workspace = true }
+regex = { workspace = true }
+clickhouse = { workspace = true, features = ["native-tls", "uuid", "time", "inserter"] }
+csv = { workspace = true }
+database-utils = { path = "../database-utils" }
+lettre = { version = "0.11" }
+tokio = { workspace = true, features = ["full"] }
+anyhow = { workspace = true }
+serde_json = { workspace = true, features = ["raw_value"] }
+serde = { workspace = true, features = ["derive"] }
+scraper = { workspace = true }
+
+[dependencies.sqlx]
+workspace = true
+default-features = false
+features = [
+  "any",
+  "runtime-tokio-rustls",
+  "macros",
+  "postgres",
+  "uuid",
+  "chrono",
+  "migrate",
+  "json",
+  "bigdecimal",
+  "tls-rustls"
+]
+
+[dependencies.uuid]
+workspace = true
+features = [
+  "v4", # Lets you generate random UUIDs
+  "fast-rng", # Use a faster (but still sufficiently random) RNG
+  "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
+  "serde", # Enable serialization/deserialization of UUIDs
+  "js"
+]
