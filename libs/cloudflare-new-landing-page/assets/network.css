@@ -379,7 +379,7 @@ button, a.button {
     .use-case-box {
         width: 100%;
         /* TODO: make this sticky? would require a pseudo-element */
-        background-image: url("./graphic-orbit-center.svg");
+        background-image: url("https://landing-page-assets.blockmesh.xyz/graphic-orbit-center.svg");
         background-size: contain;
         background-position: 50% 50%;
         background-repeat: no-repeat;
@@ -396,7 +396,7 @@ button, a.button {
             }
         }
 
-        img {
+        img, svg {
             align-self: center;
             /* 3em * 1.5 (line-height) - a bit for space */
             width: 3.5em;
