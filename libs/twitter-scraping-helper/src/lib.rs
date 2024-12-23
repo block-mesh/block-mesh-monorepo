@@ -52,8 +52,9 @@ pub fn try_from(html: &str, origin: &str) -> anyhow::Result<FeedElement> {
         get_text_by_selector(&fragment, "[data-testid='like']")?,
     );
     let date = Utc::now();
-    let href = Selector::parse("[href]")?;
-    let re = Regex::new(r"/(?P<username>[^/]+)/status/(?P<id>\d+$)")?;
+    let href = Selector::parse("[href]").map_err(|e| anyhow!(e.to_string()))?;
+    let re = Regex::new(r"/(?P<username>[^/]+)/status/(?P<id>\d+$)")
+        .map_err(|e| anyhow!(e.to_string()))?;
 
     map.insert("raw".to_owned(), html.to_string());
     for element in fragment.select(&href) {
