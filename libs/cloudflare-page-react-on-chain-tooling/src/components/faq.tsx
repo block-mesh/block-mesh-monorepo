@@ -41,6 +41,14 @@ const Faq: FC = () => {
           </Accordion.Content>
         </Accordion.Panel>
         <Accordion.Panel>
+          <Accordion.Title>Airdrop?</Accordion.Title>
+          <Accordion.Content>
+            <p className="mb-2 text-gray-500 dark:text-gray-400">
+              Users who recycled will be eligible for an airdrop
+            </p>
+          </Accordion.Content>
+        </Accordion.Panel>
+        <Accordion.Panel>
           <Accordion.Title>Where can I get help?</Accordion.Title>
           <Accordion.Content>
             <p className="mb-2 text-gray-500 dark:text-gray-400">
