@@ -77,3 +77,11 @@ button:focus-visible {
     }
 }
  */
+
+ .scrollbar-hidden::-webkit-scrollbar {
+    display: none; /* For Chrome, Safari, and Edge */
+  }
+  .scrollbar-hidden {
+    -ms-overflow-style: none; /* For Internet Explorer and Edge */
+    scrollbar-width: none; /* For Firefox */
+  }

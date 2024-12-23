@@ -10,7 +10,7 @@ const MainLayout = ({ children }: PropsWithChildren) => {
                 <Header />
             </header>
             
-            <main className="flex-grow overflow-y-auto bg-gray-900 text-white">
+            <main className="flex-grow overflow-y-auto scrollbar-hidden bg-gray-900 text-white">
                 {children}
             </main>
             

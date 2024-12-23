@@ -10,6 +10,11 @@ export default {
   },
   plugins: [
     flowbite.plugin(),
-  ]
+  ],
+  variants: {
+    extend: {
+      scrollbar: ['hidden'],
+    },
+  },
 }
 
