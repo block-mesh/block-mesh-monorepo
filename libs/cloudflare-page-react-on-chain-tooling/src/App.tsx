@@ -10,7 +10,6 @@ import { MetaplexProvider } from './contexts/MetaplexContext.tsx'
 import { Connection } from '@solana/web3.js'
 import { PythProvider } from './contexts/PythContext.tsx'
 import AppRoutes from './routes.tsx'
-import Home from './pages/Home.tsx'
 
 const App: FC = () => {
   const network = WalletAdapterNetwork.Mainnet
@@ -33,7 +32,7 @@ const App: FC = () => {
         <PythProvider>
           <MetaplexProvider metaplex={metaplex}>
             <WalletModalProvider>
-              <Home/>
+              <AppRoutes/>
             </WalletModalProvider>
           </MetaplexProvider>
         </PythProvider>
