@@ -5,6 +5,7 @@ export default {
     './src/**/*.{js,jsx,ts,tsx}',
     flowbite.content(),
   ],
+  darkMode: 'class',
   theme: {
     extend: {
       keyframes: {
