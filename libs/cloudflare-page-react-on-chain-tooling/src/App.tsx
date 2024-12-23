@@ -10,6 +10,7 @@ import { MetaplexProvider } from './contexts/MetaplexContext.tsx'
 import { Connection } from '@solana/web3.js'
 import { PythProvider } from './contexts/PythContext.tsx'
 import AppRoutes from './routes.tsx'
+import { BrowserRouter } from 'react-router-dom'
 
 const App: FC = () => {
   const network = WalletAdapterNetwork.Mainnet
@@ -27,17 +28,19 @@ const App: FC = () => {
   )
 
   return (
-    <ConnectionProvider endpoint={endpoint}>
-      <WalletProvider wallets={wallets} autoConnect>
-        <PythProvider>
-          <MetaplexProvider metaplex={metaplex}>
-            <WalletModalProvider>
-              <AppRoutes/>
-            </WalletModalProvider>
-          </MetaplexProvider>
-        </PythProvider>
-      </WalletProvider>
-    </ConnectionProvider>
+    <BrowserRouter>
+      <ConnectionProvider endpoint={endpoint}>
+        <WalletProvider wallets={wallets} autoConnect>
+          <PythProvider>
+            <MetaplexProvider metaplex={metaplex}>
+              <WalletModalProvider>
+                <AppRoutes/>
+              </WalletModalProvider>
+            </MetaplexProvider>
+          </PythProvider>
+        </WalletProvider>
+      </ConnectionProvider>
+    </BrowserRouter>
   )
 
 }
