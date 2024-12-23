@@ -321,7 +321,9 @@ button, a.button {
             right: 10%;
 
             .number {
+                color: var(--offwhite);
                 font-size: 2.75rem;
+                text-align: center;
             }
 
             .description {
