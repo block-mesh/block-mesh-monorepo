@@ -1,6 +1,6 @@
 import { useWallet } from '@solana/wallet-adapter-react'
 import { ComponentType, PropsWithChildren } from 'react'
-import Faq from '../components/faq.tsx'
+import Faq from '../components/Faq'
 
 const WalletGuard = ({ children }: PropsWithChildren) => {
   const { connected } = useWallet()
