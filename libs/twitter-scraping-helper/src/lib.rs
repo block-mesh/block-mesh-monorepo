@@ -2,7 +2,7 @@ use anyhow::anyhow;
 use block_mesh_common::interfaces::server_api::FeedElement;
 use regex::Regex;
 use scraper::{Html, Selector};
-use sqlx::types::chrono::{DateTime, Utc};
+use sqlx::types::chrono::Utc;
 use std::collections::HashMap;
 
 pub fn get_text_by_selector(fragment: &Html, selector: &str) -> anyhow::Result<String> {
