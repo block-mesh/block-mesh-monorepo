@@ -113,8 +113,7 @@ const TokensTable: FC = () => {
           </div>
           <div>
             <button className={'text-white border border-gray-50 rounded p-2 bg-green-500 hover:bg-green-800'}
-                    onClick={lfg}>Recycle
-              Accounts
+                    onClick={lfg}>Recycle Accounts
             </button>
           </div>
         </div>
