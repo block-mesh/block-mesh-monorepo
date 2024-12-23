@@ -124,13 +124,15 @@ const Home: FC = () => {
   return (
     <>
         <div >
-          <div className="px-40 my-10 flex justify-between items-center">
+          <div className="px-4 md:px-40 my-10 flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0 md:space-x-6">
             {
               loading ? 
               <Button>
                 <Spinner aria-label="Spinner button example" size="sm" />
                 <span className="pl-3">Get Token Accounts...</span>
-              </Button> : <Button color="dark" onClick={get_token_accounts}> Get Token Accounts </Button>
+              </Button> : loading === undefined ?
+              <Button color="dark" className='border-2 rounded-lg border-transparent animate-borderPulse' onClick={get_token_accounts}> Get Token Accounts </Button> :
+               <Button color="dark" onClick={get_token_accounts}> Get Token Accounts </Button>
             }
             <Button color="dark" onClick={lfg}> Recycle Accounts </Button>
             <p><strong>Total $USD:</strong><span className={'m-1'}>{totalUsd.toFixed(3)}</span></p>
@@ -139,11 +141,11 @@ const Home: FC = () => {
           {
            loading == undefined || (loading != undefined && rows.length != 0) || loading ? 
            <div>
-            <div className='overflow-x-auto my-4 mx-20'> 
+            <div className='overflow-x-auto my-4 mx-1 md:mx-20'> 
               <Table hoverable>
                 <Table.Head>
                   <Table.HeadCell className="p-4">
-                    <Checkbox checked={allChecked} onClick={handleAllChecked}/>
+                    <Checkbox checked={allChecked} onClick={handleAllChecked} onChange={() => {}}/>
                   </Table.HeadCell>
                   <Table.HeadCell>Name</Table.HeadCell>
                   <Table.HeadCell>Mint</Table.HeadCell>
@@ -156,7 +158,7 @@ const Home: FC = () => {
                 rows.slice((currentPage - 1) * 10, currentPage * 10 > rows.length ? rows.length : currentPage * 10).map((row, idx) =>
                   <Table.Row className="bg-white dark:border-gray-700 dark:bg-gray-800" key={idx}>
                     <Table.Cell className="p-4">
-                      <Checkbox checked={selected[row.mint] !== undefined}
+                      <Checkbox checked={selected[row.mint] !== undefined} onChange={() => {}}
                         onClick={() => selectMint(row, row.mint, (priceUsd || 0) * row.lamports / LAMPORTS_PER_SOL, row.lamports / LAMPORTS_PER_SOL)}/>
                     </Table.Cell>
                     <Table.Cell className="whitespace-nowrap font-medium text-gray-900 dark:text-white">
@@ -182,7 +184,7 @@ const Home: FC = () => {
                 </Table.Body>
               </Table>
             </div>
-            <div className="flex overflow-x-auto sm:justify-center">
+            <div className="flex overflow-x-auto justify-center">
               <Pagination
                 layout="navigation"
                 currentPage={currentPage}

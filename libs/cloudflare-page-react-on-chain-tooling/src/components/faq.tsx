@@ -2,7 +2,7 @@ import { FC } from 'react'
 import { Accordion } from "flowbite-react";
 const Faq: FC = () => {
   return (
-    <div className='flex items-center w-[60%] m-auto mt-20'>
+    <div className='px-[20%] mt-20'>
       <Accordion>
         <Accordion.Panel>
           <Accordion.Title>How it works?</Accordion.Title>

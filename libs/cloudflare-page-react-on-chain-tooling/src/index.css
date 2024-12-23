@@ -85,3 +85,18 @@ button:focus-visible {
     -ms-overflow-style: none; /* For Internet Explorer and Edge */
     scrollbar-width: none; /* For Firefox */
   }
+
+  @layer utilities {
+    @keyframes borderPulse {
+      0%, 100% {
+        border-color: transparent;
+      }
+      50% {
+        border-color: rgb(59, 130, 246); /* Tailwind's blue-500 */
+      }
+    }
+  
+    .animate-borderPulse {
+      animation: borderPulse 2s infinite;
+    }
+  }
