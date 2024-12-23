@@ -1,23 +1,23 @@
-import Faq from '../components/Faq';
-import { useWallet } from '@solana/wallet-adapter-react';
+import { useWallet } from '@solana/wallet-adapter-react'
+import { ComponentType, PropsWithChildren } from 'react'
+import Faq from '../components/faq.tsx'
 
-import { ComponentType, PropsWithChildren } from "react";
 const WalletGuard = ({ children }: PropsWithChildren) => {
-    const { connected } = useWallet();
-    return (
-        <>
-            {connected? children : <Faq />}
-        </>
-    );
-};
+  const { connected } = useWallet()
+  return (
+    <>
+      {connected ? children : <Faq />}
+    </>
+  )
+}
 
 export const withWalletGuard =
-<P extends object>(Component: ComponentType<P>) =>
-(props: P) =>
-  (
-    <WalletGuard>
-      <Component {...props} />
-    </WalletGuard>
-  );
+  <P extends object>(Component: ComponentType<P>) =>
+    (props: P) =>
+      (
+        <WalletGuard>
+          <Component {...props} />
+        </WalletGuard>
+      )
 
-export default withWalletGuard;
+export default withWalletGuard

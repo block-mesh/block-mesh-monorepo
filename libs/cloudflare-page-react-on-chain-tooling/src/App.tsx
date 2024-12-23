@@ -2,9 +2,9 @@ import './App.css'
 import './index.css'
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base'
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react'
-import { WalletModalProvider, WalletMultiButton } from '@solana/wallet-adapter-react-ui'
+import { WalletModalProvider } from '@solana/wallet-adapter-react-ui'
 import { Metaplex } from '@metaplex-foundation/js'
-import { FC, ReactNode, useMemo } from 'react'
+import { FC, useMemo } from 'react'
 import '@solana/wallet-adapter-react-ui/styles.css'
 import { MetaplexProvider } from './contexts/MetaplexContext.tsx'
 import { Connection } from '@solana/web3.js'
@@ -34,7 +34,7 @@ const App: FC = () => {
           <PythProvider>
             <MetaplexProvider metaplex={metaplex}>
               <WalletModalProvider>
-                <AppRoutes/>
+                <AppRoutes />
               </WalletModalProvider>
             </MetaplexProvider>
           </PythProvider>
