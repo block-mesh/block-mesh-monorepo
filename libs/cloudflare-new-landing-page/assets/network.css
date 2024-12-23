@@ -285,6 +285,7 @@ button, a.button {
 .hero-image {
     display: block;
     width: 100%;
+    max-width: 800px;
 }
 
 #how-it-works {
