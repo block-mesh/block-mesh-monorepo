@@ -12092,6 +12092,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "twitter-scraping-helper"
+version = "0.0.443"
+dependencies = [
+ "anyhow",
+ "block-mesh-common",
+ "clickhouse",
+ "csv",
+ "database-utils",
+ "lettre",
+ "rayon",
+ "regex",
+ "scraper",
+ "serde",
+ "serde_json",
+ "sqlx",
+ "tokio",
+ "uuid",
+]
+
+[[package]]
 name = "twitter-v2"
 version = "0.1.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
