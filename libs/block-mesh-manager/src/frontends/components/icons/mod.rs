@@ -1,3 +1,4 @@
+pub mod blockmesh_icon;
 pub mod checkmark_icon;
 pub mod chrome_icon;
 pub mod clipboard_icon;

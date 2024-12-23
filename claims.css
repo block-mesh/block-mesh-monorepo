@@ -1,0 +1,244 @@
+.claims-menu {
+    counter-reset: step;
+
+    display: flex;
+    gap: 1ch;
+    justify-content: center;
+    inline-size: 100%;
+    padding: 1cap 2.35ch;
+    list-style: none;
+    margin-inline: auto;
+    border-radius: var(--radius-round);
+
+    background-color: color-mix(
+        var(--color-mix),
+        var(--color-on-surface-1),
+        95% transparent
+    );
+    border-width: 1px;
+    border-style: solid;
+    border-color: color-mix(
+        var(--color-mix),
+        var(--color-on-surface-1),
+        95% transparent
+    );
+
+    a {
+        counter-increment: step;
+
+        display: inline-flex;
+        align-items: center;
+        gap: 1ch;
+
+        text-decoration: none;
+        white-space: nowrap;
+
+        transition: opacity ease-out 300ms;
+
+        /* show counter */
+        &::before {
+            content: counter(step);
+
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            inline-size: 3ch;
+            block-size: auto;
+            aspect-ratio: 1;
+            background-color: color-mix(
+                var(--color-mix),
+                var(--color-on-surface-1),
+                10% transparent
+            );
+            color: var(--color-surface-1);
+            font-size: 85%;
+            border-radius: var(--radius-round);
+        }
+
+        @media (width <= 600px) {
+            span {
+                display: none;
+            }
+        }
+    }
+
+    li {
+        display: flex;
+        align-items: center;
+        gap: 1ch;
+
+        &:not(:last-child) {
+            flex-grow: 1;
+        }
+
+        /* current state */
+        &:has(a[aria-current="true"]) ~ li {
+            opacity: 0.35;
+            pointer-events: none;
+        }
+    }
+
+    /* show arrow's tail */
+    li:not(:last-child)::before {
+        content: "";
+        background-color: var(--color-on-surface-1);
+        block-size: 1px;
+        inline-size: 100%;
+        order: 1;
+
+        position: relative;
+        inset-inline-start: 0.5ch;
+    }
+
+    /* show arrow's head */
+    li:not(:last-child)::after {
+        content: "";
+        background-color: var(--color-on-surface-1);
+        display: block;
+        inline-size: auto;
+        block-size: 0.65ch;
+        aspect-ratio: 1;
+        rotate: 45deg;
+        order: 2;
+
+        position: relative;
+        inset-inline-start: -0.5ch;
+    }
+}
+
+
+.claims-button {
+    border-radius: var(--radius-round);
+    padding: 1cap 2.15ch;
+
+    background-color: transparent;
+    color: var(--color-vibrant-1);
+
+    border: 1px solid var(--color-vibrant-1);
+
+    &:hover {
+        background-color: var(--color-vibrant-1);
+        color: var(--color-on-vibrant-1);
+    }
+
+    :is([aria-busy], [aria-busy="true"]) & {
+        background-color: transparent;
+        color: var(--color-vibrant-1);
+
+        /* reset style on hover */
+        scale: 1;
+        cursor: not-allowed;
+    }
+}
+
+
+.claims-figure {
+    display: grid;
+    place-content: center;
+    align-items: center;
+
+    > * {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    figcaption {
+        z-index: 1;
+    }
+}
+
+
+
+@property --border-color {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: transparent;
+}
+
+.claims-form {
+    position: relative;
+    z-index: 0;
+    display: grid;
+    justify-items: center;
+    gap: 2cap;
+    padding: 7cap 5ch;
+
+    @media (width <= 600px) {
+        padding: 3cap 2ch;
+    }
+
+    /* outter background */
+    background-color: color-mix(
+        var(--color-mix),
+        var(--color-accent-1),
+        85% transparent
+    );
+
+    border-width: 1px;
+    border-style: solid;
+    border-color: color-mix(
+        var(--color-mix),
+        10% var(--color-accent-1),
+        10% transparent
+    );
+
+    border-radius: var(--radius-2);
+
+    /* inner background */
+    &::before {
+        position: absolute;
+        z-index: -1;
+        content: "";
+        inset: calc(1ch + 1.5vw);
+
+        background-color: color-mix(var(--color-mix), #000, 60% transparent);
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: color-mix(
+            var(--color-mix),
+            10% var(--color-accent-1),
+            10% #000
+        );
+
+        /* inner radius size depends on the distance of the outter's */
+        border-radius: calc(var(--radius-2) - (5ch - 3.65ch));
+    }
+
+    &[aria-busy]::before {
+        border: 1px solid var(--border-color);
+        animation: --blink ease-in-out 2.65s infinite;
+    }
+
+    &[data-current-item="connecting"] {
+        --border-color-start: var(--color-accent-1);
+        --border-color-end: #ffccff;
+    }
+
+    &[data-current-item="claiming"] {
+        --border-color-start: var(--color-variant-1);
+        --border-color-end: #20ff87;
+    }
+
+    /* preserve children inline sizes */
+    > * {
+        inline-size: fit-content;
+    }
+}
+
+@keyframes --blink {
+    50% {
+        --border-color: var(--border-color-end);
+    }
+    65% {
+        --border-color: transparent;
+    }
+}
+
+
+.claims-header {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-block: 5cap;
+}

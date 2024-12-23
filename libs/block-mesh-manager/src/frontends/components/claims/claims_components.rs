@@ -1,0 +1,187 @@
+use crate::frontends::components::icons::blockmesh_icon::BlockMeshIcon;
+use leptos::*;
+use serde::{Deserialize, Serialize};
+use std::fmt::{Display, Formatter};
+
+#[derive(PartialEq, Debug, Serialize, Deserialize, Clone)]
+pub enum FormStyle {
+    DataCurrentItem,
+    Connecting,
+    Claiming,
+    Claimed,
+}
+
+impl Display for FormStyle {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Claiming => write!(f, ""),
+            Self::Connecting => write!(f, ""),
+            Self::DataCurrentItem => write!(f, ""),
+            Self::Claimed => write!(f, ""),
+        }
+    }
+}
+
+#[component]
+pub fn FormMain(children: Children) -> impl IntoView {
+    view! { <form class="claims-form">{children()}</form> }
+}
+
+#[component]
+pub fn ButtonMain(children: Children) -> impl IntoView {
+    view! { <button class="claims-button" type="submit">{children()}</button> }
+}
+
+#[component]
+pub fn HeaderMain(class: String) -> impl IntoView {
+    view! {
+        <header class="claims-header">
+            <BlockMeshIcon/>
+        </header>
+    }
+}
+
+#[component]
+pub fn MenuMain(current: FormStyle, class: String) -> impl IntoView {
+    let (current, _set_current) = create_signal(current);
+
+    view! {
+        <menu class="claims-menu">
+            <li>
+                <a
+                    href="#"
+                    aria-current=move || {
+                        if current.get_untracked() == FormStyle::Connecting {
+                            "true"
+                        } else {
+                            "false"
+                        }
+                    }
+                >
+
+                    <span>Connect Wallet</span>
+                </a>
+            </li>
+            <li>
+                <a
+                    href="#"
+                    aria-current=move || {
+                        if current.get_untracked() == FormStyle::Claiming {
+                            "true"
+                        } else {
+                            "false"
+                        }
+                    }
+                >
+
+                    <span>Check allocation</span>
+                </a>
+            </li>
+            <li>
+                <a
+                    href="#"
+                    aria-current=move || {
+                        if current.get_untracked() == FormStyle::Claimed { "true" } else { "false" }
+                    }
+                >
+
+                    <span>Claim</span>
+                </a>
+            </li>
+        </menu>
+    }
+}
+
+#[component]
+pub fn SVGPictoTier(children: Children) -> impl IntoView {
+    view! {
+        <figure class="claims-figure">
+            <figcaption>{children()}</figcaption>
+            <svg
+                width="118"
+                height="97"
+                viewBox="0 0 118 97"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+            >
+                <g filter="url(#filter0_d_463_347)">
+                    <path
+                        d="M12.812 34.0586L14.2931 34.2676L14.2843 34.2588L24.0142 35.6284V57.6471L9.77301 55.6484C9.77278 55.6484 9.77255 55.6484 9.77233 55.6483C9.23823 55.5723 8.91569 55.3038 8.7988 55.0752C8.74214 54.9644 8.73444 54.8691 8.75215 54.7933C8.7693 54.7198 8.82047 54.6207 8.96156 54.5181L8.98823 54.4987L9.01211 54.476L16.8928 46.9783C16.8931 46.978 16.8935 46.9776 16.8939 46.9773C17.6186 46.2942 17.7666 45.2068 17.2665 44.3557L11.756 34.9732L11.739 34.9442L11.7182 34.9177C11.6104 34.7804 11.5883 34.6711 11.5919 34.596C11.5956 34.5186 11.6289 34.4296 11.7135 34.3391C11.8882 34.1523 12.273 33.9825 12.812 34.0586Z"
+                        fill="#25E4D3"
+                        fillOpacity="0.15"
+                        stroke="#1E4E5C"
+                    ></path>
+                    <path
+                        d="M101.105 46.9765L108.616 54.1226L108.556 54.1821L109.03 54.5262C109.171 54.6291 109.223 54.7288 109.241 54.8029C109.259 54.8791 109.251 54.9741 109.195 55.0842C109.079 55.3114 108.758 55.5805 108.219 55.6565L93.9771 57.6552V35.6365L105.187 34.0586L105.187 34.0586C105.726 33.9825 106.111 34.1523 106.286 34.3391C106.371 34.4296 106.404 34.5186 106.408 34.596C106.411 34.6711 106.389 34.7804 106.281 34.9177L106.26 34.9442L106.243 34.9732L100.733 44.3557C100.733 44.3557 100.733 44.3557 100.733 44.3557C100.231 45.2109 100.393 46.2963 101.104 46.9758L101.105 46.9765Z"
+                        fill="#25E4D3"
+                        fillOpacity="0.15"
+                        stroke="#1E4E5C"
+                    ></path>
+                    <path
+                        d="M26.403 26.6437L26.4023 26.6441C25.0421 27.4266 24.2075 28.8748 24.2075 30.4495V65.5586C24.2075 67.1243 25.0415 68.5738 26.4041 69.365L56.8079 86.9226L26.403 26.6437ZM26.403 26.6437L56.8079 9.0855C58.1697 8.30207 59.8384 8.30207 61.2002 9.0855L91.604 26.6431L26.403 26.6437ZM91.605 69.3644L91.6057 69.364C92.966 68.5815 93.8006 67.1333 93.8006 65.5586V30.4495C93.8006 28.8842 92.967 27.435 91.605 26.6437V69.3644ZM91.605 69.3644L61.2002 86.9226M91.605 69.3644L61.2002 86.9226M61.2002 86.9226L61.1995 86.923C59.838 87.7059 58.1701 87.7059 56.8086 86.923L61.2002 86.9226Z"
+                        fill="#25E4D3"
+                        fillOpacity="0.15"
+                        stroke="#1E4E5C"
+                    ></path>
+                    <path
+                        d="M30.229 61.7925V34.2156C30.229 32.4711 31.1583 30.8571 32.6745 29.9767L56.5587 16.1842C58.0749 15.312 59.9335 15.312 61.4497 16.1842L85.334 29.9767C86.8502 30.849 87.7794 32.463 87.7794 34.2156V61.7925C87.7794 63.537 86.8502 65.151 85.334 66.0314L61.4497 79.8239C59.9335 80.6961 58.0749 80.6961 56.5587 79.8239L32.6745 66.0314C31.1583 65.1591 30.229 63.5451 30.229 61.7925Z"
+                        fill="url(#paint0_linear_463_347)"
+                    ></path>
+                    <path
+                        d="M85.0846 30.4101L85.0839 30.4097L61.2004 16.6176C61.2003 16.6175 61.2001 16.6175 61.2 16.6174C59.8384 15.8342 58.1701 15.8342 56.8084 16.6174C56.8083 16.6175 56.8082 16.6175 56.8081 16.6176L32.9256 30.4091C32.9254 30.4092 32.9252 30.4093 32.925 30.4095C31.5628 31.2007 30.729 32.6501 30.729 34.2156V61.7925C30.729 63.3672 31.5636 64.8155 32.9238 65.598L32.9245 65.5984L56.8081 79.3905L85.0846 30.4101ZM85.0846 30.4101C86.4449 31.1926 87.2794 32.6409 87.2794 34.2156M85.0846 30.4101L87.2794 34.2156M87.2794 34.2156V61.7925M87.2794 34.2156V61.7925M87.2794 61.7925C87.2794 63.358 86.4457 64.8073 85.0836 65.5985M87.2794 61.7925L85.0836 65.5985M85.0836 65.5985C85.0834 65.5987 85.0831 65.5988 85.0829 65.599M85.0836 65.5985L85.0829 65.599M85.0829 65.599L61.2004 79.3905L85.0829 65.599ZM61.1997 79.3909C59.8382 80.1738 58.1703 80.1738 56.8088 79.3909H61.1997Z"
+                        stroke="#25E4D3"
+                        strokeOpacity="0.1"
+                    ></path>
+                </g>
+                <defs>
+                    <filter
+                        id="filter0_d_463_347"
+                        x="-0.571289"
+                        y="-0.0020752"
+                        width="119.143"
+                        height="96.0122"
+                        filterUnits="userSpaceOnUse"
+                        colorInterpolationFilters="sRGB"
+                    >
+                        <feFlood floodOpacity="0" result="BackgroundImageFix"></feFlood>
+                        <feColorMatrix
+                            in="SourceAlpha"
+                            type="matrix"
+                            values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0"
+                            result="hardAlpha"
+                        ></feColorMatrix>
+                        <feOffset></feOffset>
+                        <feGaussianBlur stdDeviation="4"></feGaussianBlur>
+                        <feComposite in2="hardAlpha" operator="out"></feComposite>
+                        <feColorMatrix
+                            type="matrix"
+                            values="0 0 0 0 0.145098 0 0 0 0 0.894118 0 0 0 0 0.827451 0 0 0 0.2 0"
+                        ></feColorMatrix>
+                        <feBlend
+                            mode="normal"
+                            in2="BackgroundImageFix"
+                            result="effect1_dropShadow_463_347"
+                        ></feBlend>
+                        <feBlend
+                            mode="normal"
+                            in="SourceGraphic"
+                            in2="effect1_dropShadow_463_347"
+                            result="shape"
+                        ></feBlend>
+                    </filter>
+                    <linearGradient
+                        id="paint0_linear_463_347"
+                        x1="59.0001"
+                        y1="78.5115"
+                        x2="59.0001"
+                        y2="15.3364"
+                        gradientUnits="userSpaceOnUse"
+                    >
+                        <stop stopColor="#25E4D3" stopOpacity="0"></stop>
+                        <stop offset="1" stopColor="#25E4D3" stopOpacity="0.9"></stop>
+                    </linearGradient>
+                </defs>
+            </svg>
+        </figure>
+    }
+}

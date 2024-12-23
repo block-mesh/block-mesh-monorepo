@@ -14,6 +14,7 @@ set +x
 export AGG_SIZE=1
 source "${ROOT}/scripts/setup.sh"
 export DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
+export WRITE_DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
 export FOLLOWER_DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
 export CHANNEL_DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
 export UNLIMITED_DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"

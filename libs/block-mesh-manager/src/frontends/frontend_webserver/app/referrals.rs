@@ -130,10 +130,7 @@ pub fn Referrals() -> impl IntoView {
         </Modal>
         <div class="flex items-start justify-start gap-4">
             <Heading>Referrals</Heading>
-            <button
-                class=BUTTON_CLASS
-                on:click=move |_| apply_ranking_action.dispatch(())
-            >
+            <button class=BUTTON_CLASS on:click=move |_| apply_ranking_action.dispatch(())>
                 Apply Ranking Bonus
             </button>
             <a
@@ -143,11 +140,15 @@ pub fn Referrals() -> impl IntoView {
             >
                 <InfoIcon/>
             </a>
-            <button
-                class=BUTTON_CLASS
-                on:click=move |_| apply_ref_action.dispatch(())
-            >
-                {move || format!("Apply Ref Bonus {}/{}", true_count.get_untracked(), false_count.get_untracked() + true_count.get_untracked()) }
+            <button class=BUTTON_CLASS on:click=move |_| apply_ref_action.dispatch(())>
+                {move || {
+                    format!(
+                        "Apply Ref Bonus {}/{}",
+                        true_count.get_untracked(),
+                        false_count.get_untracked() + true_count.get_untracked(),
+                    )
+                }}
+
             </button>
             <a
                 rel="external"
