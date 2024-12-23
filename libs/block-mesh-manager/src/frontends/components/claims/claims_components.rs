@@ -33,7 +33,7 @@ pub fn ButtonMain(children: Children) -> impl IntoView {
 }
 
 #[component]
-pub fn HeaderMain(class: String) -> impl IntoView {
+pub fn HeaderMain() -> impl IntoView {
     view! {
         <header class="claims-header">
             <BlockMeshIcon/>
@@ -42,7 +42,7 @@ pub fn HeaderMain(class: String) -> impl IntoView {
 }
 
 #[component]
-pub fn MenuMain(current: FormStyle, class: String) -> impl IntoView {
+pub fn MenuMain(current: FormStyle) -> impl IntoView {
     let (current, _set_current) = create_signal(current);
 
     view! {
