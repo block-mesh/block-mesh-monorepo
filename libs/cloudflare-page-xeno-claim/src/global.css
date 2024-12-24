@@ -65,3 +65,7 @@ body {
     text-decoration: underline;
     text-underline-offset: 0.2cap;
 }
+
+:where(output.error) {
+    color: var(--color-error-1);
+}

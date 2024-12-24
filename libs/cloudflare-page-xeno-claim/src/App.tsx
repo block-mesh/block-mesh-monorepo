@@ -8,6 +8,7 @@ import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react
 import { BrowserRouter, Route, Routes } from "react-router";
 import Connect from './pages/connect'
 import Claimed from './pages/claimed'
+import Claim from './pages/claim'
 
 const App = () => {
   const network = WalletAdapterNetwork.Mainnet
@@ -34,6 +35,7 @@ const App = () => {
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Connect />} />
+                <Route path="/claim" element={<Claim />} />
                 <Route path="/claimed" element={<Claimed />} />
               </Routes>
             </BrowserRouter>

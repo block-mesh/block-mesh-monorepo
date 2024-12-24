@@ -7,20 +7,29 @@ import { useNavigate } from 'react-router'
 const Connect = () => {
   const navigate = useNavigate()
   const [connecting, setConnecting] = useState(false)
+  const [error, setError] = useState('')
 
   return (
     <>
       <MenuMain current="connecting" />
       <FormMain 
         aria-busy={connecting} 
-        data-current-item="claiming"
+        data-current-item="connecting"
       >
         <p>Connect your Solana wallet address to check if you're eligible</p>
+        {!!error && 
+          (
+            <output className="error">
+              {error}
+            </output>
+          )
+        }
         <ButtonMain
           disabled={connecting}
           onClick={async (e) => {
             e.preventDefault()
             setConnecting(true)
+            setError('')
             try {
               await new Promise((resolve) => {
                 setTimeout(() => {
@@ -31,6 +40,7 @@ const Connect = () => {
               await navigate('/claim')
             } catch(error) {
               console.error(error)
+              setError('An error occured')
             } finally {
               setConnecting(false)
             }
