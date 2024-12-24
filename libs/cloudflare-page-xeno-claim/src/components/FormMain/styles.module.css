@@ -54,17 +54,17 @@
         border-radius: calc(var(--radius-2) - (5ch - 3.65ch));
     }
 
-    &[aria-busy]::before {
+    &[aria-busy="true"]::before {
         border: 1px solid var(--border-color);
         animation: --blink ease-in-out 2.65s infinite;
     }
 
-    &[data-current-item="connecting"] {
+    &[aria-busy="true"][data-current-item="connecting"] {
         --border-color-start: var(--color-accent-1);
         --border-color-end: #ffccff;
     }
 
-    &[data-current-item="claiming"] {
+    &[aria-busy="true"][data-current-item="claiming"] {
         --border-color-start: var(--color-variant-1);
         --border-color-end: #20ff87;
     }
