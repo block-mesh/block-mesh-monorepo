@@ -1,0 +1,23 @@
+.button {
+    border-radius: var(--radius-round);
+    padding: 1cap 2.15ch;
+
+    background-color: transparent;
+    color: var(--color-vibrant-1);
+
+    border: 1px solid var(--color-vibrant-1);
+
+    &:hover {
+        background-color: var(--color-vibrant-1);
+        color: var(--color-on-vibrant-1);
+    }
+
+    :is([aria-busy="true"]) & {
+        background-color: transparent;
+        color: var(--color-vibrant-1);
+
+        /* reset style on hover */
+        scale: 1;
+        cursor: not-allowed;
+    }
+}
