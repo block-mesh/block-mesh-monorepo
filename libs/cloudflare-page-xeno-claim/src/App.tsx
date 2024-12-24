@@ -1,10 +1,10 @@
 import './global.css'
 import './styles/app.css'
-import HeaderMain from './components/HeaderMain'
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base'
-import { useMemo } from 'react'
+import React, { useMemo } from 'react'
 import '@solana/wallet-adapter-react-ui/styles.css'
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react'
+import HeaderMain from './components/HeaderMain'
 
 const App = () => {
   const network = WalletAdapterNetwork.Mainnet
