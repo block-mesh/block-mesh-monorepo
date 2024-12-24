@@ -34,7 +34,7 @@ const Connect = () => {
               await new Promise((resolve) => {
                 setTimeout(() => {
                   resolve(void 0)
-                }, 1_000)
+                }, 2_000)
               })
               // --> redirect to /claim
               await navigate('/claim')

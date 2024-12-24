@@ -8,17 +8,17 @@ export default function MenuMain({ current, ...props }: Props) {
   return (
     <menu className={styles.menu} {...props}>
       <li>
-        <a href="#" aria-current={current === 'connecting'}>
+        <a href="/connect" aria-current={current === 'connecting'}>
           <span>Connect wallet</span>
         </a>
       </li>
       <li>
-        <a href="#" aria-current={current === 'claiming'}>
+        <a href="/claim" aria-current={current === 'claiming'}>
           <span>Check allocation</span>
         </a>
       </li>
       <li>
-        <a href="#" aria-current={current === 'claimed'}>
+        <a href="/claimed" aria-current={current === 'claimed'}>
           <span>Claim</span>
         </a>
       </li>

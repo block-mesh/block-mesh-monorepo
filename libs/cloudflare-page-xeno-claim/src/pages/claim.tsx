@@ -46,11 +46,10 @@ const Claim = () => {
             setClaiming(true)
             setError('')
             try {
-              await new Promise((resolve, reject) => {
+              await new Promise((resolve) => {
                 setTimeout(() => {
-                  reject(new Error('an Error'))
                   resolve(void 0)
-                }, 10_000)
+                }, 2_000)
               })
               // --> redirect to /claim
               await navigate('/claimed')
