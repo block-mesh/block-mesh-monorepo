@@ -1,3 +1,4 @@
+.env.*
 docker-target/*
 db_logs
 !docker-target/.gitkeep
