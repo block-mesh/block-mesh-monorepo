@@ -1,3 +1,4 @@
+.env.*
 .env.clickhouse
 docker-target/*
 db_logs
