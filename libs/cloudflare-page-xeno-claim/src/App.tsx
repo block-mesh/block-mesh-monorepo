@@ -1,10 +1,15 @@
 import './global.css'
 import './styles/app.css'
+import HeaderMain from './components/HeaderMain'
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import '@solana/wallet-adapter-react-ui/styles.css'
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react'
-import HeaderMain from './components/HeaderMain'
+import { BrowserRouter, Route, Routes } from 'react-router'
+import Connect from './pages/connect'
+import Claimed from './pages/claimed'
+import Claim from './pages/claim'
+import { WalletModalProvider } from '@solana/wallet-adapter-react-ui'
 
 const App = () => {
   const network = WalletAdapterNetwork.Mainnet
@@ -19,20 +24,29 @@ const App = () => {
     <>
       <ConnectionProvider endpoint={endpoint}>
         <WalletProvider wallets={wallets} autoConnect>
-          <HeaderMain />
-          <main>
-            <hgroup>
-              <h1>Claim $XENO</h1>
-              <p>
-                Check if you are eligible to claim $XENO. Claim closes on
-                March 31st, 2025.
-              </p>
-            </hgroup>
-            <slot />
-          </main>
+          <WalletModalProvider>
+            <HeaderMain />
+            <main>
+              <hgroup>
+                <h1>Claim $XENO</h1>
+                <p>
+                  Check if you are eligible to claim $XENO. Claim closes on
+                  March 31st, 2025.
+                </p>
+              </hgroup>
+              <BrowserRouter>
+                <Routes>
+                  <Route path="/" element={<Connect />} />
+                  <Route path="/claim" element={<Claim />} />
+                  <Route path="/claimed" element={<Claimed />} />
+                </Routes>
+              </BrowserRouter>
+            </main>
+          </WalletModalProvider>
         </WalletProvider>
       </ConnectionProvider>
     </>
   )
 }
 export default App
+

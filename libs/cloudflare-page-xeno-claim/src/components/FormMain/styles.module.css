@@ -18,22 +18,23 @@
 
     /* outter background */
     background-color: color-mix(
-        var(--color-mix),
-        var(--color-accent-1),
-        85% transparent
+            var(--color-mix),
+            var(--color-accent-1),
+            85% transparent
     );
 
     border-width: 1px;
     border-style: solid;
     border-color: color-mix(
-        var(--color-mix),
-        10% var(--color-accent-1),
-        10% transparent
+            var(--color-mix),
+            10% var(--color-accent-1),
+            10% transparent
     );
 
     border-radius: var(--radius-2);
 
     /* inner background */
+
     &::before {
         position: absolute;
         z-index: -1;
@@ -45,31 +46,32 @@
         border-width: 1px;
         border-style: solid;
         border-color: color-mix(
-            var(--color-mix),
-            10% var(--color-accent-1),
-            10% #000
+                var(--color-mix),
+                10% var(--color-accent-1),
+                10% #000
         );
 
         /* inner radius size depends on the distance of the outter's */
         border-radius: calc(var(--radius-2) - (5ch - 3.65ch));
     }
 
-    &[aria-busy]::before {
+    &[aria-busy="true"]::before {
         border: 1px solid var(--border-color);
         animation: --blink ease-in-out 2.65s infinite;
     }
 
-    &[data-current-item="connecting"] {
+    &[aria-busy="true"] {
         --border-color-start: var(--color-accent-1);
         --border-color-end: #ffccff;
     }
 
-    &[data-current-item="claiming"] {
+    &[aria-busy="true"] {
         --border-color-start: var(--color-variant-1);
         --border-color-end: #20ff87;
     }
 
     /* preserve children inline sizes */
+
     > * {
         inline-size: fit-content;
     }
