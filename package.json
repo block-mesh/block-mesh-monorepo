@@ -6,8 +6,8 @@
     "preview": "vite preview",
     "lint:fix": "prettier */*.js \"*/**/*{.js,.ts}\" -w",
     "lint": "prettier */*.js \"*/**/*{.js,.ts}\" --check",
-    "solita": "npx ts-node solita.ts",
-    "solita-merkle": "npx ts-node solita-merkle-distributor.ts",
+    "solita": "npx tsx solita.ts",
+    "solita-merkle": "npx tsx solita-merkle-distributor.ts",
     "tauri": "tauri"
   },
   "dependencies": {

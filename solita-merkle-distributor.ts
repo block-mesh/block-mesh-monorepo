@@ -7,7 +7,7 @@ const PROGRAM_NAME = 'merkle_distributor'
 const PROGRAM_ID = 'AZMc26abaSP7si1wtLaV5yPxTxpWd895M8YpJFFdQ8Qw'
 const programDir = path.join('.', 'programs', 'merkle-distributor')
 const generatedIdlDir = path.join('.', 'target', 'idl')
-const generatedSDKDir = path.join('.', 'tests', 'generated')
+const generatedSDKDir = path.join('.', 'tests', 'merkle-distributor-libs')
 
 // @ts-ignore
 const anchor = spawn('anchor', ['build', '--idl', generatedIdlDir], {
