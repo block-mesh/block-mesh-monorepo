@@ -1,13 +1,25 @@
 import MenuMain from '../components/MenuMain'
+import {
+  WalletMultiButton
+} from '@solana/wallet-adapter-react-ui'
 import FormMain from '../components/FormMain'
-import ButtonMain from '../components/ButtonMain'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
+import { useWallet } from '@solana/wallet-adapter-react'
 
 const Connect = () => {
   const navigate = useNavigate()
-  const [connecting, setConnecting] = useState(false)
-  const [error, setError] = useState('')
+  const [connecting, _setConnecting] = useState(false)
+  const [error, _setError] = useState('')
+  const walletContextState = useWallet()
+
+  useEffect(() => {
+    (async () => {
+      if (walletContextState.connected) {
+        await navigate('/claim')
+      }
+    })()
+  }, [walletContextState.connected])
 
   return (
     <>
@@ -24,30 +36,7 @@ const Connect = () => {
             </output>
           )
         }
-        <ButtonMain
-          disabled={connecting}
-          onClick={async (e) => {
-            e.preventDefault()
-            setConnecting(true)
-            setError('')
-            try {
-              await new Promise((resolve) => {
-                setTimeout(() => {
-                  resolve(void 0)
-                }, 2_000)
-              })
-              // --> redirect to /claim
-              await navigate('/claim')
-            } catch (error) {
-              console.error(error)
-              setError('An error occured')
-            } finally {
-              setConnecting(false)
-            }
-          }}
-        >
-          {connecting ? 'Connecting...' : 'Connect wallet'}
-        </ButtonMain>
+        <WalletMultiButton />
       </FormMain>
     </>
   )
