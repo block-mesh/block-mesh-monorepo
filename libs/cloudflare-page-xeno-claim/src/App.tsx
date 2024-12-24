@@ -1,10 +1,14 @@
 import './global.css'
 import './styles/app.css'
+import HeaderMain from './components/HeaderMain'
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base'
-import React, { useMemo } from 'react'
+import { useMemo } from 'react'
 import '@solana/wallet-adapter-react-ui/styles.css'
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react'
-import HeaderMain from './components/HeaderMain'
+import { BrowserRouter, Route, Routes } from "react-router";
+import Connect from './pages/connect'
+import Claimed from './pages/claimed'
+import Claim from './pages/claim'
 
 const App = () => {
   const network = WalletAdapterNetwork.Mainnet
@@ -28,7 +32,13 @@ const App = () => {
                 March 31st, 2025.
               </p>
             </hgroup>
-            <slot />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Connect />} />
+                <Route path="/claim" element={<Claim />} />
+                <Route path="/claimed" element={<Claimed />} />
+              </Routes>
+            </BrowserRouter>
           </main>
         </WalletProvider>
       </ConnectionProvider>
@@ -36,3 +46,4 @@ const App = () => {
   )
 }
 export default App
+

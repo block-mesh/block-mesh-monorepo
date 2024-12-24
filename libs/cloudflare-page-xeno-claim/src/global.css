@@ -9,9 +9,9 @@ body {
     letter-spacing: -0.00875rem;
 
     color: color-mix(
-        var(--color-mix),
-        var(--color-on-surface-1),
-        10% transparent
+            var(--color-mix),
+            var(--color-on-surface-1),
+            10% transparent
     );
 
     min-block-size: 100vh;
@@ -29,28 +29,27 @@ body {
 :where(a) {
     font-weight: 400;
     color: color-mix(
-        var(--color-mix),
-        var(--color-on-surface-1),
-        10% transparent
+            var(--color-mix),
+            var(--color-on-surface-1),
+            10% transparent
     );
 }
 
 :where(p, output) {
     font-weight: 200;
     color: color-mix(
-        var(--color-mix),
-        var(--color-on-surface-1),
-        20% transparent
+            var(--color-mix),
+            var(--color-on-surface-1),
+            20% transparent
     );
 }
 
 :where(button) {
     border-color: transparent;
     cursor: pointer;
-    transition:
-        color ease-out 200ms,
-        background-color ease-out 120ms,
-        scale ease-out 60ms;
+    transition: color ease-out 200ms,
+    background-color ease-out 120ms,
+    scale ease-out 60ms;
 
     &:where(:hover) {
         scale: 1.035;
@@ -64,4 +63,8 @@ body {
 :where(u) {
     text-decoration: underline;
     text-underline-offset: 0.2cap;
+}
+
+:where(output.error) {
+    color: var(--color-error-1);
 }
