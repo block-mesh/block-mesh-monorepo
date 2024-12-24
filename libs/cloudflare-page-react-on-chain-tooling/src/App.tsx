@@ -14,12 +14,9 @@ import { BrowserRouter } from 'react-router-dom'
 
 const App: FC = () => {
   const network = WalletAdapterNetwork.Mainnet
-
-  // You can also provide a custom RPC endpoint.
   const endpoint = useMemo(() => 'https://radial-neat-fire.solana-mainnet.quiknode.pro/9cd8966a7147622cfa74581af240632b89a6109a', [network])
   const connection = new Connection(endpoint)
   const metaplex = new Metaplex(connection)
-
 
   const wallets = useMemo(
     () => [],

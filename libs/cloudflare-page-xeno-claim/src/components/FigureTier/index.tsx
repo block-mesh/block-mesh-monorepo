@@ -1,8 +1,8 @@
-import styles from "./styles.module.css";
+import styles from './styles.module.css'
 
 type Props = React.HTMLAttributes<HTMLDivElement>;
 
-export default function SVGPictoTier({ children, className, ...props }: Props) {
+export default function FigureTier({ children, className, ...props }: Props) {
   return (
     <figure className={`${styles.figure} ${className}`} {...props}>
       <figcaption>{children}</figcaption>
@@ -92,5 +92,5 @@ export default function SVGPictoTier({ children, className, ...props }: Props) {
         </defs>
       </svg>
     </figure>
-  );
+  )
 }
