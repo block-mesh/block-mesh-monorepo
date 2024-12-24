@@ -1,5 +1,5 @@
 [toolchain]
-anchor_version = "0.30.1"
+anchor_version = "0.29.0"
 solana_version = "1.18.20"
 
 [features]
@@ -18,7 +18,7 @@ cluster = "Localnet"
 wallet = "~/.config/solana/id.json"
 
 [workspace]
-members = ["programs/*"]
+members = ["programs/blockmesh-program", "programs/merkle-distributor"]
 
 [scripts]
 test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"

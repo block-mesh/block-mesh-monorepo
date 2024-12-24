@@ -20,3 +20,4 @@ idl-build = ["anchor-lang/idl-build", "anchor-spl/idl-build"]
 anchor-lang = { workspace = true }
 anchor-spl = { workspace = true, features = ["spl-associated-token-account", "spl-token", "metadata"] }
 arrayref = { workspace = true }
+anchor-lang-idl = { workspace = true, features = ["convert"] }

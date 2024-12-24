@@ -1,3 +1,5 @@
+#![allow(dead_code)]
+
 use crate::error::ErrorCode;
 use crate::merkle_proof;
 use crate::state::claim_status::{ClaimStatus, ClaimedEvent};

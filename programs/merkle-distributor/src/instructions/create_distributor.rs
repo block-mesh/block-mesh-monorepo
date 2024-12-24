@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use crate::state::merkle_distributor::MerkleDistributor;
 use anchor_lang::prelude::*;
 use anchor_spl::token::Mint;
