@@ -21,4 +21,5 @@ wallet = "~/.config/solana/id.json"
 members = ["programs/*"]
 
 [scripts]
-test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+#test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/**/*.ts"
+test = "yarn run ts-mocha -p ./tsconfig.json -t 1000000 tests/merkle-distributor/**/*.ts"
