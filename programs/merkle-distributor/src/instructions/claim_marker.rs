@@ -10,20 +10,19 @@ pub struct ClaimMarkerContext<'info> {
     #[account(mut)]
     pub signer: Signer<'info>,
     #[account(
-    mut,
+    init_if_needed,
     associated_token::mint = mint,
     associated_token::authority = signer,
+    payer = signer
     )]
     pub signer_token_account: Box<Account<'info, TokenAccount>>,
-    /// CHECK: checked via seeds
-    pub claimant: UncheckedAccount<'info>,
     #[account(
     seeds = [b"AirDropper".as_ref()],
     bump=air_dropper.bump
     )]
     pub air_dropper: Box<Account<'info, AirDropper>>,
     #[account(mut,
-    seeds = [b"ClaimMarker".as_ref(), claimant.key().as_ref()],
+    seeds = [b"ClaimMarker".as_ref(), signer.key().as_ref()],
     bump=claim_marker.bump
     )]
     pub claim_marker: Box<Account<'info, ClaimMarker>>,
@@ -31,7 +30,7 @@ pub struct ClaimMarkerContext<'info> {
     mut,
     token::mint = mint,
     token::authority = air_dropper,
-    seeds = [b"ClaimMarker".as_ref(), mint.key().as_ref(), claimant.key().as_ref()],
+    seeds = [b"ClaimMarker".as_ref(), mint.key().as_ref(), signer.key().as_ref()],
     bump
     )]
     pub claim_marker_token_account: Box<Account<'info, TokenAccount>>,
@@ -60,6 +59,6 @@ pub fn claim_marker(ctx: Context<ClaimMarkerContext>) -> Result<()> {
         claim_marker.amount,
         &[seeds],
     )?;
-    claim_marker.is_claimed = false;
+    claim_marker.is_claimed = true;
     Ok(())
 }
