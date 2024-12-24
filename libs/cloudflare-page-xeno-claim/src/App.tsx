@@ -7,6 +7,7 @@ import '@solana/wallet-adapter-react-ui/styles.css'
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react'
 import { BrowserRouter, Route, Routes } from "react-router";
 import Starting from './pages'
+import Claimed from './pages/claimed'
 
 const App = () => {
   const network = WalletAdapterNetwork.Mainnet
@@ -33,6 +34,7 @@ const App = () => {
             <BrowserRouter>
               <Routes>
                 <Route path="/" element={<Starting />} />
+                <Route path="/claimed" element={<Claimed />} />
               </Routes>
             </BrowserRouter>
           </main>
