@@ -5,6 +5,8 @@ import { WalletAdapterNetwork } from '@solana/wallet-adapter-base'
 import { useMemo } from 'react'
 import '@solana/wallet-adapter-react-ui/styles.css'
 import { ConnectionProvider, WalletProvider } from '@solana/wallet-adapter-react'
+import { BrowserRouter, Route, Routes } from "react-router";
+import Starting from './pages'
 
 const App = () => {
   const network = WalletAdapterNetwork.Mainnet
@@ -28,7 +30,11 @@ const App = () => {
                 March 31st, 2025.
               </p>
             </hgroup>
-            <slot />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Starting />} />
+              </Routes>
+            </BrowserRouter>
           </main>
         </WalletProvider>
       </ConnectionProvider>
