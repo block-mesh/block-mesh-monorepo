@@ -1,17 +1,48 @@
 import MenuMain from '../components/MenuMain'
 import FormMain from '../components/FormMain'
 import styles from './claimed.module.css'
+import { useConnection, useWallet } from '@solana/wallet-adapter-react'
+import { useClaim } from '../context/claimContex.tsx'
+import { useEffect, useState } from 'react'
+import { getClaimMarkerAccount } from '../airdrop/merkle-distributor-helpers/pda.ts'
+import { LAMPORTS_PER_SOL } from '@solana/web3.js'
 
-const address = `HN7cABqLq46Es1jh92dQQisAq662SmxELLLsHHe4YWrH`
-const displayedAddress = `${address.slice(0, 4)}…${address.slice(-4)}`
 
 const Claimed = () => {
+  const claimContext = useClaim()
+  const walletContextState = useWallet()
+  const { connection } = useConnection()
+  const [address, setAddress] = useState('')
+  const [displayedAddress, setDisplayedAddress] = useState('')
+
+  async function disconnect() {
+    console.log('disconnect')
+    if (walletContextState.publicKey && connection) {
+      await walletContextState.disconnect()
+      await navigate('/')
+    } else {
+      setError('Please connect wallet')
+    }
+  }
+
+  useEffect(() => {
+    setDisplayedAddress(`${address.slice(0, 4)}…${address.slice(-4)}`)
+  }, [address])
+
+  useEffect(() => {
+    (async () => {
+      if (walletContextState.publicKey && connection) {
+        setAddress(walletContextState.publicKey.toBase58())
+      }
+    })()
+  }, [walletContextState.connected])
+
   return (
     <>
       <MenuMain current="claimed" />
       <FormMain>
         <p>
-          <data value={17_842.36}>17,842.36 $XENO</data>
+          <data value={claimContext.amount}>{claimContext.amount} $XENO</data>
           have been sent to
           <button
             type="button"
@@ -27,7 +58,7 @@ const Claimed = () => {
         <img className={styles.img} src="/xeno-coin.png" aria-hidden="true" alt="" />
         <img className={styles.img} src="/xeno-coin.png" aria-hidden="true" alt="" />
       </FormMain>
-      <button type="button" className={`ghost ${styles.button}`}>
+      <button type="button" className={`ghost ${styles.button}`} onClick={disconnect}>
         <u>Connect another wallet</u>
       </button>
     </>

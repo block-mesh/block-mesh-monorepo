@@ -11,7 +11,10 @@
     "deploy": "npm run build && wrangler pages deploy ./dist --skip-caching"
   },
   "dependencies": {
+    "@coral-xyz/anchor": "0.29.0",
     "@metaplex-foundation/js": "^0.20.1",
+    "@metaplex-foundation/beet-solana": "0.4.1",
+    "@metaplex-foundation/solita": "0.20.1",
     "@metaplex-foundation/mpl-token-metadata": "^3.3.0",
     "@metaplex-foundation/umi-bundle-defaults": "^0.9.2",
     "@pythnetwork/price-service-client": "^1.9.0",
@@ -20,7 +23,7 @@
     "@solana/wallet-adapter-react": "^0.15.35",
     "@solana/wallet-adapter-react-ui": "^0.9.35",
     "@solana/wallet-adapter-wallets": "^0.19.32",
-    "@solana/web3.js": "^1.95.8",
+    "@solana/web3.js": "^1.98.0",
     "bs58": "^6.0.0",
     "flowbite-react": "^0.10.2",
     "react": "^18.3.1",
