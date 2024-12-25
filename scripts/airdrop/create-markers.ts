@@ -48,7 +48,7 @@ async function main() {
   console.log('claimMarker', claimMarker.pretty())
   // return
 
-  const to = new PublicKey('FYTeY3nrrd2EqxXGq98tZ2GRfYjhjeQnNjZ54HunG1mg')
+  const to = new PublicKey('Eic4L8eAagxmw4Pud8AmAeKQkhJC7vaPzo8GqBxx5dfo')
 
   const instruction = createMarker(admin.publicKey, mint, to, LAMPORTS_PER_SOL)
   const sigx = await processTransaction(
