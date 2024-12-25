@@ -27,6 +27,7 @@ export const claimMarkerStruct = new beet.BeetArgsStruct<{
  * @property [_writable_] signerTokenAccount
  * @property [] airDropper
  * @property [_writable_] claimMarker
+ * @property [_writable_] claimMarker2
  * @property [_writable_] claimMarkerTokenAccount
  * @property [] mint
  * @property [] associatedTokenProgram
@@ -39,6 +40,7 @@ export type ClaimMarkerInstructionAccounts = {
   signerTokenAccount: web3.PublicKey
   airDropper: web3.PublicKey
   claimMarker: web3.PublicKey
+  claimMarker2: web3.PublicKey
   claimMarkerTokenAccount: web3.PublicKey
   mint: web3.PublicKey
   systemProgram?: web3.PublicKey
@@ -85,6 +87,11 @@ export function createClaimMarkerInstruction(
     },
     {
       pubkey: accounts.claimMarker,
+      isWritable: true,
+      isSigner: false,
+    },
+    {
+      pubkey: accounts.claimMarker2,
       isWritable: true,
       isSigner: false,
     },

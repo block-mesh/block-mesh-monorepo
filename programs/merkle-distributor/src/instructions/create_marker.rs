@@ -25,6 +25,7 @@ pub struct CreateMarkerContext<'info> {
     pub claimant: UncheckedAccount<'info>,
     #[account(
     seeds = [b"AirDropper".as_ref()],
+    constraint = air_dropper.owner == signer.key(),
     bump=air_dropper.bump
     )]
     pub air_dropper: Box<Account<'info, AirDropper>>,

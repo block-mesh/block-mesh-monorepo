@@ -58,7 +58,7 @@ export async function processTransaction(
     preflightCommitment: 'confirmed',
     skipPreflight: true
   })
-  // console.log("Transaction signature: ", sig);
+  console.log('Transaction signature: ', sig)
   const strategy: BlockheightBasedTransactionConfirmationStrategy = {
     signature: sig,
     blockhash: blockStats.blockhash,
