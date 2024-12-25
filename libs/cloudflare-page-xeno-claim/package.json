@@ -12,10 +12,10 @@
   },
   "dependencies": {
     "@coral-xyz/anchor": "0.29.0",
-    "@metaplex-foundation/js": "^0.20.1",
     "@metaplex-foundation/beet-solana": "0.4.1",
-    "@metaplex-foundation/solita": "0.20.1",
+    "@metaplex-foundation/js": "^0.20.1",
     "@metaplex-foundation/mpl-token-metadata": "^3.3.0",
+    "@metaplex-foundation/solita": "0.20.1",
     "@metaplex-foundation/umi-bundle-defaults": "^0.9.2",
     "@pythnetwork/price-service-client": "^1.9.0",
     "@solana/spl-token": "^0.4.9",
