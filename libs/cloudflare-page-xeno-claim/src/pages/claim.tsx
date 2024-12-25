@@ -49,13 +49,13 @@ const Claim = () => {
         setAddress(walletContextState.publicKey.toBase58())
         const claimMarker = await getClaimMarkerAccount(connection, walletContextState.publicKey)
         // @ts-ignore
-        claimContext.setAmount(claimMarker.pretty().amount / LAMPORTS_PER_SOL)
+        claimContext.setAmount(claimMarker.pretty().amount / LAMPORTS_PER_SOL / 1000)
         claimContext.setClaimed(claimMarker.isClaimed)
         // @ts-ignore
-        if (claimMarker.pretty().amount / LAMPORTS_PER_SOL >= 500) {
+        if (claimMarker.pretty().amount / LAMPORTS_PER_SOL / 1000 >= 500) {
           setTier('Tier 1')
           // @ts-ignore
-        } else if (claimMarker.pretty().amount / LAMPORTS_PER_SOL >= 100) {
+        } else if (claimMarker.pretty().amount / LAMPORTS_PER_SOL / 1000 >= 100) {
           setTier('Tier 2')
           // @ts-ignore
         } else {
