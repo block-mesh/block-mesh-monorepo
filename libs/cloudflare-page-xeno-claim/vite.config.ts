@@ -12,6 +12,11 @@ export default defineConfig({
   server: {
     watch: {
       usePolling: true
+    },
+    cors: {
+      allowedHeaders: '*',
+      methods: '*',
+      origin: '*'
     }
   },
   plugins: [react(),
