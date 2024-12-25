@@ -6,7 +6,7 @@ pub fn ClaimsCard(
     title_link: &'static str,
     value: &'static str,
     value_scale: &'static str,
-    dexscreener_link: &'static str,
+    claim_link: &'static str,
     cookie_fun_link: &'static str,
     disabled: bool,
     children: ChildrenFn,
@@ -44,7 +44,7 @@ pub fn ClaimsCard(
                             }
                         >
 
-                            <a href=dexscreener_link target="_blank">
+                            <a href=claim_link target="_blank">
                                 <span class="font-bold text-4xl">{value}</span>
                                 <small>{value_scale}</small>
                             </a>
