@@ -23,9 +23,18 @@ pub struct ClaimMarkerContext<'info> {
     pub air_dropper: Box<Account<'info, AirDropper>>,
     #[account(mut,
     seeds = [b"ClaimMarker".as_ref(), signer.key().as_ref()],
+    constraint = claim_marker.claimant == signer.key(),
     bump=claim_marker.bump
     )]
     pub claim_marker: Box<Account<'info, ClaimMarker>>,
+    #[account(
+    init,
+    payer = signer,
+    seeds = [b"ClaimMarker2".as_ref(), signer.key().as_ref()],
+    space = 600,
+    bump
+    )]
+    pub claim_marker2: Box<Account<'info, ClaimMarker>>,
     #[account(
     mut,
     token::mint = mint,
@@ -47,6 +56,10 @@ pub fn claim_marker(ctx: Context<ClaimMarkerContext>) -> Result<()> {
     let signer_token_account = &ctx.accounts.signer_token_account;
     let claim_marker_token_account = &ctx.accounts.claim_marker_token_account;
     let claim_marker = &mut ctx.accounts.claim_marker;
+    let claim_marker2 = &mut ctx.accounts.claim_marker2;
+    claim_marker2.bump = ctx.bumps.claim_marker2;
+    claim_marker2.amount = claim_marker.amount;
+    claim_marker2.claimant = claim_marker.claimant;
     let air_dropper = &ctx.accounts.air_dropper;
     require_eq!(claim_marker.is_claimed, false);
     require_keys_eq!(signer.key(), claim_marker.claimant);
@@ -60,5 +73,6 @@ pub fn claim_marker(ctx: Context<ClaimMarkerContext>) -> Result<()> {
         &[seeds],
     )?;
     claim_marker.is_claimed = true;
+    claim_marker2.is_claimed = true;
     Ok(())
 }

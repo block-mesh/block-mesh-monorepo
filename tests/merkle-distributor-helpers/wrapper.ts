@@ -7,7 +7,7 @@ import {
   CreateMarkerInstructionAccounts,
   CreateMarkerInstructionArgs
 } from '../merkle-distributor-libs'
-import { getAirDropperAddress, getClaimMarkerAddress, getClaimMarkerTokenAccount } from './pda'
+import { getAirDropperAddress, getClaimMarkerAddress, getClaimMarkerAddress2, getClaimMarkerTokenAccount } from './pda'
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync
@@ -53,6 +53,7 @@ export function claimMarker(signer: PublicKey, mint: PublicKey): TransactionInst
   const [airDropper] = getAirDropperAddress()
   const signerTokenAccount = getAssociatedTokenAddressSync(mint, signer)
   const [claimMarker] = getClaimMarkerAddress(signer)
+  const [claimMarker2] = getClaimMarkerAddress2(signer)
   const [claimMarkerTokenAccount] = getClaimMarkerTokenAccount(mint, signer)
 
   const accounts: ClaimMarkerInstructionAccounts = {
@@ -60,6 +61,7 @@ export function claimMarker(signer: PublicKey, mint: PublicKey): TransactionInst
     signerTokenAccount,
     airDropper,
     claimMarker,
+    claimMarker2,
     claimMarkerTokenAccount,
     mint,
     associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID

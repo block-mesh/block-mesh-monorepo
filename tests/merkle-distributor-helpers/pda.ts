@@ -21,6 +21,13 @@ export function getClaimMarkerAddress(claimant: PublicKey): [PublicKey, number] 
   )
 }
 
+export function getClaimMarkerAddress2(claimant: PublicKey): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [Buffer.from(anchor.utils.bytes.utf8.encode('ClaimMarker2')), claimant.toBuffer()],
+    PROGRAM_ID
+  )
+}
+
 export async function getClaimMarkerAccount(connection: Connection, claimant: PublicKey): Promise<ClaimMarker> {
   const [claimMarker] = getClaimMarkerAddress(claimant)
   return await ClaimMarker.fromAccountAddress(connection, claimMarker)

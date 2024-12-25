@@ -1,4 +1,4 @@
-import { Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
+import { ComputeBudgetProgram, Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
 import {
   getOrCreateTokenAccountInstruction,
   processTransaction, sleep
@@ -31,13 +31,13 @@ function getConnection(network: Network): Connection {
   if (network === Network.DEVNET) {
     return new Connection('https://devnet.helius-rpc.com/?api-key=cb443ba5-0587-4bf8-8274-9194e993f45e')
   } else {
-    return new Connection('https://api.mainnet-beta.solana.com')
+    return new Connection('https://mainnet.helius-rpc.com/?api-key=0b25ef9e-0fd3-4fb5-a5fb-deec31b9017b')
   }
 }
 
 async function main() {
-  const admin = loadWalletKey('~/.config/solana/id.json')
-  const connection = getConnection(Network.DEVNET)
+  const admin = loadWalletKey('/Users/ohaddahan/.config/solana/id.json')
+  const connection = getConnection(Network.MAINNET)
   // const mint = await createMint(
   //   connection,
   //   admin,
@@ -45,8 +45,8 @@ async function main() {
   //   tokenMintAuthority.publicKey,
   //   9
   // )
-  const mint = new PublicKey('3XP1qCMCKsNmCp2G2inog3ztvFKPJRsAoZBjMtv1geGQ')
-  console.log('mint created', mint.toBase58())
+  const mint = new PublicKey('Db7ZUaWTThwZy7bVhjn5Dda8D3fbbAhihcxPV4m9pump')
+  // console.log('mint created', mint.toBase58())
 
   // const ata = await createAssociatedTokenAccount(connection, admin, mint, admin.publicKey)
   // const instructions = await getOrCreateTokenAccountInstruction(
@@ -79,12 +79,21 @@ async function main() {
   // )
   // console.log('mintTO done')
 
+
+  const modifyComputeUnits = ComputeBudgetProgram.setComputeUnitLimit({
+    units: 1000000
+  })
+  const addPriorityFee = ComputeBudgetProgram.setComputeUnitPrice({
+    microLamports: 5000
+  })
+
   const instruction = createAirDropperInstruction(admin.publicKey, mint)
   const sigx = await processTransaction(
-    [instruction],
+    [modifyComputeUnits, addPriorityFee, instruction],
     connection,
     admin
   )
+  console.log('sigx', sigx)
   const txnx = await connection.getParsedTransaction(
     sigx.Signature,
     'confirmed'

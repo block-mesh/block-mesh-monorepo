@@ -6,6 +6,8 @@ solana_version = "1.18.20"
 #resolution = true
 skip-lint = false
 
+# solana program deploy --use-rpc --max-sign-attempts 55  --with-compute-unit-price 50000 target/sbf-solana-solana/release/merkle_distributor.so --program-id AZMc26abaSP7si1wtLaV5yPxTxpWd895M8YpJFFdQ8Qw --max-len 500000 --use-quic --allow-excessive-deploy-account-balance  --url ""
+
 [programs.localnet]
 blockmesh-program = "FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGhgCuHHJ"
 merkle-distributor = "AZMc26abaSP7si1wtLaV5yPxTxpWd895M8YpJFFdQ8Qw"
@@ -14,7 +16,7 @@ merkle-distributor = "AZMc26abaSP7si1wtLaV5yPxTxpWd895M8YpJFFdQ8Qw"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "devnet"
+cluster = "Localnet"
 wallet = "~/.config/solana/id.json"
 
 [workspace]
