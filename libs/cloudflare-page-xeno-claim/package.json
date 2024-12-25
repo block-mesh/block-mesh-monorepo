@@ -8,7 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "npm run build && wrangler pages dev ./dist",
-    "deploy": "npm run build && wrangler pages deploy ./dist --skip-caching"
+    "deploy": "npm run build && wrangler pages deploy ./dist --skip-caching --keep-vars"
   },
   "dependencies": {
     "@coral-xyz/anchor": "0.29.0",
