@@ -37,7 +37,7 @@ function getConnection(network: Network): Connection {
 }
 
 async function main() {
-  const admin = loadWalletKey('/Users/ohaddahan/.config/solana/id.json')
+  const admin = loadWalletKey('~/.config/solana/id.json')
   const connection = getConnection(Network.DEVNET)
   const mint = new PublicKey('3XP1qCMCKsNmCp2G2inog3ztvFKPJRsAoZBjMtv1geGQ')
 
