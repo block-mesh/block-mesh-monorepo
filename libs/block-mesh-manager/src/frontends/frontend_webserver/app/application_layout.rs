@@ -6,6 +6,7 @@ use crate::frontends::components::icons::logout_icon::LogoutIcon;
 #[allow(unused_imports)]
 use crate::frontends::components::icons::medal_icon::MedalIcon;
 use crate::frontends::components::icons::perk_icon::PerkIcon;
+use crate::frontends::components::icons::token_icon::TokenIcon;
 use crate::frontends::components::navbars::navbar::Navbar;
 use crate::frontends::components::navbars::navbar_section::NavbarSection;
 use crate::frontends::components::navbars::navbar_spacer::NavbarSpacer;
@@ -69,14 +70,12 @@ pub fn ApplicationSidebar() -> impl IntoView {
                         <PerkIcon/>
                         <SidebarLabel>Perks</SidebarLabel>
                     </SidebarItemLink>
-                // <SidebarItemLink href="/ui/daily_leaderboard">
-                // <MedalIcon/>
-                // <SidebarLabel>Daily Leaderboard</SidebarLabel>
-                // </SidebarItemLink>
+                    <SidebarItemLink href="/ui/claims">
+                        <TokenIcon/>
+                        <SidebarLabel>Claims</SidebarLabel>
+                    </SidebarItemLink>
                 </SidebarSection>
-
                 <SidebarSpacer/>
-
                 <SidebarSection>
                     <SidebarItemLink href="/logout" rel="external">
                         <LogoutIcon/>

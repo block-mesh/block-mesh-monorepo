@@ -54,13 +54,13 @@ pub fn Perks() -> impl IntoView {
     let connect_action = create_action(move |wallet: &String| {
         let w = wallet.clone();
         async move {
-            // if !button_enabled.get_untracked() {
-            //     notifications.set_error("Wallet already connected");
-            //     return;
-            // }
-            if connect_wallet_in_browser(w).await {
-                // button_enabled.set(false)
-                notifications.set_success("Wallet connected");
+            match connect_wallet_in_browser(w).await {
+                Ok(_) => {
+                    notifications.set_success("Wallet connected");
+                }
+                Err(e) => {
+                    notifications.set_error(e.to_string());
+                }
             }
         }
     });
@@ -72,11 +72,7 @@ pub fn Perks() -> impl IntoView {
         <div class="lg:flex items-start justify-start gap-4">
             <Heading>Perks</Heading>
             <Show when=move || enable_proof_of_humanity.get() fallback=|| view! {}>
-                <a
-                    rel="external"
-                    href="/proof_of_humanity"
-                    class=BUTTON_CLASS
-                >
+                <a rel="external" href="/proof_of_humanity" class=BUTTON_CLASS>
                     <PersonIcon/>
                     "Proof of Humanity"
                 </a>
@@ -88,10 +84,7 @@ pub fn Perks() -> impl IntoView {
                     <InfoIcon/>
                 </a>
             </Show>
-            <button
-                on:click=move |_| on_connect_button_click()
-                class=BUTTON_CLASS
-            >
+            <button on:click=move |_| on_connect_button_click() class=BUTTON_CLASS>
                 <span class="material-symbols-outlined">wallet</span>
                 {move || {
                     if button_enabled.get() {
@@ -100,8 +93,9 @@ pub fn Perks() -> impl IntoView {
                         format!("Wallet Connected:  {}", wallet_address.get())
                     }
                 }}
+
             </button>
-               <a
+            <a
                 rel="external"
                 target="_blank"
                 href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/CONNECT_WALLET.md"
@@ -122,6 +116,7 @@ pub fn Perks() -> impl IntoView {
                         "Connect Twitter"
                     }
                 }}
+
             </a>
             <a
                 rel="external"
@@ -143,6 +138,7 @@ pub fn Perks() -> impl IntoView {
                         "Follow Founder"
                     }
                 }}
+
             </a>
             <a
                 rel="external"
@@ -151,7 +147,7 @@ pub fn Perks() -> impl IntoView {
             >
                 <InfoIcon/>
             </a>
-                <a
+            <a
                 rel="external"
                 href=format!("/twitter/login?target={}", XENO_TWITTER_USER_ID)
                 class=BUTTON_CLASS

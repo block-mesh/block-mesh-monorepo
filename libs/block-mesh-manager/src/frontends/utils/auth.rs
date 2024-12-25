@@ -68,24 +68,25 @@ pub async fn connect_wallet(
     Ok(response)
 }
 
-pub async fn connect_wallet_in_browser(wallet: String) -> bool {
+pub async fn connect_wallet_in_browser(wallet: String) -> anyhow::Result<()> {
     if wallet.is_empty() {
-        return false;
+        return Err(anyhow!("No wallet selected"));
     }
     let msg = Uuid::new_v4().to_string();
     let key = pubkey(&wallet).await;
+    if key.as_string().unwrap_or_default().is_empty() {
+        return Err(anyhow!("Couldn't find wallet {}", wallet));
+    }
     let sign = sign_message(&msg, &wallet).await;
-
-    let uint8_array = Uint8Array::new(&sign);
+    if sign.is_string() {
+        return Err(anyhow!("Failed to sign"));
+    }
+    let uint8_array = Uint8Array::new(&sign.clone());
     let mut signature = vec![0; uint8_array.length() as usize];
     uint8_array.copy_to(&mut signature[..]);
-
     let origin = window().origin();
-
     let pubkey = key.as_string().unwrap();
-
     let notifications = expect_context::<NotificationContext>();
-
     match connect_wallet(
         origin,
         ConnectWalletRequest {
@@ -98,21 +99,22 @@ pub async fn connect_wallet_in_browser(wallet: String) -> bool {
     {
         Ok(response) => {
             if response.status != 200 {
-                notifications.set_error(format!(
+                let msg = format!(
                     "Failed to connect wallet due to error: {}",
                     response.message.unwrap_or_default()
-                ));
-                false
+                );
+                notifications.set_error(msg.clone());
+                Err(anyhow!(msg))
             } else {
                 let auth = expect_context::<AuthContext>();
                 auth.wallet_address.set(Some(pubkey));
                 notifications.set_success("Connected successfully");
-                true
+                Ok(())
             }
         }
-        Err(_) => {
+        Err(e) => {
             notifications.set_error("Failed to connect");
-            false
+            Err(anyhow!("Failed wallet connection due to: {}", e))
         }
     }
 }
