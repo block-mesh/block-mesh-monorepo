@@ -4,9 +4,7 @@ import styles from './claimed.module.css'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { useClaim } from '../context/claimContex.tsx'
 import { useEffect, useState } from 'react'
-import { getClaimMarkerAccount } from '../airdrop/merkle-distributor-helpers/pda.ts'
-import { LAMPORTS_PER_SOL } from '@solana/web3.js'
-
+import { useNavigate } from 'react-router'
 
 const Claimed = () => {
   const claimContext = useClaim()
@@ -14,14 +12,13 @@ const Claimed = () => {
   const { connection } = useConnection()
   const [address, setAddress] = useState('')
   const [displayedAddress, setDisplayedAddress] = useState('')
+  const navigate = useNavigate()
 
   async function disconnect() {
     console.log('disconnect')
     if (walletContextState.publicKey && connection) {
       await walletContextState.disconnect()
       await navigate('/')
-    } else {
-      setError('Please connect wallet')
     }
   }
 
