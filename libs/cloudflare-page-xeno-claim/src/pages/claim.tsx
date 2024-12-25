@@ -6,6 +6,8 @@ import styles from './claim.module.css'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
+import { Switch, Case } from 'react-if'
+
 import {
   BlockheightBasedTransactionConfirmationStrategy,
   LAMPORTS_PER_SOL,
@@ -25,6 +27,7 @@ const Claim = () => {
   const { connection } = useConnection()
   const [address, setAddress] = useState('')
   const [displayedAddress, setDisplayedAddress] = useState('')
+  const [tier, setTier] = useState('')
 
   useEffect(() => {
     setDisplayedAddress(`${address.slice(0, 4)}…${address.slice(-4)}`)
@@ -48,6 +51,17 @@ const Claim = () => {
         // @ts-ignore
         claimContext.setAmount(claimMarker.pretty().amount / LAMPORTS_PER_SOL)
         claimContext.setClaimed(claimMarker.isClaimed)
+        // @ts-ignore
+        if (claimMarker.pretty().amount / LAMPORTS_PER_SOL >= 500) {
+          setTier('Tier 1')
+          // @ts-ignore
+        } else if (claimMarker.pretty().amount / LAMPORTS_PER_SOL >= 100) {
+          setTier('Tier 2')
+          // @ts-ignore
+        } else {
+          setTier('Tier 3')
+        }
+
       }
     })()
   }, [walletContextState.connected])
@@ -95,18 +109,45 @@ const Claim = () => {
         aria-busy={claiming}
         data-current-item="claiming"
       >
-        <FigureTier className={styles.offset}>Tier 1</FigureTier>
-        <p>
-          Congrats! <button
-          type="button"
-          className={`ghost ${styles.button}`}
-          title="Connect another wallet"
-        >
-          <u>{displayedAddress}</u>
-        </button> is eligible to <data value={claimContext.amount} className={styles.amount}>
-          {claimContext.amount} $XENO
-        </data>
-        </p>
+
+        <Switch>
+          <Case condition={claimContext.amount > 0 && !claimContext.claimed}>
+            <FigureTier className={styles.offset}>{tier}</FigureTier>
+            <p>
+              Congrats! <button
+              type="button"
+              className={`ghost ${styles.button}`}
+              title="Connect another wallet"
+            >
+              <u>{displayedAddress}</u>
+            </button> is eligible to <data value={claimContext.amount} className={styles.amount}>
+              {claimContext.amount} $XENO
+            </data>
+            </p>
+            <ButtonMain onClick={async (e) => {
+              e.preventDefault()
+              await claim()
+            }}>
+              {claiming ? 'Claiming...' : 'Claim now'}
+            </ButtonMain>
+          </Case>
+          <Case condition={claimContext.amount > 0 && claimContext.claimed}>
+            <p>
+              Congrats!
+              <u>{displayedAddress}</u>
+              already claimed <data value={claimContext.amount} className={styles.amount}>
+              {claimContext.amount} $XENO
+            </data>
+            </p>
+          </Case>
+          <Case condition={claimContext.amount == 0}>
+            <p>
+              Sorry!
+              <u>{displayedAddress}</u>
+              is not eligible for $XENO
+            </p>
+          </Case>
+        </Switch>
         {!!error &&
           (
             <output className="error">
@@ -114,12 +155,6 @@ const Claim = () => {
             </output>
           )
         }
-        <ButtonMain onClick={async (e) => {
-          e.preventDefault()
-          await claim()
-        }}>
-          {claiming ? 'Claiming...' : 'Claim now'}
-        </ButtonMain>
       </FormMain>
       <button type="button" className={`ghost ${styles.button}`} onClick={disconnect}>
         <u>Connect another wallet</u>
