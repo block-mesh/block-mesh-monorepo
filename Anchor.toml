@@ -14,7 +14,7 @@ merkle-distributor = "AZMc26abaSP7si1wtLaV5yPxTxpWd895M8YpJFFdQ8Qw"
 url = "https://api.apr.dev"
 
 [provider]
-cluster = "Localnet"
+cluster = "devnet"
 wallet = "~/.config/solana/id.json"
 
 [workspace]

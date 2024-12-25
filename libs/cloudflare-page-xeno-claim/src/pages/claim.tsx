@@ -3,16 +3,89 @@ import MenuMain from '../components/MenuMain'
 import FigureTier from '../components/FigureTier'
 import ButtonMain from '../components/ButtonMain'
 import styles from './claim.module.css'
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
-
-const address = `HN7cABqLq46Es1jh92dQQisAq662SmxELLLsHHe4YWrH`
-const displayedAddress = `${address.slice(0, 4)}…${address.slice(-4)}`
+import { useConnection, useWallet } from '@solana/wallet-adapter-react'
+import {
+  BlockheightBasedTransactionConfirmationStrategy,
+  LAMPORTS_PER_SOL,
+  PublicKey,
+  Transaction
+} from '@solana/web3.js'
+import { getClaimMarkerAccount } from '../airdrop/merkle-distributor-helpers/pda.ts'
+import { claimMarker } from '../airdrop/merkle-distributor-helpers/wrapper.ts'
+import { useClaim } from '../context/claimContex.tsx'
 
 const Claim = () => {
   const navigate = useNavigate()
   const [claiming, setClaiming] = useState(false)
+  const claimContext = useClaim()
   const [error, setError] = useState('')
+  const walletContextState = useWallet()
+  const { connection } = useConnection()
+  const [address, setAddress] = useState('')
+  const [displayedAddress, setDisplayedAddress] = useState('')
+
+  useEffect(() => {
+    setDisplayedAddress(`${address.slice(0, 4)}…${address.slice(-4)}`)
+  }, [address])
+
+  async function disconnect() {
+    console.log('disconnect')
+    if (walletContextState.publicKey && connection) {
+      await walletContextState.disconnect()
+      await navigate('/')
+    } else {
+      setError('Please connect wallet')
+    }
+  }
+
+  useEffect(() => {
+    (async () => {
+      if (walletContextState.publicKey && connection) {
+        setAddress(walletContextState.publicKey.toBase58())
+        const claimMarker = await getClaimMarkerAccount(connection, walletContextState.publicKey)
+        // @ts-ignore
+        claimContext.setAmount(claimMarker.pretty().amount / LAMPORTS_PER_SOL)
+        claimContext.setClaimed(claimMarker.isClaimed)
+      }
+    })()
+  }, [walletContextState.connected])
+
+
+  async function claim() {
+    try {
+      setClaiming(true)
+      claimContext.setClaimed(true)
+      await navigate('/claimed')
+      if (walletContextState.sendTransaction && walletContextState.publicKey && connection && walletContextState.signTransaction) {
+        // const mint = new PublicKey('3XP1qCMCKsNmCp2G2inog3ztvFKPJRsAoZBjMtv1geGQ')
+        // const block = await connection.getLatestBlockhash('confirmed')
+        // const instruction = claimMarker(walletContextState.publicKey, mint)
+        // const txn = new Transaction()
+        // txn.lastValidBlockHeight = block.lastValidBlockHeight
+        // txn.feePayer = walletContextState.publicKey
+        // txn.recentBlockhash = block.blockhash
+        // txn.add(instruction)
+        // const signedTxn = await walletContextState.signTransaction(txn)
+        // const sig = await walletContextState.sendTransaction(signedTxn, connection)
+        // const strategy: BlockheightBasedTransactionConfirmationStrategy = {
+        //   signature: sig,
+        //   blockhash: block.blockhash,
+        //   lastValidBlockHeight: block.lastValidBlockHeight
+        // }
+        // const result = await connection.confirmTransaction(strategy, 'confirmed')
+        // if (result.value.err === null) {
+        //   claimContext.setClaimed(true)
+        // } else {
+        //   setError('Transaction failed')
+        // }
+      }
+    } catch (error) {
+      console.log('CLAIM error', error)
+    }
+    setClaiming(false)
+  }
 
   return (
     <>
@@ -29,8 +102,8 @@ const Claim = () => {
           title="Connect another wallet"
         >
           <u>{displayedAddress}</u>
-        </button> is eligible to <data value={17_842.36} className={styles.amount}>
-          17,842.36 $XENO
+        </button> is eligible to <data value={claimContext.amount} className={styles.amount}>
+          {claimContext.amount} $XENO
         </data>
         </p>
         {!!error &&
@@ -40,31 +113,14 @@ const Claim = () => {
             </output>
           )
         }
-        <ButtonMain
-          onClick={async (e) => {
-            e.preventDefault()
-            setClaiming(true)
-            setError('')
-            try {
-              await new Promise((resolve) => {
-                setTimeout(() => {
-                  resolve(void 0)
-                }, 2_000)
-              })
-              // --> redirect to /claim
-              await navigate('/claimed')
-            } catch (error) {
-              console.error(error)
-              setError(`An error occured`)
-            } finally {
-              setClaiming(false)
-            }
-          }}
-        >
+        <ButtonMain onClick={async (e) => {
+          e.preventDefault()
+          await claim()
+        }}>
           {claiming ? 'Claiming...' : 'Claim now'}
         </ButtonMain>
       </FormMain>
-      <button type="button" className={`ghost ${styles.button}`}>
+      <button type="button" className={`ghost ${styles.button}`} onClick={disconnect}>
         <u>Connect another wallet</u>
       </button>
     </>
