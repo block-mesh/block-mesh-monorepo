@@ -14,8 +14,8 @@ use block_mesh_common::env::environment::Environment;
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use clickhouse::Client;
 use database_utils::utils::connection::follower_pool::follower_pool;
-use database_utils::utils::connection::write_pool::write_pool;
-use database_utils::utils::migrate::migrate;
+// use database_utils::utils::connection::write_pool::write_pool;
+// use database_utils::utils::migrate::migrate;
 use flume::Sender;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
 use sqlx::PgPool;
@@ -71,11 +71,10 @@ fn main() {
 #[derive(Clone)]
 pub struct DataSinkAppState {
     pub clickhouse_client: Arc<Client>,
-    pub data_sink_db_pool: PgPool,
     pub follower_db_pool: PgPool,
     pub environment: Environment,
     pub use_clickhouse: bool,
-    tx: Sender<DataSinkClickHouse>,
+    pub tx: Sender<DataSinkClickHouse>,
 }
 
 impl DataSinkAppState {
@@ -105,13 +104,11 @@ impl DataSinkAppState {
                     .with_option("wait_for_async_insert", "0"),
             )
         };
-        let data_sink_db_pool = write_pool(None).await;
         let follower_db_pool = follower_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
         Self {
             tx,
             use_clickhouse,
             clickhouse_client,
-            data_sink_db_pool,
             follower_db_pool,
             environment,
         }
@@ -131,12 +128,11 @@ async fn run() -> anyhow::Result<()> {
     );
     let state = DataSinkAppState::new(tx).await;
     let clickhouse_client = state.clickhouse_client.clone();
-    let env = env::var("APP_ENVIRONMENT").expect("APP_ENVIRONMENT is not set");
+    let _env = env::var("APP_ENVIRONMENT").expect("APP_ENVIRONMENT is not set");
     let (joiner_tx, joiner_rx) = flume::bounded::<JoinHandle<()>>(500);
-
-    migrate(&state.data_sink_db_pool, env)
-        .await
-        .expect("Failed to migrate database");
+    // migrate(&state.data_sink_db_pool, env)
+    //     .await
+    //     .expect("Failed to migrate database");
     migrate_clickhouse(&state.clickhouse_client)
         .await
         .expect("Failed to migrate clickhouse");
