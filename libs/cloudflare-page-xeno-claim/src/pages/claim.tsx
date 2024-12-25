@@ -9,12 +9,12 @@ import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import {
   BlockheightBasedTransactionConfirmationStrategy,
   LAMPORTS_PER_SOL,
-  PublicKey,
   Transaction
 } from '@solana/web3.js'
 import { getClaimMarkerAccount } from '../airdrop/merkle-distributor-helpers/pda.ts'
 import { claimMarker } from '../airdrop/merkle-distributor-helpers/wrapper.ts'
 import { useClaim } from '../context/claimContex.tsx'
+import { mint } from '../constants.ts'
 
 const Claim = () => {
   const navigate = useNavigate()
@@ -57,29 +57,30 @@ const Claim = () => {
     try {
       setClaiming(true)
       claimContext.setClaimed(true)
-      await navigate('/claimed')
-      if (walletContextState.sendTransaction && walletContextState.publicKey && connection && walletContextState.signTransaction) {
-        // const mint = new PublicKey('3XP1qCMCKsNmCp2G2inog3ztvFKPJRsAoZBjMtv1geGQ')
-        // const block = await connection.getLatestBlockhash('confirmed')
-        // const instruction = claimMarker(walletContextState.publicKey, mint)
-        // const txn = new Transaction()
-        // txn.lastValidBlockHeight = block.lastValidBlockHeight
-        // txn.feePayer = walletContextState.publicKey
-        // txn.recentBlockhash = block.blockhash
-        // txn.add(instruction)
-        // const signedTxn = await walletContextState.signTransaction(txn)
-        // const sig = await walletContextState.sendTransaction(signedTxn, connection)
-        // const strategy: BlockheightBasedTransactionConfirmationStrategy = {
-        //   signature: sig,
-        //   blockhash: block.blockhash,
-        //   lastValidBlockHeight: block.lastValidBlockHeight
-        // }
-        // const result = await connection.confirmTransaction(strategy, 'confirmed')
-        // if (result.value.err === null) {
-        //   claimContext.setClaimed(true)
-        // } else {
-        //   setError('Transaction failed')
-        // }
+      if (walletContextState.publicKey && connection && walletContextState.signTransaction) {
+        const block = await connection.getLatestBlockhash('confirmed')
+        const instruction = claimMarker(walletContextState.publicKey, mint)
+        const txn = new Transaction()
+        txn.lastValidBlockHeight = block.lastValidBlockHeight
+        txn.feePayer = walletContextState.publicKey
+        txn.recentBlockhash = block.blockhash
+        txn.add(instruction)
+        const signedTxn = await walletContextState.signTransaction(txn)
+        const sig = await walletContextState.sendTransaction(signedTxn, connection)
+        console.log('sig', sig)
+        const strategy: BlockheightBasedTransactionConfirmationStrategy = {
+          signature: sig,
+          blockhash: block.blockhash,
+          lastValidBlockHeight: block.lastValidBlockHeight
+        }
+        const result = await connection.confirmTransaction(strategy, 'confirmed')
+        console.log('result', result)
+        if (result.value.err === null) {
+          claimContext.setClaimed(true)
+          await navigate('/claimed')
+        } else {
+          setError('Transaction failed')
+        }
       }
     } catch (error) {
       console.log('CLAIM error', error)
