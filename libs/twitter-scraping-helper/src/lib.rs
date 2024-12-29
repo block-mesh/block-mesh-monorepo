@@ -1,6 +1,6 @@
 mod utils;
 
-use crate::utils::{get_number_by_selector, text_to_num};
+use crate::utils::{get_number_by_selector, get_text_by_selector, text_to_num};
 use anyhow::anyhow;
 use block_mesh_common::interfaces::server_api::FeedElement;
 use regex::Regex;
@@ -12,7 +12,7 @@ pub fn feed_element_try_from(html: &str, origin: &str) -> anyhow::Result<FeedEle
     let mut map: HashMap<String, String> = HashMap::new();
     map.insert(
         "tweet".to_owned(),
-        get_number_by_selector(&fragment, "[data-testid='tweetText']")?,
+        get_text_by_selector(&fragment, "[data-testid='tweetText']")?,
     );
     map.insert(
         "reply".to_owned(),
@@ -63,7 +63,7 @@ pub fn feed_element_try_from(html: &str, origin: &str) -> anyhow::Result<FeedEle
             .ok_or(anyhow!("missing tweet"))?
             .to_string(),
         id: map.get("id").ok_or(anyhow!("missing id"))?.to_string(),
-        raw: "".to_string(),
+        raw: map.get("raw").ok_or(anyhow!("missing raw"))?.to_string(),
         reply: text_to_num(
             map.get("reply")
                 .ok_or(anyhow!("missing reply"))?

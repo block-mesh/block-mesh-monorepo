@@ -558,9 +558,9 @@ pub struct FeedElement {
     pub link: String,
     pub id: String,
     pub raw: String,
-    pub reply: u64,
-    pub retweet: u64,
-    pub like: u64,
+    pub reply: u32,
+    pub retweet: u32,
+    pub like: u32,
     pub tweet: String,
 }
 

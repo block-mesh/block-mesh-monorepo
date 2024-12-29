@@ -34,6 +34,10 @@ pub struct DataSinkClickHouse {
     pub origin_id: String,
     pub user_name: String,
     pub link: String,
+    pub reply: u32,
+    pub retweet: u32,
+    pub like: u32,
+    pub tweet: String,
 }
 
 impl DataSink {
@@ -82,6 +86,10 @@ impl DataSink {
             link: data.link,
             created_at: now as u64,
             updated_at: now as u64,
+            reply: data.reply,
+            retweet: data.retweet,
+            like: data.like,
+            tweet: data.tweet,
         };
         insert.write(&row).await?;
         insert.end().await?;

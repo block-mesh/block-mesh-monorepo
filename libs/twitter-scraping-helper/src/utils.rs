@@ -2,7 +2,7 @@ use anyhow::anyhow;
 use regex::Regex;
 use scraper::{Html, Selector};
 
-pub fn text_to_num(text: String) -> anyhow::Result<u64> {
+pub fn text_to_num(text: String) -> anyhow::Result<u32> {
     let text = text.trim_matches(|c| c == ' ');
     if text.is_empty() {
         Ok(0)
@@ -25,6 +25,15 @@ pub fn get_number_by_selector(fragment: &Html, selector: &str) -> anyhow::Result
                 .unwrap_or_default()
                 .to_string());
         }
+    }
+    Ok("".to_string())
+}
+
+pub fn get_text_by_selector(fragment: &Html, selector: &str) -> anyhow::Result<String> {
+    let text = Selector::parse(selector).map_err(|e| anyhow!(e.to_string()))?;
+    for element in fragment.select(&text) {
+        let t = element.text().collect();
+        return Ok(t);
     }
     Ok("".to_string())
 }
