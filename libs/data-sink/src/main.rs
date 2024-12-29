@@ -16,8 +16,10 @@ use clickhouse::Client;
 use database_utils::utils::connection::follower_pool::follower_pool;
 // use database_utils::utils::connection::write_pool::write_pool;
 // use database_utils::utils::migrate::migrate;
+use anyhow::anyhow;
 use flume::Sender;
 use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
+use solana_sdk::signature::Keypair;
 use sqlx::PgPool;
 use std::net::SocketAddr;
 use std::str::FromStr;
@@ -75,11 +77,27 @@ pub struct DataSinkAppState {
     pub environment: Environment,
     pub use_clickhouse: bool,
     pub tx: Sender<DataSinkClickHouse>,
+    pub ext_keypair: Arc<Keypair>,
+    pub enforce_signature: bool,
+}
+
+const EXT_KEYPAIR: &str = env!("EXT_KEYPAIR");
+
+pub fn get_keypair() -> anyhow::Result<Keypair> {
+    let data: serde_json::Value =
+        serde_json::from_str(EXT_KEYPAIR).map_err(|e| anyhow!(e.to_string()))?;
+    let key_bytes: Vec<u8> = serde_json::from_value(data).map_err(|e| anyhow!(e.to_string()))?;
+    Keypair::from_bytes(&key_bytes).map_err(|e| anyhow!(e.to_string()))
 }
 
 impl DataSinkAppState {
     pub async fn new(tx: Sender<DataSinkClickHouse>) -> Self {
         let environment = env::var("APP_ENVIRONMENT").unwrap();
+        let enforce_signature = env::var("ENFORCE_SIGNATURE")
+            .unwrap_or("false".to_string())
+            .parse()
+            .unwrap_or(false);
+        let ext_keypair = get_keypair().unwrap();
         let use_clickhouse = env::var("USE_CLICKHOUSE")
             .unwrap_or("false".to_string())
             .parse()
@@ -106,11 +124,13 @@ impl DataSinkAppState {
         };
         let follower_db_pool = follower_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
         Self {
+            ext_keypair: Arc::new(ext_keypair),
             tx,
             use_clickhouse,
             clickhouse_client,
             follower_db_pool,
             environment,
+            enforce_signature,
         }
     }
 }

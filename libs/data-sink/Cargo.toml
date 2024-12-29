@@ -6,6 +6,7 @@ edition = "2021"
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
 [dependencies]
+solana-sdk = { workspace = true }
 dash-with-expiry = { path = "../dash-with-expiry" }
 clickhouse = { workspace = true, features = ["native-tls", "uuid", "time", "inserter"] }
 validator = { workspace = true, features = ["derive"] }
