@@ -58,22 +58,19 @@ pub fn feed_element_try_from(html: &str, origin: &str) -> anyhow::Result<FeedEle
             .get("user_name")
             .ok_or(anyhow!("missing user_name"))?
             .to_string(),
-        tweet: map
-            .get("tweet")
-            .ok_or(anyhow!("missing tweet"))?
-            .to_string(),
+        tweet: Some(map.get("tweet").unwrap_or(&"".to_string()).to_string()),
         id: map.get("id").ok_or(anyhow!("missing id"))?.to_string(),
         raw: map.get("raw").ok_or(anyhow!("missing raw"))?.to_string(),
         reply: text_to_num(
             map.get("reply")
                 .ok_or(anyhow!("missing reply"))?
                 .to_string(),
-        )?,
+        ),
         retweet: text_to_num(
             map.get("retweet")
                 .ok_or(anyhow!("missing retweet"))?
                 .to_string(),
-        )?,
-        like: text_to_num(map.get("like").ok_or(anyhow!("missing like"))?.to_string())?,
+        ),
+        like: text_to_num(map.get("like").ok_or(anyhow!("missing like"))?.to_string()),
     })
 }

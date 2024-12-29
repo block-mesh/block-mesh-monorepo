@@ -558,10 +558,10 @@ pub struct FeedElement {
     pub link: String,
     pub id: String,
     pub raw: String,
-    pub reply: u32,
-    pub retweet: u32,
-    pub like: u32,
-    pub tweet: String,
+    pub reply: Option<u32>,
+    pub retweet: Option<u32>,
+    pub like: Option<u32>,
+    pub tweet: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

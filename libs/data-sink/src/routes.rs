@@ -94,10 +94,10 @@ pub async fn digest_data(
             link: body.data.link,
             created_at: now as u64,
             updated_at: now as u64,
-            reply: body.data.reply,
-            retweet: body.data.retweet,
-            like: body.data.like,
-            tweet: body.data.tweet,
+            reply: body.data.reply.unwrap_or_default(),
+            retweet: body.data.retweet.unwrap_or_default(),
+            like: body.data.like.unwrap_or_default(),
+            tweet: body.data.tweet.unwrap_or_default(),
         };
         let _ = state.tx.send_async(row).await;
         cache.write().await.insert(key);

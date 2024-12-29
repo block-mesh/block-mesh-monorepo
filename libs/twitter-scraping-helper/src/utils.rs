@@ -2,14 +2,14 @@ use anyhow::anyhow;
 use regex::Regex;
 use scraper::{Html, Selector};
 
-pub fn text_to_num(text: String) -> anyhow::Result<u32> {
+pub fn text_to_num(text: String) -> Option<u32> {
     let text = text.trim_matches(|c| c == ' ');
     if text.is_empty() {
-        Ok(0)
+        Some(0)
     } else {
         match text.parse() {
-            Ok(i) => Ok(i),
-            Err(e) => Err(anyhow!("Error parsing '{}' | {}", text, e)),
+            Ok(i) => Some(i),
+            Err(_) => None,
         }
     }
 }
