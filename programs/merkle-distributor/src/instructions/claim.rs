@@ -103,7 +103,7 @@ pub fn claim(ctx: Context<Claim>, args: ClaimArgs) -> Result<()> {
     let mint_key = mint.key();
     let seeds = &[
         b"MerkleDistributor".as_ref(),
-        &mint_key.as_ref(),
+        mint_key.as_ref(),
         &[distributor.bump],
     ];
     transfer_token_pda(

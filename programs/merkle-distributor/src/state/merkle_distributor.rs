@@ -1,7 +1,5 @@
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
-use rs_merkle::MerkleProof;
-use rs_merkle::{algorithms::Sha256, Hasher, MerkleTree};
 
 /// State for the account which distributes tokens.
 #[account]
