@@ -3,7 +3,7 @@ use clickhouse::Client;
 
 #[tracing::instrument(name = "migrate_clickhouse", skip_all, ret, err)]
 pub async fn migrate_clickhouse(client: &Client) -> anyhow::Result<()> {
-    client
+    let _ = client
         .query(
             r#"
 CREATE TABLE IF NOT EXISTS data_sinks_clickhouse
@@ -25,5 +25,46 @@ SETTINGS index_granularity = 8192
         )
         .execute()
         .await
-        .map_err(|e| anyhow!("Error {}", e))
+        .map_err(|e| anyhow!("Error {}", e));
+
+    let _ = client
+        .query(
+            r#"
+            ALTER TABLE data_sinks_clickhouse ADD COLUMN IF NOT EXISTS reply UInt32
+            "#,
+        )
+        .execute()
+        .await
+        .map_err(|e| anyhow!("Error adding reply column {}", e));
+
+    let _ = client
+        .query(
+            r#"
+            ALTER TABLE data_sinks_clickhouse ADD COLUMN IF NOT EXISTS retweet UInt32
+            "#,
+        )
+        .execute()
+        .await
+        .map_err(|e| anyhow!("Error adding retweet column {}", e));
+
+    let _ = client
+        .query(
+            r#"
+            ALTER TABLE data_sinks_clickhouse ADD COLUMN IF NOT EXISTS like UInt32
+            "#,
+        )
+        .execute()
+        .await
+        .map_err(|e| anyhow!("Error adding like column {}", e));
+
+    let _ = client
+        .query(
+            r#"
+            ALTER TABLE data_sinks_clickhouse ADD COLUMN IF NOT EXISTS tweet String
+            "#,
+        )
+        .execute()
+        .await
+        .map_err(|e| anyhow!("Error adding like tweet {}", e));
+    Ok(())
 }

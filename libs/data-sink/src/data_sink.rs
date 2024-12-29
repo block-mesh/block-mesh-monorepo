@@ -1,24 +1,14 @@
-use block_mesh_common::interfaces::server_api::FeedElement;
-use chrono::{DateTime, Utc};
-use clickhouse::sql::Identifier;
-use clickhouse::Client;
 use serde::{Deserialize, Serialize};
-use sqlx::{Postgres, Transaction};
 use std::time::UNIX_EPOCH;
 use uuid::Uuid;
 
 pub const CLICKHOUSE_TABLE_NAME: &str = "data_sinks_clickhouse";
-#[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone, clickhouse::Row)]
-pub struct DataSink {
-    pub id: Uuid,
-    pub user_id: Uuid,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
-    pub raw: String,
-    pub origin: String,
-    pub origin_id: String,
-    pub user_name: String,
-    pub link: String,
+
+pub fn now_backup() -> i64 {
+    UNIX_EPOCH
+        .elapsed()
+        .expect("invalid system time")
+        .as_nanos() as i64
 }
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone, clickhouse::Row)]
@@ -29,6 +19,30 @@ pub struct DataSinkClickHouse {
     pub user_id: Uuid,
     pub created_at: u64,
     pub updated_at: u64,
+    pub raw: String,
+    pub origin: String,
+    pub origin_id: String,
+    pub user_name: String,
+    pub link: String,
+    pub reply: u32,
+    pub retweet: u32,
+    pub like: u32,
+    pub tweet: String,
+}
+
+/*
+use block_mesh_common::interfaces::server_api::FeedElement;
+use chrono::{DateTime, Utc};
+use clickhouse::sql::Identifier;
+use clickhouse::Client;
+use sqlx::{Postgres, Transaction};
+
+#[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone, clickhouse::Row)]
+pub struct DataSink {
+    pub id: Uuid,
+    pub user_id: Uuid,
+    pub created_at: DateTime<Utc>,
+    pub updated_at: DateTime<Utc>,
     pub raw: String,
     pub origin: String,
     pub origin_id: String,
@@ -82,6 +96,10 @@ impl DataSink {
             link: data.link,
             created_at: now as u64,
             updated_at: now as u64,
+            reply: data.reply.unwrap_or_default(),
+            retweet: data.retweet.unwrap_or_default(),
+            like: data.like.unwrap_or_default(),
+            tweet: data.tweet.unwrap_or_default(),
         };
         insert.write(&row).await?;
         insert.end().await?;
@@ -105,10 +123,4 @@ impl DataSink {
         Ok(result.is_some())
     }
 }
-
-pub fn now_backup() -> i64 {
-    UNIX_EPOCH
-        .elapsed()
-        .expect("invalid system time")
-        .as_nanos() as i64
-}
+ */

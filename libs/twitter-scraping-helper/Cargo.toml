@@ -1,0 +1,24 @@
+[package]
+name = "twitter-scraping-helper"
+edition = "2021"
+authors.workspace = true
+version.workspace = true
+
+[dependencies]
+block-mesh-common = { path = "../block-mesh-common" }
+regex = { workspace = true }
+anyhow = { workspace = true }
+serde_json = { workspace = true, features = ["raw_value"] }
+serde = { workspace = true, features = ["derive"] }
+scraper = { workspace = true }
+chrono = { workspace = true, features = ["wasmbind"] }
+
+[dependencies.uuid]
+workspace = true
+features = [
+  "v4", # Lets you generate random UUIDs
+  "fast-rng", # Use a faster (but still sufficiently random) RNG
+  "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
+  "serde", # Enable serialization/deserialization of UUIDs
+  "js"
+]

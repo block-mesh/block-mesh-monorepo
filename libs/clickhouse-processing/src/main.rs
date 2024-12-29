@@ -1,17 +1,12 @@
-mod utils;
-
-use crate::utils::{DataSinkClickHouse, ExportData};
-use anyhow::anyhow;
-use clickhouse::sql::Identifier;
 use clickhouse::Client;
 use sqlx::types::chrono::NaiveDate;
 use std::env;
 use std::sync::Arc;
 
 pub async fn process_chunk(
-    clickhouse_client: Arc<Client>,
+    _clickhouse_client: Arc<Client>,
     index: i32,
-    date: NaiveDate,
+    _date: NaiveDate,
     limit: i64,
     offset: i64,
 ) -> anyhow::Result<()> {
@@ -22,44 +17,44 @@ pub async fn process_chunk(
     let mut writer = csv::WriterBuilder::new()
         .buffer_capacity(10_000)
         .from_path(format!("csv/2024-12-11_{}.csv", index))?;
-    let data = clickhouse_client
-        .query(
-            r#"
-                   SELECT ?fields
-                   FROM ?
-                   WHERE created_at::DATE = ?
-                   ORDER BY created_at ASC
-                   LIMIT ?
-                   OFFSET ?
-
-            "#,
-        )
-        .bind(index)
-        .bind(Identifier("data_sinks_clickhouse"))
-        .bind(date)
-        .bind(limit)
-        .bind(offset)
-        .fetch_all::<DataSinkClickHouse>()
-        .await
-        .map_err(|e| {
-            eprintln!("process_chunk {}", e);
-            anyhow!(e.to_string())
-        })?;
-    for i in data {
-        let x = i.clone();
-        // println!("{:#?}", i);
-        match ExportData::try_from(i) {
-            Ok(data) => {
-                // println!("data => {:#?}", data);
-                let _ = writer.serialize(data);
-            }
-            Err(e) => {
-                eprintln!("error {}", e);
-                eprintln!("error {:#?}", x);
-                break;
-            }
-        }
-    }
+    // let data = clickhouse_client
+    //     .query(
+    //         r#"
+    //                SELECT ?fields
+    //                FROM ?
+    //                WHERE created_at::DATE = ?
+    //                ORDER BY created_at ASC
+    //                LIMIT ?
+    //                OFFSET ?
+    //
+    //         "#,
+    //     )
+    //     .bind(index)
+    //     .bind(Identifier("data_sinks_clickhouse"))
+    //     .bind(date)
+    //     .bind(limit)
+    //     .bind(offset)
+    //     .fetch_all::<DataSinkClickHouse>()
+    //     .await
+    //     .map_err(|e| {
+    //         eprintln!("process_chunk {}", e);
+    //         anyhow!(e.to_string())
+    //     })?;
+    // for i in data {
+    //     let x = i.clone();
+    //     // println!("{:#?}", i);
+    //     match ExportData::try_from(i) {
+    //         Ok(data) => {
+    //             // println!("data => {:#?}", data);
+    //             let _ = writer.serialize(data);
+    //         }
+    //         Err(e) => {
+    //             eprintln!("error {}", e);
+    //             eprintln!("error {:#?}", x);
+    //             break;
+    //         }
+    //     }
+    // }
     let _ = writer.flush();
     Ok(())
 }

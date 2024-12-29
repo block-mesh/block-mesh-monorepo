@@ -1,13 +1,11 @@
 use crate::utils::extension_wrapper_state::ExtensionWrapperState;
 use block_mesh_common::constants::DeviceType;
-use block_mesh_common::interfaces::server_api::{DigestDataRequest, FeedElement};
+use block_mesh_common::interfaces::server_api::DigestDataRequest;
 use block_mesh_common::reqwest::http_client;
 use leptos::logging::log;
-use regex::Regex;
-use scraper::{Html, Selector};
-use std::collections::HashMap;
 use std::str::FromStr;
 use std::string::ToString;
+use twitter_scraping_helper::feed_element_try_from;
 use uuid::Uuid;
 use wasm_bindgen::prelude::wasm_bindgen;
 
@@ -42,26 +40,7 @@ pub async fn read_dom(html: String, origin: String) {
         return;
     }
 
-    let fragment = Html::parse_fragment(&html);
-    let href = Selector::parse("[href]").unwrap();
-    let re = Regex::new(r"/(?P<username>[^/]+)/status/(?P<id>\d+$)").unwrap();
-    let mut map: HashMap<String, String> = HashMap::new();
-    map.insert("raw".to_owned(), html);
-    for element in fragment.select(&href) {
-        if let Some(href_value) = element.value().attr("href") {
-            if let Some(caps) = re.captures(href_value) {
-                if let Some(username) = caps.name("username") {
-                    map.insert("user_name".to_owned(), username.as_str().to_owned());
-                }
-                if let Some(id) = caps.name("id") {
-                    map.insert("id".to_owned(), id.as_str().to_owned());
-                }
-                map.insert("link".to_owned(), href_value.to_owned());
-                map.insert("origin".to_owned(), origin.to_owned());
-            }
-        }
-    }
-    match FeedElement::try_from(map) {
+    match feed_element_try_from(&html, &origin) {
         Ok(feed_element) => {
             let client = http_client(DeviceType::Extension);
             let body: DigestDataRequest = DigestDataRequest {

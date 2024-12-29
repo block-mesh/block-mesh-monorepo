@@ -5,7 +5,6 @@ use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::cmp::Ordering;
-use std::collections::HashMap;
 use std::sync::Arc;
 use std::time::Duration;
 use typeshare::typeshare;
@@ -559,32 +558,17 @@ pub struct FeedElement {
     pub link: String,
     pub id: String,
     pub raw: String,
+    pub reply: Option<u32>,
+    pub retweet: Option<u32>,
+    pub like: Option<u32>,
+    pub tweet: Option<String>,
 }
 
-impl TryFrom<HashMap<String, String>> for FeedElement {
-    type Error = String;
-
-    fn try_from(value: HashMap<String, String>) -> Result<Self, Self::Error> {
-        Ok(FeedElement {
-            origin: value
-                .get("origin")
-                .ok_or("Missing origin".to_string())?
-                .to_string(),
-            user_name: value
-                .get("user_name")
-                .ok_or("Missing UserName".to_string())?
-                .to_string(),
-            link: value
-                .get("link")
-                .ok_or("Missing link".to_string())?
-                .to_string(),
-            id: value.get("id").ok_or("Missing id".to_string())?.to_string(),
-            raw: value
-                .get("raw")
-                .ok_or("Missing raw".to_string())?
-                .to_string(),
-        })
-    }
+#[derive(Debug, Deserialize, Serialize)]
+pub struct GetFeedElementUserNameIdLin {
+    pub user_name: String,
+    pub link: String,
+    pub id: String,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

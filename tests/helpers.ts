@@ -47,27 +47,32 @@ export async function processTransaction(
   connection: Connection,
   payer: Keypair
 ): Promise<TxnResult> {
-  const tx = new Transaction()
-  instructions.map((i) => tx.add(i))
-  const blockStats = await connection.getLatestBlockhash()
-  tx.recentBlockhash = blockStats.blockhash
-  tx.feePayer = payer.publicKey
-  tx.sign(payer)
-  const sig = await connection.sendRawTransaction(tx.serialize(), {
-    maxRetries: 3,
-    preflightCommitment: 'confirmed',
-    skipPreflight: true
-  })
-  console.log('Transaction signature: ', sig)
-  const strategy: BlockheightBasedTransactionConfirmationStrategy = {
-    signature: sig,
-    blockhash: blockStats.blockhash,
-    lastValidBlockHeight: blockStats.lastValidBlockHeight
-  }
-  const result = await connection.confirmTransaction(strategy, 'confirmed')
-  return {
-    Signature: sig,
-    SignatureResult: result.value
+  try {
+
+    const tx = new Transaction()
+    instructions.map((i) => tx.add(i))
+    const blockStats = await connection.getLatestBlockhash()
+    tx.recentBlockhash = blockStats.blockhash
+    tx.feePayer = payer.publicKey
+    tx.sign(payer)
+    const sig = await connection.sendRawTransaction(tx.serialize(), {
+      maxRetries: 3,
+      preflightCommitment: 'confirmed',
+      skipPreflight: true
+    })
+    console.log('Transaction signature: ', sig)
+    const strategy: BlockheightBasedTransactionConfirmationStrategy = {
+      signature: sig,
+      blockhash: blockStats.blockhash,
+      lastValidBlockHeight: blockStats.lastValidBlockHeight
+    }
+    const result = await connection.confirmTransaction(strategy, 'confirmed')
+    return {
+      Signature: sig,
+      SignatureResult: result.value
+    }
+  } catch (e) {
+    console.log('processTransaction error', e)
   }
 }
 

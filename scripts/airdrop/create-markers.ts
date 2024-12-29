@@ -1,4 +1,5 @@
 import { ComputeBudgetProgram, Connection, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
+import { parse } from 'csv-parse/sync'
 import {
   getOrCreateTokenAccountInstruction,
   processTransaction, sleep
@@ -37,43 +38,45 @@ function getConnection(network: Network): Connection {
 }
 
 async function main() {
-  const admin = loadWalletKey('/Users/ohaddahan/.config/solana/id.json')
+  const admin = loadWalletKey('~config/solana/id.json')
   const connection = getConnection(Network.MAINNET)
   const mint = new PublicKey('Db7ZUaWTThwZy7bVhjn5Dda8D3fbbAhihcxPV4m9pump')
+  const f = await fs.readFileSync('./tier-3-final.csv')
+  const records: [] = parse(f.toString())
+  let count = 0
+  let promises = []
+  for (const record of records) {
+    count += 1
+    const to_raw = record[4]
+    if (to_raw === 'wallet_address') {
+      continue
+    }
+    if (count < 19000) {
+      continue
+    }
+    const to = new PublicKey(record[4])
+    console.log('count', count, ' to', to.toBase58())
+    const modifyComputeUnits = ComputeBudgetProgram.setComputeUnitLimit({
+      units: 100000
+    })
+    const addPriorityFee = ComputeBudgetProgram.setComputeUnitPrice({
+      microLamports: 1000
+    })
 
-
-  console.log('Here 1')
-  const airDropped = await getAirDropperAccount(connection)
-  console.log('airDropped', airDropped.pretty())
-  console.log('Here 2')
-  // const claimMarker = await getClaimMarkerAccount(connection, admin.publicKey)
-  // console.log('claimMarker', claimMarker.pretty())
-
-  const to = new PublicKey('HQ6SbfdKsPuvSBrkq538tvZjASoqcdZUTfSYgLe7jSSH')
-
-  const modifyComputeUnits = ComputeBudgetProgram.setComputeUnitLimit({
-    units: 100000
-  })
-  const addPriorityFee = ComputeBudgetProgram.setComputeUnitPrice({
-    microLamports: 10000
-  })
-
-  const instruction = createMarker(admin.publicKey, mint, to, LAMPORTS_PER_SOL / 1000)
-  const sigx = await processTransaction(
-    [modifyComputeUnits, addPriorityFee, instruction],
-    connection,
-    admin
-  )
-  const txnx = await connection.getParsedTransaction(
-    sigx.Signature,
-    'confirmed'
-  )
-  assert.equal(
-    sigx.SignatureResult.err,
-    null,
-    `${mint.toBase58()}\n${txnx?.meta?.logMessages.join('\n')}`
-  )
-  console.log('createMarker done')
+    try {
+      const instruction = createMarker(admin.publicKey, mint, to, 25 * LAMPORTS_PER_SOL / 1000)
+      const sigx = processTransaction(
+        [modifyComputeUnits, addPriorityFee, instruction],
+        connection,
+        admin
+      )
+      await sleep(200)
+      promises.push(sigx)
+    } catch (error) {
+      console.log('error wallet', to.toBase58(), ' error ', error)
+    }
+  }
+  await Promise.allSettled(promises)
 }
 
 main()
