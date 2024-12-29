@@ -31,7 +31,7 @@ pub fn get_number_by_selector(fragment: &Html, selector: &str) -> anyhow::Result
 
 pub fn get_text_by_selector(fragment: &Html, selector: &str) -> anyhow::Result<String> {
     let text = Selector::parse(selector).map_err(|e| anyhow!(e.to_string()))?;
-    for element in fragment.select(&text) {
+    if let Some(element) = fragment.select(&text).next() {
         let t = element.text().collect();
         return Ok(t);
     }
