@@ -93,6 +93,11 @@ pub fn get_keypair() -> anyhow::Result<Keypair> {
 impl DataSinkAppState {
     pub async fn new(tx: Sender<DataSinkClickHouse>) -> Self {
         let environment = env::var("APP_ENVIRONMENT").unwrap();
+        let enforce_signature = env::var("ENFORCE_SIGNATURE")
+            .unwrap_or("false".to_string())
+            .parse()
+            .unwrap_or(false);
+        let ext_keypair = get_keypair().unwrap();
         let use_clickhouse = env::var("USE_CLICKHOUSE")
             .unwrap_or("false".to_string())
             .parse()
@@ -119,11 +124,13 @@ impl DataSinkAppState {
         };
         let follower_db_pool = follower_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
         Self {
+            ext_keypair: Arc::new(ext_keypair),
             tx,
             use_clickhouse,
             clickhouse_client,
             follower_db_pool,
             environment,
+            enforce_signature,
         }
     }
 }
