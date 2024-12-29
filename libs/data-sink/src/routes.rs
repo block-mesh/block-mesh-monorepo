@@ -12,7 +12,9 @@ use chrono::Utc;
 use database_utils::utils::health_check::health_check;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use reqwest::StatusCode;
+use solana_sdk::signature::{Signature, Signer};
 use std::collections::HashSet;
+use std::str::FromStr;
 use std::sync::Arc;
 use tokio::sync::{OnceCell, RwLock};
 use uuid::Uuid;
@@ -65,6 +67,24 @@ pub async fn digest_data(
     if !validate_email(&body.email) {
         return Err(Error::from(anyhow!("BadEmail")));
     }
+    if state.enforce_signature {
+        tracing::info!("enforcing sign");
+        let pubkey = body.pubkey.ok_or(Error::from(anyhow!("Missing pubkey")))?;
+        let signature = body
+            .signature
+            .ok_or(Error::from(anyhow!("Missing signature")))?;
+        let msg = body.msg.ok_or(Error::from(anyhow!("Missing msg")))?;
+
+        if state.ext_keypair.pubkey().to_string() != pubkey {
+            return Err(Error::from(anyhow!("Mismatch on keys")));
+        }
+        let sig =
+            Signature::from_str(&signature).map_err(|e| Error::from(anyhow!(e.to_string())))?;
+        if !sig.verify(&state.ext_keypair.pubkey().to_bytes(), &msg.as_bytes()) {
+            return Err(Error::from(anyhow!("Failed to verify signature")));
+        }
+    }
+
     let follower_db_pool = &state.follower_db_pool;
     let mut transaction = create_txn(follower_db_pool).await?;
     let user = get_user_and_api_token_by_email(&mut transaction, &body.email)

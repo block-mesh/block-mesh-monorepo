@@ -576,6 +576,9 @@ pub struct DigestDataRequest {
     pub email: String,
     pub api_token: Uuid,
     pub data: FeedElement,
+    pub pubkey: Option<String>,
+    pub signature: Option<String>,
+    pub msg: Option<String>,
 }
 
 #[derive(Debug, Deserialize, Serialize)]

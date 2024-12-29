@@ -34,6 +34,7 @@ speed-test = { path = "../speed-test" }
 chrono = { workspace = true, features = ["wasmbind"] }
 gloo-utils = { workspace = true }
 once_cell = { workspace = true }
+solana-sdk = { workspace = true }
 
 [dependencies.web-sys]
 workspace = true
