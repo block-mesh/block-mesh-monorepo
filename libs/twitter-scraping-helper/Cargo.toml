@@ -6,33 +6,12 @@ version.workspace = true
 
 [dependencies]
 block-mesh-common = { path = "../block-mesh-common" }
-rayon = { workspace = true }
 regex = { workspace = true }
-clickhouse = { workspace = true, features = ["native-tls", "uuid", "time", "inserter"] }
-csv = { workspace = true }
-database-utils = { path = "../database-utils" }
-lettre = { version = "0.11" }
-tokio = { workspace = true, features = ["full"] }
 anyhow = { workspace = true }
 serde_json = { workspace = true, features = ["raw_value"] }
 serde = { workspace = true, features = ["derive"] }
 scraper = { workspace = true }
-
-[dependencies.sqlx]
-workspace = true
-default-features = false
-features = [
-  "any",
-  "runtime-tokio-rustls",
-  "macros",
-  "postgres",
-  "uuid",
-  "chrono",
-  "migrate",
-  "json",
-  "bigdecimal",
-  "tls-rustls"
-]
+chrono = { workspace = true, features = ["wasmbind"] }
 
 [dependencies.uuid]
 workspace = true

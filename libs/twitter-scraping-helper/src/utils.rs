@@ -1,0 +1,30 @@
+use anyhow::anyhow;
+use regex::Regex;
+use scraper::{Html, Selector};
+
+pub fn text_to_num(text: String) -> anyhow::Result<u64> {
+    let text = text.trim_matches(|c| c == ' ');
+    if text.is_empty() {
+        Ok(0)
+    } else {
+        match text.parse() {
+            Ok(i) => Ok(i),
+            Err(e) => Err(anyhow!("Error parsing '{}' | {}", text, e)),
+        }
+    }
+}
+
+pub fn get_number_by_selector(fragment: &Html, selector: &str) -> anyhow::Result<String> {
+    let re = Regex::new(r"^\d+").map_err(|e| anyhow!(e.to_string()))?;
+    let text = Selector::parse(selector).map_err(|e| anyhow!(e.to_string()))?;
+    for element in fragment.select(&text) {
+        if let Some(s) = element.value().attr("aria-label") {
+            return Ok(re
+                .find(s)
+                .map(|m| m.as_str())
+                .unwrap_or_default()
+                .to_string());
+        }
+    }
+    Ok("".to_string())
+}

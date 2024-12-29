@@ -4149,6 +4149,7 @@ dependencies = [
  "serde-wasm-bindgen 0.6.5",
  "serde_json",
  "speed-test",
+ "twitter-scraping-helper",
  "url",
  "urlencoding",
  "uuid",
@@ -11956,17 +11957,11 @@ version = "0.0.444"
 dependencies = [
  "anyhow",
  "block-mesh-common",
- "clickhouse",
- "csv",
- "database-utils",
- "lettre",
- "rayon",
+ "chrono",
  "regex",
  "scraper",
  "serde",
  "serde_json",
- "sqlx",
- "tokio",
  "uuid",
 ]
 

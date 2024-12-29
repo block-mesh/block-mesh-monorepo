@@ -1,61 +1,34 @@
+mod utils;
+
+use crate::utils::{get_number_by_selector, text_to_num};
 use anyhow::anyhow;
 use block_mesh_common::interfaces::server_api::FeedElement;
 use regex::Regex;
 use scraper::{Html, Selector};
-use sqlx::types::chrono::Utc;
 use std::collections::HashMap;
 
-pub fn get_text_by_selector(fragment: &Html, selector: &str) -> anyhow::Result<String> {
-    let re = Regex::new(r"^\d+").unwrap();
-    let text = Selector::parse(selector).map_err(|e| anyhow!(e.to_string()))?;
-    for element in fragment.select(&text) {
-        if let Some(s) = element.value().attr("aria-label") {
-            return Ok(re
-                .find(s)
-                .map(|m| m.as_str())
-                .unwrap_or_default()
-                .to_string());
-        }
-    }
-    Ok("".to_string())
-}
-
-pub fn text_to_num(text: String) -> anyhow::Result<u64> {
-    let text = text.trim_matches(|c| c == ' ');
-    if text.is_empty() {
-        Ok(0)
-    } else {
-        match text.parse() {
-            Ok(i) => Ok(i),
-            Err(e) => Err(anyhow!("Error parsing '{}' | {}", text, e)),
-        }
-    }
-}
-
-pub fn try_from(html: &str, origin: &str) -> anyhow::Result<FeedElement> {
+pub fn feed_element_try_from(html: &str, origin: &str) -> anyhow::Result<FeedElement> {
     let fragment = Html::parse_fragment(html);
     let mut map: HashMap<String, String> = HashMap::new();
     map.insert(
         "tweet".to_owned(),
-        get_text_by_selector(&fragment, "[data-testid='tweetText']")?,
+        get_number_by_selector(&fragment, "[data-testid='tweetText']")?,
     );
     map.insert(
         "reply".to_owned(),
-        get_text_by_selector(&fragment, "[data-testid='reply']")?,
+        get_number_by_selector(&fragment, "[data-testid='reply']")?,
     );
     map.insert(
         "retweet".to_owned(),
-        get_text_by_selector(&fragment, "[data-testid='retweet']")?,
+        get_number_by_selector(&fragment, "[data-testid='retweet']")?,
     );
     map.insert(
         "like".to_owned(),
-        get_text_by_selector(&fragment, "[data-testid='like']")?,
+        get_number_by_selector(&fragment, "[data-testid='like']")?,
     );
-    let _date = Utc::now();
     let href = Selector::parse("[href]").map_err(|e| anyhow!(e.to_string()))?;
     let re = Regex::new(r"/(?P<username>[^/]+)/status/(?P<id>\d+$)")
         .map_err(|e| anyhow!(e.to_string()))?;
-
     map.insert("raw".to_owned(), html.to_string());
     for element in fragment.select(&href) {
         if let Some(href_value) = element.value().attr("href") {
