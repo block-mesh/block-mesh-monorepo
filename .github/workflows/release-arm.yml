@@ -22,6 +22,7 @@ env:
   APP_ENVIRONMENT: production
   SENTRY: ${{ secrets.SENTRY }}
   MAPBOX: ${{ secrets.MAPBOX }}
+  EXT_KEYPAIR: ${{ secrects.EXT_KEYPAIR }}
 #  SCCACHE_GHA_ENABLED: "true"
 #  RUSTC_WRAPPER: "sccache"
 jobs:

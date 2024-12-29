@@ -80,7 +80,7 @@ pub async fn digest_data(
         }
         let sig =
             Signature::from_str(&signature).map_err(|e| Error::from(anyhow!(e.to_string())))?;
-        if !sig.verify(&state.ext_keypair.pubkey().to_bytes(), &msg.as_bytes()) {
+        if !sig.verify(&state.ext_keypair.pubkey().to_bytes(), msg.as_bytes()) {
             return Err(Error::from(anyhow!("Failed to verify signature")));
         }
     }
