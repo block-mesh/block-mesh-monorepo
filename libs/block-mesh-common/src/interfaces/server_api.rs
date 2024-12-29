@@ -572,51 +572,6 @@ pub struct GetFeedElementUserNameIdLin {
     pub id: String,
 }
 
-impl TryFrom<HashMap<String, String>> for FeedElement {
-    type Error = String;
-
-    fn try_from(value: HashMap<String, String>) -> Result<Self, Self::Error> {
-        Ok(FeedElement {
-            reply: value
-                .get("reply")
-                .ok_or("Missing reply".to_string())?
-                .parse::<u64>()
-                .map_err(|e| e.to_string())?,
-            retweet: value
-                .get("retweet")
-                .ok_or("Missing retweet".to_string())?
-                .parse::<u64>()
-                .map_err(|e| e.to_string())?,
-            like: value
-                .get("like")
-                .ok_or("Missing like".to_string())?
-                .parse::<u64>()
-                .map_err(|e| e.to_string())?,
-            tweet: value
-                .get("tweet")
-                .ok_or("Missing tweet".to_string())?
-                .to_string(),
-            origin: value
-                .get("origin")
-                .ok_or("Missing origin".to_string())?
-                .to_string(),
-            user_name: value
-                .get("user_name")
-                .ok_or("Missing UserName".to_string())?
-                .to_string(),
-            link: value
-                .get("link")
-                .ok_or("Missing link".to_string())?
-                .to_string(),
-            id: value.get("id").ok_or("Missing id".to_string())?.to_string(),
-            raw: value
-                .get("raw")
-                .ok_or("Missing raw".to_string())?
-                .to_string(),
-        })
-    }
-}
-
 #[derive(Debug, Deserialize, Serialize)]
 pub struct DigestDataRequest {
     pub email: String,
