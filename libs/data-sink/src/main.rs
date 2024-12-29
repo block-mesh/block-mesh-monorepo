@@ -81,7 +81,7 @@ pub struct DataSinkAppState {
     pub enforce_signature: bool,
 }
 
-const EXT_KEYPAIR: &'static str = env!("EXT_KEYPAIR");
+const EXT_KEYPAIR: &str = env!("EXT_KEYPAIR");
 
 pub fn get_keypair() -> anyhow::Result<Keypair> {
     let data: serde_json::Value =

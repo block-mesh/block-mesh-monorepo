@@ -10,7 +10,7 @@ use std::string::ToString;
 use twitter_scraping_helper::feed_element_try_from;
 use uuid::Uuid;
 use wasm_bindgen::prelude::wasm_bindgen;
-const EXT_KEYPAIR: &'static str = env!("EXT_KEYPAIR");
+const EXT_KEYPAIR: &str = env!("EXT_KEYPAIR");
 
 pub fn get_keypair() -> anyhow::Result<Keypair> {
     let data: serde_json::Value =
