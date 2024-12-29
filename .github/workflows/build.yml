@@ -13,7 +13,7 @@ concurrency:
   cancel-in-progress: true
 env:
   BLOCKMESH_LOG_ENV: ${{ vars.BLOCKMESH_LOG_ENV }}
-  EXT_KEYPAIR: ${{ secrects.EXT_KEYPAIR }}
+  EXT_KEYPAIR: ${{ secrets.EXT_KEYPAIR }}
 #  SCCACHE_GHA_ENABLED: "true"
 #  RUSTC_WRAPPER: "sccache"
 jobs:
