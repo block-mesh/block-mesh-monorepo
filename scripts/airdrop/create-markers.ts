@@ -38,10 +38,10 @@ function getConnection(network: Network): Connection {
 }
 
 async function main() {
-  const admin = loadWalletKey('/Users/ohaddahan/.config/solana/id.json')
+  const admin = loadWalletKey('~config/solana/id.json')
   const connection = getConnection(Network.MAINNET)
   const mint = new PublicKey('Db7ZUaWTThwZy7bVhjn5Dda8D3fbbAhihcxPV4m9pump')
-  const f = await fs.readFileSync('/Users/ohaddahan/Downloads/xeno-tiers/tier-3-final.csv')
+  const f = await fs.readFileSync('./tier-3-final.csv')
   const records: [] = parse(f.toString())
   let count = 0
   let promises = []
