@@ -1,0 +1,70 @@
+@import "./styles/reset.css";
+@import "./styles/font.css";
+@import "./styles/props.css";
+
+body {
+    background-color: var(--color-surface-1);
+    font-family: var(--font-family-sans);
+    line-height: 1.5;
+    letter-spacing: -0.00875rem;
+
+    color: color-mix(
+            var(--color-mix),
+            var(--color-on-surface-1),
+            10% transparent
+    );
+
+    min-block-size: 100vh;
+
+    background-image: url(/body.svg);
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+}
+
+:where(h1, h2, h3, h4, h5, h6) {
+    font-weight: 700;
+}
+
+:where(a) {
+    font-weight: 400;
+    color: color-mix(
+            var(--color-mix),
+            var(--color-on-surface-1),
+            10% transparent
+    );
+}
+
+:where(p, output) {
+    font-weight: 200;
+    color: color-mix(
+            var(--color-mix),
+            var(--color-on-surface-1),
+            20% transparent
+    );
+}
+
+:where(button) {
+    border-color: transparent;
+    cursor: pointer;
+    transition: color ease-out 200ms,
+    background-color ease-out 120ms,
+    scale ease-out 60ms;
+
+    &:where(:hover) {
+        scale: 1.035;
+    }
+
+    &:where(:active) {
+        scale: 0.985;
+    }
+}
+
+:where(u) {
+    text-decoration: underline;
+    text-underline-offset: 0.2cap;
+}
+
+:where(output.error) {
+    color: var(--color-error-1);
+}

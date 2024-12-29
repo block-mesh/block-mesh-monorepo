@@ -1,4 +1,4 @@
-use crate::data_sink::{now_backup, DataSink, DataSinkClickHouse};
+use crate::data_sink::{now_backup, DataSinkClickHouse};
 use crate::database::get_user_and_api_token_by_email;
 use crate::errors::Error;
 use crate::DataSinkAppState;
@@ -20,11 +20,23 @@ use validator::validate_email;
 
 #[tracing::instrument(name = "db_health", skip_all)]
 pub async fn db_health(State(state): State<DataSinkAppState>) -> Result<impl IntoResponse, Error> {
-    let data_sink_db_pool = &state.data_sink_db_pool;
-    let mut transaction = create_txn(data_sink_db_pool).await?;
-    health_check(&mut *transaction).await?;
-    commit_txn(transaction).await?;
-    Ok((StatusCode::OK, "OK"))
+    let clickhouse = &state.clickhouse_client;
+    let result: Option<String> = clickhouse
+        .query(r#"SELECT current_database()"#)
+        .fetch_optional()
+        .await
+        .map_err(|e| anyhow!(e.to_string()))?;
+    tracing::info!("result {:#?}", result);
+    match result {
+        Some(v) => {
+            if v == "default" {
+                Ok((StatusCode::OK, "OK"))
+            } else {
+                Err(Error::from(anyhow!("Wrong DB")))
+            }
+        }
+        None => Err(Error::from(anyhow!("No DB"))),
+    }
 }
 
 #[tracing::instrument(name = "follower_health", skip_all)]
@@ -85,19 +97,6 @@ pub async fn digest_data(
         };
         let _ = state.tx.send_async(row).await;
         cache.write().await.insert(key);
-    } else {
-        let data_sink_db_pool = &state.data_sink_db_pool;
-        let mut transaction = create_txn(data_sink_db_pool).await?;
-        let result = DataSink::create_data_sink(&mut transaction, &user.user_id, body.data).await;
-        if let Err(error) = result {
-            if error
-                .to_string()
-                .contains("duplicate key value violates unique constraint")
-            {
-                return Ok((StatusCode::ALREADY_REPORTED, "Already reported"));
-            }
-        }
-        commit_txn(transaction).await?;
     }
     Ok((StatusCode::OK, "OK"))
 }

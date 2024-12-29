@@ -1,0 +1,24 @@
+:root {
+    --color-surface-1: #0c1120;
+    --color-on-surface-1: #fff;
+
+    --color-accent-1: #fe49ff;
+    --color-on-accent-1: #fff;
+
+    --color-vibrant-1: #25e4d3;
+    --color-on-vibrant-1: #0c1120;
+
+    --color-success-1: #20ff49;
+    --color-on-success-1: #0c1120;
+
+    --color-error-1: #f97432;
+    --color-on-error: #fff;
+
+    --color-mix: in lch;
+
+    --font-family-sans: "Inter", sans-serif;
+
+    --radius-1: 1rem;
+    --radius-2: 2rem;
+    --radius-round: 9999rem;
+}

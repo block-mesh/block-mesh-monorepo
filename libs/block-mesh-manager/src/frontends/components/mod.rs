@@ -1,6 +1,7 @@
 pub mod avatar;
 pub mod bandwidth_card;
 pub mod bar_chart;
+pub mod claims_card;
 pub mod conditionals;
 pub mod divider;
 pub mod download_extension;

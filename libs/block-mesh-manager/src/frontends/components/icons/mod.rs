@@ -9,5 +9,7 @@ pub mod logout_icon;
 pub mod medal_icon;
 pub mod perk_icon;
 pub mod person_icon;
+pub mod token_icon;
 pub mod twitter_icon;
+pub mod xeno_icon;
 pub mod xmark_icon;

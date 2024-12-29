@@ -118,6 +118,7 @@ pub fn NewDashboard() -> impl IntoView {
                     show_edit_email.set(true);
                 }
             >
+
                 <span class="material-symbols-outlined">email</span>
                 {move || email.get().to_string()}
             </button>
