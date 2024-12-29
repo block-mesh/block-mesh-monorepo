@@ -7,6 +7,7 @@ use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
 #[account]
 #[derive(Default)]
 pub struct ClaimStatus {
+    pub bump: u8,
     /// If true, the tokens have been claimed.
     pub is_claimed: bool,
     /// Authority that claimed the tokens.
