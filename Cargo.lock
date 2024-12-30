@@ -2594,6 +2594,8 @@ name = "clickhouse-processing"
 version = "0.0.448"
 dependencies = [
  "anyhow",
+ "block-mesh-common",
+ "clap 4.5.8",
  "clickhouse",
  "csv",
  "database-utils",
@@ -2605,6 +2607,7 @@ dependencies = [
  "serde_json",
  "sqlx",
  "tokio",
+ "twitter-scraping-helper",
  "uuid",
 ]
 
