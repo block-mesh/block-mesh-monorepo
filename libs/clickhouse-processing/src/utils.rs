@@ -43,7 +43,7 @@ pub fn read_csv_file(path: &str) -> Vec<Record> {
     records
 }
 
-pub fn query_builder(records: &Vec<Record>, date: NaiveDate) -> String {
+pub fn query_builder(records: &[Record], date: NaiveDate) -> String {
     let vec: Vec<String> = records
         .iter()
         .map(|i| format!("('{}', '{}')", i.user_name, i.origin_id))
@@ -62,7 +62,7 @@ pub fn query_builder(records: &Vec<Record>, date: NaiveDate) -> String {
 pub async fn process_chunk(
     clickhouse_client: Arc<Client>,
     date: NaiveDate,
-    records: &Vec<Record>,
+    records: &[Record],
 ) -> anyhow::Result<Vec<DataSinkClickHouse>> {
     let query_str = query_builder(records, date);
     let data = clickhouse_client
