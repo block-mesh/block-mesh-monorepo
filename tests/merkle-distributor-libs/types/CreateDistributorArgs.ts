@@ -10,6 +10,7 @@ export type CreateDistributorArgs = {
   root: number[] /* size: 32 */
   maxTotalClaim: beet.bignum
   maxNumNodes: beet.bignum
+  leavesLen: beet.bignum
 }
 
 /**
@@ -22,6 +23,7 @@ export const createDistributorArgsBeet =
       ['root', beet.uniformFixedSizeArray(beet.u8, 32)],
       ['maxTotalClaim', beet.u64],
       ['maxNumNodes', beet.u64],
+      ['leavesLen', beet.u64],
     ],
     'CreateDistributorArgs'
   )

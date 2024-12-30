@@ -10,6 +10,7 @@ export type ClaimArgs = {
   index: beet.bignum
   amount: beet.bignum
   proof: Uint8Array
+  leavesToProve: Uint8Array[]
 }
 
 /**
@@ -21,6 +22,7 @@ export const claimArgsBeet = new beet.FixableBeetArgsStruct<ClaimArgs>(
     ['index', beet.u64],
     ['amount', beet.u64],
     ['proof', beet.bytes],
+    ['leavesToProve', beet.array(beet.bytes)],
   ],
   'ClaimArgs'
 )

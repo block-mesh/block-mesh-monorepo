@@ -26,14 +26,16 @@ export function createDistributorInstruction(
   maxTotalClaim: number,
   maxNumNodes: number,
   signer: PublicKey,
-  mint: PublicKey
+  mint: PublicKey,
+  leavesLen: number
 ): TransactionInstruction {
 
   const args: CreateDistributorInstructionArgs = {
     args: {
       root,
       maxTotalClaim,
-      maxNumNodes
+      maxNumNodes,
+      leavesLen
     }
   }
 
@@ -58,14 +60,16 @@ export function createClaimStatusInstruction(
   amount: number,
   proof: number[],
   signer: PublicKey,
-  mint: PublicKey
+  mint: PublicKey,
+  leavesToProve: number[][]
 ): TransactionInstruction {
 
   const args: ClaimInstructionArgs = {
     args: {
       index,
       amount,
-      proof: new Uint8Array(proof)
+      proof: new Uint8Array(proof),
+      leavesToProve: leavesToProve.map(i => new Uint8Array(i))
     }
   }
 

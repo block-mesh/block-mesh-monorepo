@@ -24,6 +24,7 @@ export type MerkleDistributorArgs = {
   maxNumNodes: beet.bignum
   totalAmountClaimed: beet.bignum
   numNodesClaimed: beet.bignum
+  leavesLen: beet.bignum
 }
 
 export const merkleDistributorDiscriminator = [
@@ -46,7 +47,8 @@ export class MerkleDistributor implements MerkleDistributorArgs {
     readonly maxTotalClaim: beet.bignum,
     readonly maxNumNodes: beet.bignum,
     readonly totalAmountClaimed: beet.bignum,
-    readonly numNodesClaimed: beet.bignum
+    readonly numNodesClaimed: beet.bignum,
+    readonly leavesLen: beet.bignum
   ) {}
 
   /**
@@ -62,7 +64,8 @@ export class MerkleDistributor implements MerkleDistributorArgs {
       args.maxTotalClaim,
       args.maxNumNodes,
       args.totalAmountClaimed,
-      args.numNodesClaimed
+      args.numNodesClaimed,
+      args.leavesLen
     )
   }
 
@@ -218,6 +221,17 @@ export class MerkleDistributor implements MerkleDistributorArgs {
         }
         return x
       })(),
+      leavesLen: (() => {
+        const x = <{ toNumber: () => number }>this.leavesLen
+        if (typeof x.toNumber === 'function') {
+          try {
+            return x.toNumber()
+          } catch (_) {
+            return x
+          }
+        }
+        return x
+      })(),
     }
   }
 }
@@ -243,6 +257,7 @@ export const merkleDistributorBeet = new beet.BeetStruct<
     ['maxNumNodes', beet.u64],
     ['totalAmountClaimed', beet.u64],
     ['numNodesClaimed', beet.u64],
+    ['leavesLen', beet.u64],
   ],
   MerkleDistributor.fromArgs,
   'MerkleDistributor'

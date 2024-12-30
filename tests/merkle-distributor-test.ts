@@ -22,7 +22,25 @@ import {
 } from './merkle-distributor-helpers/wrapper'
 import { getDistributorAccount, getDistributorTokenAccount } from './merkle-distributor-helpers/pda'
 
-export let merkle_json: any
+export type Claimant = {
+  claimant: number[];
+  amount: number;
+}
+
+export type Leaf = {
+  index: number;
+  proof: number[];
+  claimant: Claimant;
+  leaves_to_prove: number[][];
+}
+
+export type MerkleOutput = {
+  root: number[];
+  leafs: Leaf[];
+}
+
+export let merkle_json: MerkleOutput = null
+
 export const admin = Keypair.generate()
 export const users = [
   Keypair.generate(),
@@ -168,7 +186,12 @@ describe('0-prep', () => {
     const merkle_file = fs.readFileSync(`${cwd}/programs/merkle-distributor/test-merkle/merkle.json`).toString()
     merkle_json = JSON.parse(merkle_file)
     console.log('merkle_json = ', merkle_json)
-    const instruction = createDistributorInstruction(merkle_json.root, LAMPORTS_PER_SOL * 1_000, 12, admin.publicKey, mint)
+    const instruction = createDistributorInstruction(merkle_json.root,
+      LAMPORTS_PER_SOL * 1_000, 12,
+      admin.publicKey,
+      mint,
+      merkle_json.leafs.length
+    )
     const sig = await processTransaction(
       [instruction],
       program.provider.connection,
@@ -206,7 +229,14 @@ describe('0-prep', () => {
       const key = keys[index]
       const leaf = merkle_json.leafs[index]
       const proof = leaf.proof
-      const instruction = createClaimStatusInstruction(index, index * LAMPORTS_PER_SOL, proof, key.publicKey, mint)
+      const instruction = createClaimStatusInstruction(
+        index,
+        leaf.claimant.amount,
+        proof,
+        key.publicKey,
+        mint,
+        leaf.leaves_to_prove
+      )
       const sig = await processTransaction(
         [instruction],
         program.provider.connection,

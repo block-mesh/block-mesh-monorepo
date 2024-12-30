@@ -22,6 +22,8 @@ pub struct MerkleDistributor {
     pub total_amount_claimed: u64,
     /// Number of nodes that have been claimed.
     pub num_nodes_claimed: u64,
+    /// Number of leaves.
+    pub leaves_len: u64,
 }
 
 impl MerkleDistributor {
@@ -151,10 +153,12 @@ mod tests {
                 leaves_to_prove,
                 leaves.len()
             ));
+            let leaves_to_prove = leaves_to_prove.iter().map(|i| i.to_vec()).collect();
             merkle_output.leafs.push(Leaf {
                 index: index as u64,
                 proof: proof_bytes.to_vec(),
                 claimant: leaf_values.get(index).cloned().unwrap(),
+                leaves_to_prove,
             });
         }
 

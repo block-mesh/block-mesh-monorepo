@@ -2,16 +2,19 @@ use crate::error::ErrorCode;
 // use crate::merkle_proof;
 use crate::state::claim_status::{ClaimStatus, ClaimedEvent};
 use crate::state::merkle_distributor::MerkleDistributor;
-use crate::utils::transfer_token_pda;
+use crate::utils::{transfer_token_pda, vec_to_array};
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Mint, Token, TokenAccount};
+use rs_merkle::algorithms::Sha256;
+use rs_merkle::MerkleProof;
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct ClaimArgs {
     index: u64,
     amount: u64,
     proof: Vec<u8>,
+    leaves_to_prove: Vec<Vec<u8>>,
 }
 
 #[derive(Accounts)]
@@ -87,6 +90,25 @@ pub fn claim(ctx: Context<Claim>, args: ClaimArgs) -> Result<()> {
         &claimant.key().to_bytes(),
         &args.amount.to_le_bytes(),
     ]);
+    let merkle_root = distributor.root.clone();
+    let proof_bytes = args.proof;
+    let proof = MerkleProof::<Sha256>::try_from(proof_bytes.clone())
+        .map_err(|_| ErrorCode::InvalidProof)?;
+    let indices_to_prove = [args.index as usize];
+    let leaves_to_prove = args.leaves_to_prove;
+    let leaves_to_prove = leaves_to_prove
+        .iter()
+        .map(|i| vec_to_array(i))
+        .collect::<Vec<[u8; 32]>>();
+    let leaves_to_prove = leaves_to_prove.as_slice();
+
+    proof.verify(
+        merkle_root,
+        &indices_to_prove,
+        leaves_to_prove,
+        distributor.leaves_len as usize,
+    );
+
     // TODO
     // require!(
     //     merkle_proof::verify(args.proof, distributor.root, node.0),

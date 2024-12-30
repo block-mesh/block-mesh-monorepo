@@ -9,6 +9,7 @@ pub struct CreateDistributorArgs {
     pub root: [u8; 32],
     pub max_total_claim: u64,
     pub max_num_nodes: u64,
+    pub leaves_len: u64,
 }
 
 #[derive(Accounts)]
@@ -75,6 +76,7 @@ pub fn create_distributor(
     distributor.total_amount_claimed = 0;
     distributor.num_nodes_claimed = 0;
     distributor.token_account = distributor_token_account.key();
+    distributor.leaves_len = args.leaves_len;
     transfer_token(
         signer_token_account.to_account_info(),
         distributor_token_account.to_account_info(),

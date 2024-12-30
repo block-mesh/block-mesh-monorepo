@@ -39,6 +39,7 @@ pub struct Leaf {
     pub index: u64,
     pub proof: Vec<u8>,
     pub claimant: Claimant,
+    pub leaves_to_prove: Vec<Vec<u8>>,
 }
 
 #[derive(Debug, Deserialize, Serialize, Clone, AnchorDeserialize, AnchorSerialize)]
