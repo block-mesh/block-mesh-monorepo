@@ -1,5 +1,5 @@
 use crate::error::ErrorCode;
-use crate::merkle_proof;
+// use crate::merkle_proof;
 use crate::state::claim_status::{ClaimStatus, ClaimedEvent};
 use crate::state::merkle_distributor::MerkleDistributor;
 use crate::utils::transfer_token_pda;

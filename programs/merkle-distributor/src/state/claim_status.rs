@@ -1,5 +1,5 @@
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
+// use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
 
 /// Holds whether or not a claimant has claimed tokens.
 #[account]
