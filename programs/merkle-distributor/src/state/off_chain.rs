@@ -57,7 +57,7 @@ impl MerkleOutput {
         let leaf_values = self.leaf_values();
         let leaves: Vec<[u8; 32]> = leaf_values
             .iter()
-            .map(|x| Sha256::hash(&*x.as_bytes()))
+            .map(|x| Sha256::hash(&x.as_bytes()))
             .collect();
         leaves
     }

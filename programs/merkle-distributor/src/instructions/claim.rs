@@ -82,7 +82,7 @@ pub fn claim(ctx: Context<Claim>, args: ClaimArgs) -> Result<()> {
     );
     require!(claimant.is_signer, ErrorCode::Unauthorized);
     // Verify the merkle proof.
-    let node = anchor_lang::solana_program::keccak::hashv(&[
+    let _node = anchor_lang::solana_program::keccak::hashv(&[
         &args.index.to_le_bytes(),
         &claimant.key().to_bytes(),
         &args.amount.to_le_bytes(),
