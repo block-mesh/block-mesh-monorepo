@@ -1,4 +1,5 @@
 use anyhow::anyhow;
+use block_mesh_common::interfaces::server_api::FeedElement;
 use clickhouse::Client;
 use csv::ReaderBuilder;
 use serde::{Deserialize, Serialize};
@@ -13,34 +14,75 @@ pub struct Record {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone, clickhouse::Row)]
+pub struct Output {
+    pub user: String,
+    pub id: String,
+    pub link: String,
+    pub tweet: String,
+    pub date: String,
+    pub reply: String,
+    pub retweet: String,
+    pub like: String,
+}
+
+impl Output {
+    pub fn merge(element: FeedElement, data_sink: DataSinkClickHouse) -> Self {
+        Self {
+            user: element.user_name,
+            id: element.id,
+            link: element.link,
+            tweet: element.tweet.unwrap_or_default(),
+            date: data_sink.created_at,
+            reply: element.reply.unwrap_or_default().to_string(),
+            retweet: element.retweet.unwrap_or_default().to_string(),
+            like: element.like.unwrap_or_default().to_string(),
+        }
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, clickhouse::Row)]
 pub struct DataSinkClickHouse {
     #[serde(with = "clickhouse::serde::uuid")]
     pub id: Uuid,
     #[serde(with = "clickhouse::serde::uuid")]
     pub user_id: Uuid,
-    pub created_at: u64,
-    pub updated_at: u64,
-    pub raw: String,
     pub origin: String,
     pub origin_id: String,
     pub user_name: String,
     pub link: String,
-    pub reply: u32,
-    pub retweet: u32,
-    pub like: u32,
+    pub created_at: String,
+    pub updated_at: String,
+    pub raw: String,
+    pub reply: String,
+    pub retweet: String,
+    pub like: String,
     pub tweet: String,
 }
 
-pub fn read_csv_file(path: &str) -> Vec<Record> {
+pub fn read_csv_file<T>(path: &str) -> Vec<T>
+where
+    T: for<'a> Deserialize<'a>,
+{
     let mut reader = ReaderBuilder::new().from_path(path).unwrap();
-    let mut records: Vec<Record> = Vec::with_capacity(3_000_000);
+    let mut records: Vec<T> = Vec::with_capacity(3_000_000);
     for result in reader.deserialize() {
         // Notice that we need to provide a type hint for automatic
         // deserialization.
-        let record: Record = result.unwrap();
+        let record: T = result.unwrap();
         records.push(record);
     }
     records
+}
+
+pub fn write_to_csv_file<T>(records: Vec<T>, path: &str)
+where
+    T: Serialize,
+{
+    let mut wtr = csv::Writer::from_path(path).unwrap();
+    for record in records {
+        wtr.serialize(record).unwrap();
+    }
+    wtr.flush().unwrap();
 }
 
 pub fn query_builder(records: &[Record], date: NaiveDate) -> String {
