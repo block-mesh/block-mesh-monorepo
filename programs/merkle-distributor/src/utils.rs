@@ -7,7 +7,7 @@ use anchor_lang::solana_program;
 use anchor_spl::associated_token::get_associated_token_address;
 use anchor_spl::token::spl_token;
 
-pub fn vec_to_array(vec: &Vec<u8>) -> [u8; 32] {
+pub fn vec_to_array(vec: &[u8]) -> [u8; 32] {
     let mut array = [0u8; 32]; // Initialize with zeros
     let len = vec.len().min(32); // Use the minimum of 32 or vector length
     array[..len].copy_from_slice(&vec[..len]);

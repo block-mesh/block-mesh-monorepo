@@ -90,7 +90,7 @@ pub fn claim(ctx: Context<Claim>, args: ClaimArgs) -> Result<()> {
         &claimant.key().to_bytes(),
         &args.amount.to_le_bytes(),
     ]);
-    let merkle_root = distributor.root.clone();
+    let merkle_root = distributor.root;
     let proof_bytes = args.proof;
     let proof = MerkleProof::<Sha256>::try_from(proof_bytes.clone())
         .map_err(|_| ErrorCode::InvalidProof)?;
