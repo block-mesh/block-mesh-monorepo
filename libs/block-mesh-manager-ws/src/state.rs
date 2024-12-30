@@ -49,8 +49,8 @@ impl WsAppState {
         let mut user_ids = self.user_ids.write().await;
         user_ids.insert(*user_id);
         let mut redis = self.redis.clone();
-        let _: RedisResult<()> = redis.incr(&self.redis_key(), 1).await;
-        let _: RedisResult<()> = redis.expire(&self.redis_key(), 120).await;
+        let _: RedisResult<()> = redis.incr(self.redis_key(), 1).await;
+        let _: RedisResult<()> = redis.expire(self.redis_key(), 120).await;
     }
 
     pub async fn unsubscribe_light(&self, email: &str, user_id: &Uuid) {
@@ -59,8 +59,8 @@ impl WsAppState {
         let mut user_ids = self.user_ids.write().await;
         user_ids.remove(user_id);
         let mut redis = self.redis.clone();
-        let _: RedisResult<()> = redis.decr(&self.redis_key(), 1).await;
-        let _: RedisResult<()> = redis.expire(&self.redis_key(), 120).await;
+        let _: RedisResult<()> = redis.decr(self.redis_key(), 1).await;
+        let _: RedisResult<()> = redis.expire(self.redis_key(), 120).await;
     }
 }
 
