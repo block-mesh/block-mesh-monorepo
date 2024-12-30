@@ -117,12 +117,9 @@ pub async fn stats(State(state): State<Arc<WsAppState>>) -> Result<impl IntoResp
         .map_err(|e| Error::from(anyhow!(e.to_string())))?;
     for key in redis_results {
         let redis_count: RedisResult<i64> = redis.get(key.clone()).await;
-        match redis_count {
-            Ok(count) => {
-                counts.push((key, count));
-                total += count;
-            }
-            Err(_) => {}
+        if let Ok(count) = redis_count {
+            counts.push((key, count));
+            total += count;
         }
     }
     Ok(Json(StatsResponse { counts, total }))

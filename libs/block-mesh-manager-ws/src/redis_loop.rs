@@ -7,7 +7,7 @@ use std::time::Duration;
 pub async fn redis_loop(state: Arc<WsAppState>) -> Result<(), anyhow::Error> {
     loop {
         let mut redis = state.redis.clone();
-        let _: RedisResult<()> = redis.expire(&state.redis_key(), 120).await;
+        let _: RedisResult<()> = redis.expire(state.redis_key(), 120).await;
         tokio::time::sleep(Duration::from_secs(100)).await;
     }
 }
