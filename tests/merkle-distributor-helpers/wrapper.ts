@@ -1,18 +1,92 @@
 import { PublicKey, TransactionInstruction } from '@solana/web3.js'
 import {
+  ClaimInstructionAccounts,
+  ClaimInstructionArgs,
   ClaimMarkerInstructionAccounts,
-  CreateAirDropperInstructionAccounts, createClaimMarkerInstruction,
-  createCreateAirDropperInstruction,
-  createCreateMarkerInstruction,
+  CreateAirDropperInstructionAccounts, createClaimInstruction, createClaimMarkerInstruction,
+  createCreateAirDropperInstruction, createCreateDistributorInstruction,
+  createCreateMarkerInstruction, CreateDistributorInstructionAccounts, CreateDistributorInstructionArgs,
   CreateMarkerInstructionAccounts,
   CreateMarkerInstructionArgs
 } from '../merkle-distributor-libs'
-import { getAirDropperAddress, getClaimMarkerAddress, getClaimMarkerAddress2, getClaimMarkerTokenAccount } from './pda'
+import {
+  getAirDropperAddress,
+  getClaimMarkerAddress,
+  getClaimMarkerAddress2,
+  getClaimMarkerTokenAccount, getClaimStatusAddress,
+  getDistributorAddress, getDistributorTokenAccount
+} from './pda'
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync
 } from '@solana/spl-token'
 
+export function createDistributorInstruction(
+  root: number[],
+  maxTotalClaim: number,
+  maxNumNodes: number,
+  signer: PublicKey,
+  mint: PublicKey
+): TransactionInstruction {
+
+  const args: CreateDistributorInstructionArgs = {
+    args: {
+      root,
+      maxTotalClaim,
+      maxNumNodes
+    }
+  }
+
+  const signerTokenAccount = getAssociatedTokenAddressSync(mint, signer)
+  const [distributor] = getDistributorAddress(mint)
+  const [distributorTokenAccount] = getDistributorTokenAccount(mint)
+
+  const accounts: CreateDistributorInstructionAccounts = {
+    signer,
+    signerTokenAccount,
+    distributor,
+    distributorTokenAccount,
+    mint,
+    associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+  }
+
+  return createCreateDistributorInstruction(accounts, args)
+}
+
+export function createClaimStatusInstruction(
+  index: number,
+  amount: number,
+  proof: number[],
+  signer: PublicKey,
+  mint: PublicKey
+): TransactionInstruction {
+
+  const args: ClaimInstructionArgs = {
+    args: {
+      index,
+      amount,
+      proof: new Uint8Array(proof)
+    }
+  }
+
+  const claimant = signer
+  const claimantTokenAccount = getAssociatedTokenAddressSync(mint, signer)
+  const [distributor] = getDistributorAddress(mint)
+  const [distributorTokenAccount] = getDistributorTokenAccount(mint)
+  const [claimStatus] = getClaimStatusAddress(mint, claimant)
+
+  const accounts: ClaimInstructionAccounts = {
+    claimant,
+    claimantTokenAccount,
+    distributor,
+    distributorTokenAccount,
+    associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID,
+    mint,
+    claimStatus
+  }
+
+  return createClaimInstruction(accounts, args)
+}
 
 export function createAirDropperInstruction(signer: PublicKey, mint: PublicKey): TransactionInstruction {
   const [airDropper, _] = getAirDropperAddress()

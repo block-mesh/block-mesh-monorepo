@@ -2,8 +2,6 @@ use anchor_lang::prelude::*;
 use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
 
 /// Holds whether or not a claimant has claimed tokens.
-///
-/// TODO: this is probably better stored as the node that was verified.
 #[account]
 #[derive(Default)]
 pub struct ClaimStatus {
@@ -19,7 +17,7 @@ pub struct ClaimStatus {
 }
 
 impl ClaimStatus {
-    pub const LEN: usize = 1 + PUBKEY_BYTES + 8 + 8;
+    pub const LEN: usize = 500;
 }
 
 /// Emitted when tokens are claimed.

@@ -32,7 +32,7 @@ pub struct CreateDistributor<'info> {
         ],
         bump,
         space = 8 + MerkleDistributor::LEN,
-        payer = payer
+        payer = signer
     )]
     pub distributor: Account<'info, MerkleDistributor>,
     #[account(
@@ -47,8 +47,6 @@ pub struct CreateDistributor<'info> {
     /// The mint to distribute.
     pub mint: Account<'info, Mint>,
     /// Payer to create the distributor.
-    #[account(mut)]
-    pub payer: Signer<'info>,
     /// The [System] program.
     pub system_program: Program<'info, System>,
     /// The [Token] program.
