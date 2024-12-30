@@ -76,6 +76,7 @@ pub fn create_distributor(
     distributor.max_num_nodes = args.max_num_nodes;
     distributor.total_amount_claimed = 0;
     distributor.num_nodes_claimed = 0;
+    distributor.token_account = distributor_token_account.key();
     transfer_token(
         signer_token_account.to_account_info(),
         distributor_token_account.to_account_info(),

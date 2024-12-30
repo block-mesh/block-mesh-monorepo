@@ -25,3 +25,7 @@ sha2 = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 rs_merkle = { workspace = true }
+
+[dev-dependencies]
+rand = { workspace = true }
+solana-sdk = { workspace = true }
