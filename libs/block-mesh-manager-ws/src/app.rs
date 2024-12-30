@@ -1,6 +1,7 @@
 use crate::errors::Error;
 use crate::state::WsAppState;
 use crate::websocket::ws_handler::ws_handler;
+use anyhow::anyhow;
 use axum::extract::{Query, State};
 use axum::http::StatusCode;
 use axum::response::IntoResponse;
@@ -101,17 +102,27 @@ pub async fn version() -> impl IntoResponse {
 
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct StatsResponse {
-    count: i64,
+    pub counts: Vec<(String, i64)>,
+    pub total: i64,
 }
 
 #[tracing::instrument(name = "stats", skip_all)]
-pub async fn stats(State(state): State<Arc<WsAppState>>) -> Json<StatsResponse> {
+pub async fn stats(State(state): State<Arc<WsAppState>>) -> Result<impl IntoResponse, Error> {
     let mut redis = state.redis.clone();
-    let redis_count: RedisResult<i64> = redis.get(BLOCKMESH_WS_REDIS_COUNT_KEY.to_string()).await;
-    match redis_count {
-        Ok(count) => Json(StatsResponse { count }),
-        Err(_) => Json(StatsResponse { count: 0 }),
+    let mut counts: Vec<(String, i64)> = Vec::with_capacity(50);
+    let mut total = 0;
+    let redis_results: Vec<String> = redis
+        .keys(format!("{}*", BLOCKMESH_WS_REDIS_COUNT_KEY))
+        .await
+        .map_err(|e| Error::from(anyhow!(e.to_string())))?;
+    for key in redis_results {
+        let redis_count: RedisResult<i64> = redis.get(key.clone()).await;
+        if let Ok(count) = redis_count {
+            counts.push((key, count));
+            total += count;
+        }
     }
+    Ok(Json(StatsResponse { counts, total }))
 }
 
 pub async fn app(listener: TcpListener, state: Arc<WsAppState>) {
