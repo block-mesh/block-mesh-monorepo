@@ -1,63 +1,10 @@
+mod utils;
+
+use crate::utils::{process_chunk, read_csv_file, write_chunk, Record};
 use clickhouse::Client;
-use sqlx::types::chrono::NaiveDate;
+use sqlx::types::chrono::{NaiveDate, Utc};
 use std::env;
 use std::sync::Arc;
-
-pub async fn process_chunk(
-    _clickhouse_client: Arc<Client>,
-    index: i32,
-    _date: NaiveDate,
-    limit: i64,
-    offset: i64,
-) -> anyhow::Result<()> {
-    println!(
-        "index = {}  | limit = {} | offset = {}",
-        index, limit, offset
-    );
-    let mut writer = csv::WriterBuilder::new()
-        .buffer_capacity(10_000)
-        .from_path(format!("csv/2024-12-11_{}.csv", index))?;
-    // let data = clickhouse_client
-    //     .query(
-    //         r#"
-    //                SELECT ?fields
-    //                FROM ?
-    //                WHERE created_at::DATE = ?
-    //                ORDER BY created_at ASC
-    //                LIMIT ?
-    //                OFFSET ?
-    //
-    //         "#,
-    //     )
-    //     .bind(index)
-    //     .bind(Identifier("data_sinks_clickhouse"))
-    //     .bind(date)
-    //     .bind(limit)
-    //     .bind(offset)
-    //     .fetch_all::<DataSinkClickHouse>()
-    //     .await
-    //     .map_err(|e| {
-    //         eprintln!("process_chunk {}", e);
-    //         anyhow!(e.to_string())
-    //     })?;
-    // for i in data {
-    //     let x = i.clone();
-    //     // println!("{:#?}", i);
-    //     match ExportData::try_from(i) {
-    //         Ok(data) => {
-    //             // println!("data => {:#?}", data);
-    //             let _ = writer.serialize(data);
-    //         }
-    //         Err(e) => {
-    //             eprintln!("error {}", e);
-    //             eprintln!("error {:#?}", x);
-    //             break;
-    //         }
-    //     }
-    // }
-    let _ = writer.flush();
-    Ok(())
-}
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
@@ -69,28 +16,39 @@ async fn main() -> anyhow::Result<()> {
             .with_option("async_insert", "1")
             .with_option("wait_for_async_insert", "0"),
     );
-    let total = 10_000;
-    let limit = 500;
-    let mut offset = 0;
-    let date = NaiveDate::from_ymd_opt(2024, 12, 11).unwrap();
-    let mut jobs = vec![];
-    let mut index = 0;
-    while offset < total {
-        let task = tokio::spawn(process_chunk(
-            clickhouse_client.clone(),
-            index,
-            date,
-            limit,
-            offset,
-        ));
-        jobs.push(task);
-        offset += limit;
-        index += 1;
-    }
 
-    for (index, job) in jobs.into_iter().enumerate() {
-        let _ = job.await;
-        println!("Finished index = {}", index);
+    let mut records = read_csv_file("./CSV/backup-2024-12-11.csv");
+    let total_records = records.len();
+    println!("records.len = {}", total_records);
+    let date = NaiveDate::from_ymd_opt(2024, 12, 11).unwrap();
+    let mut index = 0;
+    let mut acc = 0;
+    while records.len() > 0 {
+        let clickhouse_client = clickhouse_client.clone();
+        let test_records: Vec<Record> = records.drain(0..999).collect();
+        if index < 34 {
+            index += 1;
+            continue;
+        }
+        let mut success = false;
+        while !success {
+            let clickhouse_client = clickhouse_client.clone();
+            if let Ok(db_records) = process_chunk(clickhouse_client, date, &test_records).await {
+                acc += db_records.len();
+                let now = Utc::now();
+                println!(
+                    "[{}] stats: index = {} | db_records.len() = {} | acc = {} | total = {}",
+                    now,
+                    index,
+                    db_records.len(),
+                    acc,
+                    total_records
+                );
+                write_chunk(db_records, index, &date);
+                index += 1;
+                success = true;
+            }
+        }
     }
     Ok(())
 }
