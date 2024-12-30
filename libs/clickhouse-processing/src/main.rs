@@ -23,13 +23,9 @@ async fn main() -> anyhow::Result<()> {
     let date = NaiveDate::from_ymd_opt(2024, 12, 11).unwrap();
     let mut index = 0;
     let mut acc = 0;
-    while records.len() > 0 {
+    while !records.is_empty() {
         let clickhouse_client = clickhouse_client.clone();
         let test_records: Vec<Record> = records.drain(0..999).collect();
-        if index < 34 {
-            index += 1;
-            continue;
-        }
         let mut success = false;
         while !success {
             let clickhouse_client = clickhouse_client.clone();
