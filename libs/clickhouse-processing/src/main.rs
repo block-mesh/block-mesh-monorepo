@@ -1,96 +1,58 @@
-use clickhouse::Client;
-use sqlx::types::chrono::NaiveDate;
-use std::env;
-use std::sync::Arc;
+mod backup;
+mod utils;
 
-pub async fn process_chunk(
-    _clickhouse_client: Arc<Client>,
-    index: i32,
-    _date: NaiveDate,
-    limit: i64,
-    offset: i64,
-) -> anyhow::Result<()> {
-    println!(
-        "index = {}  | limit = {} | offset = {}",
-        index, limit, offset
-    );
-    let mut writer = csv::WriterBuilder::new()
-        .buffer_capacity(10_000)
-        .from_path(format!("csv/2024-12-11_{}.csv", index))?;
-    // let data = clickhouse_client
-    //     .query(
-    //         r#"
-    //                SELECT ?fields
-    //                FROM ?
-    //                WHERE created_at::DATE = ?
-    //                ORDER BY created_at ASC
-    //                LIMIT ?
-    //                OFFSET ?
-    //
-    //         "#,
-    //     )
-    //     .bind(index)
-    //     .bind(Identifier("data_sinks_clickhouse"))
-    //     .bind(date)
-    //     .bind(limit)
-    //     .bind(offset)
-    //     .fetch_all::<DataSinkClickHouse>()
-    //     .await
-    //     .map_err(|e| {
-    //         eprintln!("process_chunk {}", e);
-    //         anyhow!(e.to_string())
-    //     })?;
-    // for i in data {
-    //     let x = i.clone();
-    //     // println!("{:#?}", i);
-    //     match ExportData::try_from(i) {
-    //         Ok(data) => {
-    //             // println!("data => {:#?}", data);
-    //             let _ = writer.serialize(data);
-    //         }
-    //         Err(e) => {
-    //             eprintln!("error {}", e);
-    //             eprintln!("error {:#?}", x);
-    //             break;
-    //         }
-    //     }
-    // }
-    let _ = writer.flush();
-    Ok(())
+use crate::utils::{write_to_csv_file, DataSinkClickHouse, Output};
+use anyhow::anyhow;
+use clap::Parser;
+use csv::{ReaderBuilder, StringRecord};
+use twitter_scraping_helper::feed_element_try_from;
+
+#[derive(Parser, Debug)]
+pub struct CliArgs {
+    #[arg(long)]
+    pub input_file: String,
+    #[arg(long)]
+    pub output_file: String,
+    #[arg(long, default_value = "-1")]
+    pub limit: i32,
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    let clickhouse_client = Arc::new(
-        Client::default()
-            .with_url(env::var("PROD_CLICKHOUSE_URL").unwrap())
-            .with_user(env::var("PROD_CLICKHOUSE_USER").unwrap())
-            .with_password(env::var("PROD_CLICKHOUSE_PASSWORD").unwrap())
-            .with_option("async_insert", "1")
-            .with_option("wait_for_async_insert", "0"),
-    );
-    let total = 10_000;
-    let limit = 500;
-    let mut offset = 0;
-    let date = NaiveDate::from_ymd_opt(2024, 12, 11).unwrap();
-    let mut jobs = vec![];
-    let mut index = 0;
-    while offset < total {
-        let task = tokio::spawn(process_chunk(
-            clickhouse_client.clone(),
-            index,
-            date,
-            limit,
-            offset,
-        ));
-        jobs.push(task);
-        offset += limit;
-        index += 1;
+    let args = CliArgs::parse();
+    println!("args = {:#?}", args);
+    if args.input_file == args.output_file {
+        let msg = "Input and output file cannot be the same";
+        eprintln!("{}", msg);
+        return Err(anyhow!(msg));
+    }
+    // let inputs = read_csv_file(&args.input_file);
+
+    let mut reader = ReaderBuilder::new()
+        .buffer_capacity(64_000_000)
+        .from_path(args.input_file)
+        .unwrap();
+    let mut string_record = StringRecord::new();
+    let mut output: Vec<Output> = Vec::with_capacity(1_000_000);
+
+    let mut count = 0;
+    loop {
+        if count % 1_000 == 0 {
+            println!("count = {}", count);
+        }
+        reader.read_record(&mut string_record).unwrap();
+        let record: DataSinkClickHouse = string_record.deserialize(None).unwrap();
+        let element = feed_element_try_from(&record.raw, &record.origin).map_err(|e| {
+            eprintln!("error = {}", e);
+            anyhow!(e.to_string())
+        })?;
+        output.push(Output::merge(element, record));
+        if args.limit > 0 && count > args.limit {
+            break;
+        }
+        count += 1;
     }
 
-    for (index, job) in jobs.into_iter().enumerate() {
-        let _ = job.await;
-        println!("Finished index = {}", index);
-    }
+    write_to_csv_file(output, &args.output_file);
     Ok(())
 }

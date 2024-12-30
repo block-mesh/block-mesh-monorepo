@@ -35,16 +35,22 @@ pub struct WsAppState {
     pub emails: Arc<RwLock<HashSet<String>>>,
     pub user_ids: Arc<RwLock<HashSet<Uuid>>>,
     pub creds_cache: Arc<RwLock<HashMap<(String, Uuid), WsCredsCache>>>,
+    pub redis_key: String,
 }
 
 impl WsAppState {
+    pub fn redis_key(&self) -> String {
+        format!("{}_{}", BLOCKMESH_WS_REDIS_COUNT_KEY, self.redis_key)
+    }
+
     pub async fn subscribe_light(&self, email: &str, user_id: &Uuid) {
         let mut emails = self.emails.write().await;
         emails.insert(email.to_string());
         let mut user_ids = self.user_ids.write().await;
         user_ids.insert(*user_id);
         let mut redis = self.redis.clone();
-        let _: RedisResult<()> = redis.incr(BLOCKMESH_WS_REDIS_COUNT_KEY, 1).await;
+        let _: RedisResult<()> = redis.incr(self.redis_key(), 1).await;
+        let _: RedisResult<()> = redis.expire(self.redis_key(), 120).await;
     }
 
     pub async fn unsubscribe_light(&self, email: &str, user_id: &Uuid) {
@@ -53,12 +59,14 @@ impl WsAppState {
         let mut user_ids = self.user_ids.write().await;
         user_ids.remove(user_id);
         let mut redis = self.redis.clone();
-        let _: RedisResult<()> = redis.decr(BLOCKMESH_WS_REDIS_COUNT_KEY, 1).await;
+        let _: RedisResult<()> = redis.decr(self.redis_key(), 1).await;
+        let _: RedisResult<()> = redis.expire(self.redis_key(), 120).await;
     }
 }
 
 impl WsAppState {
     pub async fn new(tx: Sender<DBMessage>) -> Self {
+        let redis_key = Uuid::new_v4().to_string();
         let environment = env::var("APP_ENVIRONMENT").unwrap();
         let environment = Environment::from_str(&environment).unwrap();
         let pool = write_pool(None).await;
@@ -76,6 +84,7 @@ impl WsAppState {
             .await
             .unwrap();
         Self {
+            redis_key,
             creds_cache: Arc::new(RwLock::new(HashMap::new())),
             emails: Arc::new(RwLock::new(HashSet::new())),
             user_ids: Arc::new(RwLock::new(HashSet::new())),
