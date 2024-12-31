@@ -118,11 +118,11 @@ async fn run() -> anyhow::Result<()> {
     let queue_ref_bonus_task = tokio::spawn(queue_ref_bonus(tx.subscribe(), queue.clone()));
     let ref_bonus_bg_table_cron_task = tokio::spawn(ref_bonus_bg_table_cron(db_pool.clone()));
     let bulk_task_bonus_task = tokio::spawn(bulk_task_bonus_cron(un_limited_db_pool.clone()));
-    let bulk_uptime_bonus_task = tokio::spawn(bulk_uptime_bonus_cron(un_limited_db_pool));
+    let bulk_uptime_bonus_task = tokio::spawn(bulk_uptime_bonus_cron(un_limited_db_pool.clone()));
     let joiner_task = tokio::spawn(joiner_loop(joiner_rx));
     let joiner_task_ref = tokio::spawn(joiner_loop(joiner_rx_ref));
     let rpc_worker_task = tokio::spawn(rpc_worker_loop(db_pool.clone()));
-    let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(db_pool.clone()));
+    let finalize_daily_stats_task = tokio::spawn(finalize_daily_cron(un_limited_db_pool.clone()));
     let delete_old_tasks_task = tokio::spawn(clean_old_tasks(db_pool.clone()));
     let channel_pool = channel_pool(Some("CHANNEL_DATABASE_URL".to_string())).await;
 
