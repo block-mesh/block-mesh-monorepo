@@ -43,7 +43,7 @@ export function loadWalletKey(keypair: string): Keypair {
   const loaded = Keypair.fromSecretKey(
     new Uint8Array(JSON.parse(fs.readFileSync(keypair).toString()))
   )
-  console.log(`wallet public key: ${loaded.publicKey}`)
+  // console.log(`wallet public key: ${loaded.publicKey}`)
   return loaded
 }
 
@@ -57,9 +57,9 @@ export async function processAndValidateTransaction(
   signer: Keypair
 ) {
   const sig = await processTransaction(instructions, connection, signer)
-  console.log('Transaction signature: ', sig.Signature)
+  // console.log('Transaction signature: ', sig.Signature)
   const txn = await connection.getParsedTransaction(sig.Signature, 'confirmed')
-  console.log('Transaction: ', txn)
+  // console.log('Transaction: ', txn)
   assert.equal(
     sig.SignatureResult.err,
     null,
@@ -90,7 +90,7 @@ export async function processTransaction(
       preflightCommitment: 'confirmed',
       skipPreflight: true
     })
-    console.log('Transaction signature: ', sig)
+    // console.log('Transaction signature: ', sig)
     const strategy: BlockheightBasedTransactionConfirmationStrategy = {
       signature: sig,
       blockhash: blockStats.blockhash,

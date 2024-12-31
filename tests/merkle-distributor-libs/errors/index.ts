@@ -12,13 +12,36 @@ const createErrorFromCodeLookup: Map<number, () => ErrorWithCode> = new Map()
 const createErrorFromNameLookup: Map<string, () => ErrorWithCode> = new Map()
 
 /**
+ * NumericalOverflow: 'Numerical Overflow'
+ *
+ * @category Errors
+ * @category generated
+ */
+export class NumericalOverflowError extends Error {
+  readonly code: number = 0x1770
+  readonly name: string = 'NumericalOverflow'
+  constructor() {
+    super('Numerical Overflow')
+    if (typeof Error.captureStackTrace === 'function') {
+      Error.captureStackTrace(this, NumericalOverflowError)
+    }
+  }
+}
+
+createErrorFromCodeLookup.set(0x1770, () => new NumericalOverflowError())
+createErrorFromNameLookup.set(
+  'NumericalOverflow',
+  () => new NumericalOverflowError()
+)
+
+/**
  * CannotValidateProof: 'Cannot Validate Proof.'
  *
  * @category Errors
  * @category generated
  */
 export class CannotValidateProofError extends Error {
-  readonly code: number = 0x1770
+  readonly code: number = 0x1771
   readonly name: string = 'CannotValidateProof'
   constructor() {
     super('Cannot Validate Proof.')
@@ -28,7 +51,7 @@ export class CannotValidateProofError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x1770, () => new CannotValidateProofError())
+createErrorFromCodeLookup.set(0x1771, () => new CannotValidateProofError())
 createErrorFromNameLookup.set(
   'CannotValidateProof',
   () => new CannotValidateProofError()
@@ -41,7 +64,7 @@ createErrorFromNameLookup.set(
  * @category generated
  */
 export class InvalidProofError extends Error {
-  readonly code: number = 0x1771
+  readonly code: number = 0x1772
   readonly name: string = 'InvalidProof'
   constructor() {
     super('Invalid Merkle proof.')
@@ -51,7 +74,7 @@ export class InvalidProofError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x1771, () => new InvalidProofError())
+createErrorFromCodeLookup.set(0x1772, () => new InvalidProofError())
 createErrorFromNameLookup.set('InvalidProof', () => new InvalidProofError())
 
 /**
@@ -61,7 +84,7 @@ createErrorFromNameLookup.set('InvalidProof', () => new InvalidProofError())
  * @category generated
  */
 export class InvalidProofLengthError extends Error {
-  readonly code: number = 0x1772
+  readonly code: number = 0x1773
   readonly name: string = 'InvalidProofLength'
   constructor() {
     super('Invalid Proof Length.')
@@ -71,7 +94,7 @@ export class InvalidProofLengthError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x1772, () => new InvalidProofLengthError())
+createErrorFromCodeLookup.set(0x1773, () => new InvalidProofLengthError())
 createErrorFromNameLookup.set(
   'InvalidProofLength',
   () => new InvalidProofLengthError()
@@ -84,7 +107,7 @@ createErrorFromNameLookup.set(
  * @category generated
  */
 export class DropAlreadyClaimedError extends Error {
-  readonly code: number = 0x1773
+  readonly code: number = 0x1774
   readonly name: string = 'DropAlreadyClaimed'
   constructor() {
     super('Drop already claimed.')
@@ -94,7 +117,7 @@ export class DropAlreadyClaimedError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x1773, () => new DropAlreadyClaimedError())
+createErrorFromCodeLookup.set(0x1774, () => new DropAlreadyClaimedError())
 createErrorFromNameLookup.set(
   'DropAlreadyClaimed',
   () => new DropAlreadyClaimedError()
@@ -107,7 +130,7 @@ createErrorFromNameLookup.set(
  * @category generated
  */
 export class ExceededMaxClaimError extends Error {
-  readonly code: number = 0x1774
+  readonly code: number = 0x1775
   readonly name: string = 'ExceededMaxClaim'
   constructor() {
     super('Exceeded maximum claim amount.')
@@ -117,7 +140,7 @@ export class ExceededMaxClaimError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x1774, () => new ExceededMaxClaimError())
+createErrorFromCodeLookup.set(0x1775, () => new ExceededMaxClaimError())
 createErrorFromNameLookup.set(
   'ExceededMaxClaim',
   () => new ExceededMaxClaimError()
@@ -130,7 +153,7 @@ createErrorFromNameLookup.set(
  * @category generated
  */
 export class ExceededMaxNumNodesError extends Error {
-  readonly code: number = 0x1775
+  readonly code: number = 0x1776
   readonly name: string = 'ExceededMaxNumNodes'
   constructor() {
     super('Exceeded maximum number of claimed nodes.')
@@ -140,7 +163,7 @@ export class ExceededMaxNumNodesError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x1775, () => new ExceededMaxNumNodesError())
+createErrorFromCodeLookup.set(0x1776, () => new ExceededMaxNumNodesError())
 createErrorFromNameLookup.set(
   'ExceededMaxNumNodes',
   () => new ExceededMaxNumNodesError()
@@ -153,7 +176,7 @@ createErrorFromNameLookup.set(
  * @category generated
  */
 export class UnauthorizedError extends Error {
-  readonly code: number = 0x1776
+  readonly code: number = 0x1777
   readonly name: string = 'Unauthorized'
   constructor() {
     super('Account is not authorized to execute this instruction')
@@ -163,7 +186,7 @@ export class UnauthorizedError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x1776, () => new UnauthorizedError())
+createErrorFromCodeLookup.set(0x1777, () => new UnauthorizedError())
 createErrorFromNameLookup.set('Unauthorized', () => new UnauthorizedError())
 
 /**
@@ -173,7 +196,7 @@ createErrorFromNameLookup.set('Unauthorized', () => new UnauthorizedError())
  * @category generated
  */
 export class OwnerMismatchError extends Error {
-  readonly code: number = 0x1777
+  readonly code: number = 0x1778
   readonly name: string = 'OwnerMismatch'
   constructor() {
     super('Token account owner did not match intended owner')
@@ -183,7 +206,7 @@ export class OwnerMismatchError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x1777, () => new OwnerMismatchError())
+createErrorFromCodeLookup.set(0x1778, () => new OwnerMismatchError())
 createErrorFromNameLookup.set('OwnerMismatch', () => new OwnerMismatchError())
 
 /**
@@ -193,7 +216,7 @@ createErrorFromNameLookup.set('OwnerMismatch', () => new OwnerMismatchError())
  * @category generated
  */
 export class BadMathError extends Error {
-  readonly code: number = 0x1778
+  readonly code: number = 0x1779
   readonly name: string = 'BadMath'
   constructor() {
     super('Bad math')
@@ -203,7 +226,7 @@ export class BadMathError extends Error {
   }
 }
 
-createErrorFromCodeLookup.set(0x1778, () => new BadMathError())
+createErrorFromCodeLookup.set(0x1779, () => new BadMathError())
 createErrorFromNameLookup.set('BadMath', () => new BadMathError())
 
 /**
