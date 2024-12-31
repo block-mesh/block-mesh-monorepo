@@ -2,6 +2,9 @@ import { ComputeBudgetProgram, Connection, LAMPORTS_PER_SOL, PublicKey } from '@
 import { Keypair } from '@solana/web3.js'
 import fs from 'fs'
 import { ClaimMarker } from '../../tests/merkle-distributor-libs'
+import { createReclaimInstruction } from '../../tests/merkle-distributor-helpers/wrapper'
+import { processTransaction } from '../../tests/helpers'
+import assert from 'assert'
 
 export function loadWalletKey(keypair: string): Keypair {
   if (!keypair || keypair == '') {
@@ -23,7 +26,7 @@ function getConnection(network: Network): Connection {
   if (network === Network.DEVNET) {
     return new Connection('https://devnet.helius-rpc.com/?api-key=cb443ba5-0587-4bf8-8274-9194e993f45e')
   } else {
-    return new Connection('https://mainnet.helius-rpc.com/?api-key=beebdf43-fe25-4693-9eb2-6891e3d6cc5f')
+    return new Connection('https://mainnet.helius-rpc.com/?api-key=32c35600-ee87-4ba1-b348-7d41f9b1693c')
   }
 }
 
@@ -32,15 +35,15 @@ async function main() {
   const connection = getConnection(Network.MAINNET)
   const mint = new PublicKey('Db7ZUaWTThwZy7bVhjn5Dda8D3fbbAhihcxPV4m9pump')
 
-  const modifyComputeUnits = ComputeBudgetProgram.setComputeUnitLimit({
-    units: 1000000
-  })
+  // const modifyComputeUnits = ComputeBudgetProgram.setComputeUnitLimit({
+  //   units: 1000000
+  // })
   const addPriorityFee = ComputeBudgetProgram.setComputeUnitPrice({
-    microLamports: 5000
+    microLamports: 100000
   })
 
   const markers = await ClaimMarker.gpaBuilder().run(connection)
-  console.log('markets.length = ', markers.length)
+  console.log('markers.length = ', markers.length)
   const claimed = await ClaimMarker.gpaBuilder().addFilter('isClaimed', true).run(connection)
   console.log('claimed.length = ', claimed.length)
   const unclaimed = await ClaimMarker.gpaBuilder().addFilter('isClaimed', false).run(connection)
@@ -54,30 +57,40 @@ async function main() {
   }
 
   let unclaimed_sum = 0
+  let unclaimd_500 = 0
   for (const c of unclaimed.values()) {
     const [account] = ClaimMarker.fromAccountInfo(c.account)
     // @ts-ignore
     unclaimed_sum += account.pretty().amount
+    if (account.pretty().amount === 500 * (LAMPORTS_PER_SOL / 1000)) {
+      // @ts-ignore
+      unclaimd_500 += account.pretty().amount
+    }
   }
   console.log('claimed_sum', claimed_sum / (LAMPORTS_PER_SOL / 1000))
   console.log('unclaimed_sum', unclaimed_sum / (LAMPORTS_PER_SOL / 1000))
+  console.log('unclaimd_500', unclaimd_500 / (LAMPORTS_PER_SOL / 1000))
 
-  // const instruction = createAirDropperInstruction(admin.publicKey, mint)
-  // const sigx = await processTransaction(
-  //   [modifyComputeUnits, addPriorityFee, instruction],
-  //   connection,
-  //   admin
-  // )
-  // console.log('sigx', sigx)
-  // const txnx = await connection.getParsedTransaction(
-  //   sigx.Signature,
-  //   'confirmed'
-  // )
-  // assert.equal(
-  //   sigx.SignatureResult.err,
-  //   null,
-  //   `${mint.toBase58()}\n${txnx?.meta?.logMessages.join('\n')}`
-  // )
+  return
+  const c = Array.from(unclaimed.values())[0]
+  const [account] = ClaimMarker.fromAccountInfo(c.account)
+  const instruction = createReclaimInstruction(admin.publicKey, account.claimant, mint)
+  const sigx = await processTransaction(
+    [addPriorityFee, instruction],
+    connection,
+    admin
+  )
+  console.log('sigx', sigx)
+  const txnx = await connection.getParsedTransaction(
+    sigx.Signature,
+    'confirmed'
+  )
+  console.log('txnx', txnx)
+  assert.equal(
+    sigx.SignatureResult.err,
+    null,
+    `${mint.toBase58()}\n${txnx?.meta?.logMessages.join('\n')}`
+  )
 }
 
 main()
