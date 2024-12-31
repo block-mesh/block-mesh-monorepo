@@ -18,6 +18,7 @@ export type ClaimStatusArgs = {
   bump: number
   isClaimed: boolean
   claimant: web3.PublicKey
+  mint: web3.PublicKey
   claimedAt: beet.bignum
   amount: beet.bignum
 }
@@ -35,6 +36,7 @@ export class ClaimStatus implements ClaimStatusArgs {
     readonly bump: number,
     readonly isClaimed: boolean,
     readonly claimant: web3.PublicKey,
+    readonly mint: web3.PublicKey,
     readonly claimedAt: beet.bignum,
     readonly amount: beet.bignum
   ) {}
@@ -47,6 +49,7 @@ export class ClaimStatus implements ClaimStatusArgs {
       args.bump,
       args.isClaimed,
       args.claimant,
+      args.mint,
       args.claimedAt,
       args.amount
     )
@@ -158,6 +161,7 @@ export class ClaimStatus implements ClaimStatusArgs {
       bump: this.bump,
       isClaimed: this.isClaimed,
       claimant: this.claimant.toBase58(),
+      mint: this.mint.toBase58(),
       claimedAt: (() => {
         const x = <{ toNumber: () => number }>this.claimedAt
         if (typeof x.toNumber === 'function') {
@@ -199,6 +203,7 @@ export const claimStatusBeet = new beet.BeetStruct<
     ['bump', beet.u8],
     ['isClaimed', beet.bool],
     ['claimant', beetSolana.publicKey],
+    ['mint', beetSolana.publicKey],
     ['claimedAt', beet.i64],
     ['amount', beet.u64],
   ],

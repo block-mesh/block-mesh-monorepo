@@ -6,7 +6,7 @@ import {
   SignatureResult,
   PublicKey,
   BlockheightBasedTransactionConfirmationStrategy,
-  ParsedTransactionWithMeta
+  ParsedTransactionWithMeta, LAMPORTS_PER_SOL
 } from '@solana/web3.js'
 import { Program } from '@coral-xyz/anchor'
 import {
@@ -17,7 +17,24 @@ import {
 import assert from 'assert'
 import keccak256 from 'keccak256'
 import fs from 'fs'
+import { keys } from './merkle-distributor-test'
 
+export type Claimant = {
+  claimant: number[];
+  amount: number;
+}
+
+export type Leaf = {
+  index: number;
+  proof: number[];
+  claimant: Claimant;
+  leaves_to_prove: number[][];
+}
+
+export type MerkleOutput = {
+  root: number[];
+  leafs: Leaf[];
+}
 
 export function loadWalletKey(keypair: string): Keypair {
   if (!keypair || keypair == '') {
@@ -225,4 +242,25 @@ export function generateHashInput(game: PublicKey, length: number): Hash {
     hash: sum,
     salt
   }
+}
+
+export function walletMap(): Map<string, Keypair> {
+  const cwd = process.cwd()
+  const map = new Map<string, Keypair>()
+  for (let i = 1; i <= 12; i++) {
+    let key = loadWalletKey(`${cwd}/programs/merkle-distributor/test-keys/${i}.json`)
+    map.set(key.publicKey.toBase58(), key)
+  }
+  return map
+}
+
+export function findDataInMerkle(pubkey: PublicKey, merkle: MerkleOutput): Leaf | null {
+  for (const leaf of merkle.leafs) {
+    const uint8Array = new Uint8Array(leaf.claimant.claimant)
+    const pub = new PublicKey(uint8Array)
+    if (pub.toBase58() === pubkey.toBase58()) {
+      return leaf
+    }
+  }
+  return null
 }

@@ -4,7 +4,6 @@ use anchor_lang::prelude::*;
 
 pub mod error;
 pub mod instructions;
-pub mod merkle_proof;
 pub mod state;
 pub mod utils;
 

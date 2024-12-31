@@ -10,6 +10,8 @@ pub struct ClaimStatus {
     pub is_claimed: bool,
     /// Authority that claimed the tokens.
     pub claimant: Pubkey,
+    /// Mint of claimed the tokens.
+    pub mint: Pubkey,
     /// When the tokens were claimed.
     pub claimed_at: i64,
     /// Amount of tokens claimed.
@@ -27,6 +29,8 @@ pub struct ClaimedEvent {
     pub index: u64,
     /// User that claimed.
     pub claimant: Pubkey,
+    /// Mint of claimed the tokens.
+    pub mint: Pubkey,
     /// Amount of tokens to distribute.
     pub amount: u64,
 }

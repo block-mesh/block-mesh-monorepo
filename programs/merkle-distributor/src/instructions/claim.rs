@@ -2,12 +2,13 @@ use crate::error::ErrorCode;
 // use crate::merkle_proof;
 use crate::state::claim_status::{ClaimStatus, ClaimedEvent};
 use crate::state::merkle_distributor::MerkleDistributor;
+use crate::state::off_chain::Claimant;
 use crate::utils::{transfer_token_pda, vec_to_array};
 use anchor_lang::prelude::*;
 use anchor_spl::associated_token::AssociatedToken;
 use anchor_spl::token::{Mint, Token, TokenAccount};
 use rs_merkle::algorithms::Sha256;
-use rs_merkle::MerkleProof;
+use rs_merkle::{Hasher, MerkleProof};
 
 #[derive(AnchorSerialize, AnchorDeserialize)]
 pub struct ClaimArgs {
@@ -71,6 +72,7 @@ pub struct Claim<'info> {
 }
 
 pub fn claim(ctx: Context<Claim>, args: ClaimArgs) -> Result<()> {
+    let clock = Clock::get()?;
     let mint = &ctx.accounts.mint;
     let claim_status = &mut ctx.accounts.claim_status;
     let claimant = &ctx.accounts.claimant;
@@ -84,12 +86,6 @@ pub fn claim(ctx: Context<Claim>, args: ClaimArgs) -> Result<()> {
         ErrorCode::DropAlreadyClaimed
     );
     require!(claimant.is_signer, ErrorCode::Unauthorized);
-    // Verify the merkle proof.
-    let _node = anchor_lang::solana_program::keccak::hashv(&[
-        &args.index.to_le_bytes(),
-        &claimant.key().to_bytes(),
-        &args.amount.to_le_bytes(),
-    ]);
     let merkle_root = distributor.root;
     let proof_bytes = args.proof;
     let proof = MerkleProof::<Sha256>::try_from(proof_bytes.clone())
@@ -102,23 +98,32 @@ pub fn claim(ctx: Context<Claim>, args: ClaimArgs) -> Result<()> {
         .collect::<Vec<[u8; 32]>>();
     let leaves_to_prove = leaves_to_prove.as_slice();
 
-    proof.verify(
-        merkle_root,
-        &indices_to_prove,
-        leaves_to_prove,
-        distributor.leaves_len as usize,
+    require!(
+        proof.verify(
+            merkle_root,
+            &indices_to_prove,
+            leaves_to_prove,
+            distributor.leaves_len as usize,
+        ),
+        ErrorCode::InvalidProof
     );
 
-    // TODO
-    // require!(
-    //     merkle_proof::verify(args.proof, distributor.root, node.0),
-    //     ErrorCode::InvalidProof
-    // );
+    require_eq!(1, leaves_to_prove.len(), ErrorCode::InvalidProofLength);
+
+    let leaf = Claimant {
+        claimant: claimant.key(),
+        amount: args.amount,
+    };
+
+    let leaf = Sha256::hash(&*leaf.as_bytes());
+    let inner_leaf = leaves_to_prove[0];
+    require!(leaf == inner_leaf, ErrorCode::CannotValidateProof);
+
     // Mark it claimed and send the tokens.
     claim_status.bump = ctx.bumps.claim_status;
     claim_status.amount = args.amount;
     claim_status.is_claimed = true;
-    let clock = Clock::get()?;
+    claim_status.mint = mint.key();
     claim_status.claimed_at = clock.unix_timestamp;
     claim_status.claimant = claimant.key();
 
@@ -155,6 +160,7 @@ pub fn claim(ctx: Context<Claim>, args: ClaimArgs) -> Result<()> {
     emit!(ClaimedEvent {
         index: args.index,
         claimant: claimant.key(),
+        mint: mint.key(),
         amount: args.amount
     });
     Ok(())

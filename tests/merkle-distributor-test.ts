@@ -4,9 +4,9 @@ import { MerkleDistributor } from '../target/types/merkle_distributor'
 import { Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
 import assert from 'assert'
 import {
-  airdrop,
-  getOrCreateTokenAccountInstruction, getWalletBalance, loadWalletKey,
-  processTransaction
+  airdrop, findDataInMerkle,
+  getOrCreateTokenAccountInstruction, getWalletBalance, loadWalletKey, MerkleOutput,
+  processTransaction, walletMap
 } from './helpers'
 import {
   createMint,
@@ -21,23 +21,6 @@ import {
   createMarker
 } from './merkle-distributor-helpers/wrapper'
 import { getDistributorAccount, getDistributorTokenAccount } from './merkle-distributor-helpers/pda'
-
-export type Claimant = {
-  claimant: number[];
-  amount: number;
-}
-
-export type Leaf = {
-  index: number;
-  proof: number[];
-  claimant: Claimant;
-  leaves_to_prove: number[][];
-}
-
-export type MerkleOutput = {
-  root: number[];
-  leafs: Leaf[];
-}
 
 export let merkle_json: MerkleOutput = null
 
@@ -218,21 +201,16 @@ describe('0-prep', () => {
   })
 
   it('claim-by-users', async () => {
-    const cwd = process.cwd()
-    for (let i = 1; i <= 12; i++) {
-      let key = loadWalletKey(`${cwd}/programs/merkle-distributor/test-keys/${i}.json`)
+    const wallets = walletMap()
+    for (const [_pubkey, key] of wallets.entries()) {
       await airdrop(program, key.publicKey, LAMPORTS_PER_SOL * 50_000)
-      keys.push(key)
     }
-
-    for (let index = 0; index < keys.length; index++) {
-      const key = keys[index]
-      const leaf = merkle_json.leafs[index]
-      const proof = leaf.proof
+    for (const [_pubkey, key] of wallets.entries()) {
+      const leaf = findDataInMerkle(key.publicKey, merkle_json)
       const instruction = createClaimStatusInstruction(
-        index,
+        leaf.index,
         leaf.claimant.amount,
-        proof,
+        leaf.proof,
         key.publicKey,
         mint,
         leaf.leaves_to_prove
@@ -253,6 +231,8 @@ describe('0-prep', () => {
       )
       const distributor = await getDistributorAccount(program.provider.connection, mint)
       console.log('distributor = ', distributor.pretty())
+      const balancePost = await getWalletBalance(program.provider.connection, key.publicKey, mint)
+      console.log('balancePost = ', balancePost, ' amount = ', leaf.claimant.amount)
     }
   })
 })
