@@ -115,7 +115,7 @@ pub fn claim(ctx: Context<Claim>, args: ClaimArgs) -> Result<()> {
         amount: args.amount,
     };
 
-    let leaf = Sha256::hash(&*leaf.as_bytes());
+    let leaf = Sha256::hash(&leaf.as_bytes());
     let inner_leaf = leaves_to_prove[0];
     require!(leaf == inner_leaf, ErrorCode::CannotValidateProof);
 
