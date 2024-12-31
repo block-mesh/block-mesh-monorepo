@@ -4,7 +4,6 @@ use anchor_lang::prelude::*;
 
 pub mod error;
 pub mod instructions;
-pub mod merkle_proof;
 pub mod state;
 pub mod utils;
 
@@ -28,14 +27,14 @@ pub mod merkle_distributor {
         create_marker::create_marker(ctx, args)
     }
 
-    // pub fn create_distributor(
-    //     ctx: Context<CreateDistributor>,
-    //     args: CreateDistributorArgs,
-    // ) -> Result<()> {
-    //     create_distributor::create_distributor(ctx, args)
-    // }
-    //
-    // pub fn claim(ctx: Context<Claim>, args: ClaimArgs) -> Result<()> {
-    //     claim::claim(ctx, args)
-    // }
+    pub fn create_distributor(
+        ctx: Context<CreateDistributor>,
+        args: CreateDistributorArgs,
+    ) -> Result<()> {
+        create_distributor::create_distributor(ctx, args)
+    }
+
+    pub fn claim(ctx: Context<Claim>, args: ClaimArgs) -> Result<()> {
+        claim::claim(ctx, args)
+    }
 }

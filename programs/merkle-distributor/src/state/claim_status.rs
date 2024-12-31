@@ -1,16 +1,19 @@
 use anchor_lang::prelude::*;
-use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
+// use anchor_lang::solana_program::pubkey::PUBKEY_BYTES;
 
 /// Holds whether or not a claimant has claimed tokens.
-///
-/// TODO: this is probably better stored as the node that was verified.
 #[account]
 #[derive(Default)]
 pub struct ClaimStatus {
+    pub bump: u8,
     /// If true, the tokens have been claimed.
     pub is_claimed: bool,
     /// Authority that claimed the tokens.
     pub claimant: Pubkey,
+    /// Mint of claimed the tokens.
+    pub mint: Pubkey,
+    /// The Distributor
+    pub distributor: Pubkey,
     /// When the tokens were claimed.
     pub claimed_at: i64,
     /// Amount of tokens claimed.
@@ -18,7 +21,7 @@ pub struct ClaimStatus {
 }
 
 impl ClaimStatus {
-    pub const LEN: usize = 1 + PUBKEY_BYTES + 8 + 8;
+    pub const LEN: usize = 500;
 }
 
 /// Emitted when tokens are claimed.
@@ -28,6 +31,10 @@ pub struct ClaimedEvent {
     pub index: u64,
     /// User that claimed.
     pub claimant: Pubkey,
+    /// Mint of claimed the tokens.
+    pub mint: Pubkey,
+    /// The Distributor
+    pub distributor: Pubkey,
     /// Amount of tokens to distribute.
     pub amount: u64,
 }

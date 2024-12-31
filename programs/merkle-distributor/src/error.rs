@@ -3,8 +3,12 @@ use anchor_lang::prelude::*;
 /// Error codes.
 #[error_code]
 pub enum ErrorCode {
+    #[msg("Cannot Validate Proof.")]
+    CannotValidateProof,
     #[msg("Invalid Merkle proof.")]
     InvalidProof,
+    #[msg("Invalid Proof Length.")]
+    InvalidProofLength,
     #[msg("Drop already claimed.")]
     DropAlreadyClaimed,
     #[msg("Exceeded maximum claim amount.")]

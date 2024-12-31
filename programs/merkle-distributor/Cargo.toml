@@ -21,3 +21,11 @@ anchor-lang = { workspace = true, features = ["init-if-needed"] }
 anchor-spl = { workspace = true, features = ["spl-associated-token-account", "spl-token", "metadata"] }
 arrayref = { workspace = true }
 anchor-lang-idl = { workspace = true, features = ["convert"] }
+sha2 = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+rs_merkle = { workspace = true }
+
+[dev-dependencies]
+rand = { workspace = true }
+solana-sdk = { workspace = true }
