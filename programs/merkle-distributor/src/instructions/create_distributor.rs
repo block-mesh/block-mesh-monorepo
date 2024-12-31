@@ -26,14 +26,11 @@ pub struct CreateDistributor<'info> {
     pub signer_token_account: Box<Account<'info, TokenAccount>>,
     /// [MerkleDistributor].
     #[account(
-        init,
-        seeds = [
-            b"MerkleDistributor".as_ref(),
-            mint.key().as_ref()
-        ],
-        bump,
-        space = 8 + MerkleDistributor::LEN,
-        payer = signer
+    init,
+    seeds = [b"MerkleDistributor".as_ref(),mint.key().as_ref()],
+    space = 8 + MerkleDistributor::LEN,
+    payer = signer,
+    bump,
     )]
     pub distributor: Account<'info, MerkleDistributor>,
     #[account(

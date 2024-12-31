@@ -25,40 +25,37 @@ pub struct Claim<'info> {
     #[account(mut)]
     pub claimant: Signer<'info>,
     #[account(
-        init_if_needed,
-        associated_token::mint = mint,
-        associated_token::authority = claimant,
-        payer = claimant
+    init_if_needed,
+    associated_token::mint = mint,
+    associated_token::authority = claimant,
+    payer = claimant
     )]
     pub claimant_token_account: Box<Account<'info, TokenAccount>>,
     /// The [MerkleDistributor].
     #[account(mut,
-      seeds = [
-            b"MerkleDistributor".as_ref(),
-            mint.key().as_ref()
-        ],
+    seeds = [b"MerkleDistributor".as_ref(),mint.key().as_ref()],
     bump=distributor.bump
     )]
     pub distributor: Account<'info, MerkleDistributor>,
     #[account(
-        mut,
-        token::mint = mint,
-        token::authority = distributor,
-        seeds = [b"MerkleDistributor".as_ref(), distributor.key().as_ref()],
-        bump
+    mut,
+    token::mint = mint,
+    token::authority = distributor,
+    seeds = [b"MerkleDistributor".as_ref(), distributor.key().as_ref()],
+    bump
     )]
     pub distributor_token_account: Box<Account<'info, TokenAccount>>,
     /// Status of the claim.
     #[account(
-        init,
-        seeds = [
-            b"ClaimStatus".as_ref(),
-            distributor.key().as_ref(),
-            claimant.key().as_ref(),
-        ],
-        bump,
-        space = 8 + ClaimStatus::LEN,
-        payer = claimant
+    init,
+    seeds = [
+    b"ClaimStatus".as_ref(),
+    distributor.key().as_ref(),
+    claimant.key().as_ref(),
+    ],
+    space = 8 + ClaimStatus::LEN,
+    payer = claimant,
+    bump,
     )]
     pub claim_status: Account<'info, ClaimStatus>,
     /// Distributor ATA containing the tokens to distribute.
