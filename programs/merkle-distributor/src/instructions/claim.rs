@@ -58,12 +58,13 @@ pub struct Claim<'info> {
     bump,
     )]
     pub claim_status: Account<'info, ClaimStatus>,
-    /// Distributor ATA containing the tokens to distribute.
     /// The [System] program.
     pub system_program: Program<'info, System>,
     /// SPL [Token] program.
     pub token_program: Program<'info, Token>,
+    /// Token [Mint].
     pub mint: Box<Account<'info, Mint>>,
+    /// The [Associated Token] program.
     pub associated_token_program: Program<'info, AssociatedToken>,
     pub rent: Sysvar<'info, Rent>,
 }
@@ -123,6 +124,7 @@ pub fn claim(ctx: Context<Claim>, args: ClaimArgs) -> Result<()> {
     claim_status.mint = mint.key();
     claim_status.claimed_at = clock.unix_timestamp;
     claim_status.claimant = claimant.key();
+    claim_status.distributor = distributor.key();
 
     let mint_key = mint.key();
     let seeds = &[
@@ -158,6 +160,7 @@ pub fn claim(ctx: Context<Claim>, args: ClaimArgs) -> Result<()> {
         index: args.index,
         claimant: claimant.key(),
         mint: mint.key(),
+        distributor: distributor.key(),
         amount: args.amount
     });
     Ok(())
