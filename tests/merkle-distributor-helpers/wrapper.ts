@@ -7,7 +7,7 @@ import {
   createCreateAirDropperInstruction, createCreateDistributorInstruction,
   createCreateMarkerInstruction, CreateDistributorInstructionAccounts, CreateDistributorInstructionArgs,
   CreateMarkerInstructionAccounts,
-  CreateMarkerInstructionArgs
+  CreateMarkerInstructionArgs, createReclaimMarkerInstruction, ReclaimMarkerInstructionAccounts
 } from '../merkle-distributor-libs'
 import {
   getAirDropperAddress,
@@ -20,6 +20,30 @@ import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync
 } from '@solana/spl-token'
+
+export function createReclaimInstruction(
+  signer: PublicKey,
+  claimant: PublicKey,
+  mint: PublicKey
+): TransactionInstruction {
+  const signerTokenAccount = getAssociatedTokenAddressSync(mint, signer)
+  const [airDropper] = getAirDropperAddress()
+  const [claimMarker] = getClaimMarkerAddress(claimant)
+  const [claimMarkerTokenAccount] = getClaimMarkerTokenAccount(mint, claimant)
+  const [claimMarker2] = getClaimMarkerAddress2(claimant)
+  const accounts: ReclaimMarkerInstructionAccounts = {
+    signer,
+    signerTokenAccount,
+    claimant,
+    airDropper,
+    claimMarker,
+    claimMarker2,
+    claimMarkerTokenAccount,
+    mint,
+    associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+  }
+  return createReclaimMarkerInstruction(accounts)
+}
 
 export function createDistributorInstruction(
   root: number[],

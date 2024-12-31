@@ -37,4 +37,8 @@ pub mod merkle_distributor {
     pub fn claim(ctx: Context<Claim>, args: ClaimArgs) -> Result<()> {
         claim::claim(ctx, args)
     }
+
+    pub fn reclaim_marker(ctx: Context<ReclaimMarkerContext>) -> Result<()> {
+        reclaim_marker::reclaim_marker(ctx)
+    }
 }

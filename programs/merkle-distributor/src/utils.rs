@@ -4,6 +4,7 @@
 use crate::error::ErrorCode;
 use anchor_lang::prelude::*;
 use anchor_lang::solana_program;
+use anchor_lang::solana_program::program_memory::sol_memset;
 use anchor_spl::associated_token::get_associated_token_address;
 use anchor_spl::token::spl_token;
 
@@ -60,5 +61,49 @@ pub fn transfer_token_pda<'a>(
         &[from, to, token_program, owner],
         seeds,
     )?;
+    Ok(())
+}
+
+pub fn close_account(from: &mut AccountInfo, to: &mut AccountInfo) -> Result<()> {
+    let amount = from.lamports();
+    let size = from.try_data_len()?;
+    transfer_sol_from_pda(from, to, amount)?;
+    sol_memset(&mut from.try_borrow_mut_data()?, 0, size);
+    Ok(())
+}
+
+pub fn close_token_account<'a>(
+    account: AccountInfo<'a>,
+    destination: AccountInfo<'a>,
+    authority: AccountInfo<'a>,
+    seeds: &[&[&[u8]]],
+) -> Result<()> {
+    let ix = spl_token::instruction::close_account(
+        &spl_token::ID,
+        account.key,
+        destination.key,
+        authority.key,
+        &[],
+    )?;
+    solana_program::program::invoke_signed(&ix, &[account, destination, authority], seeds)?;
+    Ok(())
+}
+
+pub fn transfer_sol_from_pda(
+    from: &mut AccountInfo,
+    to: &mut AccountInfo,
+    amount: u64,
+) -> Result<()> {
+    let post_from = from
+        .lamports()
+        .checked_sub(amount)
+        .ok_or(ErrorCode::NumericalOverflow)?;
+    let post_to = to
+        .lamports()
+        .checked_add(amount)
+        .ok_or(ErrorCode::NumericalOverflow)?;
+
+    **from.try_borrow_mut_lamports().unwrap() = post_from;
+    **to.try_borrow_mut_lamports().unwrap() = post_to;
     Ok(())
 }

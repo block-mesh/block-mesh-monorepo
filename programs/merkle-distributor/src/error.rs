@@ -3,6 +3,8 @@ use anchor_lang::prelude::*;
 /// Error codes.
 #[error_code]
 pub enum ErrorCode {
+    #[msg("Numerical Overflow")]
+    NumericalOverflow,
     #[msg("Cannot Validate Proof.")]
     CannotValidateProof,
     #[msg("Invalid Merkle proof.")]

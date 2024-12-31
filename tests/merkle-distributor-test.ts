@@ -5,7 +5,7 @@ import { Keypair, LAMPORTS_PER_SOL, PublicKey } from '@solana/web3.js'
 import assert from 'assert'
 import {
   airdrop, findDataInMerkle,
-  getOrCreateTokenAccountInstruction, getWalletBalance, loadWalletKey, MerkleOutput,
+  getOrCreateTokenAccountInstruction, getWalletBalance, MerkleOutput,
   processTransaction, walletMap
 } from './helpers'
 import {
@@ -18,9 +18,13 @@ import {
   claimMarker,
   createAirDropperInstruction, createClaimStatusInstruction,
   createDistributorInstruction,
-  createMarker
+  createMarker, createReclaimInstruction
 } from './merkle-distributor-helpers/wrapper'
-import { getDistributorAccount, getDistributorTokenAccount } from './merkle-distributor-helpers/pda'
+import {
+  getAirDropperAddress, getClaimMarkerAccount, getClaimMarkerAddress, getClaimMarkerTokenAccount,
+  getDistributorAccount,
+  getDistributorTokenAccount
+} from './merkle-distributor-helpers/pda'
 
 export let merkle_json: MerkleOutput = null
 
@@ -32,7 +36,6 @@ export const users = [
 ]
 export const tokenMintAuthority = Keypair.generate()
 export let mint: PublicKey
-export let token9Decimals: PublicKey
 
 export let keys: Keypair[] = []
 
@@ -100,6 +103,9 @@ describe('0-prep', () => {
 
 
   it('Create air dropper', async () => {
+    const [airDropperPre] = getAirDropperAddress()
+    const accountPre = await program.provider.connection.getAccountInfo(airDropperPre)
+    assert(accountPre === null)
     const instruction = createAirDropperInstruction(admin.publicKey, mint)
     const sig = await processTransaction(
       [instruction],
@@ -115,6 +121,9 @@ describe('0-prep', () => {
       null,
       `${mint.toBase58()}\n${txn?.meta?.logMessages.join('\n')}`
     )
+    const [airDropperPost] = getAirDropperAddress()
+    const accountPost = await program.provider.connection.getAccountInfo(airDropperPost)
+    assert(accountPost !== null)
   })
 
 
@@ -122,6 +131,10 @@ describe('0-prep', () => {
     for (let i = 0; i < users.length; i++) {
       const user = users[i]
       const amount = LAMPORTS_PER_SOL * (i + 1)
+      const [claimMarkerPre] = getClaimMarkerAddress(user.publicKey)
+      const accountPre = await program.provider.connection.getAccountInfo(claimMarkerPre)
+      assert(accountPre === null)
+
       const instruction = createMarker(admin.publicKey, mint, user.publicKey, amount)
       const sig = await processTransaction(
         [instruction],
@@ -137,13 +150,19 @@ describe('0-prep', () => {
         null,
         `${mint.toBase58()}\n${txn?.meta?.logMessages.join('\n')}`
       )
+
+      const [claimMarkerPost] = getClaimMarkerAddress(user.publicKey)
+      const accountPost = await program.provider.connection.getAccountInfo(claimMarkerPost)
+      assert(accountPost !== null)
     }
   })
 
 
   it('claim marker', async () => {
-    for (let i = 0; i < users.length; i++) {
+    for (let i = 0; i < users.length - 1; i++) {
       const user = users[i]
+      const claimMarkerAccount = await getClaimMarkerAccount(program.provider.connection, user.publicKey)
+      assert(claimMarkerAccount.pretty().isClaimed === false)
       const instruction = claimMarker(user.publicKey, mint)
       const sig = await processTransaction(
         [instruction],
@@ -160,15 +179,83 @@ describe('0-prep', () => {
         `${mint.toBase58()}\n${txn?.meta?.logMessages.join('\n')}`
       )
       const balance = await getWalletBalance(program.provider.connection, user.publicKey, mint)
-      console.log('collect claims user', user.publicKey.toBase58(), ' balance', balance)
+      const claimMarkerAccount2 = await getClaimMarkerAccount(program.provider.connection, user.publicKey)
+      assert(claimMarkerAccount2.pretty().isClaimed === true)
+      assert(claimMarkerAccount2.pretty().amount === balance)
     }
+  })
+
+  it('reclaim marker 1', async () => {
+    const claimed_user = users[0]
+    const claimMarkerAccount = await getClaimMarkerAccount(program.provider.connection, claimed_user.publicKey)
+    assert(claimMarkerAccount.pretty().isClaimed === true)
+    const [claimMarkerPre] = getClaimMarkerAddress(claimed_user.publicKey)
+    const [claimMarkerTokenPre] = getClaimMarkerTokenAccount(mint, claimed_user.publicKey)
+    const accountPre = await program.provider.connection.getAccountInfo(claimMarkerPre)
+    assert(accountPre !== null)
+    const accountTokenPre = await program.provider.connection.getAccountInfo(claimMarkerTokenPre)
+    assert(accountTokenPre !== null)
+    const claim_instruction = createReclaimInstruction(admin.publicKey, claimed_user.publicKey, mint)
+    const sig = await processTransaction(
+      [claim_instruction],
+      program.provider.connection,
+      admin
+    )
+    const txn = await program.provider.connection.getParsedTransaction(
+      sig.Signature,
+      'confirmed'
+    )
+    assert.equal(
+      sig.SignatureResult.err,
+      null,
+      `${mint.toBase58()}\n${txn?.meta?.logMessages.join('\n')}`
+    )
+    const [claimMarkerPost] = getClaimMarkerAddress(claimed_user.publicKey)
+    const [claimMarkerTokenPost] = getClaimMarkerTokenAccount(mint, claimed_user.publicKey)
+    const accountPost = await program.provider.connection.getAccountInfo(claimMarkerPost)
+    assert(accountPost === null)
+    const accountTokenPost = await program.provider.connection.getAccountInfo(claimMarkerTokenPost)
+    assert(accountTokenPost === null)
+  })
+
+  it('reclaim marker 2', async () => {
+    const unclaimed_user = users[users.length - 1]
+    const claimMarkerAccount = await getClaimMarkerAccount(program.provider.connection, unclaimed_user.publicKey)
+    assert(claimMarkerAccount.pretty().isClaimed === false)
+    const [claimMarkerPre] = getClaimMarkerAddress(unclaimed_user.publicKey)
+    const [claimMarkerTokenPre] = getClaimMarkerTokenAccount(mint, unclaimed_user.publicKey)
+    const accountPre = await program.provider.connection.getAccountInfo(claimMarkerPre)
+    assert(accountPre !== null)
+    const accountTokenPre = await program.provider.connection.getAccountInfo(claimMarkerTokenPre)
+    assert(accountTokenPre !== null)
+    const unclaim_instruction = createReclaimInstruction(admin.publicKey, unclaimed_user.publicKey, mint)
+    const sig = await processTransaction(
+      [unclaim_instruction],
+      program.provider.connection,
+      admin
+    )
+    const txn = await program.provider.connection.getParsedTransaction(
+      sig.Signature,
+      'confirmed'
+    )
+    assert.equal(
+      sig.SignatureResult.err,
+      null,
+      `${mint.toBase58()}\n${txn?.meta?.logMessages.join('\n')}`
+    )
+    const [claimMarkerPost] = getClaimMarkerAddress(unclaimed_user.publicKey)
+    const [claimMarkerTokenPost] = getClaimMarkerTokenAccount(mint, unclaimed_user.publicKey)
+    const accountPost = await program.provider.connection.getAccountInfo(claimMarkerPost)
+    assert(accountPost === null)
+    const accountTokenPost = await program.provider.connection.getAccountInfo(claimMarkerTokenPost)
+    assert(accountTokenPost === null)
   })
 
   it('create distributor', async () => {
     const cwd = process.cwd()
     const merkle_file = fs.readFileSync(`${cwd}/programs/merkle-distributor/test-merkle/merkle.json`).toString()
     merkle_json = JSON.parse(merkle_file)
-    console.log('merkle_json = ', merkle_json)
+    // console.log('merkle_json = ', merkle_json)
     const instruction = createDistributorInstruction(merkle_json.root,
       LAMPORTS_PER_SOL * 1_000, 12,
       admin.publicKey,
@@ -191,13 +278,11 @@ describe('0-prep', () => {
     )
 
     const distributor = await getDistributorAccount(program.provider.connection, mint)
-    console.log('distributor = ', distributor.pretty())
     const [distributorTokenAccountAddress] = getDistributorTokenAccount(mint)
     const tokenBalance = await program.provider.connection.getTokenAccountBalance(
       distributorTokenAccountAddress,
       'confirmed'
     )
-    console.log('tokenBalance = ', parseInt(tokenBalance.value.amount))
   })
 
   it('claim-by-users', async () => {
@@ -207,6 +292,8 @@ describe('0-prep', () => {
     }
     for (const [_pubkey, key] of wallets.entries()) {
       const leaf = findDataInMerkle(key.publicKey, merkle_json)
+      const distributorPre = await getDistributorAccount(program.provider.connection, mint)
+      const pre = distributorPre.pretty().totalAmountClaimed as number
       const instruction = createClaimStatusInstruction(
         leaf.index,
         leaf.claimant.amount,
@@ -229,10 +316,11 @@ describe('0-prep', () => {
         null,
         `${mint.toBase58()}\n${txn?.meta?.logMessages.join('\n')}`
       )
-      const distributor = await getDistributorAccount(program.provider.connection, mint)
-      console.log('distributor = ', distributor.pretty())
+      const distributorPost = await getDistributorAccount(program.provider.connection, mint)
+      const post = distributorPost.pretty().totalAmountClaimed as number
       const balancePost = await getWalletBalance(program.provider.connection, key.publicKey, mint)
-      console.log('balancePost = ', balancePost, ' amount = ', leaf.claimant.amount)
+      assert(balancePost == leaf.claimant.amount)
+      assert(post - pre == balancePost)
     }
   })
 })
