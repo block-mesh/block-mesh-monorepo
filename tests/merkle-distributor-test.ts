@@ -9,21 +9,24 @@ import {
   processTransaction, walletMap
 } from './helpers'
 import {
+  createAssociatedTokenAccount,
   createMint,
   getAssociatedTokenAddress,
   mintTo
 } from '@solana/spl-token'
 import { Program } from '@coral-xyz/anchor'
 import {
-  claimMarker,
-  createAirDropperInstruction, createClaimStatusInstruction,
-  createDistributorInstruction,
-  createMarker, createReclaimInstruction
+  claimMarkerTransactionInstruction,
+  createAirDropperTransactionInstruction,
+  createClaimStatusTransactionInstruction, createCloseTokenAccountWithFeeTransactionInstruction,
+  createDistributorTransactionInstruction, createFeeCollectorTransactionInstruction,
+  createMarkerTransactionInstruction,
+  createReclaimTransactionInstruction
 } from './merkle-distributor-helpers/wrapper'
 import {
   getAirDropperAddress, getClaimMarkerAccount, getClaimMarkerAddress, getClaimMarkerTokenAccount,
   getDistributorAccount,
-  getDistributorTokenAccount
+  getDistributorTokenAccount, getFeeCollectorAddress
 } from './merkle-distributor-helpers/pda'
 
 export let merkle_json: MerkleOutput = null
@@ -39,6 +42,8 @@ export let mint: PublicKey
 
 export let keys: Keypair[] = []
 
+export const user_for_close = Keypair.generate()
+
 describe('0-prep', () => {
   // Configure the client to use the local cluster.
   anchor.setProvider(anchor.AnchorProvider.env())
@@ -50,7 +55,7 @@ describe('0-prep', () => {
   })
 
   it('Airdrops', async () => {
-    for (const key of [...users, admin]) {
+    for (const key of [...users, admin, user_for_close]) {
       await airdrop(program, key.publicKey, LAMPORTS_PER_SOL * 50_000)
     }
   })
@@ -101,12 +106,55 @@ describe('0-prep', () => {
     }
   })
 
+  it('create fee collector', async () => {
+    const [feeCollector] = getFeeCollectorAddress()
+    const accountPre = await program.provider.connection.getAccountInfo(feeCollector)
+    assert(accountPre === null)
+
+    const instruction = createFeeCollectorTransactionInstruction(admin.publicKey, 100)
+    const sig = await processTransaction(
+      [instruction],
+      program.provider.connection,
+      admin
+    )
+    const txn = await program.provider.connection.getParsedTransaction(
+      sig.Signature,
+      'confirmed'
+    )
+    assert.equal(
+      sig.SignatureResult.err,
+      null,
+      `${mint.toBase58()}\n${txn?.meta?.logMessages.join('\n')}`
+    )
+    const accountPost = await program.provider.connection.getAccountInfo(feeCollector)
+    assert(accountPost !== null)
+  })
+
+  it('close account with fee', async () => {
+    await createAssociatedTokenAccount(program.provider.connection, user_for_close, mint, user_for_close.publicKey)
+    const instruction = createCloseTokenAccountWithFeeTransactionInstruction(user_for_close.publicKey, mint)
+    const sig = await processTransaction(
+      [instruction],
+      program.provider.connection,
+      user_for_close
+    )
+    const txn = await program.provider.connection.getParsedTransaction(
+      sig.Signature,
+      'confirmed'
+    )
+    assert.equal(
+      sig.SignatureResult.err,
+      null,
+      `${mint.toBase58()}\n${txn?.meta?.logMessages.join('\n')}`
+    )
+  })
+
 
   it('Create air dropper', async () => {
     const [airDropperPre] = getAirDropperAddress()
     const accountPre = await program.provider.connection.getAccountInfo(airDropperPre)
     assert(accountPre === null)
-    const instruction = createAirDropperInstruction(admin.publicKey, mint)
+    const instruction = createAirDropperTransactionInstruction(admin.publicKey, mint)
     const sig = await processTransaction(
       [instruction],
       program.provider.connection,
@@ -135,7 +183,7 @@ describe('0-prep', () => {
       const accountPre = await program.provider.connection.getAccountInfo(claimMarkerPre)
       assert(accountPre === null)
 
-      const instruction = createMarker(admin.publicKey, mint, user.publicKey, amount)
+      const instruction = createMarkerTransactionInstruction(admin.publicKey, mint, user.publicKey, amount)
       const sig = await processTransaction(
         [instruction],
         program.provider.connection,
@@ -163,7 +211,7 @@ describe('0-prep', () => {
       const user = users[i]
       const claimMarkerAccount = await getClaimMarkerAccount(program.provider.connection, user.publicKey)
       assert(claimMarkerAccount.pretty().isClaimed === false)
-      const instruction = claimMarker(user.publicKey, mint)
+      const instruction = claimMarkerTransactionInstruction(user.publicKey, mint)
       const sig = await processTransaction(
         [instruction],
         program.provider.connection,
@@ -195,7 +243,7 @@ describe('0-prep', () => {
     assert(accountPre !== null)
     const accountTokenPre = await program.provider.connection.getAccountInfo(claimMarkerTokenPre)
     assert(accountTokenPre !== null)
-    const claim_instruction = createReclaimInstruction(admin.publicKey, claimed_user.publicKey, mint)
+    const claim_instruction = createReclaimTransactionInstruction(admin.publicKey, claimed_user.publicKey, mint)
     const sig = await processTransaction(
       [claim_instruction],
       program.provider.connection,
@@ -228,7 +276,7 @@ describe('0-prep', () => {
     assert(accountPre !== null)
     const accountTokenPre = await program.provider.connection.getAccountInfo(claimMarkerTokenPre)
     assert(accountTokenPre !== null)
-    const unclaim_instruction = createReclaimInstruction(admin.publicKey, unclaimed_user.publicKey, mint)
+    const unclaim_instruction = createReclaimTransactionInstruction(admin.publicKey, unclaimed_user.publicKey, mint)
     const sig = await processTransaction(
       [unclaim_instruction],
       program.provider.connection,
@@ -256,7 +304,7 @@ describe('0-prep', () => {
     const merkle_file = fs.readFileSync(`${cwd}/programs/merkle-distributor/test-merkle/merkle.json`).toString()
     merkle_json = JSON.parse(merkle_file)
     // console.log('merkle_json = ', merkle_json)
-    const instruction = createDistributorInstruction(merkle_json.root,
+    const instruction = createDistributorTransactionInstruction(merkle_json.root,
       LAMPORTS_PER_SOL * 1_000, 12,
       admin.publicKey,
       mint,
@@ -294,7 +342,7 @@ describe('0-prep', () => {
       const leaf = findDataInMerkle(key.publicKey, merkle_json)
       const distributorPre = await getDistributorAccount(program.provider.connection, mint)
       const pre = distributorPre.pretty().totalAmountClaimed as number
-      const instruction = createClaimStatusInstruction(
+      const instruction = createClaimStatusTransactionInstruction(
         leaf.index,
         leaf.claimant.amount,
         leaf.proof,

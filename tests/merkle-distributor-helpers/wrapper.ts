@@ -2,26 +2,69 @@ import { PublicKey, TransactionInstruction } from '@solana/web3.js'
 import {
   ClaimInstructionAccounts,
   ClaimInstructionArgs,
-  ClaimMarkerInstructionAccounts,
-  CreateAirDropperInstructionAccounts, createClaimInstruction, createClaimMarkerInstruction,
-  createCreateAirDropperInstruction, createCreateDistributorInstruction,
-  createCreateMarkerInstruction, CreateDistributorInstructionAccounts, CreateDistributorInstructionArgs,
+  ClaimMarkerInstructionAccounts, CloseTokenAccountWithFeeInstructionAccounts,
+  CreateAirDropperInstructionAccounts,
+  createClaimInstruction,
+  createClaimMarkerInstruction, createCloseTokenAccountWithFeeInstruction,
+  createCreateAirDropperInstruction,
+  createCreateDistributorInstruction, createCreateFeeCollectorInstruction,
+  createCreateMarkerInstruction,
+  CreateDistributorInstructionAccounts,
+  CreateDistributorInstructionArgs, CreateFeeCollectorInstructionAccounts,
+  CreateFeeCollectorInstructionArgs,
   CreateMarkerInstructionAccounts,
-  CreateMarkerInstructionArgs, createReclaimMarkerInstruction, ReclaimMarkerInstructionAccounts
+  CreateMarkerInstructionArgs,
+  createReclaimMarkerInstruction,
+  ReclaimMarkerInstructionAccounts
 } from '../merkle-distributor-libs'
 import {
   getAirDropperAddress,
   getClaimMarkerAddress,
   getClaimMarkerAddress2,
   getClaimMarkerTokenAccount, getClaimStatusAddress,
-  getDistributorAddress, getDistributorTokenAccount
+  getDistributorAddress, getDistributorTokenAccount, getFeeCollectorAddress
 } from './pda'
 import {
   ASSOCIATED_TOKEN_PROGRAM_ID,
   getAssociatedTokenAddressSync
 } from '@solana/spl-token'
 
-export function createReclaimInstruction(
+
+export function createFeeCollectorTransactionInstruction(signer: PublicKey, fee: number): TransactionInstruction {
+  const args: CreateFeeCollectorInstructionArgs = {
+    args: {
+      fee
+    }
+  }
+
+  const [feeCollector] = getFeeCollectorAddress()
+
+  const accounts: CreateFeeCollectorInstructionAccounts = {
+    signer,
+    feeCollector,
+    associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+  }
+  return createCreateFeeCollectorInstruction(accounts, args)
+}
+
+
+export function createCloseTokenAccountWithFeeTransactionInstruction(signer: PublicKey, mint: PublicKey): TransactionInstruction {
+  const [feeCollector] = getFeeCollectorAddress()
+  const signerTokenAccount = getAssociatedTokenAddressSync(mint, signer)
+
+  const accounts: CloseTokenAccountWithFeeInstructionAccounts = {
+    signer,
+    signerTokenAccount,
+    feeCollector,
+    mint,
+    associatedTokenProgram: ASSOCIATED_TOKEN_PROGRAM_ID
+  }
+
+  return createCloseTokenAccountWithFeeInstruction(accounts)
+}
+
+
+export function createReclaimTransactionInstruction(
   signer: PublicKey,
   claimant: PublicKey,
   mint: PublicKey
@@ -45,7 +88,7 @@ export function createReclaimInstruction(
   return createReclaimMarkerInstruction(accounts)
 }
 
-export function createDistributorInstruction(
+export function createDistributorTransactionInstruction(
   root: number[],
   maxTotalClaim: number,
   maxNumNodes: number,
@@ -79,7 +122,7 @@ export function createDistributorInstruction(
   return createCreateDistributorInstruction(accounts, args)
 }
 
-export function createClaimStatusInstruction(
+export function createClaimStatusTransactionInstruction(
   index: number,
   amount: number,
   proof: number[],
@@ -116,7 +159,7 @@ export function createClaimStatusInstruction(
   return createClaimInstruction(accounts, args)
 }
 
-export function createAirDropperInstruction(signer: PublicKey, mint: PublicKey): TransactionInstruction {
+export function createAirDropperTransactionInstruction(signer: PublicKey, mint: PublicKey): TransactionInstruction {
   const [airDropper, _] = getAirDropperAddress()
   const accounts: CreateAirDropperInstructionAccounts = {
     signer,
@@ -128,7 +171,7 @@ export function createAirDropperInstruction(signer: PublicKey, mint: PublicKey):
 }
 
 
-export function createMarker(signer: PublicKey, mint: PublicKey, claimant: PublicKey, amount: number): TransactionInstruction {
+export function createMarkerTransactionInstruction(signer: PublicKey, mint: PublicKey, claimant: PublicKey, amount: number): TransactionInstruction {
   const [airDropper] = getAirDropperAddress()
   const signerTokenAccount = getAssociatedTokenAddressSync(mint, signer)
   const [claimMarker] = getClaimMarkerAddress(claimant)
@@ -151,7 +194,7 @@ export function createMarker(signer: PublicKey, mint: PublicKey, claimant: Publi
   return createCreateMarkerInstruction(accounts, args)
 }
 
-export function claimMarker(signer: PublicKey, mint: PublicKey): TransactionInstruction {
+export function claimMarkerTransactionInstruction(signer: PublicKey, mint: PublicKey): TransactionInstruction {
   const [airDropper] = getAirDropperAddress()
   const signerTokenAccount = getAssociatedTokenAddressSync(mint, signer)
   const [claimMarker] = getClaimMarkerAddress(signer)
