@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE\n        daily_stats\n        SET status = $1\n        WHERE id IN (\n            SELECT\n            id\n            FROM daily_stats\n            WHERE\n                day < CURRENT_DATE\n            AND\n                status = $2\n            LIMIT $3\n        )\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Text",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "cc71b8f44aa52b9fe94d920665607ceb2e21a087a4c88150a1229b2294a0ed22"
+}
