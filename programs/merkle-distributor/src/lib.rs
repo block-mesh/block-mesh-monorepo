@@ -41,4 +41,17 @@ pub mod merkle_distributor {
     pub fn reclaim_marker(ctx: Context<ReclaimMarkerContext>) -> Result<()> {
         reclaim_marker::reclaim_marker(ctx)
     }
+
+    pub fn create_fee_collector(
+        ctx: Context<CreateFeeCollectorContext>,
+        args: CreateFeeCollectorArgs,
+    ) -> Result<()> {
+        create_fee_collector::create_fee_collector(ctx, args)
+    }
+
+    pub fn close_token_account_with_fee(
+        ctx: Context<CloseTokenAccountWithFeeContext>,
+    ) -> Result<()> {
+        close_token_account_with_fee::close_token_account_with_fee(ctx)
+    }
 }

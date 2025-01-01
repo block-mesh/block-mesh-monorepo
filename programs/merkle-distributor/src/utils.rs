@@ -20,6 +20,20 @@ pub fn assert_ata(ata: &Pubkey, owner: &Pubkey, mint: &Pubkey) -> Result<()> {
     require_keys_eq!(*ata, real_ata, ErrorCode::OwnerMismatch);
     Ok(())
 }
+
+pub fn transfer_sol<'a>(
+    from: AccountInfo<'a>,
+    to: AccountInfo<'a>,
+    system_program: AccountInfo<'a>,
+    amount: u64,
+) -> Result<()> {
+    solana_program::program::invoke(
+        &solana_program::system_instruction::transfer(&from.key(), &to.key(), amount),
+        &[from, to, system_program],
+    )?;
+    Ok(())
+}
+
 pub fn transfer_token<'a>(
     from: AccountInfo<'a>,
     to: AccountInfo<'a>,

@@ -1,6 +1,28 @@
 import { Connection, PublicKey } from '@solana/web3.js'
 import * as anchor from '@coral-xyz/anchor'
-import { AirDropper, ClaimMarker, ClaimStatus, MerkleDistributor, PROGRAM_ID } from '../merkle-distributor-libs'
+import {
+  AirDropper,
+  ClaimMarker,
+  ClaimStatus,
+  FeeCollector,
+  MerkleDistributor,
+  PROGRAM_ID
+} from '../merkle-distributor-libs'
+
+
+export function getFeeCollectorAddress(): [PublicKey, number] {
+  return PublicKey.findProgramAddressSync(
+    [
+      Buffer.from(anchor.utils.bytes.utf8.encode('FeeCollector'))
+    ],
+    PROGRAM_ID
+  )
+}
+
+export async function getFeeCollectorAccount(connection: Connection): Promise<FeeCollector> {
+  const [feeCollector] = getFeeCollectorAddress()
+  return await FeeCollector.fromAccountAddress(connection, feeCollector)
+}
 
 export function getClaimStatusAddress(mint: PublicKey, claimant: PublicKey): [PublicKey, number] {
   const [distributor] = getDistributorAddress(mint)
