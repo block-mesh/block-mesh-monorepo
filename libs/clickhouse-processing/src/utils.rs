@@ -7,9 +7,10 @@ use regex::Regex;
 use serde::{Deserialize, Serialize};
 use sqlx::types::chrono::{NaiveDate, Utc};
 use std::fs::File;
-use std::io;
 use std::io::{BufRead, Write};
+use std::path::PathBuf;
 use std::sync::Arc;
+use std::{fs, io};
 use twitter_scraping_helper::feed_element_try_from;
 use uuid::Uuid;
 
@@ -89,6 +90,27 @@ pub struct DataSinkClickHouseMini {
     pub raw: String,
 }
 
+pub fn read_files_from_dir(path: &str) -> anyhow::Result<Vec<PathBuf>> {
+    // Read the directory
+    let entries = fs::read_dir(path).map_err(|e| {
+        eprintln!("[read_files_from_dir]::Error = {} | Path = {}", e, path);
+        anyhow!(e)
+    })?;
+    let mut files: Vec<PathBuf> = Vec::new();
+
+    // Iterate through entries
+    for entry in entries {
+        let entry = entry?;
+        let path = entry.path();
+
+        // Check if it's a file
+        if path.is_file() {
+            files.push(path);
+        }
+    }
+    Ok(files)
+}
+
 pub fn process_raw(raws: Vec<Raw>, limit: i32, date: String) -> Vec<Output> {
     let mut output: Vec<Output> = Vec::with_capacity(1_000_000);
     let origin = "https://x.com";
@@ -139,12 +161,15 @@ pub fn file_date(input: &str) -> anyhow::Result<NaiveDate> {
 }
 
 pub fn read_lson(path: &str) -> anyhow::Result<Vec<Raw>> {
-    let file = File::open(path)?;
+    let file = File::open(path).map_err(|e| {
+        eprintln!("[read_lson]::Error = {} | path = {}", e, path);
+        anyhow!(e)
+    })?;
     let reader = io::BufReader::new(file);
     let mut raws: Vec<Raw> = Vec::with_capacity(1_000_000);
     for (index, line) in reader.lines().enumerate() {
         if index % 1000 == 0 {
-            println!("[read_lson][{}][{}]count_raw = {}", path, Utc::now(), index);
+            println!("[read_lson][{}][{}]::index = {}", path, Utc::now(), index);
         }
         let line = line?;
         let json: Raw = serde_json::from_str(&line)?;
@@ -158,7 +183,7 @@ where
     T: Serialize,
 {
     let mut file =
-        File::create(path).unwrap_or_else(|_| panic!("[write_to_file_ljson] Error {}", path));
+        File::create(path).unwrap_or_else(|_| panic!("[write_to_file_ljson]::Error {}", path));
     let string_records: Vec<String> = records
         .iter()
         .filter_map(|i| match serde_json::to_string(&i) {
@@ -168,7 +193,8 @@ where
         .collect();
 
     let s = string_records.join("\n");
-    write!(file, "{}", s).unwrap_or_else(|_| panic!("[write_to_file_ljson] Error write! {}", path));
+    write!(file, "{}", s)
+        .unwrap_or_else(|_| panic!("[write_to_file_ljson]::Error write! {}", path));
 }
 
 pub fn write_to_csv_file<T>(records: Vec<T>, path: &str)
