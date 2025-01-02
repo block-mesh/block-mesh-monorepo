@@ -157,7 +157,8 @@ pub fn write_to_file_ljson<T>(records: Vec<T>, path: &str)
 where
     T: Serialize,
 {
-    let mut file = File::create(path).expect(&format!("[write_to_file_ljson] Error {}", path));
+    let mut file =
+        File::create(path).unwrap_or_else(|_| panic!("[write_to_file_ljson] Error {}", path));
     let string_records: Vec<String> = records
         .iter()
         .filter_map(|i| match serde_json::to_string(&i) {
