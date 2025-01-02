@@ -45,8 +45,10 @@ async function main() {
   const markers = await ClaimMarker.gpaBuilder().run(connection)
   console.log('markers.length = ', markers.length)
   const claimed = await ClaimMarker.gpaBuilder().addFilter('isClaimed', true).run(connection)
+  let claimers = []
   console.log('claimed.length = ', claimed.length)
   const unclaimed = await ClaimMarker.gpaBuilder().addFilter('isClaimed', false).run(connection)
+  const unclaimers = []
   console.log('unclaimed.length = ', unclaimed.length)
 
   let claimed_sum = 0
@@ -54,6 +56,7 @@ async function main() {
     const [account] = ClaimMarker.fromAccountInfo(c.account)
     // @ts-ignore
     claimed_sum += account.pretty().amount
+    claimers.push(account.pretty())
   }
 
   let unclaimed_sum = 0
@@ -66,31 +69,35 @@ async function main() {
       // @ts-ignore
       unclaimd_500 += account.pretty().amount
     }
+    unclaimers.push(account.pretty())
   }
   console.log('claimed_sum', claimed_sum / (LAMPORTS_PER_SOL / 1000))
   console.log('unclaimed_sum', unclaimed_sum / (LAMPORTS_PER_SOL / 1000))
   console.log('unclaimd_500', unclaimd_500 / (LAMPORTS_PER_SOL / 1000))
 
-  return
-  const c = Array.from(unclaimed.values())[0]
-  const [account] = ClaimMarker.fromAccountInfo(c.account)
-  const instruction = createReclaimInstruction(admin.publicKey, account.claimant, mint)
-  const sigx = await processTransaction(
-    [addPriorityFee, instruction],
-    connection,
-    admin
-  )
-  console.log('sigx', sigx)
-  const txnx = await connection.getParsedTransaction(
-    sigx.Signature,
-    'confirmed'
-  )
-  console.log('txnx', txnx)
-  assert.equal(
-    sigx.SignatureResult.err,
-    null,
-    `${mint.toBase58()}\n${txnx?.meta?.logMessages.join('\n')}`
-  )
+  fs.writeFileSync('claimers.json', JSON.stringify(claimers, null, 2))
+  fs.writeFileSync('unclaimers.json', JSON.stringify(unclaimers, null, 2))
+
+  // return
+  // const c = Array.from(unclaimed.values())[0]
+  // const [account] = ClaimMarker.fromAccountInfo(c.account)
+  // const instruction = createReclaimInstruction(admin.publicKey, account.claimant, mint)
+  // const sigx = await processTransaction(
+  //   [addPriorityFee, instruction],
+  //   connection,
+  //   admin
+  // )
+  // console.log('sigx', sigx)
+  // const txnx = await connection.getParsedTransaction(
+  //   sigx.Signature,
+  //   'confirmed'
+  // )
+  // console.log('txnx', txnx)
+  // assert.equal(
+  //   sigx.SignatureResult.err,
+  //   null,
+  //   `${mint.toBase58()}\n${txnx?.meta?.logMessages.join('\n')}`
+  // )
 }
 
 main()

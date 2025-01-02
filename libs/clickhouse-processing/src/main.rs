@@ -1,18 +1,20 @@
 mod backup;
+
+mod s3_utils;
 mod utils;
 
-use crate::utils::{write_to_csv_file, DataSinkClickHouse, Output};
-use anyhow::anyhow;
+use crate::s3_utils::download_file_from_s3;
+use crate::utils::{file_date, process_raw, read_lson, write_to_file_ljson};
 use clap::Parser;
-use csv::{ReaderBuilder, StringRecord};
-use twitter_scraping_helper::feed_element_try_from;
 
 #[derive(Parser, Debug)]
 pub struct CliArgs {
     #[arg(long)]
-    pub input_file: String,
+    pub bucket: String,
     #[arg(long)]
-    pub output_file: String,
+    pub key: String,
+    #[arg(long)]
+    pub dir: String,
     #[arg(long, default_value = "-1")]
     pub limit: i32,
 }
@@ -21,38 +23,13 @@ pub struct CliArgs {
 async fn main() -> anyhow::Result<()> {
     let args = CliArgs::parse();
     println!("args = {:#?}", args);
-    if args.input_file == args.output_file {
-        let msg = "Input and output file cannot be the same";
-        eprintln!("{}", msg);
-        return Err(anyhow!(msg));
-    }
-    // let inputs = read_csv_file(&args.input_file);
-
-    let mut reader = ReaderBuilder::new()
-        .buffer_capacity(64_000_000)
-        .from_path(args.input_file)
-        .unwrap();
-    let mut string_record = StringRecord::new();
-    let mut output: Vec<Output> = Vec::with_capacity(1_000_000);
-
-    let mut count = 0;
-    loop {
-        if count % 1_000 == 0 {
-            println!("count = {}", count);
-        }
-        reader.read_record(&mut string_record).unwrap();
-        let record: DataSinkClickHouse = string_record.deserialize(None).unwrap();
-        let element = feed_element_try_from(&record.raw, &record.origin).map_err(|e| {
-            eprintln!("error = {}", e);
-            anyhow!(e.to_string())
-        })?;
-        output.push(Output::merge(element, record));
-        if args.limit > 0 && count > args.limit {
-            break;
-        }
-        count += 1;
-    }
-
-    write_to_csv_file(output, &args.output_file);
+    let output_file = format!("{}/DONE__{}", args.dir, args.key);
+    let input_file = format!("{}/{}", args.dir, args.key);
+    let local_key = args.key.replace("/", "_");
+    download_file_from_s3(&args.bucket, &args.key, &local_key, &args.dir).await?;
+    let date = file_date(&input_file)?.to_string();
+    let raws = read_lson(&input_file)?;
+    let output = process_raw(raws, args.limit, date);
+    write_to_file_ljson(output, &output_file);
     Ok(())
 }
