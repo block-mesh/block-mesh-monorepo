@@ -51,7 +51,7 @@ async fn main() -> anyhow::Result<()> {
                 .unwrap_or_default();
             let output_file = format!("{}/DONE__{}", args.output_dir, key);
             let date = file_date(&input_file).unwrap().to_string();
-            let raws = read_lson(&input_file).unwrap();
+            let raws = read_lson(input_file).unwrap();
             let output = process_raw(raws, args.limit, date);
             write_to_file_ljson(output, &output_file);
         });
