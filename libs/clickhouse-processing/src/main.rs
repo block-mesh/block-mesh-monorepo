@@ -14,7 +14,9 @@ pub struct CliArgs {
     #[arg(long)]
     pub key: String,
     #[arg(long)]
-    pub dir: String,
+    pub input_dir: String,
+    #[arg(long)]
+    pub output_dir: String,
     #[arg(long, default_value = "-1")]
     pub limit: i32,
 }
@@ -23,10 +25,10 @@ pub struct CliArgs {
 async fn main() -> anyhow::Result<()> {
     let args = CliArgs::parse();
     println!("args = {:#?}", args);
-    let output_file = format!("{}/DONE__{}", args.dir, args.key);
-    let input_file = format!("{}/{}", args.dir, args.key);
+    let output_file = format!("{}/DONE__{}", args.output_dir, args.key);
+    let input_file = format!("{}/{}", args.input_dir, args.key);
     let local_key = args.key.replace("/", "_");
-    download_file_from_s3(&args.bucket, &args.key, &local_key, &args.dir).await?;
+    download_file_from_s3(&args.bucket, &args.key, &local_key, &args.input_dir).await?;
     let date = file_date(&input_file)?.to_string();
     let raws = read_lson(&input_file)?;
     let output = process_raw(raws, args.limit, date);
