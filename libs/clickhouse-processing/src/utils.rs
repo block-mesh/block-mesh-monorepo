@@ -96,7 +96,7 @@ pub fn process_raw(raws: Vec<Raw>, limit: i32, date: String) -> Vec<Output> {
         if count % 1_000 == 0 {
             println!("[{}]::count = {}", Utc::now(), count);
         }
-        match feed_element_try_from(&raw.raw, &origin) {
+        match feed_element_try_from(&raw.raw, origin) {
             Ok(element) => {
                 output.push(Output::merge_mini(element, date.clone()));
             }
@@ -142,18 +142,10 @@ pub fn read_lson(path: &str) -> anyhow::Result<Vec<Raw>> {
     let file = File::open(path)?;
     let reader = io::BufReader::new(file);
     let mut raws: Vec<Raw> = Vec::with_capacity(1_000_000);
-
-    let mut count_raw = 0;
-    for line in reader.lines() {
-        if count_raw % 1000 == 0 {
-            println!(
-                "[read_lson][{}][{}]count_raw = {}",
-                path,
-                Utc::now(),
-                count_raw
-            );
+    for (index, line) in reader.lines().enumerate() {
+        if index % 1000 == 0 {
+            println!("[read_lson][{}][{}]count_raw = {}", path, Utc::now(), index);
         }
-        count_raw += 1;
         let line = line?;
         let json: Raw = serde_json::from_str(&line)?;
         raws.push(json);
