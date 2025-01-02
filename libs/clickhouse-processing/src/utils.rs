@@ -168,7 +168,7 @@ where
         .collect();
 
     let s = string_records.join("\n");
-    write!(file, "{}", s).expect(&format!("[write_to_file_ljson] Error write! {}", path));
+    write!(file, "{}", s).unwrap_or_else(|_| panic!("[write_to_file_ljson] Error write! {}", path));
 }
 
 pub fn write_to_csv_file<T>(records: Vec<T>, path: &str)
