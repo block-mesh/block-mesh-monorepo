@@ -123,7 +123,7 @@ where
 }
 
 pub fn file_date(input: &str) -> anyhow::Result<NaiveDate> {
-    let date_pattern = Regex::new(r"^(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})")?;
+    let date_pattern = Regex::new(r"(?P<year>\d{4})-(?P<month>\d{2})-(?P<day>\d{2})")?;
 
     if let Some(captures) = date_pattern.captures(input) {
         // Extract each named group
