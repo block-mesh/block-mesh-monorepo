@@ -5,7 +5,9 @@ mod s3_utils;
 mod utils;
 
 use crate::s3_utils::download_file_from_s3;
-use crate::utils::{file_date, process_raw, read_files_from_dir, read_lson, write_to_file_ljson};
+use crate::utils::{
+    file_date, is_exists, process_raw, read_files_from_dir, read_lson, write_to_file_ljson,
+};
 use clap::Parser;
 use rayon::iter::IntoParallelRefIterator;
 use std::path::PathBuf;
@@ -50,10 +52,14 @@ async fn main() -> anyhow::Result<()> {
                 .to_str()
                 .unwrap_or_default();
             let output_file = format!("{}/DONE__{}", args.output_dir, key);
-            let date = file_date(input_file).unwrap().to_string();
-            let raws = read_lson(input_file).unwrap();
-            let output = process_raw(raws, args.limit, date);
-            write_to_file_ljson(output, &output_file);
+            if is_exists(&output_file) {
+                println!("file = '{}' , already exists", output_file);
+            } else {
+                let date = file_date(input_file).unwrap().to_string();
+                let raws = read_lson(input_file).unwrap();
+                let output = process_raw(raws, args.limit, date);
+                write_to_file_ljson(output, &output_file);
+            }
         });
     }
     Ok(())
