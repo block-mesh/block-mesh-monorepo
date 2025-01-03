@@ -248,3 +248,7 @@ pub fn write_chunk(records: Vec<DataSinkClickHouse>, index: u64, date: &NaiveDat
     }
     wtr.flush().unwrap();
 }
+
+pub fn is_exists(path: &str) -> bool {
+    fs::metadata(path).is_ok()
+}
