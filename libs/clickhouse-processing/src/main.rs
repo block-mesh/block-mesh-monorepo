@@ -6,7 +6,8 @@ mod utils;
 
 use crate::s3_utils::download_file_from_s3;
 use crate::utils::{
-    file_date, is_exists, process_raw, read_files_from_dir, read_lson, write_to_file_ljson,
+    file_date, is_exists, process_raw, read_files_from_dir, read_ljson_for_merge, read_lson,
+    write_to_file_ljson, Output,
 };
 use clap::Parser;
 use rayon::iter::IntoParallelRefIterator;
@@ -26,13 +27,21 @@ pub struct CliArgs {
     pub limit: i32,
     #[arg(long, default_value = "false")]
     pub from_s3: bool,
+    #[arg(long)]
+    pub mode: String,
+    #[arg(long)]
+    pub input_file: String,
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let args = CliArgs::parse();
     println!("args = {:#?}", args);
-    if args.from_s3 {
+    if args.mode == "merge" {
+        let lines = read_ljson_for_merge(&args.input_file)?;
+        let vec: Vec<Output> = lines.values().cloned().collect();
+        write_to_file_ljson(vec, "output.json");
+    } else if args.from_s3 {
         let output_file = format!("{}/DONE__{}", args.output_dir, args.key);
         let input_file = format!("{}/{}", args.input_dir, args.key);
         let local_key = args.key.replace("/", "_");
