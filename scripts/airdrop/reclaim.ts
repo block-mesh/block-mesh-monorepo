@@ -2,9 +2,9 @@ import { ComputeBudgetProgram, Connection, LAMPORTS_PER_SOL, PublicKey } from '@
 import { Keypair } from '@solana/web3.js'
 import fs from 'fs'
 import { ClaimMarker } from '../../tests/merkle-distributor-libs'
-import { createReclaimInstruction } from '../../tests/merkle-distributor-helpers/wrapper'
-import { processTransaction } from '../../tests/helpers'
+import { processTransaction, sleep } from '../../tests/helpers'
 import assert from 'assert'
+import { createReclaimTransactionInstruction } from '../../tests/merkle-distributor-helpers/wrapper'
 
 export function loadWalletKey(keypair: string): Keypair {
   if (!keypair || keypair == '') {
@@ -52,32 +52,39 @@ async function main() {
   console.log('unclaimed.length = ', unclaimed.length)
 
   let claimed_sum = 0
+  let sol = 0
   for (const c of claimed.values()) {
     const [account] = ClaimMarker.fromAccountInfo(c.account)
+    reclaim(connection, mint, admin, account)
     // @ts-ignore
     claimed_sum += account.pretty().amount
     claimers.push(account.pretty())
+    sol += c.account.lamports
+    await sleep(250)
   }
-
-  let unclaimed_sum = 0
-  let unclaimd_500 = 0
-  for (const c of unclaimed.values()) {
-    const [account] = ClaimMarker.fromAccountInfo(c.account)
-    // @ts-ignore
-    unclaimed_sum += account.pretty().amount
-    if (account.pretty().amount === 500 * (LAMPORTS_PER_SOL / 1000)) {
-      // @ts-ignore
-      unclaimd_500 += account.pretty().amount
-    }
-    unclaimers.push(account.pretty())
-  }
-  console.log('claimed_sum', claimed_sum / (LAMPORTS_PER_SOL / 1000))
-  console.log('unclaimed_sum', unclaimed_sum / (LAMPORTS_PER_SOL / 1000))
-  console.log('unclaimd_500', unclaimd_500 / (LAMPORTS_PER_SOL / 1000))
-
-  fs.writeFileSync('claimers.json', JSON.stringify(claimers, null, 2))
-  fs.writeFileSync('unclaimers.json', JSON.stringify(unclaimers, null, 2))
-
+  // let unclaimed_sum = 0
+  // let unclaimd_500 = 0
+  // for (const c of unclaimed.values()) {
+  //   const [account] = ClaimMarker.fromAccountInfo(c.account)
+  //   reclaim(connection, mint, admin, account)
+  //   // @ts-ignore
+  //   unclaimed_sum += account.pretty().amount
+  //   if (account.pretty().amount === 500 * (LAMPORTS_PER_SOL / 1000)) {
+  //     // @ts-ignore
+  //     unclaimd_500 += account.pretty().amount
+  //   }
+  //   unclaimers.push(account.pretty())
+  //   sol += c.account.lamports
+  //   await sleep(250)
+  // }
+  // console.log('claimed_sum', claimed_sum / (LAMPORTS_PER_SOL / 1000))
+  // console.log('unclaimed_sum', unclaimed_sum / (LAMPORTS_PER_SOL / 1000))
+  // console.log('unclaimd_500', unclaimd_500 / (LAMPORTS_PER_SOL / 1000))
+  // console.log('sol', sol / LAMPORTS_PER_SOL)
+  //
+  // fs.writeFileSync('claimers.json', JSON.stringify(claimers, null, 2))
+  // fs.writeFileSync('unclaimers.json', JSON.stringify(unclaimers, null, 2))
+  //
   // return
   // const c = Array.from(unclaimed.values())[0]
   // const [account] = ClaimMarker.fromAccountInfo(c.account)
@@ -99,6 +106,34 @@ async function main() {
   //   `${mint.toBase58()}\n${txnx?.meta?.logMessages.join('\n')}`
   // )
 }
+
+async function reclaim(connection: Connection, mint: PublicKey, admin: Keypair, account: ClaimMarker) {
+  try {
+    const addPriorityFee = ComputeBudgetProgram.setComputeUnitPrice({
+      microLamports: 100000
+    })
+    const instruction = createReclaimTransactionInstruction(admin.publicKey, account.claimant, mint)
+    const sigx = await processTransaction(
+      [addPriorityFee, instruction],
+      connection,
+      admin
+    )
+    console.log('sigx', sigx)
+    const txnx = await connection.getParsedTransaction(
+      sigx.Signature,
+      'confirmed'
+    )
+    console.log('txnx', txnx)
+    assert.equal(
+      sigx.SignatureResult.err,
+      null,
+      `${mint.toBase58()}\n${txnx?.meta?.logMessages.join('\n')}`
+    )
+  } catch (error) {
+    console.error('reclaim error', error)
+  }
+}
+
 
 main()
   .then(() => {

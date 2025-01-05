@@ -6,6 +6,7 @@ use csv::ReaderBuilder;
 use regex::Regex;
 use serde::{Deserialize, Serialize};
 use sqlx::types::chrono::{NaiveDate, Utc};
+use std::collections::HashMap;
 use std::fs::File;
 use std::io::{BufRead, Write};
 use std::path::PathBuf;
@@ -158,6 +159,32 @@ pub fn file_date(input: &str) -> anyhow::Result<NaiveDate> {
         eprintln!("No valid date found at the start of the string.");
         Err(anyhow!("Can't parse {}", input))
     }
+}
+
+pub fn read_ljson_for_merge(path: &str) -> anyhow::Result<HashMap<String, Output>> {
+    let file = File::open(path).map_err(|e| {
+        eprintln!("[read_ljson_for_merge]::Error = {} | path = {}", e, path);
+        anyhow!(e)
+    })?;
+    let mut output: HashMap<String, Output> = HashMap::with_capacity(50_000_000);
+    let reader = io::BufReader::new(file);
+    for (index, line) in reader.lines().enumerate() {
+        if index % 100_000 == 0 {
+            println!(
+                "[read_ljson_for_merge][{}][{}]::index = {}",
+                path,
+                Utc::now(),
+                index
+            );
+        }
+        let line = line?;
+        let json: Output = serde_json::from_str(&line).map_err(|e| {
+            eprintln!("[read_ljson_for_merge]::Error = {} | lint = {}", e, line);
+            anyhow!(e)
+        })?;
+        output.insert(json.id.clone(), json);
+    }
+    Ok(output)
 }
 
 pub fn read_lson(path: &str) -> anyhow::Result<Vec<Raw>> {
