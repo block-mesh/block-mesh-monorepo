@@ -70,10 +70,10 @@ pub fn ApplicationSidebar() -> impl IntoView {
                         <PerkIcon/>
                         <SidebarLabel>Perks</SidebarLabel>
                     </SidebarItemLink>
-                    <SidebarItemLink href="/ui/claims">
-                        <TokenIcon/>
-                        <SidebarLabel>Claims</SidebarLabel>
-                    </SidebarItemLink>
+                    // <SidebarItemLink href="/ui/claims">
+                    //     <TokenIcon/>
+                    //     <SidebarLabel>Claims</SidebarLabel>
+                    // </SidebarItemLink>
                 </SidebarSection>
                 <SidebarSpacer/>
                 <SidebarSection>

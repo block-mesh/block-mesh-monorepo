@@ -65,7 +65,7 @@ pub fn App() -> impl IntoView {
                     <Route path="/dashboard" view=NewDashboard/>
                     <Route path="/referrals" view=Referrals/>
                     <Route path="/perks" view=Perks/>
-                    <Route path="/claims" view=Claims/>
+                    // <Route path="/claims" view=Claims/>
                     <Route path="/admin_dashboard" view=AdminDashboard/>
                 </Route>
                 <Route
