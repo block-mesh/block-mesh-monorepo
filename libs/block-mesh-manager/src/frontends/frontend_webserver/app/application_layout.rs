@@ -6,7 +6,6 @@ use crate::frontends::components::icons::logout_icon::LogoutIcon;
 #[allow(unused_imports)]
 use crate::frontends::components::icons::medal_icon::MedalIcon;
 use crate::frontends::components::icons::perk_icon::PerkIcon;
-use crate::frontends::components::icons::token_icon::TokenIcon;
 use crate::frontends::components::navbars::navbar::Navbar;
 use crate::frontends::components::navbars::navbar_section::NavbarSection;
 use crate::frontends::components::navbars::navbar_spacer::NavbarSpacer;

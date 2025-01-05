@@ -19,7 +19,6 @@ use crate::frontends::frontend_tauri::pages::register::TauriRegister;
 use crate::frontends::frontend_tauri::tauri_header::TauriHeader;
 use crate::frontends::frontend_webserver::app::admin_dashboard::AdminDashboard;
 use crate::frontends::frontend_webserver::app::application_layout::ApplicationLayout;
-use crate::frontends::frontend_webserver::app::claims::Claims;
 use crate::frontends::frontend_webserver::app::daily_leaderboard::DailyLeaderboardDashboard;
 use crate::frontends::frontend_webserver::app::new_dashboard::NewDashboard;
 use crate::frontends::frontend_webserver::app::perks::Perks;
