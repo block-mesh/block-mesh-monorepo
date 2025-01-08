@@ -1,10 +1,9 @@
-import ImgLogoBlockmesh from '../SVGLogoBlockmesh'
 import styles from './styles.module.css'
 
 export default function HeaderMain() {
   return (
     <header className={styles.header}>
-      <a href={'https://blockmesh.xyz'} target={'_blank'}><ImgLogoBlockmesh /></a>
+      <img src={'https://landing-page-assets.blockmesh.xyz/logo-symbol.svg'} className={'w-20 h-20'} />
     </header>
   )
 }
