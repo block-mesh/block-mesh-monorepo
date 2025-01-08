@@ -1,26 +1,26 @@
 import FormMain from '../components/FormMain'
 import MenuMain from '../components/MenuMain'
-import FigureTier from '../components/FigureTier'
 import ButtonMain from '../components/ButtonMain'
 import styles from './login.module.css'
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
 import { Switch, Case } from 'react-if'
+import { useMessage } from '../context/messageContext.tsx'
+import { get_api_token } from '../utils/login.ts'
+import { BASE_URL } from '../constants.ts'
+import { connect_wallet } from '../utils/connect_wallet_api.ts'
 
 const Login = () => {
   const navigate = useNavigate()
   const [loggedIn, setLoggedIn] = useState(false)
+  const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const walletContextState = useWallet()
+  const message = useMessage()
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const { connection } = useConnection()
-  const [address, setAddress] = useState('')
-  const [displayedAddress, setDisplayedAddress] = useState('')
-  const [tier, setTier] = useState('')
-
-  useEffect(() => {
-    setDisplayedAddress(`${address.slice(0, 4)}…${address.slice(-4)}`)
-  }, [address])
 
   async function disconnect() {
     console.log('disconnect')
@@ -34,17 +34,67 @@ const Login = () => {
 
   useEffect(() => {
     (async () => {
-      if (walletContextState.publicKey && connection) {
-
+      if (!loading && loggedIn) {
+        await navigate('/done')
       }
     })()
-  }, [walletContextState.connected])
+  }, [loggedIn, loading])
 
 
-  async function login() {
+  useEffect(() => {
+    (async () => {
+      if (message.message === '' || message.pubkey === '' || message.signature.length === 0) {
+        await navigate('/')
+      }
+    })()
+  }, [message.signature, message.message, message.pubkey])
+
+  async function login_and_apply_perk() {
     try {
+      setLoading(true)
+      if (!walletContextState.publicKey) {
+        alert('Please connect wallet')
+        setLoading(false)
+        return
+      }
+      if (message.message === '' || message.pubkey === '' || message.signature.length === 0) {
+        alert('Please connect wallet and sign message')
+        setLoading(false)
+        return
+      }
+      if (email === undefined || email === '' || password === undefined || password === '') {
+        alert('Please fill in email and password')
+        setLoading(false)
+        return
+      }
+      const url = `${BASE_URL}/api/get_token`
+      const loginResult = await get_api_token(url, { email, password })
+      console.log('loginResult', loginResult)
+      if (loginResult.isErr) {
+        alert('Failed to login, please retry')
+        setLoading(false)
+        return
+      }
+      const api_token = loginResult.unwrap().api_token
 
+      const connect_url = `${BASE_URL}/api/connect_wallet_api`
+      const connectResult = await connect_wallet(connect_url, {
+        api_token,
+        email,
+        pubkey: message.pubkey,
+        message: message.message,
+        signature: message.signature
+      })
+      console.log('connectResult', connectResult)
+      if (connectResult.isOk) {
+        setLoggedIn(true)
+        setLoading(false)
+      } else {
+        alert('Failed to apply perk, please retry')
+        setLoading(false)
+      }
     } catch (error) {
+      setLoading(false)
       console.log('login error', error)
     }
   }
@@ -54,45 +104,39 @@ const Login = () => {
       <MenuMain current="login" />
       <FormMain
         aria-busy={loggedIn}
-        data-current-item="login"
+        data-current-item="connecting"
       >
-
         <Switch>
-          <Case condition={true}>
-            <FigureTier className={styles.offset}>{tier}</FigureTier>
-            <p>
-              Congrats! <button
-              type="button"
-              className={`ghost ${styles.button}`}
-              title="Connect another wallet"
-            >
-              <u>{displayedAddress}</u>
-            </button> is eligible to <data value={0} className={styles.amount}>
-              0 $XENO
-            </data>
-            </p>
+          <Case condition={!loggedIn && !loading}>
+            not logged in
+            <input type={'email'} placeholder={'Email'}
+                   onChange={e => setEmail(e.target.value)}
+                   className={'shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline'} />
+            <input type={'password'} placeholder={'password'}
+                   onChange={e => setPassword(e.target.value)}
+                   className={'shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline'} />
+            <input type={'text'} placeholder={'public key'}
+                   readOnly={true}
+                   value={message.pubkey}
+
+                   className={'shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline'} />
+            <input type={'text'} placeholder={'message'}
+                   readOnly={true}
+                   value={message.message}
+                   className={'shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline'} />
+            <input type={'text'} placeholder={'signature'}
+                   readOnly={true}
+                   value={JSON.stringify(message.signature)}
+                   className={'shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline'} />
             <ButtonMain onClick={async (e) => {
               e.preventDefault()
-              await login()
+              await login_and_apply_perk()
             }}>
-              {loggedIn ? 'Logging In...' : 'Logged In now'}
+              Submit
             </ButtonMain>
           </Case>
-          <Case condition={true}>
-            <p>
-              Congrats!
-              <u>{displayedAddress}</u>
-              already logged in <data value={0} className={styles.amount}>
-              $XENO
-            </data>
-            </p>
-          </Case>
-          <Case condition={true}>
-            <p>
-              Sorry!
-              <u>{displayedAddress}</u>
-              is not eligible for $XENO
-            </p>
+          <Case condition={!loggedIn && loading}>
+            loading
           </Case>
         </Switch>
         {!!error &&

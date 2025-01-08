@@ -1,9 +1,8 @@
-import { PublicKey } from '@solana/web3.js'
 import { WalletAdapterNetwork } from '@solana/wallet-adapter-base'
-
-export const mint = new PublicKey(import.meta.env.VITE_MINT)
 
 export const network = WalletAdapterNetwork.Mainnet
 export const rpc = import.meta.env.VITE_RPC
 
-console.log('rpc', rpc, ' mint', mint.toBase58())
+export const BASE_URL = import.meta.env.VITE_BASE_URL
+
+console.log('BASE_URL', BASE_URL)

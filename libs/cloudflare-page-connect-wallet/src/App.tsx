@@ -10,6 +10,7 @@ import Done from './pages/done.tsx'
 import Login from './pages/login.tsx'
 import { WalletModalProvider } from '@solana/wallet-adapter-react-ui'
 import { network, rpc } from './constants.ts'
+import { MessageProvider } from './context/messageContext.tsx'
 
 const App = () => {
   const endpoint = useMemo(() => rpc, [network])
@@ -23,21 +24,23 @@ const App = () => {
     <>
       <ConnectionProvider endpoint={endpoint}>
         <WalletProvider wallets={wallets} autoConnect>
-          <WalletModalProvider>
-            <HeaderMain />
-            <main>
-              <hgroup>
-                <h1>Connect Wallet Perk</h1>
-              </hgroup>
-              <BrowserRouter>
-                <Routes>
-                  <Route path="/" element={<Connect />} />
-                  <Route path="/login" element={<Login />} />
-                  <Route path="/done" element={<Done />} />
-                </Routes>
-              </BrowserRouter>
-            </main>
-          </WalletModalProvider>
+          <MessageProvider>
+            <WalletModalProvider>
+              <HeaderMain />
+              <main>
+                <hgroup>
+                  <h1>Connect Wallet Perk</h1>
+                </hgroup>
+                <BrowserRouter>
+                  <Routes>
+                    <Route path="/" element={<Connect />} />
+                    <Route path="/login" element={<Login />} />
+                    <Route path="/done" element={<Done />} />
+                  </Routes>
+                </BrowserRouter>
+              </main>
+            </WalletModalProvider>
+          </MessageProvider>
         </WalletProvider>
       </ConnectionProvider>
     </>

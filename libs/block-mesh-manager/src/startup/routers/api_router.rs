@@ -20,6 +20,10 @@ pub fn get_api_router() -> Router<Arc<AppState>> {
             post(routes::perks::connect_wallet::handler),
         )
         .route(
+            RoutesEnum::Api_ConnectWalletApi.to_string().as_str(),
+            post(routes::perks::connect_wallet_api::handler),
+        )
+        .route(
             RoutesEnum::Api_ReportUptime.to_string().as_str(),
             post(routes::uptime_report::report_uptime::handler),
         )

@@ -2,14 +2,11 @@ import MenuMain from '../components/MenuMain'
 import FormMain from '../components/FormMain'
 import styles from './done.module.css'
 import { useConnection, useWallet } from '@solana/wallet-adapter-react'
-import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
 
 const Done = () => {
   const walletContextState = useWallet()
   const { connection } = useConnection()
-  const [address, setAddress] = useState('')
-  const [displayedAddress, setDisplayedAddress] = useState('')
   const navigate = useNavigate()
 
   async function disconnect() {
@@ -20,38 +17,22 @@ const Done = () => {
     }
   }
 
-  useEffect(() => {
-    setDisplayedAddress(`${address.slice(0, 4)}…${address.slice(-4)}`)
-  }, [address])
-
-  useEffect(() => {
-    (async () => {
-      if (walletContextState.publicKey && connection) {
-        setAddress(walletContextState.publicKey.toBase58())
-      }
-    })()
-  }, [walletContextState.connected])
-
   return (
     <>
       <MenuMain current="done" />
       <FormMain>
         <p>
-          <data value={0}>zzz $XENO</data>
-          have been sent to
-          <button
-            type="button"
-            className={`ghost ${styles.button}`}
-            title="Connect another wallet"
-          >
-            <u>{displayedAddress}</u>
-          </button>
+          <data>Connect Wallet Perk Applied</data>
         </p>
-        <output className={styles.output}>Claim successful!</output>
-        <img className={styles.img} src="/xeno-coin.png" aria-hidden="true" alt="" />
-        <img className={styles.img} src="/xeno-coin.png" aria-hidden="true" alt="" />
-        <img className={styles.img} src="/xeno-coin.png" aria-hidden="true" alt="" />
-        <img className={styles.img} src="/xeno-coin.png" aria-hidden="true" alt="" />
+        <output className={styles.output}>Connect wallet successful!</output>
+        <img className={styles.img} src="https://landing-page-assets.blockmesh.xyz/logo-symbol.svg" aria-hidden="true"
+             alt="" />
+        <img className={styles.img} src="https://landing-page-assets.blockmesh.xyz/logo-symbol.svg" aria-hidden="true"
+             alt="" />
+        <img className={styles.img} src="https://landing-page-assets.blockmesh.xyz/logo-symbol.svg" aria-hidden="true"
+             alt="" />
+        <img className={styles.img} src="https://landing-page-assets.blockmesh.xyz/logo-symbol.svg" aria-hidden="true"
+             alt="" />
       </FormMain>
       <button type="button" className={`ghost ${styles.button}`} onClick={disconnect}>
         <u>Connect another wallet</u>
