@@ -11,6 +11,7 @@ incremental = false
 [workspace]
 members = ["libs/*", "programs/*"]
 exclude = [
+  "libs/cloudflare-page-connect-wallet",
   "libs/cloudflare-page-xeno-claim",
   "libs/cloudflare-page-react-on-chain-tooling",
   "libs/installers",
