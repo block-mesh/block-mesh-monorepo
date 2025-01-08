@@ -87,8 +87,15 @@ const Login = () => {
       })
       console.log('connectResult', connectResult)
       if (connectResult.isOk) {
-        setLoggedIn(true)
-        setLoading(false)
+        const result = connectResult.unwrap()
+        if (result.status !== 200) {
+          alert(`Error ${result.message}`)
+          setLoading(false)
+          return
+        } else {
+          setLoggedIn(true)
+          setLoading(false)
+        }
       } else {
         alert('Failed to apply perk, please retry')
         setLoading(false)
