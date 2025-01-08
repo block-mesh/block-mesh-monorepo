@@ -4,6 +4,7 @@ pub mod bulk_task_bonus;
 pub mod bulk_uptime_bonus;
 pub mod create_server_user;
 pub mod create_task;
+pub mod finalize_cleanup;
 pub mod get_all_rpcs;
 pub mod get_or_create_analytics;
 pub mod touch_users_ip;

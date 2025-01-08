@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        DELETE\n        FROM daily_stats_on_going\n        WHERE\n        id IN (\n            SELECT\n                DISTINCT daily_stats_on_going.id\n            FROM daily_stats_on_going\n\t\t\tINNER JOIN daily_stats_finalized ON daily_stats_on_going.day = daily_stats_finalized.day\n\t\tWHERE\n\t\t\tdaily_stats_on_going.day = $1\n\t\t\tAND daily_stats_on_going.status = 'OnGoing'\n\t\t)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Date"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "51b83d6e1cac6e7ae15fea494d05ae3d06b77206c7d9e323ad2f261fd572b83b"
+}
