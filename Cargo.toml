@@ -11,6 +11,7 @@ incremental = false
 [workspace]
 members = ["libs/*", "programs/*"]
 exclude = [
+  "libs/cloudflare-page-connect-wallet",
   "libs/cloudflare-page-xeno-claim",
   "libs/cloudflare-page-react-on-chain-tooling",
   "libs/installers",
@@ -47,7 +48,7 @@ dead_code = "forbid"
 
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.453"
+version = "0.0.454"
 
 [patch.crates-io]
 ## aes-gcm-siv 0.10.3 and curve25519-dalek 3.x pin zeroize to <1.4

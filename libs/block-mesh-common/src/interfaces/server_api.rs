@@ -364,6 +364,16 @@ pub struct ConnectWalletRequest {
 
 #[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
+pub struct ConnectWalletApiRequest {
+    pub email: String,
+    pub api_token: Uuid,
+    pub pubkey: String,
+    pub message: String,
+    pub signature: Vec<u8>,
+}
+
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ConnectWalletResponse {
     pub status: i32,
     pub message: Option<String>,
