@@ -24,10 +24,11 @@ use redis::aio::MultiplexedConnection;
 use reqwest::Client;
 use sentry_tower::NewSentryLayer;
 use sqlx::postgres::PgPool;
+use std::collections::HashMap;
 use std::env;
 use std::net::SocketAddr;
 use std::path::Path;
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio::sync::Mutex;
@@ -70,7 +71,7 @@ pub struct AppState {
     pub channel_pool: PgPool,
     pub email_client: Arc<EmailClient>,
     pub client: Client,
-    pub flags: Arc<DashMap<String, FlagValue>>,
+    pub flags: Arc<RwLock<HashMap<String, FlagValue>>>,
     pub redis: MultiplexedConnection,
 }
 

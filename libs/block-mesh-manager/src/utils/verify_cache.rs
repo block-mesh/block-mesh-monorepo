@@ -1,17 +1,16 @@
 use bcrypt::verify;
-use dashmap::try_result::TryResult::Present;
-use dashmap::DashMap;
+use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::OnceCell;
+use tokio::sync::{OnceCell, RwLock};
 
-type VerifyMap = Arc<DashMap<(String, String), bool>>;
+type VerifyMap = Arc<RwLock<HashMap<(String, String), bool>>>;
 
 static CACHE: OnceCell<VerifyMap> = OnceCell::const_new();
 
 #[tracing::instrument(name = "get_cache", skip_all)]
 pub async fn get_cache<'a>() -> &'a VerifyMap {
     CACHE
-        .get_or_init(|| async { Arc::new(DashMap::new()) })
+        .get_or_init(|| async { Arc::new(RwLock::new(HashMap::new())) })
         .await
 }
 
@@ -19,11 +18,11 @@ pub async fn get_cache<'a>() -> &'a VerifyMap {
 pub async fn verify_with_cache(password: &str, hash: &str) -> bool {
     let key = (password.to_string(), hash.to_string());
     let cache = get_cache().await;
-    if let Present(entry) = cache.try_get(&key) {
-        return *entry.value();
+    if let Some(entry) = cache.read().await.get(&key) {
+        return *entry;
     }
     if let Ok(result) = verify::<&str>(password, hash) {
-        cache.insert(key, result);
+        cache.write().await.insert(key, result);
         return result;
     }
     false

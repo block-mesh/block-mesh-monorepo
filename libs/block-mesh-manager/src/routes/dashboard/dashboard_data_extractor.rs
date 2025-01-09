@@ -91,10 +91,11 @@ pub async fn dashboard_data_extractor(
     let mut write_transaction = create_txn(write_pool).await?;
     let _ = get_or_create_daily_stat(&mut write_transaction, &user.user_id, None).await?;
     let interval = get_flag_value_from_map(
-        &state.flags,
+        state.flags.clone(),
         "polling_interval",
         FlagValue::Number(120_000.0),
-    );
+    )
+    .await;
     let interval: f64 =
         <FlagValue as TryInto<f64>>::try_into(interval.to_owned()).unwrap_or_default();
     let aggregates =

@@ -1,9 +1,9 @@
 use crate::constants::{DeviceType, BLOCK_MESH_FEATURE_FLAGS};
-use dashmap::try_result::TryResult::Present;
-use dashmap::DashMap;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use std::collections::HashMap;
+use std::sync::{Arc, RwLock};
 
 const FLAGS: [&str; 1] = ["polling_interval"];
 
@@ -40,8 +40,8 @@ impl TryInto<f64> for FlagValue {
 pub async fn get_all_flags(
     client: &Client,
     device_type: DeviceType,
-) -> anyhow::Result<DashMap<String, FlagValue>> {
-    let flags: DashMap<String, FlagValue> = DashMap::new();
+) -> anyhow::Result<HashMap<String, FlagValue>> {
+    let mut flags: HashMap<String, FlagValue> = HashMap::new();
     for flag in FLAGS {
         tracing::info!("Fetching flag {:?}", flag);
         let value = match get_flag_value(flag, client, device_type).await {
@@ -69,14 +69,18 @@ pub async fn get_all_flags(
     Ok(flags)
 }
 
-pub fn get_flag_value_from_map(
-    map: &DashMap<String, FlagValue>,
+pub async fn get_flag_value_from_map(
+    map: Arc<RwLock<HashMap<String, FlagValue>>>,
     flag: &str,
     default: FlagValue,
 ) -> FlagValue {
-    match map.try_get(flag) {
-        Present(value) => value.value().clone(),
-        _ => default,
+    if let Ok(map) = map.read() {
+        match map.get(flag) {
+            Some(value) => value.clone(),
+            None => default,
+        }
+    } else {
+        default
     }
 }
 
