@@ -16,10 +16,10 @@ pub async fn finalize_daily_cron(pool: PgPool) -> Result<(), anyhow::Error> {
             let _ = bulk_finalize(&mut transaction).await;
             let _ = commit_txn(transaction).await;
         }
-        if let Ok(mut transaction) = create_txn(&pool).await {
-            let _ = finalize_cleanup(&mut transaction).await;
-            let _ = commit_txn(transaction).await;
-        }
+        // if let Ok(mut transaction) = create_txn(&pool).await {
+        //     let _ = finalize_cleanup(&mut transaction).await;
+        //     let _ = commit_txn(transaction).await;
+        // }
         tokio::time::sleep(Duration::from_secs(finalize_sleep)).await;
     }
 }
