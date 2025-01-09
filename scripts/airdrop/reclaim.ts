@@ -34,6 +34,7 @@ async function main() {
   const admin = loadWalletKey('/Users/ohaddahan/.config/solana/id.json')
   const connection = getConnection(Network.MAINNET)
   const mint = new PublicKey('Db7ZUaWTThwZy7bVhjn5Dda8D3fbbAhihcxPV4m9pump')
+  const promises = []
 
   // const modifyComputeUnits = ComputeBudgetProgram.setComputeUnitLimit({
   //   units: 1000000
@@ -51,36 +52,39 @@ async function main() {
   const unclaimers = []
   console.log('unclaimed.length = ', unclaimed.length)
 
+  let count = 0
   let claimed_sum = 0
   let sol = 0
   for (const c of claimed.values()) {
     const [account] = ClaimMarker.fromAccountInfo(c.account)
     reclaim(connection, mint, admin, account)
     // @ts-ignore
-    claimed_sum += account.pretty().amount
-    claimers.push(account.pretty())
-    sol += c.account.lamports
+    // claimed_sum += account.pretty().amount
+    // claimers.push(account.pretty())
+    // sol += c.account.lamports
     await sleep(250)
   }
-  // let unclaimed_sum = 0
-  // let unclaimd_500 = 0
-  // for (const c of unclaimed.values()) {
-  //   const [account] = ClaimMarker.fromAccountInfo(c.account)
-  //   reclaim(connection, mint, admin, account)
-  //   // @ts-ignore
-  //   unclaimed_sum += account.pretty().amount
-  //   if (account.pretty().amount === 500 * (LAMPORTS_PER_SOL / 1000)) {
-  //     // @ts-ignore
-  //     unclaimd_500 += account.pretty().amount
-  //   }
-  //   unclaimers.push(account.pretty())
-  //   sol += c.account.lamports
-  //   await sleep(250)
-  // }
-  // console.log('claimed_sum', claimed_sum / (LAMPORTS_PER_SOL / 1000))
-  // console.log('unclaimed_sum', unclaimed_sum / (LAMPORTS_PER_SOL / 1000))
-  // console.log('unclaimd_500', unclaimd_500 / (LAMPORTS_PER_SOL / 1000))
-  // console.log('sol', sol / LAMPORTS_PER_SOL)
+  let unclaimed_sum = 0
+  let unclaimd_500 = 0
+  for (const c of unclaimed.values()) {
+    const [account] = ClaimMarker.fromAccountInfo(c.account)
+    promises.push(reclaim(connection, mint, admin, account))
+    // @ts-ignore
+    // unclaimed_sum += account.pretty().amount
+    // if (account.pretty().amount === 500 * (LAMPORTS_PER_SOL / 1000)) {
+    // @ts-ignore
+    unclaimd_500 += account.pretty().amount
+    // }
+    // unclaimers.push(account.pretty())
+    sol += c.account.lamports
+    await sleep(250)
+    count += 1
+  }
+  console.log('claimed_sum', claimed_sum / (LAMPORTS_PER_SOL / 1000))
+  console.log('unclaimed_sum', unclaimed_sum / (LAMPORTS_PER_SOL / 1000))
+  console.log('unclaimd_500', unclaimd_500 / (LAMPORTS_PER_SOL / 1000))
+  console.log('sol', sol / LAMPORTS_PER_SOL)
+  await Promise.all(promises)
   //
   // fs.writeFileSync('claimers.json', JSON.stringify(claimers, null, 2))
   // fs.writeFileSync('unclaimers.json', JSON.stringify(unclaimers, null, 2))

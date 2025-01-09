@@ -13,6 +13,47 @@ import initWasmModule, {
 console.log('Background script started')
 
 const PING_INTERVAL = 3 * 1000
+const headers = {}
+
+async function get_api_details(requestHeaders) {
+  const h = ['x-csrf-token', 'authorization']
+  requestHeaders.forEach((header) => {
+    if (h.includes(header.name)) {
+      headers[header.name] = header.value
+      chrome.storage.sync.set({ [`twitter-${header.name}`]: header.value }).then(onSuccess, onError)
+    }
+  })
+  console.log('headers', headers)
+}
+
+chrome.webRequest.onBeforeSendHeaders.addListener(
+  function(details) {
+    if (details.url.includes('SearchTimeline')) {
+      console.log('onBeforeSendHeaders details', details)
+      get_api_details(details.requestHeaders)
+    }
+  },
+  { urls: ['https://x.com/i/api/graphql/*'] },
+  ['requestHeaders']
+)
+
+
+chrome.webRequest.onBeforeRedirect.addListener(
+  async (details) => {
+    console.log('onBeforeRedirect details', details)
+  },
+  { urls: ['https://x.com/i/api/graphql/*'] },
+  ['responseHeaders', 'extraHeaders']
+)
+
+// chrome.webRequest.onCompleted.addListener(
+//   async (details) => {
+//     console.log('onCompleted details', details)
+//   },
+//   { urls: ['<all_urls>'] },
+//   ['responseHeaders', 'extraHeaders']
+// )
+
 
 // This keeps the service worker alive
 function stayAlive() {
