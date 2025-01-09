@@ -50,10 +50,11 @@ pub async fn handler(
     }
 
     let polling_interval = get_flag_value_from_map(
-        &state.flags,
+        state.flags.clone(),
         "polling_interval",
         FlagValue::Number(120_000.0),
-    );
+    )
+    .await;
     let polling_interval: f64 =
         <FlagValue as TryInto<f64>>::try_into(polling_interval.to_owned()).unwrap_or_default();
     let interval_factor = get_envar("INTERVAL_FACTOR").await.parse().unwrap_or(10.0);

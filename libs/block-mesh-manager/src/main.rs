@@ -5,6 +5,8 @@
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use std::sync::RwLock;
+    use std::collections::HashMap;
     use database_utils::utils::connection::write_pool::write_pool;
     use block_mesh_common::email_client::client::EmailClient;
     use database_utils::utils::connection::channel_pool::channel_pool;
@@ -102,11 +104,11 @@ async fn run() -> anyhow::Result<()> {
     let email_client = Arc::new(EmailClient::new(configuration.application.base_url.clone()).await);
     let client = http_client(DeviceType::AppServer);
     tracing::info!("Starting to get feature flags");
-    let flags = Arc::new(
+    let flags = Arc::new(RwLock::new(
         get_all_flags(&client, DeviceType::AppServer)
             .await
-            .unwrap_or(DashMap::new()),
-    );
+            .unwrap_or(HashMap::new()),
+    ));
     tracing::info!("Finished getting feature flags");
     let redis_url = env::var("REDIS_URL")?;
     let redis_url = if redis_url.ends_with("#insecure") {

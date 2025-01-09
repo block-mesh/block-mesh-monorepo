@@ -6,13 +6,13 @@ use axum::{Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::{DailyLeaderboard, LeaderBoardUser};
 use chrono::{Duration, NaiveDate, Utc};
-use dashmap::DashMap;
 use sqlx::PgPool;
+use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::OnceCell;
+use tokio::sync::{OnceCell, RwLock};
 
 #[allow(dead_code)]
-type DailyLeaderBoardCache = Arc<DashMap<NaiveDate, Vec<LeaderBoardUser>>>;
+type DailyLeaderBoardCache = Arc<RwLock<HashMap<NaiveDate, Vec<LeaderBoardUser>>>>;
 #[allow(dead_code)]
 static CACHE: OnceCell<DailyLeaderBoardCache> = OnceCell::const_new();
 
