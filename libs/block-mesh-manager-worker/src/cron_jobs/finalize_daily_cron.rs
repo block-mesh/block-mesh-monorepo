@@ -1,5 +1,4 @@
 use crate::db_calls::bulk_finalize::bulk_finalize;
-use crate::db_calls::finalize_cleanup::finalize_cleanup;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::env;
