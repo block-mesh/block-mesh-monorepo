@@ -2,7 +2,6 @@
 use anyhow::Context;
 #[allow(unused_imports)]
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
-use block_mesh_common::constants::BLOCKMESH_WS_REDIS_COUNT_KEY;
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use block_mesh_common::interfaces::db_messages::DBMessage;
 use block_mesh_manager_ws::app::app;
@@ -10,22 +9,23 @@ use block_mesh_manager_ws::joiner_loop::joiner_loop;
 use block_mesh_manager_ws::message_aggregator::collect_messages;
 use block_mesh_manager_ws::redis_loop::redis_loop;
 use block_mesh_manager_ws::state::WsAppState;
-use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
-use redis::{AsyncCommands, RedisResult};
+use logger_general::tracing::{get_sentry_layer, setup_tracing_stdout_only_with_sentry};
 use std::sync::Arc;
 #[allow(unused_imports)]
 use std::time::Duration;
 use std::{env, mem, process};
+#[cfg(not(target_env = "msvc"))]
+use tikv_jemallocator::Jemalloc;
 use tokio::net::TcpListener;
 use tokio::task::JoinHandle;
 #[allow(unused_imports)]
 use uuid::Uuid;
+#[cfg(not(target_env = "msvc"))]
+#[global_allocator]
+static GLOBAL: Jemalloc = Jemalloc;
 
 fn main() {
-    let sentry_layer = env::var("SENTRY_LAYER")
-        .unwrap_or("false".to_string())
-        .parse()
-        .unwrap_or(false);
+    let sentry_layer = get_sentry_layer();
     let sentry_url = env::var("SENTRY_WS").unwrap_or_default();
     let sentry_sample_rate = env::var("SENTRY_SAMPLE_RATE")
         .unwrap_or("0.1".to_string())
@@ -66,8 +66,6 @@ async fn run() -> anyhow::Result<()> {
     let (tx, rx) = flume::bounded::<DBMessage>(10_000);
     let state = Arc::new(WsAppState::new(tx).await);
     let channel_pool = state.channel_pool.clone();
-    let mut redis = state.redis.clone();
-    let _: RedisResult<()> = redis.set(BLOCKMESH_WS_REDIS_COUNT_KEY, 0).await;
     let server_task = app(listener, state.clone());
     let (joiner_tx, joiner_rx) = flume::bounded::<JoinHandle<()>>(10_000);
     let joiner_task = tokio::spawn(joiner_loop(joiner_rx));
