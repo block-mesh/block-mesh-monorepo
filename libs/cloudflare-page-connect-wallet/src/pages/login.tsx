@@ -123,25 +123,27 @@ const Login = () => {
             </svg>
           </Case>
           <Case condition={!loggedIn && !loading}>
+            <label>Email</label>
             <input type={'email'} placeholder={'Email'}
                    onChange={e => setEmail(e.target.value)}
                    className={'shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline'} />
+            <label>Password</label>
             <input type={'password'} placeholder={'password'}
                    onChange={e => setPassword(e.target.value)}
                    className={'shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline'} />
+            <label>Pubkey</label>
             <input type={'text'} placeholder={'public key'}
                    readOnly={true}
                    value={message.pubkey}
-
                    className={'shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline'} />
             <input type={'text'} placeholder={'message'}
                    readOnly={true}
                    value={message.message}
-                   className={'shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline'} />
+                   className={'hidden shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline'} />
             <input type={'text'} placeholder={'signature'}
                    readOnly={true}
                    value={JSON.stringify(message.signature)}
-                   className={'shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline'} />
+                   className={'hidden shadow appearance-none border rounded w-full py-2 px-3 text-black leading-tight focus:outline-none focus:shadow-outline'} />
             <ButtonMain onClick={async (e) => {
               e.preventDefault()
               await login_and_apply_perk()
