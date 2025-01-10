@@ -9,7 +9,7 @@ use block_mesh_manager_ws::joiner_loop::joiner_loop;
 use block_mesh_manager_ws::message_aggregator::collect_messages;
 use block_mesh_manager_ws::redis_loop::redis_loop;
 use block_mesh_manager_ws::state::WsAppState;
-use logger_general::tracing::{get_sentry_layer, setup_tracing_stdout_only_with_sentry};
+use logger_general::tracing::get_sentry_layer;
 use std::sync::Arc;
 #[allow(unused_imports)]
 use std::time::Duration;
@@ -56,7 +56,8 @@ fn main() {
 
 async fn run() -> anyhow::Result<()> {
     load_dotenv();
-    setup_tracing_stdout_only_with_sentry();
+    // setup_tracing_stdout_only_with_sentry();
+    console_subscriber::init();
     let port = env::var("PORT")
         .unwrap_or("8002".to_string())
         .parse()
