@@ -8,7 +8,7 @@ use block_mesh_common::env::environment::Environment;
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use database_utils::utils::connection::write_pool::write_pool;
 use database_utils::utils::migrate::migrate;
-use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
+use logger_general::tracing::{get_sentry_layer, setup_tracing_stdout_only_with_sentry};
 use sqlx::PgPool;
 use std::net::SocketAddr;
 use std::str::FromStr;
@@ -25,10 +25,7 @@ pub async fn run_server(listener: TcpListener, app: Router<()>) -> std::io::Resu
 }
 
 fn main() {
-    let sentry_layer = env::var("SENTRY_LAYER")
-        .unwrap_or("false".to_string())
-        .parse()
-        .unwrap_or(false);
+    let sentry_layer = get_sentry_layer();
     let sentry_url = env::var("SENTRY_LOGS_DRAIN").unwrap_or_default();
     let sentry_sample_rate = env::var("SENTRY_SAMPLE_RATE")
         .unwrap_or("0.1".to_string())

@@ -5,9 +5,9 @@ use sentry_tracing;
 use serde_json::{json, Value};
 use std::option::Option;
 use std::sync::mpsc::{Receiver, Sender};
-use std::sync::{mpsc, Arc, Once};
-use std::thread;
+use std::sync::{mpsc, Arc, Once, OnceLock};
 use std::time::Duration;
+use std::{env, thread};
 use tokio::sync::Mutex;
 use tokio::task::JoinHandle;
 use tokio::time::Instant;
@@ -71,6 +71,17 @@ pub fn setup_tracing_stdout_only() {
     });
 }
 
+pub static SENTRY_LAYER: OnceLock<bool> = OnceLock::new();
+
+pub fn get_sentry_layer() -> bool {
+    *SENTRY_LAYER.get_or_init(|| {
+        env::var("SENTRY_LAYER")
+            .unwrap_or("false".to_string())
+            .parse()
+            .unwrap_or(false)
+    })
+}
+
 pub fn setup_tracing_stdout_only_with_sentry() {
     static SET_HOOK: Once = Once::new();
     SET_HOOK.call_once(|| {
@@ -82,8 +93,10 @@ pub fn setup_tracing_stdout_only_with_sentry() {
             .with(tracing_subscriber::fmt::layer().with_ansi(false));
         #[cfg(feature = "sentry")]
         {
-            println!("ADDING SENTRY LAYER");
-            sub.with(sentry_tracing::layer()).init();
+            if get_sentry_layer() {
+                println!("ADDING SENTRY LAYER");
+                sub.with(sentry_tracing::layer()).init();
+            }
         }
         #[cfg(not(feature = "sentry"))]
         {

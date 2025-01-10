@@ -36,7 +36,7 @@ pub async fn handle_socket_light(
 
     let tx_c = state.tx.clone();
 
-    let create_daily_state_task = tokio::spawn(async move {
+    let mut create_daily_state_task = tokio::spawn(async move {
         loop {
             let _ = tx_c
                 .send_async(DBMessage::CreateDailyStatMessage(CreateDailyStatMessage {
@@ -139,24 +139,20 @@ pub async fn handle_socket_light(
     });
 
     tokio::select! {
-        rv_a = &mut send_task => {
-            match rv_a {
-                Ok(_) => tracing::trace!("send_task done {ip}"),
-                Err(e) => tracing::trace!("send_task error {e}")
-            }
-            recv_task.abort();
-        },
-        rv_b = &mut recv_task => {
-            match rv_b {
-                Ok(_) => tracing::trace!("recv_task done {ip}"),
-                Err(e) => tracing::trace!("recv_task error {e}")
-            }
-            send_task.abort();
-        },
-        _ = create_daily_state_task => {
+        _ = &mut send_task => {
+            create_daily_state_task.abort();
             recv_task.abort();
             send_task.abort();
-            tracing::trace!("create_daily_state_task done {ip}");
+        },
+        _ = &mut recv_task => {
+            create_daily_state_task.abort();
+            send_task.abort();
+            recv_task.abort();
+        },
+        _ = &mut create_daily_state_task => {
+            recv_task.abort();
+            send_task.abort();
+            create_daily_state_task.abort();
         }
     }
 

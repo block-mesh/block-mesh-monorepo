@@ -187,7 +187,7 @@ futures = { version = "0.3" }
 futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
 headers = { version = "0.4.0" }
 tokio = { version = "1.0", features = ["full"] }
-tokio-tungstenite = "0.21.0"
+tokio-tungstenite = { version = "0.26.1" }
 tower = { version = "0.4.13", features = ["util"] }
 tower-http = { version = "0.5.1", features = ["fs", "trace", "request-id", "util", "cors", "add-extension"] }
 tracing = { version = "0.1" }

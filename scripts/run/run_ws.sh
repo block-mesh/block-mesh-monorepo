@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -x
 export APP_ENVIRONMENT="local"
-export SENTRY_LAYER="true"
+export SENTRY_LAYER="false"
 export SENTRY_SAMPLE_RATE="1.0"
 export _PWD="$(pwd)"
 export ROOT="$(git rev-parse --show-toplevel)"
@@ -21,5 +21,5 @@ if [ -f "${ROOT}/.env" ] ; then
 fi
 #ensure "${ROOT}/scripts/init_db.sh"
 #cargo run -p block-mesh-manager-ws | bunyan
-#export RUSTFLAGS="--cfg tokio_unstable"
+#export RUSTFLAGS="--cfg tokio_unstable" ; export CARGO_TARGET_DIR="${ROOT}/target/tokio-console"
 cargo watch --watch libs --shell "cargo run -p block-mesh-manager-ws"

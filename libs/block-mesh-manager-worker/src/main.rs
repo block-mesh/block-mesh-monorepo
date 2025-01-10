@@ -7,7 +7,7 @@ use chrono::NaiveDate;
 use database_utils::utils::connection::channel_pool::channel_pool;
 use database_utils::utils::connection::unlimited_pool::unlimited_pool;
 use database_utils::utils::connection::write_pool::write_pool;
-use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
+use logger_general::tracing::{get_sentry_layer, setup_tracing_stdout_only_with_sentry};
 use serde_json::Value;
 use std::collections::HashSet;
 use std::net::SocketAddr;
@@ -57,10 +57,7 @@ pub async fn run_server(listener: TcpListener, app: Router<()>) -> std::io::Resu
 }
 
 fn main() {
-    let sentry_layer = env::var("SENTRY_LAYER")
-        .unwrap_or("false".to_string())
-        .parse()
-        .unwrap_or(false);
+    let sentry_layer = get_sentry_layer();
     let sentry_url = env::var("SENTRY_WORKER").unwrap_or_default();
     let sentry_sample_rate = env::var("SENTRY_SAMPLE_RATE")
         .unwrap_or("0.1".to_string())
