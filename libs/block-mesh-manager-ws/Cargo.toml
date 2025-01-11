@@ -33,7 +33,7 @@ http = { workspace = true }
 http-body-util = { workspace = true }
 redis = { workspace = true, features = ["tokio-comp", "tokio-rustls-comp", "tls-rustls-insecure"] }
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
-tikv-jemallocator = { workspace = true }
+tikv-jemallocator = { workspace = true, features = ["background_threads"] }
 console-subscriber = { workspace = true }
 
 [dev-dependencies]
