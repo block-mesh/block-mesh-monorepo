@@ -3,7 +3,7 @@ use axum::extract::Request;
 use axum::{Extension, Router};
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use dashmap::DashMap;
-use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
+use logger_general::tracing::{get_sentry_layer, setup_tracing_stdout_only_with_sentry};
 use sentry_tower::NewSentryLayer;
 use std::net::SocketAddr;
 use std::sync::Arc;
@@ -26,10 +26,7 @@ use tower_http::timeout::TimeoutLayer;
 
 fn main() -> anyhow::Result<()> {
     load_dotenv();
-    let sentry_layer = env::var("SENTRY_LAYER")
-        .unwrap_or("false".to_string())
-        .parse()
-        .unwrap_or(false);
+    let sentry_layer = get_sentry_layer();
     let sentry_url = env::var("SENTRY").unwrap_or_default();
     let sentry_sample_rate = env::var("SENTRY_SAMPLE_RATE")
         .unwrap_or("0.1".to_string())

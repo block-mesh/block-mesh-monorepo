@@ -20,6 +20,7 @@ use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
 use dashmap::DashMap;
 use http::{header, HeaderValue};
 use leptos::leptos_config::get_config_from_env;
+use logger_general::tracing::get_sentry_layer;
 use redis::aio::MultiplexedConnection;
 use reqwest::Client;
 use sentry_tower::NewSentryLayer;
@@ -124,11 +125,7 @@ impl Application {
 
         let application_base_url = ApplicationBaseUrl(settings.application.base_url.clone());
 
-        let sentry_layer = env::var("SENTRY_LAYER")
-            .unwrap_or("false".to_string())
-            .parse()
-            .unwrap_or(false);
-
+        let sentry_layer = get_sentry_layer();
         let backend = Router::new()
             .nest("/", auth_router)
             .route_layer(login_required!(Backend, login_url = "/login"))

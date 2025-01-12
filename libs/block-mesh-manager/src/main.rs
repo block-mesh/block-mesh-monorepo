@@ -3,6 +3,7 @@
 #![deny(unreachable_pub)]
 
 use cfg_if::cfg_if;
+use logger_general::tracing::get_sentry_layer;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
     use std::sync::RwLock;
@@ -47,10 +48,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 #[cfg(feature = "ssr")]
 #[tracing::instrument(name = "main", skip_all)]
 fn main() {
-    let sentry_layer = env::var("SENTRY_LAYER")
-        .unwrap_or("false".to_string())
-        .parse()
-        .unwrap_or(false);
+    let sentry_layer = get_sentry_layer();
     let sentry_url = env::var("SENTRY").unwrap_or_default();
     let sentry_sample_rate = env::var("SENTRY_SAMPLE_RATE")
         .unwrap_or("0.1".to_string())

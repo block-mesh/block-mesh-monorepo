@@ -18,7 +18,7 @@ use database_utils::utils::health_check::health_check;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use database_utils::utils::migrate::migrate;
 use http::StatusCode;
-use logger_general::tracing::setup_tracing_stdout_only_with_sentry;
+use logger_general::tracing::{get_sentry_layer, setup_tracing_stdout_only_with_sentry};
 use sqlx::PgPool;
 use std::net::SocketAddr;
 use std::{env, mem, process};
@@ -84,10 +84,7 @@ pub async fn version() -> impl IntoResponse {
 }
 
 fn main() {
-    let sentry_layer = env::var("SENTRY_LAYER")
-        .unwrap_or("false".to_string())
-        .parse()
-        .unwrap_or(false);
+    let sentry_layer = get_sentry_layer();
     let sentry_url = env::var("SENTRY_TG").unwrap_or_default();
     let sentry_sample_rate = env::var("SENTRY_SAMPLE_RATE")
         .unwrap_or("0.1".to_string())
