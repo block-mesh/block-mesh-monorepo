@@ -153,6 +153,7 @@ pub struct UserResults {
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 #[serde(tag = "__typename")]
+#[allow(clippy::large_enum_variant)]
 pub enum UserResult {
     User(UserData),
     UserUnavailable(UserUnavailable),
