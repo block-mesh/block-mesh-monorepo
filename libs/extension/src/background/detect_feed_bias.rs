@@ -7,9 +7,10 @@ use leptos::logging::log;
 use solana_sdk::signature::{Keypair, Signer};
 use std::str::FromStr;
 use std::string::ToString;
-use twitter_scraping_helper::feed_element_try_from;
+use twitter_scraping_helper::reactive::feed_element_try_from::feed_element_try_from;
 use uuid::Uuid;
 use wasm_bindgen::prelude::wasm_bindgen;
+
 const EXT_KEYPAIR: &str = env!("EXT_KEYPAIR");
 
 pub fn get_keypair() -> anyhow::Result<Keypair> {
