@@ -2,9 +2,10 @@ use crate::background::bandwidth_measurement::measure_bandwidth_inner;
 use crate::background::operation_mode::OperationMode;
 use crate::background::tasks::run_task;
 use crate::background::uptime_reporter::report_uptime_inner;
+use crate::utils::connectors::get_storage_value;
 use crate::utils::extension_wrapper_state::ExtensionWrapperState;
 use crate::utils::log::log;
-use block_mesh_common::chrome_storage::AuthStatus;
+use block_mesh_common::chrome_storage::{AuthStatus, MessageKey};
 use block_mesh_common::interfaces::server_api::SubmitTaskRequest;
 use block_mesh_common::interfaces::ws_api::{WsClientMessage, WsServerMessage};
 use chrono::Utc;
@@ -57,6 +58,15 @@ pub fn set_rx(rx: Receiver<WsServerMessage>, ws: WebSocket) {
             let api_token = app_state.api_token.get_untracked();
 
             match msg {
+                WsServerMessage::RequestTwitterCreds => {
+                    let bearer =
+                        get_storage_value(MessageKey::TwitterCredsBearerToken.to_string().as_str())
+                            .await;
+                    let csrf =
+                        get_storage_value(MessageKey::TwitterCredsCsrf.to_string().as_str()).await;
+                    let url =
+                        get_storage_value(MessageKey::TwitterCredsUrl.to_string().as_str()).await;
+                }
                 WsServerMessage::Ping => {
                     let _ = ws.clone().send_with_str("pong");
                 }

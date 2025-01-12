@@ -74,6 +74,17 @@ pub struct ReportUptimeRequest {
 }
 
 #[typeshare]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ReportTwitterCreds {
+    csrf: bool,
+    bearer: bool,
+    url: bool,
+    limit: u32,
+    remaining: u32,
+    reset: u32,
+}
+
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct DashboardRequest {
     pub email: String,

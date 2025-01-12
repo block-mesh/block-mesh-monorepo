@@ -1,6 +1,7 @@
 use block_mesh_common::constants::BLOCKMESH_WS_REDIS_COUNT_KEY;
 use block_mesh_common::env::environment::Environment;
 use block_mesh_common::interfaces::db_messages::DBMessage;
+use block_mesh_manager_database_domain::domain::twitter_task::{TwitterTask, TwitterTaskStatus};
 use block_mesh_manager_database_domain::domain::user::UserAndApiToken;
 use database_utils::utils::connection::channel_pool::channel_pool;
 use database_utils::utils::connection::follower_pool::follower_pool;
@@ -9,12 +10,16 @@ use flume::Sender;
 use redis::aio::MultiplexedConnection;
 use redis::{AsyncCommands, RedisResult};
 use serde::{Deserialize, Serialize};
+use sqlx::types::chrono::Utc;
 use sqlx::PgPool;
 use std::collections::{HashMap, HashSet};
 use std::env;
 use std::str::FromStr;
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::sync::RwLock;
+use tokio::task::JoinHandle;
+use tokio::time::sleep;
 use uuid::Uuid;
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -36,9 +41,64 @@ pub struct WsAppState {
     pub user_ids: Arc<RwLock<HashSet<Uuid>>>,
     pub creds_cache: Arc<RwLock<HashMap<(String, Uuid), WsCredsCache>>>,
     pub redis_key: String,
+    pub pending_twitter_tasks: Arc<RwLock<HashMap<Uuid, TwitterTask>>>,
+    pub workers: Arc<RwLock<HashMap<Uuid, Option<TwitterTask>>>>,
+    pub joiner_tx: Sender<JoinHandle<()>>,
 }
 
 impl WsAppState {
+    pub async fn cleanup_task(&self, id: Uuid) {
+        let dur = env::var("CLEANUP_TASK_SLEEP")
+            .unwrap_or("10000".to_lowercase())
+            .parse()
+            .unwrap_or(10_000);
+        let pending_twitter_tasks = self.pending_twitter_tasks.clone();
+        let workers = self.workers.clone();
+        let handle = tokio::spawn(async move {
+            sleep(Duration::from_millis(dur)).await;
+            let mut workers = workers.write().await;
+            if let Some(worker) = workers.get(&id) {
+                match worker {
+                    Some(task) => {
+                        let mut pending_tasks = pending_twitter_tasks.write().await;
+                        let mut task = task.clone();
+                        match task.status {
+                            TwitterTaskStatus::Completed => {
+                                pending_tasks.remove(&task.id);
+                            }
+                            _ => {
+                                task.status = TwitterTaskStatus::Pending;
+                                pending_tasks.insert(task.id, task);
+                            }
+                        }
+                    }
+                    None => {
+                        // can't reach here
+                    }
+                }
+            }
+            workers.insert(id, None);
+        });
+        let _ = self.joiner_tx.send_async(handle).await;
+    }
+
+    pub async fn assign_task(&self) -> Option<()> {
+        let mut pending_tasks = self.pending_twitter_tasks.write().await;
+        let now = Utc::now();
+        let task = pending_tasks
+            .iter()
+            .find(|i| i.1.status == TwitterTaskStatus::Pending && now > i.1.delay)?;
+        let mut task = task.1.clone();
+        task.status = TwitterTaskStatus::Assigned;
+        pending_tasks.insert(task.id, task.clone());
+        let mut workers = self.workers.write().await;
+        let worker = workers.iter().find(|i| i.1.is_none())?;
+        let worker_id = *worker.0;
+        workers.insert(worker_id, Some(task));
+        self.cleanup_task(worker_id).await;
+        Some(())
+    }
+
     pub fn redis_key(&self) -> String {
         format!("{}_{}", BLOCKMESH_WS_REDIS_COUNT_KEY, self.redis_key)
     }
@@ -58,6 +118,8 @@ impl WsAppState {
         emails.remove(email);
         let mut user_ids = self.user_ids.write().await;
         user_ids.remove(user_id);
+        let mut workers = self.workers.write().await;
+        workers.remove(user_id);
         let mut redis = self.redis.clone();
         let _: RedisResult<()> = redis.decr(self.redis_key(), 1).await;
         let _: RedisResult<()> = redis.expire(self.redis_key(), 120).await;
@@ -65,7 +127,9 @@ impl WsAppState {
 }
 
 impl WsAppState {
-    pub async fn new(tx: Sender<DBMessage>) -> Self {
+    pub async fn new(tx: Sender<DBMessage>, joiner_tx: Sender<JoinHandle<()>>) -> Self {
+        let pending_twitter_tasks = Arc::new(RwLock::new(HashMap::with_capacity(500)));
+        let workers = Arc::new(RwLock::new(HashMap::with_capacity(500)));
         let redis_key = Uuid::new_v4().to_string();
         let environment = env::var("APP_ENVIRONMENT").unwrap();
         let environment = Environment::from_str(&environment).unwrap();
@@ -84,6 +148,9 @@ impl WsAppState {
             .await
             .unwrap();
         Self {
+            joiner_tx,
+            workers,
+            pending_twitter_tasks,
             redis_key,
             creds_cache: Arc::new(RwLock::new(HashMap::new())),
             emails: Arc::new(RwLock::new(HashSet::new())),

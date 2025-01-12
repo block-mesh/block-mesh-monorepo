@@ -1,5 +1,6 @@
 use crate::interfaces::server_api::{
-    GetTaskResponse, ReportBandwidthRequest, ReportUptimeRequest, SubmitTaskRequest,
+    GetTaskResponse, ReportBandwidthRequest, ReportTwitterCreds, ReportUptimeRequest,
+    SubmitTaskRequest,
 };
 use serde::{Deserialize, Serialize};
 use std::fmt::{Display, Formatter};
@@ -12,6 +13,7 @@ pub enum WsServerMessage {
     RequestBandwidthReport,
     RequestUptimeReport,
     CloseConnection,
+    RequestTwitterCreds,
 }
 
 impl Display for WsServerMessage {
@@ -22,6 +24,7 @@ impl Display for WsServerMessage {
             Self::RequestUptimeReport => write!(f, "RequestUptimeReport"),
             Self::CloseConnection => write!(f, "CloseConnection"),
             Self::AssignTask(_response) => write!(f, "AssignTask"),
+            Self::RequestTwitterCreds => write!(f, "RequestTwitterCreds"),
         }
     }
 }
@@ -39,6 +42,7 @@ impl TryFrom<String> for WsServerMessage {
             "RequestBandwidthReport" => Ok(Self::RequestBandwidthReport),
             "RequestUptimeReport" => Ok(Self::RequestUptimeReport),
             "CloseConnection" => Ok(Self::CloseConnection),
+            "RequestTwitterCreds" => Ok(Self::RequestTwitterCreds),
             _ => Err(()),
         }
     }
@@ -50,6 +54,7 @@ pub enum WsClientMessage {
     CompleteTask(SubmitTaskRequest),
     ReportBandwidth(ReportBandwidthRequest),
     ReportUptime(ReportUptimeRequest),
+    ReportTwitterCreds(ReportTwitterCreds),
 }
 
 impl Display for WsClientMessage {
@@ -59,6 +64,7 @@ impl Display for WsClientMessage {
             Self::CompleteTask(_request) => write!(f, "CompleteTask"),
             Self::ReportBandwidth(_request) => write!(f, "ReportBandwidth"),
             Self::ReportUptime(_request) => write!(f, "ReportUptime"),
+            Self::ReportTwitterCreds(_request) => write!(f, "RequestTwitterCreds"),
         }
     }
 }

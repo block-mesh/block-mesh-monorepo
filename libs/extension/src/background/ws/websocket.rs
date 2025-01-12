@@ -34,6 +34,8 @@ pub async fn stop_websocket() {
     }
 }
 
+pub async fn notify_twitter_creds() {}
+
 #[wasm_bindgen]
 pub async fn start_websocket() -> Result<(), JsValue> {
     set_panic_hook();

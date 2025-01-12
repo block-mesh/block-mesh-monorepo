@@ -9,7 +9,7 @@ use std::fmt::Display;
 use std::time::Duration;
 use uuid::Uuid;
 
-#[derive(Serialize, Deserialize, Debug, Clone)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum TwitterTaskStatus {
     Pending,
     Assigned,
@@ -85,6 +85,22 @@ impl TwitterTask {
         let random_number: u64 = rng.gen_range(1..=900);
         let now = Utc::now();
         now + Duration::from_secs(random_number)
+    }
+
+    pub async fn get_pending_tasks(
+        transaction: &mut Transaction<'_, Postgres>,
+    ) -> anyhow::Result<Vec<Self>> {
+        let tasks: Vec<Self> = sqlx::query_as!(
+            TwitterTask,
+            r#"
+            SELECT
+            id, assigned_user_id, twitter_username, status, created_at, updated_at, since, until, delay, results
+            FROM twitter_tasks
+            "#
+        )
+        .fetch_all(&mut **transaction)
+        .await?;
+        Ok(tasks)
     }
 
     pub async fn create_twitter_task(

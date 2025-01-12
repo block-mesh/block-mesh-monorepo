@@ -87,13 +87,19 @@ pub async fn handle_socket_light(
     });
 
     let tx_c = state.tx.clone();
+    let workers = state.workers.clone();
     let mut recv_task = tokio::spawn(async move {
+        let workers = workers.clone();
         // Receive from client
         while let Some(Ok(msg)) = receiver.next().await {
             match msg {
                 Message::Text(txt) => {
                     if let Ok(msg) = serde_json::from_str::<WsClientMessage>(&txt) {
                         match msg {
+                            WsClientMessage::ReportTwitterCreds(_report) => {
+                                let mut workers = workers.write().await;
+                                workers.insert(user_id, None);
+                            }
                             WsClientMessage::ReportBandwidth(report) => {
                                 let mut messages: Vec<DBMessage> = Vec::with_capacity(10);
                                 messages.push(DBMessage::AggregateSetToMessage(

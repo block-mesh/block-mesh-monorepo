@@ -21,6 +21,9 @@ pub enum MessageKey {
     UploadSpeed,
     LastUpdate,
     WalletAddress,
+    TwitterCredsUrl,
+    TwitterCredsCsrf,
+    TwitterCredsBearerToken,
 }
 
 impl Serialize for MessageKey {
@@ -35,19 +38,22 @@ impl Serialize for MessageKey {
 impl Display for MessageKey {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let str = match self {
-            MessageKey::All => "all".to_string(),
-            MessageKey::BlockMeshUrl => "blockmesh_url".to_string(),
-            MessageKey::BlockMeshWsUrl => "blockmesh_ws_url".to_string(),
-            MessageKey::BlockMeshDataSinkUrl => "blockmesh_data_sink_url".to_string(),
-            MessageKey::Email => "email".to_string(),
-            MessageKey::ApiToken => "blockmesh_api_token".to_string(),
-            MessageKey::DeviceId => "device_id".to_string(),
-            MessageKey::Uptime => "uptime".to_string(),
-            MessageKey::InviteCode => "invite_code".to_string(),
-            MessageKey::DownloadSpeed => "download_speed".to_string(),
-            MessageKey::UploadSpeed => "upload_speed".to_string(),
-            MessageKey::LastUpdate => "last_update".to_string(),
-            MessageKey::WalletAddress => "wallet_address".to_string(),
+            Self::TwitterCredsUrl => "twitter-url".to_string(),
+            Self::TwitterCredsCsrf => "twitter-x-csrf-token".to_string(),
+            Self::TwitterCredsBearerToken => "twitter-authorization".to_string(),
+            Self::All => "all".to_string(),
+            Self::BlockMeshUrl => "blockmesh_url".to_string(),
+            Self::BlockMeshWsUrl => "blockmesh_ws_url".to_string(),
+            Self::BlockMeshDataSinkUrl => "blockmesh_data_sink_url".to_string(),
+            Self::Email => "email".to_string(),
+            Self::ApiToken => "blockmesh_api_token".to_string(),
+            Self::DeviceId => "device_id".to_string(),
+            Self::Uptime => "uptime".to_string(),
+            Self::InviteCode => "invite_code".to_string(),
+            Self::DownloadSpeed => "download_speed".to_string(),
+            Self::UploadSpeed => "upload_speed".to_string(),
+            Self::LastUpdate => "last_update".to_string(),
+            Self::WalletAddress => "wallet_address".to_string(),
         };
         write!(f, "{}", str)
     }
@@ -59,18 +65,21 @@ impl TryFrom<&str> for MessageKey {
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         let value = value.trim_matches('"');
         match value {
-            "all" => Ok(MessageKey::All),
-            "blockmesh_url" => Ok(MessageKey::BlockMeshUrl),
-            "blockmesh_ws_url" => Ok(MessageKey::BlockMeshWsUrl),
-            "email" => Ok(MessageKey::Email),
-            "blockmesh_api_token" => Ok(MessageKey::ApiToken),
-            "device_id" => Ok(MessageKey::DeviceId),
-            "uptime" => Ok(MessageKey::Uptime),
-            "invite_code" => Ok(MessageKey::InviteCode),
-            "download_speed" => Ok(MessageKey::DownloadSpeed),
-            "upload_speed" => Ok(MessageKey::UploadSpeed),
-            "last_update" => Ok(MessageKey::LastUpdate),
-            "wallet_address" => Ok(MessageKey::WalletAddress),
+            "twitter-url" => Ok(Self::TwitterCredsUrl),
+            "twitter-x-csrf-token" => Ok(Self::TwitterCredsCsrf),
+            "twitter-authorization" => Ok(Self::TwitterCredsBearerToken),
+            "all" => Ok(Self::All),
+            "blockmesh_url" => Ok(Self::BlockMeshUrl),
+            "blockmesh_ws_url" => Ok(Self::BlockMeshWsUrl),
+            "email" => Ok(Self::Email),
+            "blockmesh_api_token" => Ok(Self::ApiToken),
+            "device_id" => Ok(Self::DeviceId),
+            "uptime" => Ok(Self::Uptime),
+            "invite_code" => Ok(Self::InviteCode),
+            "download_speed" => Ok(Self::DownloadSpeed),
+            "upload_speed" => Ok(Self::UploadSpeed),
+            "last_update" => Ok(Self::LastUpdate),
+            "wallet_address" => Ok(Self::WalletAddress),
             _ => Err(format!("Invalid MessageKey value {}", value)),
         }
     }
