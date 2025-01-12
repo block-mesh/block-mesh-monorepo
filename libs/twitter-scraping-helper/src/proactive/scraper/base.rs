@@ -1,16 +1,18 @@
-use crate::{auth, config::Config};
+use crate::proactive::config::Config;
 use anyhow::anyhow;
+use block_mesh_common::constants::DeviceType;
+use block_mesh_common::reqwest::http_client;
 use chrono::Utc;
 use reqwest::header::{HeaderMap, HeaderName};
 use reqwest::Client;
 use secrecy::{ExposeSecret as _, SecretString};
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
+use std::thread::sleep;
 use std::time::Duration;
-use tokio::sync::RwLock;
-use tokio::time::sleep;
 
 #[derive(Clone, Debug)]
 pub struct Scraper {
+    pub base: Arc<String>,
     pub client: Client,
     pub bearer_token: SecretString,
     pub csrf: SecretString,
@@ -23,37 +25,43 @@ pub struct Scraper {
 
 impl Scraper {
     #[tracing::instrument(name = "get_tweets_collected", skip_all)]
-    pub async fn incr_tweets_collected(&self, incr: u64) {
-        *self.tweets_collected.write().await += incr;
+    pub fn incr_tweets_collected(&self, incr: u64) {
+        if let Ok(mut v) = self.tweets_collected.write() {
+            *v += incr;
+        }
     }
 
     #[tracing::instrument(name = "get_tweets_collected", skip_all)]
-    pub async fn get_tweets_collected(&self) -> u64 {
-        *self.tweets_collected.read().await
+    pub fn get_tweets_collected(&self) -> u64 {
+        match self.tweets_collected.read() {
+            Ok(v) => *v,
+            Err(_) => 0,
+        }
     }
 
     #[tracing::instrument(name = "new", skip_all)]
-    pub fn new(client: Client, csrf: SecretString, config: Config) -> Self {
+    pub fn new(client: Client, config: Config) -> Self {
         Self {
+            base: Arc::new(config.base.to_string()),
             min_sleep: 1_000,
             limit: Arc::new(RwLock::new(Default::default())),
             remaining: Arc::new(RwLock::new(Default::default())),
             reset: Arc::new(RwLock::new(Default::default())),
             client,
             bearer_token: config.bearer_token,
-            csrf,
+            csrf: config.cookie,
             tweets_collected: Arc::new(Default::default()),
         }
     }
 
     #[tracing::instrument(name = "wait_for_reset", skip_all)]
-    pub async fn wait_for_reset(&self) {
+    pub fn wait_for_reset(&self) -> anyhow::Result<()> {
         let now = Utc::now();
-        let remaining = *self.remaining.read().await;
-        let reset = *self.reset.read().await;
-        let limit = *self.limit.read().await;
-        if remaining <= 0 && reset > now.timestamp() {
-            let diff = reset - now.timestamp();
+        let remaining = self.remaining.read().unwrap();
+        let reset = self.reset.read().unwrap();
+        let limit = self.limit.read().unwrap();
+        if *remaining <= 0 && *reset > now.timestamp() {
+            let diff = *reset - now.timestamp();
             tracing::info!(
                 "Sleeping for {}[sec] | limit = {} | remaining = {} | reset = {} | now = {} | total_collected = {}",
                 diff,
@@ -61,9 +69,9 @@ impl Scraper {
                 remaining,
                 reset,
                 now.timestamp(),
-                self.get_tweets_collected().await
+                self.get_tweets_collected()
             );
-            sleep(Duration::from_secs(diff as u64)).await;
+            sleep(Duration::from_secs(diff as u64));
         } else {
             tracing::info!(
                 "Sleeping min for {}[ms] | limit = {} | remaining = {} | reset = {} | now = {} | total_collected = {}",
@@ -72,10 +80,11 @@ impl Scraper {
                 remaining,
                 reset,
                 now.timestamp(),
-                self.get_tweets_collected().await
+                self.get_tweets_collected()
             );
-            sleep(Duration::from_millis(self.min_sleep)).await;
+            sleep(Duration::from_millis(self.min_sleep));
         }
+        Ok(())
     }
 
     #[tracing::instrument(name = "extract_headers", skip_all)]
@@ -89,15 +98,21 @@ impl Scraper {
             match key.as_str() {
                 "x-rate-limit-limit" => {
                     let v = value.parse::<i32>().unwrap_or(1);
-                    *self.limit.write().await = v;
+                    if let Ok(mut limit) = self.limit.write() {
+                        *limit = v;
+                    }
                 }
                 "x-rate-limit-remaining" => {
                     let v = value.parse::<i32>().unwrap_or(1);
-                    *self.remaining.write().await = v;
+                    if let Ok(mut remaining) = self.remaining.write() {
+                        *remaining = v;
+                    }
                 }
                 "x-rate-limit-reset" => {
                     let v = value.parse::<i64>().unwrap_or(1);
-                    *self.reset.write().await = v;
+                    if let Ok(mut reset) = self.reset.write() {
+                        *reset = v;
+                    }
                 }
                 _ => {}
             }
@@ -122,8 +137,8 @@ impl Scraper {
 
     #[tracing::instrument(name = "from_config", err)]
     pub async fn from_config(config: Config) -> anyhow::Result<Self> {
-        let (client, csrf) = auth::from_config(&config).await?;
-        Ok(Self::new(client, csrf, config))
+        let client = http_client(DeviceType::Extension);
+        Ok(Self::new(client, config))
     }
 }
 

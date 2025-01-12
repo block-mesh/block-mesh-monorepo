@@ -1,9 +1,9 @@
-use crate::scraper::base::Scraper;
-use crate::types::timeline::search::{Product, SearchTimelineParams};
+use crate::proactive::scraper::base::Scraper;
+use crate::proactive::types::timeline::search::{Product, SearchTimelineParams};
 use anyhow::anyhow;
 use secrecy::ExposeSecret;
+use std::thread::sleep;
 use std::time::Duration;
-use tokio::time::sleep;
 
 impl Scraper {
     #[tracing::instrument(name = "tweet_timeline", skip_all)]
@@ -13,7 +13,7 @@ impl Scraper {
         raw_query: &str,
         count: u32,
         cursor: Option<String>,
-    ) -> anyhow::Result<crate::types::timeline::search::SearchTimeline> {
+    ) -> anyhow::Result<crate::proactive::types::timeline::search::SearchTimeline> {
         let mut search_time_line_params = SearchTimelineParams::default();
         search_time_line_params.update_count(count);
         search_time_line_params.update_raw_query(raw_query);
@@ -21,9 +21,11 @@ impl Scraper {
         search_time_line_params.update_product(search_mode.clone());
         let mut retries = 0;
         let params = search_time_line_params.params()?;
+        let url = self.base.to_string();
         let request = self
             .client
-            .get("https://api.twitter.com/graphql/nK1dw4oV3k4w5TdtcAdSww/SearchTimeline")
+            // .get("https://api.twitter.com/graphql/nK1dw4oV3k4w5TdtcAdSww/SearchTimeline")
+            .get(&url)
             .query(&params)
             .bearer_auth(self.bearer_token.expose_secret())
             .header("x-csrf-token", self.csrf.expose_secret())
@@ -42,13 +44,14 @@ impl Scraper {
             retries += 1;
             let dur = 3 * retries;
             tracing::info!("Sleeping due to rate limit for {} seconds", dur);
-            sleep(Duration::from_secs(dur)).await;
+            sleep(Duration::from_secs(dur));
         } else if response.contains("Could not authenticate you") {
             return Err(anyhow!("Auth issues : {}", response));
         } else {
-            return match serde_json::from_str::<crate::types::timeline::search::SearchTimeline>(
-                response,
-            ) {
+            return match serde_json::from_str::<
+                crate::proactive::types::timeline::search::SearchTimeline,
+            >(response)
+            {
                 Ok(json) => Ok(json),
                 Err(e) => Err(anyhow!("Error {} | text {}", e, response)),
             };

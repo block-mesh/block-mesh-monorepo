@@ -1,10 +1,10 @@
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::types::profile::LegacyUserRaw;
-use crate::types::profile::Profile;
-use crate::types::tweets::PlaceRaw;
-use crate::types::tweets::Tweet;
+use crate::proactive::types::profile::LegacyUserRaw;
+use crate::proactive::types::profile::Profile;
+use crate::proactive::types::tweets::PlaceRaw;
+use crate::proactive::types::tweets::Tweet;
 
 #[derive(Debug, Deserialize, Serialize)]
 pub struct Hashtag {

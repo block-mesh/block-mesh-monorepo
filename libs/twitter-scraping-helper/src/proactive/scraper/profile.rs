@@ -1,5 +1,5 @@
-use crate::scraper::base::Scraper;
-use crate::types::timeline::search::Product;
+use crate::proactive::scraper::base::Scraper;
+use crate::proactive::types::timeline::search::Product;
 
 impl Scraper {
     #[tracing::instrument(name = "profiles", skip_all)]
@@ -8,9 +8,9 @@ impl Scraper {
         query: &str,
         count: u32,
         cursor: Option<String>,
-    ) -> anyhow::Result<crate::types::timeline::v1::QueryProfilesResponse> {
+    ) -> anyhow::Result<crate::proactive::types::timeline::v1::QueryProfilesResponse> {
         self.tweet_timeline(&Product::People, query, count, cursor)
             .await
-            .map(|timeline| crate::types::timeline::search::parse_users(&timeline))
+            .map(|timeline| crate::proactive::types::timeline::search::parse_users(&timeline))
     }
 }

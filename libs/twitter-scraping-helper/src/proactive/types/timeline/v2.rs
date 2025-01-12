@@ -1,7 +1,7 @@
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
 
-use crate::types::{
+use crate::proactive::types::{
     profile::LegacyUserRaw,
     tweets::{Mention, Photo, Tweet, Video},
 };

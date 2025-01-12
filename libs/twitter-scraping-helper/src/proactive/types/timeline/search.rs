@@ -2,7 +2,7 @@ use super::{
     v1::{QueryProfilesResponse, QueryTweetsResponse},
     v2::{parse_legacy_tweet, SearchEntryRaw},
 };
-use crate::types::profile::parse_profile;
+use crate::proactive::types::profile::parse_profile;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 
