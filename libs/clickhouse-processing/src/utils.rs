@@ -12,7 +12,7 @@ use std::io::{BufRead, Write};
 use std::path::PathBuf;
 use std::sync::Arc;
 use std::{fs, io};
-use twitter_scraping_helper::feed_element_try_from;
+use twitter_scraping_helper::reactive::feed_element_try_from::feed_element_try_from;
 use uuid::Uuid;
 
 #[derive(Debug, Deserialize, Serialize)]
