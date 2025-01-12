@@ -10,19 +10,18 @@ use block_mesh_manager_ws::message_aggregator::collect_messages;
 use block_mesh_manager_ws::redis_loop::redis_loop;
 use block_mesh_manager_ws::state::WsAppState;
 use logger_general::tracing::{get_sentry_layer, setup_tracing_stdout_only_with_sentry};
+use mimalloc::MiMalloc;
 use std::sync::Arc;
 #[allow(unused_imports)]
 use std::time::Duration;
 use std::{env, mem, process};
-#[cfg(not(target_env = "msvc"))]
-use tikv_jemallocator::Jemalloc;
 use tokio::net::TcpListener;
 use tokio::task::JoinHandle;
 #[allow(unused_imports)]
 use uuid::Uuid;
-#[cfg(not(target_env = "msvc"))]
 #[global_allocator]
-static GLOBAL: Jemalloc = Jemalloc;
+static GLOBAL: MiMalloc = MiMalloc;
+use block_mesh_manager_ws::memory_loop::memory_loop;
 
 fn main() {
     let sentry_layer = get_sentry_layer();
@@ -71,6 +70,7 @@ async fn run() -> anyhow::Result<()> {
     let (joiner_tx, joiner_rx) = flume::bounded::<JoinHandle<()>>(10_000);
     let joiner_task = tokio::spawn(joiner_loop(joiner_rx));
     let redis_task = tokio::spawn(redis_loop(state.clone()));
+    let memory_task = tokio::spawn(memory_loop());
     let collect_messages_task = tokio::spawn(collect_messages(
         joiner_tx,
         rx,
@@ -82,6 +82,7 @@ async fn run() -> anyhow::Result<()> {
         5,
     ));
     tokio::select! {
+        o = memory_task => panic!("memory_task {:?}", o),
         o = redis_task => panic!("redis_task {:?}", o),
         o = joiner_task => panic!("joiner_task {:?}", o),
         o = server_task => panic!("server_task {:?}", o),
