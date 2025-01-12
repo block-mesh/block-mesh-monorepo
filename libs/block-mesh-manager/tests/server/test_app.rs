@@ -25,7 +25,7 @@ use reqwest::ClientBuilder;
 use secret::Secret;
 use sqlx::PgPool;
 use std::env;
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use tokio;
 use tokio::time::sleep;
@@ -66,7 +66,9 @@ pub async fn spawn_app() -> TestApp {
         .build()
         .unwrap_or_default();
 
-    let flags = Arc::new(get_all_flags(&client, DeviceType::AppServer).await.unwrap());
+    let flags = Arc::new(RwLock::new(
+        get_all_flags(&client, DeviceType::AppServer).await.unwrap(),
+    ));
     let redis_client = redis::Client::open(env::var("REDIS_URL").unwrap()).unwrap();
     let redis = redis_client
         .get_multiplexed_async_connection()

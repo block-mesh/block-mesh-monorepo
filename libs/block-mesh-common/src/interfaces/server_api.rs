@@ -682,7 +682,7 @@ pub struct AdminReferral {
     pub code: String,
 }
 
-#[derive(Debug, Deserialize, Serialize)]
+#[derive(Clone, Debug, Deserialize, Serialize)]
 pub struct CreateTwitterTask {
     pub code: String,
     pub username: String,
