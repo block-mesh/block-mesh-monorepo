@@ -33,7 +33,7 @@ chrome.webRequest.onBeforeSendHeaders.addListener(
       get_api_details(details.requestHeaders)
     }
   },
-  { urls: ['https://x.com/i/api/graphql/*'] },
+  { urls: ['https://x.com/i/api/*'] },
   ['requestHeaders']
 )
 
@@ -42,7 +42,7 @@ chrome.webRequest.onBeforeRedirect.addListener(
   async (details) => {
     console.log('onBeforeRedirect details', details)
   },
-  { urls: ['https://x.com/i/api/graphql/*'] },
+  { urls: ['https://x.com/i/api/*'] },
   ['responseHeaders', 'extraHeaders']
 )
 
