@@ -34,7 +34,7 @@ dashmap = { workspace = true }
 futures-util = { workspace = true }
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
-tikv-jemallocator = { workspace = true, optional = true }
+tikv-jemallocator = { workspace = true, optional = true, features = ["background_threads"] }
 logger-leptos = { path = "../logger-leptos", optional = true }
 logger-general = { path = "../logger-general", optional = true, features = ["sentry"] }
 tracing-subscriber-wasm = { workspace = true }

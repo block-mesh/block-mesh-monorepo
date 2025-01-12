@@ -32,10 +32,10 @@ block-mesh-manager-database-domain = { path = "../block-mesh-manager-database-do
 http = { workspace = true }
 http-body-util = { workspace = true }
 redis = { workspace = true, features = ["tokio-comp", "tokio-rustls-comp", "tls-rustls-insecure"] }
-[target.'cfg(not(target_env = "msvc"))'.dependencies]
-tikv-jemallocator = { workspace = true }
+mimalloc = { workspace = true, features = ["extended"] }
+libmimalloc-sys = { workspace = true, features = ["extended"] }
+console-subscriber = { workspace = true }
 
 [dev-dependencies]
-console-subscriber = { workspace = true }
 testcontainers = { workspace = true }
 testcontainers-modules = { workspace = true, features = ["postgres"] }
