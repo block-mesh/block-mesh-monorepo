@@ -681,3 +681,11 @@ pub struct AdminReferral {
     pub email: String,
     pub code: String,
 }
+
+#[derive(Debug, Deserialize, Serialize)]
+pub struct CreateTwitterTask {
+    pub code: String,
+    pub username: String,
+    pub since: NaiveDate,
+    pub until: NaiveDate,
+}

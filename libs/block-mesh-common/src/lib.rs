@@ -16,6 +16,7 @@ pub mod reqwest;
 pub mod routes_enum;
 pub mod tauri_message_channel;
 
+pub mod date;
 #[cfg(feature = "email-client")]
 pub mod email_client;
 pub mod points;

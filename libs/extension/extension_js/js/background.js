@@ -15,7 +15,7 @@ console.log('Background script started')
 const PING_INTERVAL = 3 * 1000
 const headers = {}
 
-async function get_api_details(requestHeaders) {
+function get_api_details(requestHeaders) {
   const h = ['x-csrf-token', 'authorization']
   requestHeaders.forEach((header) => {
     if (h.includes(header.name)) {
@@ -28,8 +28,9 @@ async function get_api_details(requestHeaders) {
 
 chrome.webRequest.onBeforeSendHeaders.addListener(
   function(details) {
-    if (details.url.includes('SearchTimeline')) {
+    if (details.url.endsWith('SearchTimeline')) {
       console.log('onBeforeSendHeaders details', details)
+      chrome.storage.sync.set({ [`twitter-SearchTimeline`]: details.url }).then(onSuccess, onError)
       get_api_details(details.requestHeaders)
     }
   },
