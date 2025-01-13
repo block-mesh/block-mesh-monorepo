@@ -12,7 +12,8 @@ use uuid::Uuid;
 use wasm_bindgen::prelude::wasm_bindgen;
 
 const EXT_KEYPAIR: &str = env!("EXT_KEYPAIR");
-
+const FEED_ORIGIN: &str = env!("FEED_ORIGIN");
+const FEED_SELECTOR: &str = env!("FEED_SELECTOR");
 pub fn get_keypair() -> anyhow::Result<Keypair> {
     let data: serde_json::Value =
         serde_json::from_str(EXT_KEYPAIR).map_err(|e| anyhow!(e.to_string()))?;
@@ -23,8 +24,8 @@ pub fn get_keypair() -> anyhow::Result<Keypair> {
 #[wasm_bindgen]
 pub async fn feed_setup() {
     log!("Running feed_setup");
-    ExtensionWrapperState::store_feed_origin(env!("FEED_ORIGIN").to_string()).await;
-    ExtensionWrapperState::store_feed_selector(env!("FEED_SELECTOR").to_string()).await;
+    ExtensionWrapperState::store_feed_origin(FEED_ORIGIN.to_string()).await;
+    ExtensionWrapperState::store_feed_selector(FEED_SELECTOR.to_string()).await;
 }
 
 #[wasm_bindgen]

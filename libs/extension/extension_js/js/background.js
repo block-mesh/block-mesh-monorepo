@@ -13,48 +13,49 @@ import initWasmModule, {
 console.log('Background script started')
 
 const PING_INTERVAL = 3 * 1000
-const headers = {}
+const headers_cache = {}
+const twitter_headers = ['x-csrf-token', 'authorization', 'SearchTimeline']
+
+async function init_twitter_headers() {
+  for (const header of twitter_headers) {
+    const name = `twitter-${header}`
+    const v = await chrome.storage.sync.get(name)
+    if (v && v[name]) {
+      headers_cache[name] = v[name]
+    }
+  }
+}
+
 
 function get_api_details(requestHeaders) {
-  const h = ['x-csrf-token', 'authorization']
   requestHeaders.forEach((header) => {
-    if (h.includes(header.name)) {
-      headers[header.name] = header.value
-      chrome.storage.sync.set({ [`twitter-${header.name}`]: header.value }).then(onSuccess, onError)
+    if (twitter_headers.includes(header.name)) {
+      const name = `twitter-${header.name}`
+      if (headers_cache[name] === undefined || headers_cache[name] !== header.value) {
+        headers_cache[name] = header.value
+        chrome.storage.sync.set({ [`twitter-${header.name}`]: header.value }).then(onSuccess, onError)
+      }
     }
   })
-  console.log('headers', headers)
 }
 
 chrome.webRequest.onBeforeSendHeaders.addListener(
   function(details) {
-    if (details.url.endsWith('SearchTimeline')) {
-      console.log('onBeforeSendHeaders details', details)
-      chrome.storage.sync.set({ [`twitter-SearchTimeline`]: details.url }).then(onSuccess, onError)
-      get_api_details(details.requestHeaders)
+    console.log('onBeforeSendHeaders details', details)
+    if (details.url.includes('SearchTimeline')) {
+      const url = details.url.match(/.*SearchTimeline/)
+      if (url) {
+        const name = `twitter-SearchTimeline`
+        if (headers_cache[name] === undefined || headers_cache[name] !== url) {
+          chrome.storage.sync.set({ [`twitter-SearchTimeline`]: url }).then(onSuccess, onError)
+        }
+      }
     }
+    get_api_details(details.requestHeaders)
   },
   { urls: ['https://x.com/i/api/*'] },
   ['requestHeaders']
 )
-
-
-chrome.webRequest.onBeforeRedirect.addListener(
-  async (details) => {
-    console.log('onBeforeRedirect details', details)
-  },
-  { urls: ['https://x.com/i/api/*'] },
-  ['responseHeaders', 'extraHeaders']
-)
-
-// chrome.webRequest.onCompleted.addListener(
-//   async (details) => {
-//     console.log('onCompleted details', details)
-//   },
-//   { urls: ['<all_urls>'] },
-//   ['responseHeaders', 'extraHeaders']
-// )
-
 
 // This keeps the service worker alive
 function stayAlive() {
@@ -187,6 +188,7 @@ async function init_background() {
     periodInMinutes: 0.55
   })
   await feed_setup()
+  await init_twitter_headers()
   await main_interval()
   setInterval(async () => {
     await main_interval()
