@@ -54,7 +54,7 @@ impl WsAppState {
             .unwrap_or("10000".to_lowercase())
             .parse()
             .unwrap_or(10_000);
-        let id = id.clone();
+        let id = *id;
         let state = self.clone();
         let state_c = self.clone();
         let handle = tokio::spawn(async move {
@@ -106,25 +106,22 @@ impl WsAppState {
     pub async fn get_task(&self) -> Option<TwitterTask> {
         let now = Utc::now();
         let pending_tasks = self.pending_twitter_tasks.read().await;
-        match pending_tasks
+        pending_tasks
             .iter()
             .find(|i| i.1.status == TwitterTaskStatus::Pending && now > i.1.delay)
-        {
-            Some(v) => Some(v.1.clone()),
-            None => None,
-        }
+            .map(|v| v.1.clone())
     }
 
     #[tracing::instrument(name = "add_worker", skip_all)]
     pub async fn add_worker(&self, user_id: &Uuid, task: Option<TwitterTask>) {
         let mut workers = self.workers.write().await;
-        workers.insert(user_id.clone(), task);
+        workers.insert(*user_id, task);
     }
 
     #[tracing::instrument(name = "reset_worker", skip_all)]
     pub async fn reset_worker(&self, user_id: &Uuid) {
         let mut workers = self.workers.write().await;
-        workers.insert(user_id.clone(), None);
+        workers.insert(*user_id, None);
     }
 
     #[tracing::instrument(name = "remove_worker", skip_all)]
@@ -142,11 +139,7 @@ impl WsAppState {
     #[tracing::instrument(name = "get_available_worker", skip_all)]
     pub async fn get_available_worker(&self) -> Option<Uuid> {
         let workers = self.workers.read().await;
-        let worker = workers.iter().find(|i| i.1.is_none());
-        match worker {
-            Some(w) => Some(w.0.clone()),
-            None => None,
-        }
+        workers.iter().find(|i| i.1.is_none()).map(|w| w.0.clone())
     }
 
     #[tracing::instrument(name = "subscribe_light", skip_all)]
