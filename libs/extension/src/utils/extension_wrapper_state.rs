@@ -160,28 +160,30 @@ impl ExtensionWrapperState {
         let twitter_creds_csrf = Self::get_twitter_creds_csrf().await;
         let twitter_creds_bearer_token = Self::get_twitter_creds_bearer_token().await;
         // Signals:
-        self.feed_origin.update(|v| *v = feed_origin);
+        self.feed_origin.update(|v| *v = feed_origin.clone());
         send_storage_value_to_iframe(
             MessageKey::FeedOrigin,
             MessageValue::String(feed_origin.clone()),
         );
-        self.feed_selector.update(|v| *v = feed_selector);
+        self.feed_selector.update(|v| *v = feed_selector.clone());
         send_storage_value_to_iframe(
             MessageKey::FeedSelector,
             MessageValue::String(feed_selector.clone()),
         );
-        self.twitter_creds_url.update(|v| *v = twitter_creds_url);
+        self.twitter_creds_url
+            .update(|v| *v = twitter_creds_url.clone());
         send_storage_value_to_iframe(
             MessageKey::TwitterCredsUrl,
             MessageValue::String(twitter_creds_url.clone()),
         );
-        self.twitter_creds_csrf.update(|v| *v = twitter_creds_csrf);
+        self.twitter_creds_csrf
+            .update(|v| *v = twitter_creds_csrf.clone());
         send_storage_value_to_iframe(
             MessageKey::TwitterCredsCsrf,
             MessageValue::String(twitter_creds_csrf.clone()),
         );
         self.twitter_creds_bearer_token
-            .update(|v| *v = twitter_creds_bearer_token);
+            .update(|v| *v = twitter_creds_bearer_token.clone());
         send_storage_value_to_iframe(
             MessageKey::TwitterCredsBearerToken,
             MessageValue::String(twitter_creds_bearer_token.clone()),
