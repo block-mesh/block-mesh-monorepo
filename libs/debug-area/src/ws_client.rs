@@ -77,7 +77,7 @@ async fn spawn_client(who: usize) {
     let mut send_task = tokio::spawn(async move {
         if let Some(tx) = SIGNAL_TX.get() {
             let mut rx = tx.subscribe();
-            while rx.recv().await.is_ok() {
+            if rx.recv().await.is_ok() {
                 eprintln!("recv_async Closing {who}");
                 let _ = sender
                     .send(Message::Close(Some(CloseFrame {
