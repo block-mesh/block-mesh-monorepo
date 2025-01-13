@@ -731,6 +731,7 @@ impl ExtensionWrapperState {
         .await;
     }
 
+    #[allow(dead_code)]
     pub async fn store_twitter_creds_url(v: String) {
         set_storage_value(
             MessageKey::TwitterCredsUrl.to_string().as_str(),

@@ -59,12 +59,12 @@ pub fn set_rx(rx: Receiver<WsServerMessage>, ws: WebSocket) {
 
             match msg {
                 WsServerMessage::RequestTwitterCreds => {
-                    let bearer =
+                    let _bearer =
                         get_storage_value(MessageKey::TwitterCredsBearerToken.to_string().as_str())
                             .await;
-                    let csrf =
+                    let _csrf =
                         get_storage_value(MessageKey::TwitterCredsCsrf.to_string().as_str()).await;
-                    let url =
+                    let _url =
                         get_storage_value(MessageKey::TwitterCredsUrl.to_string().as_str()).await;
                 }
                 WsServerMessage::Ping => {
