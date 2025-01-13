@@ -220,6 +220,9 @@ async fn handle_ws_message(
             WsServerMessage::RequestTwitterCreds => {
                 todo!()
             }
+            WsServerMessage::GetTwitterData(_) => {
+                todo!()
+            }
         }
     });
 }
