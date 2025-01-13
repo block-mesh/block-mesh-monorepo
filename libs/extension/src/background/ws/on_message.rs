@@ -5,6 +5,9 @@ use crate::utils::log::{log, log_error};
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use serde::{Deserialize, Serialize};
 use std::cmp::PartialEq;
+use std::fmt::{Display, Formatter};
+use wasm_bindgen::convert::IntoWasmAbi;
+use wasm_bindgen::describe::WasmDescribe;
 use wasm_bindgen::prelude::*;
 use web_sys::{CloseEvent, ErrorEvent, MessageEvent};
 
@@ -13,9 +16,9 @@ pub fn on_message_handler(
     _app_state: ExtensionWrapperState,
 ) -> Closure<dyn FnMut(MessageEvent)> {
     Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
-        log!("on_message_handle => {:#?}", e);
         log!("on_message_handle e.data() => {:#?}", e.data());
         if let Ok(txt) = e.data().dyn_into::<js_sys::JsString>() {
+            log!("21 => txt = {}", txt);
             if txt == "ping" {
                 let _ = ws.send_with_str("pong");
             }
@@ -29,7 +32,7 @@ pub fn on_message_handler(
                     }
                 }
                 Err(error) => {
-                    log_error!("on_message_handle js error => {:#?}", error);
+                    log_error!("on_message_handle js error => {:#?} | txt = {}", error, txt);
                 }
             }
         } else {
@@ -55,6 +58,8 @@ pub fn on_open_handler(ws: web_sys::WebSocket) -> Closure<dyn FnMut()> {
         Ok(_) => {
             log!("Sent a ping message.");
             setup_channels(ws.clone());
+            let state: WebSocketReadyState = ws.ready_state().into();
+            set_ws_status(&state);
         }
         Err(err) => log_error!("error sending message: {:?}", err),
     })
@@ -75,6 +80,7 @@ pub fn on_close_handler(ws: web_sys::WebSocket) -> Closure<dyn FnMut(CloseEvent)
 
 #[derive(Serialize, Deserialize, Debug, PartialEq, Clone)]
 #[allow(clippy::upper_case_acronyms)]
+#[repr(C)]
 pub enum WebSocketReadyState {
     CONNECTING,
     OPEN,
@@ -83,14 +89,39 @@ pub enum WebSocketReadyState {
     INVALID,
 }
 
+impl WasmDescribe for WebSocketReadyState {
+    fn describe() {
+        JsValue::describe()
+    }
+}
+
+impl Display for WebSocketReadyState {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::CONNECTING => write!(f, "CONNECTING"),
+            Self::OPEN => write!(f, "OPEN"),
+            Self::CLOSING => write!(f, "CLOSING"),
+            Self::CLOSED => write!(f, "CLOSED"),
+            Self::INVALID => write!(f, "INVALID"),
+        }
+    }
+}
+impl IntoWasmAbi for WebSocketReadyState {
+    type Abi = <JsValue as IntoWasmAbi>::Abi;
+
+    fn into_abi(self) -> Self::Abi {
+        JsValue::from_str(&self.to_string()).into_abi()
+    }
+}
+
 impl From<u16> for WebSocketReadyState {
     fn from(value: u16) -> Self {
         match value {
-            0 => WebSocketReadyState::CONNECTING,
-            1 => WebSocketReadyState::OPEN,
-            2 => WebSocketReadyState::CLOSING,
-            3 => WebSocketReadyState::CLOSED,
-            _ => WebSocketReadyState::INVALID,
+            0 => Self::CONNECTING,
+            1 => Self::OPEN,
+            2 => Self::CLOSING,
+            3 => Self::CLOSED,
+            _ => Self::INVALID,
         }
     }
 }

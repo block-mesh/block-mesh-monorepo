@@ -23,6 +23,7 @@ pub async fn get_pending_twitter_tasks_loop(state: Arc<WsAppState>) -> Result<()
                 });
             }
             let _ = commit_txn(transaction).await;
+            state.assign_task().await;
         }
         sleep(dur).await;
     }

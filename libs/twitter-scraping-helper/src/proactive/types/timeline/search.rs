@@ -243,6 +243,17 @@ pub struct Features(Value);
 impl Default for Features {
     fn default() -> Self {
         Self(serde_json::json!({
+            "c9s_tweet_anatomy_moderator_badge_enabled": true,
+            "rweb_video_timestamps_enabled": true,
+            "articles_preview_enabled": true,
+            "profile_label_improvements_pcf_label_in_post_enabled": true,
+            "responsive_web_grok_analyze_post_followups_enabled": true,
+            "responsive_web_grok_analyze_button_fetch_trends_enabled": false,
+            "communities_web_enable_tweet_community_results_fetch": true,
+            "premium_content_api_read_enabled": false,
+            "responsive_web_grok_share_attachment_enabled": true,
+            "creator_subscriptions_quote_tweet_preview_enabled": false,
+            "rweb_tipjar_consumption_enabled": true,
             "rweb_lists_timeline_redesign_enabled": true,
             "responsive_web_graphql_exclude_directive_enabled": true,
             "verified_phone_label_enabled": false,

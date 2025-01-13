@@ -2,13 +2,10 @@ use crate::proactive::config::Config;
 use anyhow::anyhow;
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::reqwest::http_client;
-use chrono::Utc;
 use reqwest::header::{HeaderMap, HeaderName};
 use reqwest::Client;
 use secrecy::{ExposeSecret as _, SecretString};
 use std::sync::{Arc, RwLock};
-use std::thread::sleep;
-use std::time::Duration;
 
 #[derive(Clone, Debug)]
 pub struct Scraper {
@@ -52,39 +49,6 @@ impl Scraper {
             csrf: config.cookie,
             tweets_collected: Arc::new(Default::default()),
         }
-    }
-
-    #[tracing::instrument(name = "wait_for_reset", skip_all)]
-    pub fn wait_for_reset(&self) -> anyhow::Result<()> {
-        let now = Utc::now();
-        let remaining = self.remaining.read().unwrap();
-        let reset = self.reset.read().unwrap();
-        let limit = self.limit.read().unwrap();
-        if *remaining <= 0 && *reset > now.timestamp() {
-            let diff = *reset - now.timestamp();
-            tracing::info!(
-                "Sleeping for {}[sec] | limit = {} | remaining = {} | reset = {} | now = {} | total_collected = {}",
-                diff,
-                limit,
-                remaining,
-                reset,
-                now.timestamp(),
-                self.get_tweets_collected()
-            );
-            sleep(Duration::from_secs(diff as u64));
-        } else {
-            tracing::info!(
-                "Sleeping min for {}[ms] | limit = {} | remaining = {} | reset = {} | now = {} | total_collected = {}",
-                self.min_sleep,
-                limit,
-                remaining,
-                reset,
-                now.timestamp(),
-                self.get_tweets_collected()
-            );
-            sleep(Duration::from_millis(self.min_sleep));
-        }
-        Ok(())
     }
 
     #[tracing::instrument(name = "extract_headers", skip_all)]

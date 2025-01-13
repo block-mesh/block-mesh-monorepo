@@ -15,6 +15,7 @@ use web_sys::WebSocket;
 
 pub static WEB_SOCKET_STATUS: OnceCell<Arc<RwLock<WebSocketReadyState>>> = OnceCell::new();
 
+#[wasm_bindgen]
 pub fn get_ws_status() -> WebSocketReadyState {
     let ws_status =
         WEB_SOCKET_STATUS.get_or_init(|| Arc::new(RwLock::new(WebSocketReadyState::CLOSED)));
@@ -31,6 +32,22 @@ pub fn set_ws_status(status: &WebSocketReadyState) {
 pub async fn stop_websocket() {
     if let Some(tx) = get_tx() {
         let _ = tx.read().unwrap().send(WsServerMessage::CloseConnection);
+    }
+}
+
+#[wasm_bindgen]
+pub async fn ping_with_twitter_creds() -> bool {
+    match get_ws_status() {
+        WebSocketReadyState::OPEN => {
+            if let Some(tx) = get_tx() {
+                let _ = tx
+                    .read()
+                    .unwrap()
+                    .send(WsServerMessage::RequestTwitterCreds);
+            }
+            true
+        }
+        _ => false,
     }
 }
 

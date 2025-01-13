@@ -41,85 +41,170 @@ pub struct WsAppState {
     pub user_ids: Arc<RwLock<HashSet<Uuid>>>,
     pub creds_cache: Arc<RwLock<HashMap<(String, Uuid), WsCredsCache>>>,
     pub redis_key: String,
+    /// task id to task mapping
     pub pending_twitter_tasks: Arc<RwLock<HashMap<Uuid, TwitterTask>>>,
+    /// user_id to task mapping, if the node confirmed scraping
     pub workers: Arc<RwLock<HashMap<Uuid, Option<TwitterTask>>>>,
     pub joiner_tx: Sender<JoinHandle<()>>,
 }
 
 impl WsAppState {
-    pub async fn cleanup_task(&self, id: Uuid) {
+    pub async fn cleanup_task(&self, id: &Uuid) {
         let dur = env::var("CLEANUP_TASK_SLEEP")
             .unwrap_or("10000".to_lowercase())
             .parse()
             .unwrap_or(10_000);
-        let pending_twitter_tasks = self.pending_twitter_tasks.clone();
-        let workers = self.workers.clone();
+        let id = id.clone();
+        let state = self.clone();
+        let state_c = self.clone();
         let handle = tokio::spawn(async move {
             sleep(Duration::from_millis(dur)).await;
-            let mut workers = workers.write().await;
-            if let Some(Some(task)) = workers.get(&id) {
-                let mut pending_tasks = pending_twitter_tasks.write().await;
+            if let Some(Some(task)) = state.get_worker(&id).await {
                 let mut task = task.clone();
                 match task.status {
                     TwitterTaskStatus::Completed => {
-                        pending_tasks.remove(&task.id);
+                        state.remove_task(&task.id).await;
                     }
                     _ => {
                         task.status = TwitterTaskStatus::Pending;
-                        pending_tasks.insert(task.id, task);
+                        state.add_task(&task).await;
                     }
                 }
             }
-            workers.insert(id, None);
+            state.reset_worker(&id).await;
         });
-        let _ = self.joiner_tx.send_async(handle).await;
+        let _ = state_c.joiner_tx.send_async(handle).await;
     }
 
     pub async fn assign_task(&self) -> Option<()> {
-        let mut pending_tasks = self.pending_twitter_tasks.write().await;
-        let now = Utc::now();
-        let task = pending_tasks
-            .iter()
-            .find(|i| i.1.status == TwitterTaskStatus::Pending && now > i.1.delay)?;
-        let mut task = task.1.clone();
+        let mut task = self.get_task().await?.clone();
         task.status = TwitterTaskStatus::Assigned;
-        pending_tasks.insert(task.id, task.clone());
-        let mut workers = self.workers.write().await;
-        let worker = workers.iter().find(|i| i.1.is_none())?;
-        let worker_id = *worker.0;
-        workers.insert(worker_id, Some(task));
-        self.cleanup_task(worker_id).await;
+        self.add_task(&task).await;
+        let worker = self.get_available_worker().await?;
+        self.add_worker(&worker, Some(task)).await;
+        self.cleanup_task(&worker).await;
         Some(())
     }
 
+    #[tracing::instrument(name = "redis_key", skip_all)]
     pub fn redis_key(&self) -> String {
         format!("{}_{}", BLOCKMESH_WS_REDIS_COUNT_KEY, self.redis_key)
     }
 
+    #[tracing::instrument(name = "add_task", skip_all)]
+    pub async fn add_task(&self, task: &TwitterTask) {
+        let mut pending_tasks = self.pending_twitter_tasks.write().await;
+        pending_tasks.insert(task.id, task.clone());
+    }
+
+    #[tracing::instrument(name = "remove_task", skip_all)]
+    pub async fn remove_task(&self, id: &Uuid) {
+        let mut pending_tasks = self.pending_twitter_tasks.write().await;
+        pending_tasks.remove(id);
+    }
+
+    pub async fn get_task(&self) -> Option<TwitterTask> {
+        let now = Utc::now();
+        let pending_tasks = self.pending_twitter_tasks.read().await;
+        match pending_tasks
+            .iter()
+            .find(|i| i.1.status == TwitterTaskStatus::Pending && now > i.1.delay)
+        {
+            Some(v) => Some(v.1.clone()),
+            None => None,
+        }
+    }
+
+    #[tracing::instrument(name = "add_worker", skip_all)]
+    pub async fn add_worker(&self, user_id: &Uuid, task: Option<TwitterTask>) {
+        let mut workers = self.workers.write().await;
+        workers.insert(user_id.clone(), task);
+    }
+
+    #[tracing::instrument(name = "reset_worker", skip_all)]
+    pub async fn reset_worker(&self, user_id: &Uuid) {
+        let mut workers = self.workers.write().await;
+        workers.insert(user_id.clone(), None);
+    }
+
+    #[tracing::instrument(name = "remove_worker", skip_all)]
+    pub async fn remove_worker(&self, user_id: &Uuid) {
+        let mut workers = self.workers.write().await;
+        workers.remove(user_id);
+    }
+
+    #[tracing::instrument(name = "get_worker", skip_all)]
+    pub async fn get_worker(&self, user_id: &Uuid) -> Option<Option<TwitterTask>> {
+        let workers = self.workers.read().await;
+        workers.get(user_id).cloned()
+    }
+
+    #[tracing::instrument(name = "get_available_worker", skip_all)]
+    pub async fn get_available_worker(&self) -> Option<Uuid> {
+        let workers = self.workers.read().await;
+        let worker = workers.iter().find(|i| i.1.is_none());
+        match worker {
+            Some(w) => Some(w.0.clone()),
+            None => None,
+        }
+    }
+
+    #[tracing::instrument(name = "subscribe_light", skip_all)]
     pub async fn subscribe_light(&self, email: &str, user_id: &Uuid) {
-        let mut emails = self.emails.write().await;
-        emails.insert(email.to_string());
-        let mut user_ids = self.user_ids.write().await;
-        user_ids.insert(*user_id);
+        self.add_email(email).await;
+        self.add_user_id(user_id).await;
+        self.incr_redis().await;
+    }
+
+    #[tracing::instrument(name = "unsubscribe_light", skip_all)]
+    pub async fn unsubscribe_light(&self, email: &str, user_id: &Uuid) {
+        self.remove_email(email).await;
+        self.remove_user_id(user_id).await;
+        self.remove_worker(user_id).await;
+        self.decr_redis().await;
+    }
+
+    #[tracing::instrument(name = "incr_redis", skip_all)]
+    pub async fn incr_redis(&self) {
         let mut redis = self.redis.clone();
         let _: RedisResult<()> = redis.incr(self.redis_key(), 1).await;
         let _: RedisResult<()> = redis.expire(self.redis_key(), 120).await;
     }
 
-    pub async fn unsubscribe_light(&self, email: &str, user_id: &Uuid) {
-        let mut emails = self.emails.write().await;
-        emails.remove(email);
-        let mut user_ids = self.user_ids.write().await;
-        user_ids.remove(user_id);
-        let mut workers = self.workers.write().await;
-        workers.remove(user_id);
+    #[tracing::instrument(name = "decr_redis", skip_all)]
+    pub async fn decr_redis(&self) {
         let mut redis = self.redis.clone();
         let _: RedisResult<()> = redis.decr(self.redis_key(), 1).await;
         let _: RedisResult<()> = redis.expire(self.redis_key(), 120).await;
     }
+
+    #[tracing::instrument(name = "add_email", skip_all)]
+    pub async fn add_email(&self, email: &str) {
+        let mut emails = self.emails.write().await;
+        emails.insert(email.to_string());
+    }
+
+    #[tracing::instrument(name = "add_user_id", skip_all)]
+    pub async fn add_user_id(&self, user_id: &Uuid) {
+        let mut user_ids = self.user_ids.write().await;
+        user_ids.insert(*user_id);
+    }
+
+    #[tracing::instrument(name = "remove_email", skip_all)]
+    pub async fn remove_email(&self, email: &str) {
+        let mut emails = self.emails.write().await;
+        emails.remove(email);
+    }
+
+    #[tracing::instrument(name = "remove_user_id", skip_all)]
+    pub async fn remove_user_id(&self, user_id: &Uuid) {
+        let mut user_ids = self.user_ids.write().await;
+        user_ids.remove(user_id);
+    }
 }
 
 impl WsAppState {
+    #[tracing::instrument(name = "new", skip_all)]
     pub async fn new(tx: Sender<DBMessage>, joiner_tx: Sender<JoinHandle<()>>) -> Self {
         let pending_twitter_tasks = Arc::new(RwLock::new(HashMap::with_capacity(500)));
         let workers = Arc::new(RwLock::new(HashMap::with_capacity(500)));

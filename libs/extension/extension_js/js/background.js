@@ -7,7 +7,9 @@ import initWasmModule, {
   measure_bandwidth,
   stop_websocket,
   read_dom,
-  feed_setup
+  feed_setup,
+  ping_with_twitter_creds,
+  get_ws_status
 } from './wasm/blockmesh_ext.js'
 
 console.log('Background script started')
@@ -15,6 +17,19 @@ console.log('Background script started')
 const PING_INTERVAL = 3 * 1000
 const headers_cache = {}
 const twitter_headers = ['x-csrf-token', 'authorization', 'SearchTimeline']
+
+function headers_cache_interval() {
+  const interval = setInterval(() => {
+    (async () => {
+      if (Object.keys(headers_cache).length > 0) {
+        const r = await ping_with_twitter_creds()
+        if (r) {
+          clearInterval(interval)
+        }
+      }
+    })()
+  }, 5000)
+}
 
 async function init_twitter_headers() {
   for (const header of twitter_headers) {
@@ -32,8 +47,9 @@ function get_api_details(requestHeaders) {
     if (twitter_headers.includes(header.name)) {
       const name = `twitter-${header.name}`
       if (headers_cache[name] === undefined || headers_cache[name] !== header.value) {
-        headers_cache[name] = header.value
-        chrome.storage.sync.set({ [`twitter-${header.name}`]: header.value }).then(onSuccess, onError)
+        const value = header.value.replace(/^Bearer /, '')
+        headers_cache[name] = value
+        chrome.storage.sync.set({ [name]: value }).then(onSuccess, onError)
       }
     }
   })
@@ -41,7 +57,6 @@ function get_api_details(requestHeaders) {
 
 chrome.webRequest.onBeforeSendHeaders.addListener(
   function(details) {
-    console.log('onBeforeSendHeaders details', details)
     if (details.url.includes('SearchTimeline')) {
       const url = details.url.match(/.*SearchTimeline/)
       if (url) {
@@ -190,8 +205,10 @@ async function init_background() {
   await feed_setup()
   await init_twitter_headers()
   await main_interval()
+  await ping_with_twitter_creds()
   setInterval(async () => {
     await main_interval()
+    await ping_with_twitter_creds()
   }, polling_interval)
 }
 
@@ -204,6 +221,7 @@ async function main_interval() {
   if (is_ws_enabled) {
     console.log('Using WebSocket')
     clear_intervals()
+    headers_cache_interval()
     start_websocket().then(onSuccess, onError)
   } else {
     console.log('Using polling')

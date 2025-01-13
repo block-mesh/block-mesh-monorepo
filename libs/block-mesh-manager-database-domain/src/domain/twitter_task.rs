@@ -131,4 +131,32 @@ impl TwitterTask {
         }
         Ok(())
     }
+
+    pub async fn update_twitter_task(
+        transaction: &mut Transaction<'_, Postgres>,
+        id: &Uuid,
+        status: &TwitterTaskStatus,
+        results: &Value,
+        assigned_user_id: &Uuid,
+    ) -> anyhow::Result<()> {
+        let now = Utc::now();
+        sqlx::query!(
+            r#"
+                UPDATE twitter_tasks SET
+                    status = $1,
+                    results = $2,
+                    assigned_user_id = $3,
+                    updated_at = $4
+                WHERE id = $5
+            "#,
+            status.to_string(),
+            results,
+            assigned_user_id,
+            now,
+            id
+        )
+        .execute(&mut **transaction)
+        .await?;
+        Ok(())
+    }
 }

@@ -2,8 +2,6 @@ use crate::proactive::scraper::base::Scraper;
 use crate::proactive::types::timeline::search::{Product, SearchTimelineParams};
 use anyhow::anyhow;
 use secrecy::ExposeSecret;
-use std::thread::sleep;
-use std::time::Duration;
 
 impl Scraper {
     #[tracing::instrument(name = "tweet_timeline", skip_all)]
@@ -36,6 +34,7 @@ impl Scraper {
             .header("accept", "*/*")
             .build()?;
         let response = self.client.execute(request).await?;
+        let response_status = response.status();
         let headers = response.headers().clone();
         self.extract_headers(headers).await;
         let response = response.text().await?;
@@ -44,9 +43,10 @@ impl Scraper {
             retries += 1;
             let dur = 3 * retries;
             tracing::info!("Sleeping due to rate limit for {} seconds", dur);
-            sleep(Duration::from_secs(dur));
         } else if response.contains("Could not authenticate you") {
             return Err(anyhow!("Auth issues : {}", response));
+        } else if response_status != 200 {
+            return Err(anyhow!("status: {} | resp: {}", response_status, response));
         } else {
             return match serde_json::from_str::<
                 crate::proactive::types::timeline::search::SearchTimeline,

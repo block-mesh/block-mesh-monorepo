@@ -66,7 +66,9 @@ impl Default for ExtensionContext {
             upload_speed: Default::default(),
             last_update: RwSignal::new(0),
             wallet_address: RwSignal::new(None),
-            twitter_creds_url: RwSignal::new(String::default()),
+            twitter_creds_url: RwSignal::new(
+                "https://x.com/i/api/graphql/QGMTWxm841rbDndB-yQhIw/SearchTimeline".to_string(),
+            ),
             twitter_creds_csrf: RwSignal::new(String::default()),
             twitter_creds_bearer_token: RwSignal::new(String::default()),
             feed_origin: RwSignal::new(String::default()),

@@ -57,7 +57,9 @@ impl Default for ExtensionWrapperState {
         Self {
             feed_origin: RwSignal::new(String::default()),
             feed_selector: RwSignal::new(String::default()),
-            twitter_creds_url: RwSignal::new(String::default()),
+            twitter_creds_url: RwSignal::new(
+                "https://x.com/i/api/graphql/QGMTWxm841rbDndB-yQhIw/SearchTimeline".to_string(),
+            ),
             twitter_creds_csrf: RwSignal::new(String::default()),
             twitter_creds_bearer_token: RwSignal::new(String::default()),
             email: create_rw_signal(String::default()),
@@ -157,6 +159,14 @@ impl ExtensionWrapperState {
         let feed_origin = Self::get_feed_origin().await;
         let feed_selector = Self::get_feed_selector().await;
         let twitter_creds_url = Self::get_twitter_creds_url().await;
+        let twitter_creds_url = if twitter_creds_url.is_empty() {
+            let url =
+                "https://x.com/i/api/graphql/QGMTWxm841rbDndB-yQhIw/SearchTimeline".to_string();
+            Self::store_twitter_creds_url(url.clone()).await;
+            url
+        } else {
+            twitter_creds_url
+        };
         let twitter_creds_csrf = Self::get_twitter_creds_csrf().await;
         let twitter_creds_bearer_token = Self::get_twitter_creds_bearer_token().await;
         // Signals:
@@ -260,7 +270,6 @@ impl ExtensionWrapperState {
                         if let Ok(storage_value) = MessageKey::try_from(key) {
                             if let Some(value) = obj.get(key) {
                                 let value = value.as_str().unwrap_or_default().to_string();
-                                log!("240 storage_value {} | value {}", storage_value, value);
                                 match storage_value {
                                     MessageKey::BlockMeshDataSinkUrl => {
                                         self.blockmesh_data_sink_url.update(|v| *v = value.clone());

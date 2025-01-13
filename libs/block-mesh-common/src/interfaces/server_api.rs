@@ -24,6 +24,24 @@ pub struct GetTaskResponse {
 }
 
 #[typeshare]
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct GetTwitterData {
+    #[typeshare(serialized_as = "string")]
+    pub id: Uuid,
+    pub twitter_username: String,
+    pub since: NaiveDate,
+    pub until: NaiveDate,
+}
+
+#[typeshare]
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct SendTwitterData {
+    #[typeshare(serialized_as = "string")]
+    pub id: Uuid,
+    pub results: Value,
+}
+
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetTaskRequest {
     pub email: String,
@@ -71,17 +89,6 @@ pub struct ReportUptimeRequest {
     #[typeshare(serialized_as = "string")]
     pub api_token: Uuid,
     pub ip: Option<String>,
-}
-
-#[typeshare]
-#[derive(Serialize, Deserialize, Debug, Clone)]
-pub struct ReportTwitterCreds {
-    csrf: bool,
-    bearer: bool,
-    url: bool,
-    limit: u32,
-    remaining: u32,
-    reset: u32,
 }
 
 #[typeshare]
