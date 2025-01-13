@@ -85,7 +85,6 @@ async fn spawn_client(who: usize) {
                         reason: Utf8Bytes::from_static("Goodbye"),
                     })))
                     .await;
-                return;
             }
         }
     });
