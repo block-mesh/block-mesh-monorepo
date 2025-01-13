@@ -102,7 +102,6 @@ pub async fn handle_socket_light(
     });
 
     let tx_c = state.tx.clone();
-    let pending_twitter_tasks = state.pending_twitter_tasks.clone();
     let state_c = state.clone();
     let mut recv_task = tokio::spawn(async move {
         // Receive from client

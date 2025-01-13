@@ -114,10 +114,10 @@ impl WsAppState {
 
     pub async fn find_task(&self, id: &Uuid) -> Option<TwitterTask> {
         let pending_twitter_tasks = self.pending_twitter_tasks.read().await;
-        match pending_twitter_tasks.iter().find(|i| *i.0 == *id) {
-            Some(t) => Some(t.1.clone()),
-            None => None,
-        }
+        pending_twitter_tasks
+            .iter()
+            .find(|i| *i.0 == *id)
+            .map(|t| t.1.clone())
     }
 
     #[tracing::instrument(name = "add_worker", skip_all)]
