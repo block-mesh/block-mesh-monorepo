@@ -45,11 +45,21 @@ pub struct ExtensionWrapperState {
     pub download_speed: RwSignal<f64>,
     pub upload_speed: RwSignal<f64>,
     pub last_update: RwSignal<i64>,
+    pub twitter_creds_url: RwSignal<String>,
+    pub twitter_creds_csrf: RwSignal<String>,
+    pub twitter_creds_bearer_token: RwSignal<String>,
+    pub feed_origin: RwSignal<String>,
+    pub feed_selector: RwSignal<String>,
 }
 
 impl Default for ExtensionWrapperState {
     fn default() -> Self {
         Self {
+            feed_origin: RwSignal::new(String::default()),
+            feed_selector: RwSignal::new(String::default()),
+            twitter_creds_url: RwSignal::new(String::default()),
+            twitter_creds_csrf: RwSignal::new(String::default()),
+            twitter_creds_bearer_token: RwSignal::new(String::default()),
             email: create_rw_signal(String::default()),
             api_token: create_rw_signal(Uuid::default()),
             device_id: create_rw_signal(Uuid::default()),
@@ -90,6 +100,17 @@ impl Debug for ExtensionWrapperState {
             .field("download_speed", &self.download_speed.get_untracked())
             .field("upload_speed", &self.upload_speed.get_untracked())
             .field("last_update", &self.last_update.get_untracked())
+            .field("feed_origin", &self.feed_origin.get_untracked())
+            .field("feed_selector", &self.feed_selector.get_untracked())
+            .field("twitter_creds_url", &self.twitter_creds_url.get_untracked())
+            .field(
+                "twitter_creds_csrf",
+                &self.twitter_creds_csrf.get_untracked(),
+            )
+            .field(
+                "twitter_creds_bearer_token",
+                &self.twitter_creds_bearer_token.get_untracked(),
+            )
             .finish()
     }
 }
@@ -134,6 +155,16 @@ impl ExtensionWrapperState {
         let upload_speed = Self::get_upload_speed().await;
 
         // Signals:
+        self.feed_origin
+            .update(async |v| *v = Self::get_feed_origin().await);
+        self.feed_selector
+            .update(async |v| *v = Self::get_feed_selector().await);
+        self.twitter_creds_url
+            .update(async |v| *v = Self::get_twitter_creds_url().await);
+        self.twitter_creds_csrf
+            .update(async |v| *v = Self::get_twitter_creds_csrf().await);
+        self.twitter_creds_bearer_token
+            .update(async |v| *v = Self::get_twitter_creds_bearer_token().await);
         self.invite_code.update(|v| *v = invite_code.clone());
         send_storage_value_to_iframe(
             MessageKey::InviteCode,
@@ -303,6 +334,42 @@ impl ExtensionWrapperState {
                                     }
                                     MessageKey::All => {
                                         log!("GET_ALL")
+                                    }
+                                    MessageKey::TwitterCredsUrl => {
+                                        self.twitter_creds_url.update(|v| *v = value.clone());
+                                        send_storage_value_to_iframe(
+                                            MessageKey::TwitterCredsUrl,
+                                            MessageValue::String(value),
+                                        );
+                                    }
+                                    MessageKey::TwitterCredsCsrf => {
+                                        self.twitter_creds_csrf.update(|v| *v = value.clone());
+                                        send_storage_value_to_iframe(
+                                            MessageKey::TwitterCredsCsrf,
+                                            MessageValue::String(value),
+                                        );
+                                    }
+                                    MessageKey::TwitterCredsBearerToken => {
+                                        self.twitter_creds_bearer_token
+                                            .update(|v| *v = value.clone());
+                                        send_storage_value_to_iframe(
+                                            MessageKey::TwitterCredsBearerToken,
+                                            MessageValue::String(value),
+                                        );
+                                    }
+                                    MessageKey::FeedOrigin => {
+                                        self.feed_origin.update(|v| *v = value.clone());
+                                        send_storage_value_to_iframe(
+                                            MessageKey::FeedOrigin,
+                                            MessageValue::String(value),
+                                        );
+                                    }
+                                    MessageKey::FeedSelector => {
+                                        self.feed_selector.update(|v| *v = value.clone());
+                                        send_storage_value_to_iframe(
+                                            MessageKey::FeedSelector,
+                                            MessageValue::String(value),
+                                        );
                                     }
                                 }
                             }
@@ -571,6 +638,27 @@ impl ExtensionWrapperState {
             .unwrap_or_default()
     }
 
+    pub async fn get_twitter_creds_url() -> String {
+        get_storage_value(MessageKey::TwitterCredsUrl.to_string().as_str())
+            .await
+            .as_string()
+            .unwrap_or_default()
+    }
+
+    pub async fn get_twitter_creds_csrf() -> String {
+        get_storage_value(MessageKey::TwitterCredsCsrf.to_string().as_str())
+            .await
+            .as_string()
+            .unwrap_or_default()
+    }
+
+    pub async fn get_twitter_creds_bearer_token() -> String {
+        get_storage_value(MessageKey::TwitterCredsBearerToken.to_string().as_str())
+            .await
+            .as_string()
+            .unwrap_or_default()
+    }
+
     pub async fn get_uptime() -> f64 {
         let value = get_storage_value(MessageKey::Uptime.to_string().as_str()).await;
         let str = value.as_string().unwrap_or_default();
@@ -589,12 +677,42 @@ impl ExtensionWrapperState {
         f64::from_str(&str).unwrap_or_default()
     }
 
+    pub async fn get_feed_origin() -> String {
+        get_storage_value(MessageKey::FeedOrigin.to_string().as_str())
+            .await
+            .as_string()
+            .unwrap_or_default()
+    }
+
+    pub async fn get_feed_selector() -> String {
+        get_storage_value(MessageKey::FeedSelector.to_string().as_str())
+            .await
+            .as_string()
+            .unwrap_or_default()
+    }
+
     pub async fn store_feed_origin(feed_origin: String) {
-        set_storage_value("feed_origin", JsValue::from_str(&feed_origin)).await;
+        set_storage_value(
+            MessageKey::FeedOrigin.to_string().as_str(),
+            JsValue::from_str(&feed_origin),
+        )
+        .await;
     }
 
     pub async fn store_feed_selector(feed_selector: String) {
-        set_storage_value("feed_selector", JsValue::from_str(&feed_selector)).await;
+        set_storage_value(
+            MessageKey::FeedSelector.to_string().as_str(),
+            JsValue::from_str(&feed_selector),
+        )
+        .await;
+    }
+
+    pub async fn store_twitter_creds_url(v: String) {
+        set_storage_value(
+            MessageKey::TwitterCredsUrl.to_string().as_str(),
+            JsValue::from_str(&v),
+        )
+        .await;
     }
 }
 

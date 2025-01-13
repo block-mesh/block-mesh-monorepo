@@ -24,6 +24,8 @@ pub enum MessageKey {
     TwitterCredsUrl,
     TwitterCredsCsrf,
     TwitterCredsBearerToken,
+    FeedOrigin,
+    FeedSelector,
 }
 
 impl Serialize for MessageKey {
@@ -38,6 +40,8 @@ impl Serialize for MessageKey {
 impl Display for MessageKey {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let str = match self {
+            Self::FeedOrigin => "feed_origin".to_string(),
+            Self::FeedSelector => "feed_selector".to_string(),
             Self::TwitterCredsUrl => "twitter-url".to_string(),
             Self::TwitterCredsCsrf => "twitter-x-csrf-token".to_string(),
             Self::TwitterCredsBearerToken => "twitter-authorization".to_string(),
@@ -65,6 +69,8 @@ impl TryFrom<&str> for MessageKey {
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         let value = value.trim_matches('"');
         match value {
+            "feed_origin" => Ok(Self::FeedOrigin),
+            "feed_selector" => Ok(Self::FeedSelector),
             "twitter-url" => Ok(Self::TwitterCredsUrl),
             "twitter-x-csrf-token" => Ok(Self::TwitterCredsCsrf),
             "twitter-authorization" => Ok(Self::TwitterCredsBearerToken),

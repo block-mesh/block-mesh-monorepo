@@ -39,6 +39,11 @@ pub struct ExtensionContext {
     pub upload_speed: RwSignal<f64>,
     pub last_update: RwSignal<i64>,
     pub wallet_address: RwSignal<Option<String>>,
+    pub twitter_creds_url: RwSignal<String>,
+    pub twitter_creds_csrf: RwSignal<String>,
+    pub twitter_creds_bearer_token: RwSignal<String>,
+    pub feed_origin: RwSignal<String>,
+    pub feed_selector: RwSignal<String>,
 }
 
 impl Default for ExtensionContext {
@@ -61,6 +66,11 @@ impl Default for ExtensionContext {
             upload_speed: Default::default(),
             last_update: RwSignal::new(0),
             wallet_address: RwSignal::new(None),
+            twitter_creds_url: RwSignal::new(String::default()),
+            twitter_creds_csrf: RwSignal::new(String::default()),
+            twitter_creds_bearer_token: RwSignal::new(String::default()),
+            feed_origin: RwSignal::new(String::default()),
+            feed_selector: RwSignal::new(String::default()),
         }
     }
 }
@@ -86,6 +96,15 @@ impl Debug for ExtensionContext {
             .field("upload_speed", &self.upload_speed.get_untracked())
             .field("last_update", &self.last_update.get_untracked())
             .field("wallet_address", &self.wallet_address.get_untracked())
+            .field("twitter_creds_url", &self.twitter_creds_url.get_untracked())
+            .field(
+                "twitter_creds_csrf",
+                &self.twitter_creds_csrf.get_untracked(),
+            )
+            .field(
+                "twitter_creds_bearer_token",
+                &self.twitter_creds_bearer_token.get_untracked(),
+            )
             .finish()
     }
 }
@@ -183,6 +202,15 @@ impl ExtensionContext {
                                     "".to_string()
                                 };
                                 match storage_value {
+                                    MessageKey::TwitterCredsUrl => {
+                                        self.twitter_creds_url.update(|v| *v = value);
+                                    }
+                                    MessageKey::TwitterCredsCsrf => {
+                                        self.twitter_creds_csrf.update(|v| *v = value);
+                                    }
+                                    MessageKey::TwitterCredsBearerToken => {
+                                        self.twitter_creds_bearer_token.update(|v| *v = value);
+                                    }
                                     MessageKey::BlockMeshDataSinkUrl => {
                                         self.blockmesh_data_sink_url.update(|v| *v = value);
                                     }
@@ -232,6 +260,12 @@ impl ExtensionContext {
                                     }),
                                     MessageKey::All => {
                                         log!("GET_ALL");
+                                    }
+                                    MessageKey::FeedOrigin => {
+                                        self.feed_origin.update(|v| *v = value);
+                                    }
+                                    MessageKey::FeedSelector => {
+                                        self.feed_selector.update(|v| *v = value);
                                     }
                                 }
 
