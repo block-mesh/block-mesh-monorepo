@@ -139,7 +139,7 @@ impl WsAppState {
     #[tracing::instrument(name = "get_available_worker", skip_all)]
     pub async fn get_available_worker(&self) -> Option<Uuid> {
         let workers = self.workers.read().await;
-        workers.iter().find(|i| i.1.is_none()).map(|w| w.0.clone())
+        workers.iter().find(|i| i.1.is_none()).map(|w| *w.0)
     }
 
     #[tracing::instrument(name = "subscribe_light", skip_all)]
