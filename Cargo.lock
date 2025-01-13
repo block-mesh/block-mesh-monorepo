@@ -3860,11 +3860,14 @@ dependencies = [
  "axum 0.7.9",
  "clap 4.5.26",
  "database-utils",
+ "flume",
  "futures",
  "futures-util",
  "lettre",
+ "libc",
  "serde",
  "serde_json",
+ "signal-hook",
  "sqlx",
  "tokio",
  "tokio-tungstenite 0.26.1",
@@ -9740,6 +9743,16 @@ name = "shell-words"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "24188a676b6ae68c3b2cb3a01be17fbf7240ce009799bb56d5b1409051e78fde"
+
+[[package]]
+name = "signal-hook"
+version = "0.3.17"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8621587d4798caf8eb44879d42e56b9a93ea5dcd315a6487c357130095b62801"
+dependencies = [
+ "libc",
+ "signal-hook-registry",
+]
 
 [[package]]
 name = "signal-hook-registry"

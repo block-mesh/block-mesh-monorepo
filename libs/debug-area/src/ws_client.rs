@@ -14,8 +14,11 @@ use futures_util::stream::FuturesUnordered;
 use futures_util::{SinkExt, StreamExt};
 use std::ops::ControlFlow;
 use std::time::Instant;
-
 // we will use tungstenite for websocket client impl (same library as what axum is using)
+use crate::SIGNAL_TX;
+use tokio_tungstenite::tungstenite::protocol::frame::coding::CloseCode;
+use tokio_tungstenite::tungstenite::protocol::CloseFrame;
+use tokio_tungstenite::tungstenite::Utf8Bytes;
 use tokio_tungstenite::{connect_async, tungstenite::protocol::Message};
 use uuid::Uuid;
 
@@ -49,11 +52,11 @@ async fn spawn_client(who: usize) {
         Uuid::new_v4()
     );
     let ws_stream = match connect_async(url).await {
-        Ok((stream, response)) => {
-            println!("Handshake for client {who} has been completed");
+        Ok((stream, _response)) => {
+            // println!("Handshake for client {who} has been completed");
             // This will be the HTTP response, same as with server this is the last moment we
             // can still access HTTP stuff.
-            println!("Server response was {response:?}");
+            // println!("Server response was {response:?}");
             stream
         }
         Err(e) => {
@@ -72,34 +75,21 @@ async fn spawn_client(who: usize) {
         .await
         .expect("Can not send!");
 
-    // //spawn an async sender to push some more messages into the server
-    // let mut send_task = tokio::spawn(async move {
-    //     for i in 1..30 {
-    //         // In any websocket error, break loop.
-    //         if sender
-    //             .send(Message::Text(format!("Message number {i}...").into()))
-    //             .await
-    //             .is_err()
-    //         {
-    //             //just as with server, if send fails there is nothing we can do but exit.
-    //             return;
-    //         }
-    //
-    //         tokio::time::sleep(std::time::Duration::from_millis(300)).await;
-    //     }
-    //
-    //     // When we are done we may want our client to close connection cleanly.
-    //     println!("Sending close to {who}...");
-    //     if let Err(e) = sender
-    //         .send(Message::Close(Some(CloseFrame {
-    //             code: CloseCode::Normal,
-    //             reason: Utf8Bytes::from_static("Goodbye"),
-    //         })))
-    //         .await
-    //     {
-    //         println!("Could not send Close due to {e:?}, probably it is ok?");
-    //     };
-    // });
+    //spawn an async sender to push some more messages into the server
+    let mut send_task = tokio::spawn(async move {
+        if let Some(tx) = SIGNAL_TX.get() {
+            let mut rx = tx.subscribe();
+            while let Ok(_) = rx.recv().await {
+                eprintln!("recv_async Closing {who}");
+                let _ = sender
+                    .send(Message::Close(Some(CloseFrame {
+                        code: CloseCode::Normal,
+                        reason: Utf8Bytes::from_static("Goodbye"),
+                    })))
+                    .await;
+            }
+        }
+    });
 
     //receiver just prints whatever it gets
     let mut recv_task = tokio::spawn(async move {
@@ -113,12 +103,13 @@ async fn spawn_client(who: usize) {
 
     //wait for either task to finish and kill the other task
     tokio::select! {
-        // _ = (&mut send_task) => {
-        //     recv_task.abort();
-        // },
+        _ = (&mut send_task) => {
+            println!("send_task for {} ended", who);
+            recv_task.abort();
+        },
         _ = (&mut recv_task) => {
             println!("rect_task for {} ended", who);
-            // send_task.abort();
+            send_task.abort();
         }
     }
 }
@@ -127,8 +118,8 @@ async fn spawn_client(who: usize) {
 /// since we are working with the underlying tungstenite library directly without axum here).
 fn process_message(msg: Message, who: usize) -> ControlFlow<(), ()> {
     match msg {
-        Message::Text(t) => {
-            println!(">>> {who} got str: {t:?}");
+        Message::Text(_t) => {
+            // println!(">>> {who} got str: {t:?}");
         }
         Message::Binary(d) => {
             println!(">>> {} got {} bytes: {:?}", who, d.len(), d);
@@ -145,14 +136,14 @@ fn process_message(msg: Message, who: usize) -> ControlFlow<(), ()> {
             return ControlFlow::Break(());
         }
 
-        Message::Pong(v) => {
-            println!(">>> {who} got pong with {v:?}");
+        Message::Pong(_v) => {
+            // println!(">>> {who} got pong with {v:?}");
         }
         // Just as with axum server, the underlying tungstenite websocket library
         // will handle Ping for you automagically by replying with Pong and copying the
         // v according to spec. But if you need the contents of the pings you can see them here.
-        Message::Ping(v) => {
-            println!(">>> {who} got ping with {v:?}");
+        Message::Ping(_v) => {
+            // println!(">>> {who} got ping with {v:?}");
         }
 
         Message::Frame(_) => {
