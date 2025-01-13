@@ -96,6 +96,8 @@ pub fn setup_tracing_stdout_only_with_sentry() {
             if get_sentry_layer() {
                 println!("ADDING SENTRY LAYER");
                 sub.with(sentry_tracing::layer()).init();
+            } else {
+                sub.init();
             }
         }
         #[cfg(not(feature = "sentry"))]

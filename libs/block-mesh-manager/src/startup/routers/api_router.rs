@@ -67,6 +67,10 @@ pub fn get_api_router() -> Router<Arc<AppState>> {
             RoutesEnum::Api_ReportsQueue.to_string().as_str(),
             get(routes::admin::reports_queue::get_stats::handler)
                 .post(routes::admin::reports_queue::change_settings::handler),
+        )
+        .route(
+            RoutesEnum::Api_CreateTwitterTask.to_string().as_str(),
+            get(routes::twitter_task::create_twitter_task::handler),
         );
     api_router
 }

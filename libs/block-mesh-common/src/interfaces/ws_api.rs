@@ -1,7 +1,10 @@
 use crate::interfaces::server_api::{
-    GetTaskResponse, ReportBandwidthRequest, ReportUptimeRequest, SubmitTaskRequest,
+    GetTaskResponse, GetTwitterData, ReportBandwidthRequest, ReportUptimeRequest, SendTwitterData,
+    SubmitTaskRequest,
 };
+use anyhow::anyhow;
 use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use std::fmt::{Display, Formatter};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -12,6 +15,8 @@ pub enum WsServerMessage {
     RequestBandwidthReport,
     RequestUptimeReport,
     CloseConnection,
+    RequestTwitterCreds,
+    GetTwitterData(GetTwitterData),
 }
 
 impl Display for WsServerMessage {
@@ -22,25 +27,44 @@ impl Display for WsServerMessage {
             Self::RequestUptimeReport => write!(f, "RequestUptimeReport"),
             Self::CloseConnection => write!(f, "CloseConnection"),
             Self::AssignTask(_response) => write!(f, "AssignTask"),
+            Self::RequestTwitterCreds => write!(f, "RequestTwitterCreds"),
+            Self::GetTwitterData(_t) => write!(f, "GetTwitterData"),
         }
     }
 }
 
 impl TryFrom<String> for WsServerMessage {
-    type Error = ();
+    type Error = anyhow::Error;
 
     fn try_from(value: String) -> Result<Self, Self::Error> {
         match value.as_str() {
             "Ping" => Ok(Self::Ping),
             "ping" => Ok(Self::Ping),
-            "AssignTask" => Ok(Self::AssignTask(
-                serde_json::from_str(&value).map_err(|_| ())?,
-            )),
             "RequestBandwidthReport" => Ok(Self::RequestBandwidthReport),
             "RequestUptimeReport" => Ok(Self::RequestUptimeReport),
             "CloseConnection" => Ok(Self::CloseConnection),
-            _ => Err(()),
+            "RequestTwitterCreds" => Ok(Self::RequestTwitterCreds),
+            other => {
+                let json: Value = serde_json::from_str(other)?;
+                Ok(Self::try_from(json)?)
+            }
         }
+    }
+}
+
+impl TryFrom<Value> for WsServerMessage {
+    type Error = anyhow::Error;
+
+    fn try_from(value: Value) -> Result<Self, Self::Error> {
+        if let Some(json) = value.get("AssignTask") {
+            let v: GetTaskResponse = serde_json::from_value(json.clone())?;
+            return Ok(WsServerMessage::AssignTask(v));
+        }
+        if let Some(json) = value.get("GetTwitterData") {
+            let v: GetTwitterData = serde_json::from_value(json.clone())?;
+            return Ok(WsServerMessage::GetTwitterData(v));
+        }
+        Err(anyhow!("unsupported type {:#?}", value))
     }
 }
 
@@ -50,6 +74,8 @@ pub enum WsClientMessage {
     CompleteTask(SubmitTaskRequest),
     ReportBandwidth(ReportBandwidthRequest),
     ReportUptime(ReportUptimeRequest),
+    ReportTwitterCreds,
+    SendTwitterData(SendTwitterData),
 }
 
 impl Display for WsClientMessage {
@@ -59,6 +85,8 @@ impl Display for WsClientMessage {
             Self::CompleteTask(_request) => write!(f, "CompleteTask"),
             Self::ReportBandwidth(_request) => write!(f, "ReportBandwidth"),
             Self::ReportUptime(_request) => write!(f, "ReportUptime"),
+            Self::ReportTwitterCreds => write!(f, "RequestTwitterCreds"),
+            Self::SendTwitterData(_t) => write!(f, "SendTwitterData"),
         }
     }
 }

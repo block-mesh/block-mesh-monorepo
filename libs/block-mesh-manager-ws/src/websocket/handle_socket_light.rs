@@ -3,8 +3,11 @@ use axum::extract::ws::{Message, WebSocket};
 use block_mesh_common::interfaces::db_messages::{
     AggregateAddToMessage, AggregateSetToMessage, CreateDailyStatMessage, DBMessage, DBMessageTypes,
 };
+use block_mesh_common::interfaces::server_api::GetTwitterData;
 use block_mesh_common::interfaces::ws_api::{WsClientMessage, WsServerMessage};
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
+use block_mesh_manager_database_domain::domain::twitter_task::{TwitterTask, TwitterTaskStatus};
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use futures::{SinkExt, StreamExt};
 use sqlx::types::chrono::Utc;
 use std::env;
@@ -52,6 +55,7 @@ pub async fn handle_socket_light(
     let (mut sender, mut receiver) = socket.split();
 
     let tx_c = state.tx.clone();
+    let state_c = state.clone();
     let mut send_task = tokio::spawn(async move {
         let mut accumulator = 0i64;
         let mut counter = 0u64;
@@ -82,11 +86,23 @@ pub async fn handle_socket_light(
             }
             prev = Utc::now();
             let _ = sender.send(Message::Text("ping".to_string())).await;
+            if let Some(Some(task)) = state_c.get_worker(&user_id).await {
+                let msg = WsServerMessage::GetTwitterData(GetTwitterData {
+                    id: task.id,
+                    twitter_username: task.twitter_username.clone(),
+                    since: task.since,
+                    until: task.until,
+                });
+                if let Ok(msg) = serde_json::to_string(&msg) {
+                    let _ = sender.send(Message::Text(msg)).await;
+                }
+            }
             tokio::time::sleep(Duration::from_millis(sleep)).await;
         }
     });
 
     let tx_c = state.tx.clone();
+    let state_c = state.clone();
     let mut recv_task = tokio::spawn(async move {
         // Receive from client
         while let Some(Ok(msg)) = receiver.next().await {
@@ -94,6 +110,27 @@ pub async fn handle_socket_light(
                 Message::Text(txt) => {
                     if let Ok(msg) = serde_json::from_str::<WsClientMessage>(&txt) {
                         match msg {
+                            WsClientMessage::SendTwitterData(data) => {
+                                if let Some(mut task) = state_c.find_task(&data.id).await {
+                                    task.status = TwitterTaskStatus::Completed;
+                                    state_c.add_task(&task).await;
+                                    state_c.add_worker(&user_id, None).await;
+                                    if let Ok(mut transaction) = create_txn(&state_c.pool).await {
+                                        let _ = TwitterTask::update_twitter_task(
+                                            &mut transaction,
+                                            &data.id,
+                                            &TwitterTaskStatus::Completed,
+                                            &data.results,
+                                            &user_id,
+                                        )
+                                        .await;
+                                        let _ = commit_txn(transaction).await;
+                                    }
+                                }
+                            }
+                            WsClientMessage::ReportTwitterCreds => {
+                                state_c.add_worker(&user_id, None).await;
+                            }
                             WsClientMessage::ReportBandwidth(report) => {
                                 let mut messages: Vec<DBMessage> = Vec::with_capacity(10);
                                 messages.push(DBMessage::AggregateSetToMessage(

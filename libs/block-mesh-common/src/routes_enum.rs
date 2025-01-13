@@ -48,6 +48,7 @@ pub enum RoutesEnum {
     Api_EMailViaToken,
     Api_Dashboard,
     Api_ReportsQueue,
+    Api_CreateTwitterTask,
 }
 
 impl Display for RoutesEnum {
@@ -101,6 +102,7 @@ impl Display for RoutesEnum {
             RoutesEnum::Api_Dashboard => write!(f, "/dashboard"),
             RoutesEnum::Api_ReportsQueue => write!(f, "/admin/reports_queue"),
             RoutesEnum::Static_UnAuth_Unsubscribe => write!(f, "/unsubscribe"),
+            RoutesEnum::Api_CreateTwitterTask => write!(f, "/create_twitter_task"),
         }
     }
 }

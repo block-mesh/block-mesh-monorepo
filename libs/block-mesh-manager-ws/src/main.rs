@@ -5,6 +5,7 @@ use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use block_mesh_common::interfaces::db_messages::DBMessage;
 use block_mesh_manager_ws::app::app;
+use block_mesh_manager_ws::get_pending_twitter_tasks_loop::get_pending_twitter_tasks_loop;
 use block_mesh_manager_ws::joiner_loop::joiner_loop;
 use block_mesh_manager_ws::message_aggregator::collect_messages;
 use block_mesh_manager_ws::redis_loop::redis_loop;
@@ -20,6 +21,7 @@ use tokio::net::TcpListener;
 use tokio::task::JoinHandle;
 #[allow(unused_imports)]
 use uuid::Uuid;
+
 #[cfg(not(target_env = "msvc"))]
 #[global_allocator]
 static GLOBAL: Jemalloc = Jemalloc;
@@ -64,10 +66,13 @@ async fn run() -> anyhow::Result<()> {
     let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
     tracing::info!("Listening on {}", listener.local_addr()?);
     let (tx, rx) = flume::bounded::<DBMessage>(10_000);
-    let state = Arc::new(WsAppState::new(tx).await);
-    let channel_pool = state.channel_pool.clone();
-    let server_task = app(listener, state.clone());
     let (joiner_tx, joiner_rx) = flume::bounded::<JoinHandle<()>>(10_000);
+    let state = Arc::new(WsAppState::new(tx, joiner_tx.clone()).await);
+    let channel_pool = state.channel_pool.clone();
+    let get_pending_twitter_tasks_loop_task =
+        tokio::spawn(get_pending_twitter_tasks_loop(state.clone()));
+    let server_task = app(listener, state.clone());
+
     let joiner_task = tokio::spawn(joiner_loop(joiner_rx));
     let redis_task = tokio::spawn(redis_loop(state.clone()));
     let collect_messages_task = tokio::spawn(collect_messages(
@@ -81,6 +86,7 @@ async fn run() -> anyhow::Result<()> {
         5,
     ));
     tokio::select! {
+        o = get_pending_twitter_tasks_loop_task => panic!("get_pending_twitter_tasks_loop_task {:?}", o),
         o = redis_task => panic!("redis_task {:?}", o),
         o = joiner_task => panic!("joiner_task {:?}", o),
         o = server_task => panic!("server_task {:?}", o),

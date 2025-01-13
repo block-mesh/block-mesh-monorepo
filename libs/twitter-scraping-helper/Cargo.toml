@@ -5,13 +5,21 @@ authors.workspace = true
 version.workspace = true
 
 [dependencies]
-block-mesh-common = { path = "../block-mesh-common" }
+block-mesh-common = { path = "../block-mesh-common", features = ["reqwest"] }
 regex = { workspace = true }
 anyhow = { workspace = true }
 serde_json = { workspace = true, features = ["raw_value"] }
 serde = { workspace = true, features = ["derive"] }
 scraper = { workspace = true }
 chrono = { workspace = true, features = ["wasmbind"] }
+reqwest = { workspace = true, default-features = false, features = ["json", "rustls-tls"] }
+secrecy = { workspace = true, features = ["serde"] }
+strum = { workspace = true, features = ["derive"] }
+toml = { workspace = true }
+url = { workspace = true, features = ["serde"] }
+tracing = { workspace = true, features = ["attributes", "tracing-attributes"] }
+tracing-subscriber = { workspace = true, features = ["env-filter", "time", "json"] }
+tracing-serde = { workspace = true }
 
 [dependencies.uuid]
 workspace = true

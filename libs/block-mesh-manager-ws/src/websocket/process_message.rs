@@ -61,6 +61,12 @@ async fn process_client_message(
     match serde_json::from_str::<WsClientMessage>(text) {
         Ok(message) => {
             match &message {
+                WsClientMessage::SendTwitterData(data) => {
+                    return Some(WsClientMessage::SendTwitterData(data.clone()))
+                }
+                WsClientMessage::ReportTwitterCreds => {
+                    return Some(WsClientMessage::ReportTwitterCreds)
+                }
                 WsClientMessage::CompleteTask(query) => {
                     let _ = submit_task_content(
                         &state.pool,

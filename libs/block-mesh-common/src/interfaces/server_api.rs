@@ -24,6 +24,24 @@ pub struct GetTaskResponse {
 }
 
 #[typeshare]
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct GetTwitterData {
+    #[typeshare(serialized_as = "string")]
+    pub id: Uuid,
+    pub twitter_username: String,
+    pub since: NaiveDate,
+    pub until: NaiveDate,
+}
+
+#[typeshare]
+#[derive(Clone, Serialize, Deserialize, Debug)]
+pub struct SendTwitterData {
+    #[typeshare(serialized_as = "string")]
+    pub id: Uuid,
+    pub results: Value,
+}
+
+#[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
 pub struct GetTaskRequest {
     pub email: String,
@@ -680,4 +698,12 @@ pub struct TmpUserAffiliate {
 pub struct AdminReferral {
     pub email: String,
     pub code: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct CreateTwitterTask {
+    pub code: String,
+    pub username: String,
+    pub since: NaiveDate,
+    pub until: NaiveDate,
 }

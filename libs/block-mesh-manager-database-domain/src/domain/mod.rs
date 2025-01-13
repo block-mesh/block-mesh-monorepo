@@ -30,6 +30,7 @@ pub mod submit_bandwidth_content;
 pub mod submit_task_content;
 pub mod task;
 pub mod task_limit;
+pub mod twitter_task;
 pub mod update_aggregate;
 pub mod update_task_assigned;
 pub mod user;
