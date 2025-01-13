@@ -57,23 +57,16 @@ impl WsAppState {
         let handle = tokio::spawn(async move {
             sleep(Duration::from_millis(dur)).await;
             let mut workers = workers.write().await;
-            if let Some(worker) = workers.get(&id) {
-                match worker {
-                    Some(task) => {
-                        let mut pending_tasks = pending_twitter_tasks.write().await;
-                        let mut task = task.clone();
-                        match task.status {
-                            TwitterTaskStatus::Completed => {
-                                pending_tasks.remove(&task.id);
-                            }
-                            _ => {
-                                task.status = TwitterTaskStatus::Pending;
-                                pending_tasks.insert(task.id, task);
-                            }
-                        }
+            if let Some(Some(task)) = workers.get(&id) {
+                let mut pending_tasks = pending_twitter_tasks.write().await;
+                let mut task = task.clone();
+                match task.status {
+                    TwitterTaskStatus::Completed => {
+                        pending_tasks.remove(&task.id);
                     }
-                    None => {
-                        // can't reach here
+                    _ => {
+                        task.status = TwitterTaskStatus::Pending;
+                        pending_tasks.insert(task.id, task);
                     }
                 }
             }
