@@ -18,7 +18,6 @@ pub fn on_message_handler(
     Closure::<dyn FnMut(_)>::new(move |e: MessageEvent| {
         log!("on_message_handle e.data() => {:#?}", e.data());
         if let Ok(txt) = e.data().dyn_into::<js_sys::JsString>() {
-            log!("21 => txt = {}", txt);
             if txt == "ping" {
                 let _ = ws.send_with_str("pong");
             }

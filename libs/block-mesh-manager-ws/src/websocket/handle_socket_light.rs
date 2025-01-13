@@ -112,25 +112,21 @@ pub async fn handle_socket_light(
                     if let Ok(msg) = serde_json::from_str::<WsClientMessage>(&txt) {
                         match msg {
                             WsClientMessage::SendTwitterData(data) => {
-                                let mut pending_tasks = pending_twitter_tasks.write().await;
-                                let task = pending_tasks.iter().find(|i| *i.0 == data.id);
-                                let mut task = match task {
-                                    Some(t) => t.1.clone(),
-                                    None => continue,
-                                };
-                                task.status = TwitterTaskStatus::Completed;
-                                pending_tasks.insert(task.id, task.clone());
-                                state_c.add_worker(&user_id, None).await;
-                                if let Ok(mut transaction) = create_txn(&state_c.pool).await {
-                                    let _ = TwitterTask::update_twitter_task(
-                                        &mut transaction,
-                                        &data.id,
-                                        &TwitterTaskStatus::Completed,
-                                        &data.results,
-                                        &user_id,
-                                    )
-                                    .await;
-                                    let _ = commit_txn(transaction).await;
+                                if let Some(mut task) = state_c.find_task(&data.id).await {
+                                    task.status = TwitterTaskStatus::Completed;
+                                    state_c.add_task(&task).await;
+                                    state_c.add_worker(&user_id, None).await;
+                                    if let Ok(mut transaction) = create_txn(&state_c.pool).await {
+                                        let _ = TwitterTask::update_twitter_task(
+                                            &mut transaction,
+                                            &data.id,
+                                            &TwitterTaskStatus::Completed,
+                                            &data.results,
+                                            &user_id,
+                                        )
+                                        .await;
+                                        let _ = commit_txn(transaction).await;
+                                    }
                                 }
                             }
                             WsClientMessage::ReportTwitterCreds => {

@@ -51,7 +51,7 @@ pub struct WsAppState {
 impl WsAppState {
     pub async fn cleanup_task(&self, id: &Uuid) {
         let dur = env::var("CLEANUP_TASK_SLEEP")
-            .unwrap_or("10000".to_lowercase())
+            .unwrap_or("20000".to_lowercase())
             .parse()
             .unwrap_or(10_000);
         let id = *id;
@@ -77,10 +77,10 @@ impl WsAppState {
     }
 
     pub async fn assign_task(&self) -> Option<()> {
+        let worker = self.get_available_worker().await?;
         let mut task = self.get_task().await?.clone();
         task.status = TwitterTaskStatus::Assigned;
         self.add_task(&task).await;
-        let worker = self.get_available_worker().await?;
         self.add_worker(&worker, Some(task)).await;
         self.cleanup_task(&worker).await;
         Some(())
@@ -110,6 +110,14 @@ impl WsAppState {
             .iter()
             .find(|i| i.1.status == TwitterTaskStatus::Pending && now > i.1.delay)
             .map(|v| v.1.clone())
+    }
+
+    pub async fn find_task(&self, id: &Uuid) -> Option<TwitterTask> {
+        let pending_twitter_tasks = self.pending_twitter_tasks.read().await;
+        match pending_twitter_tasks.iter().find(|i| *i.0 == *id) {
+            Some(t) => Some(t.1.clone()),
+            None => None,
+        }
     }
 
     #[tracing::instrument(name = "add_worker", skip_all)]
