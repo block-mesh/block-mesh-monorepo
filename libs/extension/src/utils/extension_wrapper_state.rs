@@ -237,6 +237,7 @@ impl ExtensionWrapperState {
                         if let Ok(storage_value) = MessageKey::try_from(key) {
                             if let Some(value) = obj.get(key) {
                                 let value = value.as_str().unwrap_or_default().to_string();
+                                log!("240 storage_value {} | value {}", storage_value, value);
                                 match storage_value {
                                     MessageKey::BlockMeshDataSinkUrl => {
                                         self.blockmesh_data_sink_url.update(|v| *v = value.clone());
