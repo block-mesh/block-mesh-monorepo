@@ -30,12 +30,10 @@ pub async fn run_client(num_clients: usize) {
     let mut clients = (0..num_clients)
         .map(|cli| tokio::spawn(spawn_client(cli)))
         .collect::<FuturesUnordered<_>>();
-
+    println!("launched {}", clients.len());
     //wait for all our clients to exit
     while clients.next().await.is_some() {}
-
     let end_time = Instant::now();
-
     //total time should be the same no matter how many clients we spawn
     println!(
         "Total time taken {:#?} with {num_clients} concurrent clients, should be about 6.45 seconds.",
@@ -79,7 +77,7 @@ async fn spawn_client(who: usize) {
     let mut send_task = tokio::spawn(async move {
         if let Some(tx) = SIGNAL_TX.get() {
             let mut rx = tx.subscribe();
-            while let Ok(_) = rx.recv().await {
+            while rx.recv().await.is_ok() {
                 eprintln!("recv_async Closing {who}");
                 let _ = sender
                     .send(Message::Close(Some(CloseFrame {
@@ -87,6 +85,7 @@ async fn spawn_client(who: usize) {
                         reason: Utf8Bytes::from_static("Goodbye"),
                     })))
                     .await;
+                return;
             }
         }
     });
