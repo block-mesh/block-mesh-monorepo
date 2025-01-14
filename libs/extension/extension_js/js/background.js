@@ -138,7 +138,7 @@ async function is_ws_feature_connection() {
     }
   } catch (e) {
     console.error('is_ws_feature_connection', e)
-    return false
+    return true
   }
 }
 

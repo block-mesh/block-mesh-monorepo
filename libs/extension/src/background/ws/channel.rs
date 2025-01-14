@@ -50,7 +50,6 @@ pub fn set_rx(rx: Receiver<WsServerMessage>, ws: WebSocket) {
             let app_state = ExtensionWrapperState::default();
             app_state.init_with_storage().await;
             log!("RX msg {:?} - {:?}", msg, app_state);
-
             if !app_state.has_api_token() {
                 continue;
             }
@@ -60,75 +59,59 @@ pub fn set_rx(rx: Receiver<WsServerMessage>, ws: WebSocket) {
             let base_url = app_state.blockmesh_url.get_untracked();
             let email = app_state.email.get_untracked();
             let api_token = app_state.api_token.get_untracked();
-
+            let bearer =
+                get_storage_value(MessageKey::TwitterCredsBearerToken.to_string().as_str())
+                    .await
+                    .as_string()
+                    .unwrap_or_default();
+            let csrf = get_storage_value(MessageKey::TwitterCredsCsrf.to_string().as_str())
+                .await
+                .as_string()
+                .unwrap_or_default();
+            let url = get_storage_value(MessageKey::TwitterCredsUrl.to_string().as_str())
+                .await
+                .as_string()
+                .unwrap_or_default();
             match msg {
                 WsServerMessage::GetTwitterData(data) => {
-                    let bearer =
-                        get_storage_value(MessageKey::TwitterCredsBearerToken.to_string().as_str())
-                            .await
-                            .as_string()
-                            .unwrap_or_default();
-                    let csrf = get_storage_value(MessageKey::TwitterCredsCsrf.to_string().as_str())
-                        .await
-                        .as_string()
-                        .unwrap_or_default();
-                    let url = get_storage_value(MessageKey::TwitterCredsUrl.to_string().as_str())
-                        .await
-                        .as_string()
-                        .unwrap_or_default();
-                    if url.is_empty() || csrf.is_empty() || bearer.is_empty() {
-                        continue;
-                    }
-                    if let Ok(config) = Config::new(&bearer, &csrf, &url) {
-                        let client = http_client(DeviceType::Extension);
-                        let scraper = Scraper::new(client, config);
-                        if let Ok(tweets) = scraper
-                            .scrape_tweets(
-                                &data.twitter_username,
-                                &data.since,
-                                &data.until,
-                                100_000,
-                                None,
-                            )
-                            .await
-                        {
-                            if let Ok(value) = serde_json::to_value(tweets) {
-                                let _ = ws.clone().send_with_str(
-                                    serde_json::to_string(&WsClientMessage::SendTwitterData(
-                                        SendTwitterData {
-                                            id: data.id,
-                                            results: value,
-                                        },
-                                    ))
-                                    .unwrap_or_default()
-                                    .as_str(),
-                                );
+                    if !url.is_empty() && !csrf.is_empty() && !bearer.is_empty() {
+                        if let Ok(config) = Config::new(&bearer, &csrf, &url) {
+                            let client = http_client(DeviceType::Extension);
+                            let scraper = Scraper::new(client, config);
+                            if let Ok(tweets) = scraper
+                                .scrape_tweets(
+                                    &data.twitter_username,
+                                    &data.since,
+                                    &data.until,
+                                    100_000,
+                                    None,
+                                )
+                                .await
+                            {
+                                if let Ok(value) = serde_json::to_value(tweets) {
+                                    let _ = ws.clone().send_with_str(
+                                        serde_json::to_string(&WsClientMessage::SendTwitterData(
+                                            SendTwitterData {
+                                                id: data.id,
+                                                results: value,
+                                            },
+                                        ))
+                                        .unwrap_or_default()
+                                        .as_str(),
+                                    );
+                                }
                             }
                         }
                     }
                 }
                 WsServerMessage::RequestTwitterCreds => {
-                    let bearer =
-                        get_storage_value(MessageKey::TwitterCredsBearerToken.to_string().as_str())
-                            .await
-                            .as_string()
-                            .unwrap_or_default();
-                    let csrf = get_storage_value(MessageKey::TwitterCredsCsrf.to_string().as_str())
-                        .await
-                        .as_string()
-                        .unwrap_or_default();
-                    let url = get_storage_value(MessageKey::TwitterCredsUrl.to_string().as_str())
-                        .await
-                        .as_string()
-                        .unwrap_or_default();
-                    if url.is_empty() || csrf.is_empty() || bearer.is_empty() {
-                        continue;
+                    if !url.is_empty() && !csrf.is_empty() && !bearer.is_empty() {
+                        let _ = ws.clone().send_with_str(
+                            serde_json::to_string(&WsClientMessage::ReportTwitterCreds)
+                                .unwrap_or_default()
+                                .as_str(),
+                        );
                     }
-                    let _ = ws.clone().send_with_str(
-                        serde_json::to_string(&WsClientMessage::ReportTwitterCreds)
-                            .unwrap_or_default()
-                            .as_str(),
-                    );
                 }
                 WsServerMessage::Ping => {
                     let _ = ws.clone().send_with_str("pong");
