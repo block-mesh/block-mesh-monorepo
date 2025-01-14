@@ -93,7 +93,7 @@ pub async fn handle_socket_light(
         while let Some(Ok(msg)) = receiver.next().await {
             if msg.is_text() {
                 let txt = msg.as_text().unwrap_or_default();
-                if let Ok(msg) = serde_json::from_str::<WsClientMessage>(&txt) {
+                if let Ok(msg) = serde_json::from_str::<WsClientMessage>(txt) {
                     match msg {
                         WsClientMessage::ReportBandwidth(report) => {
                             let mut messages: Vec<DBMessage> = Vec::with_capacity(10);
