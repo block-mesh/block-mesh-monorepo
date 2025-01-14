@@ -6,7 +6,6 @@ use block_mesh_common::interfaces::db_messages::{
 use block_mesh_common::interfaces::ws_api::{WsClientMessage, WsServerMessage};
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use futures::{SinkExt, StreamExt};
-use redis::PushKind::Message;
 use sqlx::types::chrono::Utc;
 use std::env;
 use std::sync::Arc;
