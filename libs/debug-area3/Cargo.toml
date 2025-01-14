@@ -1,0 +1,34 @@
+[package]
+name = "debug-area3"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "axum_server_simple_tws"
+path = "src/axum_server_simple_tws.rs"
+
+[[bin]]
+name = "client"
+path = "src/client.rs"
+
+[dependencies]
+axum = { workspace = true, features = ["ws"] }
+axum-extra = { version = "0.10.0", features = ["typed-header"] }
+axum-tws = "0.4.0"
+clap = { version = "4.5.26", features = ["derive"] }
+env_logger = "0.11.6"
+futures = "0.3.31"
+futures-util = "0.3.31"
+headers = "0.4.0"
+log = { workspace = true }
+serde = { version = "1.0.217", features = ["derive"] }
+tokio = { version = "1.43.0", features = ["rt-multi-thread"] }
+tokio-tungstenite = "0.26.1"
+tower-http = { version = "0.6.2", features = ["fs", "trace"] }
+tracing = "0.1.41"
+tracing-subscriber = { version = "0.3.19", features = ["env-filter"] }
+tungstenite = "0.26.1"
+
+[target.'cfg(not(target_env = "msvc"))'.dependencies]
+#tikv-jemallocator = "0.6"
+tikv-jemallocator = { workspace = true }
