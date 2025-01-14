@@ -1,11 +1,12 @@
 use crate::state::WsAppState;
-use axum::extract::ws::{Message, WebSocket};
+use axum_tws::{Message, WebSocket};
 use block_mesh_common::interfaces::db_messages::{
     AggregateAddToMessage, AggregateSetToMessage, CreateDailyStatMessage, DBMessage, DBMessageTypes,
 };
 use block_mesh_common::interfaces::ws_api::{WsClientMessage, WsServerMessage};
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use futures::{SinkExt, StreamExt};
+use redis::PushKind::Message;
 use sqlx::types::chrono::Utc;
 use std::env;
 use std::sync::Arc;
@@ -27,7 +28,8 @@ pub async fn handle_socket_light(
         .ok()
         .and_then(|var| var.parse().ok())
         .unwrap_or(15000);
-    if socket.send(Message::Ping(vec![1, 2, 3])).await.is_ok() {
+    // if socket.send(Message::Ping(vec![1, 2, 3])).await.is_ok() {
+    if socket.send(Message::ping(vec![1, 2, 3])).await.is_ok() {
         tracing::trace!("Pinged {ip}...");
     } else {
         tracing::trace!("Could not send ping {ip}!");
@@ -56,14 +58,14 @@ pub async fn handle_socket_light(
         let mut accumulator = 0i64;
         let mut counter = 0u64;
         let _ = sender
-            .send(Message::Text(
+            .send(Message::text(
                 WsServerMessage::RequestBandwidthReport.to_string(),
             ))
             .await;
         let mut prev = Utc::now();
         // Send to client - keep alive via ping
         loop {
-            let _ = sender.send(Message::Ping(vec![1, 2, 3])).await;
+            let _ = sender.send(Message::ping(vec![1, 2, 3])).await;
             let now = Utc::now();
             let delta = (now - prev).num_seconds();
             accumulator += delta;
@@ -81,7 +83,7 @@ pub async fn handle_socket_light(
                 counter = 0;
             }
             prev = Utc::now();
-            let _ = sender.send(Message::Text("ping".to_string())).await;
+            let _ = sender.send(Message::text("ping".to_string())).await;
             tokio::time::sleep(Duration::from_millis(sleep)).await;
         }
     });
@@ -90,50 +92,47 @@ pub async fn handle_socket_light(
     let mut recv_task = tokio::spawn(async move {
         // Receive from client
         while let Some(Ok(msg)) = receiver.next().await {
-            match msg {
-                Message::Text(txt) => {
-                    if let Ok(msg) = serde_json::from_str::<WsClientMessage>(&txt) {
-                        match msg {
-                            WsClientMessage::ReportBandwidth(report) => {
-                                let mut messages: Vec<DBMessage> = Vec::with_capacity(10);
-                                messages.push(DBMessage::AggregateSetToMessage(
-                                    AggregateSetToMessage {
-                                        msg_type: DBMessageTypes::AggregateSetToMessage,
-                                        user_id,
-                                        value: serde_json::Value::from(report.download_speed),
-                                        name: AggregateName::Download.to_string(),
-                                    },
-                                ));
-                                messages.push(DBMessage::AggregateSetToMessage(
-                                    AggregateSetToMessage {
-                                        msg_type: DBMessageTypes::AggregateSetToMessage,
-                                        user_id,
-                                        value: serde_json::Value::from(report.upload_speed),
-                                        name: AggregateName::Upload.to_string(),
-                                    },
-                                ));
-                                messages.push(DBMessage::AggregateSetToMessage(
-                                    AggregateSetToMessage {
-                                        msg_type: DBMessageTypes::AggregateSetToMessage,
-                                        user_id,
-                                        value: serde_json::Value::from(report.latency),
-                                        name: AggregateName::Latency.to_string(),
-                                    },
-                                ));
-                                for message in messages {
-                                    let _ = tx_c.send_async(message).await;
-                                }
+            if msg.is_text() {
+                let txt = msg.as_text().unwrap_or_default();
+                if let Ok(msg) = serde_json::from_str::<WsClientMessage>(&txt) {
+                    match msg {
+                        WsClientMessage::ReportBandwidth(report) => {
+                            let mut messages: Vec<DBMessage> = Vec::with_capacity(10);
+                            messages.push(DBMessage::AggregateSetToMessage(
+                                AggregateSetToMessage {
+                                    msg_type: DBMessageTypes::AggregateSetToMessage,
+                                    user_id,
+                                    value: serde_json::Value::from(report.download_speed),
+                                    name: AggregateName::Download.to_string(),
+                                },
+                            ));
+                            messages.push(DBMessage::AggregateSetToMessage(
+                                AggregateSetToMessage {
+                                    msg_type: DBMessageTypes::AggregateSetToMessage,
+                                    user_id,
+                                    value: serde_json::Value::from(report.upload_speed),
+                                    name: AggregateName::Upload.to_string(),
+                                },
+                            ));
+                            messages.push(DBMessage::AggregateSetToMessage(
+                                AggregateSetToMessage {
+                                    msg_type: DBMessageTypes::AggregateSetToMessage,
+                                    user_id,
+                                    value: serde_json::Value::from(report.latency),
+                                    name: AggregateName::Latency.to_string(),
+                                },
+                            ));
+                            for message in messages {
+                                let _ = tx_c.send_async(message).await;
                             }
-                            _ => continue,
                         }
+                        _ => continue,
                     }
                 }
-                Message::Close(_c) => {
-                    break;
-                }
-                _ => {
-                    continue;
-                }
+            } else if msg.is_close() {
+                break;
+            } else {
+                continue;
             }
         }
     });

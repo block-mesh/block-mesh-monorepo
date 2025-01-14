@@ -13,9 +13,9 @@ path = "src/client.rs"
 
 [dependencies]
 axum = { workspace = true, features = ["ws"] }
-axum-extra = { version = "0.10.0", features = ["typed-header"] }
-axum-tws = "0.4.0"
-clap = { version = "4.5.26", features = ["derive"] }
+axum-tws = { workspace = true }
+axum-extra = { workspace = true, features = ["typed-header"] }
+clap = { workspace = true, features = ["derive"] }
 env_logger = "0.11.6"
 futures = "0.3.31"
 futures-util = "0.3.31"

@@ -1620,29 +1620,6 @@ dependencies = [
 
 [[package]]
 name = "axum-extra"
-version = "0.9.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0be6ea09c9b96cb5076af0de2e383bd2bc0c18f827cf1967bdd353e0b910d733"
-dependencies = [
- "axum 0.7.9",
- "axum-core 0.4.5",
- "bytes",
- "futures-util",
- "headers",
- "http 1.1.0",
- "http-body 1.0.0",
- "http-body-util",
- "mime",
- "pin-project-lite",
- "serde",
- "tower 0.4.13",
- "tower-layer",
- "tower-service",
- "tracing",
-]
-
-[[package]]
-name = "axum-extra"
 version = "0.10.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "460fc6f625a1f7705c6cf62d0d070794e94668988b1c38111baeec177c715f7b"
@@ -1692,6 +1669,25 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.89",
+]
+
+[[package]]
+name = "axum-tws"
+version = "0.4.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5e5f12af798db0f54fbc8ca1ddd298297246931b3a29fc6b58aa2cc94d273368"
+dependencies = [
+ "async-trait",
+ "axum-core 0.4.5",
+ "base64 0.22.1",
+ "bytes",
+ "futures-util",
+ "http 1.1.0",
+ "hyper 1.4.0",
+ "hyper-util",
+ "sha1",
+ "tokio",
+ "tokio-websockets",
 ]
 
 [[package]]
@@ -1902,7 +1898,7 @@ dependencies = [
  "aws-config",
  "aws-sdk-sesv2",
  "axum 0.7.9",
- "axum-extra 0.9.3",
+ "axum-extra",
  "axum-login",
  "bcrypt",
  "block-mesh-common",
@@ -1986,7 +1982,7 @@ version = "0.0.456"
 dependencies = [
  "anyhow",
  "axum 0.7.9",
- "axum-extra 0.9.3",
+ "axum-extra",
  "bcrypt",
  "block-mesh-common",
  "block-mesh-manager-database-domain",
@@ -2045,7 +2041,7 @@ version = "0.0.456"
 dependencies = [
  "anyhow",
  "axum 0.7.9",
- "axum-extra 0.9.3",
+ "axum-extra",
  "bcrypt",
  "block-mesh-common",
  "block-mesh-manager-database-domain",
@@ -2081,6 +2077,7 @@ version = "0.0.456"
 dependencies = [
  "anyhow",
  "axum 0.7.9",
+ "axum-tws",
  "block-mesh-common",
  "block-mesh-manager-database-domain",
  "console-subscriber",
@@ -3796,7 +3793,7 @@ version = "0.0.456"
 dependencies = [
  "anyhow",
  "axum 0.7.9",
- "axum-extra 0.9.3",
+ "axum-extra",
  "bcrypt",
  "block-mesh-common",
  "chrono",
@@ -3879,7 +3876,30 @@ name = "debug-area2"
 version = "0.1.0"
 dependencies = [
  "axum 0.8.1",
- "axum-extra 0.10.0",
+ "axum-extra",
+ "clap 4.5.26",
+ "env_logger 0.11.6",
+ "futures",
+ "futures-util",
+ "headers",
+ "log",
+ "serde",
+ "tikv-jemallocator",
+ "tokio",
+ "tokio-tungstenite 0.26.1",
+ "tower-http 0.6.2",
+ "tracing",
+ "tracing-subscriber",
+ "tungstenite 0.26.1",
+]
+
+[[package]]
+name = "debug-area3"
+version = "0.1.0"
+dependencies = [
+ "axum 0.7.9",
+ "axum-extra",
+ "axum-tws",
  "clap 4.5.26",
  "env_logger 0.11.6",
  "futures",
@@ -4526,7 +4546,7 @@ version = "0.0.456"
 dependencies = [
  "anyhow",
  "axum 0.7.9",
- "axum-extra 0.9.3",
+ "axum-extra",
  "block-mesh-common",
  "chrono",
  "dashmap 6.1.0",
@@ -6737,7 +6757,7 @@ version = "0.0.456"
 dependencies = [
  "anyhow",
  "axum 0.7.9",
- "axum-extra 0.9.3",
+ "axum-extra",
  "bcrypt",
  "block-mesh-common",
  "chrono",
@@ -11976,6 +11996,24 @@ dependencies = [
  "hashbrown 0.14.5",
  "pin-project-lite",
  "tokio",
+]
+
+[[package]]
+name = "tokio-websockets"
+version = "0.10.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f591660438b3038dd04d16c938271c79e7e06260ad2ea2885a4861bfb238605d"
+dependencies = [
+ "base64 0.22.1",
+ "bytes",
+ "futures-core",
+ "futures-sink",
+ "http 1.1.0",
+ "httparse",
+ "ring 0.17.8",
+ "tokio",
+ "tokio-rustls 0.26.0",
+ "tokio-util",
 ]
 
 [[package]]

@@ -8,6 +8,7 @@ version.workspace = true
 
 [dependencies]
 num-traits = { workspace = true }
+axum-tws = { workspace = true }
 database-utils = { path = "../database-utils" }
 sentry = { workspace = true }
 axum = { workspace = true, features = ["ws", "http2"] }
