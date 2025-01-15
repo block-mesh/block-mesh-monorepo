@@ -2,8 +2,9 @@ use crate::errors::Error;
 use crate::state::{WsAppState, WsCredsCache};
 use crate::websocket::handle_socket_light::handle_socket_light;
 use anyhow::{anyhow, Context};
-use axum::extract::{Query, State, WebSocketUpgrade};
+use axum::extract::{Query, State};
 use axum::response::IntoResponse;
+use axum_tws::WebSocketUpgrade;
 use block_mesh_common::interfaces::db_messages::{DBMessage, DBMessageTypes, UsersIpMessage};
 use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
 use block_mesh_manager_database_domain::domain::user::UserAndApiToken;
@@ -103,7 +104,6 @@ pub async fn ws_handler(
         }))
         .await;
 
-    Ok(ws.on_upgrade(move |socket| {
-        handle_socket_light(email, socket, header_ip, state, user.user_id)
-    }))
+    let user_id = Uuid::new_v4();
+    Ok(ws.on_upgrade(move |socket| handle_socket_light(email, socket, header_ip, state, user_id)))
 }
