@@ -1,0 +1,20 @@
+main {
+    display: grid;
+    gap: 3cap;
+    text-align: center;
+
+    inline-size: calc(100% - 2 * 1ch);
+    max-inline-size: 64ch;
+    margin-inline: auto;
+
+    padding-block-end: 5cap;
+}
+
+hgroup {
+    display: grid;
+    gap: 1cap;
+}
+
+h1 {
+    font-size: 2.65rem;
+}

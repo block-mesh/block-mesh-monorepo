@@ -1,0 +1,87 @@
+@property --border-color {
+    syntax: "<color>";
+    inherits: false;
+    initial-value: transparent;
+}
+
+.form {
+    position: relative;
+    z-index: 0;
+    display: grid;
+    justify-items: center;
+    gap: 2cap;
+    padding: 7cap 5ch;
+
+    @media (width <= 600px) {
+        padding: 3cap 2ch;
+    }
+
+    /* outter background */
+    background-color: color-mix(
+            var(--color-mix),
+            var(--color-accent-1),
+            85% transparent
+    );
+
+    border-width: 1px;
+    border-style: solid;
+    border-color: color-mix(
+            var(--color-mix),
+            10% var(--color-accent-1),
+            10% transparent
+    );
+
+    border-radius: var(--radius-2);
+
+    /* inner background */
+
+    &::before {
+        position: absolute;
+        z-index: -1;
+        content: "";
+        inset: calc(1ch + 1.5vw);
+
+        background-color: color-mix(var(--color-mix), #000, 60% transparent);
+
+        border-width: 1px;
+        border-style: solid;
+        border-color: color-mix(
+                var(--color-mix),
+                10% var(--color-accent-1),
+                10% #000
+        );
+
+        /* inner radius size depends on the distance of the outter's */
+        border-radius: calc(var(--radius-2) - (5ch - 3.65ch));
+    }
+
+    &[aria-busy="true"]::before {
+        border: 1px solid var(--border-color);
+        animation: --blink ease-in-out 2.65s infinite;
+    }
+
+    &[aria-busy="true"] {
+        --border-color-start: var(--color-accent-1);
+        --border-color-end: #ffccff;
+    }
+
+    &[aria-busy="true"] {
+        --border-color-start: var(--color-variant-1);
+        --border-color-end: #20ff87;
+    }
+
+    /* preserve children inline sizes */
+
+    > * {
+        inline-size: fit-content;
+    }
+}
+
+@keyframes --blink {
+    50% {
+        --border-color: var(--border-color-end);
+    }
+    65% {
+        --border-color: transparent;
+    }
+}

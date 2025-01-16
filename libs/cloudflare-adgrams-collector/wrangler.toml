@@ -1,0 +1,10 @@
+name = "cloudflare-adgrams-collector"
+main = "build/worker/shim.mjs"
+compatibility_date = "2023-12-01"
+kv_namespaces = [
+  { binding = "adgrams", id = "25fa93935f3e41fea98cc6fdd70b02a4" }
+]
+
+[build]
+command = "cargo install -q worker-build && worker-build --release"
+watch_dir = ["src", "templates"]

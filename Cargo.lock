@@ -2814,6 +2814,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "cloudflare-adgrams-collector"
+version = "0.0.459"
+dependencies = [
+ "askama",
+ "askama_axum",
+ "block-mesh-common",
+ "serde",
+ "serde_json",
+ "time",
+ "tracing",
+ "tracing-subscriber",
+ "tracing-web",
+ "uuid",
+ "worker",
+]
+
+[[package]]
 name = "cloudflare-affiliate-plan-page"
 version = "0.0.459"
 dependencies = [
