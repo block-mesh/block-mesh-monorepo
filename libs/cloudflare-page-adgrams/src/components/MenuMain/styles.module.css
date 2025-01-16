@@ -1,0 +1,107 @@
+.menu {
+    counter-reset: step;
+
+    display: flex;
+    gap: 1ch;
+    justify-content: center;
+    inline-size: 100%;
+    padding: 1cap 2.35ch;
+    list-style: none;
+    margin-inline: auto;
+    border-radius: var(--radius-round);
+
+    background-color: color-mix(
+        var(--color-mix),
+        var(--color-on-surface-1),
+        95% transparent
+    );
+    border-width: 1px;
+    border-style: solid;
+    border-color: color-mix(
+        var(--color-mix),
+        var(--color-on-surface-1),
+        95% transparent
+    );
+
+    a {
+        counter-increment: step;
+
+        display: inline-flex;
+        align-items: center;
+        gap: 1ch;
+
+        text-decoration: none;
+        white-space: nowrap;
+
+        transition: opacity ease-out 300ms;
+
+        /* show counter */
+        &::before {
+            content: counter(step);
+
+            display: inline-flex;
+            justify-content: center;
+            align-items: center;
+            inline-size: 3ch;
+            block-size: auto;
+            aspect-ratio: 1;
+            background-color: color-mix(
+                var(--color-mix),
+                var(--color-on-surface-1),
+                10% transparent
+            );
+            color: var(--color-surface-1);
+            font-size: 85%;
+            border-radius: var(--radius-round);
+        }
+
+        @media (width <= 600px) {
+            span {
+                display: none;
+            }
+        }
+    }
+
+    li {
+        display: flex;
+        align-items: center;
+        gap: 1ch;
+
+        &:not(:last-child) {
+            flex-grow: 1;
+        }
+
+        /* current state */
+        &:has(a[aria-current="true"]) ~ li {
+            opacity: 0.35;
+            pointer-events: none;
+        }
+    }
+
+    /* show arrow's tail */
+    li:not(:last-child)::before {
+        content: "";
+        background-color: var(--color-on-surface-1);
+        block-size: 1px;
+        inline-size: 100%;
+        order: 1;
+
+        position: relative;
+        inset-inline-start: 0.5ch;
+    }
+
+    /* show arrow's head */
+    li:not(:last-child)::after {
+        content: "";
+        background-color: var(--color-on-surface-1);
+        display: block;
+        inline-size: auto;
+        block-size: 0.65ch;
+        aspect-ratio: 1;
+        rotate: 45deg;
+        order: 2;
+
+        position: relative;
+        inset-inline-start: -0.5ch;
+    }
+}

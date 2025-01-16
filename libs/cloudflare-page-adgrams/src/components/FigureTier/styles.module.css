@@ -1,0 +1,14 @@
+.figure {
+    display: grid;
+    place-content: center;
+    align-items: center;
+
+    > * {
+        grid-column: 1;
+        grid-row: 1;
+    }
+
+    figcaption {
+        z-index: 1;
+    }
+}
