@@ -1,4 +1,5 @@
 use serde_json::Value;
+use std::collections::HashMap;
 use tracing_subscriber::fmt::format::Pretty;
 use tracing_subscriber::fmt::time::UtcTime;
 use tracing_subscriber::prelude::*;
@@ -42,14 +43,16 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
             Response::from_json(&value)
         })
         .get_async("/all", |_req, ctx| async move {
+            let mut output: HashMap<String, String> = HashMap::new();
             let kv = ctx.kv("adgrams")?;
             let list = kv.list().execute().await?;
             for key in &list.keys {
                 let k = &key.name;
                 let value = kv.get(k).text().await?.unwrap_or_default();
-                console_log!("k = {} | value = {}", k, value);
+                output.insert(k.clone(), value);
             }
-            Response::from_json(&Value::Null)
+            let value = serde_json::to_value(output)?;
+            Response::from_json(&value)
         })
         .run(req, env)
         .await
