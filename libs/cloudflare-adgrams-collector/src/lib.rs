@@ -41,7 +41,7 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
             console_log!("great success");
             Response::from_json(&value)
         })
-        .get_async("/all", |req, ctx| async move {
+        .get_async("/all", |_req, ctx| async move {
             let kv = ctx.kv("adgrams")?;
             let list = kv.list().execute().await?;
             for key in &list.keys {
