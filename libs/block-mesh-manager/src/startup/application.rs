@@ -15,9 +15,8 @@ use block_mesh_common::env::env_var;
 use block_mesh_common::env::get_env_var_or_panic::get_env_var_or_panic;
 use block_mesh_common::feature_flag_client::FlagValue;
 use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenResponseMap};
-use dash_with_expiry::dash_map_with_expiry::DashMapWithExpiry;
-use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
-use dashmap::DashMap;
+use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
+use dash_with_expiry::hash_set_with_expiry::HashSetWithExpiry;
 use http::{header, HeaderValue};
 use leptos::leptos_config::get_config_from_env;
 use logger_general::tracing::get_sentry_layer;
@@ -46,8 +45,8 @@ pub struct Application {
 }
 
 pub struct AppState {
-    pub wallet_login_nonce: Arc<DashMapWithExpiry<String, String>>,
-    pub rate_limiter: Arc<DashSetWithExpiry<String>>,
+    pub wallet_login_nonce: HashMapWithExpiry<String, String>,
+    pub rate_limiter: HashSetWithExpiry<String>,
     pub enable_hcaptcha: bool,
     pub enable_recaptcha: bool,
     pub enable_proof_of_humanity: bool,
@@ -65,8 +64,8 @@ pub struct AppState {
     pub submit_bandwidth_limit: bool,
     pub get_token_map: GetTokenResponseMap,
     pub check_token_map: CheckTokenResponseMap,
-    pub invite_codes: Arc<DashMap<String, String>>,
-    pub wallet_addresses: Arc<DashMap<String, Option<String>>>,
+    pub invite_codes: HashMapWithExpiry<String, String>,
+    pub wallet_addresses: HashMapWithExpiry<String, Option<String>>,
     pub pool: PgPool,
     pub follower_pool: PgPool,
     pub channel_pool: PgPool,

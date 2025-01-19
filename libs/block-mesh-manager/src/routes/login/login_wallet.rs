@@ -44,7 +44,8 @@ pub async fn handler(
             let date = Utc::now() + Duration::milliseconds(600_000);
             state
                 .wallet_login_nonce
-                .insert(nonce.clone(), nonce.clone(), Some(date));
+                .insert(nonce.clone(), nonce.clone(), Some(date))
+                .await;
             Ok(LoginTemplate {
                 cf_site_key: state.cf_site_key.to_string(),
                 nonce,

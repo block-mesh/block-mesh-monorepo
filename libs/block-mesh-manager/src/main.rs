@@ -3,9 +3,11 @@
 #![deny(unreachable_pub)]
 
 use cfg_if::cfg_if;
-use logger_general::tracing::get_sentry_layer;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use logger_general::tracing::get_sentry_layer;
+    use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
+    use dash_with_expiry::hash_set_with_expiry::HashSetWithExpiry;
     use std::sync::RwLock;
     use std::collections::HashMap;
     use database_utils::utils::connection::write_pool::write_pool;
@@ -13,8 +15,6 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use database_utils::utils::connection::channel_pool::channel_pool;
     use database_utils::utils::connection::follower_pool::follower_pool;
     use database_utils::utils::connection::unlimited_pool::unlimited_pool;
-    use dash_with_expiry::dash_map_with_expiry::DashMapWithExpiry;
-    use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
     use block_mesh_common::constants::DeviceType;
     use block_mesh_manager::worker::update_feature_flags::feature_flags_loop;
     use block_mesh_manager::utils::cache_envar::get_envar;
@@ -135,8 +135,8 @@ async fn run() -> anyhow::Result<()> {
         .parse()
         .unwrap_or(false);
     let follower_pool = follower_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
-    let invite_codes = Arc::new(DashMap::new());
-    let wallet_addresses = Arc::new(DashMap::new());
+    let invite_codes = HashMapWithExpiry::new();
+    let wallet_addresses = HashMapWithExpiry::new();
     let cf_site_key = env::var("CF_SITE_KEY")?;
     let cf_secret_key = env::var("CF_SECRET_KEY")?;
     let cf_enforce = env::var("CF_ENFORCE")
@@ -162,8 +162,8 @@ async fn run() -> anyhow::Result<()> {
         .parse()
         .unwrap_or(false);
     let app_state = Arc::new(AppState {
-        wallet_login_nonce: Arc::new(DashMapWithExpiry::new()),
-        rate_limiter: Arc::new(DashSetWithExpiry::new()),
+        wallet_login_nonce: HashMapWithExpiry::new(),
+        rate_limiter: HashSetWithExpiry::new(),
         enable_hcaptcha,
         enable_recaptcha,
         enable_proof_of_humanity,

@@ -88,7 +88,8 @@ pub async fn handler(
                 }
                 state
                     .wallet_addresses
-                    .insert(user_and_api_token.email.clone(), Some(body.pubkey));
+                    .insert(user_and_api_token.email.clone(), Some(body.pubkey), None)
+                    .await;
             }
             Some(wallet_address) => {
                 let name = format!("{}_{}", AggregateName::WalletChange, Uuid::new_v4());
@@ -135,7 +136,8 @@ pub async fn handler(
                 }
                 state
                     .wallet_addresses
-                    .insert(user_and_api_token.email.clone(), Some(body.pubkey));
+                    .insert(user_and_api_token.email.clone(), Some(body.pubkey), None)
+                    .await;
             }
         }
     } else {
