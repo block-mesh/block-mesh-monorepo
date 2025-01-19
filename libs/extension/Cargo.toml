@@ -9,6 +9,7 @@ crate-type = ["cdylib", "rlib"]
 
 [dependencies]
 twitter-scraping-helper = { path = "../twitter-scraping-helper" }
+gloo-timers = { workspace = true, features = ["futures"] }
 urlencoding = { workspace = true }
 wee_alloc = { workspace = true }
 regex = { version = "1" }

@@ -4412,6 +4412,7 @@ dependencies = [
  "chrono",
  "console_error_panic_hook",
  "flume",
+ "gloo-timers 0.3.0",
  "gloo-utils 0.2.0",
  "js-sys",
  "leptos",
