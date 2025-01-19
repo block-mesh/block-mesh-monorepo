@@ -9,7 +9,7 @@ authors.workspace = true
 fake = { workspace = true, features = ["derive"] }
 
 [dependencies]
-dash-with-expiry = { path = "../dash-with-expiry" }
+dash-with-expiry = { path = "../dash-with-expiry", features = ["tokio"], optional = true }
 lettre = { workspace = true, optional = true }
 reqwest-websocket = { workspace = true }
 flume = { workspace = true, default-features = false, features = ["async", "select"] }
@@ -154,6 +154,7 @@ hydrate = [
   "dep:logger-leptos"
 ]
 ssr = [
+  "dep:dash-with-expiry",
   "block-mesh-common/ssr",
   "dep:lettre",
   "dep:futures-time",

@@ -34,15 +34,15 @@ pub async fn handler(
             .unwrap_or(3u64);
         let date = Utc::now() + Duration::milliseconds(expiry as i64);
         let key = format!("submit_bandwidth_{}", header_ip);
-        if state.rate_limiter.get(&key).is_some() {
+        if state.rate_limiter.get(&key).await.is_some() {
             return Ok(Json(ReportBandwidthResponse { status_code: 429 }));
         }
-        state.rate_limiter.insert(key, Some(date));
+        state.rate_limiter.insert(key, Some(date)).await;
         let key = format!("submit_bandwidth_{}", body.api_token);
-        if state.rate_limiter.get(&key).is_some() {
+        if state.rate_limiter.get(&key).await.is_some() {
             return Ok(Json(ReportBandwidthResponse { status_code: 429 }));
         }
-        state.rate_limiter.insert(key, Some(date));
+        state.rate_limiter.insert(key, Some(date)).await;
     }
     submit_bandwidth_content(&state.pool, &state.follower_pool, &state.channel_pool, body)
         .await

@@ -12,7 +12,6 @@ use block_mesh_common::constants::{
     BLOCK_MESH_LANDING_PAGE_IMAGE, BLOCK_MESH_LOGO, BLOCK_MESH_SUPPORT_CHAT,
     BLOCK_MESH_SUPPORT_EMAIL, BLOCK_MESH_TWITTER,
 };
-use dashmap::try_result::TryResult::Present;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::sync::Arc;
@@ -41,8 +40,8 @@ pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<impl IntoResponse, Error> {
     let user = auth.user.ok_or(Error::UserNotFound)?;
-    if let Present(invite_code) = state.invite_codes.try_get(&user.email) {
-        let code = invite_code.value().clone();
+    if let Some(invite_code) = state.invite_codes.get(&user.email).await {
+        let code = invite_code.clone();
         return Ok(EditInviteCodeTemplate {
             cf_site_key: state.cf_site_key.clone(),
             current_invite_code: code,
@@ -64,7 +63,12 @@ pub async fn handler(
     commit_txn(transaction).await?;
     state
         .invite_codes
-        .insert(user.email.clone(), user_invite_code.invite_code.clone());
+        .insert(
+            user.email.clone(),
+            user_invite_code.invite_code.clone(),
+            None,
+        )
+        .await;
     Ok(EditInviteCodeTemplate {
         cf_site_key: state.cf_site_key.clone(),
         current_invite_code: user_invite_code.invite_code,

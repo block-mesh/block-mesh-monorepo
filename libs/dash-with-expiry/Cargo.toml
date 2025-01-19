@@ -10,8 +10,13 @@ version.workspace = true
 dashmap = { workspace = true }
 chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }
 time = { workspace = true, features = ['wasm-bindgen'] }
+tokio = { workspace = true, features = ["full"], optional = true }
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["full"] }
 tracing-test = { workspace = true }
 tracing = { workspace = true }
+
+
+[features]
+tokio = ["dep:tokio"]

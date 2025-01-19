@@ -38,15 +38,15 @@ pub async fn handler(
             .unwrap_or(3u64);
         let date = Utc::now() + Duration::milliseconds(expiry as i64);
         let key = format!("report_uptime_{}", header_ip);
-        if state.rate_limiter.get(&key).is_some() {
+        if state.rate_limiter.get(&key).await.is_some() {
             return Ok(Json(ReportUptimeResponse { status_code: 429 }));
         }
-        state.rate_limiter.insert(key, Some(date));
+        state.rate_limiter.insert(key, Some(date)).await;
         let key = format!("report_uptime_{}", query.api_token);
-        if state.rate_limiter.get(&key).is_some() {
+        if state.rate_limiter.get(&key).await.is_some() {
             return Ok(Json(ReportUptimeResponse { status_code: 429 }));
         }
-        state.rate_limiter.insert(key, Some(date));
+        state.rate_limiter.insert(key, Some(date)).await;
     }
 
     let polling_interval = get_flag_value_from_map(

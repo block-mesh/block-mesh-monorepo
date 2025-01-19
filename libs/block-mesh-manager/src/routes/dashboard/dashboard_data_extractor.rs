@@ -31,11 +31,10 @@ use block_mesh_manager_database_domain::domain::aggregate::AggregateName::{
 use block_mesh_manager_database_domain::domain::bulk_get_or_create_aggregate_by_user_and_name::bulk_get_or_create_aggregate_by_user_and_name;
 use block_mesh_manager_database_domain::domain::create_daily_stat::get_or_create_daily_stat;
 use block_mesh_manager_database_domain::domain::user::UserAndApiToken;
-use dash_with_expiry::dash_map_with_expiry::DashMapWithExpiry;
+use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 
-static RATE_LIMIT: OnceCell<DashMapWithExpiry<String, Vec<DailyStatForDashboard>>> =
-    OnceCell::const_new();
+static RATE_LIMIT: OnceCell<HashMapWithExpiry<String, DashboardResponse>> = OnceCell::const_new();
 
 #[tracing::instrument(name = "dashboard_data_extractor", skip_all)]
 pub async fn dashboard_data_extractor(
@@ -44,6 +43,12 @@ pub async fn dashboard_data_extractor(
     state: Arc<AppState>,
     user: UserAndApiToken,
 ) -> anyhow::Result<DashboardResponse> {
+    let cache = RATE_LIMIT
+        .get_or_init(|| async { HashMapWithExpiry::new() })
+        .await;
+    if let Some(response) = cache.get(&user.email).await {
+        return Ok(response);
+    }
     let ip_limit = get_envar("DASHBOARD_IP_LIMIT")
         .await
         .parse()
@@ -60,34 +65,23 @@ pub async fn dashboard_data_extractor(
     let number_of_users_invited = get_number_of_users_invited(follower_transaction, &user.user_id)
         .await
         .map_err(Error::from)?;
-    let cache = RATE_LIMIT
-        .get_or_init(|| async { DashMapWithExpiry::new() })
-        .await;
+
     let daily_stats_count =
         get_daily_stats_ref_status_by_user_id(follower_transaction, &user.user_id).await?;
-    let daily_stats = match cache.get(&user.email) {
-        Some(vec) => vec,
-        None => {
-            let result: Vec<DailyStatForDashboard> =
-                get_daily_stats_by_user_id(follower_transaction, &user.user_id)
-                    .await?
-                    .into_iter()
-                    .map(|i| {
-                        let points =
-                            calc_points_daily(i.uptime, i.tasks_count, i.ref_bonus, &perks);
-                        DailyStatForDashboard {
-                            tasks_count: i.tasks_count,
-                            uptime: i.uptime,
-                            points,
-                            day: i.day,
-                        }
-                    })
-                    .collect();
-            let date = Utc::now() + Duration::milliseconds(300_000);
-            cache.insert(user.email.clone(), result.clone(), Some(date));
-            result
-        }
-    };
+    let daily_stats: Vec<DailyStatForDashboard> =
+        get_daily_stats_by_user_id(follower_transaction, &user.user_id)
+            .await?
+            .into_iter()
+            .map(|i| {
+                let points = calc_points_daily(i.uptime, i.tasks_count, i.ref_bonus, &perks);
+                DailyStatForDashboard {
+                    tasks_count: i.tasks_count,
+                    uptime: i.uptime,
+                    points,
+                    day: i.day,
+                }
+            })
+            .collect();
     let mut write_transaction = create_txn(write_pool).await?;
     let _ = get_or_create_daily_stat(&mut write_transaction, &user.user_id, None).await?;
     let interval = get_flag_value_from_map(
@@ -143,7 +137,7 @@ pub async fn dashboard_data_extractor(
         one_time_bonus_points + daily_stats.iter().map(|i| i.points).sum::<f64>() as u64,
     ) as f64;
     commit_txn(write_transaction).await?;
-    Ok(DashboardResponse {
+    let response = DashboardResponse {
         true_count: daily_stats_count.true_count,
         false_count: daily_stats_count.false_count,
         wallet_address: user.wallet_address,
@@ -190,5 +184,10 @@ pub async fn dashboard_data_extractor(
                 one_time_bonus: i.one_time_bonus,
             })
             .collect(),
-    })
+    };
+    let date = Utc::now() + Duration::milliseconds(480_000);
+    cache
+        .insert(user.email.clone(), response.clone(), Some(date))
+        .await;
+    Ok(response)
 }

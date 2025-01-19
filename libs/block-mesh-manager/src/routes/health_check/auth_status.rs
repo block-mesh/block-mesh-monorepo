@@ -8,7 +8,6 @@ use axum::{Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::{AuthStatusParams, AuthStatusResponse};
 use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
-use dashmap::try_result::TryResult::Present;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use std::sync::Arc;
 
@@ -36,8 +35,8 @@ pub async fn handler(
         None => state.enable_proof_of_humanity,
     };
 
-    let wallet_address = if let Present(entry) = state.wallet_addresses.try_get(&user.email) {
-        entry.value().clone()
+    let wallet_address = if let Some(entry) = state.wallet_addresses.get(&user.email).await {
+        entry.clone()
     } else {
         let mut transaction = create_txn(&state.follower_pool).await?;
         let db_user = get_user_opt_by_id(&mut transaction, &user.id)
@@ -48,7 +47,8 @@ pub async fn handler(
             Some(user) => {
                 state
                     .wallet_addresses
-                    .insert(user.email.clone(), user.wallet_address.clone());
+                    .insert(user.email.clone(), user.wallet_address.clone(), None)
+                    .await;
                 user.wallet_address.clone()
             }
             None => {

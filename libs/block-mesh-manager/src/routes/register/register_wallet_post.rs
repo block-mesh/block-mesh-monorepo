@@ -73,7 +73,7 @@ pub async fn handler(
     let form_nonce = form.nonce.clone();
     let message = form.nonce.as_bytes();
     let email = format!("wallet_{pubkey}@blockmesh.xyz").to_ascii_lowercase();
-    let mem_nonce = state.wallet_login_nonce.get(&form_nonce);
+    let mem_nonce = state.wallet_login_nonce.get(&form_nonce).await;
     match mem_nonce {
         Some(mem_nonce) => {
             if mem_nonce != form_nonce {
@@ -175,7 +175,8 @@ pub async fn handler(
         update_user_wallet(&mut transaction, user_id, &form.pubkey).await?;
         state
             .wallet_addresses
-            .insert(email.clone(), Some(form.pubkey));
+            .insert(email.clone(), Some(form.pubkey), None)
+            .await;
     } else {
         tracing::error!("Signature verification failed.");
         return Err(Error::SignatureMismatch);

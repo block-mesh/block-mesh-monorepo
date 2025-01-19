@@ -18,7 +18,7 @@ pub async fn handler(
         .await
         .map_err(|e| Error::Auth(e.to_string()))?;
     if let Some(session_user) = user {
-        state.wallet_addresses.remove(&session_user.email);
+        state.wallet_addresses.remove(&session_user.email).await;
     }
     Ok(Redirect::to(
         RoutesEnum::Static_UnAuth_Login.to_string().as_str(),

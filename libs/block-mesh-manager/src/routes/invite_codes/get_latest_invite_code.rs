@@ -7,7 +7,6 @@ use block_mesh_common::interfaces::server_api::{
     GetLatestInviteCodeRequest, GetLatestInviteCodeResponse,
 };
 use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
-use dashmap::try_result::TryResult::Present;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use std::sync::Arc;
 
@@ -16,8 +15,8 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Json(body): Json<GetLatestInviteCodeRequest>,
 ) -> Result<Json<GetLatestInviteCodeResponse>, Error> {
-    if let Present(invite_code) = state.invite_codes.try_get(&body.email) {
-        let code = invite_code.value().clone();
+    if let Some(invite_code) = state.invite_codes.get(&body.email).await {
+        let code = invite_code.clone();
         return Ok(Json(GetLatestInviteCodeResponse { invite_code: code }));
     }
     let mut transaction = create_txn(&state.follower_pool).await?;

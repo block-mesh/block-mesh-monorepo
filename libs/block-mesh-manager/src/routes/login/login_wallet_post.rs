@@ -56,7 +56,7 @@ pub async fn handler(
         Signature::try_from(sig_array.0.as_slice()).map_err(|_| Error::InternalServer)?;
     let form_nonce = form.nonce.clone();
     let message = form.nonce.as_bytes();
-    let mem_nonce = state.wallet_login_nonce.get(&form_nonce);
+    let mem_nonce = state.wallet_login_nonce.get(&form_nonce).await;
     match mem_nonce {
         Some(mem_nonce) => {
             if mem_nonce != form_nonce {
