@@ -3,7 +3,6 @@ use super::{
 };
 use crate::background::ws::channel::get_tx;
 use crate::utils::log::log;
-use crate::utils::sleep::sleep;
 use crate::utils::{connectors::set_panic_hook, extension_wrapper_state::ExtensionWrapperState};
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::ws_api::WsServerMessage;
@@ -12,7 +11,6 @@ use logger_leptos::leptos_tracing::setup_leptos_tracing;
 use once_cell::sync::OnceCell;
 use std::sync::{Arc, RwLock};
 use wasm_bindgen::prelude::*;
-use wasm_bindgen_futures::spawn_local;
 use web_sys::WebSocket;
 
 pub static WEB_SOCKET_STATUS: OnceCell<Arc<RwLock<WebSocketReadyState>>> = OnceCell::new();
