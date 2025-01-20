@@ -119,7 +119,7 @@ impl WsAppState {
         let ids: Vec<Uuid> = pending_tasks
             .iter()
             .filter(|i| i.1.status != TwitterTaskStatus::Pending)
-            .map(|i| i.0.clone())
+            .map(|i| *i.0)
             .collect();
         for id in ids {
             pending_tasks.remove(&id);
