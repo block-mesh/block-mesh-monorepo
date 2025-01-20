@@ -23,7 +23,7 @@ pub fn get_key_deep(key: &str, json: &Value) -> Option<Value> {
     if !json.is_object() {
         return None;
     }
-    if let Some(v) = json.get(&key) {
+    if let Some(v) = json.get(key) {
         return Some(v.clone());
     }
     let j = json.as_object().unwrap();
