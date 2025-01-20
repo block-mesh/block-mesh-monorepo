@@ -103,6 +103,7 @@ impl WsAppState {
         pending_tasks.remove(id);
     }
 
+    #[tracing::instrument(name = "get_task", skip_all)]
     pub async fn get_task(&self) -> Option<TwitterTask> {
         let now = Utc::now();
         let pending_tasks = self.pending_twitter_tasks.read().await;
@@ -112,6 +113,20 @@ impl WsAppState {
             .map(|v| v.1.clone())
     }
 
+    #[tracing::instrument(name = "clean_tasks", skip_all)]
+    pub async fn clear_tasks(&self) {
+        let mut pending_tasks = self.pending_twitter_tasks.write().await;
+        let ids: Vec<Uuid> = pending_tasks
+            .iter()
+            .filter(|i| i.1.status != TwitterTaskStatus::Pending)
+            .map(|i| i.0.clone())
+            .collect();
+        for id in ids {
+            pending_tasks.remove(&id);
+        }
+    }
+
+    #[tracing::instrument(name = "find_task", skip_all)]
     pub async fn find_task(&self, id: &Uuid) -> Option<TwitterTask> {
         let pending_twitter_tasks = self.pending_twitter_tasks.read().await;
         pending_twitter_tasks
