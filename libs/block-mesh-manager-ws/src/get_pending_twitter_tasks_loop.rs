@@ -29,6 +29,7 @@ pub async fn get_pending_twitter_tasks_loop(state: Arc<WsAppState>) -> Result<()
                     t.insert(i.id, i);
                 });
             }
+            state.clear_tasks().await;
             let _ = commit_txn(transaction).await;
             let limit = min(assign_limit, state.workers.read().await.len());
             for _ in 0..limit {
