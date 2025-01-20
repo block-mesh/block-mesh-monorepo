@@ -2,10 +2,16 @@ use crate::proactive::config::Config;
 use anyhow::anyhow;
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::reqwest::http_client;
+use chrono::Utc;
+#[cfg(target_arch = "wasm32")]
+use gloo_timers::future::TimeoutFuture;
 use reqwest::header::{HeaderMap, HeaderName};
 use reqwest::Client;
 use secrecy::{ExposeSecret as _, SecretString};
 use std::sync::{Arc, RwLock};
+use std::time::Duration;
+#[cfg(not(target_arch = "wasm32"))]
+use tokio::time::sleep;
 
 #[derive(Clone, Debug)]
 pub struct Scraper {
@@ -81,6 +87,48 @@ impl Scraper {
                 _ => {}
             }
         }
+    }
+
+    #[tracing::instrument(name = "wait_for_reset", skip_all)]
+    pub async fn wait_for_reset(&self) {
+        let now = Utc::now();
+        let remaining = *self.remaining.read().unwrap();
+        let reset = *self.reset.read().unwrap();
+        let limit = *self.limit.read().unwrap();
+        if remaining <= 0 && reset > now.timestamp() {
+            let diff = reset - now.timestamp();
+            tracing::info!(
+                "Sleeping for {}[sec] | limit = {} | remaining = {} | reset = {} | now = {} | total_collected = {}",
+                diff,
+                limit,
+                remaining,
+                reset,
+                now.timestamp(),
+                self.get_tweets_collected()
+            );
+            self.sleep(Duration::from_secs(diff as u64)).await;
+        } else {
+            tracing::info!(
+                "Sleeping min for {}[ms] | limit = {} | remaining = {} | reset = {} | now = {} | total_collected = {}",
+                self.min_sleep,
+                limit,
+                remaining,
+                reset,
+                now.timestamp(),
+                self.get_tweets_collected()
+            );
+            self.sleep(Duration::from_millis(self.min_sleep)).await;
+        }
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    async fn sleep(&self, duration: Duration) {
+        TimeoutFuture::new(duration.as_millis() as u32).await;
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    async fn sleep(&self, duration: Duration) {
+        sleep(duration).await
     }
 
     #[tracing::instrument(name = "test_creds", skip_all)]

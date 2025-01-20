@@ -20,7 +20,10 @@ url = { workspace = true, features = ["serde"] }
 tracing = { workspace = true, features = ["attributes", "tracing-attributes"] }
 tracing-subscriber = { workspace = true, features = ["env-filter", "time", "json"] }
 tracing-serde = { workspace = true }
-
+#[target.'cfg(target_arch = "wasm32")'.dependencies]
+gloo-timers = { workspace = true, features = ["futures"] }
+[target.'cfg(not(target_arch = "wasm32"))'.dependencies]
+tokio = { workspace = true, features = ["full"] }
 [dependencies.uuid]
 workspace = true
 features = [
