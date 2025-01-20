@@ -7,11 +7,10 @@ use axum::Json;
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::GetTwitterProfileDetails;
 use block_mesh_common::reqwest::http_client;
-use chrono::{DateTime, FixedOffset, NaiveDate, Utc};
+use chrono::{DateTime, FixedOffset, NaiveDate};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::env;
-use std::str::FromStr;
 use std::sync::Arc;
 
 #[derive(Serialize, Deserialize, Debug)]
