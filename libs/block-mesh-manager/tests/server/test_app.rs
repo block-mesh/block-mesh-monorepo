@@ -14,6 +14,8 @@ use block_mesh_manager::configuration::settings::Settings;
 use block_mesh_manager::startup::application::{AppState, Application};
 use dash_with_expiry::dash_map_with_expiry::DashMapWithExpiry;
 use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
+use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
+use dash_with_expiry::hash_set_with_expiry::HashSetWithExpiry;
 use dashmap::DashMap;
 use database_utils::utils::connection::channel_pool::channel_pool;
 use database_utils::utils::connection::write_pool::write_pool;
@@ -77,12 +79,12 @@ pub async fn spawn_app() -> TestApp {
 
     let check_token_map: CheckTokenResponseMap = Arc::new(DashMap::new());
     let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());
-    let wallet_addresses = Arc::new(DashMap::new());
-    let invite_codes = Arc::new(DashMap::new());
+    let wallet_addresses = HashMapWithExpiry::new();
+    let invite_codes = HashMapWithExpiry::new();
 
     let app_state = Arc::new(AppState {
-        wallet_login_nonce: Arc::new(DashMapWithExpiry::new()),
-        rate_limiter: Arc::new(DashSetWithExpiry::new()),
+        wallet_login_nonce: HashMapWithExpiry::new(),
+        rate_limiter: HashSetWithExpiry::new(),
         enable_hcaptcha: false,
         enable_recaptcha: false,
         enable_proof_of_humanity: false,

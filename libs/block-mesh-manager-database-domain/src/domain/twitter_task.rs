@@ -4,6 +4,7 @@ use rand::Rng;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{Decode, Postgres, Transaction};
+use std::env;
 use std::error::Error;
 use std::fmt::Display;
 use std::time::Duration;
@@ -90,13 +91,23 @@ impl TwitterTask {
     pub async fn get_pending_tasks(
         transaction: &mut Transaction<'_, Postgres>,
     ) -> anyhow::Result<Vec<Self>> {
+        let limit = env::var("GET_PENDING_TASKS_LIMIT")
+            .unwrap_or("500".to_string())
+            .parse()
+            .unwrap_or(500);
+
         let tasks: Vec<Self> = sqlx::query_as!(
             TwitterTask,
             r#"
             SELECT
             id, assigned_user_id, twitter_username, status, created_at, updated_at, since, until, delay, results
             FROM twitter_tasks
-            "#
+            WHERE status = $1
+            LIMIT $2
+            "#,
+            TwitterTaskStatus::Pending.to_string(),
+            limit
+
         )
         .fetch_all(&mut **transaction)
         .await?;

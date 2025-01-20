@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n            SELECT\n            id, assigned_user_id, twitter_username, status, created_at, updated_at, since, until, delay, results\n            FROM twitter_tasks\n            ",
+  "query": "\n            SELECT\n            id, assigned_user_id, twitter_username, status, created_at, updated_at, since, until, delay, results\n            FROM twitter_tasks\n            WHERE status = $1\n            LIMIT $2\n            ",
   "describe": {
     "columns": [
       {
@@ -55,7 +55,10 @@
       }
     ],
     "parameters": {
-      "Left": []
+      "Left": [
+        "Text",
+        "Int8"
+      ]
     },
     "nullable": [
       false,
@@ -70,5 +73,5 @@
       false
     ]
   },
-  "hash": "f3e9b0e4a4fba27f7497ca9962332116a0068bf06e69fe3e118babc373d9d42c"
+  "hash": "43f23e318e82b1942cab713a789e98bf99f875765ecab5e3cfb06da0be9eb0ab"
 }
