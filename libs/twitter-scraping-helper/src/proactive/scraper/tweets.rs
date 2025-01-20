@@ -54,6 +54,7 @@ impl Scraper {
             cursor = new.next;
             tracing::info!("cursor = {}", cursor.clone().unwrap_or_default());
             tweets.merge(new.tweets);
+            self.wait_for_reset().await;
         }
         Ok(tweets)
     }
