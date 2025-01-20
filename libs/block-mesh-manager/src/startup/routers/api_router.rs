@@ -71,6 +71,16 @@ pub fn get_api_router() -> Router<Arc<AppState>> {
         .route(
             RoutesEnum::Api_CreateTwitterTask.to_string().as_str(),
             get(routes::twitter_task::create_twitter_task::handler),
+        )
+        .route(
+            RoutesEnum::Api_GetTwitterProfileDetails
+                .to_string()
+                .as_str(),
+            get(routes::twitter_task::get_twitter_profile_details::handler),
+        )
+        .route(
+            RoutesEnum::Api_CreateBulkTwitterTask.to_string().as_str(),
+            get(routes::twitter_task::create_bulk_twitter_task::handler),
         );
     api_router
 }

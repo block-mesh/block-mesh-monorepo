@@ -707,3 +707,15 @@ pub struct CreateTwitterTask {
     pub since: NaiveDate,
     pub until: NaiveDate,
 }
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct CreateBulkTwitterTask {
+    pub code: String,
+    pub username: String,
+}
+
+#[derive(Clone, Debug, Deserialize, Serialize)]
+pub struct GetTwitterProfileDetails {
+    pub code: String,
+    pub username: String,
+}
