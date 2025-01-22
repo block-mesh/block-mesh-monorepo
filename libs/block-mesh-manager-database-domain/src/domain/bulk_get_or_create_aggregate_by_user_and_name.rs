@@ -1,13 +1,24 @@
 use crate::domain::aggregate::{Aggregate, AggregateTmp};
+use rand::Rng;
+use serde_json::Value;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
+
+pub fn init_rand() -> i32 {
+    let mut rng = rand::thread_rng();
+    let random_number: i32 = rng.gen_range(1..=100);
+    random_number
+}
 
 #[tracing::instrument(name = "bulk_get_or_create_aggregate_by_user_and_name", skip_all)]
 pub async fn bulk_get_or_create_aggregate_by_user_and_name(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
 ) -> anyhow::Result<Vec<Aggregate>> {
-    let value = serde_json::Value::Null;
+    let upload = Value::from(init_rand());
+    let download = Value::from(init_rand());
+    let latency = Value::from(init_rand());
+    let value = Value::Null;
     let aggregates: Vec<AggregateTmp> = sqlx::query_as!(
         AggregateTmp,
         r#"
@@ -17,9 +28,9 @@ WITH input_data AS (
     FROM (
     VALUES
         (gen_random_uuid(), now(), now(), $1::uuid, 'Uptime', $2::jsonb),
-        (gen_random_uuid(), now(), now(), $1::uuid, 'Download', $2::jsonb),
-        (gen_random_uuid(), now(), now(), $1::uuid, 'Upload', $2::jsonb),
-        (gen_random_uuid(), now(), now(), $1::uuid, 'Latency', $2::jsonb),
+        (gen_random_uuid(), now(), now(), $1::uuid, 'Download', $4::jsonb),
+        (gen_random_uuid(), now(), now(), $1::uuid, 'Upload', $3::jsonb),
+        (gen_random_uuid(), now(), now(), $1::uuid, 'Latency', $5::jsonb),
         (gen_random_uuid(), now(), now(), $1::uuid, 'Tasks', $2::jsonb)
     )
     AS t (id, created_at, updated_at, user_id, name, value)
@@ -58,7 +69,10 @@ SELECT id, created_at, user_id, name, value, updated_at
 FROM extant;
 "#,
         user_id,
-        value
+        value,
+        upload,
+        download,
+        latency
     )
     .fetch_all(&mut **transaction)
     .await?;
