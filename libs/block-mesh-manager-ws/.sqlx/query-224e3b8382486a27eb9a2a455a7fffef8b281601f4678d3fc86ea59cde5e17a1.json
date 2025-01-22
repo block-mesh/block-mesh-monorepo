@@ -1,0 +1,56 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nWITH input_data AS (\n    -- Input data\n    SELECT *\n    FROM (\n    VALUES\n        (gen_random_uuid(), now(), now(), $1::uuid, 'Uptime', $2::jsonb),\n        (gen_random_uuid(), now(), now(), $1::uuid, 'Download', $4::jsonb),\n        (gen_random_uuid(), now(), now(), $1::uuid, 'Upload', $3::jsonb),\n        (gen_random_uuid(), now(), now(), $1::uuid, 'Latency', $5::jsonb),\n        (gen_random_uuid(), now(), now(), $1::uuid, 'Tasks', $2::jsonb)\n    )\n    AS t (id, created_at, updated_at, user_id, name, value)\n),\nextant AS (\n\t-- Existing records matching user_id and name\n\tSELECT id, created_at, user_id, name, value, updated_at\n\tFROM aggregates\n\tWHERE (user_id, name) IN(SELECT user_id, name FROM input_data)\n),\ninserted AS (\n\t-- Insert new records where they do not exist\n\tINSERT INTO aggregates (id, created_at, user_id, name, value, updated_at, dummy_updated_at)\n    SELECT id, created_at, user_id, name, value, created_at, created_at\n    FROM input_data\n    WHERE NOT EXISTS (\n        SELECT 1\n\t\tFROM extant e\n\t\tWHERE\n\t\t\te.user_id = input_data.user_id\n\t\t\tAND e.name = input_data.name\n\t)\n\tRETURNING\n\t\tid,\n\t\tcreated_at,\n\t\tuser_id,\n\t\tname,\n\t\tvalue,\n\t\tupdated_at\n)\n-- Combine results from inserted and existing records\nSELECT id, created_at, user_id, name, value, updated_at\nFROM inserted\nUNION ALL\nSELECT id, created_at, user_id, name, value, updated_at\nFROM extant;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 5,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "224e3b8382486a27eb9a2a455a7fffef8b281601f4678d3fc86ea59cde5e17a1"
+}
