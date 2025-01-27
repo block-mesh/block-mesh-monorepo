@@ -14,7 +14,6 @@ use axum_login::AuthSession;
 use block_mesh_common::constants::{DeviceType, BLOCK_MESH_EMAILS};
 use block_mesh_common::interfaces::server_api::{EditEmailForm, SendEmail};
 use block_mesh_common::reqwest::http_client;
-use block_mesh_common::routes_enum::RoutesEnum;
 use chrono::{Duration, Utc};
 use http::{HeaderMap, StatusCode};
 use std::env;
