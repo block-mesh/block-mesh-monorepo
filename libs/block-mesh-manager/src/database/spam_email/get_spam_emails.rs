@@ -15,10 +15,7 @@ pub async fn get_from_email_rate_limit(key: &String) -> Option<String> {
     let cache = RATE_LIMIT_EMAIL
         .get_or_init(|| async { Arc::new(RwLock::new(HashSetWithExpiry::new())) })
         .await;
-    match cache.read().await.get(key).await {
-        Some(v) => Some(v),
-        None => None,
-    }
+    cache.read().await.get(key).await.map(|v| v)
 }
 
 pub async fn update_email_rate_limit(email_or_ip: &str, date: Option<DateTime<Utc>>) {
