@@ -1,6 +1,6 @@
 use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
 use crate::database::spam_email::get_spam_emails::{
-    get_email_rate_limit, get_spam_emails_cache, update_email_rate_limit,
+    get_from_email_rate_limit, get_spam_emails_cache, update_email_rate_limit,
 };
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::domain::spam_email::SpamEmail;
@@ -63,8 +63,9 @@ pub async fn handler(
     }
     .to_string();
 
-    let cache = get_email_rate_limit().await;
-    if cache.get(&email).await.is_some() || cache.get(&header_ip).await.is_some() {
+    if get_from_email_rate_limit(&email).await.is_some()
+        || get_from_email_rate_limit(&header_ip).await.is_some()
+    {
         return Err(Error::NotAllowedRateLimit);
     }
     let date = Utc::now() + Duration::milliseconds(60_000);

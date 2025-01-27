@@ -1,5 +1,5 @@
 use crate::database::spam_email::get_spam_emails::{
-    get_email_rate_limit, get_spam_emails_cache, update_email_rate_limit,
+    get_from_email_rate_limit, get_spam_emails_cache, update_email_rate_limit,
 };
 use crate::domain::spam_email::SpamEmail;
 use crate::errors::error::Error;
@@ -62,10 +62,9 @@ pub async fn handler(
         "127.0.0.1"
     }
     .to_string();
-    let cache = get_email_rate_limit().await;
-    if cache.get(&user.email).await.is_some()
-        || cache.get(&email).await.is_some()
-        || cache.get(&header_ip).await.is_some()
+    if get_from_email_rate_limit(&user.email).await.is_some()
+        || get_from_email_rate_limit(&email).await.is_some()
+        || get_from_email_rate_limit(&header_ip).await.is_some()
     {
         return Err(Error::NotAllowedRateLimit);
     }
