@@ -1,3 +1,7 @@
+use crate::database::spam_email::get_spam_emails::{
+    get_email_rate_limit, get_spam_emails_cache, update_email_rate_limit,
+};
+use crate::domain::spam_email::SpamEmail;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use crate::startup::application::AppState;
@@ -10,15 +14,12 @@ use axum_login::AuthSession;
 use block_mesh_common::constants::{DeviceType, BLOCK_MESH_EMAILS};
 use block_mesh_common::interfaces::server_api::{EditEmailForm, SendEmail};
 use block_mesh_common::reqwest::http_client;
+use block_mesh_common::routes_enum::RoutesEnum;
 use chrono::{Duration, Utc};
-use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
 use http::{HeaderMap, StatusCode};
 use std::env;
 use std::sync::Arc;
-use tokio::sync::OnceCell;
 use validator::validate_email;
-
-static RATE_LIMIT_EMAIL: OnceCell<DashSetWithExpiry<String>> = OnceCell::const_new();
 
 #[tracing::instrument(name = "edit_email_post", skip_all)]
 pub async fn handler(
@@ -29,6 +30,27 @@ pub async fn handler(
 ) -> Result<impl IntoResponse, Error> {
     let user = auth.user.ok_or(Error::UserNotFound)?;
     let email = form.new_email.clone().to_ascii_lowercase();
+    let spam_emails = get_spam_emails_cache().await;
+    let email_domain = match email.split('@').last() {
+        Some(d) => d.to_string(),
+        None => {
+            return Ok(Error::redirect(
+                400,
+                "Invalid email domain",
+                "Please check if email you inserted is correct",
+                RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
+            ));
+        }
+    };
+
+    if SpamEmail::check_domains(&email_domain, spam_emails).is_err() {
+        return Ok(Error::redirect(
+            400,
+            "Invalid email domain",
+            "Please check if email you inserted is correct",
+            RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
+        ));
+    }
 
     let app_env = get_envar("APP_ENVIRONMENT").await;
     let header_ip = if app_env != "local" {
@@ -42,9 +64,7 @@ pub async fn handler(
     }
     .to_string();
 
-    let cache = RATE_LIMIT_EMAIL
-        .get_or_init(|| async { DashSetWithExpiry::new() })
-        .await;
+    let cache = get_email_rate_limit().await;
     if cache.get(&user.email).is_some()
         || cache.get(&email).is_some()
         || cache.get(&header_ip).is_some()
@@ -52,9 +72,9 @@ pub async fn handler(
         return Err(Error::NotAllowedRateLimit);
     }
     let date = Utc::now() + Duration::milliseconds(60_000);
-    cache.insert(user.email.clone(), Some(date));
-    cache.insert(email.clone(), Some(date));
-    cache.insert(header_ip, Some(date));
+    update_email_rate_limit(user.email.clone(), Some(date)).await;
+    update_email_rate_limit(email, Some(date)).await;
+    update_email_rate_limit(header_ip, Some(date)).await;
 
     if !validate_email(email.clone()) {
         return Err(Error::Anyhow(anyhow!("Invalid Email")));

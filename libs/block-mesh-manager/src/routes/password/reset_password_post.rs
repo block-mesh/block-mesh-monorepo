@@ -1,5 +1,9 @@
 use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
+use crate::database::spam_email::get_spam_emails::{
+    get_email_rate_limit, get_spam_emails_cache, update_email_rate_limit,
+};
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
+use crate::domain::spam_email::SpamEmail;
 use crate::errors::error::Error;
 use crate::notification::notification_redirect::NotificationRedirect;
 use crate::startup::application::AppState;
@@ -11,16 +15,13 @@ use axum::{Extension, Form};
 use block_mesh_common::constants::{DeviceType, BLOCK_MESH_EMAILS};
 use block_mesh_common::interfaces::server_api::{ResetPasswordForm, SendEmail};
 use block_mesh_common::reqwest::http_client;
+use block_mesh_common::routes_enum::RoutesEnum;
 use chrono::{Duration, Utc};
-use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::HeaderMap;
 use sqlx::PgPool;
 use std::env;
 use std::sync::Arc;
-use tokio::sync::OnceCell;
-
-static RATE_LIMIT_EMAIL: OnceCell<DashSetWithExpiry<String>> = OnceCell::const_new();
 
 pub async fn handler(
     headers: HeaderMap,
@@ -29,6 +30,27 @@ pub async fn handler(
     Form(form): Form<ResetPasswordForm>,
 ) -> Result<Redirect, Error> {
     let email = form.email.clone().to_ascii_lowercase();
+    let spam_emails = get_spam_emails_cache().await;
+    let email_domain = match email.split('@').last() {
+        Some(d) => d.to_string(),
+        None => {
+            return Ok(Error::redirect(
+                400,
+                "Invalid email domain",
+                "Please check if email you inserted is correct",
+                RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
+            ));
+        }
+    };
+
+    if SpamEmail::check_domains(&email_domain, spam_emails).is_err() {
+        return Ok(Error::redirect(
+            400,
+            "Invalid email domain",
+            "Please check if email you inserted is correct",
+            RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
+        ));
+    }
     let app_env = get_envar("APP_ENVIRONMENT").await;
     let header_ip = if app_env != "local" {
         headers
@@ -40,15 +62,15 @@ pub async fn handler(
         "127.0.0.1"
     }
     .to_string();
-    let cache = RATE_LIMIT_EMAIL
-        .get_or_init(|| async { DashSetWithExpiry::new() })
-        .await;
+
+    let cache = get_email_rate_limit().await;
     if cache.get(&email).is_some() || cache.get(&header_ip).is_some() {
         return Err(Error::NotAllowedRateLimit);
     }
     let date = Utc::now() + Duration::milliseconds(60_000);
-    cache.insert(email.clone(), Some(date));
-    cache.insert(header_ip, Some(date));
+    update_email_rate_limit(email, Some(date)).await;
+    update_email_rate_limit(header_ip, Some(date)).await;
+
     let mut transaction = create_txn(&pool).await?;
     let user = get_user_opt_by_email(&mut transaction, &email)
         .await?

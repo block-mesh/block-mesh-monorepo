@@ -2,6 +2,7 @@
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unreachable_pub)]
 
+use block_mesh_manager::database::spam_email::get_spam_emails::init_spam_emails_cache;
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
@@ -120,6 +121,7 @@ async fn run() -> anyhow::Result<()> {
     let redis = redis_client.get_multiplexed_async_connection().await?;
     tracing::info!("Finished redis client");
     let _ = create_test_user(&db_pool).await;
+    let _ = init_spam_emails_cache(&db_pool).await;
     let check_token_map: CheckTokenResponseMap = Arc::new(DashMap::new());
     let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());
     let submit_bandwidth_limit = env::var("APP_BW_LIMIT")
