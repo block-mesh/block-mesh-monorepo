@@ -64,12 +64,12 @@ pub async fn handler(
     .to_string();
 
     let cache = get_email_rate_limit().await;
-    if cache.get(&email).is_some() || cache.get(&header_ip).is_some() {
+    if cache.get(&email).await.is_some() || cache.get(&header_ip).await.is_some() {
         return Err(Error::NotAllowedRateLimit);
     }
     let date = Utc::now() + Duration::milliseconds(60_000);
-    update_email_rate_limit(email, Some(date)).await;
-    update_email_rate_limit(header_ip, Some(date)).await;
+    update_email_rate_limit(&email, Some(date)).await;
+    update_email_rate_limit(&header_ip, Some(date)).await;
 
     let mut transaction = create_txn(&pool).await?;
     let user = get_user_opt_by_email(&mut transaction, &email)
