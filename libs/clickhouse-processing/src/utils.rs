@@ -33,6 +33,33 @@ pub struct Output {
     pub like: String,
 }
 
+#[derive(Debug, Serialize, Deserialize, Clone, clickhouse::Row)]
+pub struct Output2 {
+    pub user_name: String,
+    pub origin_id: String,
+    pub link: String,
+    pub event_date: String,
+    pub tweet: String,
+    pub reply: u32,
+    pub retweet: u32,
+    pub like: u32,
+}
+
+impl From<Output2> for Output {
+    fn from(value: Output2) -> Self {
+        Self {
+            user: value.user_name,
+            id: value.origin_id,
+            link: value.link,
+            tweet: value.tweet,
+            date: value.event_date,
+            reply: value.reply.to_string(),
+            retweet: value.retweet.to_string(),
+            like: value.like.to_string(),
+        }
+    }
+}
+
 impl Output {
     pub fn merge(element: FeedElement, data_sink: DataSinkClickHouse) -> Self {
         Self {
@@ -179,10 +206,36 @@ pub fn read_ljson_for_merge(path: &str) -> anyhow::Result<HashMap<String, Output
         }
         let line = line?;
         let json: Output = serde_json::from_str(&line).map_err(|e| {
-            eprintln!("[read_ljson_for_merge]::Error = {} | lint = {}", e, line);
+            eprintln!("[read_ljson_for_merge]::Error = {} | line = {}", e, line);
             anyhow!(e)
         })?;
         output.insert(json.id.clone(), json);
+    }
+    Ok(output)
+}
+
+pub fn read_ljson_for_merge2(path: &str) -> anyhow::Result<HashMap<String, Output>> {
+    let file = File::open(path).map_err(|e| {
+        eprintln!("[read_ljson_for_merge]::Error = {} | path = {}", e, path);
+        anyhow!(e)
+    })?;
+    let mut output: HashMap<String, Output> = HashMap::with_capacity(50_000_000);
+    let reader = io::BufReader::new(file);
+    for (index, line) in reader.lines().enumerate() {
+        if index % 100_000 == 0 {
+            println!(
+                "[read_ljson_for_merge][{}][{}]::index = {}",
+                path,
+                Utc::now(),
+                index
+            );
+        }
+        let line = line?;
+        let json: Output2 = serde_json::from_str(&line).map_err(|e| {
+            eprintln!("[read_ljson_for_merge]::Error = {} | line = {}", e, line);
+            anyhow!(e)
+        })?;
+        output.insert(json.origin_id.clone(), json.into());
     }
     Ok(output)
 }

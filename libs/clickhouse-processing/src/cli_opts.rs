@@ -19,6 +19,8 @@ pub struct Process {
     pub mode: String,
     #[arg(long)]
     pub input_file: String,
+    #[arg(long, default_value = "2")]
+    pub format: String,
 }
 
 #[derive(Parser, Debug)]
