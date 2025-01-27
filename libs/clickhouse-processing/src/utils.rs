@@ -231,6 +231,9 @@ pub fn read_ljson_for_merge2(path: &str) -> anyhow::Result<HashMap<String, Outpu
             );
         }
         let line = line?;
+        if line.is_empty() {
+            continue;
+        }
         let json: Output2 = serde_json::from_str(&line).map_err(|e| {
             eprintln!("[read_ljson_for_merge]::Error = {} | line = {}", e, line);
             anyhow!(e)
@@ -252,6 +255,9 @@ pub fn read_lson(path: &str) -> anyhow::Result<Vec<Raw>> {
             println!("[read_lson][{}][{}]::index = {}", path, Utc::now(), index);
         }
         let line = line?;
+        if line.is_empty() {
+            continue;
+        }
         let json: Raw = serde_json::from_str(&line)?;
         raws.push(json);
     }
