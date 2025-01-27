@@ -2,10 +2,10 @@
 #![deny(elided_lifetimes_in_paths)]
 #![deny(unreachable_pub)]
 
-use block_mesh_manager::database::spam_email::get_spam_emails::init_spam_emails_cache;
 use cfg_if::cfg_if;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
+    use block_mesh_manager::database::spam_email::get_spam_emails::init_spam_emails_cache;
     use logger_general::tracing::get_sentry_layer;
     use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
     use dash_with_expiry::hash_set_with_expiry::HashSetWithExpiry;
