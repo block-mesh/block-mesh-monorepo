@@ -21,7 +21,6 @@ use bcrypt::{hash, DEFAULT_COST};
 use block_mesh_common::constants::{DeviceType, BLOCK_MESH_EMAILS};
 use block_mesh_common::interfaces::server_api::{RegisterForm, RegisterResponse, SendEmail};
 use block_mesh_common::reqwest::http_client;
-use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
 use chrono::{Duration, Utc};
 use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;

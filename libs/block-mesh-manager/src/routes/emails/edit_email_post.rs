@@ -65,16 +65,16 @@ pub async fn handler(
     .to_string();
 
     let cache = get_email_rate_limit().await;
-    if cache.get(&user.email).is_some()
-        || cache.get(&email).is_some()
-        || cache.get(&header_ip).is_some()
+    if cache.get(&user.email).await.is_some()
+        || cache.get(&email).await.is_some()
+        || cache.get(&header_ip).await.is_some()
     {
         return Err(Error::NotAllowedRateLimit);
     }
     let date = Utc::now() + Duration::milliseconds(60_000);
-    update_email_rate_limit(user.email.clone(), Some(date)).await;
-    update_email_rate_limit(email, Some(date)).await;
-    update_email_rate_limit(header_ip, Some(date)).await;
+    update_email_rate_limit(&user.email, Some(date)).await;
+    update_email_rate_limit(&email, Some(date)).await;
+    update_email_rate_limit(&header_ip, Some(date)).await;
 
     if !validate_email(email.clone()) {
         return Err(Error::Anyhow(anyhow!("Invalid Email")));

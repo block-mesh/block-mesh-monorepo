@@ -27,7 +27,7 @@ use crate::database::api_token::create_api_token::create_api_token;
 use crate::database::invite_code::create_invite_code::create_invite_code;
 use crate::database::invite_code::get_user_opt_by_invited_code::get_user_opt_by_invited_code;
 use crate::database::nonce::create_nonce::create_nonce;
-use crate::database::spam_email::get_spam_emails::{get_spam_emails_cache, init_spam_emails_cache};
+use crate::database::spam_email::get_spam_emails::get_spam_emails_cache;
 use crate::database::uptime_report::create_uptime_report::create_uptime_report;
 use crate::database::user::create_user::create_user;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;

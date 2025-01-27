@@ -1,5 +1,5 @@
 use crate::database::nonce::get_nonce_by_nonce::get_nonce_by_nonce;
-use crate::database::spam_email::get_spam_emails::{get_spam_emails_cache, init_spam_emails_cache};
+use crate::database::spam_email::get_spam_emails::get_spam_emails_cache;
 use crate::database::user::update_email::update_email;
 use crate::database::user::update_verified_email::update_verified_email;
 use crate::domain::spam_email::SpamEmail;

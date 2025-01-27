@@ -52,7 +52,7 @@ pub async fn init_spam_emails_cache(pool: &PgPool) -> anyhow::Result<()> {
         FROM spam_emails
         "#,
     )
-    .fetch_all(&mut **transaction)
+    .fetch_all(&mut *transaction)
     .await?;
     *cache.write().await = spam_emails.clone();
     commit_txn(transaction).await?;
