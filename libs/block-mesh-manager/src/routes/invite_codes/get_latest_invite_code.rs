@@ -15,12 +15,13 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Json(body): Json<GetLatestInviteCodeRequest>,
 ) -> Result<Json<GetLatestInviteCodeResponse>, Error> {
-    if let Some(invite_code) = state.invite_codes.get(&body.email).await {
+    let email = body.email.clone().to_ascii_lowercase();
+    if let Some(invite_code) = state.invite_codes.get(&email).await {
         let code = invite_code.clone();
         return Ok(Json(GetLatestInviteCodeResponse { invite_code: code }));
     }
     let mut transaction = create_txn(&state.follower_pool).await?;
-    let user = get_user_and_api_token_by_email(&mut transaction, &body.email)
+    let user = get_user_and_api_token_by_email(&mut transaction, &email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     if user.token.as_ref() != &body.api_token {
@@ -31,6 +32,10 @@ pub async fn handler(
         .await
         .map_err(Error::from)?;
     commit_txn(transaction).await?;
+    state
+        .invite_codes
+        .insert(email.clone(), user_invite_code.invite_code.clone(), None)
+        .await;
     Ok(Json(GetLatestInviteCodeResponse {
         invite_code: user_invite_code.invite_code,
     }))
