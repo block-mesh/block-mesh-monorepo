@@ -7,6 +7,7 @@ use axum::response::Redirect;
 use axum::{Extension, Form};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::EditInviteCodeForm;
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::sync::Arc;
 
@@ -17,7 +18,7 @@ pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
     Form(form): Form<EditInviteCodeForm>,
 ) -> Result<Redirect, Error> {
-    let mut transaction = pool.begin().await.map_err(Error::from)?;
+    let mut transaction = create_txn(&pool).await?;
     let user = auth.user.ok_or(Error::UserNotFound)?;
     if !form.new_invite_code.chars().all(char::is_alphanumeric) {
         return Err(Error::InternalServer);
@@ -28,11 +29,10 @@ pub async fn handler(
     {
         return Err(Error::InternalServer);
     };
-    transaction.commit().await.map_err(Error::from)?;
-    let email = user.email.clone();
+    commit_txn(transaction).await?;
     state
         .invite_codes
-        .insert(email, form.new_invite_code, None)
+        .insert(user.email.clone(), form.new_invite_code.clone(), None)
         .await;
     Ok(Redirect::to("/ui/dashboard"))
 }
