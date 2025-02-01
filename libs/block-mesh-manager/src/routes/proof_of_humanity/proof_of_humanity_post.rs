@@ -4,6 +4,7 @@ use crate::domain::perk::PerkName;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use crate::notification::notification_redirect::NotificationRedirect;
+use crate::routes::health_check::auth_status::AUTH_STATUS_RATE_LIMIT;
 use crate::startup::application::AppState;
 use crate::utils::cftoken::check_cf_token;
 use crate::utils::hcaptcha::hcaptcha;
@@ -14,6 +15,7 @@ use axum::{Extension, Form};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::ProofOfHumanForm;
 use block_mesh_common::routes_enum::RoutesEnum;
+use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use std::sync::Arc;
 
@@ -73,6 +75,10 @@ pub async fn handler(
     )
     .await?;
     commit_txn(transaction).await?;
+    let cache = AUTH_STATUS_RATE_LIMIT
+        .get_or_init(|| async { HashMapWithExpiry::new() })
+        .await;
+    cache.remove(&user.email).await;
     Ok(NotificationRedirect::redirect(
         "Success",
         "Human Verification done",
