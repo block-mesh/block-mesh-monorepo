@@ -273,7 +273,7 @@ pub struct GetUserUptimeResponse {
 }
 
 #[typeshare]
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GetLatestInviteCodeResponse {
     pub invite_code: String,
 }
