@@ -8,8 +8,14 @@ use axum::{Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::{AuthStatusParams, AuthStatusResponse};
 use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
+use chrono::{Duration, Utc};
+use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use std::sync::Arc;
+use tokio::sync::OnceCell;
+
+pub static AUTH_STATUS_RATE_LIMIT: OnceCell<HashMapWithExpiry<String, Json<AuthStatusResponse>>> =
+    OnceCell::const_new();
 
 #[tracing::instrument(name = "auth_status", skip_all)]
 pub async fn handler(
@@ -18,6 +24,12 @@ pub async fn handler(
     Query(query): Query<AuthStatusParams>,
 ) -> Result<Json<AuthStatusResponse>, Error> {
     let user = auth.user.ok_or(Error::UserNotFound)?;
+    let cache = AUTH_STATUS_RATE_LIMIT
+        .get_or_init(|| async { HashMapWithExpiry::new() })
+        .await;
+    if let Some(response) = cache.get(&user.email).await {
+        return Ok(response);
+    }
     let enable_proof_of_humanity = match query.perks_page {
         Some(perks_page) => {
             if perks_page {
@@ -62,11 +74,16 @@ pub async fn handler(
             }
         }
     };
-    Ok(Json(AuthStatusResponse {
+    let response = Json(AuthStatusResponse {
         enable_proof_of_humanity,
         email: Some(user.email.to_ascii_lowercase()),
         status_code: 200,
         logged_in: true,
         wallet_address,
-    }))
+    });
+    let date = Utc::now() + Duration::milliseconds(120_000);
+    cache
+        .insert(user.email.clone(), response.clone(), Some(date))
+        .await;
+    Ok(response)
 }

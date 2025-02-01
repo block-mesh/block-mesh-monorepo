@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        DELETE\n        FROM daily_stats_on_going d\n        WHERE d.day = $1\n        AND d.status = 'OnGoing'\n        AND d.day < CURRENT_DATE - INTERVAL '1 day'\n        AND EXISTS (\n            SELECT 1\n            FROM daily_stats_finalized f\n            WHERE f.day = $1\n            AND f.status = 'Finalized'\n            )\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Date"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0acd8f0c3a14082d54b4ed68d0ba5781d8dd2f62af18a6ed53f8dca9c7013725"
+}

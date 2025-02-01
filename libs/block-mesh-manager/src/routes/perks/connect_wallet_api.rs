@@ -3,6 +3,7 @@ use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::database::user::update_user_wallet::update_user_wallet;
 use crate::domain::perk::PerkName;
 use crate::errors::error::Error;
+use crate::routes::health_check::auth_status::AUTH_STATUS_RATE_LIMIT;
 use crate::startup::application::AppState;
 use askama_axum::IntoResponse;
 use axum::extract::State;
@@ -12,6 +13,7 @@ use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_str;
 use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
 use block_mesh_manager_database_domain::domain::update_aggregate::update_aggregate;
+use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::StatusCode;
 use serde_json::Value;
@@ -148,6 +150,10 @@ pub async fn handler(
         .into_response());
     }
     commit_txn(transaction).await?;
+    let cache = AUTH_STATUS_RATE_LIMIT
+        .get_or_init(|| async { HashMapWithExpiry::new() })
+        .await;
+    cache.remove(&user_and_api_token.email).await;
     Ok(Json(ConnectWalletResponse {
         status: 200,
         message: None,

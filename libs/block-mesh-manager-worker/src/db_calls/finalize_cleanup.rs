@@ -4,21 +4,20 @@ use sqlx::{Postgres, Transaction};
 #[tracing::instrument(name = "finalize_cleanup", skip_all, err)]
 pub async fn finalize_cleanup(transaction: &mut Transaction<'_, Postgres>) -> anyhow::Result<()> {
     let now = Utc::now();
-    let day = now.date_naive() - Duration::days(1);
+    let day = now.date_naive() - Duration::days(2);
     sqlx::query!(
         r#"
         DELETE
-        FROM daily_stats_on_going
-        WHERE
-        id IN (
-            SELECT
-                DISTINCT daily_stats_on_going.id
-            FROM daily_stats_on_going
-			INNER JOIN daily_stats_finalized ON daily_stats_on_going.day = daily_stats_finalized.day
-		WHERE
-			daily_stats_on_going.day = $1
-			AND daily_stats_on_going.status = 'OnGoing'
-		)
+        FROM daily_stats_on_going d
+        WHERE d.day = $1
+        AND d.status = 'OnGoing'
+        AND d.day < CURRENT_DATE - INTERVAL '1 day'
+        AND EXISTS (
+            SELECT 1
+            FROM daily_stats_finalized f
+            WHERE f.day = $1
+            AND f.status = 'Finalized'
+            )
         "#,
         day
     )

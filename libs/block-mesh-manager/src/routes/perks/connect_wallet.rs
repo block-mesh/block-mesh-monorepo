@@ -4,6 +4,7 @@ use crate::database::user::update_user_wallet::update_user_wallet;
 use crate::domain::perk::PerkName;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
+use crate::routes::health_check::auth_status::AUTH_STATUS_RATE_LIMIT;
 use crate::startup::application::AppState;
 use axum::extract::State;
 use axum::{Extension, Json};
@@ -12,6 +13,7 @@ use block_mesh_common::interfaces::server_api::{ConnectWalletRequest, ConnectWal
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_str;
 use block_mesh_manager_database_domain::domain::update_aggregate::update_aggregate;
+use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use serde_json::Value;
 use solana_sdk::pubkey::Pubkey;
@@ -122,6 +124,10 @@ pub async fn handler(
         }));
     }
     commit_txn(transaction).await?;
+    let cache = AUTH_STATUS_RATE_LIMIT
+        .get_or_init(|| async { HashMapWithExpiry::new() })
+        .await;
+    cache.remove(&user.email).await;
     Ok(Json(ConnectWalletResponse {
         status: 200,
         message: None,
