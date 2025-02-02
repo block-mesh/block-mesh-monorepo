@@ -53,12 +53,7 @@ pub fn ExtensionRegister() -> impl IntoView {
             match result {
                 Ok(_) => {
                     state.api_token.update(|t| *t = uuid::Uuid::default());
-                    // send_message_channel(
-                    //     MessageType::SET,
-                    //     MessageKey::ApiToken,
-                    //     Option::from(MessageValue::UUID(uuid::Uuid::default())),
-                    // )
-                    // .await;
+                    ExtensionWrapperState::store_api_token(uuid::Uuid::default()).await;
                     state
                         .status
                         .update(|v| *v = AuthStatus::WaitingEmailVerification);
