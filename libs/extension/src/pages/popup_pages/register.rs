@@ -15,7 +15,6 @@ use web_sys::HtmlInputElement;
 #[component]
 pub fn ExtensionRegister() -> impl IntoView {
     let state = use_context::<ExtensionWrapperState>().unwrap();
-    // let notifications = expect_context::<NotificationContext>();
     let (password, set_password) = create_signal(String::new());
     let (email, set_email) = create_signal(String::new());
     let (invite_code, set_invite_code) = create_signal(String::new());
@@ -60,17 +59,17 @@ pub fn ExtensionRegister() -> impl IntoView {
                     //     Option::from(MessageValue::UUID(uuid::Uuid::default())),
                     // )
                     // .await;
-                    // state
-                    //     .status
-                    //     .update(|v| *v = AuthStatus::WaitingEmailVerification);
-                    // notifications.set_success("Please confirm email and login");
+                    state
+                        .status
+                        .update(|v| *v = AuthStatus::WaitingEmailVerification);
+                    state.set_success("Please confirm email and login");
                 }
                 Err(err) => {
                     tracing::error!(
                         "Unable to register new account for {}: {err}",
                         credentials.email
                     );
-                    // notifications.set_error(err.to_string());
+                    state.set_error(err.to_string());
                 }
             }
             set_wait.set(false);

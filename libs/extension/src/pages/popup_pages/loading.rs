@@ -10,7 +10,6 @@ pub fn ExtensionLoading() -> impl IntoView {
                 src="https://r2-images.blockmesh.xyz/db4411b4-eaf5-45db-121d-15060d780800.png"
                 alt="background"
             />
-            // <div class="auth-card-frame"></div>
             <div class="auth-card-top"></div>
             <div class="auth-card-body">
                 <Logo/>

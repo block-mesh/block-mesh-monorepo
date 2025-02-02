@@ -35,7 +35,7 @@ pub fn ExtensionOptionsPage() -> impl IntoView {
             None => (),
             Some(s) => {
                 s.clear().await;
-                ExtensionWrapperState::set_success("Cache cleared".to_string(), s.success);
+                s.set_success("Cache cleared".to_string());
             }
         }
     });
@@ -46,15 +46,15 @@ pub fn ExtensionOptionsPage() -> impl IntoView {
             Some(s) => s,
         };
         if url.get_untracked().is_empty() {
-            ExtensionWrapperState::set_error("URL is empty".to_string(), s.error);
+            s.set_error("URL is empty".to_string());
             return;
         }
         if ws_url.get_untracked().is_empty() {
-            ExtensionWrapperState::set_error("WS URL is empty".to_string(), s.error);
+            s.set_error("WS URL is empty".to_string());
             return;
         }
         if data_sink_url.get_untracked().is_empty() {
-            ExtensionWrapperState::set_error("Data-Sink URL is empty".to_string(), s.error);
+            s.set_error("Data-Sink URL is empty".to_string());
             return;
         }
         let raw_url = url.get_untracked().trim_end_matches('/').to_string();
@@ -64,15 +64,15 @@ pub fn ExtensionOptionsPage() -> impl IntoView {
             .trim_end_matches('/')
             .to_string();
         if let Err(error) = Url::parse(&raw_url) {
-            ExtensionWrapperState::set_error(format!("Invalid URL: {}", error), s.error);
+            s.set_error(format!("Invalid URL: {}", error));
             return;
         }
         if let Err(error) = Url::parse(&raw_ws_url) {
-            ExtensionWrapperState::set_error(format!("Invalid WS URL: {}", error), s.error);
+            s.set_error(format!("Invalid WS URL: {}", error));
             return;
         }
         if let Err(error) = Url::parse(&raw_data_sink_url) {
-            ExtensionWrapperState::set_error(format!("Invalid Data-Sink URL: {}", error), s.error);
+            s.set_error(format!("Invalid Data-Sink URL: {}", error));
             return;
         }
         s.blockmesh_url.update(|v| *v = raw_url.clone());
@@ -84,7 +84,7 @@ pub fn ExtensionOptionsPage() -> impl IntoView {
         ExtensionWrapperState::store_blockmesh_url(raw_url).await;
         ExtensionWrapperState::store_blockmesh_ws_url(raw_ws_url).await;
         ExtensionWrapperState::store_blockmesh_data_sink_url(raw_data_sink_url).await;
-        ExtensionWrapperState::set_success("URL saved".to_string(), s.success);
+        s.set_success("URL saved".to_string());
     });
 
     view! {

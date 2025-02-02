@@ -6,7 +6,6 @@ use leptos::*;
 #[component]
 pub fn ExtensionLoggedIn() -> impl IntoView {
     let state = use_context::<ExtensionWrapperState>().unwrap();
-    // let notifications = expect_context::<NotificationContext>();
     let invite_code = Signal::derive(move || state.invite_code.get());
     let invite_url = Signal::derive(move || {
         format!(
@@ -20,13 +19,13 @@ pub fn ExtensionLoggedIn() -> impl IntoView {
         spawn_local(async move {
             let invite_url_string = invite_url.get_untracked();
             if invite_code.get_untracked().is_empty() {
-                // notifications.set_error(
-                //     "Missing invite code, please close and reopen the extension popup".to_string(),
-                // );
+                state.set_error(
+                    "Missing invite code, please close and reopen the extension popup".to_string(),
+                );
                 return;
             }
             // send_to_clipboard(&invite_url_string).await;
-            // notifications.set_success("Copied to clipboard".to_string());
+            state.set_success("Copied to clipboard".to_string());
         });
     };
 

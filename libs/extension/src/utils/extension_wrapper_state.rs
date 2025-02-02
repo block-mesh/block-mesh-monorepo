@@ -29,8 +29,18 @@ use block_mesh_common::interfaces::server_api::{
 };
 use logger_leptos::leptos_tracing::setup_leptos_tracing;
 
+#[derive(Debug, Serialize, Deserialize, Default, Clone, PartialEq)]
+pub enum Page {
+    #[default]
+    Login,
+    Loading,
+    Register,
+    LoggedIn,
+}
+
 #[derive(Clone, Serialize, Deserialize, Copy)]
 pub struct ExtensionWrapperState {
+    pub page: RwSignal<Page>,
     pub email: RwSignal<String>,
     pub api_token: RwSignal<Uuid>,
     pub device_id: RwSignal<Uuid>,
@@ -55,6 +65,7 @@ pub struct ExtensionWrapperState {
 impl Default for ExtensionWrapperState {
     fn default() -> Self {
         Self {
+            page: RwSignal::new(Page::default()),
             feed_origin: RwSignal::new(String::default()),
             feed_selector: RwSignal::new(String::default()),
             twitter_creds_url: RwSignal::new(
@@ -231,6 +242,7 @@ impl ExtensionWrapperState {
         send_storage_value_to_iframe(MessageKey::UploadSpeed, MessageValue::F64(upload_speed));
         self.last_update.update(|v| *v = now);
         send_storage_value_to_iframe(MessageKey::LastUpdate, MessageValue::I64(now));
+        log!("email = {}, api_token = {}", email, api_token);
         if !email.is_empty() && !api_token.is_nil() && api_token != Uuid::default() {
             self.status.update(|v| *v = AuthStatus::LoggedIn);
             // let credentials = CheckTokenRequest {
@@ -449,32 +461,34 @@ impl ExtensionWrapperState {
     }
 
     #[tracing::instrument(name = "AppState::set_success")]
-    pub fn set_success<T>(success: T, signal: RwSignal<Option<String>>)
+    pub fn set_success<T>(&self, success: T)
     where
         T: Display + Clone + Into<String> + Debug,
     {
+        let signal = self.success;
         let success = Option::from(success.clone().to_string());
         signal.update(|v| *v = success);
         set_timeout(
             move || {
                 signal.update(|v| *v = None);
             },
-            Duration::from_millis(3500),
-        );
+            Duration::from_millis(5000),
+        )
     }
 
     #[tracing::instrument(name = "AppState::set_error")]
-    pub fn set_error<T>(error: T, signal: RwSignal<Option<String>>)
+    pub fn set_error<T>(self, error: T)
     where
         T: Display + Clone + Into<String> + Debug,
     {
+        let signal = self.error;
         let error = Option::from(error.clone().to_string());
         signal.update(|v| *v = error);
         set_timeout(
             move || {
                 signal.update(|v| *v = None);
             },
-            Duration::from_millis(3500),
+            Duration::from_millis(5000),
         );
     }
 

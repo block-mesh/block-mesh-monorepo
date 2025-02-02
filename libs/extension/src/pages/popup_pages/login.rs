@@ -1,7 +1,7 @@
 use crate::components::logo::Logo;
 use crate::utils::auth::login;
 use crate::utils::extension_wrapper_state::ExtensionWrapperState;
-use block_mesh_common::chrome_storage::{AuthStatus, MessageKey, MessageType, MessageValue};
+use block_mesh_common::chrome_storage::AuthStatus;
 use block_mesh_common::interfaces::server_api::LoginForm;
 use leptos::logging::log;
 use leptos::*;
@@ -10,7 +10,6 @@ use uuid::Uuid;
 #[component]
 pub fn ExtensionLogin() -> impl IntoView {
     let state = use_context::<ExtensionWrapperState>().unwrap();
-    // let notifications = expect_context::<NotificationContext>();
     let (password, set_password) = create_signal(String::new());
     let (email, set_email) = create_signal(String::new());
     let (wait, set_wait) = create_signal(false);
@@ -34,7 +33,7 @@ pub fn ExtensionLogin() -> impl IntoView {
             match result {
                 Ok(res) => {
                     if res.message.is_some() {
-                        // notifications.set_error(res.message.unwrap());
+                        state.set_error(res.message.unwrap());
                         set_wait.set(false);
                         return;
                     }
@@ -43,27 +42,17 @@ pub fn ExtensionLogin() -> impl IntoView {
                             || state.api_token.get_untracked() == Uuid::default()
                         {
                             log!("Store new api token");
-                            state.api_token.update(|v| *v = api_token);
+                            state.api_token.update(|v| *v = api_token.clone());
                             state.email.update(|e| *e = credentials.email.clone());
-                            // send_message_channel(
-                            //     MessageType::SET,
-                            //     MessageKey::Email,
-                            //     Option::from(MessageValue::String(state.email.get_untracked())),
-                            // )
-                            // .await;
-                            // send_message_channel(
-                            //     MessageType::SET,
-                            //     MessageKey::ApiToken,
-                            //     Option::from(MessageValue::UUID(api_token)),
-                            // )
-                            // .await;
+                            ExtensionWrapperState::store_email(credentials.email.clone()).await;
+                            ExtensionWrapperState::store_api_token(api_token).await;
                         }
-                        // notifications.set_success("Successfully logged in");
+                        state.set_success("Successfully logged in");
                         state.status.update(|v| *v = AuthStatus::LoggedIn);
                     }
                 }
                 Err(_) => {
-                    // notifications.set_error("Failed to login, please check your credentials again or reset password https://app.blockmesh.xyz/reset_password".to_string());
+                    state.set_error("Failed to login, please check your credentials again or reset password https://app.blockmesh.xyz/reset_password".to_string());
                 }
             }
             set_wait.set(false);
@@ -77,7 +66,6 @@ pub fn ExtensionLogin() -> impl IntoView {
                 src="https://r2-images.blockmesh.xyz/2f6630f8-f48a-47ed-753b-4445c9399e00.png"
                 alt="background"
             />
-            // <div class="auth-card-frame"></div>
             <div class="auth-card-top"></div>
             <div class="auth-card-body">
                 <Logo/>
