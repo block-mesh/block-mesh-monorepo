@@ -42,7 +42,7 @@ pub fn ExtensionLogin() -> impl IntoView {
                             || state.api_token.get_untracked() == Uuid::default()
                         {
                             log!("Store new api token");
-                            state.api_token.update(|v| *v = api_token.clone());
+                            state.api_token.update(|v| *v = api_token);
                             state.email.update(|e| *e = credentials.email.clone());
                             ExtensionWrapperState::store_email(credentials.email.clone()).await;
                             ExtensionWrapperState::store_api_token(api_token).await;

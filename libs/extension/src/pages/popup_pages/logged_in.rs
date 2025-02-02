@@ -2,31 +2,23 @@ use crate::components::logo::Logo;
 use crate::utils::extension_wrapper_state::ExtensionWrapperState;
 use block_mesh_common::constants::BLOCKMESH_VERSION;
 use leptos::*;
+use leptos_use::{use_clipboard, UseClipboardReturn};
 
 #[component]
 pub fn ExtensionLoggedIn() -> impl IntoView {
+    let UseClipboardReturn { copy, .. } = use_clipboard();
     let state = use_context::<ExtensionWrapperState>().unwrap();
-    let invite_code = Signal::derive(move || state.invite_code.get());
-    let invite_url = Signal::derive(move || {
-        format!(
-            "{}/register?invite_code={}",
-            state.blockmesh_url.get(),
-            state.invite_code.get()
-        )
-    });
-
     let copy_to_clipboard = move |_| {
-        spawn_local(async move {
-            let invite_url_string = invite_url.get_untracked();
-            if invite_code.get_untracked().is_empty() {
-                state.set_error(
-                    "Missing invite code, please close and reopen the extension popup".to_string(),
-                );
-                return;
-            }
-            // send_to_clipboard(&invite_url_string).await;
-            state.set_success("Copied to clipboard".to_string());
-        });
+        let invite_code_string = state.invite_code.get_untracked();
+        if !invite_code_string.is_empty() {
+            copy(&format!(
+                "https://app.blockmesh.xyz/register?invite_code={}",
+                invite_code_string
+            ));
+            state.set_success("Successfully Copied");
+        } else {
+            state.set_error("Failed to copy invite code");
+        }
     };
 
     let logout = create_action(move |_| async move {
