@@ -19,7 +19,16 @@ pub async fn get_or_create_daily_stat(
         r#"
            WITH
             extant AS (
-                SELECT id, created_at, user_id, tasks_count, status, day, uptime, updated_at, ref_bonus, ref_bonus_applied FROM daily_stats WHERE user_id = $3 AND day = $6
+                SELECT id, created_at, user_id, tasks_count, status, day, uptime, updated_at, ref_bonus, ref_bonus_applied FROM daily_stats
+                WHERE user_id = $3
+                AND day = $6
+                AND status = $5
+            ),
+            extant2 AS (
+                SELECT id, created_at, user_id, tasks_count, status, day, uptime, updated_at, ref_bonus, ref_bonus_applied FROM daily_stats
+                WHERE user_id = $3
+                AND day = $6
+                AND status = $11
             ),
             inserted AS (
                 INSERT INTO daily_stats (id, created_at, user_id, tasks_count, status, day, uptime, updated_at, ref_bonus, ref_bonus_applied)
@@ -30,6 +39,8 @@ pub async fn get_or_create_daily_stat(
         SELECT id, created_at, user_id, tasks_count, status, day, uptime, updated_at, ref_bonus, ref_bonus_applied FROM inserted
         UNION ALL
         SELECT id, created_at, user_id, tasks_count, status, day, uptime, updated_at, ref_bonus, ref_bonus_applied FROM extant
+        UNION ALL
+        SELECT id, created_at, user_id, tasks_count, status, day, uptime, updated_at, ref_bonus, ref_bonus_applied FROM extant2
         "#,
         id,
         now.clone(),
@@ -40,7 +51,8 @@ pub async fn get_or_create_daily_stat(
         0.0,
         now,
         0.0,
-        false
+        false,
+        DailyStatStatus::Finalized.to_string()
     )
     .fetch_one(&mut **transaction)
     .await?;
