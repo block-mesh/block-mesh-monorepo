@@ -19,7 +19,6 @@ use crate::database::invite_code::get_number_of_users_invited::get_number_of_use
 use crate::database::invite_code::get_referral_summary::get_user_referrals_summary;
 use crate::database::invite_code::get_user_latest_invite_code::get_user_latest_invite_code;
 use crate::database::perks::get_user_perks::get_user_perks;
-use crate::database::users_ip::get_user_ips::get_user_ips;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
@@ -49,14 +48,14 @@ pub async fn dashboard_data_extractor(
     if let Some(response) = cache.get(&user.email).await {
         return Ok(response);
     }
-    let ip_limit = get_envar("DASHBOARD_IP_LIMIT")
-        .await
-        .parse()
-        .unwrap_or(5i64);
+    // let ip_limit = get_envar("DASHBOARD_IP_LIMIT")
+    //     .await
+    //     .parse()
+    //     .unwrap_or(5i64);
     let user_invite_code = get_user_latest_invite_code(follower_transaction, &user.user_id)
         .await
         .map_err(Error::from)?;
-    let user_ips = get_user_ips(follower_transaction, &user.user_id, ip_limit).await?;
+    // let user_ips = get_user_ips(follower_transaction, &user.user_id, ip_limit).await?;
     let referral_summary = get_user_referrals_summary(follower_transaction, &user.user_id)
         .await
         .map_err(Error::from)?;
@@ -141,7 +140,7 @@ pub async fn dashboard_data_extractor(
         true_count: daily_stats_count.true_count,
         false_count: daily_stats_count.false_count,
         wallet_address: user.wallet_address,
-        user_ips,
+        // user_ips,
         calls_to_action: calls_to_action
             .into_iter()
             .map(|i| CallToActionUI {

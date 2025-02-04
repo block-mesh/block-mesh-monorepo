@@ -321,7 +321,7 @@ pub struct DashboardResponse {
     pub calls_to_action: Vec<CallToActionUI>,
     pub referral_summary: ReferralSummary,
     pub verified_email: bool,
-    pub user_ips: Vec<UserIpInfo>,
+    // pub user_ips: Vec<UserIpInfo>,
     pub wallet_address: Option<String>,
 }
 
@@ -718,4 +718,11 @@ pub struct CreateBulkTwitterTask {
 pub struct GetTwitterProfileDetails {
     pub code: String,
     pub username: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct DebugEndpoint {
+    pub code: String,
+    pub method: String,
+    pub user_id: Uuid,
 }
