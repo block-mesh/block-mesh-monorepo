@@ -1,0 +1,2 @@
+DROP INDEX daily_stats_background_job_day;
+DROP INDEX twitter_tasks_twitter_username;
