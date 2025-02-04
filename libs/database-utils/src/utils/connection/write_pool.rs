@@ -33,8 +33,7 @@ pub async fn write_pool(database_url_envar_name: Option<String>) -> PgPool {
             } else {
                 sqlx::postgres::PgSslMode::default()
             },
-        )
-        .log_statements(LevelFilter::Info);
+        );
     PgPoolOptions::new()
         .acquire_timeout(Duration::from_secs(
             env::var("ACQUIRE_TIMEOUT")
