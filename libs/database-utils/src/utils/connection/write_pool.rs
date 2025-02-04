@@ -4,7 +4,6 @@ use std::env;
 use std::str::FromStr;
 use std::time::Duration;
 use tracing::log;
-use tracing::log::LevelFilter;
 
 pub async fn write_pool(database_url_envar_name: Option<String>) -> PgPool {
     let url = database_url_envar_name.unwrap_or("WRITE_DATABASE_URL".to_string());
