@@ -719,3 +719,10 @@ pub struct GetTwitterProfileDetails {
     pub code: String,
     pub username: String,
 }
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct DebugEndpoint {
+    pub code: String,
+    pub method: String,
+    pub user_id: Uuid,
+}

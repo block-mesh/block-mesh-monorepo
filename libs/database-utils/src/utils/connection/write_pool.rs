@@ -4,6 +4,7 @@ use std::env;
 use std::str::FromStr;
 use std::time::Duration;
 use tracing::log;
+use tracing::log::LevelFilter;
 
 pub async fn write_pool(database_url_envar_name: Option<String>) -> PgPool {
     let url = database_url_envar_name.unwrap_or("WRITE_DATABASE_URL".to_string());
@@ -32,7 +33,8 @@ pub async fn write_pool(database_url_envar_name: Option<String>) -> PgPool {
             } else {
                 sqlx::postgres::PgSslMode::default()
             },
-        );
+        )
+        .log_statements(LevelFilter::Info);
     PgPoolOptions::new()
         .acquire_timeout(Duration::from_secs(
             env::var("ACQUIRE_TIMEOUT")
