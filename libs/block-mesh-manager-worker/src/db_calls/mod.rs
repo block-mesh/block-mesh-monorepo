@@ -7,4 +7,3 @@ pub mod create_task;
 pub mod finalize_cleanup;
 pub mod get_all_rpcs;
 pub mod get_or_create_analytics;
-pub mod touch_users_ip;

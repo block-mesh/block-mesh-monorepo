@@ -321,7 +321,7 @@ pub struct DashboardResponse {
     pub calls_to_action: Vec<CallToActionUI>,
     pub referral_summary: ReferralSummary,
     pub verified_email: bool,
-    pub user_ips: Vec<UserIpInfo>,
+    // pub user_ips: Vec<UserIpInfo>,
     pub wallet_address: Option<String>,
 }
 

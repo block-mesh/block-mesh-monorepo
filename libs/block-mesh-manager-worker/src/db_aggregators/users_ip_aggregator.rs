@@ -50,11 +50,10 @@ pub async fn ip_address_and_users_ip_bulk_query(
            INTO ip_addresses
            (id, ip, created_at, enriched)
            VALUES {}
-           ON CONFLICT (ip) DO UPDATE SET updated_at = '{}'::timestamptz
+           ON CONFLICT (ip) DO NOTHING
            RETURNING id, ip
         "#,
-        value_str,
-        now.to_rfc3339(),
+        value_str
     );
     let mut transaction = create_txn(pool).await?;
     let rows = sqlx::query(&query)
@@ -99,10 +98,9 @@ pub async fn ip_address_and_users_ip_bulk_query(
         r#"
             INSERT INTO users_ip (id, user_id, ip_id, created_at, updated_at)
             VALUES {}
-            ON CONFLICT (user_id, ip_id) DO UPDATE SET updated_at = '{}'::timestamptz
+            ON CONFLICT (user_id, ip_id) DO NOTHING
         "#,
-        value_str,
-        now.to_rfc3339()
+        value_str
     );
     let _ = sqlx::query(&query)
         .execute(&mut *transaction)
