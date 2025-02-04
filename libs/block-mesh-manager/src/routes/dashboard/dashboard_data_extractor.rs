@@ -19,7 +19,6 @@ use crate::database::invite_code::get_number_of_users_invited::get_number_of_use
 use crate::database::invite_code::get_referral_summary::get_user_referrals_summary;
 use crate::database::invite_code::get_user_latest_invite_code::get_user_latest_invite_code;
 use crate::database::perks::get_user_perks::get_user_perks;
-use crate::database::users_ip::get_user_ips::get_user_ips;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
