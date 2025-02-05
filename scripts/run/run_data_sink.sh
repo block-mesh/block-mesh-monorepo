@@ -14,9 +14,10 @@ fi
 #export POSTGRES_DB="data-sink"
 #ensure "${ROOT}/scripts/init_db.sh"
 ensure "${ROOT}/scripts/init_clickhouse.sh"
-export DATABASE_URL="postgres://postgres:password@localhost:5552/data-sink"
+#export DATABASE_URL="postgres://postgres:password@localhost:5552/data-sink"
 export CLICKHOUSE_URL="http://127.0.0.1:8123"
 export FOLLOWER_DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
+export DATABASE_URL="${FOLLOWER_DATABASE_URL}"
 export USE_CLICKHOUSE="true"
 export AGG_SIZE=1
 export ENFORCE_SIGNATURE=true

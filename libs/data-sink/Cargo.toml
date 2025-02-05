@@ -7,7 +7,7 @@ edition = "2021"
 
 [dependencies]
 solana-sdk = { workspace = true }
-dash-with-expiry = { path = "../dash-with-expiry" }
+dash-with-expiry = { path = "../dash-with-expiry", features = ["tokio"] }
 clickhouse = { workspace = true, features = ["native-tls", "uuid", "time", "inserter"] }
 validator = { workspace = true, features = ["derive"] }
 influxdb = { workspace = true, features = ["derive"] }
@@ -39,6 +39,7 @@ url = { workspace = true }
 tracing = { workspace = true }
 chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }
 block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env"] }
+block-mesh-manager-database-domain = { path = "../block-mesh-manager-database-domain" }
 serde_json = { workspace = true, features = ["raw_value"] }
 secret = { path = "../secret" }
 

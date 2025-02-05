@@ -1,5 +1,4 @@
 use crate::data_sink::{now_backup, DataSinkClickHouse};
-use crate::database::get_user_and_api_token_by_email;
 use crate::errors::Error;
 use crate::DataSinkAppState;
 use anyhow::anyhow;
@@ -8,7 +7,10 @@ use axum::response::IntoResponse;
 use axum::routing::{get, post};
 use axum::{Json, Router};
 use block_mesh_common::interfaces::server_api::DigestDataRequest;
-use chrono::Utc;
+use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
+use block_mesh_manager_database_domain::domain::user::UserAndApiToken;
+use chrono::{Duration, Utc};
+use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use database_utils::utils::health_check::health_check;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use reqwest::StatusCode;
@@ -59,12 +61,15 @@ pub async fn server_health() -> Result<impl IntoResponse, Error> {
 
 type CacheType = OnceCell<Arc<RwLock<HashSet<(String, String)>>>>;
 static CACHE: CacheType = OnceCell::const_new();
+static USER_CACHE: OnceCell<Arc<RwLock<HashMapWithExpiry<String, UserAndApiToken>>>> =
+    OnceCell::const_new();
 
 pub async fn digest_data(
     State(state): State<DataSinkAppState>,
     Json(body): Json<DigestDataRequest>,
 ) -> Result<impl IntoResponse, Error> {
-    if !validate_email(&body.email) {
+    let email = body.email.to_lowercase();
+    if !validate_email(&email) {
         return Err(Error::from(anyhow!("BadEmail")));
     }
     if state.enforce_signature {
@@ -84,17 +89,33 @@ pub async fn digest_data(
             return Err(Error::from(anyhow!("Failed to verify signature")));
         }
     }
-
-    let follower_db_pool = &state.follower_db_pool;
-    let mut transaction = create_txn(follower_db_pool).await?;
-    let user = get_user_and_api_token_by_email(&mut transaction, &body.email)
-        .await?
-        .ok_or_else(|| anyhow!("UserNotFound"))?;
-    if user.token.as_ref() != &body.api_token {
-        commit_txn(transaction).await?;
-        return Err(Error::from(anyhow!("ApiTokenNotFound")));
+    let user_cache = USER_CACHE
+        .get_or_init(|| async { Arc::new(RwLock::new(HashMapWithExpiry::new())) })
+        .await;
+    let (user, to_save) = match user_cache.read().await.get(&email).await {
+        Some(user) => (user, false),
+        None => {
+            let follower_db_pool = &state.follower_db_pool;
+            let mut transaction = create_txn(follower_db_pool).await?;
+            let user = get_user_and_api_token_by_email(&mut transaction, &email)
+                .await?
+                .ok_or_else(|| anyhow!("UserNotFound"))?;
+            if user.token.as_ref() != &body.api_token {
+                commit_txn(transaction).await?;
+                return Err(Error::from(anyhow!("ApiTokenNotFound")));
+            }
+            commit_txn(transaction).await?;
+            (user, true)
+        }
+    };
+    if to_save {
+        let date = Utc::now() + Duration::milliseconds(600_000);
+        user_cache
+            .write()
+            .await
+            .insert(email.clone(), user.clone(), Some(date))
+            .await;
     }
-    commit_txn(transaction).await?;
     if state.use_clickhouse {
         let cache = CACHE
             .get_or_init(|| async { Arc::new(RwLock::new(HashSet::new())) })
