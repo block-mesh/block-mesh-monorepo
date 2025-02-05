@@ -1,6 +1,5 @@
 mod aggregator;
 mod data_sink;
-mod database;
 mod errors;
 mod migrate_clickhouse;
 mod routes;
