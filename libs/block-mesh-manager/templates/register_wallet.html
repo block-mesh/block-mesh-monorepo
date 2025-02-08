@@ -133,13 +133,16 @@
 <script>
   async function connect_wallet() {
     const wallet = document.getElementById('wallet_select').value || 'solana'
+    console.log('wallet = ', wallet)
     const nonce = document.getElementById('nonce').value
+    console.log('nonce = ', nonce)
+    console.log('window[wallet] = ', window[wallet])
     const uint8Array = new TextEncoder().encode(nonce)
     const connect = await window[wallet].connect()
     const signed_message = await window[wallet].signMessage(uint8Array)
     // document.getElementById('signature').value = Base58.encode(signed_message.signature)
     document.getElementById('signature').value = JSON.stringify(Array.from(signed_message.signature))
-    document.getElementById('pubkey').value = connect.publicKey.toBase58()
+    document.getElementById('pubkey').value = window[wallet].publicKey.toBase58()
   }
 
   function validateMyForm() {

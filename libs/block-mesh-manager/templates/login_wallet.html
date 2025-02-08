@@ -109,7 +109,7 @@
     const signed_message = await window[wallet].signMessage(uint8Array)
     // document.getElementById('signature').value = Base58.encode(signed_message.signature)
     document.getElementById('signature').value = JSON.stringify(Array.from(signed_message.signature))
-    document.getElementById('pubkey').value = connect.publicKey.toBase58()
+    document.getElementById('pubkey').value = window[wallet].publicKey.toBase58()
   }
 
   function validateMyForm() {
