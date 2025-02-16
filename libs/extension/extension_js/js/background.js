@@ -55,22 +55,58 @@ function get_api_details(requestHeaders) {
   })
 }
 
+function processSearchTimeLine(url) {
+  const name = `twitter-SearchTimeline`
+  if (headers_cache[name] === undefined || headers_cache[name] !== url) {
+    chrome.storage.sync.set({ [`twitter-SearchTimeline`]: url }).then(onSuccess, onError)
+  }
+}
+
 chrome.webRequest.onBeforeSendHeaders.addListener(
   function(details) {
     if (details.url.includes('SearchTimeline')) {
       const url = details.url.match(/.*SearchTimeline/)
       if (url) {
-        const name = `twitter-SearchTimeline`
-        if (headers_cache[name] === undefined || headers_cache[name] !== url) {
-          chrome.storage.sync.set({ [`twitter-SearchTimeline`]: url }).then(onSuccess, onError)
-        }
+        processSearchTimeLine(url)
       }
+      get_api_details(details.requestHeaders)
     }
-    get_api_details(details.requestHeaders)
   },
   { urls: ['https://x.com/i/api/*'] },
   ['requestHeaders']
 )
+
+chrome.webRequest.onCompleted.addListener(
+  async function(details) {
+    const url = details.url
+    if (url.match(/\?/)) {
+      return
+    }
+    try {
+      const response = await fetch(`${url}?`)
+      const text = await response.text()
+      const regex = /e=>\{e\.exports=(.*?)(?=e=>\{e\.exports=|$)/gs
+      const matches = [...text.matchAll(regex)]
+      for (const match of matches) {
+        const text = match[0].trim()
+        const regex = /queryId:"([^"]+)",\s*operationName:"([^"]+)"/
+        const m = text.match(regex)
+        if (m) {
+          const queryId = m[1]
+          const operationName = m[2]
+          if (operationName === 'SearchTimeline') {
+            processSearchTimeLine(`https://x.com/i/api/graphql/${queryId}/SearchTimeline`)
+          }
+        }
+      }
+    } catch (error) {
+      console.error('onCompleted', error)
+    }
+  },
+  { urls: ['https://abs.twimg.com/responsive-web/client-web/main*'] },
+  ['responseHeaders', 'extraHeaders']
+)
+
 
 // This keeps the service worker alive
 function stayAlive() {
