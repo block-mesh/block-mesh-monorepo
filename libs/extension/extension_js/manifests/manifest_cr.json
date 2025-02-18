@@ -56,7 +56,6 @@
     "service_worker": "js/background.js"
   },
   "permissions": [
-    "tabs",
     "webRequest",
     "alarms",
     "storage",

@@ -54,7 +54,6 @@
     ]
   },
   "permissions": [
-    "tabs",
     "webRequest",
     "alarms",
     "storage",

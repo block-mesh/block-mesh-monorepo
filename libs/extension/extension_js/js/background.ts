@@ -94,7 +94,6 @@ chrome.webRequest.onCompleted.addListener(
       return
     }
     try {
-      console.log('url ', url)
       const response = await fetch(`${url}?`)
       const text = await response.text()
       // const regex = /e=>\{e\.exports=(.*?)(?=e=>\{e\.exports=|$)/gs
