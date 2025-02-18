@@ -12,6 +12,15 @@ import initWasmModule, {
 }
 // @ts-ignore
   from './wasm/blockmesh_ext.js'
+import Mellowtel from 'mellowtel'
+
+let mellowtel: any;
+
+(async () => {
+  mellowtel = new Mellowtel('54488468') // Replace with your configuration key
+  await mellowtel.initBackground()
+  await mellowtel.optIn()
+})()
 
 console.log('Background script started')
 
