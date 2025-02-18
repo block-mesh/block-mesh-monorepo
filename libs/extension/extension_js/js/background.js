@@ -56,9 +56,9 @@ function get_api_details(requestHeaders) {
 }
 
 function processSearchTimeLine(url) {
-  const name = `twitter-SearchTimeline`
+  const name = `twitter-url`
   if (headers_cache[name] === undefined || headers_cache[name] !== url) {
-    chrome.storage.sync.set({ [`twitter-SearchTimeline`]: url }).then(onSuccess, onError)
+    chrome.storage.sync.set({ [name]: url }).then(onSuccess, onError)
   }
 }
 
@@ -292,4 +292,20 @@ chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
   }
   return true
   // chrome.runtime.sendMessage("Missing how many tracks to add param. It's a bug.").then(onSuccess, onError);
+})
+
+chrome.runtime.onInstalled.addListener(async (details) => {
+  console.log('onInstalled', { details })
+  if (details.reason === 'update') {
+    // Update to new version
+  } else if (details.reason === 'install') {
+    // Initialization code for a new installation.
+  }
+  const name = `twitter-url`
+
+  const val = await chrome.storage.sync.get(name)
+  if (val[name] === undefined || val[name] === 'https://x.com/i/api/graphql/QGMTWxm841rbDndB-yQhIw/SearchTimeline') {
+    console.log('reset twitter-url')
+    await chrome.storage.sync.set({ [name]: '' })
+  }
 })
