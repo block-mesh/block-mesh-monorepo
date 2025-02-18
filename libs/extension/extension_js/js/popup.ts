@@ -64,7 +64,7 @@ async function onMessage(e: any) {
   }
   if (msg_type === 'GET_ALL') {
     console.log('GET_ALL', window.location.href)
-    await chrome.storage.sync.get(null, async function(items) {
+    chrome.storage.sync.get(null, async function(items) {
       const allKeys = Object.keys(items)
       if (window.message_channel_port) {
         for (const key of allKeys) {

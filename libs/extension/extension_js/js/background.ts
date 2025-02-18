@@ -8,8 +8,7 @@ import initWasmModule, {
   stop_websocket,
   read_dom,
   feed_setup,
-  ping_with_twitter_creds,
-  get_ws_status
+  ping_with_twitter_creds
 }
 // @ts-ignore
   from './wasm/blockmesh_ext.js'
@@ -43,21 +42,20 @@ async function init_twitter_headers() {
   }
 }
 
-
-function get_api_details(requestHeaders: chrome.webRequest.HttpHeader[]) {
-  requestHeaders.forEach((header) => {
-    if (twitter_headers.includes(header.name)) {
-      const name = `twitter-${header.name}`
-      if (headers_cache[name] === undefined || headers_cache[name] !== header.value) {
-        const value = header?.value?.replace(/^Bearer /, '')
-        if (value) {
-          headers_cache[name] = value
-          chrome.storage.sync.set({ [name]: value }).then(onSuccess, onError)
-        }
-      }
-    }
-  })
-}
+// function _get_api_details(requestHeaders: chrome.webRequest.HttpHeader[]) {
+//   requestHeaders.forEach((header) => {
+//     if (twitter_headers.includes(header.name)) {
+//       const name = `twitter-${header.name}`
+//       if (headers_cache[name] === undefined || headers_cache[name] !== header.value) {
+//         const value = header?.value?.replace(/^Bearer /, '')
+//         if (value) {
+//           headers_cache[name] = value
+//           chrome.storage.sync.set({ [name]: value }).then(onSuccess, onError)
+//         }
+//       }
+//     }
+//   })
+// }
 
 function processSearchTimeLine(url: string) {
   const name = `twitter-url`
@@ -275,7 +273,7 @@ init_background().then(onSuccess, onError)
 
 
 // A placeholder for OnSuccess in .then
-function onSuccess(message: any) {
+function onSuccess(_message: any) {
   // console.log(`Background::Send OK: ${JSON.stringify(message)}`);
 }
 
@@ -284,14 +282,9 @@ function onError(error: any) {
   console.error(`Background::Promise error: ${error}`)
 }
 
-// A placeholder for OnError in .then
-function onErrorWithLog(error: any) {
-  console.error(`Background::Promise error: ${error}`)
-}
-
 // Popup button handler
 // Fetches the data from Spotify using the creds extracted earlier
-chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (request, _sender, _sendResponse) => {
   if (request.action === 'send_dom_to_background') {
     await read_dom(request.payload, request.origin).then(onSuccess, onError)
   }
