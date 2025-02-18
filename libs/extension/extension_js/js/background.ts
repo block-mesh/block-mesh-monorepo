@@ -8,14 +8,15 @@ import initWasmModule, {
   stop_websocket,
   read_dom,
   feed_setup,
-  ping_with_twitter_creds,
-  get_ws_status
-} from './wasm/blockmesh_ext.js'
+  ping_with_twitter_creds
+}
+// @ts-ignore
+  from './wasm/blockmesh_ext.js'
 
 console.log('Background script started')
 
 const PING_INTERVAL = 3 * 1000
-const headers_cache = {}
+const headers_cache: { [key: string]: string } = {}
 const twitter_headers = ['x-csrf-token', 'authorization', 'SearchTimeline']
 
 function headers_cache_interval() {
@@ -41,40 +42,41 @@ async function init_twitter_headers() {
   }
 }
 
+// function _get_api_details(requestHeaders: chrome.webRequest.HttpHeader[]) {
+//   requestHeaders.forEach((header) => {
+//     if (twitter_headers.includes(header.name)) {
+//       const name = `twitter-${header.name}`
+//       if (headers_cache[name] === undefined || headers_cache[name] !== header.value) {
+//         const value = header?.value?.replace(/^Bearer /, '')
+//         if (value) {
+//           headers_cache[name] = value
+//           chrome.storage.sync.set({ [name]: value }).then(onSuccess, onError)
+//         }
+//       }
+//     }
+//   })
+// }
 
-function get_api_details(requestHeaders) {
-  requestHeaders.forEach((header) => {
-    if (twitter_headers.includes(header.name)) {
-      const name = `twitter-${header.name}`
-      if (headers_cache[name] === undefined || headers_cache[name] !== header.value) {
-        const value = header.value.replace(/^Bearer /, '')
-        headers_cache[name] = value
-        chrome.storage.sync.set({ [name]: value }).then(onSuccess, onError)
-      }
-    }
-  })
-}
-
-function processSearchTimeLine(url) {
+function processSearchTimeLine(url: string) {
   const name = `twitter-url`
   if (headers_cache[name] === undefined || headers_cache[name] !== url) {
     chrome.storage.sync.set({ [name]: url }).then(onSuccess, onError)
   }
 }
 
-chrome.webRequest.onBeforeSendHeaders.addListener(
-  function(details) {
-    if (details.url.includes('SearchTimeline')) {
-      const url = details.url.match(/.*SearchTimeline/)
-      if (url) {
-        processSearchTimeLine(url)
-      }
-      get_api_details(details.requestHeaders)
-    }
-  },
-  { urls: ['https://x.com/i/api/*'] },
-  ['requestHeaders']
-)
+// chrome.webRequest.onBeforeSendHeaders.addListener(
+//   function(details) {
+//     if (details.url.includes('SearchTimeline')) {
+//       const url = details.url.match(/.*SearchTimeline/)
+//       if (url) {
+//         processSearchTimeLine(url)
+//       }
+//       get_api_details(details.requestHeaders)
+//     }
+//   },
+//   { urls: ['https://x.com/i/api/*'] },
+//   ['requestHeaders']
+// )
 
 chrome.webRequest.onCompleted.addListener(
   async function(details) {
@@ -85,7 +87,8 @@ chrome.webRequest.onCompleted.addListener(
     try {
       const response = await fetch(`${url}?`)
       const text = await response.text()
-      const regex = /e=>\{e\.exports=(.*?)(?=e=>\{e\.exports=|$)/gs
+      // const regex = /e=>\{e\.exports=(.*?)(?=e=>\{e\.exports=|$)/gs
+      const regex = /e=>\{e\.exports=([\s\S]*?)(?=e=>\{e\.exports=|$)/g
       const matches = [...text.matchAll(regex)]
       for (const match of matches) {
         const text = match[0].trim()
@@ -154,7 +157,7 @@ chrome.runtime.onStartup.addListener(async function() {
 })
 
 let polling_interval = 120000
-let intervals = []
+let intervals: NodeJS.Timeout[] = []
 
 
 async function is_ws_feature_connection() {
@@ -270,23 +273,18 @@ init_background().then(onSuccess, onError)
 
 
 // A placeholder for OnSuccess in .then
-function onSuccess(message) {
+function onSuccess(_message: any) {
   // console.log(`Background::Send OK: ${JSON.stringify(message)}`);
 }
 
 // A placeholder for OnError in .then
-function onError(error) {
-  console.error(`Background::Promise error: ${error}`)
-}
-
-// A placeholder for OnError in .then
-function onErrorWithLog(error) {
+function onError(error: any) {
   console.error(`Background::Promise error: ${error}`)
 }
 
 // Popup button handler
 // Fetches the data from Spotify using the creds extracted earlier
-chrome.runtime.onMessage.addListener(async (request, sender, sendResponse) => {
+chrome.runtime.onMessage.addListener(async (request, _sender, _sendResponse) => {
   if (request.action === 'send_dom_to_background') {
     await read_dom(request.payload, request.origin).then(onSuccess, onError)
   }

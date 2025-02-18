@@ -5,15 +5,15 @@ const targetNode = document.body
 // Options for the observer (which mutations to observe)
 const config = { childList: true, subtree: true }
 
-let feed_origin = null
-let feed_selector = null
+let feed_origin: string | null = null
+let feed_selector: string | null = null
 
-function onSuccess(message) {
+function onSuccess(message: any) {
   // console.log(`Background::Send OK: ${JSON.stringify(message)}`);
 }
 
 // A placeholder for OnError in .then
-function onError(error) {
+function onError(error: any) {
   console.error(`Background::Promise error: ${error}`)
 }
 
@@ -70,10 +70,11 @@ function send_dom_to_background() {
     .catch(onError)
 }
 
-let timer // This will hold the timeout reference
+let timer: NodeJS.Timeout // This will hold the timeout reference
 
-function debounce(func, delay) {
-  return function(...args) {
+function debounce(func: any, delay: number) {
+  return function(...args: any[]) {
+    // @ts-ignore
     const context = this // Preserve the context
     // Clear the existing timer
     clearTimeout(timer)
@@ -86,7 +87,7 @@ function debounce(func, delay) {
 
 
 // Callback function to execute when mutations are observed
-function callback(mutationsList, observer) {
+function callback(mutationsList: any, observer: any) {
   for (let mutation of mutationsList) {
     if (mutation.type === 'childList') {
       debounce(send_dom_to_background, 500)()

@@ -1,0 +1,20 @@
+{
+  "name": "extension",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "build": "webpack --config ./webpack.config.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/chrome": "0.0.304",
+    "copy-webpack-plugin": "12.0.2",
+    "ts-loader": "9.5.2",
+    "typescript": "5.7.3",
+    "webpack": "5.98.0",
+    "webpack-cli": "6.0.1"
+  }
+}

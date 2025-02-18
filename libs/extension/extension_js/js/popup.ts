@@ -1,3 +1,4 @@
+// @ts-ignore
 import initWasmModule, { mount_popup } from './wasm/blockmesh_ext.js'
 
 const channel = new MessageChannel()
@@ -5,7 +6,7 @@ window.channel = channel
 window.message_channel_port = channel.port1
 window.mounted = false
 
-function onSuccess(message) {
+function onSuccess(message: any) {
   try {
     console.log(`onSuccess: ${JSON.stringify(message)}`)
   } catch (e) {
@@ -13,7 +14,7 @@ function onSuccess(message) {
   }
 }
 
-function onError(error) {
+function onError(error: any) {
   try {
     console.error(`onError: ${JSON.stringify(error)}`)
   } catch (e) {
@@ -22,16 +23,22 @@ function onError(error) {
   }
 }
 
-function onLoad(iframe) {
+function onLoad(iframe: HTMLIFrameElement) {
   // Listen for messages on port1
-  window.channel.port1.onmessage = onMessage
+  if (window?.channel?.port1) {
+    window.channel.port1.onmessage = onMessage
+  }
+
   // Transfer port2 to the iframe
-  iframe.contentWindow.postMessage('READY', '*', [
-    window.channel.port2
-  ])
+  if (window?.channel) {
+    iframe?.contentWindow?.postMessage('READY', '*', [
+      window.channel.port2
+    ])
+  }
+
 }
 
-async function onMessage(e) {
+async function onMessage(e: any) {
   const { data } = e
   console.log('popup.js::onMessage', JSON.stringify(data))
   if (!window.mounted && data === 'READY') {
@@ -43,7 +50,7 @@ async function onMessage(e) {
   const { msg_type, key, value } = data
   if (msg_type === 'GET' && key) {
     const val = await chrome.storage.sync.get(key)
-    window.message_channel_port.postMessage({ [key]: val })
+    window?.message_channel_port?.postMessage({ [key]: val })
   }
   if (msg_type === 'SET' && key) {
     if (key === 'email') {
@@ -57,7 +64,7 @@ async function onMessage(e) {
   }
   if (msg_type === 'GET_ALL') {
     console.log('GET_ALL', window.location.href)
-    await chrome.storage.sync.get(null, async function(items) {
+    chrome.storage.sync.get(null, async function(items) {
       const allKeys = Object.keys(items)
       if (window.message_channel_port) {
         for (const key of allKeys) {
@@ -116,7 +123,7 @@ document.addEventListener('DOMContentLoaded', async function() {
   let spinner = document.getElementById('loading_spinner')
   if (spinner) {
     let parent = spinner.parentNode
-    parent.removeChild(spinner)
+    parent?.removeChild(spinner)
   }
   //body.appendChild(iframe)
 })
