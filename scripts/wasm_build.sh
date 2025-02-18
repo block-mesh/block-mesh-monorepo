@@ -66,7 +66,7 @@ rm -f extension_js/js/wasm/package.json
 ## subshell call with cd is required to avoid placing /extension/ folder as the root
 rm -f chrome.zip && \
 (cd extension_js && cp manifests/manifest_cr.json manifest.json)&& \
-(cd extension_js && zip -rq ../chrome.zip .) && \
+(cd extension_js && zip -rq ../chrome.zip . -x "*.ts" -x "*LICENSE.txt") && \
 (cd extension_js && rm -f manifest.json) && \
 (cp -f chrome.zip "${ROOT}/tmp_ext/chrome/") && \
 (cd "${ROOT}/tmp_ext/chrome/" && unzip -o chrome.zip) && \
@@ -75,7 +75,7 @@ echo Chrome package: chrome.zip || exit 1
 ## create firefox package, exclude chrome manifest and rename FF manifest to its default file name
 rm -f firefox.zip && \
 (cd extension_js && cp manifests/manifest_ff.json manifest.json)&& \
-(cd extension_js && zip -rq ../firefox.zip .) && \
+(cd extension_js && zip -rq ../firefox.zip . -x "*.ts" -x "*LICENSE.txt") && \
 (cd extension_js && rm -f manifest.json) && \
 (cp -f firefox.zip "${ROOT}/tmp_ext/firefox/") && \
 (cd "${ROOT}/tmp_ext/firefox/" && unzip -o firefox.zip) && \

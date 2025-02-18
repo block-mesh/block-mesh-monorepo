@@ -13,3 +13,4 @@ extension_js/js/background.js
 extension_js/js/options.js
 extension_js/js/popup.js
 extension_js/js/*.wasm
+extension_js/js/*.LICENSE.txt

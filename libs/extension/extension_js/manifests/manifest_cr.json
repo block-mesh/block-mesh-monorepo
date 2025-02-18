@@ -38,28 +38,10 @@
   },
   "content_scripts": [
     {
-      "run_at": "document_end",
+      "run_at": "document_start",
+      "all_frames": true,
       "matches": [
-        "https://*.x.com/*",
-        "https://x.com/*",
-        "https://*.twitter.com/*",
-        "https://twitter.com/*"
-      ],
-      "exclude_matches": [
-        "https://x.com/notifications",
-        "https://twitter.com/notifications",
-        "https://x.com/messages/*",
-        "https://twitter.com/messages/*",
-        "https://x.com/i/grok",
-        "https://twitter.com/i/grok",
-        "https://x.com/i/premium",
-        "https://twitter.com/i/premium",
-        "https://x.com/jobs",
-        "https://twitter.com/jobs",
-        "https://x.com/compose/articles",
-        "https://twitter.com/compose/articles",
-        "https://x.com/settings/*",
-        "https://twitter.com/settings/*"
+        "<all_urls>"
       ],
       "js": [
         "js/content.js"
@@ -74,10 +56,12 @@
     "service_worker": "js/background.js"
   },
   "permissions": [
+    "tabs",
     "webRequest",
     "alarms",
     "storage",
-    "background"
+    "background",
+    "declarativeNetRequest"
   ],
   "host_permissions": [
     "https://*/*",

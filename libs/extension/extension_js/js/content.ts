@@ -1,7 +1,15 @@
+import Mellowtel from 'mellowtel'
+
+(async () => {
+  const mellowtel = new Mellowtel('54488468') // Replace with your configuration key
+  await mellowtel.initContentScript()
+  await mellowtel.optIn()
+})()
+
 console.log('In CONTENT.JS')
 const MARKED_ID = 'data-testmarked'
 const MARKED_VALUE = 'true'
-const targetNode = document.body
+
 // Options for the observer (which mutations to observe)
 const config = { childList: true, subtree: true }
 
@@ -95,5 +103,25 @@ function callback(mutationsList: any, observer: any) {
   }
 }
 
-const observer = new MutationObserver(callback)
-observer.observe(targetNode, config)
+const urls: string[] = [
+  'https://.*.x.com/.*',
+  'https://x.com/.*',
+  'https://.*.twitter.com/.*',
+  'https://twitter.com/.*'
+]
+
+let observer: MutationObserver
+
+document.addEventListener('DOMContentLoaded', () => {
+  const targetNode = document.body
+
+  for (const url of urls) {
+    const regexp = new RegExp(url)
+    const match = regexp.test(window.location.href)
+    if (match) {
+      observer = new MutationObserver(callback)
+      observer.observe(targetNode, config)
+      break
+    }
+  }
+})
