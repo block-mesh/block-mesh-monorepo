@@ -28,8 +28,7 @@ module.exports = [
     plugins: [
       new CopyPlugin({
         patterns: [
-          { from: '.', to: '.', context: 'public' },
-          { from: './extension_js/manifests/manifest_cr.json', to: 'manifest.json' }
+          { from: '.', to: '.', context: 'public' }
         ]
       })
     ]
@@ -59,8 +58,7 @@ module.exports = [
     plugins: [
       new CopyPlugin({
         patterns: [
-          { from: '.', to: '.', context: 'public' },
-          { from: './extension_js/manifests/manifest_cr.json', to: 'manifest.json' }
+          { from: '.', to: '.', context: 'public' }
         ]
       })
     ]
