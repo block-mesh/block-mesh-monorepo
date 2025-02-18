@@ -14,3 +14,4 @@ extension_js/js/options.js
 extension_js/js/popup.js
 extension_js/js/*.wasm
 extension_js/js/*.LICENSE.txt
+extension_js/js/manifest.json
