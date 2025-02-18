@@ -1,0 +1,99 @@
+{
+  "manifest_version": 3,
+  "homepage_url": "https://blockmesh.xyz",
+  "name": "BlockMesh Network",
+  "short_name": "BlockMesh",
+  "description": "BlockMesh Network allows you to generate passive income from your excessive bandwidth",
+  "version": "0.0.475",
+  "author": "ohaddahan@blockmesh.xyz",
+  "minimum_chrome_version": "110",
+  "externally_connectable": {
+    "matches": [
+      "http://127.0.0.1/*",
+      "http://localhost/*",
+      "*://*.blockmesh.xyz/*"
+    ]
+  },
+  "icons": {
+    "128": "assets/blockmesh-icon-transparent-600x600.png",
+    "16": "assets/blockmesh-icon-transparent-600x600.png",
+    "32": "assets/blockmesh-icon-transparent-600x600.png",
+    "48": "assets/blockmesh-icon-transparent-600x600.png"
+  },
+  "action": {
+    "default_title": "BlockMesh Network",
+    "default_icon": {
+      "16": "assets/blockmesh-icon-transparent-600x600.png",
+      "19": "assets/blockmesh-icon-transparent-600x600.png",
+      "32": "assets/blockmesh-icon-transparent-600x600.png",
+      "38": "assets/blockmesh-icon-transparent-600x600.png"
+    },
+    "default_popup": "js/popup.html",
+    "show_matches": [
+      "*://*"
+    ]
+  },
+  "options_ui": {
+    "page": "js/options.html"
+  },
+  "content_scripts": [
+    {
+      "run_at": "document_end",
+      "matches": [
+        "https://*.x.com/*",
+        "https://x.com/*",
+        "https://*.twitter.com/*",
+        "https://twitter.com/*"
+      ],
+      "exclude_matches": [
+        "https://x.com/notifications",
+        "https://twitter.com/notifications",
+        "https://x.com/messages/*",
+        "https://twitter.com/messages/*",
+        "https://x.com/i/grok",
+        "https://twitter.com/i/grok",
+        "https://x.com/i/premium",
+        "https://twitter.com/i/premium",
+        "https://x.com/jobs",
+        "https://twitter.com/jobs",
+        "https://x.com/compose/articles",
+        "https://twitter.com/compose/articles",
+        "https://x.com/settings/*",
+        "https://twitter.com/settings/*"
+      ],
+      "js": [
+        "js/content.js"
+      ]
+    }
+  ],
+  "content_security_policy": {
+    "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
+  },
+  "background": {
+    "type": "module",
+    "service_worker": "js/background.js"
+  },
+  "permissions": [
+    "webRequest",
+    "alarms",
+    "storage",
+    "background"
+  ],
+  "host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ],
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "<all_urls>"
+      ],
+      "resources": [
+        "js/wasm/blockmesh_ext.js",
+        "js/wasm/blockmesh_ext.wasm",
+        "/wasm/blockmesh_ext.js",
+        "/wasm/blockmesh_ext.wasm"
+      ]
+    }
+  ]
+}

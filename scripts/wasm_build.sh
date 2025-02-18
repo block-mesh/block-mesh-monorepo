@@ -1,13 +1,17 @@
 #!/usr/bin/env bash
 # https://github.com/rimutaka/spotify-playlist-builder/blob/master/build.sh
 set -x
+set -e
 export BUILD_TYPE=$1
 if [ -z "${BUILD_TYPE}" ] ; then
   export BUILD_TYPE="--dev"
   export BLOCKMESH_LOG_ENV="dev"
 elif [ "${BUILD_TYPE}" == "--release" ]; then
+  export BUILD_TYPE="--release"
   export BLOCKMESH_LOG_ENV="prod"
-elif [ "${BUILD_TYPE}" != "--release" ]; then
+elif [ "${BUILD_TYPE}" == "--clean" ]; then
+  export BUILD_TYPE="clean"
+else
   echo "Invalid argument: ${BUILD_TYPE}"
   exit 1
 fi
@@ -21,6 +25,8 @@ if [ -f "${ROOT}/.env" ] ; then
 fi
 cd "${ROOT}/libs/extension" || exit 1
 
+npm install
+
 ## --release or --dev - exclude/include debug info
 ## --no-typescript - disable .d.ts files output
 ## --out-dir - where to write the compiled files
@@ -32,10 +38,16 @@ echo Cleaning up...
 mkdir -p "${ROOT}"/tmp_ext/chrome/
 mkdir -p "${ROOT}"/tmp_ext/firefox/
 rm -fr extension_js/js/wasm/*
+rm -fr dist/*
 rm -f chrome.zip
 rm -f firefox.zip
 rm -fr "${ROOT}"/tmp_ext/chrome/*
 rm -fr "${ROOT}"/tmp_ext/firefox/*
+
+if [ "${BUILD_TYPE}" = "clean" ] ; then
+  echo "Finished cleaning"
+  exit 0
+fi
 
 sed -i -e "s/\"version\":.*/\"version\": \"${VERSION}\",/" extension_js/manifests/manifest_cr.json || exit 1
 sed -i -e "s/\"version\":.*/\"version\": \"${VERSION}\",/" extension_js/manifests/manifest_ff.json || exit 1
@@ -43,7 +55,7 @@ sed -i -e "s/\"version\":.*/\"version\": \"${VERSION}\",/" extension_js/manifest
 echo Building wasm module...
 export RUSTFLAGS=--cfg=web_sys_unstable_apis
 wasm-pack build . ${BUILD_TYPE} --no-typescript --out-dir "./extension_js/js/wasm" --out-name "blockmesh_ext" --target web || exit 1
-
+npm run build
 ## wasm-pack creates bunch of useless files:
 echo Removing trash files...
 rm -f extension_js/js/wasm/.gitignore
