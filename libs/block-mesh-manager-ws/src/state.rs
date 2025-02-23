@@ -91,6 +91,17 @@ impl WsAppState {
         format!("{}_{}", BLOCKMESH_WS_REDIS_COUNT_KEY, self.redis_key)
     }
 
+    #[tracing::instrument(name = "email_key", skip_all)]
+    pub fn email_key(&self, email: &str) -> String {
+        format!("emails_{}", email)
+    }
+
+    pub async fn check_email_redis(&self, email: &str) -> anyhow::Result<i32> {
+        let mut redis = self.redis.clone();
+        let r: Option<i32> = redis.get(self.email_key(email)).await?;
+        Ok(r.unwrap_or_default())
+    }
+
     #[tracing::instrument(name = "add_task", skip_all)]
     pub async fn add_task(&self, task: &TwitterTask) {
         let mut pending_tasks = self.pending_twitter_tasks.write().await;
@@ -170,6 +181,7 @@ impl WsAppState {
         self.add_email(email).await;
         self.add_user_id(user_id).await;
         self.incr_redis().await;
+        self.add_email_redis(email).await;
     }
 
     #[tracing::instrument(name = "unsubscribe_light", skip_all)]
@@ -178,6 +190,27 @@ impl WsAppState {
         self.remove_user_id(user_id).await;
         self.remove_worker(user_id).await;
         self.decr_redis().await;
+        self.remove_email_redis(email).await;
+    }
+
+    #[tracing::instrument(name = "add_email_redis", skip_all)]
+    pub async fn add_email_redis(&self, email: &str) {
+        let mut redis = self.redis.clone();
+        let _: RedisResult<()> = redis.incr(self.email_key(email), 1).await;
+        let _: RedisResult<()> = redis.expire(self.email_key(email), 40).await;
+    }
+
+    #[tracing::instrument(name = "add_email_redis", skip_all)]
+    pub async fn touch_email_redis(&self, email: &str) {
+        let mut redis = self.redis.clone();
+        let _: RedisResult<()> = redis.expire(self.email_key(email), 40).await;
+    }
+
+    #[tracing::instrument(name = "remove_email_redis", skip_all)]
+    pub async fn remove_email_redis(&self, email: &str) {
+        let mut redis = self.redis.clone();
+        let _: RedisResult<()> = redis.decr(self.email_key(email), 1).await;
+        let _: RedisResult<()> = redis.expire(self.email_key(email), 5).await;
     }
 
     #[tracing::instrument(name = "incr_redis", skip_all)]
