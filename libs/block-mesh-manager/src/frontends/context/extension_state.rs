@@ -82,31 +82,15 @@ impl Debug for ExtensionContext {
         f.debug_struct("ExtensionState")
             .field("email", &self.email.get_untracked())
             .field("user_id", &self.device_id.get_untracked())
-            .field("api_token", &"********")
+            .field("api_token", &self.api_token.get_untracked())
             .field("blockmesh_url", &self.blockmesh_url.get_untracked())
             .field("blockmesh_ws_url", &self.blockmesh_ws_url.get_untracked())
             .field(
                 "blockmesh_data_sink_url",
                 &self.blockmesh_data_sink_url.get_untracked(),
             )
-            .field("uptime", &self.uptime.get_untracked())
             .field("status", &self.status.get_untracked())
-            .field("invite_code", &self.invite_code.get_untracked())
-            .field("success", &self.success.get_untracked())
-            .field("error", &self.error.get_untracked())
-            .field("download_speed", &self.download_speed.get_untracked())
-            .field("upload_speed", &self.upload_speed.get_untracked())
-            .field("last_update", &self.last_update.get_untracked())
             .field("wallet_address", &self.wallet_address.get_untracked())
-            .field("twitter_creds_url", &self.twitter_creds_url.get_untracked())
-            .field(
-                "twitter_creds_csrf",
-                &self.twitter_creds_csrf.get_untracked(),
-            )
-            .field(
-                "twitter_creds_bearer_token",
-                &self.twitter_creds_bearer_token.get_untracked(),
-            )
             .finish()
     }
 }
