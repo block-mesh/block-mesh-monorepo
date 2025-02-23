@@ -210,7 +210,7 @@ impl WsAppState {
     pub async fn remove_email_redis(&self, email: &str) {
         let mut redis = self.redis.clone();
         let _: RedisResult<()> = redis.decr(self.email_key(email), 1).await;
-        let _: RedisResult<()> = redis.expire(self.email_key(email), 20).await;
+        let _: RedisResult<()> = redis.expire(self.email_key(email), 5).await;
     }
 
     #[tracing::instrument(name = "incr_redis", skip_all)]
