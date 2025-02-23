@@ -49,12 +49,18 @@ pub async fn ws_handler(
     let email = query
         .get("email")
         .ok_or(anyhow!("Missing email".to_string()))?
-        .clone();
+        .clone()
+        .to_lowercase();
     let api_token = query
         .get("api_token")
         .ok_or(anyhow!("Missing token".to_string()))?;
     let api_token = Uuid::from_str(api_token).context("Cannot deserialize UUID")?;
     if state.emails.read().await.contains(&email) {
+        return Ok((StatusCode::ALREADY_REPORTED, "Already connected").into_response());
+    }
+
+    let user_in_redis = state.check_email_redis(&email).await?;
+    if user_in_redis > 0 {
         return Ok((StatusCode::ALREADY_REPORTED, "Already connected").into_response());
     }
     let creds_key = (email.clone(), api_token);
@@ -104,6 +110,7 @@ pub async fn ws_handler(
         }))
         .await;
 
-    let user_id = Uuid::new_v4();
-    Ok(ws.on_upgrade(move |socket| handle_socket_light(email, socket, header_ip, state, user_id)))
+    Ok(ws.on_upgrade(move |socket| {
+        handle_socket_light(email, socket, header_ip, state, user.user_id)
+    }))
 }

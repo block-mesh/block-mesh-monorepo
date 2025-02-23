@@ -56,6 +56,7 @@ pub async fn handle_socket_light(
 
     let tx_c = state.tx.clone();
     let state_c = state.clone();
+    let email_c = email.clone();
     let mut send_task = tokio::spawn(async move {
         let mut accumulator = 0i64;
         let mut counter = 0u64;
@@ -97,6 +98,7 @@ pub async fn handle_socket_light(
                     let _ = sender.send(Message::text(msg)).await;
                 }
             }
+            state_c.touch_email_redis(&email_c).await;
             tokio::time::sleep(Duration::from_millis(sleep)).await;
         }
     });
