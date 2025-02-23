@@ -1,4 +1,5 @@
 use crate::database::nonce::get_nonce_by_nonce::get_nonce_by_nonce;
+use crate::database::nonce::update_nonce::update_nonce;
 use crate::database::spam_email::get_spam_emails::get_spam_emails_cache;
 use crate::database::user::update_email::update_email;
 use crate::database::user::update_verified_email::update_verified_email;
@@ -85,6 +86,7 @@ pub async fn handler(
                     let key = Backend::authenticate_key_with_user_id(&user.id);
                     del_from_cache(&key).await;
                 }
+                update_nonce(&mut transaction, user.id).await?;
                 transaction.commit().await.map_err(Error::from)?;
                 Ok(NotificationRedirect::redirect(
                     "Please Login",

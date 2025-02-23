@@ -40,7 +40,7 @@ pub async fn handler(
     match auth.user {
         Some(_) => Err(Redirect::to("/ui/dashboard")),
         None => {
-            let nonce = Nonce::generate_nonce(16);
+            let nonce = Nonce::generate_nonce(128);
             let date = Utc::now() + Duration::milliseconds(600_000);
             state
                 .wallet_login_nonce

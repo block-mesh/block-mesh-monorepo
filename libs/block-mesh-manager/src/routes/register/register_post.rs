@@ -157,7 +157,7 @@ pub async fn handler(
             RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
         ));
     }
-    let nonce = Nonce::generate_nonce(16);
+    let nonce = Nonce::generate_nonce(128);
     let nonce_secret = Secret::from(nonce.clone());
     let hashed_password = hash(form.password.clone(), DEFAULT_COST)?;
     let user_id = create_user(&mut transaction, None, &email, &hashed_password)
