@@ -43,7 +43,7 @@ pub async fn handler(
             RoutesEnum::Static_UnAuth_Login.to_string().as_str(),
         )),
         None => {
-            let nonce = Nonce::generate_nonce(16);
+            let nonce = Nonce::generate_nonce(128);
             let date = Utc::now() + Duration::milliseconds(600_000);
             state
                 .wallet_login_nonce

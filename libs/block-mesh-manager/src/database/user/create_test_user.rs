@@ -57,7 +57,7 @@ pub async fn create_test_user(pool: &PgPool) -> anyhow::Result<()> {
     )
         .execute(pool)
         .await?;
-    let nonce = Nonce::generate_nonce(16);
+    let nonce = Nonce::generate_nonce(128);
     let nonce_secret = Secret::from(nonce.clone());
     let mut transaction = pool.begin().await?;
     create_nonce(&mut transaction, &user_id, &nonce_secret).await?;
