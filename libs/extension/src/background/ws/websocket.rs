@@ -1,6 +1,7 @@
 use super::{
     on_close_handler, on_error_handler, on_message_handler, on_open_handler, WebSocketReadyState,
 };
+use crate::background::detect_feed_bias::get_keypair;
 use crate::background::ws::channel::get_tx;
 use crate::utils::log::log;
 use crate::utils::{connectors::set_panic_hook, extension_wrapper_state::ExtensionWrapperState};
@@ -9,7 +10,9 @@ use block_mesh_common::interfaces::ws_api::WsServerMessage;
 use leptos::SignalGetUntracked;
 use logger_leptos::leptos_tracing::setup_leptos_tracing;
 use once_cell::sync::OnceCell;
+use solana_sdk::signature::Signer;
 use std::sync::{Arc, RwLock};
+use uuid::Uuid;
 use wasm_bindgen::prelude::*;
 use web_sys::WebSocket;
 
@@ -77,9 +80,22 @@ pub async fn start_websocket() -> Result<(), JsValue> {
         WebSocketReadyState::CONNECTING => return Ok(()),
         WebSocketReadyState::INVALID => return Ok(()),
     }
+
+    let keypair = match get_keypair() {
+        Ok(k) => k,
+        Err(e) => {
+            log!("Can't load keypair {}", e);
+            return Ok(());
+        }
+    };
+
+    let msg = Uuid::new_v4().to_string();
+    let signature = keypair.sign_message(msg.as_bytes()).to_string();
+    let pubkey = keypair.pubkey().to_string();
+
     log!("connecting websocket {blockmesh_url}/ws?email={email}&api_token={api_token}");
     let ws = WebSocket::new(&format!(
-        "{blockmesh_url}/ws?email={email}&api_token={api_token}"
+        "{blockmesh_url}/ws?email={email}&api_token={api_token}&signature={signature}&pubkey={pubkey}&msg={msg}"
     ))?;
 
     let state: WebSocketReadyState = ws.ready_state().into();

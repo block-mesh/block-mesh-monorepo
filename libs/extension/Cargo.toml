@@ -8,6 +8,7 @@ authors.workspace = true
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
+serde_urlencoded = { workspace = true }
 twitter-scraping-helper = { path = "../twitter-scraping-helper" }
 urlencoding = { workspace = true }
 wee_alloc = { workspace = true }

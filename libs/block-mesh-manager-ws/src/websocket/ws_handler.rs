@@ -10,12 +10,20 @@ use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user
 use block_mesh_manager_database_domain::domain::user::UserAndApiToken;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::{HeaderMap, StatusCode};
+use solana_sdk::signature::{Keypair, Signature, Signer};
 use sqlx::PgPool;
 use std::collections::HashMap;
 use std::env;
 use std::str::FromStr;
 use std::sync::Arc;
 use uuid::Uuid;
+
+pub fn get_keypair() -> anyhow::Result<Keypair> {
+    let data: serde_json::Value =
+        serde_json::from_str(&env::var("EXT_KEYPAIR")?).map_err(|e| anyhow!(e.to_string()))?;
+    let key_bytes: Vec<u8> = serde_json::from_value(data).map_err(|e| anyhow!(e.to_string()))?;
+    Keypair::from_bytes(&key_bytes).map_err(|e| anyhow!(e.to_string()))
+}
 
 pub async fn get_user_from_db(
     follower_pool: &PgPool,
@@ -46,6 +54,36 @@ pub async fn ws_handler(
         "127.0.0.1"
     }
     .to_string();
+
+    let enforce_keypair = env::var("ENFORCE_KEYPAIR")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
+
+    if enforce_keypair {
+        let signature = query
+            .get("signature")
+            .ok_or(anyhow!("Missing signature".to_string()))?
+            .clone();
+        let pubkey = query
+            .get("pubkey")
+            .ok_or(anyhow!("Missing pubkey".to_string()))?
+            .clone();
+        let msg = query
+            .get("msg")
+            .ok_or(anyhow!("Missing msg".to_string()))?
+            .clone();
+        let keypair = get_keypair()?;
+        if keypair.pubkey().to_string() != pubkey {
+            return Err(Error::from(anyhow!("Mismatch on keys")));
+        }
+        let sig =
+            Signature::from_str(&signature).map_err(|e| Error::from(anyhow!(e.to_string())))?;
+        if !sig.verify(&keypair.pubkey().to_bytes(), msg.as_bytes()) {
+            return Err(Error::from(anyhow!("Failed to verify signature")));
+        }
+    }
+
     let email = query
         .get("email")
         .ok_or(anyhow!("Missing email".to_string()))?
