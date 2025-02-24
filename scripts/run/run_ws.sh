@@ -1,5 +1,6 @@
 #!/usr/bin/env bash
 set -x
+export ENFORCE_KEYPAIR="true"
 export APP_ENVIRONMENT="local"
 export SENTRY_LAYER="false"
 export SENTRY_SAMPLE_RATE="1.0"
