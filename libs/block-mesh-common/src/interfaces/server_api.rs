@@ -238,6 +238,17 @@ pub struct RegisterWalletForm {
 
 #[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
+pub struct ResetPasswordWalletForm {
+    pub pubkey: String,
+    pub signature: String,
+    pub nonce: String,
+    pub password: String,
+    pub password_confirm: String,
+    pub cftoken: Option<String>,
+}
+
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct RegisterResponse {
     pub status_code: u16,
     pub error: Option<String>,
