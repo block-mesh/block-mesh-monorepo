@@ -53,6 +53,13 @@ pub fn get_static_un_auth_router() -> Router<Arc<AppState>> {
                 .post(routes::password::reset_password_post::handler),
         )
         .route(
+            RoutesEnum::Static_UnAuth_ResetPasswordWallet
+                .to_string()
+                .as_str(),
+            get(routes::password::reset_password_wallet_form::handler)
+                .post(routes::password::reset_password_wallet_post::handler),
+        )
+        .route(
             RoutesEnum::Static_UnAuth_NewPassword.to_string().as_str(),
             get(routes::password::new_password_form::handler)
                 .post(routes::password::new_password_post::handler),
