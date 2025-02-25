@@ -268,7 +268,7 @@ impl WsAppState {
         let workers = Arc::new(RwLock::new(HashMap::with_capacity(500)));
         let redis_key = format!(
             "{}_{}_{}_{}",
-            Uuid::new_v4().to_string(),
+            Uuid::new_v4(),
             hostname::get()
                 .unwrap_or("unknown_host".to_string().parse().unwrap())
                 .to_str()
