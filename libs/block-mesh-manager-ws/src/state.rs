@@ -7,16 +7,18 @@ use database_utils::utils::connection::channel_pool::channel_pool;
 use database_utils::utils::connection::follower_pool::follower_pool;
 use database_utils::utils::connection::write_pool::write_pool;
 use flume::Sender;
+use local_ip_address::local_ip;
 use redis::aio::MultiplexedConnection;
 use redis::{AsyncCommands, RedisResult};
 use serde::{Deserialize, Serialize};
 use sqlx::types::chrono::Utc;
 use sqlx::PgPool;
 use std::collections::{HashMap, HashSet};
-use std::env;
+use std::net::IpAddr;
 use std::str::FromStr;
 use std::sync::Arc;
 use std::time::Duration;
+use std::{env, process};
 use tokio::sync::RwLock;
 use tokio::task::JoinHandle;
 use tokio::time::sleep;
@@ -213,6 +215,13 @@ impl WsAppState {
         let _: RedisResult<()> = redis.expire(self.email_key(email), 5).await;
     }
 
+    #[tracing::instrument(name = "init_redis", skip_all)]
+    pub async fn init_redis(&self) {
+        let mut redis = self.redis.clone();
+        let _: RedisResult<()> = redis.set(self.redis_key(), 0).await;
+        let _: RedisResult<()> = redis.expire(self.redis_key(), 120).await;
+    }
+
     #[tracing::instrument(name = "incr_redis", skip_all)]
     pub async fn incr_redis(&self) {
         let mut redis = self.redis.clone();
@@ -257,7 +266,16 @@ impl WsAppState {
     pub async fn new(tx: Sender<DBMessage>, joiner_tx: Sender<JoinHandle<()>>) -> Self {
         let pending_twitter_tasks = Arc::new(RwLock::new(HashMap::with_capacity(500)));
         let workers = Arc::new(RwLock::new(HashMap::with_capacity(500)));
-        let redis_key = Uuid::new_v4().to_string();
+        let redis_key = format!(
+            "{}_{}_{}_{}",
+            Uuid::new_v4(),
+            hostname::get()
+                .unwrap_or("unknown_host".to_string().parse().unwrap())
+                .to_str()
+                .unwrap_or("unknown_host"),
+            process::id(),
+            local_ip().unwrap_or(IpAddr::from_str("10.0.0.0").unwrap())
+        );
         let environment = env::var("APP_ENVIRONMENT").unwrap();
         let environment = Environment::from_str(&environment).unwrap();
         let pool = write_pool(None).await;

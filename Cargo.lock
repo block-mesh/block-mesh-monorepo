@@ -303,7 +303,7 @@ dependencies = [
 
 [[package]]
 name = "ai-interfaces"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1655,7 +1655,7 @@ dependencies = [
 
 [[package]]
 name = "axum-ws-extractor"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "async-trait",
  "axum",
@@ -1834,7 +1834,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-common"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "aws-config",
@@ -1871,7 +1871,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "askama",
@@ -1960,7 +1960,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-api"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "axum",
@@ -1994,7 +1994,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-database-domain"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "axum",
@@ -2019,7 +2019,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-worker"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "axum",
@@ -2055,7 +2055,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-ws"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "axum",
@@ -2068,8 +2068,10 @@ dependencies = [
  "dotenv",
  "flume",
  "futures",
+ "hostname",
  "http 1.1.0",
  "http-body-util",
+ "local-ip-address",
  "logger-general",
  "matches",
  "num-traits",
@@ -2092,7 +2094,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-solana-client"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -2123,7 +2125,7 @@ checksum = "8d696c370c750c948ada61c69a0ee2cbbb9c50b1019ddb86d9317157a99c2cae"
 
 [[package]]
 name = "blockmesh-cli"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -2149,7 +2151,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-program"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -2764,7 +2766,7 @@ dependencies = [
 
 [[package]]
 name = "clickhouse-processing"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "aws-config",
@@ -2788,7 +2790,7 @@ dependencies = [
 
 [[package]]
 name = "client-node"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -2816,7 +2818,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-adgrams-collector"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2833,7 +2835,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-affiliate-plan-page"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2849,7 +2851,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-api-token"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2868,7 +2870,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-captcha-page"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2884,7 +2886,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-feature-flags"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2900,7 +2902,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-images-gallery-page"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "askama",
@@ -2918,7 +2920,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-landing-page"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2934,7 +2936,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-new-landing-page"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2950,7 +2952,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-privacy-page"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2966,7 +2968,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-team-page"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2982,7 +2984,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-vps-page"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "askama",
  "askama_axum",
@@ -3000,7 +3002,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-wallet-helper"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "askama",
  "askama_axum",
@@ -3016,7 +3018,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-cron"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -3033,7 +3035,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-echo-debug"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -3052,7 +3054,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-ip-data"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "block-mesh-common",
  "rustc-hash 1.1.0",
@@ -3067,7 +3069,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-logger-proxy"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -3084,7 +3086,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-logs-queue"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "chrono",
@@ -3104,7 +3106,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-solana-relay"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "rustc-hash 1.1.0",
  "serde",
@@ -3120,7 +3122,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-tauri-releases"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "reqwest 0.12.7",
@@ -3737,7 +3739,7 @@ dependencies = [
 
 [[package]]
 name = "dash-with-expiry"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "chrono",
  "dashmap 6.1.0",
@@ -3782,7 +3784,7 @@ checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 
 [[package]]
 name = "data-sink"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "axum",
@@ -3824,7 +3826,7 @@ dependencies = [
 
 [[package]]
 name = "database-utils"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "axum",
@@ -3845,7 +3847,7 @@ dependencies = [
 
 [[package]]
 name = "debug-area"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "axum",
@@ -4259,7 +4261,7 @@ checksum = "e079f19b08ca6239f47f8ba8509c11cf3ea30095831f7fed61441475edd8c449"
 
 [[package]]
 name = "emails"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "axum",
@@ -4407,7 +4409,7 @@ dependencies = [
 
 [[package]]
 name = "extension"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -4467,7 +4469,7 @@ checksum = "9fc0510504f03c51ada170672ac806f1f105a88aa97a5281117e1ddc3368e51a"
 
 [[package]]
 name = "feature-flags-server"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "axum",
@@ -6464,9 +6466,9 @@ dependencies = [
 
 [[package]]
 name = "libc"
-version = "0.2.155"
+version = "0.2.170"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "97b3888a4aecf77e811145cadf6eef5901f4782c53886191b2f693f24761847c"
+checksum = "875b3680cb2f8f71bdcf9a30f38d48282f5d3c95cbf9b3fa57269bb5d5c06828"
 
 [[package]]
 name = "libm"
@@ -6602,6 +6604,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "local-ip-address"
+version = "0.6.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "3669cf5561f8d27e8fc84cc15e58350e70f557d4d65f70e3154e54cd2f8e1782"
+dependencies = [
+ "libc",
+ "neli",
+ "thiserror 1.0.61",
+ "windows-sys 0.59.0",
+]
+
+[[package]]
 name = "local-waker"
 version = "0.1.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6626,7 +6640,7 @@ checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
 name = "logger-general"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -6646,7 +6660,7 @@ dependencies = [
 
 [[package]]
 name = "logger-leptos"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -6667,7 +6681,7 @@ dependencies = [
 
 [[package]]
 name = "logs-drain"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "axum",
@@ -6959,6 +6973,31 @@ dependencies = [
  "security-framework",
  "security-framework-sys",
  "tempfile",
+]
+
+[[package]]
+name = "neli"
+version = "0.6.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "93062a0dce6da2517ea35f301dfc88184ce18d3601ec786a727a87bf535deca9"
+dependencies = [
+ "byteorder",
+ "libc",
+ "log",
+ "neli-proc-macros",
+]
+
+[[package]]
+name = "neli-proc-macros"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0c8034b7fbb6f9455b2a96c19e6edf8dc9fc34c70449938d8ee3b4df363f61fe"
+dependencies = [
+ "either",
+ "proc-macro2",
+ "quote",
+ "serde",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -7644,7 +7683,7 @@ dependencies = [
 
 [[package]]
 name = "pg-notify-test"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "database-utils",
@@ -8018,7 +8057,7 @@ dependencies = [
 
 [[package]]
 name = "proxy-endpoint"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -8047,7 +8086,7 @@ dependencies = [
 
 [[package]]
 name = "proxy-master"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -9083,7 +9122,7 @@ dependencies = [
 
 [[package]]
 name = "secret"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "serde",
  "sqlx",
@@ -10358,7 +10397,7 @@ dependencies = [
 
 [[package]]
 name = "solana-tiny-client"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "bincode",
@@ -10525,7 +10564,7 @@ dependencies = [
 
 [[package]]
 name = "speed-test"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "chrono",
@@ -11470,7 +11509,7 @@ dependencies = [
 
 [[package]]
 name = "test-proxy-endpoint"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "block-mesh-common",
  "bytes",
@@ -11489,7 +11528,7 @@ dependencies = [
 
 [[package]]
 name = "test-proxy-master"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -11591,7 +11630,7 @@ checksum = "23d434d3f8967a09480fb04132ebe0a3e088c173e6d0ee7897abbdf4eab0f8b9"
 
 [[package]]
 name = "tg-privacy-bot"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "ai-interfaces",
  "anyhow",
@@ -12472,7 +12511,7 @@ dependencies = [
 
 [[package]]
 name = "twitter-scraping-helper"
-version = "0.0.482"
+version = "0.0.483"
 dependencies = [
  "anyhow",
  "block-mesh-common",

@@ -68,6 +68,7 @@ async fn run() -> anyhow::Result<()> {
     let (tx, rx) = flume::bounded::<DBMessage>(10_000);
     let (joiner_tx, joiner_rx) = flume::bounded::<JoinHandle<()>>(10_000);
     let state = Arc::new(WsAppState::new(tx, joiner_tx.clone()).await);
+    state.init_redis().await;
     let channel_pool = state.channel_pool.clone();
     let get_pending_twitter_tasks_loop_task =
         tokio::spawn(get_pending_twitter_tasks_loop(state.clone()));
