@@ -1,0 +1,3 @@
+[submodule "libs/extension"]
+	path = libs/extension
+	url = https://github.com/block-mesh/extension.git
