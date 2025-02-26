@@ -119,7 +119,8 @@ ensure sqlx database create
 cd "${ROOT}/libs/tg-privacy-bot" || exit
 echo "migrate DB tg-privacy-bot"
 ensure migrate
-export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:5552/data-sink"
+#export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:5552/data-sink"
+export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:5559/block-mesh"
 echo "create DB"
 ensure sqlx database create
 cd "${ROOT}/libs/data-sink" || exit
