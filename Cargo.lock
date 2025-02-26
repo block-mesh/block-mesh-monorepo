@@ -1688,40 +1688,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "backup-extension"
-version = "0.0.484"
-dependencies = [
- "anyhow",
- "block-mesh-common",
- "chrono",
- "console_error_panic_hook",
- "flume",
- "gloo-utils 0.2.0",
- "js-sys",
- "leptos",
- "leptos-use",
- "logger-leptos",
- "once_cell",
- "regex",
- "reqwest 0.12.7",
- "scraper",
- "serde",
- "serde-wasm-bindgen 0.6.5",
- "serde_json",
- "serde_urlencoded",
- "solana-sdk",
- "speed-test",
- "twitter-scraping-helper",
- "url",
- "urlencoding",
- "uuid",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
- "wee_alloc",
-]
-
-[[package]]
 name = "base16ct"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
