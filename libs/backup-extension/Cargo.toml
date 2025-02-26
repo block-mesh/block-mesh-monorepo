@@ -1,5 +1,5 @@
 [package]
-name = "extension"
+name = "backup-extension"
 version = { workspace = true }
 edition = "2021"
 authors.workspace = true
