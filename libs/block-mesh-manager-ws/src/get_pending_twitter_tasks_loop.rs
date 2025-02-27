@@ -21,20 +21,27 @@ pub async fn get_pending_twitter_tasks_loop(state: Arc<WsAppState>) -> Result<()
         .parse()
         .unwrap_or(10_000usize);
 
+    let twitter_tasks = env::var("TWITTER_TASKS")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
+
     loop {
-        if let Ok(mut transaction) = create_txn(&state.pool).await {
-            if let Ok(tasks) = TwitterTask::get_pending_tasks(&mut transaction).await {
-                let mut t = state.pending_twitter_tasks.write().await;
-                tasks.into_iter().for_each(|i| {
-                    t.insert(i.id, i);
-                });
-            }
-            state.clear_tasks().await;
-            let _ = commit_txn(transaction).await;
-            let limit = min(assign_limit, state.workers.read().await.len());
-            for _ in 0..limit {
-                state.assign_task().await;
-                sleep(Duration::from_millis(10)).await;
+        if twitter_tasks {
+            if let Ok(mut transaction) = create_txn(&state.pool).await {
+                if let Ok(tasks) = TwitterTask::get_pending_tasks(&mut transaction).await {
+                    let mut t = state.pending_twitter_tasks.write().await;
+                    tasks.into_iter().for_each(|i| {
+                        t.insert(i.id, i);
+                    });
+                }
+                state.clear_tasks().await;
+                let _ = commit_txn(transaction).await;
+                let limit = min(assign_limit, state.workers.read().await.len());
+                for _ in 0..limit {
+                    state.assign_task().await;
+                    sleep(Duration::from_millis(10)).await;
+                }
             }
         }
         sleep(dur).await;
