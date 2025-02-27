@@ -32,27 +32,3 @@ CREATE TABLE twitter_tasks_completed PARTITION OF twitter_tasks FOR VALUES IN ('
 CREATE TABLE twitter_tasks_failed PARTITION OF twitter_tasks FOR VALUES IN ('Failed');
 -----
 CREATE TABLE twitter_tasks_default PARTITION OF twitter_tasks DEFAULT;
------
-INSERT INTO twitter_tasks (id,
-                           assigned_user_id,
-                           twitter_username,
-                           status,
-                           created_at,
-                           updated_at,
-                           since,
-                           until,
-                           delay,
-                           results)
-SELECT id,
-       assigned_user_id,
-       twitter_username,
-       status,
-       created_at,
-       updated_at,
-       since,
-       until,
-       delay,
-       results
-FROM twitter_tasks_old;
--- -- -----
-DROP TABLE twitter_tasks_old;
