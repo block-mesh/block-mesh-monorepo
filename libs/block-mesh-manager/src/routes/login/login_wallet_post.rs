@@ -19,7 +19,7 @@ use std::sync::Arc;
 
 #[tracing::instrument(name = "login_wallet_post", skip_all)]
 pub async fn handler(
-    State(state): State<Arc<AppState>>,
+    State(_state): State<Arc<AppState>>,
     Extension(pool): Extension<PgPool>,
     Extension(mut auth): Extension<AuthSession<Backend>>,
     Form(form): Form<LoginWalletForm>,
@@ -27,9 +27,6 @@ pub async fn handler(
     let mut transaction = create_txn(&pool).await?;
     let pubkey = Pubkey::from_str(form.pubkey.as_str()).unwrap_or_default();
     let email = format!("wallet_{pubkey}@blockmesh.xyz").to_ascii_lowercase();
-    tracing::info!("form = {:#?}", form);
-    tracing::info!("email = {:#?}", email);
-
     let user = get_user_opt_by_email(&mut transaction, &email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
@@ -41,6 +38,16 @@ pub async fn handler(
         password: Secret::from(form.password),
         nonce: nonce.nonce.as_ref().to_string(),
     };
+    let user_wallet = user.wallet_address.unwrap_or_default().to_lowercase();
+    let form_wallet = form.pubkey.to_lowercase();
+    if user_wallet != form_wallet {
+        return Ok(Error::redirect(
+            400,
+            "Error",
+            "Wallet Mismatch",
+            RoutesEnum::Static_UnAuth_Login_Wallet.to_string().as_str(),
+        ));
+    }
     let sig_array: SigArray = match serde_json::from_str(&form.signature) {
         Ok(sig_array) => sig_array,
         Err(_) => {
@@ -54,30 +61,7 @@ pub async fn handler(
     };
     let signature =
         Signature::try_from(sig_array.0.as_slice()).map_err(|_| Error::InternalServer)?;
-    let form_nonce = form.nonce.clone();
     let message = form.nonce.as_bytes();
-    let mem_nonce = state.wallet_login_nonce.get(&form_nonce).await;
-    match mem_nonce {
-        Some(mem_nonce) => {
-            if mem_nonce != form_nonce {
-                return Ok(Error::redirect(
-                    400,
-                    "Retry please",
-                    "Invalid nonce",
-                    RoutesEnum::Static_UnAuth_Login_Wallet.to_string().as_str(),
-                ));
-            }
-        }
-        None => {
-            return Ok(Error::redirect(
-                400,
-                "Retry please",
-                "Missing nonce",
-                RoutesEnum::Static_UnAuth_Login_Wallet.to_string().as_str(),
-            ));
-        }
-    }
-
     if !signature.verify(pubkey.as_ref(), message) {
         tracing::error!("Signature verification failed.");
         return Err(Error::SignatureMismatch);
