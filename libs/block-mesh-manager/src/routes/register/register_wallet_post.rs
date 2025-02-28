@@ -70,34 +70,8 @@ pub async fn handler(
     let signature =
         Signature::try_from(sig_array.0.as_slice()).map_err(|_| Error::InternalServer)?;
     let pubkey = Pubkey::from_str(form.pubkey.as_str()).unwrap_or_default();
-    let form_nonce = form.nonce.clone();
     let message = form.nonce.as_bytes();
     let email = format!("wallet_{pubkey}@blockmesh.xyz").to_ascii_lowercase();
-    let mem_nonce = state.wallet_login_nonce.get(&form_nonce).await;
-    match mem_nonce {
-        Some(mem_nonce) => {
-            if mem_nonce != form_nonce {
-                return Ok(Error::redirect(
-                    400,
-                    "Retry please",
-                    "Invalid nonce",
-                    RoutesEnum::Static_UnAuth_Register_Wallet
-                        .to_string()
-                        .as_str(),
-                ));
-            }
-        }
-        None => {
-            return Ok(Error::redirect(
-                400,
-                "Retry please",
-                "Missing nonce",
-                RoutesEnum::Static_UnAuth_Register_Wallet
-                    .to_string()
-                    .as_str(),
-            ));
-        }
-    }
     if form.password.contains(' ') {
         return Ok(Error::redirect(
             400,
