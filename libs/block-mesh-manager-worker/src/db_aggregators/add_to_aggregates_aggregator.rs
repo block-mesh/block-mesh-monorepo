@@ -6,6 +6,7 @@ use flume::Sender;
 use serde_json::Value;
 use sqlx::PgPool;
 use std::collections::HashMap;
+use std::env;
 use tokio::sync::broadcast::error::RecvError;
 use tokio::sync::broadcast::Receiver;
 use tokio::task::JoinHandle;
@@ -68,6 +69,10 @@ pub async fn add_to_aggregates_aggregator(
     let mut calls: HashMap<Uuid, (String, Value)> = HashMap::new();
     let mut count = 0;
     let mut prev = Utc::now();
+    let save_to_db = env::var("ADD_TO_AGGREGATOR_SAVE_TO_DB")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
     loop {
         match rx.recv().await {
             Ok(message) => {
@@ -86,25 +91,29 @@ pub async fn add_to_aggregates_aggregator(
                         let handle = tokio::spawn(async move {
                             tracing::info!("add_to_aggregates_create_bulk_query starting txn");
                             if let Ok(mut transaction) = create_txn(&poll_clone).await {
-                                let query = add_to_aggregates_create_bulk_query(calls_clone);
-                                let r = sqlx::query(&query)
-                                            .execute(&mut *transaction)
-                                            .await
-                                            .map_err(|e| {
-                                                tracing::error!(
-                                                    "add_to_aggregates_create_bulk_query failed to execute query size: {} , with error {:?}",
-                                                    count,
-                                                    e
-                                                );
-                                            });
-                                if let Ok(r) = r {
+                                if save_to_db {
+                                    let query = add_to_aggregates_create_bulk_query(calls_clone);
+                                    let r = sqlx::query(&query)
+                                        .execute(&mut *transaction)
+                                        .await
+                                        .map_err(|e| {
+                                            tracing::error!(
+                                                "add_to_aggregates_create_bulk_query failed to execute query size: {} , with error {:?}",
+                                                count,
+                                                e
+                                            );
+                                        });
+                                    if let Ok(r) = r {
+                                        tracing::info!(
+                                            "add_to_aggregates_create_bulk_query rows_affected : {}",
+                                            r.rows_affected()
+                                        );
+                                    }
+                                    let _ = commit_txn(transaction).await;
                                     tracing::info!(
-                                        "add_to_aggregates_create_bulk_query rows_affected : {}",
-                                        r.rows_affected()
+                                        "add_to_aggregates_create_bulk_query finished txn"
                                     );
                                 }
-                                let _ = commit_txn(transaction).await;
-                                tracing::info!("add_to_aggregates_create_bulk_query finished txn");
                             }
                         });
                         let _ = joiner_tx.send_async(handle).await;
