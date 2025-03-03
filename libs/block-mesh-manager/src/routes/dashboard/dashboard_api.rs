@@ -9,7 +9,7 @@ use crate::errors::error::Error;
 use crate::routes::dashboard::dashboard_data_extractor::dashboard_data_extractor;
 use crate::startup::application::AppState;
 use block_mesh_common::interfaces::server_api::{DashboardRequest, DashboardResponse};
-use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
+use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 
 #[tracing::instrument(name = "dashboard_api", skip_all)]

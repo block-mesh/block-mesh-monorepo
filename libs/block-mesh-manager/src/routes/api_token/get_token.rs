@@ -7,7 +7,7 @@ use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{
     GetTokenRequest, GetTokenResponse, GetTokenResponseEnum,
 };
-use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
+use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use dashmap::try_result::TryResult::Present;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::StatusCode;

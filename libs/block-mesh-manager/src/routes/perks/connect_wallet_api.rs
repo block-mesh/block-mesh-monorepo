@@ -11,7 +11,7 @@ use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{ConnectWalletApiRequest, ConnectWalletResponse};
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_str;
-use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
+use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use block_mesh_manager_database_domain::domain::update_aggregate::update_aggregate;
 use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};

@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n        users.email as email,\n        users.id as user_id,\n        api_tokens.token as \"token: Secret<Uuid>\",\n        users.password as \"password: Secret<String>\",\n        users.wallet_address as wallet_address,\n        users.verified_email as verified_email\n        FROM users\n        JOIN api_tokens ON users.id = api_tokens.user_id\n        WHERE users.email = $1\n        LIMIT 1",
+  "query": "SELECT\n        users.email as email,\n        users.id as user_id,\n        api_tokens.token as \"token: Secret<Uuid>\",\n        users.password as \"password: Secret<String>\",\n        nonces.nonce as \"nonce: Secret<String>\",\n        users.wallet_address as wallet_address,\n        users.verified_email as verified_email\n        FROM users\n        JOIN api_tokens ON users.id = api_tokens.user_id\n        JOIN nonces ON users.id = nonces.user_id\n        WHERE users.email = $1\n        LIMIT 1",
   "describe": {
     "columns": [
       {
@@ -25,11 +25,16 @@
       },
       {
         "ordinal": 4,
-        "name": "wallet_address",
+        "name": "nonce: Secret<String>",
         "type_info": "Text"
       },
       {
         "ordinal": 5,
+        "name": "wallet_address",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
         "name": "verified_email",
         "type_info": "Bool"
       }
@@ -44,9 +49,10 @@
       false,
       false,
       false,
+      false,
       true,
       false
     ]
   },
-  "hash": "9a3a81e9964ebf5981c7a6192dbcd6c5d424537204d126600f49236a3a58c804"
+  "hash": "e341ca6d69cc5e9c5206ca97bf78a6844be11d5bdad156a0dfb17859c028a9fb"
 }

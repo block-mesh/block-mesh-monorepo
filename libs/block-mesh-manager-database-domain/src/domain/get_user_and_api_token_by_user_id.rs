@@ -8,13 +8,13 @@ use std::sync::Arc;
 use tokio::sync::{OnceCell, RwLock};
 use uuid::Uuid;
 
-type CacheType = Arc<RwLock<HashMapWithExpiry<String, Option<UserAndApiToken>>>>;
+type CacheType = Arc<RwLock<HashMapWithExpiry<Uuid, Option<UserAndApiToken>>>>;
 static CACHE: OnceCell<CacheType> = OnceCell::const_new();
 
-#[tracing::instrument(name = "get_user_and_api_token_by_email", skip_all)]
-pub async fn get_user_and_api_token_by_email(
+#[tracing::instrument(name = "get_user_and_api_token_by_user_id", skip_all)]
+pub async fn get_user_and_api_token_by_user_id(
     transaction: &mut Transaction<'_, Postgres>,
-    email: &str,
+    user_id: &Uuid,
 ) -> anyhow::Result<Option<UserAndApiToken>> {
     let enable = env::var("ENABLE_CACHE_USER_AND_API_TOKEN")
         .unwrap_or("false".to_ascii_lowercase())
@@ -24,24 +24,28 @@ pub async fn get_user_and_api_token_by_email(
         .get_or_init(|| async { Arc::new(RwLock::new(HashMapWithExpiry::new())) })
         .await;
     if enable {
-        if let Some(out) = cache.read().await.get(&email.to_string()).await {
+        if let Some(out) = cache.read().await.get(user_id).await {
             return Ok(out);
         }
     }
     let output = sqlx::query_as!(
         UserAndApiToken,
-        r#"SELECT
+        r#"
+        SELECT
         users.email as email,
         users.id as user_id,
         api_tokens.token as "token: Secret<Uuid>",
         users.password as "password: Secret<String>",
+        nonces.nonce as "nonce: Secret<String>",
         users.wallet_address as wallet_address,
         users.verified_email as verified_email
         FROM users
         JOIN api_tokens ON users.id = api_tokens.user_id
-        WHERE users.email = $1
-        LIMIT 1"#,
-        email,
+        JOIN nonces ON users.id = nonces.user_id
+        WHERE users.id = $1
+        LIMIT 1
+        "#,
+        user_id,
     )
     .fetch_optional(&mut **transaction)
     .await?;
@@ -50,7 +54,7 @@ pub async fn get_user_and_api_token_by_email(
         cache
             .write()
             .await
-            .insert(email.to_string(), output.clone(), Some(date))
+            .insert(*user_id, output.clone(), Some(date))
             .await;
     }
     Ok(output)

@@ -1,0 +1,64 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n        id,\n        created_at,\n        password as \"password: Secret<String>\",\n        email,\n        wallet_address,\n        role as \"role: UserRole\",\n        invited_by as \"invited_by: OptionUuid\",\n        verified_email\n        FROM users WHERE email = $1 LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "password: Secret<String>",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "email",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "wallet_address",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "role: UserRole",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "invited_by: OptionUuid",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 7,
+        "name": "verified_email",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "7c6a71d57382d7b16145f4a8e72b2a4d693041d8b1d1e12eef8d4ac996afbc3d"
+}

@@ -6,7 +6,7 @@ use axum::Json;
 use block_mesh_common::interfaces::server_api::{
     GetLatestInviteCodeRequest, GetLatestInviteCodeResponse,
 };
-use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
+use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use std::sync::Arc;
 

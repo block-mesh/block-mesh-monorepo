@@ -6,7 +6,7 @@ use axum::extract::{Query, State};
 use axum::response::IntoResponse;
 use axum_tws::WebSocketUpgrade;
 use block_mesh_common::interfaces::db_messages::{DBMessage, DBMessageTypes, UsersIpMessage};
-use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
+use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use block_mesh_manager_database_domain::domain::user::UserAndApiToken;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::{HeaderMap, StatusCode};

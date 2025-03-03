@@ -84,6 +84,7 @@ pub struct UserAndApiToken {
     pub token: Secret<Uuid>,
     pub email: String,
     pub password: Secret<String>,
+    pub nonce: Secret<String>,
     pub wallet_address: Option<String>,
     pub verified_email: bool,
 }
