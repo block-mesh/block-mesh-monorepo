@@ -171,6 +171,9 @@ pub async fn authentication_layer(
     pool: &PgPool,
     con: &MultiplexedConnection,
 ) -> AuthManagerLayer<Backend, PostgresStore> {
+    let inactivity_limit = get_envar("INACTIVITY_LIMIT").await;
+    let inactivity_limit = inactivity_limit.parse().unwrap_or(900_000);
+
     let session_store = PostgresStore::new(pool.clone());
     session_store.migrate().await.unwrap();
 
@@ -182,7 +185,9 @@ pub async fn authentication_layer(
 
     let session_layer = SessionManagerLayer::new(session_store)
         .with_secure(false)
-        .with_expiry(Expiry::OnInactivity(Duration::days(2)));
+        .with_expiry(Expiry::OnInactivity(Duration::milliseconds(
+            inactivity_limit,
+        )));
 
     let backend = Backend::new(pool.clone(), con.clone());
     AuthManagerLayerBuilder::new(backend, session_layer).build()

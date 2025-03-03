@@ -1,0 +1,2 @@
+drop index twitter_tasks__status;
+drop index twitter_tasks__twitter_username;
