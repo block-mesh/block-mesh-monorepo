@@ -39,7 +39,7 @@ pub async fn get_user_perks(
     cache
         .write()
         .await
-        .insert(user_id.clone(), perks.clone(), Some(date))
+        .insert(*user_id, perks.clone(), Some(date))
         .await;
     Ok(perks)
 }
