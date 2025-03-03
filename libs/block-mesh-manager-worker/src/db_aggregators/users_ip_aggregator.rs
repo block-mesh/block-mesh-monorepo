@@ -7,6 +7,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{PgPool, Row};
 use std::collections::HashMap;
+use std::env;
 use tokio::sync::broadcast::error::RecvError;
 use tokio::sync::broadcast::Receiver;
 use tokio::task::JoinHandle;
@@ -124,6 +125,10 @@ pub async fn users_ip_aggregator(
     let mut calls: HashMap<_, _> = HashMap::new();
     let mut count = 0;
     let mut prev = Utc::now();
+    let save_to_db = env::var("USERS_IP_AGGREGATOR_SAVE_TO_DB")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
     loop {
         match rx.recv().await {
             Ok(message) => {
@@ -140,8 +145,11 @@ pub async fn users_ip_aggregator(
                         let calls_clone = calls.clone();
                         let poll_clone = pool.clone();
                         let handle = tokio::spawn(async move {
-                            let _ =
-                                ip_address_and_users_ip_bulk_query(&poll_clone, calls_clone).await;
+                            if save_to_db {
+                                let _ =
+                                    ip_address_and_users_ip_bulk_query(&poll_clone, calls_clone)
+                                        .await;
+                            }
                         });
                         let _ = joiner_tx.send_async(handle).await;
                         count = 0;
