@@ -1,0 +1,1 @@
+CREATE UNIQUE INDEX nonces_user_unique ON nonces (user_id);

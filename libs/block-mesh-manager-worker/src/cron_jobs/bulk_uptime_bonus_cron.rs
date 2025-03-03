@@ -7,6 +7,10 @@ use tokio::time::Instant;
 
 #[tracing::instrument(name = "bulk_uptime_bonus_cron", level = "trace", skip(pool))]
 pub async fn bulk_uptime_bonus_cron(pool: PgPool) -> Result<(), anyhow::Error> {
+    let enable = env::var("BULK_UPTIME_BONUS_ENABLE")
+        .unwrap_or("false".to_ascii_lowercase())
+        .parse()
+        .unwrap_or(false);
     let bonus = env::var("BULK_UPTIME_BONUS")
         .unwrap_or(String::from("0"))
         .parse()
@@ -17,19 +21,21 @@ pub async fn bulk_uptime_bonus_cron(pool: PgPool) -> Result<(), anyhow::Error> {
         .unwrap_or(60000u64);
     let duration = Duration::from_millis(sleep);
     loop {
-        if let Ok(mut transaction) = create_txn(&pool).await {
-            let now = Instant::now();
+        if enable {
+            if let Ok(mut transaction) = create_txn(&pool).await {
+                let now = Instant::now();
 
-            let r = bulk_uptime_bonus(&mut transaction, bonus).await;
-            let _ = commit_txn(transaction).await;
-            let elapsed = now.elapsed();
-            if let Ok(r) = r {
-                tracing::info!(
-                    "bulk_uptime_bonus bonus = {} , affected rows = {}, elapsed = {:?}",
-                    bonus,
-                    r.rows_affected(),
-                    elapsed
-                );
+                let r = bulk_uptime_bonus(&mut transaction, bonus).await;
+                let _ = commit_txn(transaction).await;
+                let elapsed = now.elapsed();
+                if let Ok(r) = r {
+                    tracing::info!(
+                        "bulk_uptime_bonus bonus = {} , affected rows = {}, elapsed = {:?}",
+                        bonus,
+                        r.rows_affected(),
+                        elapsed
+                    );
+                }
             }
         }
         tokio::time::sleep(duration).await;
