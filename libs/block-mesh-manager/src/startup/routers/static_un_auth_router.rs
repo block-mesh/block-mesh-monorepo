@@ -69,7 +69,7 @@ pub fn get_static_un_auth_router() -> Router<Arc<AppState>> {
             get(routes::login::login_form::handler),
         )
         .route(
-            &format!("{}_post", RoutesEnum::Static_UnAuth_Login.to_string()),
+            &format!("{}_post", RoutesEnum::Static_UnAuth_Login),
             get(routes::login::login_post::handler),
         )
         .route(
@@ -85,10 +85,7 @@ pub fn get_static_un_auth_router() -> Router<Arc<AppState>> {
             get(routes::login::login_wallet::handler),
         )
         .route(
-            &format!(
-                "{}_post",
-                RoutesEnum::Static_UnAuth_Login_Wallet.to_string()
-            ),
+            &format!("{}_post", RoutesEnum::Static_UnAuth_Login_Wallet),
             get(routes::login::login_wallet_post::handler),
         )
         .route(
