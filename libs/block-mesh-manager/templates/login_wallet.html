@@ -2,7 +2,7 @@
 
 {% block content %}
 {% include "turnstile.html" %}
-<form action="/login_wallet" method="post" onsubmit="return validateMyForm();">
+<form action="/login_wallet_post" method="get" onsubmit="return validateMyForm();">
   {% include "hidden-token.html" %}
   <div class="bg-dark-blue flex justify-center items-center h-screen">
     <div class="bg-dark-blue border-cyan border-solid border-2 p-8 rounded-lg shadow-md w-80">
@@ -103,11 +103,12 @@
 <script>
   async function connect_wallet() {
     const wallet = document.getElementById('wallet_select').value || 'solana'
+    console.log('wallet', wallet)
+    console.log('window[wallet]', window[wallet])
     const nonce = document.getElementById('nonce').value
     const uint8Array = new TextEncoder().encode(nonce)
-    const connect = await window[wallet].connect()
+    await window[wallet].connect()
     const signed_message = await window[wallet].signMessage(uint8Array)
-    // document.getElementById('signature').value = Base58.encode(signed_message.signature)
     document.getElementById('signature').value = JSON.stringify(Array.from(signed_message.signature))
     document.getElementById('pubkey').value = window[wallet].publicKey.toBase58()
   }
