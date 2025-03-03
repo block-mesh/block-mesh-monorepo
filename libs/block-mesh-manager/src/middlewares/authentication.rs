@@ -1,7 +1,5 @@
 #![allow(clippy::blocks_in_conditions)]
 
-use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
-use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::errors::error::Error;
 use crate::utils::cache_envar::get_envar;
 use crate::utils::verify_cache::verify_with_cache;
@@ -12,7 +10,8 @@ use axum_login::{
     tower_sessions::{ExpiredDeletion, Expiry, SessionManagerLayer},
     AuthManagerLayer, AuthManagerLayerBuilder, AuthUser, AuthnBackend, UserId,
 };
-use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
+use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
+use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_user_id::get_user_and_api_token_by_user_id;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use redis::aio::MultiplexedConnection;
 use secret::Secret;
@@ -86,7 +85,7 @@ impl AuthnBackend for Backend {
         }
         let pool = self.db.clone();
         let mut transaction = create_txn(&pool).await?;
-        let user = match get_user_opt_by_email(&mut transaction, &creds.email).await {
+        let user = match get_user_and_api_token_by_email(&mut transaction, &creds.email).await {
             Ok(u) => u,
             Err(e) => {
                 del_from_cache(&key).await;
@@ -94,7 +93,6 @@ impl AuthnBackend for Backend {
             }
         };
         commit_txn(transaction).await?;
-
         let user = match user {
             Some(u) => u,
             None => {
@@ -106,7 +104,7 @@ impl AuthnBackend for Backend {
             return Err(Error::Auth("Invalid password".to_string()));
         }
         let session_user = SessionUser {
-            id: user.id,
+            id: user.user_id,
             nonce: creds.nonce,
             email: user.email,
         };
@@ -122,7 +120,7 @@ impl AuthnBackend for Backend {
         }
         let pool = self.db.clone();
         let mut transaction = create_txn(&pool).await?;
-        let user = match get_user_opt_by_id(&mut transaction, user_id).await {
+        let user = match get_user_and_api_token_by_user_id(&mut transaction, user_id).await {
             Ok(u) => u,
             Err(e) => {
                 del_from_cache(&key).await;
@@ -138,13 +136,10 @@ impl AuthnBackend for Backend {
             }
         };
 
-        let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
-            .await?
-            .ok_or_else(|| Error::Auth("Nonce not found".to_string()))?;
         let session_user = SessionUser {
-            id: user.id,
+            id: user.user_id,
             email: user.email.clone(),
-            nonce: nonce.nonce.as_ref().to_string(),
+            nonce: user.nonce.as_ref().to_string(),
         };
         save_to_cache(&key, &session_user).await;
         commit_txn(transaction).await?;

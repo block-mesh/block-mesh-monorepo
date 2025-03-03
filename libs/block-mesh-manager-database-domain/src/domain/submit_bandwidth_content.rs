@@ -1,6 +1,6 @@
 use crate::domain::aggregate::AggregateName::{Download, Latency, Upload};
 use crate::domain::bulk_get_or_create_aggregate_by_user_and_name::bulk_get_or_create_aggregate_by_user_and_name;
-use crate::domain::get_user_and_api_token::get_user_and_api_token_by_email;
+use crate::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use crate::domain::notify_worker::notify_worker;
 use anyhow::{anyhow, Error};
 use axum::Json;

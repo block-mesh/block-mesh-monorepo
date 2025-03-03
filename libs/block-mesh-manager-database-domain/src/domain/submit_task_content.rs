@@ -3,7 +3,7 @@ use crate::domain::create_daily_stat::get_or_create_daily_stat;
 use crate::domain::find_task_by_task_id_and_status::find_task_by_task_id_and_status;
 use crate::domain::finish_task::finish_task;
 use crate::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
-use crate::domain::get_user_and_api_token::get_user_and_api_token_by_email;
+use crate::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use crate::domain::increment_tasks_count::increment_tasks_count;
 use crate::domain::notify_worker::notify_worker;
 use crate::domain::task::TaskStatus;

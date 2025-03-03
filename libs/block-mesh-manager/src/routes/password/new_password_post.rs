@@ -1,7 +1,5 @@
 use crate::database::api_token::update_api_token::update_api_token;
-use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
 use crate::database::nonce::update_nonce::update_nonce;
-use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::database::user::update_user_password::update_user_password;
 use crate::domain::password::Password;
 use crate::errors::error::Error;
@@ -15,6 +13,7 @@ use bcrypt::{hash, DEFAULT_COST};
 use block_mesh_common::interfaces::db_messages::InvalidateApiCache;
 use block_mesh_common::interfaces::server_api::NewPasswordForm;
 use block_mesh_common::routes_enum::RoutesEnum;
+use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use block_mesh_manager_database_domain::domain::notify_api::notify_api;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
@@ -54,19 +53,17 @@ pub async fn handler(
             RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
         ));
     }
-    let user = get_user_opt_by_email(&mut transaction, &email)
+
+    let user = get_user_and_api_token_by_email(&mut transaction, &email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
-        .await?
-        .ok_or_else(|| Error::NonceNotFound)?;
-    if *nonce.nonce.expose_secret() != form.token {
+    if *user.nonce.expose_secret() != form.token {
         return Err(Error::TokenMismatch);
     }
     let hashed_password = hash(form.password.clone(), DEFAULT_COST)?;
-    update_user_password(&mut transaction, user.id, hashed_password).await?;
-    update_api_token(&mut transaction, user.id).await?;
-    update_nonce(&mut transaction, user.id).await?;
+    update_user_password(&mut transaction, user.user_id, hashed_password).await?;
+    update_api_token(&mut transaction, user.user_id).await?;
+    update_nonce(&mut transaction, user.user_id).await?;
     match commit_txn(transaction).await {
         Ok(_) => {}
         Err(_) => {
@@ -106,7 +103,7 @@ pub async fn handler(
         state.check_token_map.remove(key);
     });
     del_from_cache_with_pattern(&email).await?;
-    del_from_cache_with_pattern(&user.id.to_string()).await?;
+    del_from_cache_with_pattern(&user.user_id.to_string()).await?;
     let _ = notify_api(
         &state.channel_pool,
         InvalidateApiCache { email: user.email },

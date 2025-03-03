@@ -2,7 +2,7 @@ use crate::database::task::count_user_tasks_in_period::count_user_tasks_in_perio
 use crate::database::task::create_task::create_task;
 use crate::errors::error::Error;
 use axum::{Extension, Json};
-use block_mesh_manager_database_domain::domain::get_user_and_api_token::get_user_and_api_token_by_email;
+use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use block_mesh_manager_database_domain::domain::task::TaskMethod;
 use database_utils::utils::instrument_wrapper::commit_txn;
 use serde::{Deserialize, Serialize};

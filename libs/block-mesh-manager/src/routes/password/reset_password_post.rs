@@ -1,8 +1,6 @@
-use crate::database::nonce::get_nonce_by_user_id::get_nonce_by_user_id;
 use crate::database::spam_email::get_spam_emails::{
     get_from_email_rate_limit, get_spam_emails_cache, update_email_rate_limit,
 };
-use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::domain::spam_email::SpamEmail;
 use crate::errors::error::Error;
 use crate::notification::notification_redirect::NotificationRedirect;
@@ -16,6 +14,7 @@ use block_mesh_common::constants::{DeviceType, BLOCK_MESH_EMAILS};
 use block_mesh_common::interfaces::server_api::{ResetPasswordForm, SendEmail};
 use block_mesh_common::reqwest::http_client;
 use block_mesh_common::routes_enum::RoutesEnum;
+use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use chrono::{Duration, Utc};
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::HeaderMap;
@@ -73,17 +72,15 @@ pub async fn handler(
     update_email_rate_limit(&header_ip, Some(date)).await;
 
     let mut transaction = create_txn(&pool).await?;
-    let user = get_user_opt_by_email(&mut transaction, &email)
+    let user = get_user_and_api_token_by_email(&mut transaction, &email.to_ascii_lowercase())
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
-    let nonce = get_nonce_by_user_id(&mut transaction, &user.id)
-        .await?
-        .ok_or_else(|| Error::NonceNotFound)?;
+    commit_txn(transaction).await?;
     let email_mode = get_envar("EMAIL_MODE").await;
     if email_mode == "AWS" {
         state
             .email_client
-            .send_reset_password_email_aws(&user.email, nonce.nonce.expose_secret())
+            .send_reset_password_email_aws(&user.email, user.nonce.expose_secret())
             .await?;
     } else if email_mode == "SERVICE" {
         let client = http_client(DeviceType::AppServer);
@@ -91,10 +88,10 @@ pub async fn handler(
             .get(format!("{}/send_email", BLOCK_MESH_EMAILS))
             .query(&SendEmail {
                 code: env::var("EMAILS_CODE").unwrap_or_default(),
-                user_id: user.id,
+                user_id: user.user_id,
                 email_type: "reset_password".to_string(),
                 email_address: user.email,
-                nonce: nonce.nonce.expose_secret().clone(),
+                nonce: user.nonce.expose_secret().clone(),
             })
             .send()
             .await
@@ -102,10 +99,9 @@ pub async fn handler(
     } else {
         state
             .email_client
-            .send_reset_password_email_smtp(&user.email, nonce.nonce.expose_secret())
+            .send_reset_password_email_smtp(&user.email, user.nonce.expose_secret())
             .await?;
     }
-    commit_txn(transaction).await?;
     Ok(NotificationRedirect::redirect(
         "Email Sent",
         "Please check your email",
