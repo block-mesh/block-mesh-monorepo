@@ -11,8 +11,8 @@ struct Id {
     id: Uuid,
 }
 
-static CACHE: OnceCell<Arc<RwLock<HashMapWithExpiry<Uuid, Vec<CallToAction>>>>> =
-    OnceCell::const_new();
+type CacheType = Arc<RwLock<HashMapWithExpiry<Uuid, Vec<CallToAction>>>>;
+static CACHE: OnceCell<CacheType> = OnceCell::const_new();
 
 pub async fn get_user_call_to_action(
     transaction: &mut Transaction<'_, Postgres>,
@@ -40,7 +40,7 @@ pub async fn get_user_call_to_action(
     cache
         .write()
         .await
-        .insert(user_id.clone(), calls_to_action.clone(), Some(date))
+        .insert(*user_id, calls_to_action.clone(), Some(date))
         .await;
     Ok(calls_to_action)
 }

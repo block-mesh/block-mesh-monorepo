@@ -44,7 +44,7 @@ pub async fn get_user_referrals_summary(
     cache
         .write()
         .await
-        .insert(user_id.clone(), output.clone(), Some(date))
+        .insert(*user_id, output.clone(), Some(date))
         .await;
     Ok(output)
 }
