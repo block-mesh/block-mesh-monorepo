@@ -12,8 +12,6 @@ use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager::configuration::get_configuration::get_configuration;
 use block_mesh_manager::configuration::settings::Settings;
 use block_mesh_manager::startup::application::{AppState, Application};
-use dash_with_expiry::dash_map_with_expiry::DashMapWithExpiry;
-use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
 use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use dash_with_expiry::hash_set_with_expiry::HashSetWithExpiry;
 use dashmap::DashMap;

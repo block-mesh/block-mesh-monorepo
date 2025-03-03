@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "SELECT\n        id,\n        created_at,\n        user_id,\n        token as \"token: Secret<Uuid>\",\n        status as \"status: ApiTokenStatus\"\n        FROM api_tokens WHERE token = $1 and status = $2 LIMIT 1",
+  "query": "\n        SELECT\n        id,\n        created_at,\n        user_id,\n        nonce as \"nonce: Secret<String>\"\n        FROM nonces\n        WHERE user_id = $1\n        LIMIT 1",
   "describe": {
     "columns": [
       {
@@ -20,28 +20,21 @@
       },
       {
         "ordinal": 3,
-        "name": "token: Secret<Uuid>",
-        "type_info": "Uuid"
-      },
-      {
-        "ordinal": 4,
-        "name": "status: ApiTokenStatus",
+        "name": "nonce: Secret<String>",
         "type_info": "Text"
       }
     ],
     "parameters": {
       "Left": [
-        "Uuid",
-        "Text"
+        "Uuid"
       ]
     },
     "nullable": [
       false,
       false,
       false,
-      false,
       false
     ]
   },
-  "hash": "5cca41b4897d808a80286aff059b264bff5b929088196be684e8b84cc3a3921c"
+  "hash": "3dc53dfbc5530a1f1e5fda7c1ba36130c0b4e62dab0e18d573c2df98076264b1"
 }

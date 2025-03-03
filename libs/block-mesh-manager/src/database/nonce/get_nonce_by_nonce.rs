@@ -16,7 +16,6 @@ pub async fn get_nonce_by_nonce(
         nonce as "nonce: Secret<String>"
         FROM nonces
         WHERE nonce = $1
-        ORDER BY created_at DESC
         LIMIT 1"#,
         nonce
     )
