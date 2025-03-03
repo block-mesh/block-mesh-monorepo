@@ -1,3 +1,4 @@
+use block_mesh_manager_database_domain::domain::daily_stat::DailyStatStatus;
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
@@ -25,9 +26,13 @@ pub async fn get_daily_stats_ref_status_by_user_id(
             COUNT(*) FILTER  (WHERE ref_bonus_applied = TRUE)  AS true_count,
             COUNT(*) FILTER  (WHERE ref_bonus_applied = FALSE) AS false_count
         FROM daily_stats
-        WHERE user_id = $1
+        WHERE
+            user_id = $1
+        AND
+            status = $2
         "#,
-        user_id
+        user_id,
+        DailyStatStatus::Finalized.to_string()
     )
     .fetch_one(&mut **transaction)
     .await?;
