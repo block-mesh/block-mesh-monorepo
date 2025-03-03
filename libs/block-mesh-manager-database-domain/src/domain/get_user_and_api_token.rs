@@ -3,6 +3,7 @@ use chrono::{Duration, Utc};
 use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use secret::Secret;
 use sqlx::{Postgres, Transaction};
+use std::env;
 use std::sync::Arc;
 use tokio::sync::{OnceCell, RwLock};
 use uuid::Uuid;
@@ -15,11 +16,17 @@ pub async fn get_user_and_api_token_by_email(
     transaction: &mut Transaction<'_, Postgres>,
     email: &str,
 ) -> anyhow::Result<Option<UserAndApiToken>> {
+    let enable = env::var("ENABLE_CACHE_USER_AND_API_TOKEN")
+        .unwrap_or("false".to_ascii_lowercase())
+        .parse()
+        .unwrap_or(false);
     let cache = CACHE
         .get_or_init(|| async { Arc::new(RwLock::new(HashMapWithExpiry::new())) })
         .await;
-    if let Some(out) = cache.read().await.get(&email.to_string()).await {
-        return Ok(out);
+    if enable {
+        if let Some(out) = cache.read().await.get(&email.to_string()).await {
+            return Ok(out);
+        }
     }
     let output = sqlx::query_as!(
         UserAndApiToken,
@@ -38,11 +45,13 @@ pub async fn get_user_and_api_token_by_email(
     )
     .fetch_optional(&mut **transaction)
     .await?;
-    let date = Utc::now() + Duration::milliseconds(600_000);
-    cache
-        .write()
-        .await
-        .insert(email.to_string(), output.clone(), Some(date))
-        .await;
+    if enable {
+        let date = Utc::now() + Duration::milliseconds(600_000);
+        cache
+            .write()
+            .await
+            .insert(email.to_string(), output.clone(), Some(date))
+            .await;
+    }
     Ok(output)
 }
