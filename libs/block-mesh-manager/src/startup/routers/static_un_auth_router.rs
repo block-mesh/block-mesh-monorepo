@@ -66,7 +66,11 @@ pub fn get_static_un_auth_router() -> Router<Arc<AppState>> {
         )
         .route(
             RoutesEnum::Static_UnAuth_Root.to_string().as_str(),
-            get(routes::login::login_form::handler).post(routes::login::login_post::handler),
+            get(routes::login::login_form::handler),
+        )
+        .route(
+            &format!("{}_post", RoutesEnum::Static_UnAuth_Login.to_string()),
+            get(routes::login::login_post::handler),
         )
         .route(
             RoutesEnum::Static_UnAuth_Error.to_string().as_str(),
@@ -74,12 +78,18 @@ pub fn get_static_un_auth_router() -> Router<Arc<AppState>> {
         )
         .route(
             RoutesEnum::Static_UnAuth_Login.to_string().as_str(),
-            get(routes::login::login_form::handler).post(routes::login::login_post::handler),
+            get(routes::login::login_form::handler),
         )
         .route(
             RoutesEnum::Static_UnAuth_Login_Wallet.to_string().as_str(),
-            get(routes::login::login_wallet::handler)
-                .post(routes::login::login_wallet_post::handler),
+            get(routes::login::login_wallet::handler),
+        )
+        .route(
+            &format!(
+                "{}_post",
+                RoutesEnum::Static_UnAuth_Login_Wallet.to_string()
+            ),
+            get(routes::login::login_wallet_post::handler),
         )
         .route(
             RoutesEnum::Static_UnAuth_RegisterApi.to_string().as_str(),
