@@ -20,12 +20,26 @@ use block_mesh_common::routes_enum::RoutesEnum;
 use leptos::*;
 use reqwest::Client;
 
+fn truncate_string(s: &str) -> String {
+    let chars: Vec<char> = s.chars().collect();
+
+    if chars.len() <= 6 {
+        return s.to_string();
+    }
+
+    let first_three: String = chars[..3].iter().collect();
+    let last_three: String = chars[chars.len() - 3..].iter().collect();
+
+    format!("{}...{}", first_three, last_three)
+}
+
 #[component]
 pub fn NewDashboard() -> impl IntoView {
     let notifications = expect_context::<NotificationContext>();
     let async_data = use_context::<DashboardResponse>();
     let auth_status = use_context::<AuthStatusResponse>();
 
+    let wallet_address = RwSignal::new("".to_string());
     let connected = RwSignal::new(false);
     let uptime = RwSignal::new(0.0);
     // let user_ips = RwSignal::new(vec![]);
@@ -54,6 +68,9 @@ pub fn NewDashboard() -> impl IntoView {
         points.set(data.points);
         tasks.set(data.tasks);
         number_of_users_invited.set(data.number_of_users_invited);
+        if let Some(w) = data.wallet_address {
+            wallet_address.set(w);
+        }
         if email.get_untracked().contains("wallet_")
             && email.get_untracked().contains("@blockmesh.xyz")
         {
@@ -110,7 +127,7 @@ pub fn NewDashboard() -> impl IntoView {
             <EditEmail/>
         </Modal>
 
-        <div class="flex items-start justify-start gap-4">
+        <div class="lg:flex items-start justify-start gap-4">
             <Heading>{move || format!("Dashboard v{}", env!("CARGO_PKG_VERSION"))}</Heading>
             <button
                 class=BUTTON_CLASS
@@ -123,6 +140,13 @@ pub fn NewDashboard() -> impl IntoView {
                 {move || email.get().to_string()}
             </button>
 
+
+            <Show when=move || !wallet_address.get().is_empty()>
+                <button class=BUTTON_CLASS>
+                    <span class="material-symbols-outlined">wallet</span>
+                    {move || truncate_string(&wallet_address.get())}
+                </button>
+            </Show>
             <a
                 rel="external"
                 target="_blank"
