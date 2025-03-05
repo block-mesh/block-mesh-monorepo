@@ -3,6 +3,7 @@ use chrono::{Duration, Utc};
 use num_traits::abs;
 use sqlx::{PgPool, Postgres, Transaction};
 use std::cmp::max;
+use std::env;
 use std::sync::Arc;
 use tokio::sync::OnceCell;
 #[allow(unused_imports)]
@@ -184,9 +185,12 @@ pub async fn dashboard_data_extractor(
             })
             .collect(),
     };
-    let date = Utc::now() + Duration::milliseconds(480_000);
-    cache
-        .insert(user.email.clone(), response.clone(), Some(date))
-        .await;
+    let app_environment = env::var("APP_ENVIRONMENT").unwrap_or("local".to_string());
+    if app_environment != "local" {
+        let date = Utc::now() + Duration::milliseconds(480_000);
+        cache
+            .insert(user.email.clone(), response.clone(), Some(date))
+            .await;
+    }
     Ok(response)
 }

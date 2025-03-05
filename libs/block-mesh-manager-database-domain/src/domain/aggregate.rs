@@ -31,6 +31,7 @@ pub enum AggregateName {
     Twitter,
     FounderTwitter,
     XenoTwitter,
+    WootzAppTwitter,
     Uptime,
     Download,
     Upload,
@@ -47,6 +48,7 @@ impl Display for AggregateName {
             Self::Twitter => write!(f, "Twitter"),
             Self::FounderTwitter => write!(f, "FounderTwitter"),
             Self::XenoTwitter => write!(f, "XenoTwitter"),
+            Self::WootzAppTwitter => write!(f, "WootzAppTwitter"),
             Self::Uptime => write!(f, "Uptime"),
             Self::Download => write!(f, "Download"),
             Self::Upload => write!(f, "Upload"),
@@ -73,6 +75,7 @@ impl From<String> for AggregateName {
             return Self::WalletChange;
         }
         match s.as_str() {
+            "WootzAppTwitter" => Self::WootzAppTwitter,
             "XenoTwitter" => Self::XenoTwitter,
             "FounderTwitter" => Self::FounderTwitter,
             "Twitter" => Self::Twitter,

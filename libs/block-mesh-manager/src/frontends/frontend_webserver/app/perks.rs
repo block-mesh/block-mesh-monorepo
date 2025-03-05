@@ -10,9 +10,10 @@ use crate::frontends::components::tables::table_head::TableHead;
 use crate::frontends::components::tables::table_header::TableHeader;
 use crate::frontends::components::wallet_selector::WalletSelector;
 use crate::frontends::context::notification_context::NotificationContext;
+use crate::frontends::frontend_webserver::app::perks_data::{get_perks_data, show_perk};
 use crate::frontends::utils::auth::connect_wallet_in_browser;
 use block_mesh_common::constants::{
-    BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID, BUTTON_CLASS,
+    BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID, BUTTON_CLASS, WOOTZ_APP_USER_ID,
     XENO_TWITTER_USER_ID,
 };
 use block_mesh_common::interfaces::server_api::{AuthStatusResponse, DashboardResponse};
@@ -20,9 +21,10 @@ use leptos::*;
 
 #[component]
 pub fn Perks() -> impl IntoView {
+    let perks_data: RwSignal<Vec<(String, String)>> =
+        RwSignal::new(get_perks_data().into_iter().collect());
     let async_data = use_context::<DashboardResponse>();
     let auth_status = use_context::<AuthStatusResponse>();
-
     let notifications = expect_context::<NotificationContext>();
     let show_wallet_modal = RwSignal::new(false);
     let wallet_name = RwSignal::new("".to_string());
@@ -71,107 +73,176 @@ pub fn Perks() -> impl IntoView {
         </Modal>
         <div class="lg:flex items-start justify-start gap-4">
             <Heading>Perks</Heading>
-            <Show when=move || enable_proof_of_humanity.get() fallback=|| view! {}>
-                <a rel="external" href="/proof_of_humanity" class=BUTTON_CLASS>
-                    <PersonIcon/>
-                    "Proof of Humanity"
-                </a>
+            <Show when=move || { show_perk(&perks.get(),"proof_of_humanity") }>
+                <Show when=move || enable_proof_of_humanity.get() fallback=|| view! {}>
+                    <a rel="external" href="/proof_of_humanity" class=BUTTON_CLASS>
+                        <PersonIcon/>
+                        "Proof of Humanity"
+                    </a>
+                    <a
+                        rel="external"
+                        target="_blank"
+                        href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/PROOF_OF_HUMANITY.md"
+                    >
+                        <InfoIcon/>
+                    </a>
+                </Show>
+            </Show>
+            <Show when=move || { show_perk(&perks.get(),"wallet") }>
+                <button on:click=move |_| on_connect_button_click() class=BUTTON_CLASS>
+                    <span class="material-symbols-outlined">wallet</span>
+                    {move || {
+                        if button_enabled.get() {
+                            "Connect Wallet".to_string()
+                        } else {
+                            format!("Wallet Connected:  {}", wallet_address.get())
+                        }
+                    }}
+
+                </button>
                 <a
                     rel="external"
                     target="_blank"
-                    href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/PROOF_OF_HUMANITY.md"
+                    href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/CONNECT_WALLET.md"
                 >
                     <InfoIcon/>
                 </a>
             </Show>
-            <button on:click=move |_| on_connect_button_click() class=BUTTON_CLASS>
-                <span class="material-symbols-outlined">wallet</span>
-                {move || {
-                    if button_enabled.get() {
-                        "Connect Wallet".to_string()
-                    } else {
-                        format!("Wallet Connected:  {}", wallet_address.get())
-                    }
-                }}
+            <Show when=move || { show_perk(&perks.get(),"twitter") }>
+                <a
+                    rel="external"
+                    href=format!("/twitter/login?target={}", BLOCKMESH_TWITTER_USER_ID)
+                    class=BUTTON_CLASS
+                >
+                    <TwitterIcon/>
 
-            </button>
-            <a
-                rel="external"
-                target="_blank"
-                href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/CONNECT_WALLET.md"
-            >
-                <InfoIcon/>
-            </a>
-            <a
-                rel="external"
-                href=format!("/twitter/login?target={}", BLOCKMESH_TWITTER_USER_ID)
-                class=BUTTON_CLASS
-            >
-                <TwitterIcon/>
+                    {move || {
+                        if perks.get().iter().any(|i| i.name == "twitter") {
+                            "Twitter Connected"
+                        } else {
+                            "Connect Twitter"
+                        }
+                    }}
 
-                {move || {
-                    if perks.get().iter().any(|i| i.name == "twitter") {
-                        "Twitter Connected"
-                    } else {
-                        "Connect Twitter"
-                    }
-                }}
+                </a>
+                <a
+                    rel="external"
+                    target="_blank"
+                    href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
+                >
+                    <InfoIcon/>
+                </a>
+            </Show>
+            <Show when=move || { show_perk(&perks.get(),"founder_twitter") }>
+                <a
+                    rel="external"
+                    href=format!("/twitter/login?target={}", BLOCKMESH_FOUNDER_TWITTER_USER_ID)
+                    class=BUTTON_CLASS
+                >
+                    <TwitterIcon/>
+                    {move || {
+                        if perks.get().iter().any(|i| i.name == "founder_twitter") {
+                            "Founder Followed"
+                        } else {
+                            "Follow Founder"
+                        }
+                    }}
+                </a>
+                <a
+                    rel="external"
+                    target="_blank"
+                    href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
+                >
+                    <InfoIcon/>
+                </a>
+            </Show>
+            <Show when=move || { show_perk(&perks.get(),"xeno_twitter") }>
+                <a
+                    rel="external"
+                    href=format!("/twitter/login?target={}", XENO_TWITTER_USER_ID)
+                    class=BUTTON_CLASS
+                >
+                    <TwitterIcon/>
 
-            </a>
-            <a
-                rel="external"
-                target="_blank"
-                href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
-            >
-                <InfoIcon/>
-            </a>
-            <a
-                rel="external"
-                href=format!("/twitter/login?target={}", BLOCKMESH_FOUNDER_TWITTER_USER_ID)
-                class=BUTTON_CLASS
-            >
-                <TwitterIcon/>
-                {move || {
-                    if perks.get().iter().any(|i| i.name == "founder_twitter") {
-                        "Foundered Followed"
-                    } else {
-                        "Follow Founder"
-                    }
-                }}
+                    {move || {
+                        if perks.get().iter().any(|i| i.name == "xeno_twitter") {
+                            "Xenopus Followed"
+                        } else {
+                            "Follow Xenopus"
+                        }
+                    }}
 
-            </a>
-            <a
-                rel="external"
-                target="_blank"
-                href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
-            >
-                <InfoIcon/>
-            </a>
-            <a
-                rel="external"
-                href=format!("/twitter/login?target={}", XENO_TWITTER_USER_ID)
-                class=BUTTON_CLASS
-            >
-                <TwitterIcon/>
+                </a>
+                <a
+                    rel="external"
+                    target="_blank"
+                    href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
+                >
+                    <InfoIcon/>
+                </a>
+            </Show>
+                        <Show when=move || { show_perk(&perks.get(),"wootz_twitter") }>
+                <a
+                    rel="external"
+                    href=format!("/twitter/login?target={}", WOOTZ_APP_USER_ID)
+                    class=BUTTON_CLASS
+                >
+                    <TwitterIcon/>
 
-                {move || {
-                    if perks.get().iter().any(|i| i.name == "xeno_twitter") {
-                        "Xenopus Followed"
-                    } else {
-                        "Follow Xenopus"
-                    }
-                }}
+                    {move || {
+                        if perks.get().iter().any(|i| i.name == "wootz_twitter") {
+                            "WootzApp Followed"
+                        } else {
+                            "Follow WootzApp"
+                        }
+                    }}
 
-            </a>
-            <a
-                rel="external"
-                target="_blank"
-                href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
-            >
-                <InfoIcon/>
-            </a>
+                </a>
+                <a
+                    rel="external"
+                    target="_blank"
+                    href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
+                >
+                    <InfoIcon/>
+                </a>
+            </Show>
         </div>
         <Subheading class="mt-14">Perks List</Subheading>
+         <Table class="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]">
+            <TableHead>
+                <tr>
+                    <TableHeader>Perk</TableHeader>
+                    <TableHeader>Info</TableHeader>
+                </tr>
+            </TableHead>
+            <tbody>
+                {move || {
+                    perks_data
+                        .get()
+                        .iter()
+                        .cloned()
+                        .map(|(key,val)| {
+                            view! {
+                                <tr>
+                                    <TableCell>{key.to_uppercase()}</TableCell>
+                                    <TableCell>
+                                        <a rel="external"
+                                           target="_blank"
+                                           href=val
+                                        >
+                                            <InfoIcon/>
+                                        </a>
+                                    </TableCell>
+                                </tr>
+                            }
+                        })
+                        .collect_view()
+                }}
+
+            </tbody>
+        </Table>
+
+        <Subheading class="mt-14">Completed Perks List</Subheading>
         <Table class="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]">
             <TableHead>
                 <tr>

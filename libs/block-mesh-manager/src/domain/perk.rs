@@ -12,6 +12,7 @@ pub enum PerkName {
     Twitter,
     FounderTwitter,
     XenoTwitter,
+    WootzTwitter,
     Invalid,
     ProofOfHumanity,
     Novice,
@@ -26,6 +27,7 @@ pub enum PerkName {
 impl Display for PerkName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::WootzTwitter => write!(f, "wootz_twitter"),
             Self::Wallet => write!(f, "wallet"),
             Self::Twitter => write!(f, "twitter"),
             Self::FounderTwitter => write!(f, "founder_twitter"),
@@ -46,6 +48,7 @@ impl Display for PerkName {
 impl From<String> for PerkName {
     fn from(s: String) -> Self {
         match s.as_str() {
+            "wootz_twitter" => Self::WootzTwitter,
             "wallet" => Self::Wallet,
             "twitter" => Self::Twitter,
             "founder_twitter" => Self::FounderTwitter,

@@ -7,7 +7,8 @@ use axum::response::Redirect;
 use axum::Extension;
 use axum_login::AuthSession;
 use block_mesh_common::constants::{
-    BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID, XENO_TWITTER_USER_ID,
+    BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID, WOOTZ_APP_USER_ID,
+    XENO_TWITTER_USER_ID,
 };
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
@@ -57,6 +58,8 @@ pub async fn login(
             AggregateName::FounderTwitter
         } else if target == XENO_TWITTER_USER_ID {
             AggregateName::XenoTwitter
+        } else if target == WOOTZ_APP_USER_ID {
+            AggregateName::WootzAppTwitter
         } else {
             return Err(Error::Auth("Bad follow target".to_string()));
         },
