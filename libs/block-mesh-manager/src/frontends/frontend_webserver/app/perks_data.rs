@@ -36,6 +36,6 @@ pub fn get_perks_data() -> HashMap<String, String> {
     perks_data
 }
 
-pub fn show_perk(perks: &Vec<PerkUI>, name: &str) -> bool {
-    perks.iter().find(|perk| perk.name == name).is_none()
+pub fn show_perk(perks: &[PerkUI], name: &str) -> bool {
+    !perks.iter().any(|perk| perk.name == name)
 }
