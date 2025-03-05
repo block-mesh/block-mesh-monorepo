@@ -1,5 +1,6 @@
 use crate::frontends::components::heading::Heading;
 use crate::frontends::components::icons::info_icon::InfoIcon;
+use crate::frontends::components::icons::intract_icon::IntractIcon;
 use crate::frontends::components::icons::person_icon::PersonIcon;
 use crate::frontends::components::icons::twitter_icon::TwitterIcon;
 use crate::frontends::components::modal::Modal;
@@ -73,6 +74,21 @@ pub fn Perks() -> impl IntoView {
         </Modal>
         <div class="lg:flex items-start justify-start gap-4">
             <Heading>Perks</Heading>
+            <a
+                target="_blank"
+                rel="external"
+                href="https://quest.intract.io/project/6532e81854ff44c8a3b2c1d58dd68bd3"
+                class=BUTTON_CLASS>
+                    <IntractIcon/>
+                    "Intract"
+            </a>
+            <a
+                rel="external"
+                target="_blank"
+                href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/INTRACT_PERK.md"
+            >
+                <InfoIcon/>
+            </a>
             <Show when=move || { show_perk(&perks.get(),"proof_of_humanity") }>
                 <Show when=move || enable_proof_of_humanity.get() fallback=|| view! {}>
                     <a rel="external" href="/proof_of_humanity" class=BUTTON_CLASS>
