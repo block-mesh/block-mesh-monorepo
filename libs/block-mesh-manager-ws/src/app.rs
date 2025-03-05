@@ -136,6 +136,7 @@ pub async fn app(listener: TcpListener, state: Arc<WsAppState>) {
         .route("/summary", get(summary))
         .route("/status", get(status))
         .route("/ws", get(ws_handler))
+        .route("/ext/ws", get(ws_handler))
         .with_state(state);
 
     axum::serve(
