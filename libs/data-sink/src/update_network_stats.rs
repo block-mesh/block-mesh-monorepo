@@ -41,7 +41,7 @@ pub async fn update_network_stats(clickhouse_client: Arc<Client>) -> Result<(), 
             let _ = client
                 .get(&stats_url)
                 .query(&Params {
-                    code: code,
+                    code,
                     mentions: output,
                 })
                 .send()
