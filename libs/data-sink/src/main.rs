@@ -3,6 +3,7 @@ mod data_sink;
 mod errors;
 mod migrate_clickhouse;
 mod routes;
+mod update_network_stats;
 
 use crate::aggregator::{collect_writes_for_clickhouse, joiner_loop};
 use crate::data_sink::DataSinkClickHouse;
@@ -15,6 +16,7 @@ use clickhouse::Client;
 use database_utils::utils::connection::follower_pool::follower_pool;
 // use database_utils::utils::connection::write_pool::write_pool;
 // use database_utils::utils::migrate::migrate;
+use crate::update_network_stats::update_network_stats;
 use anyhow::anyhow;
 use flume::Sender;
 use logger_general::tracing::{get_sentry_layer, setup_tracing_stdout_only_with_sentry};
@@ -144,6 +146,7 @@ async fn run() -> anyhow::Result<()> {
     );
     let state = DataSinkAppState::new(tx).await;
     let clickhouse_client = state.clickhouse_client.clone();
+
     let _env = env::var("APP_ENVIRONMENT").expect("APP_ENVIRONMENT is not set");
     let (joiner_tx, joiner_rx) = flume::bounded::<JoinHandle<()>>(500);
     // migrate(&state.data_sink_db_pool, env)
@@ -154,7 +157,7 @@ async fn run() -> anyhow::Result<()> {
         .expect("Failed to migrate clickhouse");
 
     let collect_writes_for_clickhouse_task = tokio::spawn(collect_writes_for_clickhouse(
-        clickhouse_client,
+        clickhouse_client.clone(),
         joiner_tx,
         rx,
         env::var("AGG_SIZE")
@@ -172,7 +175,10 @@ async fn run() -> anyhow::Result<()> {
     tracing::info!("Listening on {}", listener.local_addr()?);
     let server_task = run_server(listener, app);
     let joiner_task = tokio::spawn(joiner_loop(joiner_rx));
+    let dashboard_task = tokio::spawn(update_network_stats(clickhouse_client.clone()));
+
     tokio::select! {
+        o = dashboard_task => panic!("dashboard_task exit {:?}", o),
         o = collect_writes_for_clickhouse_task => panic!("collect_writes_for_clickhouse_task exit {:?}", o),
         o = joiner_task => panic!("joiner_task exit {:?}", o),
         o = server_task => panic!("server task exit {:?}", o)
