@@ -137,7 +137,10 @@ async fn run() -> anyhow::Result<()> {
             .unwrap_or("300".to_string())
             .parse()
             .unwrap_or(300),
-        5,
+        env::var("SET_TO_AGG_TIME_LIMIT")
+            .unwrap_or("5".to_string())
+            .parse()
+            .unwrap_or(5),
     ));
     let db_aggregator_add = tokio::spawn(add_to_aggregates_aggregator(
         joiner_tx.clone(),
@@ -147,7 +150,10 @@ async fn run() -> anyhow::Result<()> {
             .unwrap_or("300".to_string())
             .parse()
             .unwrap_or(300),
-        5,
+        env::var("ADD_TO_AGG_TIME_LIMIT")
+            .unwrap_or("5".to_string())
+            .parse()
+            .unwrap_or(5),
     ));
     let db_aggregator_users_ip_task = tokio::spawn(users_ip_aggregator(
         joiner_tx.clone(),
@@ -157,7 +163,10 @@ async fn run() -> anyhow::Result<()> {
             .unwrap_or("300".to_string())
             .parse()
             .unwrap_or(300),
-        5,
+        env::var("USERS_IP_AGG_TIME_LIMIT")
+            .unwrap_or("5".to_string())
+            .parse()
+            .unwrap_or(5),
     ));
     let db_aggregates_aggregator_task = tokio::spawn(aggregates_aggregator(
         joiner_tx.clone(),
@@ -167,7 +176,10 @@ async fn run() -> anyhow::Result<()> {
             .unwrap_or("300".to_string())
             .parse()
             .unwrap_or(300),
-        5,
+        env::var("AGG_AGG_TIME_LIMIT")
+            .unwrap_or("5".to_string())
+            .parse()
+            .unwrap_or(5),
     ));
     let db_analytics_aggregator_task = tokio::spawn(analytics_aggregator(
         db_pool.clone(),
@@ -176,7 +188,10 @@ async fn run() -> anyhow::Result<()> {
             .unwrap_or("300".to_string())
             .parse()
             .unwrap_or(300),
-        5,
+        env::var("ANALYTICS_AGG_TIME_LIMIT")
+            .unwrap_or("5".to_string())
+            .parse()
+            .unwrap_or(5),
     ));
     let db_daily_stats_aggregator_task = tokio::spawn(daily_stats_aggregator(
         joiner_tx.clone(),
@@ -186,7 +201,10 @@ async fn run() -> anyhow::Result<()> {
             .unwrap_or("300".to_string())
             .parse()
             .unwrap_or(300),
-        5,
+        env::var("DAILY_STATS_AGG_TIME_LIMIT")
+            .unwrap_or("5".to_string())
+            .parse()
+            .unwrap_or(5),
     ));
     let db_create_daily_stats_aggregator_task = tokio::spawn(create_daily_stats_aggregator(
         joiner_tx.clone(),
@@ -196,7 +214,10 @@ async fn run() -> anyhow::Result<()> {
             .unwrap_or("300".to_string())
             .parse()
             .unwrap_or(300),
-        5,
+        env::var("CREATE_DAILY_STATS_AGG_TIME_LIMIT")
+            .unwrap_or("5".to_string())
+            .parse()
+            .unwrap_or(5),
     ));
     let db_special_task = tokio::spawn(special_worker_loop(db_pool.clone()));
 
