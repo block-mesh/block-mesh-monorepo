@@ -20,3 +20,6 @@ pub mod date;
 #[cfg(feature = "email-client")]
 pub mod email_client;
 pub mod points;
+
+#[cfg(feature = "intract")]
+pub mod intract;

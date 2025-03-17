@@ -5,6 +5,7 @@ use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::cmp::Ordering;
+use std::fmt::{Display, Formatter};
 use std::sync::Arc;
 use std::time::Duration;
 use typeshare::typeshare;
@@ -736,4 +737,58 @@ pub struct DebugEndpoint {
     pub code: String,
     pub method: String,
     pub user_id: Uuid,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct IntractResp {
+    pub message: String,
+    pub data: IntractRespData,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+#[allow(non_snake_case)]
+pub struct IntractRespData {
+    pub evmAddress: Option<String>,
+    pub userId: String,
+    pub twitterId: Option<String>,
+    pub twitterUsername: Option<String>,
+    pub discordId: Option<String>,
+    pub discordUsername: Option<String>,
+    pub solAddress: Option<String>,
+    pub telegramId: Option<String>,
+    pub telegramUsername: Option<String>,
+    pub email: Option<String>,
+    pub pohMintStatus: bool,
+    pub kyc: Vec<String>,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+#[serde(rename_all = "camelCase")]
+#[allow(non_snake_case)]
+pub struct IntractParams {
+    pub identity: String,
+    pub identityType: IntractIdentityType,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum IntractIdentityType {
+    Twitter,
+    Discord,
+    Email,
+    Telegram,
+    IntractUser,
+    // EVM::EVM, SOLANA::SOLANA
+}
+
+impl Display for IntractIdentityType {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::Twitter => write!(f, "Twitter"),
+            Self::Discord => write!(f, "Discord"),
+            Self::Email => write!(f, "Email"),
+            Self::Telegram => write!(f, "Telegram"),
+            Self::IntractUser => write!(f, "IntractUser"),
+        }
+    }
 }

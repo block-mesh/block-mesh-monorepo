@@ -19,6 +19,7 @@ use block_mesh_common::constants::{
 };
 use block_mesh_common::interfaces::server_api::{AuthStatusResponse, DashboardResponse};
 use leptos::*;
+use reqwest::Client;
 
 #[component]
 pub fn Perks() -> impl IntoView {
@@ -33,6 +34,7 @@ pub fn Perks() -> impl IntoView {
     let button_enabled = RwSignal::new(true);
     let wallet_address = RwSignal::new("".to_string());
     let enable_proof_of_humanity = RwSignal::new(false);
+    let email = RwSignal::new("".to_string());
 
     if let Some(a) = auth_status {
         enable_proof_of_humanity.set(a.enable_proof_of_humanity);
@@ -42,6 +44,7 @@ pub fn Perks() -> impl IntoView {
             &wallet[wallet.len().saturating_sub(4)..],
         );
         wallet_address.set(format!("{}...{}", first_4, last_4));
+        email.set(a.email.clone().unwrap_or_default());
     }
 
     if let Some(data) = async_data {
@@ -53,6 +56,22 @@ pub fn Perks() -> impl IntoView {
         show_wallet_modal.set(true);
         // }
     };
+
+    let sync_intract = create_action(move |_: &()| async move {
+        if email.get_untracked().is_empty() {
+            return;
+        }
+        let client = Client::new();
+        let response = client
+            .get(format!("{}/api/intract_perk", window().origin()))
+            .send()
+            .await;
+        if response.is_ok() {
+            notifications.set_success("Intract synced");
+        } else {
+            notifications.set_error("Failed to sync Intract");
+        }
+    });
 
     let connect_action = create_action(move |wallet: &String| {
         let w = wallet.clone();
@@ -74,14 +93,12 @@ pub fn Perks() -> impl IntoView {
         </Modal>
         <div class="lg:flex items-start justify-start gap-4">
             <Heading>Perks</Heading>
-            <a
-                target="_blank"
-                rel="external"
-                href="https://quest.intract.io/project/6532e81854ff44c8a3b2c1d58dd68bd3"
+            <button
+                on:click=move |_| sync_intract.dispatch(())
                 class=BUTTON_CLASS>
                     <IntractIcon/>
                     "Intract"
-            </a>
+            </button>
             <a
                 rel="external"
                 target="_blank"

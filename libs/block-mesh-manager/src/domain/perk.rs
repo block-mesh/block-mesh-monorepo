@@ -8,6 +8,7 @@ use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum PerkName {
+    Intract,
     Wallet,
     Twitter,
     FounderTwitter,
@@ -27,6 +28,7 @@ pub enum PerkName {
 impl Display for PerkName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::Intract => write!(f, "intract"),
             Self::WootzTwitter => write!(f, "wootz_twitter"),
             Self::Wallet => write!(f, "wallet"),
             Self::Twitter => write!(f, "twitter"),
@@ -48,6 +50,7 @@ impl Display for PerkName {
 impl From<String> for PerkName {
     fn from(s: String) -> Self {
         match s.as_str() {
+            "intract" => Self::Intract,
             "wootz_twitter" => Self::WootzTwitter,
             "wallet" => Self::Wallet,
             "twitter" => Self::Twitter,

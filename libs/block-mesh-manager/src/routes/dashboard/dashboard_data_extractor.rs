@@ -42,12 +42,15 @@ pub async fn dashboard_data_extractor(
     follower_transaction: &mut Transaction<'_, Postgres>,
     state: Arc<AppState>,
     user: UserAndApiToken,
+    invalidate_cache: bool,
 ) -> anyhow::Result<DashboardResponse> {
     let cache = RATE_LIMIT
         .get_or_init(|| async { HashMapWithExpiry::new() })
         .await;
-    if let Some(response) = cache.get(&user.email).await {
-        return Ok(response);
+    if !invalidate_cache {
+        if let Some(response) = cache.get(&user.email).await {
+            return Ok(response);
+        }
     }
     // let ip_limit = get_envar("DASHBOARD_IP_LIMIT")
     //     .await

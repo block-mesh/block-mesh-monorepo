@@ -155,6 +155,7 @@ hydrate = [
 ]
 ssr = [
   "dep:dash-with-expiry",
+  "block-mesh-common/intract",
   "block-mesh-common/ssr",
   "dep:lettre",
   "dep:futures-time",
