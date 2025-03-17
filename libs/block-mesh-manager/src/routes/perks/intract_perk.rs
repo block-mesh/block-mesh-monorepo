@@ -34,7 +34,7 @@ pub async fn handler(
     let cache = RATE_LIMIT
         .get_or_init(|| async { HashMapWithExpiry::new() })
         .await;
-    if let Some(_) = cache.get(&user.email).await {
+    if cache.get(&user.email).await.is_some() {
         return Ok((StatusCode::OK, "OK").into_response());
     }
     let email = user.email.to_lowercase();
