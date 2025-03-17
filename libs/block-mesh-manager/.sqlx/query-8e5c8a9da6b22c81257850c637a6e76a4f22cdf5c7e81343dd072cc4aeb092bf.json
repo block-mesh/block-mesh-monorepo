@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE perks SET data = $3 WHERE user_id = $1 AND name = $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8e5c8a9da6b22c81257850c637a6e76a4f22cdf5c7e81343dd072cc4aeb092bf"
+}
