@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        WITH limited_rows AS (\n            SELECT ds.id\n            FROM daily_stats ds\n            JOIN aggregates a ON ds.user_id = a.user_id\n            WHERE a.name = 'Uptime'\n                AND a.updated_at >= NOW() - INTERVAL '2 hour'\n                AND ds.status = 'OnGoing'\n                AND ds.day = CURRENT_DATE\n                AND ds.tasks_count < $2\n            LIMIT $3\n        )\n        UPDATE daily_stats ds\n        SET\n            tasks_count = GREATEST(tasks_count, LEAST(tasks_count + $1, $2)),\n            tasks_count_bonus = GREATEST(tasks_count_bonus, tasks_count_bonus + (LEAST(tasks_count + $1, $2) - tasks_count)),\n            updated_at = NOW()\n        FROM limited_rows lr\n        WHERE ds.id = lr.id\n        AND ds.status = 'OnGoing'\n        AND ds.day = CURRENT_DATE\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4",
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "577dddae1e65808b6a515abb73e09e12797e83e49d95365df5ab878614da204e"
+}
