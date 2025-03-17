@@ -17,13 +17,19 @@ pub async fn update_user_perk(
         merged_data.insert(key.to_string(), value.clone());
     }
     let data = serde_json::to_value(merged_data)?;
+    let score = block_mesh_common::intract::calc_bonus(data.clone())?;
     let _ = sqlx::query!(
         r#"
-        UPDATE perks SET data = $3 WHERE user_id = $1 AND name = $2
+        UPDATE perks
+        SET
+            data = $3,
+            one_time_bonus = $4
+        WHERE user_id = $1 AND name = $2
         "#,
         user_id,
         name.to_string(),
         data,
+        score
     )
     .execute(&mut **transaction)
     .await?;
