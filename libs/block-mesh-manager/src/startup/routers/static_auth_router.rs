@@ -9,6 +9,10 @@ use block_mesh_common::routes_enum::RoutesEnum;
 pub fn get_static_auth_router() -> Router<Arc<AppState>> {
     let auth_router = Router::new()
         .route(
+            RoutesEnum::Api_Auth_IntractPerk.to_string().as_str(),
+            get(routes::perks::intract_perk::handler),
+        )
+        .route(
             RoutesEnum::Static_Auth_Proof_Of_Humanity
                 .to_string()
                 .as_str(),
