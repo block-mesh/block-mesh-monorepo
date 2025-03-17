@@ -38,6 +38,7 @@ echo Cleaning up...
 mkdir -p "${ROOT}"/tmp_ext/chrome/
 mkdir -p "${ROOT}"/tmp_ext/firefox/
 rm -fr extension_js/js/wasm/*
+rm -fr extension_js/js/*.wasm
 rm -fr dist/*
 rm -f chrome.zip
 rm -f firefox.zip
