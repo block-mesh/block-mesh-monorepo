@@ -43,6 +43,8 @@ pub fn calc_bonus(data: Value) -> anyhow::Result<f64> {
             score += 1_000.0;
         } else if key == "kyc" && value.is_array() && !value.as_array().unwrap().is_empty() {
             score += value.as_array().unwrap().len() as f64 * 1_000.0;
+        } else if key == "pohMintStatus" && value.is_bool() && value.as_bool().unwrap() {
+            score += 2_000.0;
         } else if key == "xp" {
             score += value.as_f64().unwrap_or(0.0);
         }
