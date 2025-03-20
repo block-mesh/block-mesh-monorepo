@@ -1,4 +1,4 @@
-use crate::domain::perk::PerkName;
+use crate::domain::perk::{Perk, PerkName, PerkTmp};
 use chrono::Utc;
 use serde_json::Value;
 use sqlx::{Postgres, Transaction};
@@ -11,10 +11,11 @@ pub async fn add_perk_to_user(
     multiplier: f64,
     one_time_bonus: f64,
     data: Value,
-) -> anyhow::Result<()> {
+) -> anyhow::Result<Perk> {
     let now = Utc::now();
     let id = Uuid::new_v4();
-    let _ = sqlx::query!(
+    let perk: PerkTmp = sqlx::query_as!(
+        PerkTmp,
         r#"
         INSERT INTO perks
         (id, user_id, created_at, name, multiplier, one_time_bonus, data, updated_at)
@@ -34,5 +35,14 @@ pub async fn add_perk_to_user(
     )
     .fetch_one(&mut **transaction)
     .await?;
-    Ok(())
+    Ok(Perk {
+        id: perk.id.unwrap_or_default(),
+        user_id: perk.user_id.unwrap_or_default(),
+        created_at: perk.created_at.unwrap_or_default(),
+        multiplier: perk.multiplier.unwrap_or_default(),
+        one_time_bonus: perk.one_time_bonus.unwrap_or_default(),
+        name: PerkName::from(perk.name.unwrap_or_default()),
+        data: perk.data.unwrap_or_default(),
+        updated_at: perk.updated_at.unwrap_or_default(),
+    })
 }

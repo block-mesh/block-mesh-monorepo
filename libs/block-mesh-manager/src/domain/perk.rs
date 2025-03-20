@@ -25,6 +25,12 @@ pub enum PerkName {
     Legend,
 }
 
+impl Default for PerkName {
+    fn default() -> Self {
+        Self::Invalid
+    }
+}
+
 impl Display for PerkName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
@@ -112,4 +118,17 @@ pub struct Perk {
     pub one_time_bonus: f64,
     pub name: PerkName,
     pub data: Value,
+    pub updated_at: DateTime<Utc>,
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct PerkTmp {
+    pub id: Option<Uuid>,
+    pub user_id: Option<Uuid>,
+    pub created_at: Option<DateTime<Utc>>,
+    pub multiplier: Option<f64>,
+    pub one_time_bonus: Option<f64>,
+    pub name: Option<String>,
+    pub data: Option<Value>,
+    pub updated_at: Option<DateTime<Utc>>,
 }

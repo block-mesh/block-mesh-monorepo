@@ -30,7 +30,7 @@ pub async fn get_user_perks(
         Perk,
         r#"
         SELECT
-        id, user_id, name, created_at, multiplier, one_time_bonus, data
+        id, user_id, name, created_at, multiplier, one_time_bonus, data, updated_at
         FROM perks
         WHERE user_id = $1
         "#,

@@ -109,6 +109,8 @@ impl AuthnBackend for Backend {
             email: user.email,
         };
         save_to_cache(&key, &session_user).await;
+        let key = Backend::authenticate_key_with_user_id(&user.user_id);
+        save_to_cache(&key, &session_user).await;
         Ok(Option::from(session_user))
     }
 
