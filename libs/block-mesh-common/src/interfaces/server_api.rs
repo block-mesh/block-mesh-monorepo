@@ -792,3 +792,11 @@ impl Display for IntractIdentityType {
         }
     }
 }
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct PerkResponse {
+    pub cached: bool,
+    pub name: String,
+    pub multiplier: f64,
+    pub one_time_bonus: f64,
+}

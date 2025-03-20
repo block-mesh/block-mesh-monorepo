@@ -13,13 +13,13 @@ use crate::frontends::components::wallet_selector::WalletSelector;
 use crate::frontends::context::notification_context::NotificationContext;
 use crate::frontends::frontend_webserver::app::perks_data::{get_perks_data, show_perk};
 use crate::frontends::utils::auth::connect_wallet_in_browser;
+use crate::frontends::utils::perk_util::sync_perk;
 use block_mesh_common::constants::{
     BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID, BUTTON_CLASS, WOOTZ_APP_USER_ID,
     XENO_TWITTER_USER_ID,
 };
 use block_mesh_common::interfaces::server_api::{AuthStatusResponse, DashboardResponse};
 use leptos::*;
-use reqwest::Client;
 
 #[component]
 pub fn Perks() -> impl IntoView {
@@ -61,15 +61,17 @@ pub fn Perks() -> impl IntoView {
         if email.get_untracked().is_empty() {
             return;
         }
-        let client = Client::new();
-        let response = client
-            .get(format!("{}/api/intract_perk", window().origin()))
-            .send()
-            .await;
-        if response.is_ok() {
-            notifications.set_success("Intract synced");
-        } else {
-            notifications.set_error("Failed to sync Intract");
+        match sync_perk().await {
+            Ok(response) => {
+                if response.cached {
+                    notifications.set_success("Please try again in 10min");
+                } else {
+                    notifications.set_success("Intract synced");
+                }
+            }
+            Err(_) => {
+                notifications.set_error("Failed to sync Intract");
+            }
         }
     });
 
