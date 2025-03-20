@@ -69,7 +69,7 @@ pub async fn handler(
     let user_perks = get_user_perks(&mut transaction, &user.user_id).await?;
     let perk = if let Some(perk) = user_perks.iter().find(|i| i.name == PerkName::Intract) {
         if new_data == perk.data {
-            let resp = add_to_cache(&email, &perk, &cache).await;
+            let resp = add_to_cache(&email, perk, cache).await;
             return Ok(Json(resp).into_response());
         }
         update_user_perk(
@@ -96,7 +96,7 @@ pub async fn handler(
     let mut follower_transaction = create_txn(&state.follower_pool).await?;
     dashboard_data_extractor(&pool, &mut follower_transaction, state.clone(), user, true).await?;
     commit_txn(follower_transaction).await?;
-    let mut resp = add_to_cache(&email, &perk, &cache).await.clone();
+    let mut resp = add_to_cache(&email, &perk, cache).await.clone();
     resp.cached = false;
     Ok(Json(resp).into_response())
 }
