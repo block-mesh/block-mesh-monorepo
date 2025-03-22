@@ -70,7 +70,10 @@ pub fn Perks() -> impl IntoView {
                 }
             }
             Err(_) => {
-                notifications.set_error("Failed to sync Intract");
+                notifications.set_error(format!(
+                    "Failed to sync Intract , please ensure your Intract email is {}",
+                    email.get_untracked().to_lowercase()
+                ));
             }
         }
     });
@@ -95,20 +98,20 @@ pub fn Perks() -> impl IntoView {
         </Modal>
         <div class="lg:flex items-start justify-start gap-4">
             <Heading>Perks</Heading>
-            <button
-                on:click=move |_| sync_intract.dispatch(())
-                class=BUTTON_CLASS>
+            <Show when=move || { show_perk(&perks.get(), "intract") }>
+                <button on:click=move |_| sync_intract.dispatch(()) class=BUTTON_CLASS>
                     <IntractIcon/>
                     "Intract"
-            </button>
-            <a
-                rel="external"
-                target="_blank"
-                href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/INTRACT_PERK.md"
-            >
-                <InfoIcon/>
-            </a>
-            <Show when=move || { show_perk(&perks.get(),"proof_of_humanity") }>
+                </button>
+                <a
+                    rel="external"
+                    target="_blank"
+                    href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/INTRACT_PERK.md"
+                >
+                    <InfoIcon/>
+                </a>
+            </Show>
+            <Show when=move || { show_perk(&perks.get(), "proof_of_humanity") }>
                 <Show when=move || enable_proof_of_humanity.get() fallback=|| view! {}>
                     <a rel="external" href="/proof_of_humanity" class=BUTTON_CLASS>
                         <PersonIcon/>
@@ -123,7 +126,7 @@ pub fn Perks() -> impl IntoView {
                     </a>
                 </Show>
             </Show>
-            <Show when=move || { show_perk(&perks.get(),"wallet") }>
+            <Show when=move || { show_perk(&perks.get(), "wallet") }>
                 <button on:click=move |_| on_connect_button_click() class=BUTTON_CLASS>
                     <span class="material-symbols-outlined">wallet</span>
                     {move || {
@@ -143,7 +146,7 @@ pub fn Perks() -> impl IntoView {
                     <InfoIcon/>
                 </a>
             </Show>
-            <Show when=move || { show_perk(&perks.get(),"twitter") }>
+            <Show when=move || { show_perk(&perks.get(), "twitter") }>
                 <a
                     rel="external"
                     href=format!("/twitter/login?target={}", BLOCKMESH_TWITTER_USER_ID)
@@ -168,7 +171,7 @@ pub fn Perks() -> impl IntoView {
                     <InfoIcon/>
                 </a>
             </Show>
-            <Show when=move || { show_perk(&perks.get(),"founder_twitter") }>
+            <Show when=move || { show_perk(&perks.get(), "founder_twitter") }>
                 <a
                     rel="external"
                     href=format!("/twitter/login?target={}", BLOCKMESH_FOUNDER_TWITTER_USER_ID)
@@ -182,6 +185,7 @@ pub fn Perks() -> impl IntoView {
                             "Follow Founder"
                         }
                     }}
+
                 </a>
                 <a
                     rel="external"
@@ -191,7 +195,7 @@ pub fn Perks() -> impl IntoView {
                     <InfoIcon/>
                 </a>
             </Show>
-            <Show when=move || { show_perk(&perks.get(),"xeno_twitter") }>
+            <Show when=move || { show_perk(&perks.get(), "xeno_twitter") }>
                 <a
                     rel="external"
                     href=format!("/twitter/login?target={}", XENO_TWITTER_USER_ID)
@@ -216,7 +220,7 @@ pub fn Perks() -> impl IntoView {
                     <InfoIcon/>
                 </a>
             </Show>
-                        <Show when=move || { show_perk(&perks.get(),"wootz_twitter") }>
+            <Show when=move || { show_perk(&perks.get(), "wootz_twitter") }>
                 <a
                     rel="external"
                     href=format!("/twitter/login?target={}", WOOTZ_APP_USER_ID)
@@ -243,7 +247,7 @@ pub fn Perks() -> impl IntoView {
             </Show>
         </div>
         <Subheading class="mt-14">Perks List</Subheading>
-         <Table class="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]">
+        <Table class="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]">
             <TableHead>
                 <tr>
                     <TableHeader>Perk</TableHeader>
@@ -256,15 +260,12 @@ pub fn Perks() -> impl IntoView {
                         .get()
                         .iter()
                         .cloned()
-                        .map(|(key,val)| {
+                        .map(|(key, val)| {
                             view! {
                                 <tr>
                                     <TableCell>{key.to_uppercase()}</TableCell>
                                     <TableCell>
-                                        <a rel="external"
-                                           target="_blank"
-                                           href=val
-                                        >
+                                        <a rel="external" target="_blank" href=val>
                                             <InfoIcon/>
                                         </a>
                                     </TableCell>

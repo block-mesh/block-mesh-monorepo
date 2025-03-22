@@ -140,7 +140,6 @@ pub fn NewDashboard() -> impl IntoView {
                 {move || email.get().to_string()}
             </button>
 
-
             <Show when=move || !wallet_address.get().is_empty()>
                 <button class=BUTTON_CLASS>
                     <span class="material-symbols-outlined">wallet</span>
@@ -225,28 +224,28 @@ pub fn NewDashboard() -> impl IntoView {
         </div>
         // <Subheading>Networks</Subheading>
         // <Table class="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]">
-        //     <TableHead>
-        //         <tr>
-        //             <TableHeader>IP</TableHeader>
-        //             <TableHeader>Country</TableHeader>
-        //         </tr>
-        //     </TableHead>
-        //     <tbody>
-        //         <Suspense>
-        //             {user_ips
-        //                 .get()
-        //                 .into_iter()
-        //                 .map(|ip_info| {
-        //                     view! {
-        //                         <tr>
-        //                             <TableCell>{ip_info.ip.clone()}</TableCell>
-        //                             <TableCell>{ip_info.country.clone()}</TableCell>
-        //                         </tr>
-        //                     }
-        //                 })
-        //                 .collect_view()}
-        //         </Suspense>
-        //     </tbody>
+        // <TableHead>
+        // <tr>
+        // <TableHeader>IP</TableHeader>
+        // <TableHeader>Country</TableHeader>
+        // </tr>
+        // </TableHead>
+        // <tbody>
+        // <Suspense>
+        // {user_ips
+        // .get()
+        // .into_iter()
+        // .map(|ip_info| {
+        // view! {
+        // <tr>
+        // <TableCell>{ip_info.ip.clone()}</TableCell>
+        // <TableCell>{ip_info.country.clone()}</TableCell>
+        // </tr>
+        // }
+        // })
+        // .collect_view()}
+        // </Suspense>
+        // </tbody>
         // </Table>
         <Subheading>Daily points earnings</Subheading>
         <BarChart/>

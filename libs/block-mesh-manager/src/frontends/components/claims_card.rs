@@ -57,6 +57,7 @@ pub fn ClaimsCard(
                                 view! { {view.get()} }
                             }
                         >
+
                             <a href=cookie_fun_link target="_blank">
                                 {view.get()}
                             </a>
