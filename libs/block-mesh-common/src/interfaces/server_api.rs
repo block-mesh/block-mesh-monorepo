@@ -751,7 +751,7 @@ pub struct IntractError {
     pub name: String,
 }
 
-#[allow(large_enum_variant)]
+#[allow(clippy::large_enum_variant)]
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum IntractResponses {
     IntractRespData(IntractRespData),
