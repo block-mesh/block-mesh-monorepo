@@ -1,7 +1,6 @@
 use crate::frontends::components::bandwidth_card::BandwidthCard;
 use crate::frontends::components::bar_chart::BarChart;
 use crate::frontends::components::download_extension::DownloadExtension;
-use crate::frontends::components::edit_email::EditEmail;
 use crate::frontends::components::heading::Heading;
 use crate::frontends::components::icons::chrome_icon::ChromeIcon;
 use crate::frontends::components::modal::Modal;
@@ -123,9 +122,9 @@ pub fn NewDashboard() -> impl IntoView {
         <Modal show=show_download_extension show_close_button=false>
             <DownloadExtension show=show_download_extension/>
         </Modal>
-        <Modal show=show_edit_email show_close_button=true>
-            <EditEmail/>
-        </Modal>
+        // <Modal show=show_edit_email show_close_button=true>
+        //     <EditEmail/>
+        // </Modal>
 
         <div class="lg:flex items-start justify-start gap-4">
             <Heading>{move || format!("Dashboard v{}", env!("CARGO_PKG_VERSION"))}</Heading>

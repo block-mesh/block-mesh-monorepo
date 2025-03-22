@@ -1,7 +1,8 @@
 use crate::constants::INTRACT_USER_INFO_API_URL;
 use crate::interfaces::server_api::{
-    IntractIdentityType, IntractParams, IntractResp, IntractRespData,
+    IntractError, IntractIdentityType, IntractParams, IntractResp, IntractResponses,
 };
+use anyhow::anyhow;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::env;
@@ -9,7 +10,7 @@ use std::env;
 pub async fn get_intract_user_details(
     identity: &str,
     identity_type: &IntractIdentityType,
-) -> anyhow::Result<IntractRespData> {
+) -> anyhow::Result<IntractResponses> {
     let client = reqwest::Client::new();
     let response: Value = client
         .get(INTRACT_USER_INFO_API_URL)
@@ -25,8 +26,13 @@ pub async fn get_intract_user_details(
         .await?
         .json()
         .await?;
-    let response: IntractResp = serde_json::from_value(response)?;
-    Ok(response.data)
+    if let Ok(resp) = serde_json::from_value::<IntractResp>(response.clone()) {
+        return Ok(IntractResponses::IntractRespData(resp.data));
+    }
+    if let Ok(resp) = serde_json::from_value::<IntractError>(response) {
+        return Ok(IntractResponses::IntractError(resp));
+    }
+    Err(anyhow!("Intract failure"))
 }
 
 pub fn calc_bonus(data: Value) -> anyhow::Result<f64> {
