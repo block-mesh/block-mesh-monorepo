@@ -10,9 +10,9 @@ pub fn Claims() -> impl IntoView {
     view! {
         <div class="lg:flex items-start justify-start gap-4">
             <Heading>Claims</Heading>
-            // <a rel="external" href="#" class=BUTTON_CLASS>
-            //     "Claim your $XENO"
-            // </a>
+        // <a rel="external" href="#" class=BUTTON_CLASS>
+        // "Claim your $XENO"
+        // </a>
         </div>
         <Subheading class="mt-14">Token Claims</Subheading>
         <div class="mt-10 grid gap-8 sm:grid-cols-2 xl:grid-cols-3">
@@ -27,19 +27,19 @@ pub fn Claims() -> impl IntoView {
             >
                 <XenoIcon/>
             </ClaimsCard>
-            // <ClaimsCard
-            //     title="Who will be next?"
-            //     title_link=""
-            //     value="Ticker?"
-            //     value_scale=""
-            //     dexscreener_link=""
-            //     cookie_fun_link=""
-            //     disabled=true
-            // >
-            //     <span class="material-symbols-outlined" style="font-size: 2.3em">
-            //         "help"
-            //     </span>
-            // </ClaimsCard>
+        // <ClaimsCard
+        // title="Who will be next?"
+        // title_link=""
+        // value="Ticker?"
+        // value_scale=""
+        // dexscreener_link=""
+        // cookie_fun_link=""
+        // disabled=true
+        // >
+        // <span class="material-symbols-outlined" style="font-size: 2.3em">
+        // "help"
+        // </span>
+        // </ClaimsCard>
         </div>
     }
 }
