@@ -746,6 +746,18 @@ pub struct IntractResp {
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct IntractError {
+    pub message: String,
+    pub name: String,
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub enum IntractResponses {
+    IntractRespData(IntractRespData),
+    IntractError(IntractError),
+}
+
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "camelCase")]
 #[allow(non_snake_case)]
 pub struct IntractRespData {
@@ -795,6 +807,8 @@ impl Display for IntractIdentityType {
 
 #[derive(Serialize, Deserialize, Clone)]
 pub struct PerkResponse {
+    pub error: bool,
+    pub message: Option<String>,
     pub cached: bool,
     pub name: String,
     pub multiplier: f64,

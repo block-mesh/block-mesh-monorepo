@@ -63,7 +63,12 @@ pub fn Perks() -> impl IntoView {
         }
         match sync_perk().await {
             Ok(response) => {
-                if response.cached {
+                if response.error {
+                    notifications.set_error(format!(
+                        "Error from Intract: {}",
+                        response.message.unwrap_or_default()
+                    ));
+                } else if response.cached {
                     notifications.set_success("Please try again in 10min");
                 } else {
                     notifications.set_success("Intract synced");

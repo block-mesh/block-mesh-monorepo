@@ -10,7 +10,9 @@ use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::{Extension, Json};
 use axum_login::AuthSession;
-use block_mesh_common::interfaces::server_api::{IntractIdentityType, PerkResponse};
+use block_mesh_common::interfaces::server_api::{
+    IntractIdentityType, IntractResponses, PerkResponse,
+};
 use block_mesh_common::intract::get_intract_user_details;
 use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use chrono::{Duration, Utc};
@@ -29,6 +31,8 @@ pub async fn add_to_cache(
     cache: &HashMapWithExpiry<String, PerkResponse>,
 ) -> PerkResponse {
     let resp = PerkResponse {
+        error: false,
+        message: None,
         cached: true,
         name: perk.name.to_string(),
         multiplier: perk.multiplier,
@@ -64,6 +68,20 @@ pub async fn handler(
         .ok_or_else(|| Error::UserNotFound)?;
     commit_txn(follower_transaction).await?;
     let resp = get_intract_user_details(&email, &IntractIdentityType::Email).await?;
+    let resp = match resp {
+        IntractResponses::IntractRespData(resp) => resp,
+        IntractResponses::IntractError(resp) => {
+            let r = PerkResponse {
+                error: true,
+                message: Some(resp.message),
+                cached: false,
+                name: PerkName::Intract.to_string(),
+                multiplier: 1.0,
+                one_time_bonus: 0.0,
+            };
+            return Ok(Json(r).into_response());
+        }
+    };
     let new_data = serde_json::to_value(resp.clone()).map_err(|_| Error::InternalServer)?;
     let mut transaction = create_txn(&pool).await?;
     let user_perks = get_user_perks(&mut transaction, &user.user_id).await?;
