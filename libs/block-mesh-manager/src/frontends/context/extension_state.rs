@@ -44,6 +44,7 @@ pub struct ExtensionContext {
     pub twitter_creds_bearer_token: RwSignal<String>,
     pub feed_origin: RwSignal<String>,
     pub feed_selector: RwSignal<String>,
+    pub wootz: RwSignal<String>,
 }
 
 impl Default for ExtensionContext {
@@ -73,6 +74,7 @@ impl Default for ExtensionContext {
             twitter_creds_bearer_token: RwSignal::new(String::default()),
             feed_origin: RwSignal::new(String::default()),
             feed_selector: RwSignal::new(String::default()),
+            wootz: RwSignal::new(String::default()),
         }
     }
 }
@@ -188,6 +190,9 @@ impl ExtensionContext {
                                     "".to_string()
                                 };
                                 match storage_value {
+                                    MessageKey::Wootz => {
+                                        self.wootz.update(|v| *v = value);
+                                    }
                                     MessageKey::TwitterCredsUrl => {
                                         self.twitter_creds_url.update(|v| *v = value);
                                     }

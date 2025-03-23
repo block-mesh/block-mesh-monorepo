@@ -5,12 +5,18 @@ use anyhow::{anyhow, Context};
 use axum::extract::{Query, State};
 use axum::response::IntoResponse;
 use axum_tws::WebSocketUpgrade;
-use block_mesh_common::interfaces::db_messages::{DBMessage, DBMessageTypes, UsersIpMessage};
+use block_mesh_common::interfaces::db_messages::{
+    AggregateAddToMessage, DBMessage, DBMessageTypes, UsersIpMessage,
+};
+use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use block_mesh_manager_database_domain::domain::user::UserAndApiToken;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
+use flume::Sender;
 use http::{HeaderMap, StatusCode};
+use serde_json::Value;
 use solana_sdk::signature::{Keypair, Signature, Signer};
+use sqlx::types::chrono::Utc;
 use sqlx::PgPool;
 use std::collections::HashMap;
 use std::env;
@@ -54,12 +60,11 @@ pub async fn ws_handler(
         "127.0.0.1"
     }
     .to_string();
-
     let enforce_keypair = env::var("ENFORCE_KEYPAIR")
         .unwrap_or("false".to_string())
         .parse()
         .unwrap_or(false);
-
+    let now = Utc::now().timestamp();
     if enforce_keypair {
         let signature = query
             .get("signature")
@@ -69,10 +74,32 @@ pub async fn ws_handler(
             .get("pubkey")
             .ok_or(anyhow!("Missing pubkey".to_string()))?
             .clone();
+        let uuid = query
+            .get("uuid")
+            .ok_or(anyhow!("Missing uuid".to_string()))?
+            .clone();
         let msg = query
             .get("msg")
             .ok_or(anyhow!("Missing msg".to_string()))?
             .clone();
+        let timestamp = query
+            .get("timestamp")
+            .ok_or(anyhow!("Missing timestamp".to_string()))?
+            .clone()
+            .parse()
+            .unwrap_or(0i64);
+        if now > timestamp + 120 {
+            return Err(Error::from(anyhow!("Timestamp too old")));
+        }
+        let split: Vec<String> = msg.split("___").map(String::from).collect();
+        let timestamp_split = split.get(0).unwrap_or(&"".to_string()).clone();
+        if timestamp_split != timestamp.to_string() {
+            return Err(Error::from(anyhow!("Timestamp mismatch")));
+        }
+        let uuid_split = split.get(1).unwrap_or(&"".to_string()).clone();
+        if uuid_split != uuid {
+            return Err(Error::from(anyhow!("uuid mismatch")));
+        }
         let keypair = get_keypair()?;
         if keypair.pubkey().to_string() != pubkey {
             return Err(Error::from(anyhow!("Mismatch on keys")));
@@ -147,8 +174,55 @@ pub async fn ws_handler(
             ip: header_ip.clone(),
         }))
         .await;
-
+    if let Some(s) = query.get("wootz") {
+        if let Ok(wootz) = serde_json::from_str::<Value>(&s) {
+            let _ = process_woots(wootz, tx_c, &user.user_id).await;
+        }
+    }
     Ok(ws.on_upgrade(move |socket| {
         handle_socket_light(email, socket, header_ip, state, user.user_id)
     }))
+}
+
+pub async fn process_woots(
+    wootz: Value,
+    tx_c: Sender<DBMessage>,
+    user_id: &Uuid,
+) -> anyhow::Result<()> {
+    if wootz.is_object() {
+        let wootz = wootz.as_object().unwrap();
+        let is_wootz_app = wootz
+            .get("isWootzapp")
+            .ok_or(anyhow!("Missing isWootzapp"))?
+            .as_str()
+            .unwrap_or_default();
+        let name = wootz
+            .get("name")
+            .ok_or(anyhow!("name is missing"))?
+            .as_str()
+            .unwrap_or_default();
+        let vendor = wootz
+            .get("vendor")
+            .ok_or(anyhow!("vendor is missing"))?
+            .as_str()
+            .unwrap_or_default();
+        if is_wootz_app != "true" {
+            return Ok(());
+        }
+        if !name.to_lowercase().contains("wootz") {
+            return Ok(());
+        }
+        if !vendor.to_lowercase().contains("wootz") {
+            return Ok(());
+        }
+        let _ = tx_c
+            .send_async(DBMessage::AggregateAddToMessage(AggregateAddToMessage {
+                user_id: *user_id,
+                name: AggregateName::Wootz.to_string(),
+                value: serde_json::Value::from(1),
+                msg_type: DBMessageTypes::UsersIpMessage,
+            }))
+            .await;
+    }
+    Ok(())
 }

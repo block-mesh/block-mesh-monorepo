@@ -102,11 +102,13 @@ pub async fn bulk_get_or_create_aggregate_by_user_and_name(
         r#"
 WITH input_data(id, created_at, updated_at, user_id, name, value) AS (
   VALUES
-    (gen_random_uuid(), now(), now(), $1::uuid, 'Uptime',   $2::jsonb),
-    (gen_random_uuid(), now(), now(), $1::uuid, 'Download', $4::jsonb),
-    (gen_random_uuid(), now(), now(), $1::uuid, 'Upload',   $3::jsonb),
-    (gen_random_uuid(), now(), now(), $1::uuid, 'Latency',  $5::jsonb),
-    (gen_random_uuid(), now(), now(), $1::uuid, 'Tasks',    $2::jsonb)
+    (gen_random_uuid(), now(), now(), $1::uuid, 'Uptime',           $2::jsonb),
+    (gen_random_uuid(), now(), now(), $1::uuid, 'InteractiveExt',   $2::jsonb),
+    (gen_random_uuid(), now(), now(), $1::uuid, 'Wootz',            $2::jsonb),
+    (gen_random_uuid(), now(), now(), $1::uuid, 'Download',         $4::jsonb),
+    (gen_random_uuid(), now(), now(), $1::uuid, 'Upload',           $3::jsonb),
+    (gen_random_uuid(), now(), now(), $1::uuid, 'Latency',          $5::jsonb),
+    (gen_random_uuid(), now(), now(), $1::uuid, 'Tasks',            $2::jsonb)
 ),
 upsert AS (
   INSERT INTO aggregates (id, created_at, user_id, name, value, updated_at, dummy_updated_at)

@@ -26,6 +26,7 @@ pub enum MessageKey {
     TwitterCredsBearerToken,
     FeedOrigin,
     FeedSelector,
+    Wootz,
 }
 
 impl Serialize for MessageKey {
@@ -58,6 +59,7 @@ impl Display for MessageKey {
             Self::UploadSpeed => "upload_speed".to_string(),
             Self::LastUpdate => "last_update".to_string(),
             Self::WalletAddress => "wallet_address".to_string(),
+            Self::Wootz => "wootz".to_string(),
         };
         write!(f, "{}", str)
     }
@@ -86,6 +88,7 @@ impl TryFrom<&str> for MessageKey {
             "upload_speed" => Ok(Self::UploadSpeed),
             "last_update" => Ok(Self::LastUpdate),
             "wallet_address" => Ok(Self::WalletAddress),
+            "wootz" => Ok(Self::Wootz),
             _ => Err(format!("Invalid MessageKey value {}", value)),
         }
     }

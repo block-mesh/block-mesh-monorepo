@@ -40,6 +40,8 @@ pub enum AggregateName {
     Invalid,
     CronReports,
     WalletChange,
+    Wootz,
+    InteractiveExt,
 }
 
 impl Display for AggregateName {
@@ -57,6 +59,8 @@ impl Display for AggregateName {
             Self::Invalid => write!(f, "Invalid"),
             Self::CronReports => write!(f, "CronReports"),
             Self::WalletChange => write!(f, "WalletChange"),
+            Self::Wootz => write!(f, "Wootz"),
+            Self::InteractiveExt => write!(f, " InteractiveExt"),
         }
     }
 }
@@ -86,6 +90,8 @@ impl From<String> for AggregateName {
             "Tasks" => Self::Tasks,
             "CronReports" => Self::CronReports,
             "WalletChange" => Self::WalletChange,
+            "Wootz" => Self::Wootz,
+            "InteractiveExt" => Self::InteractiveExt,
             _ => Self::Invalid,
         }
     }
