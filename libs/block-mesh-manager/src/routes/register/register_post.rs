@@ -168,8 +168,9 @@ pub async fn handler(
     create_invite_code(&mut transaction, user_id, &Uuid::new_v4().to_string()).await?;
     create_uptime_report(&mut transaction, &user_id, &None).await?;
     prep_user(&mut transaction, &user_id).await?;
-    if !form.invite_code.is_empty() {
-        match get_user_opt_by_invited_code(&mut transaction, form.invite_code).await? {
+    let invite_code = form.invite_code.unwrap_or("123".to_string());
+    if !invite_code.is_empty() {
+        match get_user_opt_by_invited_code(&mut transaction, invite_code).await? {
             Some(invited_by_user) => {
                 let invited_by_user_id = invited_by_user.user_id;
                 update_user_invited_by(&mut transaction, user_id, invited_by_user_id).await?;
