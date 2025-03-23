@@ -27,6 +27,7 @@ pub enum MessageKey {
     FeedOrigin,
     FeedSelector,
     Wootz,
+    Interactive,
 }
 
 impl Serialize for MessageKey {
@@ -60,6 +61,7 @@ impl Display for MessageKey {
             Self::LastUpdate => "last_update".to_string(),
             Self::WalletAddress => "wallet_address".to_string(),
             Self::Wootz => "wootz".to_string(),
+            Self::Interactive => "interactive".to_string(),
         };
         write!(f, "{}", str)
     }
@@ -89,6 +91,7 @@ impl TryFrom<&str> for MessageKey {
             "last_update" => Ok(Self::LastUpdate),
             "wallet_address" => Ok(Self::WalletAddress),
             "wootz" => Ok(Self::Wootz),
+            "interactive" => Ok(Self::Interactive),
             _ => Err(format!("Invalid MessageKey value {}", value)),
         }
     }

@@ -8,6 +8,7 @@ use axum_tws::WebSocketUpgrade;
 use block_mesh_common::interfaces::db_messages::{
     AggregateAddToMessage, DBMessage, DBMessageTypes, UsersIpMessage,
 };
+use block_mesh_common::solana::get_keypair;
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use block_mesh_manager_database_domain::domain::user::UserAndApiToken;
@@ -15,7 +16,7 @@ use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use flume::Sender;
 use http::{HeaderMap, StatusCode};
 use serde_json::Value;
-use solana_sdk::signature::{Keypair, Signature, Signer};
+use solana_sdk::signature::{Signature, Signer};
 use sqlx::types::chrono::Utc;
 use sqlx::PgPool;
 use std::collections::HashMap;
@@ -23,13 +24,6 @@ use std::env;
 use std::str::FromStr;
 use std::sync::Arc;
 use uuid::Uuid;
-
-pub fn get_keypair() -> anyhow::Result<Keypair> {
-    let data: serde_json::Value =
-        serde_json::from_str(&env::var("EXT_KEYPAIR")?).map_err(|e| anyhow!(e.to_string()))?;
-    let key_bytes: Vec<u8> = serde_json::from_value(data).map_err(|e| anyhow!(e.to_string()))?;
-    Keypair::from_bytes(&key_bytes).map_err(|e| anyhow!(e.to_string()))
-}
 
 pub async fn get_user_from_db(
     follower_pool: &PgPool,

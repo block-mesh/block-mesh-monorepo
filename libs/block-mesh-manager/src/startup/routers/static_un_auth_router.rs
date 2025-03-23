@@ -89,6 +89,10 @@ pub fn get_static_un_auth_router() -> Router<Arc<AppState>> {
             get(routes::login::login_wallet_post::handler),
         )
         .route(
+            RoutesEnum::Static_UnAuth_LivenessApi.to_string().as_str(),
+            get(routes::liveness::liveness_check::handler),
+        )
+        .route(
             RoutesEnum::Static_UnAuth_RegisterApi.to_string().as_str(),
             post(routes::register::register_api::handler),
         )

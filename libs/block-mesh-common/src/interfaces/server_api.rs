@@ -221,7 +221,7 @@ pub struct RegisterForm {
     pub email: String,
     pub password: String,
     pub password_confirm: String,
-    pub invite_code: String,
+    pub invite_code: Option<String>,
     pub cftoken: Option<String>,
 }
 
@@ -233,7 +233,7 @@ pub struct RegisterWalletForm {
     pub nonce: String,
     pub password: String,
     pub password_confirm: String,
-    pub invite_code: String,
+    pub invite_code: Option<String>,
     pub cftoken: Option<String>,
 }
 
@@ -814,4 +814,20 @@ pub struct PerkResponse {
     pub name: String,
     pub multiplier: f64,
     pub one_time_bonus: f64,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct LivenessRequest {
+    pub email: String,
+    pub api_token: Uuid,
+    pub signature: String,
+    pub msg: String,
+    pub timestamp: i64,
+    pub pubkey: String,
+    pub uuid: Uuid,
+}
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct LivenessResponse {
+    pub timestamp: i64,
 }

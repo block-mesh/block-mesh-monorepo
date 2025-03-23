@@ -123,7 +123,7 @@ pub fn NewDashboard() -> impl IntoView {
             <DownloadExtension show=show_download_extension/>
         </Modal>
         // <Modal show=show_edit_email show_close_button=true>
-        //     <EditEmail/>
+        // <EditEmail/>
         // </Modal>
 
         <div class="lg:flex items-start justify-start gap-4">
