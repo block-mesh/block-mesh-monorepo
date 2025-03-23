@@ -1,0 +1,56 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nWITH input_data(id, created_at, updated_at, user_id, name, value) AS (\n  VALUES\n    (gen_random_uuid(), now(), now(), $1::uuid, 'Uptime',           $2::jsonb),\n    (gen_random_uuid(), now(), now(), $1::uuid, 'InteractiveExt',   $2::jsonb),\n    (gen_random_uuid(), now(), now(), $1::uuid, 'Wootz',            $2::jsonb),\n    (gen_random_uuid(), now(), now(), $1::uuid, 'Download',         $4::jsonb),\n    (gen_random_uuid(), now(), now(), $1::uuid, 'Upload',           $3::jsonb),\n    (gen_random_uuid(), now(), now(), $1::uuid, 'Latency',          $5::jsonb),\n    (gen_random_uuid(), now(), now(), $1::uuid, 'Tasks',            $2::jsonb)\n),\nupsert AS (\n  INSERT INTO aggregates (id, created_at, user_id, name, value, updated_at, dummy_updated_at)\n  SELECT id, created_at, user_id, name, value, created_at, created_at\n  FROM input_data\n  ON CONFLICT (user_id, name) DO NOTHING\n  RETURNING id, created_at, user_id, name, value, updated_at\n)\nSELECT id, created_at, user_id, name, value, updated_at FROM upsert\nUNION ALL\nSELECT a.id, a.created_at, a.user_id, a.name, a.value, a.updated_at FROM aggregates a\nJOIN input_data i USING (user_id, name)\nWHERE NOT EXISTS (\n  SELECT 1\n  FROM upsert u\n  WHERE u.user_id = i.user_id AND u.name = i.name\n);\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 5,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "4c60a6dd73eb5d7fe8cca826740a245d76f11bc76ec196b2810cfda0fddd45cc"
+}
