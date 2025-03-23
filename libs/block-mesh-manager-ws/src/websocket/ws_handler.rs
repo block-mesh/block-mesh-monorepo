@@ -92,7 +92,7 @@ pub async fn ws_handler(
             return Err(Error::from(anyhow!("Timestamp too old")));
         }
         let split: Vec<String> = msg.split("___").map(String::from).collect();
-        let timestamp_split = split.get(0).unwrap_or(&"".to_string()).clone();
+        let timestamp_split = split.first().unwrap_or(&"".to_string()).clone();
         if timestamp_split != timestamp.to_string() {
             return Err(Error::from(anyhow!("Timestamp mismatch")));
         }
@@ -175,7 +175,7 @@ pub async fn ws_handler(
         }))
         .await;
     if let Some(s) = query.get("wootz") {
-        if let Ok(wootz) = serde_json::from_str::<Value>(&s) {
+        if let Ok(wootz) = serde_json::from_str::<Value>(s) {
             let _ = process_woots(wootz, tx_c, &user.user_id).await;
         }
     }
