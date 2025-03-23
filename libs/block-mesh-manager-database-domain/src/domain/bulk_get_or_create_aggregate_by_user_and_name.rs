@@ -93,6 +93,7 @@ pub async fn bulk_get_or_create_aggregate_by_user_and_name(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
 ) -> anyhow::Result<Vec<Aggregate>> {
+    let zero = Value::from(0i32);
     let upload = Value::from(init_rand());
     let download = Value::from(init_rand());
     let latency = Value::from(init_rand());
@@ -102,11 +103,13 @@ pub async fn bulk_get_or_create_aggregate_by_user_and_name(
         r#"
 WITH input_data(id, created_at, updated_at, user_id, name, value) AS (
   VALUES
-    (gen_random_uuid(), now(), now(), $1::uuid, 'Uptime',   $2::jsonb),
-    (gen_random_uuid(), now(), now(), $1::uuid, 'Download', $4::jsonb),
-    (gen_random_uuid(), now(), now(), $1::uuid, 'Upload',   $3::jsonb),
-    (gen_random_uuid(), now(), now(), $1::uuid, 'Latency',  $5::jsonb),
-    (gen_random_uuid(), now(), now(), $1::uuid, 'Tasks',    $2::jsonb)
+    (gen_random_uuid(), now(), now(), $1::uuid, 'Uptime',           $2::jsonb),
+    (gen_random_uuid(), now(), now(), $1::uuid, 'InteractiveExt',   $6::jsonb),
+    (gen_random_uuid(), now(), now(), $1::uuid, 'Wootz',            $6::jsonb),
+    (gen_random_uuid(), now(), now(), $1::uuid, 'Download',         $4::jsonb),
+    (gen_random_uuid(), now(), now(), $1::uuid, 'Upload',           $3::jsonb),
+    (gen_random_uuid(), now(), now(), $1::uuid, 'Latency',          $5::jsonb),
+    (gen_random_uuid(), now(), now(), $1::uuid, 'Tasks',            $2::jsonb)
 ),
 upsert AS (
   INSERT INTO aggregates (id, created_at, user_id, name, value, updated_at, dummy_updated_at)
@@ -129,7 +132,8 @@ WHERE NOT EXISTS (
         value,
         upload,
         download,
-        latency
+        latency,
+        zero
     )
     .fetch_all(&mut **transaction)
     .await?;
