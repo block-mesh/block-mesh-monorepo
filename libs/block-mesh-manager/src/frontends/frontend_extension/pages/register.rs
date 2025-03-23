@@ -82,7 +82,7 @@ pub fn ExtensionRegister() -> impl IntoView {
                 cftoken: Some(cftoken),
                 password: password.get_untracked(),
                 password_confirm: password.get_untracked(),
-                invite_code: invite_code.get_untracked(),
+                invite_code: Some(invite_code.get_untracked()),
             };
             let result = register(&state.blockmesh_url.get_untracked(), &credentials).await;
             match result {

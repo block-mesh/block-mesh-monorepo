@@ -45,6 +45,7 @@ pub struct ExtensionContext {
     pub feed_origin: RwSignal<String>,
     pub feed_selector: RwSignal<String>,
     pub wootz: RwSignal<String>,
+    pub interactive: RwSignal<i64>,
 }
 
 impl Default for ExtensionContext {
@@ -75,6 +76,7 @@ impl Default for ExtensionContext {
             feed_origin: RwSignal::new(String::default()),
             feed_selector: RwSignal::new(String::default()),
             wootz: RwSignal::new(String::default()),
+            interactive: RwSignal::new(0i64),
         }
     }
 }
@@ -190,6 +192,11 @@ impl ExtensionContext {
                                     "".to_string()
                                 };
                                 match storage_value {
+                                    MessageKey::Interactive => {
+                                        self.interactive.update(|v| {
+                                            *v = i64::from_str(&value).unwrap_or_default()
+                                        });
+                                    }
                                     MessageKey::Wootz => {
                                         self.wootz.update(|v| *v = value);
                                     }

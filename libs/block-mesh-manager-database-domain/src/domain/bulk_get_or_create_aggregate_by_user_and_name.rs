@@ -1,23 +1,17 @@
 use crate::domain::aggregate::{Aggregate, AggregateTmp};
-use rand::Rng;
+use block_mesh_common::rand::init_rand;
 use serde_json::Value;
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
-
-pub fn init_rand() -> i32 {
-    let mut rng = rand::thread_rng();
-    let random_number: i32 = rng.gen_range(1..=100);
-    random_number
-}
 
 #[tracing::instrument(name = "bulk_get_or_create_aggregate_by_user_and_name_old", skip_all)]
 pub async fn bulk_get_or_create_aggregate_by_user_and_name_old(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
 ) -> anyhow::Result<Vec<Aggregate>> {
-    let upload = Value::from(init_rand());
-    let download = Value::from(init_rand());
-    let latency = Value::from(init_rand());
+    let upload = Value::from(init_rand(1, 100));
+    let download = Value::from(init_rand(1, 100));
+    let latency = Value::from(init_rand(1, 100));
     let value = Value::Null;
     let aggregates: Vec<AggregateTmp> = sqlx::query_as!(
         AggregateTmp,
@@ -94,9 +88,9 @@ pub async fn bulk_get_or_create_aggregate_by_user_and_name(
     user_id: &Uuid,
 ) -> anyhow::Result<Vec<Aggregate>> {
     let zero = Value::from(0i32);
-    let upload = Value::from(init_rand());
-    let download = Value::from(init_rand());
-    let latency = Value::from(init_rand());
+    let upload = Value::from(init_rand(1, 100));
+    let download = Value::from(init_rand(1, 100));
+    let latency = Value::from(init_rand(1, 100));
     let value = Value::Null;
     let aggregates: Vec<AggregateTmp> = sqlx::query_as!(
         AggregateTmp,
