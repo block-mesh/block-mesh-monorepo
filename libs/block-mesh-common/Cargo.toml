@@ -64,6 +64,7 @@ email-client = ["dep:lettre", "dep:aws-config", "aws-sdk-sesv2"]
 ssr = ["email-client", "reqwest", "env", "feature-flag", "ip-data"]
 hydrate = ["reqwest", "env", "feature-flag"]
 intract = ["reqwest"]
+solana = ["dep:solana-sdk"]
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["full"] }

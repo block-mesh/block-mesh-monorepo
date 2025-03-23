@@ -23,3 +23,5 @@ pub mod points;
 
 #[cfg(feature = "intract")]
 pub mod intract;
+#[cfg(feature = "solana")]
+pub mod solana;
