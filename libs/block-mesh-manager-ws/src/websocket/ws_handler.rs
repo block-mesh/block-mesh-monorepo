@@ -16,7 +16,7 @@ use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use flume::Sender;
 use http::{HeaderMap, StatusCode};
 use serde_json::Value;
-use solana_sdk::signature::{Keypair, Signature, Signer};
+use solana_sdk::signature::{Signature, Signer};
 use sqlx::types::chrono::Utc;
 use sqlx::PgPool;
 use std::collections::HashMap;
