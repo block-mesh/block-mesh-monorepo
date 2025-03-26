@@ -16,6 +16,7 @@ use block_mesh_manager_database_domain::domain::notify_worker::notify_worker;
 use chrono::Utc;
 use database_utils::utils::instrument_wrapper::create_txn;
 use solana_sdk::signature::{Signature, Signer};
+use std::env;
 use std::str::FromStr;
 use std::sync::Arc;
 
@@ -24,6 +25,10 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Query(query): Query<LivenessRequest>,
 ) -> Result<impl IntoResponse, Error> {
+    let timestamp_buffer = env::var("TIMESTAMP_BUFFER")
+        .unwrap_or("300".to_string())
+        .parse()
+        .unwrap_or(300);
     let mut follower_transaction = create_txn(&state.follower_pool).await?;
     let user = get_user_and_api_token_by_email(&mut follower_transaction, &query.email)
         .await?
@@ -35,7 +40,7 @@ pub async fn handler(
     let uuid = query.uuid;
     let split: Vec<String> = msg.split("___").map(String::from).collect();
     let now = Utc::now().timestamp();
-    if now > timestamp + 120 {
+    if now > timestamp + timestamp_buffer {
         return Err(Error::from(anyhow!("Timestamp too old")));
     }
     let timestamp_split = split.first().unwrap_or(&"".to_string()).clone();
