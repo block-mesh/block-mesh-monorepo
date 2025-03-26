@@ -57,11 +57,7 @@ pub fn NewDashboard() -> impl IntoView {
         email.set(a.email.clone().unwrap_or_default());
     }
     let allowed_to_edit_email = Signal::derive(move || {
-        if email.get().ends_with("@blockmesh.xyz") && email.get().starts_with("wallet_") {
-            true
-        } else {
-            false
-        }
+        email.get().ends_with("@blockmesh.xyz") && email.get().starts_with("wallet_")
     });
 
     if let Some(data) = async_data {
