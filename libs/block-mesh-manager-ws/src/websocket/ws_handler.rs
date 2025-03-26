@@ -43,6 +43,10 @@ pub async fn ws_handler(
     State(state): State<Arc<WsAppState>>,
     Query(query): Query<HashMap<String, String>>,
 ) -> Result<impl IntoResponse, Error> {
+    let timestamp_buffer = env::var("TIMESTAMP_BUFFER")
+        .unwrap_or("300".to_string())
+        .parse()
+        .unwrap_or(300);
     let app_env = env::var("APP_ENVIRONMENT").unwrap_or("production".to_string());
     let header_ip = if app_env != "local" {
         headers
@@ -82,7 +86,7 @@ pub async fn ws_handler(
             .clone()
             .parse()
             .unwrap_or(0i64);
-        if now > timestamp + 120 {
+        if now > timestamp + timestamp_buffer {
             return Err(Error::from(anyhow!("Timestamp too old")));
         }
         let split: Vec<String> = msg.split("___").map(String::from).collect();
