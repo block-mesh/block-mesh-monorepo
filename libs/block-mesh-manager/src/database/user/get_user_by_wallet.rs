@@ -1,6 +1,6 @@
-use block_mesh_manager_database_domain::domain::option_uuid::OptionUuid;
 use block_mesh_manager_database_domain::domain::user::User;
 use block_mesh_manager_database_domain::domain::user::UserRole;
+use database_utils::utils::option_uuid::OptionUuid;
 use secret::Secret;
 use sqlx::{Postgres, Transaction};
 

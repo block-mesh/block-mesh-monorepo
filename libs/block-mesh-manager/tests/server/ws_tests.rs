@@ -17,7 +17,7 @@ async fn test_ws() -> (TestApp, reqwest_websocket::WebSocket) {
         email: email.clone(),
         password: password.clone(),
         password_confirm: password.clone(),
-        invite_code: "123".to_string(),
+        invite_code: Some("123".to_string()),
         cftoken: Option::from("test".to_string()),
     })
     .await

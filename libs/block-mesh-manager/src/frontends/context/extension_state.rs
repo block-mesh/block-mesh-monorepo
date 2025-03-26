@@ -46,11 +46,13 @@ pub struct ExtensionContext {
     pub feed_selector: RwSignal<String>,
     pub wootz: RwSignal<String>,
     pub interactive: RwSignal<i64>,
+    pub fingerprint: RwSignal<String>,
 }
 
 impl Default for ExtensionContext {
     fn default() -> Self {
         Self {
+            fingerprint: RwSignal::new(String::default()),
             email: RwSignal::new(String::default()),
             api_token: RwSignal::new(Uuid::default()),
             device_id: RwSignal::new(Uuid::default()),
@@ -192,6 +194,9 @@ impl ExtensionContext {
                                     "".to_string()
                                 };
                                 match storage_value {
+                                    MessageKey::FingerPrint => {
+                                        self.fingerprint.update(|v| *v = value);
+                                    }
                                     MessageKey::Interactive => {
                                         self.interactive.update(|v| {
                                             *v = i64::from_str(&value).unwrap_or_default()

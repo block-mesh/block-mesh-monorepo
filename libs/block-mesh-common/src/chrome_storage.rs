@@ -9,6 +9,7 @@ use uuid::Uuid;
 #[derive(Deserialize, Debug)]
 pub enum MessageKey {
     All,
+    FingerPrint,
     BlockMeshUrl,
     BlockMeshWsUrl,
     BlockMeshDataSinkUrl,
@@ -42,6 +43,7 @@ impl Serialize for MessageKey {
 impl Display for MessageKey {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let str = match self {
+            Self::FingerPrint => "fingerprint".to_string(),
             Self::FeedOrigin => "feed_origin".to_string(),
             Self::FeedSelector => "feed_selector".to_string(),
             Self::TwitterCredsUrl => "twitter-url".to_string(),
@@ -73,6 +75,7 @@ impl TryFrom<&str> for MessageKey {
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         let value = value.trim_matches('"');
         match value {
+            "fingerprint" => Ok(Self::FingerPrint),
             "feed_origin" => Ok(Self::FeedOrigin),
             "feed_selector" => Ok(Self::FeedSelector),
             "twitter-url" => Ok(Self::TwitterCredsUrl),

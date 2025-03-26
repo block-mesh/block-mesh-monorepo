@@ -357,6 +357,45 @@ jobs:
           tag_name: v${{ needs.get-tag.outputs.pkg-version }}
           files: |
             data-sink-${{ matrix.target }}.tar.gz
+  upload-assets-ids:
+    name: "Upload assets to Github releases - ids"
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    needs:
+      - "prep-env"
+      - "get-tag"
+    strategy:
+      matrix:
+        include:
+          - target: "x86_64-unknown-linux-gnu"
+            os: "ubuntu-latest"
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: "Check out the repo"
+        uses: actions/checkout@v4
+      - name: "Install deps"
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y pkg-config openssl libssl-dev
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          toolchain: ${{ vars.RUSTC_VERSION }}
+          targets: wasm32-unknown-unknown
+      - name: "Cache"
+        uses: Swatinem/rust-cache@v2
+        with:
+          key: upload-assets-ids-${{ matrix.target }}
+          cache-all-crates: true
+      - name: "Build ids"
+        run: |
+          cargo build -p ids --release
+          tar acf ids-${{ matrix.target }}.tar.gz target/release/ids
+      - name: Release
+        uses: softprops/action-gh-release@v2
+        #if: startsWith(github.ref, 'refs/tags/')
+        with:
+          tag_name: v${{ needs.get-tag.outputs.pkg-version }}
+          files: |
+            ids-${{ matrix.target }}.tar.gz
   upload-assets-emails:
     name: "Upload assets to Github releases - emails"
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
@@ -451,6 +490,7 @@ jobs:
       - "upload-assets-emails"
       - "upload-assets-logs-drain"
       - "upload-assets-data-sink"
+      - "upload-assets-ids"
     runs-on: "ubuntu-latest"
     steps:
       - name: "Check out the repo"
@@ -541,6 +581,15 @@ jobs:
           file: docker/data-sink.Dockerfile
           push: true
           tags: blockmesh/data-sink:latest,blockmesh/data-sink:v${{ needs.get-tag.outputs.pkg-version }}
+          labels: ${{ steps.meta.outputs.labels }}
+      - name: "Build and push ids"
+        uses: "docker/build-push-action@v5"
+        with:
+          context: .
+          platforms: linux/amd64
+          file: docker/ids.Dockerfile
+          push: true
+          tags: blockmesh/ids:latest,blockmesh/ids:v${{ needs.get-tag.outputs.pkg-version }}
           labels: ${{ steps.meta.outputs.labels }}
       - name: "Build and push emails"
         uses: "docker/build-push-action@v5"
