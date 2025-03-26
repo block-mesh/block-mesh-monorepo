@@ -10,6 +10,7 @@ use crate::frontends::components::sub_heading::Subheading;
 //use crate::frontends::components::tables::table_cell::TableCell;
 //use crate::frontends::components::tables::table_head::TableHead;
 //use crate::frontends::components::tables::table_header::TableHeader;
+use crate::frontends::components::edit_email::EditEmail;
 use crate::frontends::context::notification_context::NotificationContext;
 use block_mesh_common::constants::{BLOCK_MESH_CHROME_EXTENSION_LINK, BUTTON_CLASS};
 use block_mesh_common::interfaces::server_api::{
@@ -55,6 +56,13 @@ pub fn NewDashboard() -> impl IntoView {
     if let Some(a) = auth_status {
         email.set(a.email.clone().unwrap_or_default());
     }
+    let allowed_to_edit_email = Signal::derive(move || {
+        if email.get().ends_with("@blockmesh.xyz") && email.get().starts_with("wallet_") {
+            true
+        } else {
+            false
+        }
+    });
 
     if let Some(data) = async_data {
         connected.set(data.connected);
@@ -122,19 +130,20 @@ pub fn NewDashboard() -> impl IntoView {
         <Modal show=show_download_extension show_close_button=false>
             <DownloadExtension show=show_download_extension/>
         </Modal>
-        // <Modal show=show_edit_email show_close_button=true>
-        // <EditEmail/>
-        // </Modal>
+        <Modal show=show_edit_email show_close_button=true>
+        <EditEmail/>
+        </Modal>
 
         <div class="lg:flex items-start justify-start gap-4">
             <Heading>{move || format!("Dashboard v{}", env!("CARGO_PKG_VERSION"))}</Heading>
             <button
                 class=BUTTON_CLASS
                 on:click=move |_| {
-                    show_edit_email.set(true);
+                    if allowed_to_edit_email.get_untracked() {
+                        show_edit_email.set(true);
+                    }
                 }
             >
-
                 <span class="material-symbols-outlined">email</span>
                 {move || email.get().to_string()}
             </button>

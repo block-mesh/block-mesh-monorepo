@@ -29,6 +29,9 @@ pub async fn handler(
 ) -> Result<impl IntoResponse, Error> {
     let user = auth.user.ok_or(Error::UserNotFound)?;
     let email = form.new_email.clone().to_ascii_lowercase();
+    if !user.email.starts_with("wallet_") || !user.email.ends_with("@blockmesh.xyz") {
+        return Err(Error::Anyhow(anyhow!("Can't change email")));
+    }
     let spam_emails = get_spam_emails_cache().await;
     let email_domain = match email.split('@').last() {
         Some(d) => d.to_string(),
