@@ -155,8 +155,12 @@ pub async fn handler(
         tracing::error!("Signature verification failed.");
         return Err(Error::SignatureMismatch);
     }
-
     let invite_code = form.invite_code.unwrap_or("123".to_string());
+    let invite_code = if invite_code.is_empty() {
+        "123".to_string()
+    } else {
+        invite_code
+    };
     if !invite_code.is_empty() {
         match get_user_opt_by_invited_code(&mut transaction, invite_code).await? {
             Some(invited_by_user) => {
