@@ -68,6 +68,7 @@ then
   start_db block-mesh 5559
   start_db tg-bot 5551
   start_db data-sink 5552
+  start_db ids 6999
   start_db emails 5553
   start_db logs-drain 5554
 
@@ -137,6 +138,12 @@ echo "create DB"
 ensure sqlx database create
 cd "${ROOT}/libs/logs-drain" || exit
 echo "migrate DB logs-drain"
+ensure migrate
+export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:6999/ids"
+echo "create DB"
+ensure sqlx database create
+cd "${ROOT}/libs/ids" || exit
+echo "migrate DB ids"
 ensure migrate
 >&2 echo "Postgres has been migrated, ready to go!"
 cd "${_PWD}"

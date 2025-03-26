@@ -1,5 +1,5 @@
-use crate::domain::option_uuid::OptionUuid;
 use chrono::{DateTime, NaiveDate, Utc};
+use database_utils::utils::option_uuid::OptionUuid;
 use serde::{Deserialize, Serialize};
 use sqlx::{Decode, Postgres};
 use std::error::Error;

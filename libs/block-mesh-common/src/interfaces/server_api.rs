@@ -831,3 +831,10 @@ pub struct LivenessRequest {
 pub struct LivenessResponse {
     pub timestamp: i64,
 }
+
+#[derive(Serialize, Deserialize, Clone)]
+pub struct IdRequest {
+    pub email: String,
+    pub api_token: String,
+    pub fp: String,
+}

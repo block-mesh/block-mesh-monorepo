@@ -1,6 +1,6 @@
-use crate::domain::option_uuid::OptionUuid;
 use crate::domain::user::User;
 use crate::domain::user::UserRole;
+use database_utils::utils::option_uuid::OptionUuid;
 use secret::Secret;
 use sqlx::PgExecutor;
 
