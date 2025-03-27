@@ -15,6 +15,7 @@ use block_mesh_manager_database_domain::domain::user::UserAndApiToken;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use flume::Sender;
 use http::{HeaderMap, StatusCode};
+use semver::Version;
 use serde_json::Value;
 use solana_sdk::signature::{Signature, Signer};
 use sqlx::types::chrono::Utc;
@@ -62,6 +63,14 @@ pub async fn ws_handler(
         .unwrap_or("false".to_string())
         .parse()
         .unwrap_or(false);
+
+    let enforce_version = env::var("ENFORCE_VERSION")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
+
+    let minimal_version = env::var("MINIMAL_VERSION").unwrap_or("0.0.515".to_string());
+
     let now = Utc::now().timestamp();
     if enforce_keypair {
         let signature = query
@@ -76,16 +85,25 @@ pub async fn ws_handler(
             .get("uuid")
             .ok_or(anyhow!("Missing uuid".to_string()))?
             .clone();
+        if uuid.is_empty() {
+            return Err(Error::from(anyhow!("UUID is empty")));
+        }
         let msg = query
             .get("msg")
             .ok_or(anyhow!("Missing msg".to_string()))?
             .clone();
+        if msg.is_empty() {
+            return Err(Error::from(anyhow!("Msg is empty")));
+        }
         let timestamp = query
             .get("timestamp")
             .ok_or(anyhow!("Missing timestamp".to_string()))?
             .clone()
             .parse()
             .unwrap_or(0i64);
+        if timestamp == 0 {
+            return Err(Error::from(anyhow!("Timestamp is empty")));
+        }
         if now > timestamp + timestamp_buffer {
             return Err(Error::from(anyhow!("Timestamp too old")));
         }
@@ -98,6 +116,34 @@ pub async fn ws_handler(
         if uuid_split != uuid {
             return Err(Error::from(anyhow!("uuid mismatch")));
         }
+
+        if enforce_version {
+            let version_split = split.get(2).unwrap_or(&"".to_string()).clone();
+            tracing::info!("version_split = {}", version_split);
+            let version = query
+                .get("version")
+                .ok_or(anyhow!("Missing version".to_string()))?
+                .clone();
+            if version_split.is_empty() || version.is_empty() {
+                return Err(Error::from(anyhow!("Empty version")));
+            }
+            if version_split != version {
+                return Err(Error::from(anyhow!("Mismatch on version")));
+            }
+            let minimal_semver = Version::parse(&minimal_version).unwrap_or(Version {
+                major: 0,
+                minor: 0,
+                patch: 0,
+                pre: Default::default(),
+                build: Default::default(),
+            });
+            let input_semver = Version::parse(&version)
+                .map_err(|_| Error::from(anyhow!("Cant parse input version")))?;
+            if input_semver < minimal_semver {
+                return Err(Error::from(anyhow!("Version too old")));
+            }
+        }
+
         let keypair = get_keypair()?;
         if keypair.pubkey().to_string() != pubkey {
             return Err(Error::from(anyhow!("Mismatch on keys")));
