@@ -11,7 +11,7 @@ incremental = false
 [workspace]
 members = ["libs/*", "programs/*"]
 exclude = [
-  "libs/extension",
+  #  "libs/extension",
   "libs/cloudflare-page-adgrams",
   "libs/cloudflare-page-connect-wallet",
   "libs/cloudflare-page-xeno-claim",
@@ -50,7 +50,7 @@ dead_code = "forbid"
 
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.516"
+version = "0.0.517"
 
 [patch.crates-io]
 ## aes-gcm-siv 0.10.3 and curve25519-dalek 3.x pin zeroize to <1.4
@@ -69,6 +69,7 @@ aes-gcm-siv = { git = 'https://github.com/block-mesh/AEADs', branch = 'rustls-de
 curve25519-dalek = { git = "https://github.com/block-mesh/curve25519-dalek", branch = "rustls-dep-hell-1-18" }
 
 [workspace.dependencies]
+semver = { version = "1.0.26" }
 local-ip-address = { version = "0.6.3" }
 hostname = { version = "0.4.0" }
 serde_urlencoded = { version = "0.7.1" }

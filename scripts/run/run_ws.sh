@@ -9,6 +9,7 @@ export ROOT="$(git rev-parse --show-toplevel)"
 source "${ROOT}/scripts/setup.sh"
 set +x
 export AGG_SIZE=1
+export ENFORCE_VERSION="true"
 export CHANNEL_AGG_SIZE=1
 export ADMIN_PARAM="test"
 source "${ROOT}/scripts/setup.sh"
