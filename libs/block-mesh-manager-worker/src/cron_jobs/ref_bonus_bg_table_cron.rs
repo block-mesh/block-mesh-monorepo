@@ -34,7 +34,11 @@ pub async fn ref_bonus_bg_table_cron(pool: PgPool) -> Result<(), anyhow::Error> 
         .unwrap_or("false".to_string())
         .parse()
         .unwrap_or(false);
-    let duration = Duration::from_millis(1_000);
+    let ref_bonus_bg_table_cron_sleep = env::var("REF_BONUS_BG_TABLE_CRON")
+        .unwrap_or("1000".to_string())
+        .parse()
+        .unwrap_or(1_000);
+    let duration = Duration::from_millis(ref_bonus_bg_table_cron_sleep);
     loop {
         if enable {
             let _ = run_loop(&pool).await;
