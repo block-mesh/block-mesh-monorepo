@@ -112,8 +112,15 @@ async fn run() -> anyhow::Result<()> {
         joiner_tx_ref.clone(),
         queue.clone(),
     ));
+    let ref_bonus_bg_cron_job_number = env::var("REF_BONUS_BG_CRON_JOB_NUMBER")
+        .unwrap_or("1".to_string())
+        .parse()
+        .unwrap_or(1);
+    for i in 0..ref_bonus_bg_cron_job_number {
+        tracing::info!("spawning ref_bonus_bg_cron_job_number = {}", i + 1);
+        let _ = tokio::spawn(ref_bonus_bg_table_cron(db_pool.clone()));
+    }
     let queue_ref_bonus_task = tokio::spawn(queue_ref_bonus(tx.subscribe(), queue.clone()));
-    let ref_bonus_bg_table_cron_task = tokio::spawn(ref_bonus_bg_table_cron(db_pool.clone()));
     let bulk_task_bonus_task = tokio::spawn(bulk_task_bonus_cron(un_limited_db_pool.clone()));
     let bulk_uptime_bonus_task = tokio::spawn(bulk_uptime_bonus_cron(un_limited_db_pool.clone()));
     let joiner_task = tokio::spawn(joiner_loop(joiner_rx));
@@ -233,7 +240,6 @@ async fn run() -> anyhow::Result<()> {
     let server_task = run_server(listener, app);
 
     tokio::select! {
-        o = ref_bonus_bg_table_cron_task => panic!("ref_bonus_bg_table_cron_task exit {:?}", o),
         o = joiner_task_ref => panic!("joiner_task_ref exit {:?}", o),
         o = ref_bonus_cron_task => panic!("ref_bonus_cron_task exit {:?}", o),
         o = queue_ref_bonus_task => panic!("queue_ref_bonus_task exit {:?}", o),
