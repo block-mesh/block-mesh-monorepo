@@ -118,7 +118,7 @@ async fn run() -> anyhow::Result<()> {
         .unwrap_or(1);
     for i in 0..ref_bonus_bg_cron_job_number {
         tracing::info!("spawning ref_bonus_bg_cron_job_number = {}", i + 1);
-        let _ = tokio::spawn(ref_bonus_bg_table_cron(db_pool.clone()));
+        tokio::spawn(ref_bonus_bg_table_cron(db_pool.clone()));
     }
     let queue_ref_bonus_task = tokio::spawn(queue_ref_bonus(tx.subscribe(), queue.clone()));
     let bulk_task_bonus_task = tokio::spawn(bulk_task_bonus_cron(un_limited_db_pool.clone()));
