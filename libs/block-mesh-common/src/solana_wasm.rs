@@ -107,3 +107,22 @@ pub async fn get_block_time_from_feature_flags() -> i64 {
         None => timestamp,
     }
 }
+
+pub async fn get_minimal_version_from_feature_flags() -> String {
+    let minimal_version = "0.0.515".to_string();
+    let client = http_client(DeviceType::Extension);
+    let block_time = get_flag_value("minimal_version", &client, DeviceType::Extension).await;
+    match block_time.unwrap_or(None) {
+        Some(i) => {
+            if i.is_string() {
+                i.as_str()
+                    .unwrap_or(&minimal_version)
+                    .trim_matches('"')
+                    .to_string()
+            } else {
+                minimal_version
+            }
+        }
+        None => minimal_version,
+    }
+}
