@@ -1,7 +1,9 @@
 use crate::error::Error;
+use block_mesh_common::solana::get_block_time;
 use chrono::{DateTime, Utc};
 use dashmap::DashMap;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
+use database_utils::utils::option_uuid::OptionUuid;
 use serde::{Deserialize, Serialize};
 use serde_json::{Number, Value};
 use sqlx::Postgres;
@@ -14,6 +16,14 @@ pub struct Flag {
     pub id: Uuid,
     pub name: String,
     pub value: Value,
+    pub created_at: Option<DateTime<Utc>>,
+}
+
+#[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
+pub struct FlagTmp {
+    pub id: OptionUuid,
+    pub name: Option<String>,
+    pub value: Option<Value>,
     pub created_at: Option<DateTime<Utc>>,
 }
 
@@ -73,8 +83,44 @@ pub async fn load_flags_cron(
     let sleep = std::time::Duration::from_millis(60_000);
     loop {
         load_flags(flags_cache.clone(), &pool).await?;
+        let block_time = get_block_time().await;
+        get_or_create_flag(&pool, "block_time", Value::Number(Number::from(block_time))).await?;
         tokio::time::sleep(sleep).await;
     }
+}
+
+pub async fn get_or_create_flag(pool: &PgPool, name: &str, value: Value) -> anyhow::Result<Flag> {
+    let id = Uuid::new_v4();
+    let now = Utc::now();
+    let flag = sqlx::query_as!(
+        FlagTmp,
+        r#"
+        WITH inserted AS (
+            INSERT INTO flags
+            (id, name, value, created_at)
+            VALUES
+            ($1, $2, $3, $4)
+            ON CONFLICT (name)
+            DO UPDATE SET created_at = now()
+            RETURNING id, name, value, created_at
+        )
+        SELECT id, name, value, created_at FROM inserted
+        UNION
+        SELECT id, name, value, created_at FROM flags WHERE name = $2 AND NOT EXISTS (SELECT 1 FROM inserted)
+        "#,
+        id,
+        name,
+        value,
+        now
+    )
+    .fetch_one(pool)
+    .await?;
+    Ok(Flag {
+        id: flag.id.unwrap_or_default(),
+        name: flag.name.unwrap_or_default(),
+        value: flag.value.unwrap_or_default(),
+        created_at: flag.created_at,
+    })
 }
 
 pub async fn create_flag(pool: &PgPool, name: &str, value: Value) -> anyhow::Result<()> {
@@ -117,6 +163,18 @@ pub async fn pre_populate_db(pool: &PgPool) -> anyhow::Result<()> {
     )
     .await?;
 
+    create_flag(
+        pool,
+        "minimal_version",
+        Value::String("0.0.515".to_string()),
+    )
+    .await?;
+    create_flag(
+        pool,
+        "current_version",
+        Value::String(env!("CARGO_PKG_VERSION").to_string()),
+    )
+    .await?;
     create_flag(pool, "send_cleanup_to_rayon", Value::Bool(true)).await?;
     create_flag(pool, "send_to_worker", Value::Bool(true)).await?;
     create_flag(pool, "submit_bandwidth_run_background", Value::Bool(false)).await?;

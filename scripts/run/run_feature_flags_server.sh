@@ -61,6 +61,8 @@ done
 >&2 echo "Postgres is up and running on port ${DB_PORT}!"
 set -x
 export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:${DB_PORT}/${DB_NAME}"
+export WRITE_DATABASE_URL="${DATABASE_URL}"
+export UNLIMITED_DATABASE_URL="${DATABASE_URL}"
 ensure sqlx database create
 ensure sqlx migrate run --source migrations
 ensure cargo sqlx prepare

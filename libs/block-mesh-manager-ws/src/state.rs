@@ -1,6 +1,7 @@
 use block_mesh_common::constants::BLOCKMESH_WS_REDIS_COUNT_KEY;
 use block_mesh_common::env::environment::Environment;
 use block_mesh_common::interfaces::db_messages::DBMessage;
+use block_mesh_common::solana::get_block_time;
 use block_mesh_manager_database_domain::domain::twitter_task::{TwitterTask, TwitterTaskStatus};
 use block_mesh_manager_database_domain::domain::user::UserAndApiToken;
 use database_utils::utils::connection::channel_pool::channel_pool;
@@ -48,6 +49,7 @@ pub struct WsAppState {
     /// user_id to task mapping, if the node confirmed scraping
     pub workers: Arc<RwLock<HashMap<Uuid, Option<TwitterTask>>>>,
     pub joiner_tx: Sender<JoinHandle<()>>,
+    pub block_time: Arc<RwLock<i64>>,
 }
 
 impl WsAppState {
@@ -259,11 +261,18 @@ impl WsAppState {
         let mut user_ids = self.user_ids.write().await;
         user_ids.remove(user_id);
     }
+
+    #[tracing::instrument(name = "remove_user_id", skip_all)]
+    pub async fn update_slot(&self) {
+        let block_time = get_block_time().await;
+        *self.block_time.write().await = block_time;
+    }
 }
 
 impl WsAppState {
     #[tracing::instrument(name = "new", skip_all)]
     pub async fn new(tx: Sender<DBMessage>, joiner_tx: Sender<JoinHandle<()>>) -> Self {
+        let block_time = get_block_time().await;
         let pending_twitter_tasks = Arc::new(RwLock::new(HashMap::with_capacity(500)));
         let workers = Arc::new(RwLock::new(HashMap::with_capacity(500)));
         let redis_key = format!(
@@ -306,6 +315,7 @@ impl WsAppState {
             environment,
             redis,
             tx,
+            block_time: Arc::new(RwLock::new(block_time)),
         }
     }
 }

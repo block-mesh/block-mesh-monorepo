@@ -18,6 +18,7 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["env-filter", "time", "json"] }
 tracing-serde = { workspace = true }
 http-body-util = { workspace = true, optional = true }
+solana-client = { workspace = true, optional = true }
 bytes = { workspace = true, optional = true }
 thiserror = { workspace = true }
 bs58 = { workspace = true }
@@ -64,7 +65,7 @@ email-client = ["dep:lettre", "dep:aws-config", "aws-sdk-sesv2"]
 ssr = ["email-client", "reqwest", "env", "feature-flag", "ip-data"]
 hydrate = ["reqwest", "env", "feature-flag"]
 intract = ["reqwest"]
-solana = ["dep:solana-sdk"]
+solana = ["dep:solana-sdk", "dep:solana-client"]
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["full"] }

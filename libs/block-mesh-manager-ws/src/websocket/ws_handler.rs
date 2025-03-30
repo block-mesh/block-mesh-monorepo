@@ -71,7 +71,7 @@ pub async fn ws_handler(
 
     let minimal_version = env::var("MINIMAL_VERSION").unwrap_or("0.0.515".to_string());
 
-    let now = Utc::now().timestamp();
+    let now = state.block_time.read().await.clone();
     if enforce_keypair {
         let signature = query
             .get("signature")

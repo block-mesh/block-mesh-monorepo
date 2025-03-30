@@ -10,6 +10,7 @@ version.workspace = true
 dashmap = { workspace = true }
 database-utils = { path = "../database-utils" }
 tokio = { workspace = true, features = ["full"] }
+solana-client = { workspace = true }
 axum-extra = { workspace = true, features = ["typed-header"] }
 axum = { workspace = true, features = ["ws", "macros"] }
 http-body-util = { workspace = true }
@@ -24,7 +25,7 @@ tower-http = { workspace = true, features = ["fs", "trace", "request-id", "util"
 tracing-subscriber = { workspace = true, features = ["env-filter"] }
 tracing-appender = { workspace = true }
 tracing-bunyan-formatter = { workspace = true }
-block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env"] }
+block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env", "solana"] }
 logger-general = { path = "../logger-general", features = ["sentry"] }
 
 [dependencies.rand]
