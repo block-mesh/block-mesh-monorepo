@@ -3,7 +3,6 @@ use crate::feature_flag_client::get_flag_value;
 use crate::reqwest::http_client;
 use chrono::Utc;
 use serde::{Deserialize, Serialize};
-use serde_json::{Number, Value};
 use std::env;
 
 #[derive(Serialize, Deserialize)]
