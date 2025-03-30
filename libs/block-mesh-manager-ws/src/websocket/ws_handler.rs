@@ -18,7 +18,6 @@ use http::{HeaderMap, StatusCode};
 use semver::Version;
 use serde_json::Value;
 use solana_sdk::signature::{Signature, Signer};
-use sqlx::types::chrono::Utc;
 use sqlx::PgPool;
 use std::collections::HashMap;
 use std::env;

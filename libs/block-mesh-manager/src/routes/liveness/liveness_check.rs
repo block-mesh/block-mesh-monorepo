@@ -46,7 +46,7 @@ pub async fn handler(
         FlagValue::Number(Utc::now().timestamp() as f64),
     )
     .await;
-    let now: i64 = <FlagValue as TryInto<i64>>::try_into(now.to_owned()).unwrap_or_default();
+    let now: i64 = <FlagValue as TryInto<f64>>::try_into(now.to_owned()).unwrap_or_default() as i64;
     if now > timestamp + timestamp_buffer {
         return Err(Error::from(anyhow!("Timestamp too old")));
     }
