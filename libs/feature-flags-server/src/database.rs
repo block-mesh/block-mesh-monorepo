@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::{Number, Value};
 use sqlx::Postgres;
 use sqlx::{PgPool, Transaction};
+use std::env;
 use std::sync::Arc;
 use uuid::Uuid;
 
@@ -80,10 +81,15 @@ pub async fn load_flags_cron(
     flags_cache: Arc<DashMap<String, Value>>,
     pool: PgPool,
 ) -> anyhow::Result<()> {
-    let sleep = std::time::Duration::from_millis(60_000);
+    let sleep_env = env::var("LOAD_FLAGS_CRON_SLEEP")
+        .unwrap_or("60000".to_string())
+        .parse()
+        .unwrap_or(60_000);
+    let sleep = std::time::Duration::from_millis(sleep_env);
     loop {
         load_flags(flags_cache.clone(), &pool).await?;
         let block_time = get_block_time().await;
+        tracing::info!("block_time = {}", block_time);
         get_or_create_flag(&pool, "block_time", Value::Number(Number::from(block_time))).await?;
         tokio::time::sleep(sleep).await;
     }
@@ -101,7 +107,7 @@ pub async fn get_or_create_flag(pool: &PgPool, name: &str, value: Value) -> anyh
             VALUES
             ($1, $2, $3, $4)
             ON CONFLICT (name)
-            DO UPDATE SET created_at = now()
+            DO UPDATE SET created_at = now() , value = $3
             RETURNING id, name, value, created_at
         )
         SELECT id, name, value, created_at FROM inserted

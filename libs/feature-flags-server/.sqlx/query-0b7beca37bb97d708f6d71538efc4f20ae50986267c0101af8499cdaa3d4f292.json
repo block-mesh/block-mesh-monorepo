@@ -1,6 +1,6 @@
 {
   "db_name": "PostgreSQL",
-  "query": "\n        WITH inserted AS (\n            INSERT INTO flags\n            (id, name, value, created_at)\n            VALUES\n            ($1, $2, $3, $4)\n            ON CONFLICT (name)\n            DO UPDATE SET created_at = now()\n            RETURNING id, name, value, created_at\n        )\n        SELECT id, name, value, created_at FROM inserted\n        UNION\n        SELECT id, name, value, created_at FROM flags WHERE name = $2 AND NOT EXISTS (SELECT 1 FROM inserted)\n        ",
+  "query": "\n        WITH inserted AS (\n            INSERT INTO flags\n            (id, name, value, created_at)\n            VALUES\n            ($1, $2, $3, $4)\n            ON CONFLICT (name)\n            DO UPDATE SET created_at = now() , value = $3\n            RETURNING id, name, value, created_at\n        )\n        SELECT id, name, value, created_at FROM inserted\n        UNION\n        SELECT id, name, value, created_at FROM flags WHERE name = $2 AND NOT EXISTS (SELECT 1 FROM inserted)\n        ",
   "describe": {
     "columns": [
       {
@@ -39,5 +39,5 @@
       null
     ]
   },
-  "hash": "3091431b169f5b51c613c0ccb61076183538e66f4984469dea340ad6c0c9bd4a"
+  "hash": "0b7beca37bb97d708f6d71538efc4f20ae50986267c0101af8499cdaa3d4f292"
 }
