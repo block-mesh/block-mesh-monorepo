@@ -25,6 +25,9 @@ pub fn ExtensionNavigator() -> impl IntoView {
                 AuthStatus::WaitingEmailVerification => {
                     navigate("/ext/login", Default::default());
                 }
+                AuthStatus::UpdateVersion => {
+                    navigate("/ext/update_version", Default::default());
+                }
             }
         },
         500.0,

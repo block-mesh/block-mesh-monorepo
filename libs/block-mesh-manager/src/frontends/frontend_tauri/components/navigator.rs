@@ -24,6 +24,9 @@ pub fn TauriNavigator() -> impl IntoView {
             AuthStatus::WaitingEmailVerification => {
                 navigate("/tauri/login", Default::default());
             }
+            AuthStatus::UpdateVersion => {
+                navigate("/tauri/update_version", Default::default());
+            }
         }
     });
 

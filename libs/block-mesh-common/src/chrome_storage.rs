@@ -9,7 +9,8 @@ use uuid::Uuid;
 #[derive(Deserialize, Debug)]
 pub enum MessageKey {
     All,
-    FingerPrint,
+    MinimalVersion,
+    FP,
     BlockMeshUrl,
     BlockMeshWsUrl,
     BlockMeshDataSinkUrl,
@@ -44,7 +45,8 @@ impl Serialize for MessageKey {
 impl Display for MessageKey {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let str = match self {
-            Self::FingerPrint => "fingerprint".to_string(),
+            Self::MinimalVersion => "minimal_version".to_string(),
+            Self::FP => "fp".to_string(),
             Self::FeedOrigin => "feed_origin".to_string(),
             Self::FeedSelector => "feed_selector".to_string(),
             Self::TwitterCredsUrl => "twitter-url".to_string(),
@@ -77,7 +79,8 @@ impl TryFrom<&str> for MessageKey {
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         let value = value.trim_matches('"');
         match value {
-            "fingerprint" => Ok(Self::FingerPrint),
+            "minimal_version" => Ok(Self::MinimalVersion),
+            "fp" => Ok(Self::FP),
             "feed_origin" => Ok(Self::FeedOrigin),
             "feed_selector" => Ok(Self::FeedSelector),
             "twitter-url" => Ok(Self::TwitterCredsUrl),
@@ -185,6 +188,7 @@ pub enum AuthStatus {
     Registering,
     LoggedOut,
     WaitingEmailVerification,
+    UpdateVersion,
 }
 
 impl Display for AuthStatus {
@@ -194,6 +198,7 @@ impl Display for AuthStatus {
             AuthStatus::Registering => write!(f, "Registering"),
             AuthStatus::LoggedOut => write!(f, "LoggedOut"),
             AuthStatus::WaitingEmailVerification => write!(f, "WaitingEmailVerification"),
+            AuthStatus::UpdateVersion => write!(f, "UpdateVersion"),
         }
     }
 }

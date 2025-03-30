@@ -5,7 +5,7 @@ use serde_json::Value;
 use std::collections::HashMap;
 use std::sync::{Arc, RwLock};
 
-const FLAGS: [&str; 1] = ["polling_interval"];
+const FLAGS: [&str; 2] = ["polling_interval", "block_time"];
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 pub enum FlagValue {

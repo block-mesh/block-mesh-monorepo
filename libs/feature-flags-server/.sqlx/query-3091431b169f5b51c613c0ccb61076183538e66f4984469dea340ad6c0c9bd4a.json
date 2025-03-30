@@ -1,0 +1,43 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        WITH inserted AS (\n            INSERT INTO flags\n            (id, name, value, created_at)\n            VALUES\n            ($1, $2, $3, $4)\n            ON CONFLICT (name)\n            DO UPDATE SET created_at = now()\n            RETURNING id, name, value, created_at\n        )\n        SELECT id, name, value, created_at FROM inserted\n        UNION\n        SELECT id, name, value, created_at FROM flags WHERE name = $2 AND NOT EXISTS (SELECT 1 FROM inserted)\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Jsonb",
+        "Timestamptz"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "3091431b169f5b51c613c0ccb61076183538e66f4984469dea340ad6c0c9bd4a"
+}

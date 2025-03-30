@@ -18,7 +18,6 @@ use http::{HeaderMap, StatusCode};
 use semver::Version;
 use serde_json::Value;
 use solana_sdk::signature::{Signature, Signer};
-use sqlx::types::chrono::Utc;
 use sqlx::PgPool;
 use std::collections::HashMap;
 use std::env;
@@ -71,7 +70,7 @@ pub async fn ws_handler(
 
     let minimal_version = env::var("MINIMAL_VERSION").unwrap_or("0.0.515".to_string());
 
-    let now = Utc::now().timestamp();
+    let now = *state.block_time.read().await;
     if enforce_keypair {
         let signature = query
             .get("signature")

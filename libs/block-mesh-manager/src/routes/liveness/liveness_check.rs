@@ -4,6 +4,7 @@ use anyhow::anyhow;
 use askama_axum::IntoResponse;
 use axum::extract::{Query, State};
 use axum::Json;
+use block_mesh_common::feature_flag_client::{get_flag_value_from_map, FlagValue};
 use block_mesh_common::interfaces::db_messages::{
     AggregateAddToMessage, DBMessage, DBMessageTypes,
 };
@@ -39,7 +40,13 @@ pub async fn handler(
     let timestamp = query.timestamp;
     let uuid = query.uuid;
     let split: Vec<String> = msg.split("___").map(String::from).collect();
-    let now = Utc::now().timestamp();
+    let now = get_flag_value_from_map(
+        state.flags.clone(),
+        "block_time",
+        FlagValue::Number(Utc::now().timestamp() as f64),
+    )
+    .await;
+    let now: i64 = <FlagValue as TryInto<f64>>::try_into(now.to_owned()).unwrap_or_default() as i64;
     if now > timestamp + timestamp_buffer {
         return Err(Error::from(anyhow!("Timestamp too old")));
     }

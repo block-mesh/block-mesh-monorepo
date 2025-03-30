@@ -303,7 +303,7 @@ dependencies = [
 
 [[package]]
 name = "ai-interfaces"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1655,7 +1655,7 @@ dependencies = [
 
 [[package]]
 name = "axum-ws-extractor"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "async-trait",
  "axum",
@@ -1834,7 +1834,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-common"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "aws-config",
@@ -1858,6 +1858,8 @@ dependencies = [
  "secret",
  "serde",
  "serde_json",
+ "solana-client",
+ "solana-client-wasm",
  "solana-sdk",
  "thiserror 1.0.61",
  "tokio",
@@ -1871,7 +1873,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "askama",
@@ -1960,7 +1962,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-api"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "axum",
@@ -1994,7 +1996,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-database-domain"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "axum",
@@ -2020,7 +2022,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-worker"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "axum",
@@ -2056,7 +2058,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-ws"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "axum",
@@ -2083,6 +2085,7 @@ dependencies = [
  "sentry",
  "serde",
  "serde_json",
+ "solana-client",
  "solana-sdk",
  "sqlx",
  "testcontainers 0.23.1",
@@ -2096,7 +2099,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-solana-client"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -2127,7 +2130,7 @@ checksum = "8d696c370c750c948ada61c69a0ee2cbbb9c50b1019ddb86d9317157a99c2cae"
 
 [[package]]
 name = "blockmesh-cli"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -2153,7 +2156,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-program"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anchor-lang",
  "anchor-spl",
@@ -2762,7 +2765,7 @@ dependencies = [
 
 [[package]]
 name = "clickhouse-processing"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "aws-config",
@@ -2786,7 +2789,7 @@ dependencies = [
 
 [[package]]
 name = "client-node"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -2814,7 +2817,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-adgrams-collector"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2831,7 +2834,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-affiliate-plan-page"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2847,7 +2850,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-api-token"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2866,7 +2869,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-captcha-page"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2882,7 +2885,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-feature-flags"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2898,7 +2901,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-images-gallery-page"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "askama",
@@ -2916,7 +2919,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-landing-page"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2932,7 +2935,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-new-landing-page"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2948,7 +2951,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-privacy-page"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2964,7 +2967,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-team-page"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2980,7 +2983,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-vps-page"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "askama",
  "askama_axum",
@@ -2998,7 +3001,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-wallet-helper"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "askama",
  "askama_axum",
@@ -3014,7 +3017,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-cron"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -3031,7 +3034,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-echo-debug"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -3050,7 +3053,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-ip-data"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "block-mesh-common",
  "rustc-hash 1.1.0",
@@ -3065,7 +3068,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-logger-proxy"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -3082,7 +3085,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-logs-queue"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "chrono",
@@ -3102,7 +3105,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-solana-relay"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "rustc-hash 1.1.0",
  "serde",
@@ -3118,7 +3121,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-tauri-releases"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "reqwest 0.12.7",
@@ -3735,7 +3738,7 @@ dependencies = [
 
 [[package]]
 name = "dash-with-expiry"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "chrono",
  "dashmap 6.1.0",
@@ -3755,7 +3758,7 @@ dependencies = [
  "hashbrown 0.14.5",
  "lock_api",
  "once_cell",
- "parking_lot_core",
+ "parking_lot_core 0.9.10",
 ]
 
 [[package]]
@@ -3769,7 +3772,7 @@ dependencies = [
  "hashbrown 0.14.5",
  "lock_api",
  "once_cell",
- "parking_lot_core",
+ "parking_lot_core 0.9.10",
 ]
 
 [[package]]
@@ -3780,7 +3783,7 @@ checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 
 [[package]]
 name = "data-sink"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "axum",
@@ -3822,7 +3825,7 @@ dependencies = [
 
 [[package]]
 name = "database-utils"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "axum",
@@ -3843,7 +3846,7 @@ dependencies = [
 
 [[package]]
 name = "debug-area"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "axum",
@@ -4257,7 +4260,7 @@ checksum = "e079f19b08ca6239f47f8ba8509c11cf3ea30095831f7fed61441475edd8c449"
 
 [[package]]
 name = "emails"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "axum",
@@ -4431,7 +4434,7 @@ checksum = "9fc0510504f03c51ada170672ac806f1f105a88aa97a5281117e1ddc3368e51a"
 
 [[package]]
 name = "feature-flags-server"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "axum",
@@ -4445,6 +4448,7 @@ dependencies = [
  "rand 0.8.5",
  "serde",
  "serde_json",
+ "solana-client",
  "sqlx",
  "thiserror 1.0.61",
  "tokio",
@@ -4516,6 +4520,21 @@ dependencies = [
  "futures-core",
  "futures-sink",
  "spin 0.9.8",
+]
+
+[[package]]
+name = "fluvio-wasm-timer"
+version = "0.2.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b768c170dc045fa587a8f948c91f9bcfb87f774930477c6215addf54317f137f"
+dependencies = [
+ "futures",
+ "js-sys",
+ "parking_lot 0.11.2",
+ "pin-utils",
+ "wasm-bindgen",
+ "wasm-bindgen-futures",
+ "web-sys",
 ]
 
 [[package]]
@@ -4624,7 +4643,7 @@ checksum = "1d930c203dd0b6ff06e0201a4a2fe9149b43c684fd4420555b26d21b1a02956f"
 dependencies = [
  "futures-core",
  "lock_api",
- "parking_lot",
+ "parking_lot 0.12.3",
 ]
 
 [[package]]
@@ -5013,7 +5032,7 @@ dependencies = [
  "futures-timer",
  "no-std-compat",
  "nonzero_ext",
- "parking_lot",
+ "parking_lot 0.12.3",
  "portable-atomic",
  "quanta",
  "rand 0.8.5",
@@ -5809,7 +5828,7 @@ dependencies = [
 
 [[package]]
 name = "ids"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "axum",
@@ -5962,6 +5981,9 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e0242819d153cba4b4b05a5a8f2a7e9bbf97b6055b2a002b395c96b5ff3c0222"
 dependencies = [
  "cfg-if",
+ "js-sys",
+ "wasm-bindgen",
+ "web-sys",
 ]
 
 [[package]]
@@ -6209,7 +6231,7 @@ dependencies = [
  "leptos_macro",
  "leptos_meta",
  "leptos_router",
- "parking_lot",
+ "parking_lot 0.12.3",
  "regex",
  "serde_json",
  "server_fn",
@@ -6233,7 +6255,7 @@ dependencies = [
  "leptos_meta",
  "leptos_router",
  "once_cell",
- "parking_lot",
+ "parking_lot 0.12.3",
  "serde_json",
  "server_fn",
  "tokio",
@@ -6293,7 +6315,7 @@ dependencies = [
  "anyhow",
  "camino",
  "indexmap 2.2.6",
- "parking_lot",
+ "parking_lot 0.12.3",
  "proc-macro2",
  "quote",
  "rstml",
@@ -6630,7 +6652,7 @@ checksum = "a7a70ba024b9dc04c27ea2f0c0548feb474ec5c54bba33a7f72f873a39d07b24"
 
 [[package]]
 name = "logger-general"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -6650,7 +6672,7 @@ dependencies = [
 
 [[package]]
 name = "logger-leptos"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -6671,7 +6693,7 @@ dependencies = [
 
 [[package]]
 name = "logs-drain"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "axum",
@@ -7241,6 +7263,15 @@ dependencies = [
 
 [[package]]
 name = "num_enum"
+version = "0.5.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1f646caf906c20226733ed5b1374287eb97e3c2a5c227ce668c1f2ce20ae57c9"
+dependencies = [
+ "num_enum_derive 0.5.11",
+]
+
+[[package]]
+name = "num_enum"
 version = "0.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7a015b430d3c108a207fd776d2e2196aaf8b1cf8cf93253e3a097ff3085076a1"
@@ -7255,6 +7286,18 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "02339744ee7253741199f897151b38e72257d13802d4ee837285cc2990a90845"
 dependencies = [
  "num_enum_derive 0.7.2",
+]
+
+[[package]]
+name = "num_enum_derive"
+version = "0.5.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "dcbff9bc912032c62bf65ef1d5aea88983b420f4f839db1e9b0c281a25c9c799"
+dependencies = [
+ "proc-macro-crate 1.3.1",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
 ]
 
 [[package]]
@@ -7511,12 +7554,37 @@ checksum = "f38d5652c16fde515bb1ecef450ab0f6a219d619a7274976324d5e377f7dceba"
 
 [[package]]
 name = "parking_lot"
+version = "0.11.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7d17b78036a60663b797adeaee46f5c9dfebb86948d1255007a1d6be0271ff99"
+dependencies = [
+ "instant",
+ "lock_api",
+ "parking_lot_core 0.8.6",
+]
+
+[[package]]
+name = "parking_lot"
 version = "0.12.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f1bf18183cf54e8d6059647fc3063646a1801cf30896933ec2311622cc4b9a27"
 dependencies = [
  "lock_api",
- "parking_lot_core",
+ "parking_lot_core 0.9.10",
+]
+
+[[package]]
+name = "parking_lot_core"
+version = "0.8.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "60a2cfe6f0ad2bfc16aefa463b497d5c7a5ecd44a23efa72aa342d90177356dc"
+dependencies = [
+ "cfg-if",
+ "instant",
+ "libc",
+ "redox_syscall 0.2.16",
+ "smallvec",
+ "winapi",
 ]
 
 [[package]]
@@ -7667,7 +7735,7 @@ dependencies = [
 
 [[package]]
 name = "pg-notify-test"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "database-utils",
@@ -8041,7 +8109,7 @@ dependencies = [
 
 [[package]]
 name = "proxy-endpoint"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -8070,7 +8138,7 @@ dependencies = [
 
 [[package]]
 name = "proxy-master"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anchor-lang",
  "anyhow",
@@ -8448,6 +8516,15 @@ dependencies = [
  "tokio-util",
  "url",
  "uuid",
+]
+
+[[package]]
+name = "redox_syscall"
+version = "0.2.16"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fb5a58c1855b4b6819d59012155603f0b22ad30cad752600aadfcb695265519a"
+dependencies = [
+ "bitflags 1.3.2",
 ]
 
 [[package]]
@@ -9106,7 +9183,7 @@ dependencies = [
 
 [[package]]
 name = "secret"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "serde",
  "sqlx",
@@ -9873,6 +9950,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "solana-client-wasm"
+version = "1.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0b838eacf1f99871489268291d9db9c3ba14a77dd01b165113459ada0509cf4e"
+dependencies = [
+ "async-trait",
+ "base64 0.13.1",
+ "bincode",
+ "bs58 0.4.0",
+ "clap 3.2.25",
+ "futures",
+ "reqwest 0.11.27",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "solana-extra-wasm",
+ "solana-sdk",
+ "thiserror 1.0.61",
+]
+
+[[package]]
 name = "solana-config-program"
 version = "1.18.20"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9906,6 +10004,41 @@ dependencies = [
  "solana-sdk",
  "thiserror 1.0.61",
  "tokio",
+]
+
+[[package]]
+name = "solana-extra-wasm"
+version = "1.18.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "19d9256b963767c7d7e85b0f3dd5439cd774406a5603ee21aff01c2e041fe954"
+dependencies = [
+ "Inflector",
+ "arrayref",
+ "assert_matches",
+ "base64 0.13.1",
+ "bincode",
+ "borsh 0.10.3",
+ "bs58 0.4.0",
+ "bytemuck",
+ "chrono",
+ "clap 3.2.25",
+ "console",
+ "fluvio-wasm-timer",
+ "humantime",
+ "lazy_static",
+ "log",
+ "num-derive 0.3.3",
+ "num-traits",
+ "num_enum 0.5.11",
+ "rustc_version",
+ "semver",
+ "serde",
+ "serde_derive",
+ "serde_json",
+ "solana-frozen-abi",
+ "solana-frozen-abi-macro",
+ "solana-sdk",
+ "thiserror 1.0.61",
 ]
 
 [[package]]
@@ -10068,7 +10201,7 @@ dependencies = [
  "num-bigint 0.4.6",
  "num-derive 0.4.2",
  "num-traits",
- "parking_lot",
+ "parking_lot 0.12.3",
  "rand 0.8.5",
  "rustc_version",
  "rustversion",
@@ -10188,7 +10321,7 @@ dependencies = [
  "log",
  "num-derive 0.4.2",
  "num-traits",
- "parking_lot",
+ "parking_lot 0.12.3",
  "qstring",
  "semver",
  "solana-sdk",
@@ -10381,7 +10514,7 @@ dependencies = [
 
 [[package]]
 name = "solana-tiny-client"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "bincode",
@@ -10548,7 +10681,7 @@ dependencies = [
 
 [[package]]
 name = "speed-test"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "chrono",
@@ -11130,7 +11263,7 @@ checksum = "f91138e76242f575eb1d3b38b4f1362f10d3a43f47d182a5b359af488a02293b"
 dependencies = [
  "new_debug_unreachable",
  "once_cell",
- "parking_lot",
+ "parking_lot 0.12.3",
  "phf_shared 0.10.0",
  "precomputed-hash",
  "serde",
@@ -11493,7 +11626,7 @@ dependencies = [
 
 [[package]]
 name = "test-proxy-endpoint"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "block-mesh-common",
  "bytes",
@@ -11512,7 +11645,7 @@ dependencies = [
 
 [[package]]
 name = "test-proxy-master"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -11614,7 +11747,7 @@ checksum = "23d434d3f8967a09480fb04132ebe0a3e088c173e6d0ee7897abbdf4eab0f8b9"
 
 [[package]]
 name = "tg-privacy-bot"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "ai-interfaces",
  "anyhow",
@@ -11820,7 +11953,7 @@ dependencies = [
  "bytes",
  "libc",
  "mio",
- "parking_lot",
+ "parking_lot 0.12.3",
  "pin-project-lite",
  "signal-hook-registry",
  "socket2 0.5.7",
@@ -12113,7 +12246,7 @@ dependencies = [
  "cookie 0.18.1",
  "futures-util",
  "http 1.1.0",
- "parking_lot",
+ "parking_lot 0.12.3",
  "pin-project-lite",
  "tower-layer",
  "tower-service",
@@ -12187,7 +12320,7 @@ dependencies = [
  "base64 0.21.7",
  "futures",
  "http 1.1.0",
- "parking_lot",
+ "parking_lot 0.12.3",
  "rand 0.8.5",
  "serde",
  "serde_json",
@@ -12495,7 +12628,7 @@ dependencies = [
 
 [[package]]
 name = "twitter-scraping-helper"
-version = "0.0.518"
+version = "0.0.519"
 dependencies = [
  "anyhow",
  "block-mesh-common",
