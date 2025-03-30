@@ -26,3 +26,6 @@ pub mod intract;
 pub mod rand;
 #[cfg(feature = "solana")]
 pub mod solana;
+
+#[cfg(feature = "solana-wasm")]
+pub mod solana_wasm;

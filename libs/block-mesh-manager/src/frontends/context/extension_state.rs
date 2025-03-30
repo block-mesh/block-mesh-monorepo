@@ -47,13 +47,15 @@ pub struct ExtensionContext {
     pub feed_selector: RwSignal<String>,
     pub wootz: RwSignal<String>,
     pub interactive: RwSignal<i64>,
-    pub fingerprint: RwSignal<String>,
+    pub fp: RwSignal<String>,
+    pub minimal_version: RwSignal<String>,
 }
 
 impl Default for ExtensionContext {
     fn default() -> Self {
         Self {
-            fingerprint: RwSignal::new(String::default()),
+            fp: RwSignal::new(String::default()),
+            minimal_version: RwSignal::new("0.0.515".to_string()),
             email: RwSignal::new(String::default()),
             api_token: RwSignal::new(Uuid::default()),
             device_id: RwSignal::new(Uuid::default()),
@@ -97,6 +99,7 @@ impl Debug for ExtensionContext {
                 "blockmesh_data_sink_url",
                 &self.blockmesh_data_sink_url.get_untracked(),
             )
+            .field("minimal_version", &self.minimal_version.get_untracked())
             .field("status", &self.status.get_untracked())
             .field("wallet_address", &self.wallet_address.get_untracked())
             .finish()
@@ -196,8 +199,11 @@ impl ExtensionContext {
                                     "".to_string()
                                 };
                                 match storage_value {
-                                    MessageKey::FingerPrint => {
-                                        self.fingerprint.update(|v| *v = value);
+                                    MessageKey::MinimalVersion => {
+                                        self.minimal_version.update(|v| *v = value);
+                                    }
+                                    MessageKey::FP => {
+                                        self.fp.update(|v| *v = value);
                                     }
                                     MessageKey::Interactive => {
                                         self.interactive.update(|v| {

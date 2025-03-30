@@ -11,7 +11,7 @@ incremental = false
 [workspace]
 members = ["libs/*", "programs/*"]
 exclude = [
-  "libs/extension",
+  #  "libs/extension",
   "libs/cloudflare-page-adgrams",
   "libs/cloudflare-page-connect-wallet",
   "libs/cloudflare-page-xeno-claim",
@@ -69,6 +69,7 @@ aes-gcm-siv = { git = 'https://github.com/block-mesh/AEADs', branch = 'rustls-de
 curve25519-dalek = { git = "https://github.com/block-mesh/curve25519-dalek", branch = "rustls-dep-hell-1-18" }
 
 [workspace.dependencies]
+solana-client-wasm = { version = "1.18.0" }
 semver = { version = "1.0.26" }
 local-ip-address = { version = "0.6.3" }
 hostname = { version = "0.4.0" }
