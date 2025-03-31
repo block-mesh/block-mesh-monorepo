@@ -144,7 +144,7 @@ impl IdAppState {
         let environment = env::var("APP_ENVIRONMENT").unwrap();
         let ext_keypair = get_keypair().unwrap();
         let environment = Environment::from_str(&environment).unwrap();
-        let db_pool = write_pool(Some("DATABASE_URL".to_string())).await;
+        let db_pool = write_pool(None).await;
         let block_time = get_block_time().await;
         Self {
             ext_keypair: Arc::new(ext_keypair),
