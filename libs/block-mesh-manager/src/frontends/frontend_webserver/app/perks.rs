@@ -141,7 +141,7 @@ pub fn Perks() -> impl IntoView {
                         if button_enabled.get() {
                             "Connect Wallet".to_string()
                         } else {
-                            format!("{}", wallet_address.get())
+                            wallet_address.get().to_string()
                         }
                     }}
 
