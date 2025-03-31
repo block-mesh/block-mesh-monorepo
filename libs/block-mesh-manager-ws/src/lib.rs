@@ -5,4 +5,5 @@ pub mod joiner_loop;
 pub mod message_aggregator;
 pub mod redis_loop;
 pub mod state;
+pub mod update_block_time;
 pub mod websocket;

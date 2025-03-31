@@ -7,10 +7,13 @@ use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::Router;
 use block_mesh_common::interfaces::server_api::IdRequest;
+use block_mesh_common::solana::get_keypair;
 use database_utils::utils::health_check::health_check;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use reqwest::StatusCode;
+use solana_sdk::signature::{Signature, Signer};
 use std::env;
+use std::str::FromStr;
 
 #[tracing::instrument(name = "db_health", skip_all)]
 pub async fn db_health(State(state): State<IdAppState>) -> Result<impl IntoResponse, Error> {
@@ -40,6 +43,55 @@ pub async fn id(
     } else {
         "127.0.0.1"
     };
+    let timestamp_buffer = env::var("TIMESTAMP_BUFFER")
+        .unwrap_or("300".to_string())
+        .parse()
+        .unwrap_or(300);
+    let enforce_keypair = env::var("ENFORCE_KEYPAIR")
+        .unwrap_or("false".to_string())
+        .parse()
+        .unwrap_or(false);
+    if enforce_keypair {
+        let now = *state.block_time.read().await;
+        let signature = query
+            .signature
+            .ok_or(anyhow!("Missing signature".to_string()))?
+            .clone();
+        let pubkey = query
+            .pubkey
+            .ok_or(anyhow!("Missing pubkey".to_string()))?
+            .clone();
+        let uuid = query.uuid.ok_or(anyhow!("Missing uuid".to_string()))?;
+        let msg = query.msg.ok_or(anyhow!("Missing msg".to_string()))?.clone();
+        let timestamp = query
+            .timestamp
+            .ok_or(anyhow!("Missing timestamp".to_string()))?;
+        if timestamp == 0 {
+            return Err(Error::from(anyhow!("Timestamp is empty")));
+        }
+        if now > timestamp + timestamp_buffer {
+            return Err(Error::from(anyhow!("Timestamp too old")));
+        }
+        let split: Vec<String> = msg.split("___").map(String::from).collect();
+        let timestamp_split = split.first().unwrap_or(&"".to_string()).clone();
+        if timestamp_split != timestamp.to_string() {
+            return Err(Error::from(anyhow!("Timestamp mismatch")));
+        }
+        let uuid_split = split.get(1).unwrap_or(&"".to_string()).clone();
+        if uuid_split != uuid.to_string() {
+            return Err(Error::from(anyhow!("uuid mismatch")));
+        }
+        let keypair = get_keypair()?;
+        if keypair.pubkey().to_string() != pubkey {
+            return Err(Error::from(anyhow!("Mismatch on keys")));
+        }
+        let sig =
+            Signature::from_str(&signature).map_err(|e| Error::from(anyhow!(e.to_string())))?;
+        if !sig.verify(&keypair.pubkey().to_bytes(), msg.as_bytes()) {
+            return Err(Error::from(anyhow!("Failed to verify signature")));
+        }
+    }
+
     let mut transaction = create_txn(&state.db_pool).await?;
     let _ = get_or_create_id(
         &mut transaction,

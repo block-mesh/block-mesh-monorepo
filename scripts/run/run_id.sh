@@ -5,6 +5,7 @@ export SENTRY_LAYER="true"
 export SENTRY_SAMPLE_RATE="1.0"
 export _PWD="$(pwd)"
 export ROOT="$(git rev-parse --show-toplevel)"
+export ENFORCE_KEYPAIR="true"
 source "${ROOT}/scripts/setup.sh"
 set +x
 source "${ROOT}/scripts/setup.sh"

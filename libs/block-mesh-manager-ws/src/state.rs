@@ -262,8 +262,8 @@ impl WsAppState {
         user_ids.remove(user_id);
     }
 
-    #[tracing::instrument(name = "remove_user_id", skip_all)]
-    pub async fn update_slot(&self) {
+    #[tracing::instrument(name = "update_block_time", skip_all)]
+    pub async fn update_block_time(&self) {
         let block_time = get_block_time().await;
         *self.block_time.write().await = block_time;
     }

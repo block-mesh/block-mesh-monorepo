@@ -5,7 +5,7 @@ use crate::routes::get_router;
 use axum::Router;
 use block_mesh_common::env::environment::Environment;
 use block_mesh_common::env::load_dotenv::load_dotenv;
-use block_mesh_common::solana::get_keypair;
+use block_mesh_common::solana::{get_block_time, get_keypair};
 use chrono::{DateTime, Utc};
 use database_utils::utils::connection::write_pool::write_pool;
 use database_utils::utils::migrate::migrate;
@@ -19,6 +19,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 use std::{env, mem, process};
 use tokio::net::TcpListener;
+use tokio::sync::RwLock;
 use tower_http::cors::CorsLayer;
 use uuid::Uuid;
 
@@ -65,6 +66,7 @@ pub struct IdAppState {
     pub db_pool: PgPool,
     pub environment: Environment,
     pub ext_keypair: Arc<Keypair>,
+    pub block_time: Arc<RwLock<i64>>,
 }
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
@@ -143,10 +145,12 @@ impl IdAppState {
         let ext_keypair = get_keypair().unwrap();
         let environment = Environment::from_str(&environment).unwrap();
         let db_pool = write_pool(Some("DATABASE_URL".to_string())).await;
+        let block_time = get_block_time().await;
         Self {
             ext_keypair: Arc::new(ext_keypair),
             environment,
             db_pool,
+            block_time: Arc::new(RwLock::new(block_time)),
         }
     }
 }
