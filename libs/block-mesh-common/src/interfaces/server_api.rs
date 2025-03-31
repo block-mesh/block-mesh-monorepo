@@ -837,4 +837,9 @@ pub struct IdRequest {
     pub email: String,
     pub api_token: String,
     pub fp: String,
+    pub signature: Option<String>,
+    pub msg: Option<String>,
+    pub timestamp: Option<i64>,
+    pub pubkey: Option<String>,
+    pub uuid: Option<Uuid>,
 }

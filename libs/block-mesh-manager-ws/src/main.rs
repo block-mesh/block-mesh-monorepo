@@ -10,6 +10,7 @@ use block_mesh_manager_ws::joiner_loop::joiner_loop;
 use block_mesh_manager_ws::message_aggregator::collect_messages;
 use block_mesh_manager_ws::redis_loop::redis_loop;
 use block_mesh_manager_ws::state::WsAppState;
+use block_mesh_manager_ws::update_block_time::update_block_time_loop;
 use logger_general::tracing::{get_sentry_layer, setup_tracing_stdout_only_with_sentry};
 use std::sync::Arc;
 #[allow(unused_imports)]
@@ -73,7 +74,7 @@ async fn run() -> anyhow::Result<()> {
     let get_pending_twitter_tasks_loop_task =
         tokio::spawn(get_pending_twitter_tasks_loop(state.clone()));
     let server_task = app(listener, state.clone());
-
+    let update_block_time_loop_task = tokio::spawn(update_block_time_loop(state.clone()));
     let joiner_task = tokio::spawn(joiner_loop(joiner_rx));
     let redis_task = tokio::spawn(redis_loop(state.clone()));
     let collect_messages_task = tokio::spawn(collect_messages(
@@ -87,6 +88,7 @@ async fn run() -> anyhow::Result<()> {
         5,
     ));
     tokio::select! {
+        o = update_block_time_loop_task => panic!("update_block_time_loop_task {:?}", o),
         o = get_pending_twitter_tasks_loop_task => panic!("get_pending_twitter_tasks_loop_task {:?}", o),
         o = redis_task => panic!("redis_task {:?}", o),
         o = joiner_task => panic!("joiner_task {:?}", o),
