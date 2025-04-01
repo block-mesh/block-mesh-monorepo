@@ -1,7 +1,7 @@
 use crate::frontends::components::bandwidth_card::BandwidthCard;
 use crate::frontends::components::bar_chart::BarChart;
 use crate::frontends::components::download_extension::DownloadExtension;
-use crate::frontends::components::heading::Heading;
+// use crate::frontends::components::heading::Heading;
 use crate::frontends::components::icons::chrome_icon::ChromeIcon;
 use crate::frontends::components::modal::Modal;
 use crate::frontends::components::stat::Stat;
@@ -131,7 +131,7 @@ pub fn NewDashboard() -> impl IntoView {
         </Modal>
 
         <div class="lg:flex items-start justify-start gap-4">
-            <Heading>{move || format!("Dashboard v{}", env!("CARGO_PKG_VERSION"))}</Heading>
+            // <Heading>{move || format!("Dashboard v{}", env!("CARGO_PKG_VERSION"))}</Heading>
             <button
                 class=BUTTON_CLASS
                 on:click=move |_| {
