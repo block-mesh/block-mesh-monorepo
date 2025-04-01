@@ -8,12 +8,17 @@ use axum::routing::get;
 use axum::Router;
 use block_mesh_common::interfaces::server_api::IdRequest;
 use block_mesh_common::solana::get_keypair;
+use dash_with_expiry::hash_set_with_expiry::HashSetWithExpiry;
 use database_utils::utils::health_check::health_check;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use reqwest::StatusCode;
+use serde::{Deserialize, Serialize};
 use solana_sdk::signature::{Signature, Signer};
 use std::env;
+use std::hash::{DefaultHasher, Hash, Hasher};
 use std::str::FromStr;
+use std::sync::Arc;
+use tokio::sync::{OnceCell, RwLock};
 
 #[tracing::instrument(name = "db_health", skip_all)]
 pub async fn db_health(State(state): State<IdAppState>) -> Result<impl IntoResponse, Error> {
@@ -28,11 +33,25 @@ pub async fn server_health() -> Result<impl IntoResponse, Error> {
     Ok((StatusCode::OK, "OK"))
 }
 
+#[derive(Serialize, Deserialize, Debug, Clone, Hash)]
+struct DataToCache {
+    pub email: String,
+    pub api_token: String,
+    pub fp: String,
+    pub ip: String,
+}
+
+type CacheType = Arc<RwLock<HashSetWithExpiry<u64>>>;
+static CACHE: OnceCell<CacheType> = OnceCell::const_new();
+
 pub async fn id(
     headers: HeaderMap,
     State(state): State<IdAppState>,
     Query(query): Query<IdRequest>,
 ) -> Result<impl IntoResponse, Error> {
+    let cache = CACHE
+        .get_or_init(|| async { Arc::new(RwLock::new(HashSetWithExpiry::new())) })
+        .await;
     let app_env = env::var("APP_ENVIRONMENT").map_err(|_| Error::Anyhow(anyhow!("Missing env")))?;
     let ip = if app_env != "local" {
         headers
@@ -43,6 +62,24 @@ pub async fn id(
     } else {
         "127.0.0.1"
     };
+    let data = DataToCache {
+        email: query.email.clone(),
+        api_token: query.api_token.clone(),
+        fp: query.fp.clone(),
+        ip: ip.to_string(),
+    };
+
+    let mut s = DefaultHasher::new();
+    data.hash(&mut s);
+    let hash = s.finish();
+
+    if cache.read().await.get(&hash).await.is_some() {
+        return Ok((StatusCode::OK, "OK").into_response());
+    }
+
+    let c = cache.write().await;
+    c.insert(hash, None).await;
+
     let timestamp_buffer = env::var("TIMESTAMP_BUFFER")
         .unwrap_or("300".to_string())
         .parse()
