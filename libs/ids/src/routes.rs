@@ -68,18 +68,12 @@ pub async fn id(
         fp: query.fp.clone(),
         ip: ip.to_string(),
     };
-
     let mut s = DefaultHasher::new();
     data.hash(&mut s);
     let hash = s.finish();
-
     if cache.read().await.get(&hash).await.is_some() {
         return Ok((StatusCode::OK, "OK").into_response());
     }
-
-    let c = cache.write().await;
-    c.insert(hash, None).await;
-
     let timestamp_buffer = env::var("TIMESTAMP_BUFFER")
         .unwrap_or("300".to_string())
         .parse()
@@ -128,7 +122,6 @@ pub async fn id(
             return Err(Error::from(anyhow!("Failed to verify signature")));
         }
     }
-
     let mut transaction = create_txn(&state.db_pool).await?;
     let _ = get_or_create_id(
         &mut transaction,
@@ -139,6 +132,8 @@ pub async fn id(
     )
     .await?;
     commit_txn(transaction).await?;
+    let c = cache.write().await;
+    c.insert(hash, None).await;
     Ok((StatusCode::OK, "OK").into_response())
 }
 #[tracing::instrument(name = "version", skip_all)]

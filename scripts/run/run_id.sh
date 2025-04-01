@@ -13,6 +13,7 @@ if [ -f "${ROOT}/.env" ] ; then
   source "${ROOT}/.env"
 fi
 export DATABASE_URL="postgres://postgres:password@localhost:6999/ids"
+export WRITE_DATABASE_URL="${DATABASE_URL}"
 export AGG_SIZE=1
 export ENFORCE_SIGNATURE=true
 cargo watch --watch libs --shell "cargo run -p ids"
