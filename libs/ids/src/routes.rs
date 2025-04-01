@@ -8,7 +8,6 @@ use axum::routing::get;
 use axum::Router;
 use block_mesh_common::interfaces::server_api::IdRequest;
 use block_mesh_common::solana::get_keypair;
-use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use dash_with_expiry::hash_set_with_expiry::HashSetWithExpiry;
 use database_utils::utils::health_check::health_check;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
@@ -20,7 +19,6 @@ use std::hash::{DefaultHasher, Hash, Hasher};
 use std::str::FromStr;
 use std::sync::Arc;
 use tokio::sync::{OnceCell, RwLock};
-use uuid::Uuid;
 
 #[tracing::instrument(name = "db_health", skip_all)]
 pub async fn db_health(State(state): State<IdAppState>) -> Result<impl IntoResponse, Error> {
