@@ -75,7 +75,7 @@ pub async fn id(
     data.hash(&mut s);
     let hash = s.finish();
 
-    if let Some(_) = cache.read().await.get(&hash).await {
+    if cache.read().await.get(&hash).await.is_some() {
         return Ok((StatusCode::OK, "OK").into_response());
     }
 
