@@ -1,3 +1,5 @@
+#![allow(unexpected_cfgs)]
+
 use crate::ip::{get_ip_api_is_response, new_ipdata};
 use block_mesh_common::interfaces::server_api::VpsResp;
 use rustc_hash::FxHashMap;
