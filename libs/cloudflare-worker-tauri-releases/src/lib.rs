@@ -1,3 +1,5 @@
+#![allow(unexpected_cfgs)]
+
 mod types;
 mod utils;
 

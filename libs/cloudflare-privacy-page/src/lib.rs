@@ -1,3 +1,5 @@
+#![allow(unexpected_cfgs)]
+
 use askama::Template;
 use block_mesh_common::constants::{
     BLOCK_MESH_APP_SERVER, BLOCK_MESH_CHROME_EXTENSION_LINK, BLOCK_MESH_GITBOOK, BLOCK_MESH_GITHUB,

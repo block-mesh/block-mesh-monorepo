@@ -1,3 +1,5 @@
+#![allow(unexpected_cfgs)]
+
 use serde_json::Value;
 use std::collections::HashMap;
 use tracing_subscriber::fmt::format::Pretty;

@@ -1,3 +1,5 @@
+#![allow(unexpected_cfgs)]
+
 use block_mesh_common::interfaces::server_api::CaptchaResp;
 use tracing_subscriber::fmt::format::Pretty;
 use tracing_subscriber::fmt::time::UtcTime;

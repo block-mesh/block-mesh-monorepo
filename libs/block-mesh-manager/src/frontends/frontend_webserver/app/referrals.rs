@@ -48,10 +48,7 @@ pub fn Referrals() -> impl IntoView {
 
     fn get_invite_code() -> Option<String> {
         let doc = document();
-        let el = match doc.get_element_by_id("copy_invite_code") {
-            None => return None,
-            Some(el) => el,
-        };
+        let el = doc.get_element_by_id("copy_invite_code")?;
         el.get_attribute("invite_code")
     }
 

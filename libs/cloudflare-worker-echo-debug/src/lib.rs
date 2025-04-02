@@ -1,3 +1,4 @@
+#![allow(unexpected_cfgs)]
 use rsyslog::parser::msg::Raw;
 use rsyslog::parser::StructuredData;
 use rsyslog::{

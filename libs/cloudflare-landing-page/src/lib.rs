@@ -1,3 +1,5 @@
+#![allow(unexpected_cfgs)]
+
 use askama::Template;
 use serde_json::Value;
 use tracing_subscriber::fmt::format::Pretty;

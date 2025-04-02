@@ -1,3 +1,5 @@
+#![allow(unexpected_cfgs)]
+
 use askama::Template;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};

@@ -1,3 +1,5 @@
+#![allow(unexpected_cfgs)]
+
 use askama::Template;
 use tracing_subscriber::fmt::format::Pretty;
 use tracing_subscriber::fmt::time::UtcTime;

@@ -1,3 +1,5 @@
+#![allow(unexpected_cfgs)]
+
 use cfg_if::cfg_if;
 
 pub mod frontends;
