@@ -1,3 +1,5 @@
+#![allow(unexpected_cfgs)]
+
 use askama::Template;
 #[allow(unused_imports)]
 use bcrypt::{hash, verify, DEFAULT_COST};
