@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+#![allow(unexpected_cfgs)]
 #![allow(ambiguous_glob_reexports)]
 use anchor_lang::prelude::*;
 
