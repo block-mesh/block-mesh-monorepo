@@ -8,6 +8,14 @@ export ROOT="$(git rev-parse --show-toplevel)"
 export BULK_UPTIME_BONUS=100
 source "${ROOT}/scripts/setup.sh"
 set +x
+export ADD_TO_AGGREGATOR_SAVE_TO_DB="true"
+export AGG_AGG_AGGREGATOR_SAVE_TO_DB="true"
+export ANALYTICS_AGG_AGGREGATOR_SAVE_TO_DB="true"
+export CREATE_STATS_AGGREGATOR_SAVE_TO_DB="true"
+export DAILY_STATS_AGGREGATOR_SAVE_TO_DB="true"
+export REF_BONUS_CRON_ENABLE="true"
+export SET_TO_AGGREGATOR_SAVE_TO_DB="true"
+export USERS_IP_AGGREGATOR_SAVE_TO_DB="true"
 export AGG_SIZE=1
 export ADD_TO_AGG_SIZE=1
 export USERS_IP_AGG_SIZE=1
