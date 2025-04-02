@@ -1,3 +1,5 @@
+#![allow(unexpected_cfgs)]
+
 use block_mesh_common::interfaces::ip_data::{
     get_ip_info, IPData, IpDataPostRequest, Locator, LocatorDe, Service,
 };
