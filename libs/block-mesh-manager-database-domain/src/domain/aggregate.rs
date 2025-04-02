@@ -60,7 +60,7 @@ impl Display for AggregateName {
             Self::CronReports => write!(f, "CronReports"),
             Self::WalletChange => write!(f, "WalletChange"),
             Self::Wootz => write!(f, "Wootz"),
-            Self::InteractiveExt => write!(f, " InteractiveExt"),
+            Self::InteractiveExt => write!(f, "InteractiveExt"),
         }
     }
 }
