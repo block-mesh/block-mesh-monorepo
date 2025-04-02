@@ -1,4 +1,5 @@
 #![allow(dead_code)]
+#![allow(unexpected_cfgs)]
 #![allow(unused_mut)]
 #![allow(unused_variables)]
 use reqwest::Client;
