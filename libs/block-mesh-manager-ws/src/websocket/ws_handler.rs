@@ -13,10 +13,8 @@ use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use block_mesh_manager_database_domain::domain::user::UserAndApiToken;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
-use flume::Sender;
 use http::{HeaderMap, StatusCode};
 use semver::Version;
-use serde_json::Value;
 use solana_sdk::signature::{Signature, Signer};
 use sqlx::PgPool;
 use std::collections::HashMap;
@@ -218,54 +216,18 @@ pub async fn ws_handler(
         }))
         .await;
     if let Some(s) = query.get("wootz") {
-        if let Ok(wootz) = serde_json::from_str::<Value>(s) {
-            let _ = process_woots(wootz, tx_c, &user.user_id).await;
+        if s == "true" {
+            let _ = tx_c
+                .send_async(DBMessage::AggregateAddToMessage(AggregateAddToMessage {
+                    user_id: user.user_id,
+                    name: AggregateName::Wootz.to_string(),
+                    value: serde_json::Value::from(1),
+                    msg_type: DBMessageTypes::UsersIpMessage,
+                }))
+                .await;
         }
     }
     Ok(ws.on_upgrade(move |socket| {
         handle_socket_light(email, socket, header_ip, state, user.user_id)
     }))
-}
-
-pub async fn process_woots(
-    wootz: Value,
-    tx_c: Sender<DBMessage>,
-    user_id: &Uuid,
-) -> anyhow::Result<()> {
-    if wootz.is_object() {
-        let wootz = wootz.as_object().unwrap();
-        let is_wootz_app = wootz
-            .get("isWootzapp")
-            .ok_or(anyhow!("Missing isWootzapp"))?
-            .as_str()
-            .unwrap_or_default();
-        let name = wootz
-            .get("name")
-            .ok_or(anyhow!("name is missing"))?
-            .as_str()
-            .unwrap_or_default();
-        let vendor = wootz
-            .get("vendor")
-            .ok_or(anyhow!("vendor is missing"))?
-            .as_str()
-            .unwrap_or_default();
-        if is_wootz_app != "true" {
-            return Ok(());
-        }
-        if !name.to_lowercase().contains("wootz") {
-            return Ok(());
-        }
-        if !vendor.to_lowercase().contains("wootz") {
-            return Ok(());
-        }
-        let _ = tx_c
-            .send_async(DBMessage::AggregateAddToMessage(AggregateAddToMessage {
-                user_id: *user_id,
-                name: AggregateName::Wootz.to_string(),
-                value: serde_json::Value::from(1),
-                msg_type: DBMessageTypes::UsersIpMessage,
-            }))
-            .await;
-    }
-    Ok(())
 }
