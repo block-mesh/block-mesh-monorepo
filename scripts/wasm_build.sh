@@ -34,6 +34,7 @@ npm install
 ## --target - always use "web"!
 ## See https://rustwasm.github.io/wasm-pack/book/commands/build.html
 
+export CARGO_TARGET_DIR="${ROOT}/target/WASM"
 echo Cleaning up...
 mkdir -p "${ROOT}"/tmp_ext/chrome/
 mkdir -p "${ROOT}"/tmp_ext/firefox/
