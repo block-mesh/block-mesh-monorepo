@@ -75,8 +75,7 @@ pub async fn report_uptime_content(
         AggregateName::Uptime,
         &user.user_id,
     )
-    .await
-    .map_err(Error::from)?;
+    .await?;
     commit_txn(transaction).await?;
     let now = Utc::now();
     let diff = now - uptime.updated_at;
