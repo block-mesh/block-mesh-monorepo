@@ -95,6 +95,7 @@ pub struct IdTmp {
     pub created_at: Option<DateTime<Utc>>,
 }
 
+#[allow(clippy::too_many_arguments)]
 pub async fn get_or_create_id(
     transaction: &mut Transaction<'_, Postgres>,
     email: &str,
