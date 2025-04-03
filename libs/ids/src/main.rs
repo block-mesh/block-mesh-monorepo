@@ -75,6 +75,9 @@ pub struct Id {
     pub email: String,
     pub api_token: String,
     pub fp: String,
+    pub fp2: String,
+    pub fp3: String,
+    pub fp4: String,
     pub ip: String,
     pub created_at: DateTime<Utc>,
 }
@@ -85,6 +88,9 @@ pub struct IdTmp {
     pub email: Option<String>,
     pub api_token: Option<String>,
     pub fp: Option<String>,
+    pub fp2: Option<String>,
+    pub fp3: Option<String>,
+    pub fp4: Option<String>,
     pub ip: Option<String>,
     pub created_at: Option<DateTime<Utc>>,
 }
@@ -94,6 +100,9 @@ pub async fn get_or_create_id(
     email: &str,
     api_token: &str,
     fp: &str,
+    fp2: &str,
+    fp3: &str,
+    fp4: &str,
     ip: &str,
 ) -> anyhow::Result<Id> {
     let uuid = Uuid::new_v4();
@@ -102,27 +111,30 @@ pub async fn get_or_create_id(
         IdTmp,
         r#"
 WITH extant AS (
-	SELECT id, email, api_token, fp, ip, created_at
+	SELECT id, email, api_token, fp, fp2, fp3, fp4, ip, created_at
 	FROM ids
 	WHERE (email) = ($2)
 ),
 inserted AS (
-INSERT INTO ids ( id, email, api_token, fp, ip, created_at)
-SELECT $1, $2, $3, $4 , $5 , $6
+INSERT INTO ids ( id, email, api_token, fp, fp2, fp3, fp4 , ip, created_at)
+SELECT $1, $2, $3, $4 , $5 , $6, $7, $8 , $9
 WHERE
 	NOT EXISTS (SELECT	FROM extant)
-	RETURNING  id, email, api_token, fp, ip, created_at
+	RETURNING  id, email, api_token, fp,  fp2, fp3, fp4, ip, created_at
 )
-SELECT id, email, api_token, fp, ip, created_at
+SELECT id, email, api_token, fp, fp2, fp3, fp4, ip, created_at
 FROM inserted
 UNION ALL
-SELECT id, email, api_token, fp, ip, created_at
+SELECT id, email, api_token, fp, fp2, fp3, fp4, ip, created_at
 FROM extant;
 "#,
         uuid,
         email,
         api_token,
         fp,
+        fp2,
+        fp3,
+        fp4,
         ip,
         now
     )
@@ -133,6 +145,9 @@ FROM extant;
         email: idtmp.email.expect("MISSING EMAIL"),
         api_token: idtmp.api_token.expect("MISSING API TOKEN"),
         fp: idtmp.fp.expect("MISSING FP"),
+        fp2: idtmp.fp2.expect("MISSING FP2"),
+        fp3: idtmp.fp3.expect("MISSING FP3"),
+        fp4: idtmp.fp4.expect("MISSING FP4"),
         ip: idtmp.ip.expect("MISSING IP"),
         created_at: idtmp.created_at.expect("MISSING TIMESTAMP CREATED_AT"),
     };
