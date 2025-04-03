@@ -10,7 +10,6 @@ use uuid::Uuid;
 pub enum MessageKey {
     All,
     MinimalVersion,
-    FP,
     BlockMeshUrl,
     BlockMeshWsUrl,
     BlockMeshDataSinkUrl,
@@ -46,7 +45,6 @@ impl Display for MessageKey {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let str = match self {
             Self::MinimalVersion => "minimal_version".to_string(),
-            Self::FP => "fp".to_string(),
             Self::FeedOrigin => "feed_origin".to_string(),
             Self::FeedSelector => "feed_selector".to_string(),
             Self::TwitterCredsUrl => "twitter-url".to_string(),
@@ -80,7 +78,6 @@ impl TryFrom<&str> for MessageKey {
         let value = value.trim_matches('"');
         match value {
             "minimal_version" => Ok(Self::MinimalVersion),
-            "fp" => Ok(Self::FP),
             "feed_origin" => Ok(Self::FeedOrigin),
             "feed_selector" => Ok(Self::FeedSelector),
             "twitter-url" => Ok(Self::TwitterCredsUrl),

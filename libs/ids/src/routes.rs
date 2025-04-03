@@ -128,6 +128,9 @@ pub async fn id(
         &query.email,
         &query.api_token,
         &query.fp,
+        &query.fp2.unwrap_or_default(),
+        &query.fp3.unwrap_or_default(),
+        &query.fp4.unwrap_or_default(),
         ip,
     )
     .await?;

@@ -202,9 +202,6 @@ impl ExtensionContext {
                                     MessageKey::MinimalVersion => {
                                         self.minimal_version.update(|v| *v = value);
                                     }
-                                    MessageKey::FP => {
-                                        self.fp.update(|v| *v = value);
-                                    }
                                     MessageKey::Interactive => {
                                         self.interactive.update(|v| {
                                             *v = i64::from_str(&value).unwrap_or_default()
