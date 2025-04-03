@@ -38,6 +38,9 @@ struct DataToCache {
     pub email: String,
     pub api_token: String,
     pub fp: String,
+    pub fp2: String,
+    pub fp3: String,
+    pub fp4: String,
     pub ip: String,
 }
 
@@ -62,10 +65,14 @@ pub async fn id(
     } else {
         "127.0.0.1"
     };
+    let c_query = query.clone();
     let data = DataToCache {
-        email: query.email.clone(),
-        api_token: query.api_token.clone(),
-        fp: query.fp.clone(),
+        email: c_query.email,
+        api_token: c_query.api_token,
+        fp: c_query.fp,
+        fp2: c_query.fp2.unwrap_or_default(),
+        fp3: c_query.fp3.unwrap_or_default(),
+        fp4: c_query.fp4.unwrap_or_default(),
         ip: ip.to_string(),
     };
     let mut s = DefaultHasher::new();
