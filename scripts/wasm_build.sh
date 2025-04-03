@@ -45,6 +45,14 @@ rm -f chrome.zip
 rm -f firefox.zip
 rm -fr "${ROOT}"/tmp_ext/chrome/*
 rm -fr "${ROOT}"/tmp_ext/firefox/*
+echo Removing trash files...
+rm -f extension_js/js/content.js
+rm -f extension_js/js/popup.js
+rm -f extension_js/js/options.js
+rm -f extension_js/js/background.js
+rm -f extension_js/js/wasm/.gitignore
+rm -f extension_js/js/wasm/package.json
+rm -f extension_js/js/fp/utils/*.js
 
 if [ "${BUILD_TYPE}" = "clean" ] ; then
   echo "Finished cleaning"
@@ -59,9 +67,7 @@ export RUSTFLAGS=--cfg=web_sys_unstable_apis
 wasm-pack build . ${BUILD_TYPE} --no-typescript --out-dir "./extension_js/js/wasm" --out-name "blockmesh_ext" --target web || exit 1
 npm run build
 ## wasm-pack creates bunch of useless files:
-echo Removing trash files...
-rm -f extension_js/js/wasm/.gitignore
-rm -f extension_js/js/wasm/package.json
+
 
 ## create chrome package and exclude manifest for firefox
 ## see ReadMe for more info on manifest config
