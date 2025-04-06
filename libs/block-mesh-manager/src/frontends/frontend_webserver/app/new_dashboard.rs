@@ -252,7 +252,6 @@ pub fn NewDashboard() -> impl IntoView {
         // </Suspense>
         // </tbody>
         // </Table>
-        <Subheading>Daily points earnings</Subheading>
         <BarChart/>
     }
 }
