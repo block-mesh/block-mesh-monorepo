@@ -72,7 +72,7 @@ curve25519-dalek = { git = "https://github.com/block-mesh/curve25519-dalek", bra
 
 [workspace.dependencies]
 deadpool-postgres = "0.14.1"
-rama = { git = "https://github.com/plabayo/rama.git", rev = "1e8ed6673fffd49f6c9ca77363de72d1f59c2471", features = ["full"] }
+rama = { git = "https://github.com/plabayo/rama.git", rev = "689175ac1470263d78423b3e554a66c1890aba12", features = ["full"] }
 itertools = "0.14.0"
 solana-client-wasm = { version = "1.18.0" }
 terminal-prompt = "0.2.3"
@@ -206,7 +206,7 @@ axum-core = { version = "0.5.0" }
 futures = { version = "0.3" }
 futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
 headers = { version = "0.4.0" }
-tokio = { version = "1.38", features = ["full"] }
+tokio = { version = "1.44", features = ["full"] }
 tokio-tungstenite = { version = "0.26.1" }
 tower = { version = "0.4.13", features = ["util"] }
 tower-http = { version = "0.5.1", features = ["fs", "trace", "request-id", "util", "cors", "add-extension"] }
