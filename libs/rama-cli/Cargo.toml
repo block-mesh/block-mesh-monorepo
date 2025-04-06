@@ -1,0 +1,32 @@
+[package]
+name = "rama-cli"
+description = "rama cli to move and transform network packets"
+version = { workspace = true }
+edition = { workspace = true }
+authors = { workspace = true }
+rust-version = { workspace = true }
+default-run = "rama"
+
+[lints]
+workspace = true
+
+[dependencies]
+base64 = { workspace = true }
+bytes = { workspace = true }
+chrono = { workspace = true }
+clap = { workspace = true }
+deadpool-postgres = { workspace = true }
+hex = { workspace = true }
+itertools = { workspace = true }
+rama = { workspace = true, features = ["full"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+terminal-prompt = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+tokio-postgres = { workspace = true, features = ["with-serde_json-1", "with-chrono-0_4"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+
+[[bin]]
+name = "rama"
+path = "src/main.rs"
