@@ -50,7 +50,7 @@ dead_code = "forbid"
 
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.530"
+version = "0.0.533"
 edition = "2024"
 rust-version = "1.85.0"
 
@@ -71,6 +71,7 @@ aes-gcm-siv = { git = 'https://github.com/block-mesh/AEADs', branch = 'rustls-de
 curve25519-dalek = { git = "https://github.com/block-mesh/curve25519-dalek", branch = "rustls-dep-hell-1-18" }
 
 [workspace.dependencies]
+crc = { version = "3.2.1" }
 deadpool-postgres = "0.14.1"
 rama = { git = "https://github.com/plabayo/rama.git", rev = "689175ac1470263d78423b3e554a66c1890aba12", features = ["full"] }
 itertools = "0.14.0"

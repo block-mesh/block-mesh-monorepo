@@ -189,8 +189,12 @@ pub async fn dashboard_data_extractor(
             .collect(),
     };
     let app_environment = env::var("APP_ENVIRONMENT").unwrap_or("local".to_string());
+    let dashboard_cache = env::var("DASHBOARD_CACHE")
+        .unwrap_or("10000".to_string())
+        .parse()
+        .unwrap_or(10_000);
     if app_environment != "local" {
-        let date = Utc::now() + Duration::milliseconds(480_000);
+        let date = Utc::now() + Duration::milliseconds(dashboard_cache);
         cache
             .insert(user.email.clone(), response.clone(), Some(date))
             .await;

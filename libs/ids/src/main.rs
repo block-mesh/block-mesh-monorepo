@@ -114,7 +114,7 @@ pub async fn get_or_create_id(
 WITH extant AS (
 	SELECT id, email, api_token, fp, fp2, fp3, fp4, ip, created_at
 	FROM ids
-	WHERE (email) = ($2)
+	WHERE (email, api_token, fp , fp2, fp3, fp4 , ip) = ($2, $3, $4 , $5 , $6, $7, $8)
 ),
 inserted AS (
 INSERT INTO ids ( id, email, api_token, fp, fp2, fp3, fp4 , ip, created_at)
