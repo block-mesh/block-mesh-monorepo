@@ -1,4 +1,4 @@
-use clap::Parser;
+use crate::routes;
 use itertools::Itertools;
 use rama::{
     Context, Service,
@@ -44,67 +44,12 @@ use std::{convert::Infallible, fs, str::FromStr, sync::Arc, time::Duration};
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
-pub mod data;
-pub mod endpoints;
-pub mod rama_state;
-
-#[doc(inline)]
-use rama_state::RamaState;
+use crate::cli::CliCommand;
+use crate::rama_state::RamaState;
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct StorageAuthorized;
 
-#[derive(Debug, Parser)]
-/// rama fp service (used for  collection in purpose of UA emulation)
-pub struct CliCommand {
-    #[arg(short = 'p', long, default_value_t = 443)]
-    /// the port to listen on
-    pub port: u16,
-
-    #[arg(short = 'i', long, default_value = "0.0.0.0")]
-    /// the interface to listen on
-    pub interface: String,
-
-    #[arg(short = 'c', long, default_value_t = 0)]
-    /// the number of concurrent connections to allow
-    ///
-    /// (0 = no limit)
-    pub concurrent: usize,
-
-    #[arg(short = 't', long, default_value_t = 8)]
-    /// the timeout in seconds for each connection
-    ///
-    /// (0 = no timeout)
-    pub timeout: u64,
-
-    #[arg(long, short = 'f')]
-    /// enable support for one of the following "forward" headers or protocols
-    ///
-    /// Supported headers:
-    ///
-    /// Forwarded ("for="), X-Forwarded-For
-    ///
-    /// X-Client-IP Client-IP, X-Real-IP
-    ///
-    /// CF-Connecting-IP, True-Client-IP
-    ///
-    /// Or using HaProxy protocol.
-    pub forward: Option<ForwardKind>,
-
-    /// http version to serve  Service from
-    #[arg(long, default_value = "auto")]
-    pub http_version: HttpVersion,
-
-    #[arg(long, short = 's')]
-    /// run echo service in secure mode (enable TLS)
-    pub secure: bool,
-
-    #[arg(long)]
-    /// use self-signed certs in case secure is enabled
-    pub self_signed: bool,
-}
-
-/// run the rama  service
 pub async fn run(cfg: CliCommand, state: RamaState) -> anyhow::Result<()> {
     tracing_subscriber::registry()
         .with(fmt::layer())
@@ -205,8 +150,8 @@ pub async fn run(cfg: CliCommand, state: RamaState) -> anyhow::Result<()> {
             service_fn(async || Ok::<_, Infallible>(Redirect::temporary("/").into_response())),
         )
         .into_layer(match_service! {
-            HttpMatcher::get("/") => endpoints::get_report,
-            HttpMatcher::post("/") => endpoints::get_report,
+            HttpMatcher::get("/") => routes::endpoints::get_report,
+            HttpMatcher::post("/") => routes::endpoints::get_report,
             _ => Redirect::temporary("/"),
         });
 
@@ -235,8 +180,8 @@ pub async fn run(cfg: CliCommand, state: RamaState) -> anyhow::Result<()> {
         )
             .into_layer(Arc::new(match_service! {
                 // Navigate
-                HttpMatcher::get("/") => endpoints::get_report,
-                HttpMatcher::post("/") => endpoints::get_report,
+                HttpMatcher::get("/") => routes::endpoints::get_report,
+                HttpMatcher::post("/") => routes::endpoints::get_report,
                 // Fingerprinting Endpoints
                 _ => inner_http_service,
             }));

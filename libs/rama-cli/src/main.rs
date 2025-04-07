@@ -1,22 +1,18 @@
-//! entrypoint for rama-cli
-
-#![cfg_attr(docsrs, feature(doc_auto_cfg, doc_cfg))]
-#![cfg_attr(test, allow(clippy::float_cmp))]
-#![cfg_attr(not(test), warn(clippy::print_stdout, clippy::dbg_macro))]
-
+use crate::cli::CliCommand;
+use crate::rama_state::RamaState;
+use crate::server::run;
 use clap::Parser;
 
-pub mod cmd;
-use crate::cmd::fp::CliCommand;
-use crate::cmd::fp::rama_state::RamaState;
-use cmd::fp;
-
+mod cli;
 pub mod error;
+mod rama_state;
+mod routes;
+mod server;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     let cfg = CliCommand::parse();
     let state = RamaState::new().await?;
-    fp::run(cfg, state).await?;
+    run(cfg, state).await?;
     Ok(())
 }

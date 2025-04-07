@@ -1,4 +1,4 @@
-use super::RamaState;
+use crate::rama_state::RamaState;
 use rama::{
     Context,
     error::{ErrorContext, OpaqueError},

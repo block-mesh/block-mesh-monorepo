@@ -1,7 +1,5 @@
-use super::{
-    RamaState,
-    data::{get_ja4h_info, get_tls_display_info_and_store},
-};
+use super::data::{get_ja4h_info, get_tls_display_info_and_store};
+use crate::rama_state::RamaState;
 use block_mesh_common::interfaces::server_api::IdRequest;
 use rama::http::{HeaderValue, Method, Response};
 use rama::{
