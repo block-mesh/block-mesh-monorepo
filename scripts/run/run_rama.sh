@@ -12,8 +12,8 @@ source "${ROOT}/scripts/setup.sh"
 if [ -f "${ROOT}/.env" ] ; then
   source "${ROOT}/.env"
 fi
-export RAMA_TLS_CRT="/Users/ohaddahan/RustroverProjects/block-mesh-monorepo/certs/cert.pem"
-export RAMA_TLS_KEY="/Users/ohaddahan/RustroverProjects/block-mesh-monorepo/certs/key.pem"
+export RAMA_TLS_CRT="${ROOT}/certs/cert.pem"
+export RAMA_TLS_KEY="${ROOT}/certs/key.pem"
 export DATABASE_URL="postgres://postgres:password@localhost:6999/ids"
 export WRITE_DATABASE_URL="${DATABASE_URL}"
 export PORT=8080
