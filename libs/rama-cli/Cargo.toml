@@ -1,0 +1,62 @@
+[package]
+name = "rama-cli"
+description = "rama cli to move and transform network packets"
+version = { workspace = true }
+edition = { workspace = true }
+authors = { workspace = true }
+rust-version = { workspace = true }
+default-run = "rama"
+
+[dependencies]
+database-utils = { path = "../database-utils" }
+block-mesh-common = { path = "../block-mesh-common", features = ["solana"] }
+anyhow = { workspace = true }
+base64 = { workspace = true }
+bytes = { workspace = true }
+chrono = { workspace = true }
+clap = { workspace = true }
+deadpool-postgres = { workspace = true }
+hex = { workspace = true }
+itertools = { workspace = true }
+rama = { workspace = true, features = ["full"] }
+rama-core = { workspace = true }
+rama-net = { workspace = true, features = ["http", "tls"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+terminal-prompt = { workspace = true }
+tokio = { workspace = true, features = ["rt-multi-thread", "macros"] }
+tokio-postgres = { workspace = true, features = ["with-serde_json-1", "with-chrono-0_4"] }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["env-filter"] }
+solana-sdk = { workspace = true }
+
+
+[[bin]]
+name = "rama"
+path = "src/main.rs"
+
+[dependencies.sqlx]
+workspace = true
+default-features = false
+features = [
+  "any",
+  "runtime-tokio-rustls",
+  "macros",
+  "postgres",
+  "uuid",
+  "chrono",
+  "migrate",
+  "json",
+  "bigdecimal",
+  "tls-rustls"
+]
+
+[dependencies.uuid]
+workspace = true
+features = [
+  "v4", # Lets you generate random UUIDs
+  "fast-rng", # Use a faster (but still sufficiently random) RNG
+  "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
+  "serde", # Enable serialization/deserialization of UUIDs
+  "js"
+]

@@ -1,4 +1,6 @@
 .env.*
+certs/cert.pem
+certs/key.pem
 .env.clickhouse
 docker-target/*
 db_logs
