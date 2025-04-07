@@ -46,10 +46,8 @@ pub async fn version() -> impl IntoResponse {
 pub async fn db_health(ctx: Context<Arc<RamaState>>) -> Result<impl IntoResponse, Response> {
     let state = ctx.state().clone();
     if let Ok(mut transaction) = create_txn(&state.db_pool).await {
-        if health_check(&mut *transaction).await.is_ok() {
-            if commit_txn(transaction).await.is_ok() {
-                return Ok((StatusCode::OK, "OK"));
-            }
+        if health_check(&mut *transaction).await.is_ok() && commit_txn(transaction).await.is_ok() {
+            return Ok((StatusCode::OK, "OK"));
         }
     }
     Ok((StatusCode::INTERNAL_SERVER_ERROR, "ERROR"))
