@@ -16,6 +16,8 @@ deadpool-postgres = { workspace = true }
 hex = { workspace = true }
 itertools = { workspace = true }
 rama = { workspace = true, features = ["full"] }
+rama-core = { workspace = true }
+rama-net = { workspace = true, features = ["http", "tls"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 terminal-prompt = { workspace = true }

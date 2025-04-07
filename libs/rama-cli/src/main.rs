@@ -35,7 +35,6 @@ enum CliCommands {
 #[tokio::main]
 async fn main() -> Result<(), BoxError> {
     let cli = Cli::parse();
-
     #[allow(clippy::exit)]
     match match cli.cmds {
         CliCommands::Http(cfg) => http::run(cfg).await,

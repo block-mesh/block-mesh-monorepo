@@ -74,6 +74,8 @@ curve25519-dalek = { git = "https://github.com/block-mesh/curve25519-dalek", bra
 crc = { version = "3.2.1" }
 deadpool-postgres = "0.14.1"
 rama = { git = "https://github.com/plabayo/rama.git", rev = "689175ac1470263d78423b3e554a66c1890aba12", features = ["full"] }
+rama-core = { git = "https://github.com/plabayo/rama.git", rev = "689175ac1470263d78423b3e554a66c1890aba12" }
+rama-net = { git = "https://github.com/plabayo/rama.git", rev = "689175ac1470263d78423b3e554a66c1890aba12", features = ["http", "tls"] }
 itertools = "0.14.0"
 solana-client-wasm = { version = "1.18.0" }
 terminal-prompt = "0.2.3"

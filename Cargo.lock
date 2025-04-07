@@ -8997,6 +8997,8 @@ dependencies = [
  "hex",
  "itertools 0.14.0",
  "rama",
+ "rama-core",
+ "rama-net",
  "serde",
  "serde_json",
  "terminal-prompt",

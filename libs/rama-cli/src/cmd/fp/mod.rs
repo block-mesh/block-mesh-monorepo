@@ -1,5 +1,5 @@
+#![allow(unused_imports)]
 //! Echo service that echos the http request and tls client config
-
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD as ENGINE;
 use clap::Args;
@@ -44,7 +44,7 @@ use rama::{
     tls::boring::server::TlsAcceptorLayer,
     utils::backoff::ExponentialBackoff,
 };
-use std::{convert::Infallible, str::FromStr, sync::Arc, time::Duration};
+use std::{convert::Infallible, fs, str::FromStr, sync::Arc, time::Duration};
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
@@ -66,23 +66,23 @@ pub struct StorageAuthorized;
 pub struct CliCommandFingerprint {
     #[arg(short = 'p', long, default_value_t = 8080)]
     /// the port to listen on
-    port: u16,
+    pub port: u16,
 
-    #[arg(short = 'i', long, default_value = "127.0.0.1")]
+    #[arg(short = 'i', long, default_value = "0.0.0.0")]
     /// the interface to listen on
-    interface: String,
+    pub interface: String,
 
     #[arg(short = 'c', long, default_value_t = 0)]
     /// the number of concurrent connections to allow
     ///
     /// (0 = no limit)
-    concurrent: usize,
+    pub concurrent: usize,
 
     #[arg(short = 't', long, default_value_t = 8)]
     /// the timeout in seconds for each connection
     ///
     /// (0 = no timeout)
-    timeout: u64,
+    pub timeout: u64,
 
     #[arg(long, short = 'f')]
     /// enable support for one of the following "forward" headers or protocols
@@ -96,19 +96,19 @@ pub struct CliCommandFingerprint {
     /// CF-Connecting-IP, True-Client-IP
     ///
     /// Or using HaProxy protocol.
-    forward: Option<ForwardKind>,
+    pub forward: Option<ForwardKind>,
 
     /// http version to serve FP Service from
     #[arg(long, default_value = "auto")]
-    http_version: HttpVersion,
+    pub http_version: HttpVersion,
 
     #[arg(long, short = 's')]
     /// run echo service in secure mode (enable TLS)
-    secure: bool,
+    pub secure: bool,
 
     #[arg(long)]
     /// use self-signed certs in case secure is enabled
-    self_signed: bool,
+    pub self_signed: bool,
 }
 
 /// run the rama FP service
@@ -187,23 +187,27 @@ pub async fn run(cfg: CliCommandFingerprint) -> Result<(), BoxError> {
         }
 
         let tls_key_pem_raw = std::env::var("RAMA_TLS_KEY").expect("RAMA_TLS_KEY");
-        let tls_key_pem_raw = std::str::from_utf8(
-            &ENGINE
-                .decode(tls_key_pem_raw)
-                .expect("base64 decode RAMA_TLS_KEY")[..],
-        )
-        .expect("base64-decoded RAMA_TLS_KEY valid utf-8")
-        .try_into()
-        .expect("tls_key_pem_raw => NonEmptyStr (RAMA_TLS_KEY)");
+        let tls_key_pem_raw =
+            fs::read_to_string(tls_key_pem_raw).expect("RAM_TLS_KEY cant read file");
+        // let tls_key_pem_raw = std::str::from_utf8(
+        //     &ENGINE
+        //         .decode(tls_key_pem_raw)
+        //         .expect("base64 decode RAMA_TLS_KEY")[..],
+        // )
+        // .expect("base64-decoded RAMA_TLS_KEY valid utf-8")
+        // .try_into()
+        // .expect("tls_key_pem_raw => NonEmptyStr (RAMA_TLS_KEY)");
         let tls_crt_pem_raw = std::env::var("RAMA_TLS_CRT").expect("RAMA_TLS_CRT");
-        let tls_crt_pem_raw = std::str::from_utf8(
-            &ENGINE
-                .decode(tls_crt_pem_raw)
-                .expect("base64 decode RAMA_TLS_CRT")[..],
-        )
-        .expect("base64-decoded RAMA_TLS_CRT valid utf-8")
-        .try_into()
-        .expect("tls_crt_pem_raw => NonEmptyStr (RAMA_TLS_CRT)");
+        let tls_crt_pem_raw =
+            fs::read_to_string(tls_crt_pem_raw).expect("RAMA_TLS_CRT cant raed file");
+        // let tls_crt_pem_raw = std::str::from_utf8(
+        //     &ENGINE
+        //         .decode(tls_crt_pem_raw)
+        //         .expect("base64 decode RAMA_TLS_CRT")[..],
+        // )
+        // .expect("base64-decoded RAMA_TLS_CRT valid utf-8")
+        // .try_into()
+        // .expect("tls_crt_pem_raw => NonEmptyStr (RAMA_TLS_CRT)");
         ServerConfig {
             application_layer_protocol_negotiation: Some(match cfg.http_version {
                 HttpVersion::H1 => vec![ApplicationProtocol::HTTP_11],
@@ -213,8 +217,8 @@ pub async fn run(cfg: CliCommandFingerprint) -> Result<(), BoxError> {
                 }
             }),
             ..ServerConfig::new(ServerAuth::Single(ServerAuthData {
-                private_key: DataEncoding::Pem(tls_key_pem_raw),
-                cert_chain: DataEncoding::Pem(tls_crt_pem_raw),
+                private_key: DataEncoding::Pem(tls_key_pem_raw.parse().unwrap()),
+                cert_chain: DataEncoding::Pem(tls_crt_pem_raw.parse().unwrap()),
                 ocsp: None,
             }))
         }
@@ -354,7 +358,7 @@ pub async fn run(cfg: CliCommandFingerprint) -> Result<(), BoxError> {
 }
 
 #[derive(Debug, Clone, Copy, PartialOrd, Ord, PartialEq, Eq, Hash)]
-enum HttpVersion {
+pub enum HttpVersion {
     Auto,
     H1,
     H2,
