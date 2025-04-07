@@ -1,12 +1,10 @@
-use base64::Engine;
-use base64::engine::general_purpose::STANDARD as ENGINE;
 use clap::Parser;
 use itertools::Itertools;
 use rama::{
     Context, Service,
     cli::ForwardKind,
     combinators::Either7,
-    error::{BoxError, OpaqueError},
+    error::OpaqueError,
     http::{
         HeaderName, HeaderValue, IntoResponse, Request,
         header::COOKIE,

@@ -1,30 +1,14 @@
-use super::{RamaState, StorageAuthorized};
+use super::RamaState;
 use rama::{
     Context,
-    error::{BoxError, ErrorContext, OpaqueError},
-    http::{
-        self, HeaderMap, HeaderName, Request,
-        conn::LastPeerPriorityParams,
-        dep::http::{Extensions, request::Parts},
-        headers::Forwarded,
-        proto::{
-            h1::Http1HeaderMap,
-            h2::{PseudoHeaderOrder, frame::InitialPeerSettings},
-        },
-    },
-    net::{
-        fingerprint::{Ja3, Ja4, Ja4H},
-        http::RequestContext,
-        stream::SocketInfo,
-    },
+    error::{ErrorContext, OpaqueError},
+    http::Request,
+    net::fingerprint::{Ja3, Ja4, Ja4H},
     tls::types::{
         SecureTransport,
         client::{ClientHello, ClientHelloExtension},
     },
-    ua::{
-        UserAgent,
-        profile::{Http1Settings, Http2Settings},
-    },
+    ua::profile::Http2Settings,
 };
 use serde::Serialize;
 use std::{str::FromStr, sync::Arc};

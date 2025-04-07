@@ -5,7 +5,6 @@
 #![cfg_attr(not(test), warn(clippy::print_stdout, clippy::dbg_macro))]
 
 use clap::Parser;
-use rama::error::BoxError;
 
 pub mod cmd;
 use crate::cmd::fp::CliCommand;
