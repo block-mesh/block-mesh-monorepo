@@ -150,8 +150,12 @@ pub async fn run(cfg: CliCommand, state: RamaState) -> anyhow::Result<()> {
             service_fn(async || Ok::<_, Infallible>(Redirect::temporary("/").into_response())),
         )
         .into_layer(match_service! {
-            HttpMatcher::get("/") => routes::endpoints::get_report,
-            HttpMatcher::post("/") => routes::endpoints::get_report,
+            HttpMatcher::get("/") => routes::endpoints::server_health,
+            HttpMatcher::get("/db_health") => routes::endpoints::db_health,
+            HttpMatcher::get("/version") => routes::endpoints::version,
+            HttpMatcher::get("/report") => routes::endpoints::get_report,
+            HttpMatcher::post("/report") => routes::endpoints::get_report,
+            HttpMatcher::options("/report") => routes::endpoints::get_report,
             _ => Redirect::temporary("/"),
         });
 
@@ -179,10 +183,12 @@ pub async fn run(cfg: CliCommand, state: RamaState) -> anyhow::Result<()> {
             http_forwarded_layer,
         )
             .into_layer(Arc::new(match_service! {
-                // Navigate
-                HttpMatcher::get("/") => routes::endpoints::get_report,
-                HttpMatcher::post("/") => routes::endpoints::get_report,
-                // Fingerprinting Endpoints
+                HttpMatcher::get("/") => routes::endpoints::server_health,
+                HttpMatcher::get("/db_health") => routes::endpoints::db_health,
+                HttpMatcher::get("/version") => routes::endpoints::version,
+                HttpMatcher::get("/report") => routes::endpoints::get_report,
+                HttpMatcher::post("/report") => routes::endpoints::get_report,
+                HttpMatcher::options("/report") => routes::endpoints::get_report,
                 _ => inner_http_service,
             }));
 
