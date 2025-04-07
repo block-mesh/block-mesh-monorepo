@@ -69,8 +69,10 @@ then
   start_db tg-bot 5551
   start_db data-sink 5552
   start_db ids 6999
+  start_db rama 6998
   start_db emails 5553
   start_db logs-drain 5554
+
 
   DOCKERS="$(docker ps -a -q --filter ancestor=redis:alpine3.20 --format="{{.ID}}")"
   if [ -n "$DOCKERS" ]
@@ -144,6 +146,12 @@ echo "create DB"
 ensure sqlx database create
 cd "${ROOT}/libs/ids" || exit
 echo "migrate DB ids"
+ensure migrate
+export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:6998/rama"
+echo "create DB"
+ensure sqlx database create
+cd "${ROOT}/libs/rama-cli" || exit
+echo "migrate DB rama-cli"
 ensure migrate
 >&2 echo "Postgres has been migrated, ready to go!"
 cd "${_PWD}"

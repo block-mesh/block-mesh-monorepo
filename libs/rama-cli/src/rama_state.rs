@@ -12,6 +12,7 @@ use std::sync::Arc;
 pub struct RamaState {
     pub db_pool: PgPool,
     pub environment: Environment,
+    #[allow(dead_code)]
     pub ext_keypair: Arc<Keypair>,
 }
 

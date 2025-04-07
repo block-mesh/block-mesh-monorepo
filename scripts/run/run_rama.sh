@@ -14,7 +14,7 @@ if [ -f "${ROOT}/.env" ] ; then
 fi
 export RAMA_TLS_CRT="${ROOT}/certs/cert.pem"
 export RAMA_TLS_KEY="${ROOT}/certs/key.pem"
-export DATABASE_URL="postgres://postgres:password@localhost:6999/ids"
+export DATABASE_URL="postgres://postgres:password@localhost:6998/rama"
 export WRITE_DATABASE_URL="${DATABASE_URL}"
 export PORT=8080
 export AGG_SIZE=1

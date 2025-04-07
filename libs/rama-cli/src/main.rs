@@ -4,6 +4,7 @@ use crate::server::run;
 use clap::Parser;
 
 mod cli;
+mod db;
 pub mod error;
 mod rama_state;
 mod routes;
