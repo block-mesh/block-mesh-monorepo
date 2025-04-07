@@ -2,14 +2,31 @@ use super::data::{get_ja4h_info, get_tls_display_info_and_store};
 use crate::db::get_or_create_rama_id;
 use crate::rama_state::RamaState;
 use block_mesh_common::interfaces::server_api::IdRequest;
+use database_utils::utils::health_check::health_check;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
-use rama::http::{HeaderValue, Method, Response};
+use rama::http::{Body, HeaderValue, Method, Response};
 use rama::{
     Context,
-    http::{BodyExtractExt, IntoResponse, Request, StatusCode, response::Json},
+    http::{
+        BodyExtractExt,
+        IntoResponse,
+        Request,
+        StatusCode,
+        //response::Json
+    },
 };
 use serde::{Deserialize, Serialize};
 use std::sync::Arc;
+
+pub fn cors_response() -> Response {
+    Response::builder()
+        .status(StatusCode::OK)
+        .header("Access-Control-Allow-Origin", "*") // Allow all origins (adjust as needed)
+        .header("Access-Control-Allow-Methods", "*") // Allowed methods
+        .header("Access-Control-Allow-Headers", "*") // Allowed headers
+        .body(Body::empty())
+        .unwrap()
+}
 
 #[derive(Serialize, Deserialize, Default, Clone)]
 pub struct Report {
@@ -17,6 +34,23 @@ pub struct Report {
     ja4: Option<String>,
     ja4h: Option<String>,
     ip: Option<String>,
+}
+
+pub async fn server_health() -> Result<impl IntoResponse, Response> {
+    Ok(cors_response())
+}
+pub async fn version() -> impl IntoResponse {
+    (StatusCode::OK, env!("CARGO_PKG_VERSION"))
+}
+
+pub async fn db_health(ctx: Context<Arc<RamaState>>) -> Result<impl IntoResponse, Response> {
+    let state = ctx.state().clone();
+    if let Ok(mut transaction) = create_txn(&state.db_pool).await {
+        if health_check(&mut *transaction).await.is_ok() && commit_txn(transaction).await.is_ok() {
+            return Ok((StatusCode::OK, "OK"));
+        }
+    }
+    Ok((StatusCode::INTERNAL_SERVER_ERROR, "ERROR"))
 }
 
 pub async fn get_report(
@@ -68,5 +102,6 @@ pub async fn get_report(
             let _ = commit_txn(transaction).await;
         }
     }
-    Ok(Json(report))
+    Ok(cors_response())
+    // Ok(Json(report))
 }
