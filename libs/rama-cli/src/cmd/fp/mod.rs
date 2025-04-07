@@ -1,8 +1,6 @@
-#![allow(unused_imports)]
-//! Echo service that echos the http request and tls client config
 use base64::Engine;
 use base64::engine::general_purpose::STANDARD as ENGINE;
-use clap::Args;
+use clap::Parser;
 use itertools::Itertools;
 use rama::{
     Context, Service,
@@ -48,23 +46,20 @@ use std::{convert::Infallible, fs, str::FromStr, sync::Arc, time::Duration};
 use tracing::level_filters::LevelFilter;
 use tracing_subscriber::{EnvFilter, fmt, layer::SubscriberExt, util::SubscriberInitExt};
 
-mod data;
-mod endpoints;
-mod state;
-mod storage;
+pub mod data;
+pub mod endpoints;
+pub mod rama_state;
 
 #[doc(inline)]
-use state::State;
-
-use self::state::ACMEData;
+use rama_state::RamaState;
 
 #[derive(Debug, Clone, Copy, Default)]
 pub struct StorageAuthorized;
 
-#[derive(Debug, Args)]
-/// rama fp service (used for FP collection in purpose of UA emulation)
-pub struct CliCommandFingerprint {
-    #[arg(short = 'p', long, default_value_t = 8080)]
+#[derive(Debug, Parser)]
+/// rama fp service (used for  collection in purpose of UA emulation)
+pub struct CliCommand {
+    #[arg(short = 'p', long, default_value_t = 443)]
     /// the port to listen on
     pub port: u16,
 
@@ -98,7 +93,7 @@ pub struct CliCommandFingerprint {
     /// Or using HaProxy protocol.
     pub forward: Option<ForwardKind>,
 
-    /// http version to serve FP Service from
+    /// http version to serve  Service from
     #[arg(long, default_value = "auto")]
     pub http_version: HttpVersion,
 
@@ -111,8 +106,8 @@ pub struct CliCommandFingerprint {
     pub self_signed: bool,
 }
 
-/// run the rama FP service
-pub async fn run(cfg: CliCommandFingerprint) -> Result<(), BoxError> {
+/// run the rama  service
+pub async fn run(cfg: CliCommand, state: RamaState) -> anyhow::Result<()> {
     tracing_subscriber::registry()
         .with(fmt::layer())
         .with(
@@ -157,21 +152,6 @@ pub async fn run(cfg: CliCommandFingerprint) -> Result<(), BoxError> {
         Some(ForwardKind::HaProxy) => (Some(HaProxyLayer::default()), None),
     };
 
-    let acme_data = if let Ok(raw_acme_data) = std::env::var("RAMA_ACME_DATA") {
-        let acme_data: Vec<_> = raw_acme_data
-            .split(';')
-            .map(|s| {
-                let mut iter = s.trim().splitn(2, ',');
-                let key = iter.next().expect("acme data key");
-                let value = iter.next().expect("acme data value");
-                (key.to_owned(), value.to_owned())
-            })
-            .collect();
-        ACMEData::with_challenges(acme_data)
-    } else {
-        ACMEData::default()
-    };
-
     let maybe_tls_server_config = cfg.secure.then(|| {
         if cfg.self_signed {
             return ServerConfig {
@@ -189,25 +169,9 @@ pub async fn run(cfg: CliCommandFingerprint) -> Result<(), BoxError> {
         let tls_key_pem_raw = std::env::var("RAMA_TLS_KEY").expect("RAMA_TLS_KEY");
         let tls_key_pem_raw =
             fs::read_to_string(tls_key_pem_raw).expect("RAM_TLS_KEY cant read file");
-        // let tls_key_pem_raw = std::str::from_utf8(
-        //     &ENGINE
-        //         .decode(tls_key_pem_raw)
-        //         .expect("base64 decode RAMA_TLS_KEY")[..],
-        // )
-        // .expect("base64-decoded RAMA_TLS_KEY valid utf-8")
-        // .try_into()
-        // .expect("tls_key_pem_raw => NonEmptyStr (RAMA_TLS_KEY)");
         let tls_crt_pem_raw = std::env::var("RAMA_TLS_CRT").expect("RAMA_TLS_CRT");
         let tls_crt_pem_raw =
             fs::read_to_string(tls_crt_pem_raw).expect("RAMA_TLS_CRT cant raed file");
-        // let tls_crt_pem_raw = std::str::from_utf8(
-        //     &ENGINE
-        //         .decode(tls_crt_pem_raw)
-        //         .expect("base64 decode RAMA_TLS_CRT")[..],
-        // )
-        // .expect("base64-decoded RAMA_TLS_CRT valid utf-8")
-        // .try_into()
-        // .expect("tls_crt_pem_raw => NonEmptyStr (RAMA_TLS_CRT)");
         ServerConfig {
             application_layer_protocol_negotiation: Some(match cfg.http_version {
                 HttpVersion::H1 => vec![ApplicationProtocol::HTTP_11],
@@ -235,22 +199,18 @@ pub async fn run(cfg: CliCommandFingerprint) -> Result<(), BoxError> {
         .parse::<HeaderValue>()
         .expect("parse header value");
 
-    graceful.spawn_task_fn(async move |guard|  {
+    graceful.spawn_task_fn(async move |guard| {
         let inner_http_service = HijackLayer::new(
-                HttpMatcher::header_exists(HeaderName::from_static("referer"))
-                    .and_header_exists(HeaderName::from_static("cookie"))
-                    .negate(),
-                service_fn(async || {
-                    Ok::<_, Infallible>(Redirect::temporary("/consent").into_response())
-                }),
-            )
-            .into_layer(match_service!{
-                HttpMatcher::get("/report") => endpoints::get_report,
-                HttpMatcher::post("/api/fetch/number/:number") => endpoints::post_api_fetch_number,
-                HttpMatcher::post("/api/xml/number/:number") => endpoints::post_api_xml_http_request_number,
-                HttpMatcher::method_get().or_method_post().and_path("/form") => endpoints::form,
-                _ => Redirect::temporary("/consent"),
-            });
+            HttpMatcher::header_exists(HeaderName::from_static("referer"))
+                .and_header_exists(HeaderName::from_static("cookie"))
+                .negate(),
+            service_fn(async || Ok::<_, Infallible>(Redirect::temporary("/").into_response())),
+        )
+        .into_layer(match_service! {
+            HttpMatcher::get("/") => endpoints::get_report,
+            HttpMatcher::post("/") => endpoints::get_report,
+            _ => Redirect::temporary("/"),
+        });
 
         let http_service = (
             TraceLayer::new_for_http(),
@@ -270,27 +230,18 @@ pub async fn run(cfg: CliCommandFingerprint) -> Result<(), BoxError> {
                 HeaderName::from_static("critical-ch"),
                 ch_headers.clone(),
             ),
-            SetResponseHeaderLayer::if_not_present(
-                HeaderName::from_static("vary"),
-                ch_headers,
-            ),
+            SetResponseHeaderLayer::if_not_present(HeaderName::from_static("vary"), ch_headers),
             UserAgentClassifierLayer::new(),
             ConsumeErrLayer::trace(tracing::Level::WARN),
             http_forwarded_layer,
-            ).into_layer(
-                Arc::new(match_service!{
-                    // Navigate
-                    HttpMatcher::get("/") => Redirect::temporary("/consent"),
-                    HttpMatcher::get("/consent") => endpoints::get_consent,
-                    // ACME
-                    HttpMatcher::get("/.well-known/acme-challenge/:token") => endpoints::get_acme_challenge,
-                    // Assets
-                    HttpMatcher::get("/assets/style.css") => endpoints::get_assets_style,
-                    HttpMatcher::get("/assets/script.js") => endpoints::get_assets_script,
-                    // Fingerprinting Endpoints
-                    _ => inner_http_service,
-                })
-            );
+        )
+            .into_layer(Arc::new(match_service! {
+                // Navigate
+                HttpMatcher::get("/") => endpoints::get_report,
+                HttpMatcher::post("/") => endpoints::get_report,
+                // Fingerprinting Endpoints
+                _ => inner_http_service,
+            }));
 
         let tcp_service_builder = (
             ConsumeErrLayer::trace(tracing::Level::WARN),
@@ -302,22 +253,17 @@ pub async fn run(cfg: CliCommandFingerprint) -> Result<(), BoxError> {
             )),
             // Limit the body size to 1MB for both request and response
             BodyLimitLayer::symmetric(1024 * 1024),
-            tls_acceptor_data.map(|data| {
-                TlsAcceptorLayer::new(data).with_store_client_hello(true)
-            })
+            tls_acceptor_data.map(|data| TlsAcceptorLayer::new(data).with_store_client_hello(true)),
         );
 
-        let pg_url = std::env::var("DATABASE_URL").ok();
-        let storage_auth = std::env::var("RAMA_FP_STORAGE_COOKIE").ok();
-
-        let tcp_listener = TcpListener::build_with_state(Arc::new(State::new(acme_data, pg_url, storage_auth.as_deref()).await.expect("create state")))
+        let tcp_listener = TcpListener::build_with_state(Arc::new(state))
             .bind(&address)
             .await
             .expect("bind TCP Listener");
 
         match cfg.http_version {
             HttpVersion::Auto => {
-                tracing::info!("FP Service (auto) listening on: {address}");
+                tracing::info!(" Service (auto) listening on: {address}");
                 tcp_listener
                     .serve_graceful(
                         guard.clone(),
@@ -328,7 +274,7 @@ pub async fn run(cfg: CliCommandFingerprint) -> Result<(), BoxError> {
                     .await;
             }
             HttpVersion::H1 => {
-                tracing::info!("FP Service (http/1.1) listening on: {address}");
+                tracing::info!(" Service (http/1.1) listening on: {address}");
                 tcp_listener
                     .serve_graceful(
                         guard,
@@ -337,7 +283,7 @@ pub async fn run(cfg: CliCommandFingerprint) -> Result<(), BoxError> {
                     .await;
             }
             HttpVersion::H2 => {
-                tracing::info!("FP Service (h2) listening on: {address}");
+                tracing::info!(" Service (h2) listening on: {address}");
                 tcp_listener
                     .serve_graceful(
                         guard.clone(),
@@ -404,17 +350,17 @@ impl<S: std::fmt::Debug> std::fmt::Debug for StorageAuthService<S> {
     }
 }
 
-impl<S, Body> Service<Arc<State>, Request<Body>> for StorageAuthService<S>
+impl<S, Body> Service<Arc<RamaState>, Request<Body>> for StorageAuthService<S>
 where
     Body: Send + 'static,
-    S: Service<Arc<State>, Request<Body>>,
+    S: Service<Arc<RamaState>, Request<Body>>,
 {
     type Response = S::Response;
     type Error = S::Error;
 
     async fn serve(
         &self,
-        mut ctx: Context<Arc<State>>,
+        ctx: Context<Arc<RamaState>>,
         mut req: Request<Body>,
     ) -> Result<Self::Response, Self::Error> {
         if let Some(cookie) = req.headers().typed_get::<Cookie>() {
@@ -422,9 +368,6 @@ where
                 .iter()
                 .filter_map(|(k, v)| {
                     if k.eq_ignore_ascii_case("rama-storage-auth") {
-                        if Some(v) == ctx.state().storage_auth.as_deref() {
-                            ctx.insert(StorageAuthorized);
-                        }
                         Some("rama-storage-auth=xxx".to_owned())
                     } else if !k.starts_with("source-") {
                         Some(format!("{k}={v}"))

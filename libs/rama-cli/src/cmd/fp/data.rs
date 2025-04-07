@@ -1,4 +1,4 @@
-use super::{State, StorageAuthorized};
+use super::{RamaState, StorageAuthorized};
 use rama::{
     Context,
     error::{BoxError, ErrorContext, OpaqueError},
@@ -31,7 +31,7 @@ use std::{str::FromStr, sync::Arc};
 
 #[derive(Debug, Clone, Default, Serialize)]
 #[allow(dead_code)]
-pub(super) enum FetchMode {
+pub enum FetchMode {
     Cors,
     #[default]
     Navigate,
@@ -69,7 +69,7 @@ impl FromStr for FetchMode {
 
 #[derive(Debug, Clone, Default, Serialize)]
 #[allow(dead_code)]
-pub(super) enum ResourceType {
+pub enum ResourceType {
     #[default]
     Document,
     Xhr,
@@ -88,7 +88,7 @@ impl std::fmt::Display for ResourceType {
 
 #[derive(Debug, Clone, Default, Serialize)]
 #[allow(dead_code)]
-pub(super) enum Initiator {
+pub enum Initiator {
     #[default]
     Navigator,
     Fetch,
@@ -108,9 +108,9 @@ impl std::fmt::Display for Initiator {
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub(super) struct DataSource {
-    pub(super) name: String,
-    pub(super) version: String,
+pub struct DataSource {
+    pub name: String,
+    pub version: String,
 }
 
 impl Default for DataSource {
@@ -123,85 +123,34 @@ impl Default for DataSource {
 }
 
 #[derive(Debug, Default, Clone, Serialize)]
-pub(super) struct UserAgentInfo {
-    pub(super) user_agent: String,
-    pub(super) kind: Option<String>,
-    pub(super) version: Option<usize>,
-    pub(super) platform: Option<String>,
+pub struct UserAgentInfo {
+    pub user_agent: String,
+    pub kind: Option<String>,
+    pub version: Option<usize>,
+    pub platform: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub(super) struct RequestInfo {
-    pub(super) version: String,
-    pub(super) scheme: String,
-    pub(super) authority: String,
-    pub(super) method: String,
-    pub(super) fetch_mode: FetchMode,
-    pub(super) resource_type: ResourceType,
-    pub(super) initiator: Initiator,
-    pub(super) path: String,
-    pub(super) uri: String,
-    pub(super) peer_addr: Option<String>,
-}
-
-pub(super) async fn get_user_agent_info(ctx: &Context<Arc<State>>) -> UserAgentInfo {
-    ctx.get()
-        .map(|ua: &UserAgent| UserAgentInfo {
-            user_agent: ua.header_str().to_owned(),
-            kind: ua.info().map(|info| info.kind.to_string()),
-            version: ua.info().and_then(|info| info.version),
-            platform: ua.platform().map(|v| v.to_string()),
-        })
-        .unwrap_or_default()
-}
-
-pub(super) async fn get_request_info(
-    fetch_mode: FetchMode,
-    resource_type: ResourceType,
-    initiator: Initiator,
-    ctx: &mut Context<Arc<State>>,
-    parts: &Parts,
-) -> Result<RequestInfo, BoxError> {
-    let request_context = ctx
-        .get_or_try_insert_with_ctx::<RequestContext, _>(|ctx| (ctx, parts).try_into())
-        .context("get or compose RequestContext")?;
-
-    let authority = request_context.authority.to_string();
-    let scheme = request_context.protocol.to_string();
-
-    Ok(RequestInfo {
-        version: format!("{:?}", parts.version),
-        scheme,
-        authority,
-        method: parts.method.as_str().to_owned(),
-        fetch_mode: parts
-            .headers
-            .get("sec-fetch-mode")
-            .and_then(|v| v.to_str().ok())
-            .and_then(|v| v.parse().ok())
-            .unwrap_or(fetch_mode),
-        resource_type,
-        initiator,
-        path: parts.uri.path().to_owned(),
-        uri: parts.uri.to_string(),
-        peer_addr: ctx
-            .get::<Forwarded>()
-            .and_then(|f| {
-                f.client_socket_addr()
-                    .map(|addr| addr.to_string())
-                    .or_else(|| f.client_ip().map(|ip| ip.to_string()))
-            })
-            .or_else(|| ctx.get::<SocketInfo>().map(|v| v.peer_addr().to_string())),
-    })
+pub struct RequestInfo {
+    pub version: String,
+    pub scheme: String,
+    pub authority: String,
+    pub method: String,
+    pub fetch_mode: FetchMode,
+    pub resource_type: ResourceType,
+    pub initiator: Initiator,
+    pub path: String,
+    pub uri: String,
+    pub peer_addr: Option<String>,
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub(super) struct Ja4HInfo {
-    pub(super) hash: String,
-    pub(super) human_str: String,
+pub struct Ja4HInfo {
+    pub hash: String,
+    pub human_str: String,
 }
 
-pub(super) fn get_ja4h_info<B>(req: &Request<B>) -> Option<Ja4HInfo> {
+pub fn get_ja4h_info<B>(req: &Request<B>) -> Option<Ja4HInfo> {
     Ja4H::compute(req)
         .inspect_err(|err| tracing::error!(?err, "ja4h compute failure"))
         .ok()
@@ -212,184 +161,47 @@ pub(super) fn get_ja4h_info<B>(req: &Request<B>) -> Option<Ja4HInfo> {
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub(super) struct HttpInfo {
-    pub(super) headers: Vec<(String, String)>,
-    pub(super) h2_settings: Option<Http2Settings>,
-}
-
-pub(super) async fn get_and_store_http_info(
-    ctx: &Context<Arc<State>>,
-    headers: HeaderMap,
-    ext: &mut Extensions,
-    http_version: http::Version,
-    ua: String,
-    initiator: Initiator,
-) -> Result<HttpInfo, OpaqueError> {
-    let original_headers = Http1HeaderMap::new(headers, Some(ext));
-
-    let h2_settings = match http_version {
-        http::Version::HTTP_2 => Some(Http2Settings {
-            http_pseudo_headers: ext.get::<PseudoHeaderOrder>().cloned(),
-            initial_config: ext
-                .get::<InitialPeerSettings>()
-                .map(|p| p.0.as_ref().clone()),
-            priority_header: ext
-                .get::<LastPeerPriorityParams>()
-                .map(|p| p.0.dependency.clone()),
-        }),
-        _ => None,
-    };
-
-    if ctx.contains::<StorageAuthorized>() {
-        if let Some(storage) = ctx.state().storage.as_ref() {
-            match http_version {
-                http::Version::HTTP_09 | http::Version::HTTP_10 | http::Version::HTTP_11 => {
-                    match initiator {
-                        Initiator::Navigator => {
-                            storage
-                                .store_h1_headers_navigate(ua, original_headers.clone())
-                                .await
-                                .context("store h1 headers navigate")?;
-                        }
-                        Initiator::Fetch => {
-                            storage
-                                .store_h1_headers_fetch(ua, original_headers.clone())
-                                .await
-                                .context("store h1 headers fetch")?;
-                        }
-                        Initiator::XMLHttpRequest => {
-                            if let Some(header_name) = original_headers.get_original_name(
-                                &HeaderName::from_static("x-rama-custom-header-marker"),
-                            ) {
-                                // Check if the header name is title-cased or not
-                                let header_str = header_name.as_str();
-                                let title_case_headers = header_str.split('-').all(|part| {
-                                    part.chars().next().is_none_or(|c| c.is_ascii_uppercase())
-                                        && part.chars().skip(1).all(|c| c.is_ascii_lowercase())
-                                });
-
-                                tracing::debug!(
-                                    "Custom header marker found: {}, title-cased: {}",
-                                    header_str,
-                                    title_case_headers
-                                );
-
-                                storage
-                                    .store_h1_settings(
-                                        ua.clone(),
-                                        Http1Settings { title_case_headers },
-                                    )
-                                    .await
-                                    .context("store h1 settings")?;
-                            }
-
-                            storage
-                                .store_h1_headers_xhr(ua, original_headers.clone())
-                                .await
-                                .context("store h1 headers xhr")?;
-                        }
-                        Initiator::Form => {
-                            storage
-                                .store_h1_headers_form(ua, original_headers.clone())
-                                .await
-                                .context("store h1 headers form")?;
-                        }
-                    }
-                }
-                http::Version::HTTP_2 => {
-                    if let Some(settings) = h2_settings.clone() {
-                        storage
-                            .store_h2_settings(ua.clone(), settings)
-                            .await
-                            .context("store h2 settings")?;
-                    }
-                    match initiator {
-                        Initiator::Navigator => {
-                            storage
-                                .store_h2_headers_navigate(ua, original_headers.clone())
-                                .await
-                                .context("store h2 headers navigate")?;
-                        }
-                        Initiator::Fetch => {
-                            storage
-                                .store_h2_headers_fetch(ua, original_headers.clone())
-                                .await
-                                .context("store h2 headers fetch")?;
-                        }
-                        Initiator::XMLHttpRequest => {
-                            storage
-                                .store_h2_headers_xhr(ua, original_headers.clone())
-                                .await
-                                .context("store h2 headers xhr")?;
-                        }
-                        Initiator::Form => {
-                            storage
-                                .store_h2_headers_form(ua, original_headers.clone())
-                                .await
-                                .context("store h2 headers form")?;
-                        }
-                    }
-                }
-                _ => (),
-            }
-        }
-    }
-
-    let headers: Vec<_> = original_headers
-        .into_iter()
-        .map(|(name, value)| {
-            (
-                name.to_string(),
-                std::str::from_utf8(value.as_bytes())
-                    .map(|s| s.to_owned())
-                    .unwrap_or_else(|_| format!("0x{:x?}", value.as_bytes())),
-            )
-        })
-        .collect();
-
-    Ok(HttpInfo {
-        headers,
-        h2_settings,
-    })
+pub struct HttpInfo {
+    pub headers: Vec<(String, String)>,
+    pub h2_settings: Option<Http2Settings>,
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub(super) struct TlsDisplayInfo {
-    pub(super) ja4: Ja4DisplayInfo,
-    pub(super) ja3: Ja3DisplayInfo,
-    pub(super) protocol_version: String,
-    pub(super) cipher_suites: Vec<String>,
-    pub(super) compression_algorithms: Vec<String>,
-    pub(super) extensions: Vec<TlsDisplayInfoExtension>,
+pub struct TlsDisplayInfo {
+    pub ja4: Ja4DisplayInfo,
+    pub ja3: Ja3DisplayInfo,
+    pub protocol_version: String,
+    pub cipher_suites: Vec<String>,
+    pub compression_algorithms: Vec<String>,
+    pub extensions: Vec<TlsDisplayInfoExtension>,
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub(super) struct Ja4DisplayInfo {
-    pub(super) full: String,
-    pub(super) hash: String,
+pub struct Ja4DisplayInfo {
+    pub full: String,
+    pub hash: String,
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub(super) struct Ja3DisplayInfo {
-    pub(super) full: String,
-    pub(super) hash: String,
+pub struct Ja3DisplayInfo {
+    pub full: String,
+    pub hash: String,
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub(super) struct TlsDisplayInfoExtension {
-    pub(super) id: String,
-    pub(super) data: Option<TlsDisplayInfoExtensionData>,
+pub struct TlsDisplayInfoExtension {
+    pub id: String,
+    pub data: Option<TlsDisplayInfoExtensionData>,
 }
 
 #[derive(Debug, Clone, Serialize)]
-pub(super) enum TlsDisplayInfoExtensionData {
+pub enum TlsDisplayInfoExtensionData {
     Single(String),
     Multi(Vec<String>),
 }
 
-pub(super) async fn get_tls_display_info_and_store(
-    ctx: &Context<Arc<State>>,
-    ua: String,
+pub async fn get_tls_display_info_and_store(
+    ctx: &Context<Arc<RamaState>>,
 ) -> Result<Option<TlsDisplayInfo>, OpaqueError> {
     let hello: &ClientHello = match ctx
         .get::<SecureTransport>()
@@ -398,15 +210,6 @@ pub(super) async fn get_tls_display_info_and_store(
         Some(hello) => hello,
         None => return Ok(None),
     };
-
-    if ctx.contains::<StorageAuthorized>() {
-        if let Some(storage) = ctx.state().storage.as_ref() {
-            storage
-                .store_tls_client_hello(ua, hello.clone())
-                .await
-                .context("store tls client hello")?;
-        }
-    }
 
     let ja4 = Ja4::compute(ctx.extensions()).context("ja4 compute")?;
     let ja3 = Ja3::compute(ctx.extensions()).context("ja3 compute")?;

@@ -8,14 +8,16 @@ use clap::Parser;
 use rama::error::BoxError;
 
 pub mod cmd;
-use crate::cmd::fp::CliCommandFingerprint;
+use crate::cmd::fp::CliCommand;
+use crate::cmd::fp::rama_state::RamaState;
 use cmd::fp;
 
 pub mod error;
 
 #[tokio::main]
-async fn main() -> Result<(), BoxError> {
-    let cfg = CliCommandFingerprint::parse();
-    fp::run(cfg).await?;
+async fn main() -> anyhow::Result<()> {
+    let cfg = CliCommand::parse();
+    let state = RamaState::new().await?;
+    fp::run(cfg, state).await?;
     Ok(())
 }

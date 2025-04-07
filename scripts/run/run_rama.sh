@@ -19,7 +19,7 @@ export WRITE_DATABASE_URL="${DATABASE_URL}"
 export PORT=8080
 export AGG_SIZE=1
 export ENFORCE_SIGNATURE=true
-cargo watch --watch libs --shell "cargo run -p rama-cli -- fp --secure --port ${PORT} --forward CF-Connecting-IP"
+cargo watch --watch libs --shell "cargo run -p rama-cli -- --secure --port ${PORT}"
 export backend=$!
 function cleanup()
 {

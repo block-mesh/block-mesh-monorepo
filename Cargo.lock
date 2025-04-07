@@ -8989,10 +8989,13 @@ dependencies = [
 name = "rama-cli"
 version = "0.0.533"
 dependencies = [
+ "anyhow",
  "base64 0.22.1",
+ "block-mesh-common",
  "bytes",
  "chrono",
  "clap 4.5.8",
+ "database-utils",
  "deadpool-postgres",
  "hex",
  "itertools 0.14.0",
@@ -9001,11 +9004,14 @@ dependencies = [
  "rama-net",
  "serde",
  "serde_json",
+ "solana-sdk",
+ "sqlx",
  "terminal-prompt",
  "tokio",
  "tokio-postgres",
  "tracing",
  "tracing-subscriber",
+ "uuid",
 ]
 
 [[package]]
