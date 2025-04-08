@@ -30,6 +30,7 @@ pub struct ExtensionContext {
     pub blockmesh_url: RwSignal<String>,
     pub blockmesh_ws_url: RwSignal<String>,
     pub blockmesh_ids_url: RwSignal<String>,
+    pub blockmesh_ids2_url: RwSignal<String>,
     pub blockmesh_data_sink_url: RwSignal<String>,
     pub status: RwSignal<AuthStatus>,
     pub uptime: RwSignal<f64>,
@@ -62,6 +63,7 @@ impl Default for ExtensionContext {
             blockmesh_url: RwSignal::new("https://app.blockmesh.xyz".to_string()),
             blockmesh_ws_url: RwSignal::new("https://ws.blockmesh.xyz".to_string()),
             blockmesh_ids_url: RwSignal::new("https://ids.blockmesh.xyz".to_string()),
+            blockmesh_ids2_url: RwSignal::new("https://ids2.blockmesh.xyz".to_string()),
             blockmesh_data_sink_url: create_rw_signal(
                 "https://data-sink.blockmesh.xyz".to_string(),
             ),
@@ -221,6 +223,9 @@ impl ExtensionContext {
                                     }
                                     MessageKey::BlockMeshIdsUrl => {
                                         self.blockmesh_ids_url.update(|v| *v = value);
+                                    }
+                                    MessageKey::BlockMeshIds2Url => {
+                                        self.blockmesh_ids2_url.update(|v| *v = value);
                                     }
                                     MessageKey::BlockMeshDataSinkUrl => {
                                         self.blockmesh_data_sink_url.update(|v| *v = value);
