@@ -14,6 +14,7 @@ pub enum MessageKey {
     BlockMeshWsUrl,
     BlockMeshDataSinkUrl,
     BlockMeshIdsUrl,
+    BlockMeshIds2Url,
     Email,
     ApiToken,
     DeviceId,
@@ -55,6 +56,7 @@ impl Display for MessageKey {
             Self::BlockMeshWsUrl => "blockmesh_ws_url".to_string(),
             Self::BlockMeshDataSinkUrl => "blockmesh_data_sink_url".to_string(),
             Self::BlockMeshIdsUrl => "blockmesh_ids_url".to_string(),
+            Self::BlockMeshIds2Url => "blockmesh_ids2_url".to_string(),
             Self::Email => "email".to_string(),
             Self::ApiToken => "blockmesh_api_token".to_string(),
             Self::DeviceId => "device_id".to_string(),
@@ -98,6 +100,7 @@ impl TryFrom<&str> for MessageKey {
             "wootz" => Ok(Self::Wootz),
             "interactive" => Ok(Self::Interactive),
             "blockmesh_ids_url" => Ok(Self::BlockMeshIdsUrl),
+            "blockmesh_ids2_url" => Ok(Self::BlockMeshIds2Url),
             _ => Err(format!("Invalid MessageKey value {}", value)),
         }
     }
