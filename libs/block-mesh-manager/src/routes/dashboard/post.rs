@@ -41,12 +41,13 @@ pub async fn handler(
     let user = get_user_and_api_token_by_email(&mut follower_transaction, &user.email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
+    let user_id = user.user_id;
     let data =
         dashboard_data_extractor(&pool, &mut follower_transaction, state.clone(), user, false)
             .await?;
     commit_txn(follower_transaction).await?;
     let mut transaction = create_txn(&pool).await?;
-    let _ = prep_user(&mut transaction, &user.user_id).await?;
+    let _ = prep_user(&mut transaction, &user_id).await?;
     commit_txn(transaction).await?;
     Ok(Json(data))
 }
