@@ -388,7 +388,7 @@ jobs:
       - name: "Build ids"
         run: |
           cargo build -p rama-cli --release
-          tar acf rama-cli-${{ matrix.target }}.tar.gz target/release/rama-cli
+          tar acf rama-cli-${{ matrix.target }}.tar.gz target/release/rama
       - name: Release
         uses: softprops/action-gh-release@v2
         #if: startsWith(github.ref, 'refs/tags/')

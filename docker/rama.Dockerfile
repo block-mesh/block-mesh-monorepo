@@ -13,6 +13,6 @@ RUN git clone --depth 1 https://github.com/block-mesh/block-mesh-monorepo.git
 RUN cp -fr block-mesh-monorepo/libs/ids/* .
 RUN curl -sLO https://github.com/block-mesh/block-mesh-monorepo/releases/latest/download/ids-x86_64-unknown-linux-gnu.tar.gz \
   && tar -xvf ids-x86_64-unknown-linux-gnu.tar.gz \
-  && mv target/release/rama-cli rama-cli \
-  && chmod +x rama-cli
-CMD ["/opt/rama-cli", "--secure"]
+  && mv target/release/rama rama \
+  && chmod +x rama
+CMD ["/opt/rama", "--secure"]
