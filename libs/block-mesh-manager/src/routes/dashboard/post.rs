@@ -12,6 +12,7 @@ use block_mesh_common::interfaces::server_api::DashboardResponse;
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use block_mesh_manager_database_domain::domain::notify_worker::notify_worker;
+use block_mesh_manager_database_domain::domain::prep_user::prep_user;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::sync::Arc;
@@ -35,6 +36,7 @@ pub async fn handler(
         })],
     )
     .await;
+
     let mut follower_transaction = create_txn(&state.follower_pool).await?;
     let user = get_user_and_api_token_by_email(&mut follower_transaction, &user.email)
         .await?
@@ -43,5 +45,8 @@ pub async fn handler(
         dashboard_data_extractor(&pool, &mut follower_transaction, state.clone(), user, false)
             .await?;
     commit_txn(follower_transaction).await?;
+    let mut transaction = create_txn(&pool).await?;
+    let _ = prep_user(&mut transaction, &user.user_id).await?;
+    commit_txn(transaction).await?;
     Ok(Json(data))
 }
