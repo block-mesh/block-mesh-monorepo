@@ -47,7 +47,7 @@ pub async fn handler(
             .await?;
     commit_txn(follower_transaction).await?;
     let mut transaction = create_txn(&pool).await?;
-    let _ = prep_user(&mut transaction, &user_id).await?;
+    prep_user(&mut transaction, &user_id).await?;
     commit_txn(transaction).await?;
     Ok(Json(data))
 }
