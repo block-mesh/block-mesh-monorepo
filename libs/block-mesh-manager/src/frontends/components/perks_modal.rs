@@ -3,7 +3,8 @@ use crate::frontends::components::icons::twitter_icon::TwitterIcon;
 use crate::frontends::frontend_webserver::app::perks_data::show_perk;
 use block_mesh_common::constants::{
     BIT_ROBOT_TWITTER_ID, BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID,
-    BUTTON_CLASS, FRODOBOTS_TWITTER_ID, SAM_IS_MOVING_TWITTER_ID, UFBOTS_TWITTER_ID,
+    BUTTON_CLASS, FRODOBOTS_TWITTER_ID, ROBOTS_DOT_FUN_ID, SAM_IS_MOVING_TWITTER_ID,
+    UFBOTS_TWITTER_ID,
 };
 use block_mesh_common::interfaces::server_api::DashboardResponse;
 use leptos::*;
@@ -173,7 +174,7 @@ pub fn PerksModal() -> impl IntoView {
 
                                 </div>
                             </Show>
-                            <Show when=move || { show_perk(&perks.get(), "BitRobot") }>
+                            <Show when=move || { show_perk(&perks.get(), "BitRobotNetwork") }>
                                 <div class="flex flex-row gap-4">
                                     <a
                                         rel="external"
@@ -193,10 +194,40 @@ pub fn PerksModal() -> impl IntoView {
                                     >
                                         <TwitterIcon/>
                                         {move || {
-                                            if perks.get().iter().any(|i| i.name == "BitRobot") {
-                                                "BitRobot followed"
+                                            if perks.get().iter().any(|i| i.name == "BitRobotNetwork") {
+                                                "BitRobotNetwork followed"
                                             } else {
-                                                "@BitRobot"
+                                                "@BitRobotNetwork"
+                                            }
+                                        }}
+
+                                    </a>
+                                </div>
+                            </Show>
+                            <Show when=move || { show_perk(&perks.get(), "RobotsDotFun") }>
+                                <div class="flex flex-row gap-4">
+                                    <a
+                                        rel="external"
+                                        target="_blank"
+                                        href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
+                                    >
+                                        <InfoIcon/>
+                                    </a>
+                                    <a
+                                        rel="external"
+                                        href=format!(
+                                            "/twitter/login?target={}",
+                                            ROBOTS_DOT_FUN_ID,
+                                        )
+
+                                        class=BUTTON_CLASS
+                                    >
+                                        <TwitterIcon/>
+                                        {move || {
+                                            if perks.get().iter().any(|i| i.name == "RobotsDotFun") {
+                                                "RobotsDotFun followed"
+                                            } else {
+                                                "@RobotsDotFun"
                                             }
                                         }}
 
