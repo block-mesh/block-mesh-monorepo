@@ -46,11 +46,15 @@ pub enum AggregateName {
     FrodoBots,
     SamIsMoving,
     BitRobot,
+    BitRobotNetwork,
+    RobotsDotFun,
 }
 
 impl Display for AggregateName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::RobotsDotFun => write!(f, "RobotsDotFun"),
+            Self::BitRobotNetwork => write!(f, "BitRobotNetwork"),
             Self::BitRobot => write!(f, "BitRobot"),
             Self::SamIsMoving => write!(f, "SamIsMoving"),
             Self::FrodoBots => write!(f, "FrodoBots"),
@@ -87,6 +91,8 @@ impl From<String> for AggregateName {
             return Self::WalletChange;
         }
         match s.as_str() {
+            "RobotsDotFun" => Self::RobotsDotFun,
+            "BitRobotNetwork" => Self::BitRobotNetwork,
             "BitRobot" => Self::BitRobot,
             "SamIsMoving" => Self::SamIsMoving,
             "FrodoBots" => Self::FrodoBots,

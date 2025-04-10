@@ -48,10 +48,15 @@ impl TwitterProfile {
                 name: AggregateName::SamIsMoving,
                 perk: PerkName::SamIsMoving,
             },
-            69425059 => Self {
-                id: 69425059,
-                name: AggregateName::BitRobot,
-                perk: PerkName::BitRobot,
+            1861258248483151874 => Self {
+                id: 1861258248483151874,
+                name: AggregateName::BitRobotNetwork,
+                perk: PerkName::BitRobotNetwork,
+            },
+            1861269701537734658 => Self {
+                id: 1861269701537734658,
+                name: AggregateName::RobotsDotFun,
+                perk: PerkName::RobotsDotFun,
             },
             _ => return Err(anyhow!("Unknown")),
         })
