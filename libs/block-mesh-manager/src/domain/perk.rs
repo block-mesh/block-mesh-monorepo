@@ -23,6 +23,10 @@ pub enum PerkName {
     Master,
     Grandmaster,
     Legend,
+    UFBots,
+    FrodoBots,
+    SamIsMoving,
+    BitRobot,
 }
 
 impl Default for PerkName {
@@ -34,6 +38,10 @@ impl Default for PerkName {
 impl Display for PerkName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::BitRobot => write!(f, "BitRobot"),
+            Self::SamIsMoving => write!(f, "SamIsMoving"),
+            Self::FrodoBots => write!(f, "FrodoBots"),
+            Self::UFBots => write!(f, "UFBots"),
             Self::Intract => write!(f, "intract"),
             Self::WootzTwitter => write!(f, "wootz_twitter"),
             Self::Wallet => write!(f, "wallet"),
@@ -56,6 +64,10 @@ impl Display for PerkName {
 impl From<String> for PerkName {
     fn from(s: String) -> Self {
         match s.as_str() {
+            "BitRobot" => Self::BitRobot,
+            "SamIsMoving" => Self::SamIsMoving,
+            "FrodoBots" => Self::FrodoBots,
+            "UFBots" => Self::UFBots,
             "intract" => Self::Intract,
             "wootz_twitter" => Self::WootzTwitter,
             "wallet" => Self::Wallet,

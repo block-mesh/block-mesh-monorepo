@@ -15,6 +15,7 @@ pub mod modal;
 pub mod navbars;
 pub mod notification_popup;
 pub mod online_chip;
+pub mod perks_modal;
 pub mod referer_rank;
 pub mod reload_button;
 pub mod stat;

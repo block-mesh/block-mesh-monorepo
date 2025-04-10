@@ -1,20 +1,16 @@
 use crate::database::aggregate::update_aggregate::update_aggregate;
 use crate::database::perks::add_perk_to_user::add_perk_to_user;
-use crate::domain::perk::PerkName;
 use crate::errors::error::Error;
 use crate::notification::notification_redirect::NotificationRedirect;
 use crate::routes::twitter::context::{Oauth2Ctx, Oauth2CtxPg};
+use crate::routes::twitter::helper::TwitterProfile;
 use anyhow::{anyhow, Context};
 use askama_axum::IntoResponse;
 use axum::extract::Query;
 use axum::Extension;
-use block_mesh_common::constants::{
-    DeviceType, BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID, WOOTZ_APP_USER_ID,
-    XENO_TWITTER_USER_ID,
-};
+use block_mesh_common::constants::DeviceType;
 use block_mesh_common::reqwest::http_client;
 use block_mesh_common::routes_enum::RoutesEnum;
-use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
 use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name;
 use http::StatusCode;
 use serde::{Deserialize, Serialize};
@@ -47,29 +43,21 @@ pub async fn callback(
         .to_string()
         .parse::<u64>()
         .map_err(|e| anyhow!("Cannot parse target - {}", e))?;
-    let mut transaction = pool.begin().await?;
-    let twitter_agg = get_or_create_aggregate_by_user_and_name(
-        &mut transaction,
-        if target == BLOCKMESH_TWITTER_USER_ID {
-            AggregateName::Twitter
-        } else if target == BLOCKMESH_FOUNDER_TWITTER_USER_ID {
-            AggregateName::FounderTwitter
-        } else if target == XENO_TWITTER_USER_ID {
-            AggregateName::XenoTwitter
-        } else if target == WOOTZ_APP_USER_ID {
-            AggregateName::WootzAppTwitter
-        } else {
+    let twitter_profile = match TwitterProfile::new(target) {
+        Ok(t) => t,
+        Err(_) => {
             return Ok(Error::redirect(
                 500,
                 "ERROR",
                 "Invalid follow target",
                 &format!("/ui{}", RoutesEnum::Static_Auth_Dashboard),
             ));
-        },
-        &user_id,
-    )
-    .await?;
-
+        }
+    };
+    let mut transaction = pool.begin().await?;
+    let twitter_agg =
+        get_or_create_aggregate_by_user_and_name(&mut transaction, twitter_profile.name, &user_id)
+            .await?;
     let mut pg =
         serde_json::from_value::<Oauth2CtxPg>(twitter_agg.value).context("Cannot deserialize")?;
     let pg_state = pg.state.clone().ok_or(anyhow!("No state"))?;
@@ -129,22 +117,15 @@ pub async fn callback(
     let api = TwitterApi::new(oauth_token);
     if let Ok(user) = api.get_users_me().send().await {
         let data = user.into_data().unwrap();
+        tracing::info!("target = {}", target);
+        let twitter_profile = TwitterProfile::new(target)
+            .map_err(|_| Error::Auth("Bad follow target".to_string()))?;
         let follow_data = get_following(data.id.as_u64(), target).await?;
         if follow_data.following {
             add_perk_to_user(
                 &mut transaction,
                 user_id.unwrap(),
-                if target == BLOCKMESH_TWITTER_USER_ID {
-                    PerkName::Twitter
-                } else if target == BLOCKMESH_FOUNDER_TWITTER_USER_ID {
-                    PerkName::FounderTwitter
-                } else if target == XENO_TWITTER_USER_ID {
-                    PerkName::XenoTwitter
-                } else if target == WOOTZ_APP_USER_ID {
-                    PerkName::WootzTwitter
-                } else {
-                    return Err(Error::Auth("Bad follow target".to_string()));
-                },
+                twitter_profile.perk,
                 1.0,
                 500.0,
                 serde_json::to_value(&follow_data).unwrap(),
@@ -160,20 +141,7 @@ pub async fn callback(
             Ok(Error::redirect(
                 500,
                 "ERROR",
-                &format!(
-                    "You're not following @{}",
-                    if target == BLOCKMESH_TWITTER_USER_ID {
-                        "blockmesh_xyz"
-                    } else if target == BLOCKMESH_FOUNDER_TWITTER_USER_ID {
-                        "__OhadDahan__"
-                    } else if target == XENO_TWITTER_USER_ID {
-                        "Xenopus_v1"
-                    } else if target == WOOTZ_APP_USER_ID {
-                        "WootzApp"
-                    } else {
-                        "blockmesh_xyz"
-                    }
-                ),
+                &format!("You're not following @{}", twitter_profile.name),
                 &format!("/ui{}", RoutesEnum::Static_Auth_Dashboard),
             ))
         }

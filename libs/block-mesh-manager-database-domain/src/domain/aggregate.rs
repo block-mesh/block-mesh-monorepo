@@ -28,6 +28,7 @@ pub struct AggregateTmp {
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub enum AggregateName {
+    UFBots,
     Twitter,
     FounderTwitter,
     XenoTwitter,
@@ -42,11 +43,18 @@ pub enum AggregateName {
     WalletChange,
     Wootz,
     InteractiveExt,
+    FrodoBots,
+    SamIsMoving,
+    BitRobot,
 }
 
 impl Display for AggregateName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::BitRobot => write!(f, "BitRobot"),
+            Self::SamIsMoving => write!(f, "SamIsMoving"),
+            Self::FrodoBots => write!(f, "FrodoBots"),
+            Self::UFBots => write!(f, "UFBots"),
             Self::Twitter => write!(f, "Twitter"),
             Self::FounderTwitter => write!(f, "FounderTwitter"),
             Self::XenoTwitter => write!(f, "XenoTwitter"),
@@ -79,6 +87,10 @@ impl From<String> for AggregateName {
             return Self::WalletChange;
         }
         match s.as_str() {
+            "BitRobot" => Self::BitRobot,
+            "SamIsMoving" => Self::SamIsMoving,
+            "FrodoBots" => Self::FrodoBots,
+            "UFBots" => Self::UFBots,
             "WootzAppTwitter" => Self::WootzAppTwitter,
             "XenoTwitter" => Self::XenoTwitter,
             "FounderTwitter" => Self::FounderTwitter,
