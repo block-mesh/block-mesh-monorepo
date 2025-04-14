@@ -28,7 +28,7 @@ pub async fn ws_bulk_daily_stats(
     let value_str = values.join(",");
     let query = format!(
         r#"
-        UPDATE daily_stats
+        UPDATE daily_stats_on_going
         SET
             tasks_count = GREATEST(tasks_count, LEAST(tasks_count + {increment}, {upper_limit})),
             ws_tasks_count_bonus = GREATEST(ws_tasks_count_bonus, ws_tasks_count_bonus + (LEAST(tasks_count + {increment}, {upper_limit}) - tasks_count)),
@@ -37,7 +37,6 @@ pub async fn ws_bulk_daily_stats(
             updated_at = now()
         WHERE
             user_id IN ({value_str})
-            AND status = 'OnGoing'
             AND day = CURRENT_DATE
         "#,
     );
