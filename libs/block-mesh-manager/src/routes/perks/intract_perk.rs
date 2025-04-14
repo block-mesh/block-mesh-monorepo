@@ -33,14 +33,14 @@ pub async fn add_to_cache(
     let resp = PerkResponse {
         error: false,
         message: None,
-        cached: true,
+        cached: false,
         name: perk.name.to_string(),
         multiplier: perk.multiplier,
         one_time_bonus: perk.one_time_bonus,
     };
     let app_environment = env::var("APP_ENVIRONMENT").unwrap_or("local".to_string());
     if app_environment != "local" {
-        let date = Utc::now() + Duration::milliseconds(480_000);
+        let date = Utc::now() + Duration::milliseconds(60_000);
         cache
             .insert(email.to_string(), resp.clone(), Some(date))
             .await;
