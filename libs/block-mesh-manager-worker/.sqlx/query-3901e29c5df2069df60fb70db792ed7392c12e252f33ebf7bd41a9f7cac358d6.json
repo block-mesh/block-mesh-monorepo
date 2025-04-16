@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE daily_stats_on_going ds\n            SET\n                tasks_count = GREATEST(tasks_count, LEAST(tasks_count + $1, $2)),\n                tasks_count_bonus = GREATEST(tasks_count_bonus, tasks_count_bonus + (LEAST(tasks_count + $1, $2) - tasks_count)),\n                updated_at = now()\n        FROM aggregates_uptime a\n        WHERE\n            ds.user_id = a.user_id\n            AND a.updated_at >= NOW() - INTERVAL '15 minutes'\n            AND ds.day = CURRENT_DATE\n            AND ds.tasks_count < $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int4",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3901e29c5df2069df60fb70db792ed7392c12e252f33ebf7bd41a9f7cac358d6"
+}
