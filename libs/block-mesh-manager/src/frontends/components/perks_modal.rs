@@ -31,7 +31,7 @@ pub fn PerksModal() -> impl IntoView {
                                     <li>Verify</li>
                                 </ol>
                             </div>
-                            <hr class="border-t border-white mb-4" />
+                            <hr class="border-t border-white mb-4"/>
                             <Show when=move || { show_perk(&perks.get(), "twitter") }>
                                 <div class="flex flex-row gap-4">
                                     <a

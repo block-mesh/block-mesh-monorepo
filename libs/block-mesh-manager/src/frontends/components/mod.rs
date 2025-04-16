@@ -11,6 +11,7 @@ pub mod extension_button;
 pub mod extension_input;
 pub mod heading;
 pub mod icons;
+pub mod intract_modal;
 pub mod modal;
 pub mod navbars;
 pub mod notification_popup;

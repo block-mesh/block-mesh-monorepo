@@ -4,6 +4,7 @@ use crate::frontends::components::icons::info_icon::InfoIcon;
 use crate::frontends::components::icons::intract_icon::IntractIcon;
 use crate::frontends::components::icons::person_icon::PersonIcon;
 use crate::frontends::components::icons::twitter_icon::TwitterIcon;
+use crate::frontends::components::intract_modal::IntractModal;
 use crate::frontends::components::modal::Modal;
 use crate::frontends::components::perks_modal::PerksModal;
 use crate::frontends::components::sub_heading::Subheading;
@@ -38,6 +39,7 @@ pub fn Perks() -> impl IntoView {
     let enable_proof_of_humanity = RwSignal::new(false);
     let email = RwSignal::new("".to_string());
     let show_perks_modal = RwSignal::new(false);
+    let show_intract_modal = RwSignal::new(false);
 
     if let Some(a) = auth_status {
         enable_proof_of_humanity.set(a.enable_proof_of_humanity);
@@ -60,32 +62,6 @@ pub fn Perks() -> impl IntoView {
         // }
     };
 
-    let sync_intract = create_action(move |_: &()| async move {
-        if email.get_untracked().is_empty() {
-            return;
-        }
-        match sync_perk().await {
-            Ok(response) => {
-                if response.error {
-                    notifications.set_error(format!(
-                        "Error from Intract: {}",
-                        response.message.unwrap_or_default()
-                    ));
-                } else if response.cached {
-                    notifications.set_success("Please try again in 10min");
-                } else {
-                    notifications.set_success("Intract synced");
-                }
-            }
-            Err(_) => {
-                notifications.set_error(format!(
-                    "Failed to sync Intract , please ensure your Intract email is {}",
-                    email.get_untracked().to_lowercase()
-                ));
-            }
-        }
-    });
-
     let connect_action = create_action(move |wallet: &String| {
         let w = wallet.clone();
         async move {
@@ -107,16 +83,12 @@ pub fn Perks() -> impl IntoView {
         <Modal show=show_perks_modal show_close_button=true>
             <PerksModal/>
         </Modal>
+        <Modal show=show_intract_modal show_close_button=true>
+            <IntractModal/>
+        </Modal>
         <div class="flex flex-col md:flex-row items-start justify-start gap-4">
             <Heading>Perks</Heading>
             <div class="flex flex-row gap-4">
-                <a
-                    rel="external"
-                    target="_blank"
-                    href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
-                >
-                    <InfoIcon/>
-                </a>
                 <button
                     class=BUTTON_CLASS
                     on:click=move |_| {
@@ -130,18 +102,10 @@ pub fn Perks() -> impl IntoView {
             </div>
             <Show when=move || { true }>
                 <div class="flex flex-row gap-4">
-                    <a
-                        rel="external"
-                        target="_blank"
-                        href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/INTRACT_PERK.md"
-                    >
-                        <InfoIcon/>
-                    </a>
-                    <button on:click=move |_| sync_intract.dispatch(()) class=BUTTON_CLASS>
+                    <button on:click=move |_| show_intract_modal.set(true) class=BUTTON_CLASS>
                         <IntractIcon/>
                         "Intract"
                     </button>
-
                 </div>
             </Show>
             <Show when=move || { show_perk(&perks.get(), "proof_of_humanity") }>
