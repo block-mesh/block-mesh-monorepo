@@ -43,7 +43,7 @@ pub async fn bulk_uptime_bonus(
             FROM aggregates_uptime a
             WHERE
                 ds.user_id = a.user_id
-                AND a.updated_at >= NOW() - INTERVAL '1 hour'
+                AND a.updated_at >= NOW() - INTERVAL '15 minutes'
                 AND ds.day = CURRENT_DATE
                 AND ds.uptime < $2
         "#,
