@@ -37,7 +37,6 @@ pub async fn analytics_aggregator(
                     let run = diff.num_seconds() > time_limit || count >= agg_size;
                     prev = Utc::now();
                     if run && save_to_db {
-                        tracing::info!("analytics_aggregator starting txn");
                         if let Ok(mut transaction) = create_txn(&pool).await {
                             for pair in calls.iter() {
                                 let _ = get_or_create_analytics(
@@ -52,7 +51,6 @@ pub async fn analytics_aggregator(
                             let _ = commit_txn(transaction).await;
                             count = 0;
                             calls.clear();
-                            tracing::info!("analytics_aggregator finished txn");
                         }
                     }
                 }

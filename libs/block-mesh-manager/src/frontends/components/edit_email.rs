@@ -80,7 +80,7 @@ pub fn EditEmail() -> impl IntoView {
                                 type="text"
                                 name="new_email"
                                 required
-                                placeholder="New Invite Code"
+                                placeholder="New Email"
                                 on:keyup=move |ev: ev::KeyboardEvent| {
                                     let val = event_target_value(&ev);
                                     new_email.update(|v| *v = val);

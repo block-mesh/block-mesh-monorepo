@@ -11,8 +11,8 @@ where
     F: Fn() -> String + 'static,
 {
     view! {
-        <div class="text-off-white h-44 rounded-xl shadow-dark bg-bandwidth-card bg-cover p-2">
-            <div class="w-full h-full rounded-lg py-[15px] px-[20px] pt-[5px] flex flex-col justify-between bg-lightDark">
+        <div class="text-off-white h-44 rounded-xl shadow-dark bg-cover p-2 border border-white">
+            <div class="w-full h-full rounded-lg py-[15px] px-[20px] pt-[5px] flex flex-col justify-between">
                 <div class="bandwidth-card-top">
                     <span class="font-bebas-neue">{title}</span>
                 </div>

@@ -14,10 +14,14 @@ use axum_login::AuthSession;
 use block_mesh_common::constants::{DeviceType, BLOCK_MESH_EMAILS};
 use block_mesh_common::interfaces::server_api::{EditEmailForm, SendEmail};
 use block_mesh_common::reqwest::http_client;
+use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
+use block_mesh_manager_database_domain::domain::get_or_create_aggregate_by_user_and_name::get_or_create_aggregate_by_user_and_name_str;
 use chrono::{Duration, Utc};
+use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::{HeaderMap, StatusCode};
 use std::env;
 use std::sync::Arc;
+use uuid::Uuid;
 use validator::validate_email;
 
 #[tracing::instrument(name = "edit_email_post", skip_all)]
@@ -29,9 +33,6 @@ pub async fn handler(
 ) -> Result<impl IntoResponse, Error> {
     let user = auth.user.ok_or(Error::UserNotFound)?;
     let email = form.new_email.clone().to_ascii_lowercase();
-    if !user.email.starts_with("wallet_") || !user.email.ends_with("@blockmesh.xyz") {
-        return Err(Error::Anyhow(anyhow!("Can't change email")));
-    }
     let spam_emails = get_spam_emails_cache().await;
     let email_domain = match email.split('@').last() {
         Some(d) => d.to_string(),
@@ -70,7 +71,10 @@ pub async fn handler(
     update_email_rate_limit(&user.email, Some(date)).await;
     update_email_rate_limit(&email, Some(date)).await;
     update_email_rate_limit(&header_ip, Some(date)).await;
-
+    let mut transaction = create_txn(&state.pool).await?;
+    let name = format!("{}_{}", AggregateName::EmailChange, Uuid::new_v4());
+    let _ = get_or_create_aggregate_by_user_and_name_str(&mut transaction, &name, &user.id).await?;
+    commit_txn(transaction).await?;
     if !validate_email(email.clone()) {
         return Err(Error::Anyhow(anyhow!("Invalid Email")));
     }
