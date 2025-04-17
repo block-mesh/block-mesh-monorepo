@@ -9,22 +9,17 @@ pub async fn bulk_finalize(transaction: &mut Transaction<'_, Postgres>) -> anyho
         .unwrap_or(100_000);
     sqlx::query!(
         r#"
-        UPDATE
-        daily_stats
-        SET status = $1
-        WHERE id IN (
-            SELECT
-            id
-            FROM daily_stats
-            WHERE
-                day < CURRENT_DATE
-            AND
-                status = $2
-            LIMIT $3
+        WITH to_finalize AS (
+            SELECT id
+            FROM daily_stats_on_going
+            WHERE DAY < CURRENT_DATE
+            LIMIT $1
+            FOR UPDATE SKIP LOCKED
         )
+        UPDATE daily_stats
+        SET status = 'Finalized'
+        WHERE id IN (SELECT id FROM to_finalize)
         "#,
-        "Finalized".to_string(),
-        "OnGoing".to_string(),
         limit
     )
     .execute(&mut **transaction)
