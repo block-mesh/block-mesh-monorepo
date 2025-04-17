@@ -1,6 +1,5 @@
 use crate::frontends::components::bandwidth_card::BandwidthCard;
 use crate::frontends::components::bar_chart::BarChart;
-use crate::frontends::components::download_extension::DownloadExtension;
 // use crate::frontends::components::heading::Heading;
 use crate::frontends::components::icons::chrome_icon::ChromeIcon;
 use crate::frontends::components::modal::Modal;
@@ -50,14 +49,14 @@ pub fn NewDashboard() -> impl IntoView {
     let points = RwSignal::new(0.0);
     let tasks = RwSignal::new(0);
     let number_of_users_invited = RwSignal::new(0);
-    let show_download_extension = RwSignal::new(true);
     let show_edit_email = RwSignal::new(false);
     let email = RwSignal::new("".to_string());
     if let Some(a) = auth_status {
         email.set(a.email.clone().unwrap_or_default());
     }
     let allowed_to_edit_email = Signal::derive(move || {
-        email.get().ends_with("@blockmesh.xyz") && email.get().starts_with("wallet_")
+        // email.get().ends_with("@blockmesh.xyz") && email.get().starts_with("wallet_")
+        true
     });
 
     if let Some(data) = async_data {
@@ -78,13 +77,6 @@ pub fn NewDashboard() -> impl IntoView {
             && email.get_untracked().contains("@blockmesh.xyz")
         {
             verified_email.set(true)
-        }
-        if data
-            .calls_to_action
-            .iter()
-            .any(|i| i.name == "install_extension" && i.status)
-        {
-            show_download_extension.set(false)
         }
     }
 
@@ -123,15 +115,11 @@ pub fn NewDashboard() -> impl IntoView {
     });
 
     view! {
-        <Modal show=show_download_extension show_close_button=false>
-            <DownloadExtension show=show_download_extension/>
-        </Modal>
         <Modal show=show_edit_email show_close_button=true>
             <EditEmail/>
         </Modal>
 
         <div class="lg:flex items-start justify-start gap-4">
-            // <Heading>{move || format!("Dashboard v{}", env!("CARGO_PKG_VERSION"))}</Heading>
             <button
                 class=BUTTON_CLASS
                 on:click=move |_| {
@@ -140,7 +128,6 @@ pub fn NewDashboard() -> impl IntoView {
                     }
                 }
             >
-
                 <span class="material-symbols-outlined">email</span>
                 {move || email.get().to_string()}
             </button>
@@ -183,7 +170,6 @@ pub fn NewDashboard() -> impl IntoView {
 
             </button>
         </div>
-
         <div class="mt-10 grid gap-8 sm:grid-cols-2 xl:grid-cols-5">
             <Stat
                 title="Connection Status"
@@ -193,9 +179,7 @@ pub fn NewDashboard() -> impl IntoView {
 
                 icon="wifi"
             />
-            // subtext="seconds"
             <Stat title="Uptime" value=move || format!("{:.1}", uptime.get()) icon="trending_up"/>
-            // subtext="seconds"
             <Stat
                 title="# Invites"
                 value=move || format!("{:.1}", number_of_users_invited.get())
@@ -227,31 +211,6 @@ pub fn NewDashboard() -> impl IntoView {
                 value_scale="ms"
             />
         </div>
-        // <Subheading>Networks</Subheading>
-        // <Table class="mt-4 [--gutter:theme(spacing.6)] lg:[--gutter:theme(spacing.10)]">
-        // <TableHead>
-        // <tr>
-        // <TableHeader>IP</TableHeader>
-        // <TableHeader>Country</TableHeader>
-        // </tr>
-        // </TableHead>
-        // <tbody>
-        // <Suspense>
-        // {user_ips
-        // .get()
-        // .into_iter()
-        // .map(|ip_info| {
-        // view! {
-        // <tr>
-        // <TableCell>{ip_info.ip.clone()}</TableCell>
-        // <TableCell>{ip_info.country.clone()}</TableCell>
-        // </tr>
-        // }
-        // })
-        // .collect_view()}
-        // </Suspense>
-        // </tbody>
-        // </Table>
         <BarChart/>
     }
 }
