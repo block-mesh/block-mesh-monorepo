@@ -89,11 +89,10 @@ pub async fn add_to_aggregates_aggregator(
                         let calls_clone = calls.clone();
                         let poll_clone = pool.clone();
                         let handle = tokio::spawn(async move {
-                            tracing::info!("add_to_aggregates_create_bulk_query starting txn");
                             if let Ok(mut transaction) = create_txn(&poll_clone).await {
                                 if save_to_db {
                                     let query = add_to_aggregates_create_bulk_query(calls_clone);
-                                    let r = sqlx::query(&query)
+                                    let _ = sqlx::query(&query)
                                         .execute(&mut *transaction)
                                         .await
                                         .map_err(|e| {
@@ -103,16 +102,7 @@ pub async fn add_to_aggregates_aggregator(
                                                 e
                                             );
                                         });
-                                    if let Ok(r) = r {
-                                        tracing::info!(
-                                            "add_to_aggregates_create_bulk_query rows_affected : {}",
-                                            r.rows_affected()
-                                        );
-                                    }
                                     let _ = commit_txn(transaction).await;
-                                    tracing::info!(
-                                        "add_to_aggregates_create_bulk_query finished txn"
-                                    );
                                 }
                             }
                         });
