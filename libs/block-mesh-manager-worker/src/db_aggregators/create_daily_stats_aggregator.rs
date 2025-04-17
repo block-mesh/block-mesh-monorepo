@@ -71,10 +71,9 @@ pub async fn create_daily_stats_aggregator(
                         let poll_clone = pool.clone();
                         let handle = tokio::spawn(async move {
                             if save_to_db {
-                                tracing::info!("create_daily_stats_create_bulk_query starting txn");
                                 if let Ok(mut transaction) = create_txn(&poll_clone).await {
                                     let query = create_daily_stats_create_bulk_query(calls_clone);
-                                    let r = sqlx::query(&query)
+                                    let _ = sqlx::query(&query)
                                         .execute(&mut *transaction)
                                         .await
                                         .map_err(|e| {
@@ -84,16 +83,7 @@ pub async fn create_daily_stats_aggregator(
                                                 e
                                             );
                                         });
-                                    if let Ok(r) = r {
-                                        tracing::info!(
-                                            "create_daily_stats_create_bulk_query rows_affected : {}",
-                                            r.rows_affected()
-                                        );
-                                    }
                                     let _ = commit_txn(transaction).await;
-                                    tracing::info!(
-                                        "create_daily_stats_create_bulk_query finished txn"
-                                    );
                                 }
                             }
                         });
