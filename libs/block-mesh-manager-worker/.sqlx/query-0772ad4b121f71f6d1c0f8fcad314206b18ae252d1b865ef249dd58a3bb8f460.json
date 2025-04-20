@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        WITH to_finalize AS (\n            SELECT id\n            FROM daily_stats_on_going\n            WHERE DAY < CURRENT_DATE\n            LIMIT $1\n            FOR UPDATE SKIP LOCKED\n        )\n        UPDATE daily_stats\n        SET status = 'Finalized'\n        WHERE id IN (SELECT id FROM to_finalize)\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Int8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "0772ad4b121f71f6d1c0f8fcad314206b18ae252d1b865ef249dd58a3bb8f460"
+}
