@@ -9,6 +9,10 @@ databases:
     url: <%= ENV["TG_BOT_DATABASE_URL"] %>
   channel-db:
     url: <%= ENV["CHANNEL_DATABASE_URL"] %>
+  ids:
+    url: <%= ENV["IDS_DATABASE_URL"] %>
+  rama:
+    url: <%= ENV["RAMA_DATABASE_URL"] %>
 
     # System stats
     # aws_db_instance_identifier: my-instance
