@@ -43,12 +43,13 @@ pub async fn bulk_uptime_bonus(
             FROM aggregates_uptime a
             WHERE
                 ds.user_id = a.user_id
-                AND a.updated_at >= NOW() - INTERVAL '15 minutes'
+                AND a.updated_at >= NOW() - INTERVAL '60 minutes'
                 AND ds.day = CURRENT_DATE
                 AND ds.uptime < $2
         "#,
         bonus,
-        86400.0 + r_limit as f64
+        86400.0 + r_limit as f64,
+        interval
     )
     .execute(&mut **transaction)
     .await?;
