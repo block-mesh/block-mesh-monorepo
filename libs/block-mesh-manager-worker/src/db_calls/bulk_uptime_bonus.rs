@@ -48,8 +48,7 @@ pub async fn bulk_uptime_bonus(
                 AND ds.uptime < $2
         "#,
         bonus,
-        86400.0 + r_limit as f64,
-        interval
+        86400.0 + r_limit as f64
     )
     .execute(&mut **transaction)
     .await?;

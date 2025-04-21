@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE daily_stats_on_going ds\n                SET\n                    uptime = GREATEST(uptime, LEAST(uptime + $1, $2)),\n                    uptime_bonus = GREATEST(uptime_bonus, LEAST(uptime_bonus + $1, $2)),\n                    updated_at = now()\n            FROM aggregates_uptime a\n            WHERE\n                ds.user_id = a.user_id\n                AND a.updated_at >= NOW() - INTERVAL '60 minutes'\n                AND ds.day = CURRENT_DATE\n                AND ds.uptime < $2\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Float8",
+        "Float8"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "38b44cd95963e35cfb45ceff149f36175b972b960a608c3c05d8729cce551b99"
+}
