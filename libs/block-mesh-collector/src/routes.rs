@@ -46,8 +46,7 @@ pub async fn create_data_collector(
         return Err(Error::InternalServer("Bad admin param".to_string()));
     }
     let mut transaction = create_txn(&state.db_pool).await?;
-    let _ =
-        CollectorData::create_new_collector_data(&mut transaction, &params.source, &body).await?;
+    CollectorData::create_new_collector_data(&mut transaction, &params.source, &body).await?;
     commit_txn(transaction).await?;
     Ok((StatusCode::OK, "OK"))
 }
