@@ -65,13 +65,15 @@ function start_db() {
 if [ "${SKIP_DOCKER}" != "yes" ]
 then
   remove_pg
-  start_db block-mesh 5559
   start_db tg-bot 5551
   start_db data-sink 5552
-  start_db ids 6999
-  start_db rama 6998
   start_db emails 5553
   start_db logs-drain 5554
+  start_db block-mesh 5559
+  start_db ids 6999
+  start_db rama 6998
+  start_db collector 6997
+
 
 
   DOCKERS="$(docker ps -a -q --filter ancestor=redis:alpine3.20 --format="{{.ID}}")"
@@ -152,6 +154,13 @@ echo "create DB"
 ensure sqlx database create
 cd "${ROOT}/libs/rama-cli" || exit
 echo "migrate DB rama-cli"
+ensure migrate
+>&2 echo "Postgres has been migrated, ready to go!"
+export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:6997/collector"
+echo "create DB"
+ensure sqlx database create
+cd "${ROOT}/libs/block-mesh-collector" || exit
+echo "migrate DB block-mesh-collector"
 ensure migrate
 >&2 echo "Postgres has been migrated, ready to go!"
 cd "${_PWD}"

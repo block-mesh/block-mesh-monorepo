@@ -106,6 +106,7 @@ pub async fn get_flag_value(
 mod tests {
     use super::*;
     use crate::reqwest::http_client;
+    use dashmap::DashMap;
     use std::sync::Arc;
     use tracing_test::traced_test;
     use uuid::Uuid;
