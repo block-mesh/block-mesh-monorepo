@@ -17,6 +17,8 @@ fi
 export WRITE_DATABASE_URL="postgres://postgres:password@localhost:6997/collector"
 export DATABASE_URL="${WRITE_DATABASE_URL}"
 export ENFORCE_SIGNATURE=true
+export IDLE_TIMEOUT=10000
+export idle_in_transaction_session_timeout="15000ms"
 #cargo watch --watch libs --shell "cargo run -p tg-privacy-bot | bunyan &"
 cargo watch --watch libs --shell "cargo run -p block-mesh-collector"
 export backend=$!
