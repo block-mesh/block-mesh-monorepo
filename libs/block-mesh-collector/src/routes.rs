@@ -1,5 +1,5 @@
 use crate::CollectorAppState;
-use crate::collector_data::CollectorData;
+use crate::collector_data::{CollectorDailyStats, CollectorData};
 use crate::errors::Error;
 use axum::extract::{Query, State};
 use axum::response::IntoResponse;
@@ -46,7 +46,9 @@ pub async fn create_data_collector(
         return Err(Error::InternalServer("Bad admin param".to_string()));
     }
     let mut transaction = create_txn(&state.db_pool).await?;
+    CollectorDailyStats::get_or_create_collector_daily_stats(&mut transaction).await?;
     CollectorData::create_new_collector_data(&mut transaction, &params.source, &body).await?;
+    CollectorDailyStats::update_daily_stats(&mut transaction, 1).await?;
     commit_txn(transaction).await?;
     Ok((StatusCode::OK, "OK"))
 }

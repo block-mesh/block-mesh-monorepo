@@ -1,7 +1,9 @@
 mod collector_data;
+mod cron_jobs;
 mod errors;
 mod routes;
 
+use crate::cron_jobs::get_products;
 use crate::routes::get_router;
 use axum::Router;
 use block_mesh_common::env::environment::Environment;
@@ -12,6 +14,7 @@ use logger_general::tracing::{get_sentry_layer, setup_tracing_stdout_only_with_s
 use sqlx::PgPool;
 use std::net::SocketAddr;
 use std::str::FromStr;
+use std::sync::Arc;
 use std::{env, mem, process};
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
@@ -77,6 +80,7 @@ async fn run() -> anyhow::Result<()> {
     load_dotenv();
     setup_tracing_stdout_only_with_sentry();
     let state = CollectorAppState::new().await;
+    let db_pool = Arc::new(state.db_pool.clone());
     let env = env::var("APP_ENVIRONMENT").expect("APP_ENVIRONMENT is not set");
     migrate(&state.db_pool, env)
         .await
@@ -86,9 +90,11 @@ async fn run() -> anyhow::Result<()> {
     let app = Router::new().nest("/", router).layer(cors);
     let port = env::var("PORT").unwrap_or("8001".to_string());
     let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
+    let products_task = tokio::spawn(get_products(db_pool));
     tracing::info!("Listening on {}", listener.local_addr()?);
     let server_task = run_server(listener, app);
     tokio::select! {
-        o = server_task => panic!("server task exit {:?}", o)
+        o = server_task => panic!("server task exit {:?}", o),
+        o = products_task => panic!("products task exit {:?}", o),
     }
 }

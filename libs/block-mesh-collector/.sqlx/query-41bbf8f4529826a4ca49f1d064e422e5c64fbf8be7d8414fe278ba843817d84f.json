@@ -1,0 +1,43 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n                WITH extant AS (\n                \tSELECT id,created_at,day,count\n                \tFROM collector_daily_stats\n                \tWHERE (day) = ($3)\n                ),\n                inserted AS (\n                INSERT INTO collector_daily_stats (id,created_at,day, count)\n                SELECT $1,$2,$3,$4\n                WHERE\n                \tNOT EXISTS (SELECT\tFROM extant)\n                \tRETURNING id,created_at,day,count\n                )\n                SELECT id,created_at,day,count\n                FROM inserted\n                UNION ALL\n                SELECT id,created_at,day,count\n                FROM extant;\n                ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "day",
+        "type_info": "Date"
+      },
+      {
+        "ordinal": 3,
+        "name": "count",
+        "type_info": "Int4"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Date",
+        "Int4"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "41bbf8f4529826a4ca49f1d064e422e5c64fbf8be7d8414fe278ba843817d84f"
+}

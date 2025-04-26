@@ -51,3 +51,7 @@ features = [
   "serde", # Enable serialization/deserialization of UUIDs
   "js"
 ]
+
+[dependencies.rand]
+workspace = true
+features = ["min_const_gen"]

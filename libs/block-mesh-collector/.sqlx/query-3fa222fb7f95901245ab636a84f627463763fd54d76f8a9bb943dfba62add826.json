@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            UPDATE collector_daily_stats\n            SET count = count + $2  \n            WHERE (day) = ($1)\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Date",
+        "Int4"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3fa222fb7f95901245ab636a84f627463763fd54d76f8a9bb943dfba62add826"
+}
