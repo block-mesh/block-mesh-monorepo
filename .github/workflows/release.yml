@@ -349,7 +349,7 @@ jobs:
       - name: "Build block-mesh-collector"
         run: |
           cargo build -p block-mesh-collector --release
-          tar acf data-sink-${{ matrix.target }}.tar.gz target/release/block-mesh-collector
+          tar acf block-mesh-collector-${{ matrix.target }}.tar.gz target/release/block-mesh-collector
       - name: Release
         uses: softprops/action-gh-release@v2
         #if: startsWith(github.ref, 'refs/tags/')
