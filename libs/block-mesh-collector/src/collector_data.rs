@@ -1,3 +1,4 @@
+use anyhow::{Context, anyhow};
 use chrono::{DateTime, NaiveDate, Utc};
 use database_utils::utils::option_uuid::OptionUuid;
 use serde::{Deserialize, Serialize};
@@ -96,7 +97,107 @@ pub struct CollectorData {
     pub data: Value,
 }
 
+#[derive(Serialize, Deserialize, Clone, Debug)]
+pub struct ExportData {
+    /*
+    • Columns: brand, model
+     */
+    pub asin: String,
+    pub url: String,
+    pub brand: String,
+    pub product_price: f64,
+    pub review_count: i64,
+    pub rating: f64,
+    pub in_stock: String,
+    pub last_seen: NaiveDate,
+}
+
 impl CollectorData {
+    #[tracing::instrument(name = "extract_for_export", skip_all, err)]
+    pub fn extract_for_export(&self) -> anyhow::Result<ExportData> {
+        let data = self.data.as_object().context("data isn't an object")?;
+        let data = data
+            .get("data")
+            .ok_or(anyhow!("(1) Cant find data"))?
+            .as_object()
+            .ok_or(anyhow!("(2) Cant find data"))?;
+        let asin = data
+            .get("asin")
+            .ok_or(anyhow!("(1) Cant find asin"))?
+            .as_str()
+            .ok_or(anyhow!("(2) Cant find asin"))?
+            .to_string();
+        let url = format!("https://www.amazon.com/gp/product/{}", asin);
+        let product_details = data
+            .get("product_details")
+            .ok_or(anyhow!("(1) Cant find product_details"))?
+            .as_object()
+            .ok_or(anyhow!("(2) Cant find product_details"))?;
+        let brand = product_details
+            .get("Brand")
+            .ok_or(anyhow!("Cant find brand"))?
+            .as_str()
+            .unwrap_or_default()
+            .to_string();
+        tracing::info!(" data.get(product_price) = {:?}", data.get("product_price"));
+        let product_price = data
+            .get("product_price")
+            .ok_or(anyhow!("(1) Cant find product price"))?
+            .as_str()
+            .ok_or(anyhow!("(2) Cant find product price"))?
+            .parse::<f64>()?;
+        let in_stock = data
+            .get("product_availability")
+            .ok_or(anyhow!("(1) Cant find product_availability"))?
+            .as_str()
+            .ok_or(anyhow!("(2) Cant find product_availability"))?
+            .to_string();
+        let review_count = data
+            .get("product_num_ratings")
+            .ok_or(anyhow!("(1) Cant find product_num_ratings"))?
+            .as_i64()
+            .ok_or(anyhow!("(2) Cant find product_num_ratings"))?;
+        let rating = data
+            .get("product_star_rating")
+            .ok_or(anyhow!("(1) Cant find product_star_rating"))?
+            .as_str()
+            .ok_or(anyhow!("(2) Cant find product_star_rating"))?
+            .parse::<f64>()?;
+        let last_seen = self.created_at.date_naive();
+        Ok(ExportData {
+            asin,
+            url,
+            brand,
+            product_price,
+            in_stock,
+            review_count,
+            rating,
+            last_seen,
+        })
+    }
+
+    #[tracing::instrument(name = "get_day_data", skip_all, err)]
+    pub async fn get_day_data(
+        transaction: &mut Transaction<'_, Postgres>,
+        day: NaiveDate,
+        limit: i64,
+    ) -> anyhow::Result<Vec<Self>> {
+        Ok(sqlx::query_as!(
+            CollectorData,
+            r#"
+            SELECT
+            id, created_at, source, data
+            FROM collector_datas
+            WHERE DATE(created_at) = $1
+            LIMIT $2
+            "#,
+            day,
+            limit
+        )
+        .fetch_all(&mut **transaction)
+        .await?)
+    }
+
     #[tracing::instrument(name = "create_new_collector_data", skip_all, err)]
     pub async fn create_new_collector_data(
         transaction: &mut Transaction<'_, Postgres>,

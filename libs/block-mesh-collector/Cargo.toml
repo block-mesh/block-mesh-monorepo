@@ -6,6 +6,8 @@ edition.workspace = true
 rust-version.workspace = true
 
 [dependencies]
+aws-sdk-s3 = { workspace = true, features = ["behavior-version-latest"] }
+aws-config = { workspace = true, features = ["behavior-version-latest"] }
 database-utils = { path = "../database-utils" }
 axum = { workspace = true, features = ["ws", "macros"] }
 tower-http = { workspace = true, features = ["fs", "trace", "request-id", "util", "cors", "add-extension", "timeout"] }
