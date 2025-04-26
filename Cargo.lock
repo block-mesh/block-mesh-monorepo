@@ -1921,6 +1921,8 @@ name = "block-mesh-collector"
 version = "0.0.555"
 dependencies = [
  "anyhow",
+ "aws-config",
+ "aws-sdk-s3",
  "axum",
  "block-mesh-common",
  "chrono",
