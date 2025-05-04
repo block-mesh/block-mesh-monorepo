@@ -7,7 +7,7 @@ pub async fn update_verified_email(
     verified_email: bool,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
-        r#"UPDATE users SET verified_email= $1 WHERE id = $2"#,
+        r#"UPDATE users SET verified_email = $1 WHERE id = $2"#,
         verified_email,
         user_id
     )

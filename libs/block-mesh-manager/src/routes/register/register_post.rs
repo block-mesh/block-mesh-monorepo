@@ -106,7 +106,7 @@ pub async fn handler(
         ));
     }
 
-    if !validate_email(email.clone()) {
+    if !validate_email(email.clone()) || email.contains(' ') {
         return Ok(Error::redirect(
             400,
             "Invalid email",
@@ -147,7 +147,17 @@ pub async fn handler(
         ));
     }
 
-    let mut transaction = create_txn(&pool).await?;
+    let mut transaction = match create_txn(&pool).await {
+        Ok(t) => t,
+        Err(_) => {
+            return Ok(Error::redirect(
+                400,
+                "Please retry",
+                "Please retry in a few seconds",
+                RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
+            ));
+        }
+    };
     let user = get_user_opt_by_email(&mut transaction, &email).await?;
     if user.is_some() {
         return Ok(Error::redirect(
@@ -197,7 +207,17 @@ pub async fn handler(
             RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
         ));
     }
-    commit_txn(transaction).await?;
+    match commit_txn(transaction).await {
+        Ok(_) => {}
+        Err(_) => {
+            return Ok(Error::redirect(
+                400,
+                "Please retry",
+                "Please retry again in few seconds",
+                RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
+            ))
+        }
+    }
 
     let creds: Credentials = Credentials {
         email: email.clone(),

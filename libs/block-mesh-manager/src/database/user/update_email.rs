@@ -7,7 +7,7 @@ pub async fn update_email(
     email: &str,
 ) -> Result<(), sqlx::Error> {
     sqlx::query!(
-        r#"UPDATE users SET email= $1 WHERE id = $2"#,
+        r#"UPDATE users SET email = $1 WHERE id = $2"#,
         email,
         user_id
     )
