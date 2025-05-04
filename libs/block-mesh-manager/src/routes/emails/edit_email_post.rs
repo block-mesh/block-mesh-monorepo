@@ -71,13 +71,13 @@ pub async fn handler(
     update_email_rate_limit(&user.email, Some(date)).await;
     update_email_rate_limit(&email, Some(date)).await;
     update_email_rate_limit(&header_ip, Some(date)).await;
+    if !validate_email(email.clone()) || email.contains(' ') {
+        return Err(Error::Anyhow(anyhow!("Invalid Email")));
+    }
     let mut transaction = create_txn(&state.pool).await?;
     let name = format!("{}_{}", AggregateName::EmailChange, Uuid::new_v4());
     let _ = get_or_create_aggregate_by_user_and_name_str(&mut transaction, &name, &user.id).await?;
     commit_txn(transaction).await?;
-    if !validate_email(email.clone()) {
-        return Err(Error::Anyhow(anyhow!("Invalid Email")));
-    }
     let email_mode = get_envar("EMAIL_MODE").await;
     if email_mode == "AWS" {
         state
