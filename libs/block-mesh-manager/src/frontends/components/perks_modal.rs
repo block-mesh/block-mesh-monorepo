@@ -2,9 +2,8 @@ use crate::frontends::components::icons::info_icon::InfoIcon;
 use crate::frontends::components::icons::twitter_icon::TwitterIcon;
 use crate::frontends::frontend_webserver::app::perks_data::show_perk;
 use block_mesh_common::constants::{
-    BIT_ROBOT_TWITTER_ID, BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID,
-    BUTTON_CLASS, FRODOBOTS_TWITTER_ID, ROBOTS_DOT_FUN_ID, SAM_IS_MOVING_TWITTER_ID,
-    UFBOTS_TWITTER_ID,
+    BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID, BUTTON_CLASS, MRRYDON_TWITTER_ID,
+    PERCEPTRON_NTWK_TWITTER_ID, PETER_THOC_TWITTER_ID,
 };
 use block_mesh_common::interfaces::server_api::DashboardResponse;
 use leptos::*;
@@ -123,7 +122,7 @@ pub fn PerksModal() -> impl IntoView {
                                     </a>
                                 </div>
                             </Show>
-                            <Show when=move || { show_perk(&perks.get(), "UFBots") }>
+                            <Show when=move || { show_perk(&perks.get(), "PerceptronNTWK") }>
                                 <div class="flex flex-row gap-4">
                                     <a
                                         rel="external"
@@ -134,13 +133,13 @@ pub fn PerksModal() -> impl IntoView {
                                     </a>
                                     <a
                                         rel="external"
-                                        href=format!("/twitter/login?target={}", UFBOTS_TWITTER_ID)
+                                        href=format!("/twitter/login?target={}", PERCEPTRON_NTWK_TWITTER_ID)
 
                                         class=BUTTON_CLASS
                                     >
                                         {move || {
-                                            if perks.get().iter().any(|i| i.name == "UFBots") {
-                                                "UFBots followed"
+                                            if perks.get().iter().any(|i| i.name == "PerceptronNTWK") {
+                                                "PerceptronNTWK followed"
                                             } else {
                                                 "Verify"
                                             }
@@ -149,17 +148,17 @@ pub fn PerksModal() -> impl IntoView {
                                     </a>
                                     <a
                                         rel="external"
-                                        href="https://x.com/UFBots"
+                                        href="https://x.com/PerceptronNTWK"
                                         target="_blank"
 
                                         class=BUTTON_CLASS
                                     >
                                         <TwitterIcon/>
                                         {move || {
-                                            if perks.get().iter().any(|i| i.name == "UFBots") {
-                                                "UFBots followed"
+                                            if perks.get().iter().any(|i| i.name == "PerceptronNTWK") {
+                                                "PerceptronNTWK followed"
                                             } else {
-                                                "@UFBots"
+                                                "@PerceptronNTWK"
                                             }
                                         }}
 
@@ -167,7 +166,7 @@ pub fn PerksModal() -> impl IntoView {
 
                                 </div>
                             </Show>
-                            <Show when=move || { show_perk(&perks.get(), "FrodoBots") }>
+                            <Show when=move || { show_perk(&perks.get(), "MRRydon") }>
                                 <div class="flex flex-row gap-4">
                                     <a
                                         rel="external"
@@ -180,14 +179,14 @@ pub fn PerksModal() -> impl IntoView {
                                         rel="external"
                                         href=format!(
                                             "/twitter/login?target={}",
-                                            FRODOBOTS_TWITTER_ID,
+                                            MRRYDON_TWITTER_ID,
                                         )
 
                                         class=BUTTON_CLASS
                                     >
                                         {move || {
-                                            if perks.get().iter().any(|i| i.name == "FrodoBots") {
-                                                "FrodoBots followed"
+                                            if perks.get().iter().any(|i| i.name == "MRRydon") {
+                                                "MRRydon followed"
                                             } else {
                                                 "Verify"
                                             }
@@ -196,17 +195,17 @@ pub fn PerksModal() -> impl IntoView {
                                     </a>
                                     <a
                                         rel="external"
-                                        href="https://x.com/frodobots"
+                                        href="https://x.com/MRRydon"
                                         target="_blank"
 
                                         class=BUTTON_CLASS
                                     >
                                         <TwitterIcon/>
                                         {move || {
-                                            if perks.get().iter().any(|i| i.name == "FrodoBots") {
-                                                "FrodoBots followed"
+                                            if perks.get().iter().any(|i| i.name == "MRRydon") {
+                                                "MRRydon followed"
                                             } else {
-                                                "@FrodoBots"
+                                                "@MRRydon"
                                             }
                                         }}
 
@@ -214,7 +213,7 @@ pub fn PerksModal() -> impl IntoView {
 
                                 </div>
                             </Show>
-                            <Show when=move || { show_perk(&perks.get(), "SamIsMoving") }>
+                            <Show when=move || { show_perk(&perks.get(), "Peter_thoc") }>
                                 <div class="flex flex-row gap-4">
                                     <a
                                         rel="external"
@@ -227,14 +226,14 @@ pub fn PerksModal() -> impl IntoView {
                                         rel="external"
                                         href=format!(
                                             "/twitter/login?target={}",
-                                            SAM_IS_MOVING_TWITTER_ID,
+                                            PETER_THOC_TWITTER_ID,
                                         )
 
                                         class=BUTTON_CLASS
                                     >
                                         {move || {
-                                            if perks.get().iter().any(|i| i.name == "SamIsMoving") {
-                                                "SamIsMoving followed"
+                                            if perks.get().iter().any(|i| i.name == "Peter_thoc") {
+                                                "Peter_thoc followed"
                                             } else {
                                                 "Verify"
                                             }
@@ -243,108 +242,19 @@ pub fn PerksModal() -> impl IntoView {
                                     </a>
                                     <a
                                         rel="external"
-                                        href="https://x.com/SamIsMoving"
+                                        href="https://x.com/Peter_thoc"
                                         target="_blank"
 
                                         class=BUTTON_CLASS
                                     >
                                         <TwitterIcon/>
                                         {move || {
-                                            if perks.get().iter().any(|i| i.name == "SamIsMoving") {
-                                                "SamIsMoving followed"
+                                            if perks.get().iter().any(|i| i.name == "Peter_thoc") {
+                                                "Peter_thoc followed"
                                             } else {
-                                                "@SamIsMoving"
+                                                "@Peter_thoc"
                                             }
                                         }}
-
-                                    </a>
-
-                                </div>
-                            </Show>
-                            <Show when=move || { show_perk(&perks.get(), "BitRobotNetwork") }>
-                                <div class="flex flex-row gap-4">
-                                    <a
-                                        rel="external"
-                                        target="_blank"
-                                        href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
-                                    >
-                                        <InfoIcon/>
-                                    </a>
-                                    <a
-                                        rel="external"
-                                        href=format!(
-                                            "/twitter/login?target={}",
-                                            BIT_ROBOT_TWITTER_ID,
-                                        )
-
-                                        class=BUTTON_CLASS
-                                    >
-                                        {move || {
-                                            if perks.get().iter().any(|i| i.name == "BitRobotNetwork") {
-                                                "BitRobotNetwork followed"
-                                            } else {
-                                                "Verify"
-                                            }
-                                        }}
-
-                                    </a>
-                                    <a
-                                        rel="external"
-                                        href="https://x.com/BitRobotNetwork"
-                                        target="_blank"
-                                        class=BUTTON_CLASS
-                                    >
-                                        <TwitterIcon/>
-                                        {move || {
-                                            if perks.get().iter().any(|i| i.name == "BitRobotNetwork") {
-                                                "BitRobotNetwork followed"
-                                            } else {
-                                                "@BitRobotNetwork"
-                                            }
-                                        }}
-
-                                    </a>
-                                </div>
-                            </Show>
-                            <Show when=move || { show_perk(&perks.get(), "RobotsDotFun") }>
-                                <div class="flex flex-row gap-4">
-                                    <a
-                                        rel="external"
-                                        target="_blank"
-                                        href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
-                                    >
-                                        <InfoIcon/>
-                                    </a>
-                                    <a
-                                        rel="external"
-                                        href=format!("/twitter/login?target={}", ROBOTS_DOT_FUN_ID)
-
-                                        class=BUTTON_CLASS
-                                    >
-                                        {move || {
-                                            if perks.get().iter().any(|i| i.name == "RobotsDotFun") {
-                                                "RobotsDotFun followed"
-                                            } else {
-                                                "Verify"
-                                            }
-                                        }}
-
-                                    </a>
-                                    <a
-                                        rel="external"
-                                        href="https://x.com/robotsdotfun"
-                                        target="_blank"
-                                        class=BUTTON_CLASS
-                                    >
-                                        <TwitterIcon/>
-                                        {move || {
-                                            if perks.get().iter().any(|i| i.name == "RobotsDotFun") {
-                                                "RobotsDotFun followed"
-                                            } else {
-                                                "@RobotsDotFun"
-                                            }
-                                        }}
-
                                     </a>
                                 </div>
                             </Show>

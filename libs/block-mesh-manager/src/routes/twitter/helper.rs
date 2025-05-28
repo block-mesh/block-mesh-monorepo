@@ -13,6 +13,21 @@ pub struct TwitterProfile {
 impl TwitterProfile {
     pub fn new(twitter_id: u64) -> anyhow::Result<Self> {
         Ok(match twitter_id {
+            1880853313488609280 => Self {
+                id: 1880853313488609280,
+                name: AggregateName::PerceptronNTWK,
+                perk: PerkName::PerceptronNTWK,
+            },
+            814974533769662464 => Self {
+                id: 814974533769662464,
+                name: AggregateName::MRRydon,
+                perk: PerkName::MRRydon,
+            },
+            1903384295001010176 => Self {
+                id: 1903384295001010176,
+                name: AggregateName::Peter_thoc,
+                perk: PerkName::Peter_thoc,
+            },
             1766124448778784768 => Self {
                 id: 1766124448778784768,
                 name: AggregateName::Twitter,

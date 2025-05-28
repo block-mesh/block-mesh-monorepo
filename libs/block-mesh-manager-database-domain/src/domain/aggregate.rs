@@ -27,6 +27,7 @@ pub struct AggregateTmp {
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[allow(non_snake_case, non_camel_case_types)]
 pub enum AggregateName {
     UFBots,
     Twitter,
@@ -49,11 +50,17 @@ pub enum AggregateName {
     BitRobot,
     BitRobotNetwork,
     RobotsDotFun,
+    PerceptronNTWK,
+    MRRydon,
+    Peter_thoc,
 }
 
 impl Display for AggregateName {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::PerceptronNTWK => write!(f, "PerceptronNTWK"),
+            Self::MRRydon => write!(f, "MRRydon"),
+            Self::Peter_thoc => write!(f, "Peter_thoc"),
             Self::EmailChange => write!(f, "EmailChange"),
             Self::RobotsDotFun => write!(f, "RobotsDotFun"),
             Self::BitRobotNetwork => write!(f, "BitRobotNetwork"),
@@ -93,6 +100,9 @@ impl From<String> for AggregateName {
             return Self::WalletChange;
         }
         match s.as_str() {
+            "PerceptronNTWK" => Self::PerceptronNTWK,
+            "MRRydon" => Self::MRRydon,
+            "Peter_thoc" => Self::Peter_thoc,
             "EmailChange" => Self::EmailChange,
             "RobotsDotFun" => Self::RobotsDotFun,
             "BitRobotNetwork" => Self::BitRobotNetwork,
