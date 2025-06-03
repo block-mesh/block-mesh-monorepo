@@ -133,7 +133,10 @@ pub fn PerksModal() -> impl IntoView {
                                     </a>
                                     <a
                                         rel="external"
-                                        href=format!("/twitter/login?target={}", PERCEPTRON_NTWK_TWITTER_ID)
+                                        href=format!(
+                                            "/twitter/login?target={}",
+                                            PERCEPTRON_NTWK_TWITTER_ID,
+                                        )
 
                                         class=BUTTON_CLASS
                                     >
@@ -177,10 +180,7 @@ pub fn PerksModal() -> impl IntoView {
                                     </a>
                                     <a
                                         rel="external"
-                                        href=format!(
-                                            "/twitter/login?target={}",
-                                            MRRYDON_TWITTER_ID,
-                                        )
+                                        href=format!("/twitter/login?target={}", MRRYDON_TWITTER_ID)
 
                                         class=BUTTON_CLASS
                                     >
@@ -255,6 +255,7 @@ pub fn PerksModal() -> impl IntoView {
                                                 "@Peter_thoc"
                                             }
                                         }}
+
                                     </a>
                                 </div>
                             </Show>

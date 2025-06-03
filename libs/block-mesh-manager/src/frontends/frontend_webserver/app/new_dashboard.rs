@@ -128,6 +128,7 @@ pub fn NewDashboard() -> impl IntoView {
                     }
                 }
             >
+
                 <span class="material-symbols-outlined">email</span>
                 {move || email.get().to_string()}
             </button>
