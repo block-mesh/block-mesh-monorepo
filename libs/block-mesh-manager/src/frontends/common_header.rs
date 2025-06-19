@@ -13,7 +13,7 @@ pub fn CommonHeader() -> impl IntoView {
             }
             "#
         </script>
-        <Title text="BlockMesh Network"/>
+        <Title text="Perceptron Network"/>
         <Meta name="viewport" content="width=device-width, initial-scale=1.0"/>
         <Meta charset="UTF-8"/>
         <Link rel="preconnect" href="https://fonts.googleapis.com"/>
@@ -50,7 +50,7 @@ pub fn CommonHeader() -> impl IntoView {
 
         <Link
             rel="icon"
-            href="https://r2-images.blockmesh.xyz/e4f3cdc0-c2ba-442d-3e48-e2f31c0dc100.png"
+            href="https://perceptron-network.perceptrons.xyz/Logo_only_white.png"
         />
         <Script>
             r#"

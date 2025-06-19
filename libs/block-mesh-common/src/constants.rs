@@ -44,8 +44,7 @@ pub static BLOCK_MESH_EMAILS: &str = "https://emails.blockmesh.xyz";
 
 pub static BLOCK_MESH_FEATURE_FLAGS: &str = "https://feature-flags.blockmesh.xyz";
 pub static BLOCK_MESH_SUPPORT_EMAIL: &str = "support@blockmesh.xyz";
-pub static BLOCK_MESH_LOGO: &str =
-    "https://r2-images.blockmesh.xyz/d68dc689-b8ad-492b-ffc4-8f1478685800.png";
+pub static PCN_LOGO: &str = "https://perceptron-network.perceptrons.xyz/Logo_only_white.png";
 
 pub static BLOCK_MESH_LANDING_PAGE_IMAGE: &str =
     "https://r2-images.blockmesh.xyz/dfda0dd2-a321-4c75-cbbe-5521b2355f00.png";

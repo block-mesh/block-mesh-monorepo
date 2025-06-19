@@ -18,7 +18,7 @@ use crate::frontends::frontend_webserver::components::sidebar::{
 };
 use crate::frontends::frontend_webserver::components::sidebar_layout::SidebarLayout;
 use crate::frontends::utils::navigate_external::navigate_to_external_url;
-use block_mesh_common::constants::BLOCK_MESH_LOGO;
+use block_mesh_common::constants::PCN_LOGO;
 use block_mesh_common::interfaces::server_api::{
     AuthStatusResponse, DailyLeaderboard, DashboardResponse,
 };
@@ -48,8 +48,8 @@ pub fn ApplicationSidebar() -> impl IntoView {
         <Sidebar>
             <SidebarHeader>
                 <SidebarItem>
-                    <Avatar src=BLOCK_MESH_LOGO/>
-                    <SidebarLabel>BlockMesh</SidebarLabel>
+                    <Avatar src=PCN_LOGO/>
+                    <SidebarLabel>Perceptron</SidebarLabel>
                     <ReloadButton/>
                 // <OnlineChip is_online=true/>
                 </SidebarItem>
