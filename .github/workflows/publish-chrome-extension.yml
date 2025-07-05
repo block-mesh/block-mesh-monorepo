@@ -92,7 +92,7 @@ jobs:
             exit 1
           fi
       - name: Archive chrome-extension artifact
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: chrome-extension-${{ github.sha }}
           path: chrome-extension-${{ github.sha }}.zip
