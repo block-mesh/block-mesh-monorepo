@@ -117,25 +117,14 @@ pub const CONFIRM_EMAIL: &str = r#"
 <body>
     <div class="container">
         <div class="header">
-            <img src="https://r2-images.blockmesh.xyz/3ef1afb4-e176-4423-7bd3-3eed38102b00.png" alt="BlockMesh Network" width="128" height="128" />
-            <h1>BlockMesh - Confirmation Email</h1>
+            <img src="https://perceptron-network.perceptrons.xyz/Logo_only_white.png" alt="Perceptron Network" width="128" height="128" />
+            <h1>Perceptron Network - Confirmation Email</h1>
         </div>
         <div class="content">
             <p style="color:white">Hi,</p>
             <p style="color:white">Thank you for registering.</p>
             <p style="color:white">Please confirm your email by clicking the following link:</p>
             <a href="{{action_url}}" class="button">Click Here</a>
-            <div style="display: flex; align-items: center; justify-content: space-between; margin-top: 1.5rem;">
-                <a target="_blank"
-                    style="font-family: 'Open Sans', sans-serif; color: cyan; text-decoration: none; margin-bottom: 0.5rem; display: inline-block; vertical-align: baseline; font-size: 0.75rem; font-weight: bold;"
-                    href="https://x.com/blockmesh_xyz">Twitter</a>
-                <a target="_blank"
-                    style="font-family: 'Open Sans', sans-serif; color: cyan; text-decoration: none; margin-bottom: 0.5rem; display: inline-block; vertical-align: baseline; font-size: 0.75rem; font-weight: bold;"
-                    href="https://discord.blockmesh.xyz/">Discord</a>
-                <a target="_blank"
-                    style="font-family: 'Open Sans', sans-serif; color: cyan; text-decoration: none; margin-bottom: 0.5rem; display: inline-block; vertical-align: baseline; font-size: 0.75rem; font-weight: bold;"
-                    href="https://blockmesh.atlassian.net/servicedesk/customer/portals">Support</a>
-            </div>
             <div style="display: flex; align-items: center; justify-content: center; margin-top: 1.5rem;">
                 <a target="_blank"
                     style="font-family: 'Open Sans', sans-serif; color: cyan; text-decoration: none; margin-bottom: 0.5rem; display: inline-block; vertical-align: baseline; font-size: 0.75rem; font-weight: bold;"
@@ -144,7 +133,7 @@ pub const CONFIRM_EMAIL: &str = r#"
             </div>
         </div>
         <div class="footer">
-            <p>&copy; BlockMesh Network</p>
+            <p>&copy; Perceptron Network</p>
         </div>
     </div>
 </body>

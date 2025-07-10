@@ -6,12 +6,12 @@ use std::time::Duration;
 pub const _BASE_URL: &str = "https://api.mailgun.net/v3/blockmesh.xyz/messages";
 pub const _CONFIRM_TEMPLATE_ID: &str = "confirmation email";
 pub const _RESET_TEMPLATE_ID: &str = "reset password";
-pub const EMAIL: &str = "support@blockmesh.xyz";
-pub const SMTP_FROM: &str = "support@blockmesh.xyz";
-pub const _SUBJECT: &str = "BlockMesh Network";
-pub const REPLY_TO: &str = "support@blockmesh.xyz";
-pub const CONFIRM_SUBJECT: &str = "Confirmation Email from BlockMesh Network";
-pub const RESET_SUBJECT: &str = "Reset Password from BlockMesh Network";
+pub const EMAIL: &str = "support@perceptrons.xyz";
+pub const SMTP_FROM: &str = "support@perceptrons.xyz";
+pub const _SUBJECT: &str = "Perceptron Network";
+pub const REPLY_TO: &str = "support@perceptrons.xyz";
+pub const CONFIRM_SUBJECT: &str = "Confirmation Email from Perceptron Network";
+pub const RESET_SUBJECT: &str = "Reset Password from Perceptron Network";
 
 pub struct EmailClient {
     pub client: Client,
