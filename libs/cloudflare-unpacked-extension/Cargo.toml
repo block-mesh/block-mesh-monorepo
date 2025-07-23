@@ -1,0 +1,18 @@
+[package]
+name = "cloudflare-unpacked-extension"
+version = { workspace = true }
+edition = "2021"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+askama = { workspace = true, features = ["with-axum", "serde-json"] }
+askama_axum = { workspace = true }
+worker = { workspace = true }
+tracing = { workspace = true }
+tracing-web = { workspace = true }
+tracing-subscriber = { workspace = true, features = ['time', 'json'] }
+time = { workspace = true, features = ['wasm-bindgen'] }
+serde = { workspace = true, features = ['derive'] }
+serde_json = { workspace = true }
