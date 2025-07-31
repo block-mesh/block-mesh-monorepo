@@ -1,0 +1,134 @@
+@import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Open+Sans:wght@400;600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/*@font-face {*/
+/*    font-family: 'Bebas Neue';*/
+/*url("https://r2-assets.blockmesh.xyz/BebasNeue-Regular.ttf") format('truetype'), font-weight: normal;*/
+/*    font-style: normal;*/
+/*}*/
+
+body {
+    background-color: #0C1120;
+}
+
+.font-bebas-neue {
+    font-family: 'Bebas Neue', sans-serif;
+    text-transform: uppercase;
+}
+
+.font-open-sans {
+    font-family: 'Open Sans', sans-serif;
+}
+
+
+.parent-container {
+    width: 80%;
+    margin: 0 auto;
+    padding: 20px;
+    border: 1px solid #ccc;
+    text-align: center;
+}
+
+.figure-container {
+    margin: 0;
+    padding: 0;
+    display: inline-block;
+    width: 100%;
+}
+
+.figure-container figure {
+    max-width: 100%;
+    height: auto;
+}
+
+.figure-container figcaption {
+    margin-top: 10px;
+    font-size: 1em;
+    color: #666;
+}
+
+:root {
+    --blue: #25e4d3;
+    --darkBlue: #2f8985;
+    --orange: #fab457;
+    --darkOrange: #f97432;
+}
+
+/* Customer scrollbar */
+
+/* width */
+::-webkit-scrollbar {
+    width: 8px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+    box-shadow: inset 0 0 5px grey;
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+    background: var(--darkOrange);
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+    background: var(--darkOrange);
+}
+
+@media screen and (max-width: 600px) {
+    ::-webkit-scrollbar {
+        width: 4px;
+    }
+}
+
+.data-\[slot\=icon\]\:\*\:size-6 > *[data-slot=icon] {
+    width: 1.5rem;
+    height: 1.5rem;
+}
+
+.data-\[slot\=icon\]\:\*\:shrink-0 > *[data-slot=icon] {
+    flex-shrink: 0;
+}
+
+.data-\[slot\=icon\]\:\*\:data-\[active\]\:fill-zinc-950[data-active] > *[data-slot=icon] {
+    fill: #09090b;
+}
+
+.data-\[slot\=icon\]\:\*\:data-\[current\]\:fill-zinc-950[data-current] > *[data-slot=icon] {
+    fill: #09090b;
+}
+
+.data-\[slot\=icon\]\:\*\:data-\[hover\]\:fill-zinc-950[data-hover] > *[data-slot=icon] {
+    fill: #09090b;
+}
+
+.data-\[slot\=icon\]\:\*\:fill-zinc-500 > *[data-slot=icon] {
+    fill: #71717a;
+}
+
+.data-\[slot\=icon\]\:last\:\*\:ml-auto > *:last-child[data-slot=icon] {
+    margin-left: auto;
+}
+
+.data-\[slot\=icon\]\:last\:\*\:size-5 > *:last-child[data-slot=icon] {
+    width: 1.25rem;
+    height: 1.25rem;
+}
+
+@media (min-width: 640px) {
+    .sm\:data-\[slot\=icon\]\:\*\:size-5 > *[data-slot=icon] {
+        width: 1.25rem;
+        height: 1.25rem;
+    }
+
+    .sm\:data-\[slot\=icon\]\:last\:\*\:size-6 > *:last-child[data-slot=icon] {
+        width: 1.5rem;
+        height: 1.5rem;
+    }
+}
