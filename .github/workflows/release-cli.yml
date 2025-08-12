@@ -33,7 +33,7 @@ jobs:
       pkg-version: ${{ steps.pkg-version.outputs.PKG_VERSION }}
     steps:
       - name: "Check out the repo"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
@@ -64,7 +64,7 @@ jobs:
     runs-on: ${{ matrix.os }}
     steps:
       - name: "Check out the repo"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Install deps"
         run: |
           sudo apt-get update
@@ -106,7 +106,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Check out the repo"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v3
       - name: Set up Docker Buildx

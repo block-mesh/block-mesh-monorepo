@@ -20,7 +20,7 @@ jobs:
       pkg-version: ${{ steps.pkg-version.outputs.PKG_VERSION }}
     steps:
       - name: "Check out the repo"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
@@ -40,7 +40,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}

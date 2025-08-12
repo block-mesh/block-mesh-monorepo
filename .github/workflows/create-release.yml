@@ -32,7 +32,7 @@ jobs:
       pkg-version: ${{ steps.pkg-version.outputs.PKG_VERSION }}
     steps:
       - name: "Check out the repo"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Get tag"
         id: "pkg-version"
         shell: "bash"
@@ -45,7 +45,7 @@ jobs:
     runs-on: "ubuntu-latest"
     steps:
       - name: "Check out the repo"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: "Create release"
         uses: "taiki-e/create-gh-release-action@v1"
         with:

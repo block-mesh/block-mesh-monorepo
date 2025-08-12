@@ -21,7 +21,7 @@ jobs:
       pkg-version: ${{ steps.pkg-version.outputs.PKG_VERSION }}
     steps:
       - name: "Check out the repo"
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
@@ -58,7 +58,7 @@ jobs:
             target: "x86_64-pc-windows-msvc"
     runs-on: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: install Rust stable
         uses: dtolnay/rust-toolchain@stable
         with:
