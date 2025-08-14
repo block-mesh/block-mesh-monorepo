@@ -43,6 +43,14 @@ impl<'a, K: Eq + Hash + Clone + Sync + Send + 'static, V: Clone + Sync + Send + 
         self.expiry.write().await.clear();
     }
 
+    pub async fn keys(&self) -> Vec<K> {
+        let mut keys: Vec<K> = Vec::new();
+        for key in self.map.read().await.keys() {
+            keys.push(key.clone());
+        }
+        keys
+    }
+
     pub async fn period_cleanup(
         size_limit: usize,
         map: Arc<RwLock<HashMap<K, V>>>,
