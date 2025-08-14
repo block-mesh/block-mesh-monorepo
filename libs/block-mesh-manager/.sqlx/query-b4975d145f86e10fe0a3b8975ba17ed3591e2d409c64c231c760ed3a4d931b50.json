@@ -1,0 +1,89 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n           id,\n           nonce,\n           user_id,\n           created_at,\n           ip,\n           latitude,\n           longitude,\n           city,\n           region,\n           country,\n           timezone,\n           isp\n           FROM uptime_reports\n           WHERE user_id = $1\n           ORDER BY created_at DESC\n           LIMIT $2",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "nonce",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "ip",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 5,
+        "name": "latitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 6,
+        "name": "longitude",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 7,
+        "name": "city",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 8,
+        "name": "region",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 9,
+        "name": "country",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 10,
+        "name": "timezone",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 11,
+        "name": "isp",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true,
+      true
+    ]
+  },
+  "hash": "b4975d145f86e10fe0a3b8975ba17ed3591e2d409c64c231c760ed3a4d931b50"
+}

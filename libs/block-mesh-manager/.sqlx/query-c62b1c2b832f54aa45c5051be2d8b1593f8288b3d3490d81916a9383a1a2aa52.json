@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "SELECT\n        id,\n        created_at,\n        user_id,\n        token as \"token: Secret<Uuid>\",\n        status as \"status: ApiTokenStatus\"\n        FROM api_tokens WHERE user_id = $1 and status = $2 LIMIT 1",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "token: Secret<Uuid>",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 4,
+        "name": "status: ApiTokenStatus",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false
+    ]
+  },
+  "hash": "c62b1c2b832f54aa45c5051be2d8b1593f8288b3d3490d81916a9383a1a2aa52"
+}
