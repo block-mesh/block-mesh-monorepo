@@ -21,7 +21,7 @@ pub async fn get_user_and_api_token_by_user_id(
         .parse()
         .unwrap_or(false);
     let cache = CACHE
-        .get_or_init(|| async { Arc::new(RwLock::new(HashMapWithExpiry::new())) })
+        .get_or_init(|| async { Arc::new(RwLock::new(HashMapWithExpiry::new(1_000))) })
         .await;
     if enable {
         if let Some(out) = cache.read().await.get(user_id).await {

@@ -76,7 +76,7 @@ pub async fn handler(
     .await?;
     commit_txn(transaction).await?;
     let cache = AUTH_STATUS_RATE_LIMIT
-        .get_or_init(|| async { HashMapWithExpiry::new() })
+        .get_or_init(|| async { HashMapWithExpiry::new(1_000) })
         .await;
     cache.remove(&user.email).await;
     Ok(NotificationRedirect::redirect(

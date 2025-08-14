@@ -57,7 +57,7 @@ pub async fn handler(
     let user = auth.user.ok_or(Error::UserNotFound)?;
     let email = user.email.to_lowercase();
     let cache = RATE_LIMIT
-        .get_or_init(|| async { HashMapWithExpiry::new() })
+        .get_or_init(|| async { HashMapWithExpiry::new(1_000) })
         .await;
     if let Some(resp) = cache.get(&email).await {
         return Ok(Json(resp).into_response());

@@ -90,7 +90,7 @@ pub async fn digest_data(
         }
     }
     let user_cache = USER_CACHE
-        .get_or_init(|| async { Arc::new(RwLock::new(HashMapWithExpiry::new())) })
+        .get_or_init(|| async { Arc::new(RwLock::new(HashMapWithExpiry::new(1_000))) })
         .await;
     let (user, to_save) = match user_cache.read().await.get(&email).await {
         Some(user) => (user, false),

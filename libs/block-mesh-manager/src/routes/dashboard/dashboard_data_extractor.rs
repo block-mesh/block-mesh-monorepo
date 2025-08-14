@@ -45,7 +45,7 @@ pub async fn dashboard_data_extractor(
     invalidate_cache: bool,
 ) -> anyhow::Result<DashboardResponse> {
     let cache = RATE_LIMIT
-        .get_or_init(|| async { HashMapWithExpiry::new() })
+        .get_or_init(|| async { HashMapWithExpiry::new(1_000) })
         .await;
     if !invalidate_cache {
         if let Some(response) = cache.get(&user.email).await {

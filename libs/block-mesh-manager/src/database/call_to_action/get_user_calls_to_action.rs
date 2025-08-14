@@ -19,7 +19,7 @@ pub async fn get_user_call_to_action(
     user_id: &Uuid,
 ) -> anyhow::Result<Vec<CallToAction>> {
     let cache = CACHE
-        .get_or_init(|| async { Arc::new(RwLock::new(HashMapWithExpiry::new())) })
+        .get_or_init(|| async { Arc::new(RwLock::new(HashMapWithExpiry::new(1_000))) })
         .await;
     if let Some(out) = cache.read().await.get(user_id).await {
         return Ok(out);
