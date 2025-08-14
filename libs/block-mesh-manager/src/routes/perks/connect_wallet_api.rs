@@ -151,7 +151,7 @@ pub async fn handler(
     }
     commit_txn(transaction).await?;
     let cache = AUTH_STATUS_RATE_LIMIT
-        .get_or_init(|| async { HashMapWithExpiry::new() })
+        .get_or_init(|| async { HashMapWithExpiry::new(1_000) })
         .await;
     cache.remove(&user_and_api_token.email).await;
     Ok(Json(ConnectWalletResponse {
