@@ -34,6 +34,10 @@ impl<K: Eq + Hash + Clone + Sync + Send + 'static, V: Clone + Sync + Send + 'sta
 impl<'a, K: Eq + Hash + Clone + Sync + Send + 'static, V: Clone + Sync + Send + 'static>
     HashMapWithExpiry<K, V>
 {
+    pub async fn is_empty(&self) -> bool {
+        self.map.read().await.len() == 0
+    }
+
     pub async fn len(&self) -> usize {
         self.map.read().await.len()
     }
