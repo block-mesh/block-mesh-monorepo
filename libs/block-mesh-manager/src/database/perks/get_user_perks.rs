@@ -4,7 +4,7 @@ use chrono::{Duration, Utc};
 use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use sqlx::{query_as, Postgres, Transaction};
 use std::sync::Arc;
-use tokio::sync::{OnceCell, RwLock};
+use tokio::sync::OnceCell;
 use uuid::Uuid;
 
 #[allow(dead_code)]
@@ -12,7 +12,7 @@ struct Id {
     id: Uuid,
 }
 
-type CacheType = Arc<RwLock<HashMapWithExpiry<Uuid, Vec<Perk>>>>;
+type CacheType = Arc<HashMapWithExpiry<Uuid, Vec<Perk>>>;
 #[allow(dead_code)]
 static CACHE: OnceCell<CacheType> = OnceCell::const_new();
 

@@ -18,9 +18,8 @@ use redis::aio::MultiplexedConnection;
 use secret::Secret;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::{OnceCell, RwLock};
+use tokio::sync::OnceCell;
 use tower_sessions_sqlx_store::PostgresStore;
 use uuid::Uuid;
 
@@ -207,7 +206,9 @@ pub async fn save_to_cache(key: &str, session_user: &SessionUser) {
     let cache = CACHE
         .get_or_init(|| async { Arc::new(HashMapWithExpiry::new(1_000)) })
         .await;
-    cache.insert(key.to_string(), session_user.clone()).await;
+    cache
+        .insert(key.to_string(), session_user.clone(), None)
+        .await;
 }
 
 #[tracing::instrument(name = "del_from_cache", skip_all)]
@@ -224,7 +225,7 @@ pub async fn del_from_cache_with_pattern(key: &str) -> anyhow::Result<()> {
         .get_or_init(|| async { Arc::new(HashMapWithExpiry::new(1_000)) })
         .await;
     let keys = cache.keys().await;
-    for k in cache.keys().await {
+    for k in keys {
         if k.starts_with(key) {
             cache.remove(&k.to_string()).await;
         }

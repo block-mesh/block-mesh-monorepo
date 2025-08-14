@@ -6,27 +6,22 @@ use sqlx::PgPool;
 use std::sync::Arc;
 use tokio::sync::{OnceCell, RwLock};
 
-pub static RATE_LIMIT_EMAIL: OnceCell<Arc<RwLock<HashSetWithExpiry<String>>>> =
-    OnceCell::const_new();
+pub static RATE_LIMIT_EMAIL: OnceCell<Arc<HashSetWithExpiry<String>>> = OnceCell::const_new();
 
 pub static SPAM_EMAIL_CACHE: OnceCell<Arc<RwLock<Vec<SpamEmail>>>> = OnceCell::const_new();
 
 pub async fn get_from_email_rate_limit(key: &String) -> Option<String> {
     let cache = RATE_LIMIT_EMAIL
-        .get_or_init(|| async { Arc::new(RwLock::new(HashSetWithExpiry::new())) })
+        .get_or_init(|| async { Arc::new(HashSetWithExpiry::new()) })
         .await;
-    cache.read().await.get(key).await
+    cache.get(key).await
 }
 
 pub async fn update_email_rate_limit(email_or_ip: &str, date: Option<DateTime<Utc>>) {
     let cache = RATE_LIMIT_EMAIL
-        .get_or_init(|| async { Arc::new(RwLock::new(HashSetWithExpiry::new())) })
+        .get_or_init(|| async { Arc::new(HashSetWithExpiry::new()) })
         .await;
-    cache
-        .write()
-        .await
-        .insert(email_or_ip.to_string(), date)
-        .await;
+    cache.insert(email_or_ip.to_string(), date).await;
 }
 
 pub async fn get_spam_emails_cache() -> Vec<SpamEmail> {

@@ -1,8 +1,7 @@
 use bcrypt::verify;
 use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
-use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::{OnceCell, RwLock};
+use tokio::sync::OnceCell;
 
 type VerifyMap = Arc<HashMapWithExpiry<(String, String), bool>>;
 
@@ -20,7 +19,7 @@ pub async fn verify_with_cache(password: &str, hash: &str) -> bool {
     let key = (password.to_string(), hash.to_string());
     let cache = get_cache().await;
     if let Some(entry) = cache.get(&key).await {
-        return *entry;
+        return entry;
     }
     if let Ok(result) = verify::<&str>(password, hash) {
         cache.insert(key, result, None).await;

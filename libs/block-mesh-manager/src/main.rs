@@ -137,8 +137,8 @@ async fn run() -> anyhow::Result<()> {
         .parse()
         .unwrap_or(false);
     let follower_pool = follower_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
-    let invite_codes = HashMapWithExpiry::new();
-    let wallet_addresses = HashMapWithExpiry::new();
+    let invite_codes = HashMapWithExpiry::new(1_000);
+    let wallet_addresses = HashMapWithExpiry::new(1_000);
     let cf_site_key = env::var("CF_SITE_KEY")?;
     let cf_secret_key = env::var("CF_SECRET_KEY")?;
     let cf_enforce = env::var("CF_ENFORCE")
@@ -164,7 +164,7 @@ async fn run() -> anyhow::Result<()> {
         .parse()
         .unwrap_or(false);
     let app_state = Arc::new(AppState {
-        wallet_login_nonce: HashMapWithExpiry::new(),
+        wallet_login_nonce: HashMapWithExpiry::new(1_000),
         rate_limiter: HashSetWithExpiry::new(),
         enable_hcaptcha,
         enable_recaptcha,

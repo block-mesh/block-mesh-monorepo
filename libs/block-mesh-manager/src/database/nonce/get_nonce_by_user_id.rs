@@ -5,10 +5,10 @@ use secret::Secret;
 use sqlx::{Postgres, Transaction};
 use std::env;
 use std::sync::Arc;
-use tokio::sync::{OnceCell, RwLock};
+use tokio::sync::OnceCell;
 use uuid::Uuid;
 
-type CacheType = Arc<RwLock<HashMapWithExpiry<Uuid, Option<Nonce>>>>;
+type CacheType = Arc<HashMapWithExpiry<Uuid, Option<Nonce>>>;
 static CACHE: OnceCell<CacheType> = OnceCell::const_new();
 
 #[tracing::instrument(name = "get_nonce_by_user_id", skip_all)]
@@ -21,10 +21,10 @@ pub async fn get_nonce_by_user_id(
         .parse()
         .unwrap_or(true);
     let cache = CACHE
-        .get_or_init(|| async { Arc::new(RwLock::new(HashMapWithExpiry::new(1_000))) })
+        .get_or_init(|| async { Arc::new(HashMapWithExpiry::new(1_000)) })
         .await;
     if cache_flag {
-        if let Some(out) = cache.read().await.get(user_id).await {
+        if let Some(out) = cache.get(user_id).await {
             return Ok(out);
         }
     }
@@ -45,11 +45,7 @@ pub async fn get_nonce_by_user_id(
     .await?;
     if cache_flag {
         let date = Utc::now() + Duration::milliseconds(60_000);
-        cache
-            .write()
-            .await
-            .insert(*user_id, output.clone(), Some(date))
-            .await;
+        cache.insert(*user_id, output.clone(), Some(date)).await;
     }
     Ok(output)
 }
