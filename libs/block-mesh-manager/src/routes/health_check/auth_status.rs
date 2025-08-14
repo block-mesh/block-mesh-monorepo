@@ -25,7 +25,7 @@ pub async fn handler(
 ) -> Result<Json<AuthStatusResponse>, Error> {
     let user = auth.user.ok_or(Error::UserNotFound)?;
     let cache = AUTH_STATUS_RATE_LIMIT
-        .get_or_init(|| async { HashMapWithExpiry::new() })
+        .get_or_init(|| async { HashMapWithExpiry::new(1_000) })
         .await;
     if let Some(response) = cache.get(&user.email).await {
         return Ok(response);

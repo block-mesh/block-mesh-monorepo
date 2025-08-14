@@ -12,14 +12,14 @@ use axum_login::{
 };
 use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_user_id::get_user_and_api_token_by_user_id;
+use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use redis::aio::MultiplexedConnection;
 use secret::Secret;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;
-use std::collections::HashMap;
 use std::sync::Arc;
-use tokio::sync::{OnceCell, RwLock};
+use tokio::sync::OnceCell;
 use tower_sessions_sqlx_store::PostgresStore;
 use uuid::Uuid;
 
@@ -39,7 +39,7 @@ pub struct Backend {
     con: MultiplexedConnection,
 }
 
-static CACHE: OnceCell<Arc<RwLock<HashMap<String, SessionUser>>>> = OnceCell::const_new();
+static CACHE: OnceCell<Arc<HashMapWithExpiry<String, SessionUser>>> = OnceCell::const_new();
 
 impl Backend {
     pub async fn get_expire() -> i64 {
@@ -193,9 +193,9 @@ pub async fn authentication_layer(
 #[tracing::instrument(name = "get_user_from_cache", skip_all)]
 pub async fn get_user_from_cache(key: &str) -> anyhow::Result<SessionUser> {
     let cache = CACHE
-        .get_or_init(|| async { Arc::new(RwLock::new(HashMap::new())) })
+        .get_or_init(|| async { Arc::new(HashMapWithExpiry::new(1_000)) })
         .await;
-    match cache.read().await.get(key) {
+    match cache.get(&key.to_string()).await {
         Some(user) => Ok(user.clone()),
         None => Err(anyhow!("User not found".to_string())),
     }
@@ -204,32 +204,30 @@ pub async fn get_user_from_cache(key: &str) -> anyhow::Result<SessionUser> {
 #[tracing::instrument(name = "save_to_cache", skip_all)]
 pub async fn save_to_cache(key: &str, session_user: &SessionUser) {
     let cache = CACHE
-        .get_or_init(|| async { Arc::new(RwLock::new(HashMap::new())) })
+        .get_or_init(|| async { Arc::new(HashMapWithExpiry::new(1_000)) })
         .await;
     cache
-        .write()
-        .await
-        .insert(key.to_string(), session_user.clone());
+        .insert(key.to_string(), session_user.clone(), None)
+        .await;
 }
 
 #[tracing::instrument(name = "del_from_cache", skip_all)]
 pub async fn del_from_cache(key: &str) {
     let cache = CACHE
-        .get_or_init(|| async { Arc::new(RwLock::new(HashMap::new())) })
+        .get_or_init(|| async { Arc::new(HashMapWithExpiry::new(1_000)) })
         .await;
-    cache.write().await.remove(key);
+    cache.remove(&key.to_string()).await;
 }
 
 #[tracing::instrument(name = "del_from_cache_with_pattern", skip_all, err)]
 pub async fn del_from_cache_with_pattern(key: &str) -> anyhow::Result<()> {
     let cache = CACHE
-        .get_or_init(|| async { Arc::new(RwLock::new(HashMap::new())) })
+        .get_or_init(|| async { Arc::new(HashMapWithExpiry::new(1_000)) })
         .await;
-    let c = cache.read().await;
-    let keys = c.keys();
+    let keys = cache.keys().await;
     for k in keys {
         if k.starts_with(key) {
-            cache.write().await.remove(k);
+            cache.remove(&k.to_string()).await;
         }
     }
     Ok(())

@@ -22,7 +22,7 @@ pub async fn handler(
     if let Some(session_user) = user {
         state.wallet_addresses.remove(&session_user.email).await;
         let cache = AUTH_STATUS_RATE_LIMIT
-            .get_or_init(|| async { HashMapWithExpiry::new() })
+            .get_or_init(|| async { HashMapWithExpiry::new(1_000) })
             .await;
         cache.remove(&session_user.email).await;
     }

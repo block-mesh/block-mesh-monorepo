@@ -77,11 +77,11 @@ pub async fn spawn_app() -> TestApp {
 
     let check_token_map: CheckTokenResponseMap = Arc::new(DashMap::new());
     let get_token_map: GetTokenResponseMap = Arc::new(DashMap::new());
-    let wallet_addresses = HashMapWithExpiry::new();
-    let invite_codes = HashMapWithExpiry::new();
+    let wallet_addresses = HashMapWithExpiry::new(1_000);
+    let invite_codes = HashMapWithExpiry::new(1_000);
 
     let app_state = Arc::new(AppState {
-        wallet_login_nonce: HashMapWithExpiry::new(),
+        wallet_login_nonce: HashMapWithExpiry::new(1_000),
         rate_limiter: HashSetWithExpiry::new(),
         enable_hcaptcha: false,
         enable_recaptcha: false,

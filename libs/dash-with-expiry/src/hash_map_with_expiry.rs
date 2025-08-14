@@ -2,34 +2,86 @@ use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 use std::hash::Hash;
 use std::sync::Arc;
+use std::time::Duration;
 use tokio::sync::RwLock;
 
 pub struct HashMapWithExpiry<K, V> {
     map: Arc<RwLock<HashMap<K, V>>>,
     expiry: Arc<RwLock<HashMap<K, DateTime<Utc>>>>,
+    size_limit: usize,
 }
 
-impl<K: Eq + Hash + Clone, V: Clone> Clone for HashMapWithExpiry<K, V> {
+impl<K: Eq + Hash + Clone + Sync + Send + 'static, V: Clone + Sync + Send + 'static> Clone
+    for HashMapWithExpiry<K, V>
+{
     fn clone(&self) -> Self {
         Self {
+            size_limit: self.size_limit,
             map: self.map.clone(),
             expiry: self.expiry.clone(),
         }
     }
 }
 
-impl<K: Eq + Hash + Clone, V: Clone> Default for HashMapWithExpiry<K, V> {
+impl<K: Eq + Hash + Clone + Sync + Send + 'static, V: Clone + Sync + Send + 'static> Default
+    for HashMapWithExpiry<K, V>
+{
     fn default() -> Self {
-        Self::new()
+        Self::new(1_000)
     }
 }
 
-impl<'a, K: Eq + Hash + Clone, V: Clone> HashMapWithExpiry<K, V> {
-    pub fn new() -> Self {
-        HashMapWithExpiry {
+impl<'a, K: Eq + Hash + Clone + Sync + Send + 'static, V: Clone + Sync + Send + 'static>
+    HashMapWithExpiry<K, V>
+{
+    pub async fn is_empty(&self) -> bool {
+        self.map.read().await.len() == 0
+    }
+
+    pub async fn len(&self) -> usize {
+        self.map.read().await.len()
+    }
+
+    pub async fn clear(&self) {
+        self.map.write().await.clear();
+        self.expiry.write().await.clear();
+    }
+
+    pub async fn keys(&self) -> Vec<K> {
+        let mut keys: Vec<K> = Vec::new();
+        for key in self.map.read().await.keys() {
+            keys.push(key.clone());
+        }
+        keys
+    }
+
+    pub async fn period_cleanup(
+        size_limit: usize,
+        map: Arc<RwLock<HashMap<K, V>>>,
+        expiry: Arc<RwLock<HashMap<K, DateTime<Utc>>>>,
+    ) {
+        loop {
+            let clear = map.read().await.len() >= size_limit;
+            if clear {
+                map.write().await.clear();
+                expiry.write().await.clear();
+            }
+            tokio::time::sleep(Duration::from_millis(10_000)).await;
+        }
+    }
+
+    pub fn new(size_limit: usize) -> Self {
+        let inst = HashMapWithExpiry {
+            size_limit,
             map: Arc::new(RwLock::new(HashMap::new())),
             expiry: Arc::new(RwLock::new(HashMap::new())),
-        }
+        };
+        tokio::spawn(Self::period_cleanup(
+            inst.size_limit,
+            inst.map.clone(),
+            inst.expiry.clone(),
+        ));
+        inst
     }
 
     pub async fn insert(&self, key: K, value: V, expiry: Option<DateTime<Utc>>) -> Option<V> {
