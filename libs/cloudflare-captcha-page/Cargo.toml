@@ -9,6 +9,7 @@ crate-type = ["cdylib"]
 [dependencies]
 block-mesh-common = { path = "../block-mesh-common" }
 askama = { workspace = true, features = ["with-axum", "serde-json"] }
+getrandom = { workspace = true, features = ["js"] }
 askama_axum = { workspace = true }
 worker = { workspace = true }
 tracing = { workspace = true }

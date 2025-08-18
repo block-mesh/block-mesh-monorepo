@@ -7,6 +7,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
+getrandom = { workspace = true, features = ["js"] }
 block-mesh-common = { path = "../block-mesh-common" }
 askama = { workspace = true, features = ["with-axum", "serde-json"] }
 askama_axum = { workspace = true }
