@@ -54,7 +54,7 @@ pub static BLOCK_MESH_PROGRAM_ID: &str = "FRkQxATWhWqkj3SPZmbBCtkVM4fChd6VYLbEGh
 pub static BLOCK_MESH_LOGGER: &str = "https://cloudflare-worker-logger-proxy.blockmesh.xyz";
 
 pub static BLOCK_MESH_CHROME_EXTENSION_LINK: &str =
-    "https://chromewebstore.google.com/detail/blockmesh-network/obfhoiefijlolgdmphcekifedagnkfjp";
+    "https://chromewebstore.google.com/detail/perceptron-network/dflhdcckcmcajgofmipokpgknmfikhej";
 
 pub static BLOCK_MESH_APP_SERVER: &str = "https://app.blockmesh.xyz";
 pub static BLOCK_MESH_API_SERVER: &str = "https://api.blockmesh.xyz";
