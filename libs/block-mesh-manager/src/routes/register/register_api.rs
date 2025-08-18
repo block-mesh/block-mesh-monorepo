@@ -13,7 +13,7 @@ use crate::middlewares::authentication::{Backend, Credentials};
 use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
 use crate::utils::cftoken::check_cf_token;
-use anyhow::{anyhow, Context};
+use anyhow::anyhow;
 use axum::extract::State;
 use axum::{Extension, Form, Json};
 use axum_login::AuthSession;
@@ -25,7 +25,6 @@ use block_mesh_manager_database_domain::domain::nonce::Nonce;
 use chrono::{Duration, Utc};
 use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
-use http::HeaderMap;
 use secret::Secret;
 use sqlx::PgPool;
 use std::env;
@@ -38,7 +37,6 @@ static RATE_LIMIT_IP: OnceCell<DashSetWithExpiry<String>> = OnceCell::const_new(
 
 #[tracing::instrument(name = "register_api", skip_all)]
 pub async fn handler(
-    headers: HeaderMap,
     Extension(pool): Extension<PgPool>,
     Extension(mut auth): Extension<AuthSession<Backend>>,
     State(state): State<Arc<AppState>>,
@@ -62,27 +60,19 @@ pub async fn handler(
             error: Some("Please check if email you inserted is correct".to_string()),
         }));
     }
-
-    let app_env = get_envar("APP_ENVIRONMENT").await;
-    let header_ip = if app_env != "local" {
-        headers
-            .get("cf-connecting-ip")
-            .context("Missing CF-CONNECTING-IP")?
-            .to_str()
-            .context("Unable to STR CF-CONNECTING-IP")?
-    } else {
-        "127.0.0.1"
-    }
-    .to_string();
-
     let cache = RATE_LIMIT_IP
         .get_or_init(|| async { DashSetWithExpiry::new() })
         .await;
-    if cache.get(&header_ip).is_some() || cache.get(&email).is_some() {
+    if cache.get(&email).is_some() {
         return Err(Error::NotAllowedRateLimit);
     }
-    let date = Utc::now() + Duration::milliseconds(60_000);
-    cache.insert(header_ip, Some(date));
+    let date = Utc::now()
+        + Duration::milliseconds(
+            env::var("REGISTER_RATE_LIMIT_MILLISECOND")
+                .unwrap_or("10000".to_string())
+                .parse()
+                .unwrap_or(10_000),
+        );
     cache.insert(email.clone(), Some(date));
 
     if state.cf_enforce {
