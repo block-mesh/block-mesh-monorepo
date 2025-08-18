@@ -2986,6 +2986,7 @@ dependencies = [
  "askama",
  "askama_axum",
  "block-mesh-common",
+ "getrandom 0.2.15",
  "serde",
  "serde_json",
  "time",
