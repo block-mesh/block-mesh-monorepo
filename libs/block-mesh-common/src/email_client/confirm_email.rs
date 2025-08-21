@@ -128,7 +128,7 @@ pub const CONFIRM_EMAIL: &str = r#"
             <div style="display: flex; align-items: center; justify-content: center; margin-top: 1.5rem;">
                 <a target="_blank"
                     style="font-family: 'Open Sans', sans-serif; color: cyan; text-decoration: none; margin-bottom: 0.5rem; display: inline-block; vertical-align: baseline; font-size: 0.75rem; font-weight: bold;"
-                    href="https://blockmesh.xyz/unsubscribe">Unsubscribe
+                    href="https://perceptrons.xyz/unsubscribe">Unsubscribe
                 </a>
             </div>
         </div>
