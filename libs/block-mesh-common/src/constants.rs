@@ -43,7 +43,7 @@ pub static BLOCK_MESH_SUPPORT_CHAT: &str = "https://blockmesh.xyz/support-chat";
 pub static BLOCK_MESH_EMAILS: &str = "https://emails.blockmesh.xyz";
 
 pub static BLOCK_MESH_FEATURE_FLAGS: &str = "https://feature-flags.blockmesh.xyz";
-pub static BLOCK_MESH_SUPPORT_EMAIL: &str = "support@blockmesh.xyz";
+pub static BLOCK_MESH_SUPPORT_EMAIL: &str = "support@perceptrons.xyz/";
 pub static PCN_LOGO: &str = "https://perceptron-network.perceptrons.xyz/Logo_only_white.png";
 
 pub static BLOCK_MESH_LANDING_PAGE_IMAGE: &str =
@@ -56,7 +56,7 @@ pub static BLOCK_MESH_LOGGER: &str = "https://cloudflare-worker-logger-proxy.blo
 pub static BLOCK_MESH_CHROME_EXTENSION_LINK: &str =
     "https://chromewebstore.google.com/detail/perceptron-network/dflhdcckcmcajgofmipokpgknmfikhej";
 
-pub static BLOCK_MESH_APP_SERVER: &str = "https://app.blockmesh.xyz";
+pub static BLOCK_MESH_APP_SERVER: &str = "https://app.perceptrons.xyz/";
 pub static BLOCK_MESH_API_SERVER: &str = "https://api.blockmesh.xyz";
 
 pub static BLOCK_MESH_GITHUB: &str = "https://github.com/block-mesh/block-mesh-monorepo";
