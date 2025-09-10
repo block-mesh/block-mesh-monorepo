@@ -25,7 +25,7 @@ impl SpammersHelper {
             }
         }
         for reg in regs {
-            if reg.is_match(&email) {
+            if reg.is_match(email) {
                 return false;
             }
         }
