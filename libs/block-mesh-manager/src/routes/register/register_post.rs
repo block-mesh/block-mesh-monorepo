@@ -34,6 +34,7 @@ use crate::database::user::update_user_invited_by::update_user_invited_by;
 use crate::domain::spam_email::SpamEmail;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
+use crate::routes::register::spammers::SpammersHelper;
 use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
 use crate::utils::cftoken::check_cf_token;
@@ -95,7 +96,14 @@ pub async fn handler(
             RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
         ));
     }
-
+    if !SpammersHelper::check_email_address(&email) {
+        return Ok(Error::redirect(
+            400,
+            "Invalid email domain",
+            "Please check if email you inserted is correct",
+            RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
+        ));
+    }
     if !validate_email(email.clone()) || email.contains(' ') {
         return Ok(Error::redirect(
             400,
