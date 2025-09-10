@@ -10,6 +10,7 @@ use crate::database::user::update_user_invited_by::update_user_invited_by;
 use crate::domain::spam_email::SpamEmail;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
+use crate::routes::register::spammers::SpammersHelper;
 use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
 use crate::utils::cftoken::check_cf_token;
@@ -55,6 +56,12 @@ pub async fn handler(
     };
 
     if SpamEmail::check_domains(&email_domain, spam_emails).is_err() {
+        return Ok(Json(RegisterResponse {
+            status_code: 400,
+            error: Some("Please check if email you inserted is correct".to_string()),
+        }));
+    }
+    if !SpammersHelper::check_email_address(&email) {
         return Ok(Json(RegisterResponse {
             status_code: 400,
             error: Some("Please check if email you inserted is correct".to_string()),
