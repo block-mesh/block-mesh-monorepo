@@ -2,8 +2,8 @@ use crate::frontends::components::icons::info_icon::InfoIcon;
 use crate::frontends::components::icons::twitter_icon::TwitterIcon;
 use crate::frontends::frontend_webserver::app::perks_data::show_perk;
 use block_mesh_common::constants::{
-    BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID, BUTTON_CLASS, MRRYDON_TWITTER_ID,
-    PERCEPTRON_NTWK_TWITTER_ID, PETER_THOC_TWITTER_ID,
+    BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID, BUTTON_CLASS,
+    EVERLYN_TWITTER_USER_ID, MRRYDON_TWITTER_ID, PERCEPTRON_NTWK_TWITTER_ID, PETER_THOC_TWITTER_ID,
 };
 use block_mesh_common::interfaces::server_api::DashboardResponse;
 use leptos::*;
@@ -31,6 +31,52 @@ pub fn PerksModal() -> impl IntoView {
                                 </ol>
                             </div>
                             <hr class="border-t border-white mb-4"/>
+                            <Show when=move || { show_perk(&perks.get(), "Everlyn_ai") }>
+                                <div class="flex flex-row gap-4">
+                                    <a
+                                        rel="external"
+                                        target="_blank"
+                                        href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
+                                    >
+                                        <InfoIcon/>
+                                    </a>
+                                    <a
+                                        rel="external"
+                                        href=format!(
+                                            "/twitter/login?target={}",
+                                            EVERLYN_TWITTER_USER_ID,
+                                        )
+
+                                        class=BUTTON_CLASS
+                                    >
+                                        {move || {
+                                            if perks.get().iter().any(|i| i.name == "twitter") {
+                                                "Twitter Connected"
+                                            } else {
+                                                "Verify"
+                                            }
+                                        }}
+
+                                    </a>
+                                    <a
+                                        rel="external"
+                                        href="https://x.com/Everlyn_ai"
+                                        target="_blank"
+                                        class=BUTTON_CLASS
+                                    >
+                                        <TwitterIcon/>
+                                        {move || {
+                                            if perks.get().iter().any(|i| i.name == "twitter") {
+                                                "Twitter Connected"
+                                            } else {
+                                                "@Everlyn_ai"
+                                            }
+                                        }}
+
+                                    </a>
+
+                                </div>
+                            </Show>
                             <Show when=move || { show_perk(&perks.get(), "twitter") }>
                                 <div class="flex flex-row gap-4">
                                     <a
