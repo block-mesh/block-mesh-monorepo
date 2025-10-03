@@ -9,6 +9,11 @@ pub fn get_perks_data() -> HashMap<String, String> {
             .to_string(),
     );
     perks_data.insert(
+        "Everlyn_ai".to_string(),
+        "https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
+            .to_string(),
+    );
+    perks_data.insert(
         "twitter".to_string(),
         "https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
             .to_string(),

@@ -4,6 +4,7 @@ use std::fmt::{Display, Formatter};
 use std::sync::OnceLock;
 
 pub const DEV_ENV: [&str; 3] = ["dev", "development", "local"];
+pub const EVERLYN_TWITTER_USER_ID: u64 = 1838892491828785152;
 pub const BLOCKMESH_TWITTER_USER_ID: u64 = 1766124448778784768;
 pub const BLOCKMESH_FOUNDER_TWITTER_USER_ID: u64 = 1778711300127821824;
 pub const UFBOTS_TWITTER_ID: u64 = 1902284045574402049;
