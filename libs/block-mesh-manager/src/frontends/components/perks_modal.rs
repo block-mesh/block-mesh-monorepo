@@ -2,8 +2,7 @@ use crate::frontends::components::icons::info_icon::InfoIcon;
 use crate::frontends::components::icons::twitter_icon::TwitterIcon;
 use crate::frontends::frontend_webserver::app::perks_data::show_perk;
 use block_mesh_common::constants::{
-    BLOCKMESH_FOUNDER_TWITTER_USER_ID, BLOCKMESH_TWITTER_USER_ID, BUTTON_CLASS,
-    EVERLYN_TWITTER_USER_ID, MRRYDON_TWITTER_ID, PERCEPTRON_NTWK_TWITTER_ID, PETER_THOC_TWITTER_ID,
+    BUTTON_CLASS, EVERLYN_TWITTER_USER_ID, PERCEPTRON_NTWK_TWITTER_ID,
 };
 use block_mesh_common::interfaces::server_api::DashboardResponse;
 use leptos::*;
@@ -77,97 +76,6 @@ pub fn PerksModal() -> impl IntoView {
 
                                 </div>
                             </Show>
-                            <Show when=move || { show_perk(&perks.get(), "twitter") }>
-                                <div class="flex flex-row gap-4">
-                                    <a
-                                        rel="external"
-                                        target="_blank"
-                                        href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
-                                    >
-                                        <InfoIcon/>
-                                    </a>
-                                    <a
-                                        rel="external"
-                                        href=format!(
-                                            "/twitter/login?target={}",
-                                            BLOCKMESH_TWITTER_USER_ID,
-                                        )
-
-                                        class=BUTTON_CLASS
-                                    >
-                                        {move || {
-                                            if perks.get().iter().any(|i| i.name == "twitter") {
-                                                "Twitter Connected"
-                                            } else {
-                                                "Verify"
-                                            }
-                                        }}
-
-                                    </a>
-                                    <a
-                                        rel="external"
-                                        href="https://x.com/blockmesh_xyz"
-                                        target="_blank"
-                                        class=BUTTON_CLASS
-                                    >
-                                        <TwitterIcon/>
-                                        {move || {
-                                            if perks.get().iter().any(|i| i.name == "twitter") {
-                                                "Twitter Connected"
-                                            } else {
-                                                "@blockmesh_xyz"
-                                            }
-                                        }}
-
-                                    </a>
-
-                                </div>
-                            </Show>
-                            <Show when=move || { show_perk(&perks.get(), "founder_twitter") }>
-                                <div class="flex flex-row gap-4">
-                                    <a
-                                        rel="external"
-                                        target="_blank"
-                                        href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
-                                    >
-                                        <InfoIcon/>
-                                    </a>
-                                    <a
-                                        rel="external"
-                                        href=format!(
-                                            "/twitter/login?target={}",
-                                            BLOCKMESH_FOUNDER_TWITTER_USER_ID,
-                                        )
-
-                                        class=BUTTON_CLASS
-                                    >
-                                        {move || {
-                                            if perks.get().iter().any(|i| i.name == "founder_twitter") {
-                                                "Founder Followed"
-                                            } else {
-                                                "Verify"
-                                            }
-                                        }}
-
-                                    </a>
-                                    <a
-                                        rel="external"
-                                        href="https://x.com/__OhadDahan__"
-                                        target="_blank"
-                                        class=BUTTON_CLASS
-                                    >
-                                        <TwitterIcon/>
-                                        {move || {
-                                            if perks.get().iter().any(|i| i.name == "founder_twitter") {
-                                                "Founder Followed"
-                                            } else {
-                                                "@__OhadDahan__"
-                                            }
-                                        }}
-
-                                    </a>
-                                </div>
-                            </Show>
                             <Show when=move || { show_perk(&perks.get(), "PerceptronNTWK") }>
                                 <div class="flex flex-row gap-4">
                                     <a
@@ -210,98 +118,6 @@ pub fn PerksModal() -> impl IntoView {
                                                 "@PerceptronNTWK"
                                             }
                                         }}
-
-                                    </a>
-
-                                </div>
-                            </Show>
-                            <Show when=move || { show_perk(&perks.get(), "MRRydon") }>
-                                <div class="flex flex-row gap-4">
-                                    <a
-                                        rel="external"
-                                        target="_blank"
-                                        href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
-                                    >
-                                        <InfoIcon/>
-                                    </a>
-                                    <a
-                                        rel="external"
-                                        href=format!("/twitter/login?target={}", MRRYDON_TWITTER_ID)
-
-                                        class=BUTTON_CLASS
-                                    >
-                                        {move || {
-                                            if perks.get().iter().any(|i| i.name == "MRRydon") {
-                                                "MRRydon followed"
-                                            } else {
-                                                "Verify"
-                                            }
-                                        }}
-
-                                    </a>
-                                    <a
-                                        rel="external"
-                                        href="https://x.com/MRRydon"
-                                        target="_blank"
-
-                                        class=BUTTON_CLASS
-                                    >
-                                        <TwitterIcon/>
-                                        {move || {
-                                            if perks.get().iter().any(|i| i.name == "MRRydon") {
-                                                "MRRydon followed"
-                                            } else {
-                                                "@MRRydon"
-                                            }
-                                        }}
-
-                                    </a>
-
-                                </div>
-                            </Show>
-                            <Show when=move || { show_perk(&perks.get(), "Peter_thoc") }>
-                                <div class="flex flex-row gap-4">
-                                    <a
-                                        rel="external"
-                                        target="_blank"
-                                        href="https://github.com/block-mesh/block-mesh-support-faq/blob/main/TWITTER_PERK.md"
-                                    >
-                                        <InfoIcon/>
-                                    </a>
-                                    <a
-                                        rel="external"
-                                        href=format!(
-                                            "/twitter/login?target={}",
-                                            PETER_THOC_TWITTER_ID,
-                                        )
-
-                                        class=BUTTON_CLASS
-                                    >
-                                        {move || {
-                                            if perks.get().iter().any(|i| i.name == "Peter_thoc") {
-                                                "Peter_thoc followed"
-                                            } else {
-                                                "Verify"
-                                            }
-                                        }}
-
-                                    </a>
-                                    <a
-                                        rel="external"
-                                        href="https://x.com/Peter_thoc"
-                                        target="_blank"
-
-                                        class=BUTTON_CLASS
-                                    >
-                                        <TwitterIcon/>
-                                        {move || {
-                                            if perks.get().iter().any(|i| i.name == "Peter_thoc") {
-                                                "Peter_thoc followed"
-                                            } else {
-                                                "@Peter_thoc"
-                                            }
-                                        }}
-
                                     </a>
                                 </div>
                             </Show>
