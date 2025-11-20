@@ -90,10 +90,7 @@ impl Application {
 
         let app_env = get_env_var_or_panic(AppEnvVar::AppEnvironment);
         let app_env = <env_var::EnvVar as AsRef<String>>::as_ref(&app_env);
-        let cors = match app_env.as_str() {
-            "local" => CorsLayer::very_permissive(),
-            _ => CorsLayer::permissive(),
-        };
+        let cors = CorsLayer::very_permissive();
 
         let auth_router = get_static_auth_router();
         let api_router = get_api_router();
