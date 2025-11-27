@@ -36,7 +36,7 @@ pub async fn handler(
         })],
     )
     .await;
-
+    //
     let mut follower_transaction = create_txn(&state.follower_pool).await?;
     let user = get_user_and_api_token_by_email(&mut follower_transaction, &user.email)
         .await?

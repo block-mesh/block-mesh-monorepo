@@ -11,7 +11,7 @@ incremental = false
 [workspace]
 members = ["libs/*", "programs/*"]
 exclude = [
-  "libs/extension",
+  #  "libs/extension",
   "libs/cloudflare-page-adgrams",
   "libs/cloudflare-page-connect-wallet",
   "libs/cloudflare-page-xeno-claim",
@@ -50,7 +50,7 @@ dead_code = "forbid"
 
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.580"
+version = "0.0.581"
 edition = "2024"
 rust-version = "1.85.0"
 
