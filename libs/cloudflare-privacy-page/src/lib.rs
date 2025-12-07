@@ -1,11 +1,6 @@
 #![allow(unexpected_cfgs)]
 
 use askama::Template;
-use block_mesh_common::constants::{
-    BLOCK_MESH_APP_SERVER, BLOCK_MESH_CHROME_EXTENSION_LINK, BLOCK_MESH_GITBOOK, BLOCK_MESH_GITHUB,
-    BLOCK_MESH_LANDING_PAGE_IMAGE, BLOCK_MESH_SUPPORT_CHAT, BLOCK_MESH_SUPPORT_EMAIL,
-    BLOCK_MESH_TWITTER, PCN_LOGO,
-};
 use tracing_subscriber::fmt::format::Pretty;
 use tracing_subscriber::fmt::time::UtcTime;
 use tracing_subscriber::prelude::*;
@@ -44,15 +39,15 @@ struct Home {
 #[event(fetch)]
 async fn main(_req: Request, _env: Env, _ctx: Context) -> Result<Response> {
     let response = Home {
-        chrome_extension_link: BLOCK_MESH_CHROME_EXTENSION_LINK.to_string(),
-        app_server: BLOCK_MESH_APP_SERVER.to_string(),
-        github: BLOCK_MESH_GITHUB.to_string(),
-        twitter: BLOCK_MESH_TWITTER.to_string(),
-        gitbook: BLOCK_MESH_GITBOOK.to_string(),
-        logo: PCN_LOGO.to_string(),
-        image: BLOCK_MESH_LANDING_PAGE_IMAGE.to_string(),
-        support: BLOCK_MESH_SUPPORT_EMAIL.to_string(),
-        chat: BLOCK_MESH_SUPPORT_CHAT.to_string(),
+        chrome_extension_link: "".to_string(),
+        app_server: "".to_string(),
+        github: "".to_string(),
+        twitter: "".to_string(),
+        gitbook: "".to_string(),
+        logo: "".to_string(),
+        image: "".to_string(),
+        support: "".to_string(),
+        chat: "".to_string(),
     }
     .render()
     .unwrap();
