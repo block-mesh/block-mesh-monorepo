@@ -11,7 +11,9 @@ incremental = false
 [workspace]
 members = ["libs/*", "programs/*"]
 exclude = [
-  "libs/extension",
+  #  "libs/extension",
+  "libs/cloudflare-privacy-page",
+  "libs/cloudflare-delete-page",
   "libs/cloudflare-page-adgrams",
   "libs/cloudflare-page-connect-wallet",
   "libs/cloudflare-page-xeno-claim",
@@ -50,7 +52,7 @@ dead_code = "forbid"
 
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.581"
+version = "0.0.582"
 edition = "2024"
 rust-version = "1.85.0"
 
@@ -150,7 +152,7 @@ url = { version = "2.5.0" }
 leptos = { version = "0.6.14", features = ["tracing"] }
 server_fn = "0.6.14"
 leptos_router = { version = "0.6.14" }
-wasm-bindgen = { version = "=0.2.93" }
+wasm-bindgen = { version = ">=0.2.93" }
 js-sys = { version = "0.3" }
 wasm-bindgen-futures = { version = "=0.4.42" }
 serde-wasm-bindgen = { version = "0.6" }
