@@ -1,5 +1,5 @@
 {
-  "name": "cloudflare-landing-page",
+  "name": "cloudflare-delete-page",
   "version": "0.0.0",
   "private": true,
   "scripts": {
@@ -7,7 +7,7 @@
     "dev": "wrangler dev --local"
   },
   "devDependencies": {
-    "wrangler": "4.52.1",
+    "wrangler": "4.53.0",
     "undici": "5.28.4"
   }
 }

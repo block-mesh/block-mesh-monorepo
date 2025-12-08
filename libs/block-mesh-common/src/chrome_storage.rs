@@ -10,6 +10,7 @@ use uuid::Uuid;
 pub enum MessageKey {
     All,
     MinimalVersion,
+    PerceptronsUrl,
     BlockMeshUrl,
     BlockMeshWsUrl,
     BlockMeshDataSinkUrl,
@@ -45,6 +46,7 @@ impl Serialize for MessageKey {
 impl Display for MessageKey {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let str = match self {
+            Self::PerceptronsUrl => "perceptrons_url".to_string(),
             Self::MinimalVersion => "minimal_version".to_string(),
             Self::FeedOrigin => "feed_origin".to_string(),
             Self::FeedSelector => "feed_selector".to_string(),
@@ -79,6 +81,7 @@ impl TryFrom<&str> for MessageKey {
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         let value = value.trim_matches('"');
         match value {
+            "perceptrons_url" => Ok(Self::PerceptronsUrl),
             "minimal_version" => Ok(Self::MinimalVersion),
             "feed_origin" => Ok(Self::FeedOrigin),
             "feed_selector" => Ok(Self::FeedSelector),
