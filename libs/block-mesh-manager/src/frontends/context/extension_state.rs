@@ -201,6 +201,9 @@ impl ExtensionContext {
                                     "".to_string()
                                 };
                                 match storage_value {
+                                    MessageKey::PerceptronsUrl => {
+                                        //
+                                    }
                                     MessageKey::MinimalVersion => {
                                         self.minimal_version.update(|v| *v = value);
                                     }
