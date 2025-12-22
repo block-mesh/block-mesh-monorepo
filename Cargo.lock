@@ -592,6 +592,30 @@ dependencies = [
 ]
 
 [[package]]
+name = "askama_web"
+version = "0.14.7"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e1acadd534892f9ef8c3809b47997e3cd857fad735edceff77a88be1c8236920"
+dependencies = [
+ "askama",
+ "askama_web_derive",
+ "axum-core 0.5.5",
+ "bytes",
+ "http 1.4.0",
+]
+
+[[package]]
+name = "askama_web_derive"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "34921de3d57974069bad483fdfe0ec65d88c4ff892edd1ab4d8b03be0dda1b9b"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.111",
+]
+
+[[package]]
 name = "asn1-rs"
 version = "0.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1682,6 +1706,7 @@ version = "0.0.584"
 dependencies = [
  "anyhow",
  "askama",
+ "askama_web",
  "async-trait",
  "aws-config",
  "aws-sdk-sesv2",
@@ -3399,6 +3424,7 @@ dependencies = [
  "solana-sdk",
  "sqlx",
  "thiserror 1.0.61",
+ "time",
  "tokio",
  "tower 0.4.13",
  "tower-http 0.5.2",

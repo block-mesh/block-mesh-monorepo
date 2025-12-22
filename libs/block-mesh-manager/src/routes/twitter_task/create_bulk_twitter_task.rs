@@ -6,11 +6,11 @@ use axum::extract::{Query, State};
 use axum::response::IntoResponse;
 use block_mesh_common::interfaces::server_api::CreateBulkTwitterTask;
 use block_mesh_manager_database_domain::domain::twitter_task::TwitterTask;
-use chrono::Utc;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::StatusCode;
 use std::env;
 use std::sync::Arc;
+use time::OffsetDateTime;
 
 #[tracing::instrument(name = "create_bulk_twitter_task", skip_all)]
 pub async fn handler(
@@ -22,7 +22,7 @@ pub async fn handler(
     }
     let profile = get_twitter_profile(&query.username).await?;
     let since = profile.created_at;
-    let until = Utc::now().date_naive();
+    let until = OffsetDateTime::now_utc().date();
     let mut transaction = create_txn(&state.pool).await?;
     TwitterTask::create_twitter_task(
         &mut transaction,

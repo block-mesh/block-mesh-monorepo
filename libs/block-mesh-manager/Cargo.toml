@@ -50,6 +50,7 @@ validator = { workspace = true, features = ["derive"] }
 sentry = { workspace = true, optional = true }
 url = { workspace = true }
 askama = { workspace = true, features = ["serde_json"] }
+askama_web = { workspace = true }
 form_urlencoded = { workspace = true }
 tokio-stream = { workspace = true, features = ["sync"], optional = true }
 http-body-util = { workspace = true }
