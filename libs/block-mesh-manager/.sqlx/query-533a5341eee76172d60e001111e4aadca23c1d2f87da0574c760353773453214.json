@@ -1,0 +1,47 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n        id,\n        url,\n        method,\n        headers,\n        body\n        FROM tasks\n        WHERE status = $1 AND assigned_user_id = $2\n        LIMIT 1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "url",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "method",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "headers",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 4,
+        "name": "body",
+        "type_info": "Jsonb"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      true,
+      true
+    ]
+  },
+  "hash": "533a5341eee76172d60e001111e4aadca23c1d2f87da0574c760353773453214"
+}

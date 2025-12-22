@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE nonces\n        SET nonce = $1\n        WHERE user_id = $2",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "3e3902b984f1285b046e7ac768fd019472bfb28ecbb2cb15c8f36e779b784ccf"
+}
