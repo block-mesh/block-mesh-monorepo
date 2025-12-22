@@ -1,6 +1,5 @@
 use crate::constants::DeviceType;
 use crate::interfaces::ws_api::WsServerMessage;
-use chrono::{DateTime, NaiveDate, Utc};
 use dashmap::DashMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -8,6 +7,7 @@ use std::cmp::Ordering;
 use std::fmt::{Display, Formatter};
 use std::sync::Arc;
 use std::time::Duration;
+use time::{Date, OffsetDateTime};
 use typeshare::typeshare;
 use uuid::Uuid;
 
@@ -30,8 +30,8 @@ pub struct GetTwitterData {
     #[typeshare(serialized_as = "string")]
     pub id: Uuid,
     pub twitter_username: String,
-    pub since: NaiveDate,
-    pub until: NaiveDate,
+    pub since: Date,
+    pub until: Date,
 }
 
 #[typeshare]
@@ -158,7 +158,7 @@ pub struct GetStatsRequest {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct Stat {
     #[typeshare(serialized_as = "Date")]
-    pub day: NaiveDate,
+    pub day: Date,
     #[typeshare(serialized_as = "number")]
     pub tasks_count: i64,
 }
@@ -277,9 +277,9 @@ pub struct GetUserUptimeResponse {
     #[typeshare(serialized_as = "string")]
     pub user_id: Uuid,
     #[typeshare(serialized_as = "Date")]
-    pub start_time: Option<DateTime<Utc>>,
+    pub start_time: Option<OffsetDateTime>,
     #[typeshare(serialized_as = "Date")]
-    pub end_time: Option<DateTime<Utc>>,
+    pub end_time: Option<OffsetDateTime>,
     pub duration_seconds: Option<f64>,
     pub status_code: u16,
 }
@@ -363,7 +363,7 @@ pub struct DailyStatForDashboard {
     pub tasks_count: i64,
     pub uptime: f64,
     #[typeshare(serialized_as = "Date")]
-    pub day: NaiveDate,
+    pub day: Date,
     pub points: f64,
 }
 
@@ -414,7 +414,7 @@ pub struct ConnectWalletResponse {
 pub struct Referral {
     pub email: String,
     #[typeshare(serialized_as = "Date")]
-    pub created_at: DateTime<Utc>,
+    pub created_at: OffsetDateTime,
     pub verified_email: bool,
 }
 
@@ -441,7 +441,7 @@ pub struct CallToActionForm {
 #[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct DailyLeaderboard {
     #[typeshare(serialized_as = "Date")]
-    pub day: NaiveDate,
+    pub day: Date,
     pub leaderboard_users: Vec<LeaderBoardUser>,
 }
 
@@ -479,7 +479,7 @@ pub struct UserIpInfo {
     pub ip: String,
     pub country: Option<String>,
     #[typeshare(serialized_as = "Date")]
-    pub updated_at: DateTime<Utc>,
+    pub updated_at: OffsetDateTime,
 }
 
 #[derive(Serialize, Deserialize, PartialEq, Debug)]
@@ -716,8 +716,8 @@ pub struct AdminReferral {
 pub struct CreateTwitterTask {
     pub code: String,
     pub username: String,
-    pub since: NaiveDate,
-    pub until: NaiveDate,
+    pub since: Date,
+    pub until: Date,
 }
 
 #[derive(Clone, Debug, Deserialize, Serialize)]
