@@ -24,15 +24,15 @@ exclude = [
   "libs/react-native-app",
   "libs/blockmesh-bin",
   "libs/blockmesh-bin/src-tauri",
-	"libs/block-mesh-solana-client",
-	"libs/client-node",
-	"libs/proxy-endpoint",
-	"libs/proxy-master",
-	"programs/blockmesh-program",
-	"programs/merkle-distributor",
-	"libs/clickhouse-processing",
-	"libs/twitter-scraping-helper",
-	"libs/rama-cli"
+  "libs/block-mesh-solana-client",
+  "libs/client-node",
+  "libs/proxy-endpoint",
+  "libs/proxy-master",
+  "programs/blockmesh-program",
+  "programs/merkle-distributor",
+  "libs/clickhouse-processing",
+  "libs/twitter-scraping-helper",
+  "libs/rama-cli"
 ]
 
 resolver = "2"
@@ -63,7 +63,7 @@ dead_code = "forbid"
 
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.586"
+version = "0.0.587"
 edition = "2024"
 rust-version = "1.85.0"
 
