@@ -2,7 +2,7 @@ use crate::configuration::settings::Settings;
 use crate::middlewares::authentication::{authentication_layer, Backend};
 use crate::routes::twitter::context::Oauth2Ctx;
 use crate::startup::routers::api_router::get_api_router;
-use crate::startup::routers::leptos_router::get_leptos_router;
+//use crate::startup::routers::leptos_router::get_leptos_router;
 use crate::startup::routers::static_auth_router::get_static_auth_router;
 use crate::startup::routers::static_un_auth_router::get_static_un_auth_router;
 use axum::extract::Request;
@@ -18,7 +18,7 @@ use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenR
 use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use dash_with_expiry::hash_set_with_expiry::HashSetWithExpiry;
 use http::{header, HeaderValue};
-use leptos::leptos_config::get_config_from_env;
+//use leptos_config::get_config_from_env;
 use logger_general::tracing::get_sentry_layer;
 use redis::aio::MultiplexedConnection;
 use reqwest::Client;
@@ -27,14 +27,12 @@ use sqlx::postgres::PgPool;
 use std::collections::HashMap;
 use std::env;
 use std::net::SocketAddr;
-use std::path::Path;
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio::sync::Mutex;
 use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
 use tower_http::cors::CorsLayer;
-use tower_http::services::ServeDir;
 use tower_http::set_header::SetResponseHeaderLayer;
 use tower_http::timeout::TimeoutLayer;
 use twitter_v2::authorization::Oauth2Client;
@@ -95,18 +93,18 @@ impl Application {
         let auth_router = get_static_auth_router();
         let api_router = get_api_router();
         let un_auth_router = get_static_un_auth_router();
-        let leptos_config = get_config_from_env().unwrap();
-        let leptos_options = leptos_config.leptos_options;
+        //let leptos_config = get_config_from_env().unwrap();
+        //let leptos_options = leptos_config.leptos_options;
 
-        let path = Path::new("")
-            .join(leptos_options.site_root.clone())
-            .join(leptos_options.site_pkg_dir.clone());
-        let leptos_pkg: Router<()> = Router::new().nest_service(
-            &format!("/{}", leptos_options.site_pkg_dir),
-            ServeDir::new(path),
-        );
+        //let path = Path::new("")
+        //    .join(leptos_options.site_root.clone())
+        //    .join(leptos_options.site_pkg_dir.clone());
+        //let leptos_pkg: Router<()> = Router::new().nest_service(
+        //    &format!("/{}", leptos_options.site_pkg_dir),
+        //    ServeDir::new(path),
+        //);
 
-        let leptos_router = get_leptos_router();
+        //let leptos_router = get_leptos_router();
 
         let oauth_ctx = Oauth2Ctx {
             client: Oauth2Client::new(
@@ -256,9 +254,9 @@ impl Application {
             .parse()
             .unwrap_or(false);
         let app = app
-            .nest("/", leptos_router)
+            //.nest("/", leptos_router)
             .nest("/", backend)
-            .nest("/", leptos_pkg)
+            //.nest("/", leptos_pkg)
             .layer(Extension(Arc::new(Mutex::new(oauth_ctx))))
             .layer(auth_layer);
         let app = if enforce_csp {

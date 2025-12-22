@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use crate::rama_state::RamaState;
 use rama::{
     Context,

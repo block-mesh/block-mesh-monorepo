@@ -83,6 +83,7 @@ bcrypt = { workspace = true }
 secret = { path = "../secret", features = ["sqlx"], optional = true }
 leptos_axum = { workspace = true, optional = true }
 leptos = { workspace = true }
+leptos_config = { workspace = true, optional = true }
 leptos_meta = { workspace = true }
 leptos_router = { workspace = true }
 leptos-use = { workspace = true, features = ["math"] }
@@ -178,6 +179,7 @@ ssr = [
   "dep:tower-http",
   "dep:tracing-bunyan-formatter",
   "dep:leptos_axum",
+  "dep:leptos_config",
   "leptos/ssr",
   "leptos_meta/ssr",
   "leptos_router/ssr",

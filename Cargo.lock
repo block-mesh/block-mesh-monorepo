@@ -1821,6 +1821,7 @@ dependencies = [
  "leptos 0.8.15",
  "leptos-use",
  "leptos_axum",
+ "leptos_config 0.8.8",
  "leptos_meta",
  "leptos_router",
  "lettre",

@@ -7,7 +7,6 @@ use async_trait::async_trait;
 use dotenv::dotenv;
 use reqwest::header::AUTHORIZATION;
 use reqwest::Client;
-use serde::__private::de::Content;
 use serde::{Deserialize, Serialize};
 use std::env::VarError;
 use std::fmt::{Display, Formatter};
