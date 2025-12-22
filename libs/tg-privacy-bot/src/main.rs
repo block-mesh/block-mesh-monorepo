@@ -158,7 +158,7 @@ async fn run() -> anyhow::Result<()> {
     let cors = CorsLayer::permissive();
 
     let app = Router::new()
-        .nest("/", router)
+        .merge(router)
         .layer(cors)
         .layer(Extension(db_pool.clone()));
 

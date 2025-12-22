@@ -63,7 +63,7 @@ dead_code = "forbid"
 
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.587"
+version = "0.0.588"
 edition = "2024"
 rust-version = "1.85.0"
 

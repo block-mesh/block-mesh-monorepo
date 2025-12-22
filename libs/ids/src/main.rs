@@ -185,7 +185,7 @@ async fn run() -> anyhow::Result<()> {
         .expect("Failed to migrate database");
     let router = get_router(state);
     let cors = CorsLayer::permissive();
-    let app = Router::new().nest("/", router).layer(cors);
+    let app = Router::new().merge(router).layer(cors);
     let port = env::var("PORT").unwrap_or("8009".to_string());
     let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
     tracing::info!("Listening on {}", listener.local_addr()?);

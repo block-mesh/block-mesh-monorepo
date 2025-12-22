@@ -230,7 +230,7 @@ async fn run() -> anyhow::Result<()> {
     let router = get_router();
     let cors = CorsLayer::permissive();
     let app = Router::new()
-        .nest("/", router)
+        .merge(router)
         .layer(cors)
         .layer(Extension(db_pool.clone()));
     let port = env::var("PORT").unwrap_or("8001".to_string());
