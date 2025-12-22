@@ -1,12 +1,14 @@
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 #[derive(Serialize, Deserialize, Debug)]
 pub struct UserUptime {
     pub user_id: Uuid,
-    pub start_time: Option<DateTime<Utc>>,
-    pub end_time: Option<DateTime<Utc>>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub start_time: Option<OffsetDateTime>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub end_time: Option<OffsetDateTime>,
     pub duration_seconds: Option<f64>,
 }
 

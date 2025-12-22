@@ -1,11 +1,11 @@
-use chrono::{Duration, Utc};
 use sqlx::{Postgres, Transaction};
+use time::{Duration, OffsetDateTime};
 
 pub async fn delete_bandwidth_reports_by_time_for_all(
     transaction: &mut Transaction<'_, Postgres>,
     seconds: i64,
 ) -> anyhow::Result<()> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let diff = now - Duration::seconds(seconds);
     sqlx::query!(
         r#"

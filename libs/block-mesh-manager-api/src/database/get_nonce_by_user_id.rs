@@ -4,6 +4,7 @@ use sqlx::PgExecutor;
 use uuid::Uuid;
 
 #[tracing::instrument(name = "get_nonce_by_user_id", skip_all)]
+#[allow(dead_code)]
 pub async fn get_nonce_by_user_id(
     executor: impl PgExecutor<'_>,
     user_id: &Uuid,

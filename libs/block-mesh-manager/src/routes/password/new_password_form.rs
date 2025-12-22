@@ -1,6 +1,7 @@
 use askama::Template;
-use askama_axum::IntoResponse;
+use askama_web::WebTemplate;
 use axum::extract::{Query, State};
+use axum::response::IntoResponse;
 use axum::Extension;
 use axum_login::AuthSession;
 use sqlx::PgPool;
@@ -19,7 +20,7 @@ use block_mesh_common::interfaces::server_api::NewPasswordQuery;
 use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
 
 #[allow(dead_code)]
-#[derive(Template)]
+#[derive(Template, WebTemplate)]
 #[template(path = "new_password.html")]
 struct NewPasswordTemplate {
     pub email: String,

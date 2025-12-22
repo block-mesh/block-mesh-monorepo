@@ -1,14 +1,14 @@
 use crate::domain::provider_master_status::ProviderMasterStatus;
 use anyhow::anyhow;
-use chrono::Utc;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 pub async fn create_proxy_master(
     transaction: &mut Transaction<'_, Postgres>,
     address: &str,
 ) -> anyhow::Result<()> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let uuid = Uuid::new_v4();
     sqlx::query!(
         r#"INSERT INTO proxy_masters (id, created_at, address, status) VALUES ($1, $2, $3, $4)"#,

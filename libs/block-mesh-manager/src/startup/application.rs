@@ -2,7 +2,7 @@ use crate::configuration::settings::Settings;
 use crate::middlewares::authentication::{authentication_layer, Backend};
 use crate::routes::twitter::context::Oauth2Ctx;
 use crate::startup::routers::api_router::get_api_router;
-use crate::startup::routers::leptos_router::get_leptos_router;
+//use crate::startup::routers::leptos_router::get_leptos_router;
 use crate::startup::routers::static_auth_router::get_static_auth_router;
 use crate::startup::routers::static_un_auth_router::get_static_un_auth_router;
 use axum::extract::Request;
@@ -18,7 +18,7 @@ use block_mesh_common::interfaces::server_api::{CheckTokenResponseMap, GetTokenR
 use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use dash_with_expiry::hash_set_with_expiry::HashSetWithExpiry;
 use http::{header, HeaderValue};
-use leptos::leptos_config::get_config_from_env;
+//use leptos_config::get_config_from_env;
 use logger_general::tracing::get_sentry_layer;
 use redis::aio::MultiplexedConnection;
 use reqwest::Client;
@@ -27,14 +27,11 @@ use sqlx::postgres::PgPool;
 use std::collections::HashMap;
 use std::env;
 use std::net::SocketAddr;
-use std::path::Path;
 use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio::sync::Mutex;
-use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
 use tower_http::cors::CorsLayer;
-use tower_http::services::ServeDir;
 use tower_http::set_header::SetResponseHeaderLayer;
 use tower_http::timeout::TimeoutLayer;
 use twitter_v2::authorization::Oauth2Client;
@@ -95,18 +92,18 @@ impl Application {
         let auth_router = get_static_auth_router();
         let api_router = get_api_router();
         let un_auth_router = get_static_un_auth_router();
-        let leptos_config = get_config_from_env().unwrap();
-        let leptos_options = leptos_config.leptos_options;
+        //let leptos_config = get_config_from_env().unwrap();
+        //let leptos_options = leptos_config.leptos_options;
 
-        let path = Path::new("")
-            .join(leptos_options.site_root.clone())
-            .join(leptos_options.site_pkg_dir.clone());
-        let leptos_pkg: Router<()> = Router::new().nest_service(
-            &format!("/{}", leptos_options.site_pkg_dir),
-            ServeDir::new(path),
-        );
+        //let path = Path::new("")
+        //    .join(leptos_options.site_root.clone())
+        //    .join(leptos_options.site_pkg_dir.clone());
+        //let leptos_pkg: Router<()> = Router::new().nest_service(
+        //    &format!("/{}", leptos_options.site_pkg_dir),
+        //    ServeDir::new(path),
+        //);
 
-        let leptos_router = get_leptos_router();
+        //let leptos_router = get_leptos_router();
 
         let oauth_ctx = Oauth2Ctx {
             client: Oauth2Client::new(
@@ -152,6 +149,7 @@ impl Application {
             //         tracing::info!("Response status = {}, latency = {}ms", &response.status().as_u16(), latency.as_millis());
             //     }))
             .with_state(app_state.clone());
+        #[allow(deprecated)]
         let backend = if sentry_layer {
             backend
                 .layer(NewSentryLayer::<Request>::new_from_top())
@@ -176,45 +174,6 @@ impl Application {
         } else {
             app
         };
-        let gov_layer = env::var("GOV_LAYER")
-            .unwrap_or("false".to_string())
-            .parse()
-            .unwrap_or(false);
-
-        let app = if gov_layer {
-            let governor_conf = Arc::new(
-                GovernorConfigBuilder::default()
-                    .per_second(
-                        env::var("REQUEST_PER_SECOND")
-                            .unwrap_or("10".to_string())
-                            .parse()
-                            .unwrap_or(10),
-                    )
-                    .burst_size(
-                        env::var("REQUEST_PER_SECOND_BURST")
-                            .unwrap_or("30".to_string())
-                            .parse()
-                            .unwrap_or(30),
-                    )
-                    .finish()
-                    .unwrap(),
-            );
-            let governor_limiter = governor_conf.limiter().clone();
-            let interval = Duration::from_secs(60);
-            // a separate background task to clean up
-            std::thread::spawn(move || loop {
-                std::thread::sleep(interval);
-                tracing::info!("rate limiting storage size: {}", governor_limiter.len());
-                governor_limiter.retain_recent();
-                governor_limiter.shrink_to_fit();
-            });
-            app.layer(GovernorLayer {
-                config: governor_conf,
-            })
-        } else {
-            app
-        };
-
         let permissions = "'self' 'unsafe-eval' 'unsafe-inline' 'wasm-unsafe-eval' data: https://fonts.gstatic.com https://fonts.googleapis.com https://rsms.me https://opencollective.com https://cdn.jsdelivr.net https://*.cloudflare.com https://*.blockmesh.xyz https://*.perceptrons.xyz https://*.googletagmanager.com https://r2-images.blockmesh.xyz https://imagedelivery.net https://*.google-analytics.com chrome-extension://obfhoiefijlolgdmphcekifedagnkfjp ".to_string();
         let permissions = format!("{} {} ", permissions, "https://*.google.com https://*.hcaptcha.com https://*.cloudflareinsights.com https://*.hcaptcha.com https://*.gstatic.com https://*.cloudflare.com");
         let permissions = format!(
@@ -256,9 +215,9 @@ impl Application {
             .parse()
             .unwrap_or(false);
         let app = app
-            .nest("/", leptos_router)
+            //.nest("/", leptos_router)
             .nest("/", backend)
-            .nest("/", leptos_pkg)
+            //.nest("/", leptos_pkg)
             .layer(Extension(Arc::new(Mutex::new(oauth_ctx))))
             .layer(auth_layer);
         let app = if enforce_csp {

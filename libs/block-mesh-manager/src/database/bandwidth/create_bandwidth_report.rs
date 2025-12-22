@@ -1,6 +1,6 @@
 use block_mesh_common::interfaces::server_api::ReportBandwidthRequest;
-use chrono::Utc;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 pub async fn create_bandwidth_report(
@@ -8,7 +8,7 @@ pub async fn create_bandwidth_report(
     user_id: Uuid,
     report: ReportBandwidthRequest,
 ) -> anyhow::Result<Uuid> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let id = Uuid::new_v4();
     sqlx::query!(
         r#"

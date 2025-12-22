@@ -1,8 +1,9 @@
 use crate::middlewares::authentication::Backend;
 use crate::startup::application::AppState;
 use askama::Template;
-use askama_axum::IntoResponse;
+use askama_web::WebTemplate;
 use axum::extract::State;
+use axum::response::IntoResponse;
 use axum::response::Redirect;
 use axum::Extension;
 use axum_login::AuthSession;
@@ -15,7 +16,7 @@ use block_mesh_common::routes_enum::RoutesEnum;
 use std::sync::Arc;
 
 #[allow(dead_code)]
-#[derive(Template)]
+#[derive(Template, WebTemplate)]
 #[template(path = "resend_confirm_email.html")]
 struct ResendConfirmEmailTemplate {
     pub chrome_extension_link: String,

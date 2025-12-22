@@ -15,7 +15,10 @@ pub fn messenger(
         // Any message coming from the sync channel rx, is sent to ws tx/sink
         while let Some(server_message) = sink_rx.recv().await {
             if let Ok(serialized_server_message) = serde_json::to_string(&server_message) {
-                if let Err(error) = ws_sink.send(Message::Text(serialized_server_message)).await {
+                if let Err(error) = ws_sink
+                    .send(Message::Text(serialized_server_message.into()))
+                    .await
+                {
                     if is_cls.load(Ordering::Relaxed) {
                         return;
                     }

@@ -1,5 +1,5 @@
-#![allow(unexpected_cfgs)]
-
+#![allow(unexpected_cfgs, unused_imports)]
+use leptos::mount::mount_to_body;
 pub mod app;
 
 #[cfg(feature = "hydrate")]

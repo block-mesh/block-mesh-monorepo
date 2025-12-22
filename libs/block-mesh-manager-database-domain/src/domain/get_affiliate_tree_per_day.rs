@@ -1,12 +1,12 @@
 use block_mesh_common::interfaces::server_api::{TmpUserAffiliate, UserAffiliate};
-use chrono::NaiveDate;
 use sqlx::{Postgres, Transaction};
+use time::Date;
 use uuid::Uuid;
 
 pub async fn get_affiliate_tree_per_day(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
-    day: &NaiveDate,
+    day: &Date,
 ) -> anyhow::Result<Vec<UserAffiliate>> {
     let affiliates: Vec<TmpUserAffiliate> = sqlx::query_as!(
         TmpUserAffiliate,

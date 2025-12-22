@@ -1,8 +1,8 @@
 use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use crate::startup::application::AppState;
-use askama_axum::IntoResponse;
 use axum::extract::State;
+use axum::response::IntoResponse;
 use axum::{Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;

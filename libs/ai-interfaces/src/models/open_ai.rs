@@ -5,20 +5,15 @@ use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Sequence)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Sequence, Default)]
 pub enum OpenAiModels {
     Gpt4o,
     Gpt4oLatest,
     Gpt4oMini,
     Gpt4Turbo,
+    #[default]
     Gpt4,
     Gpt35Turbo,
-}
-
-impl Default for OpenAiModels {
-    fn default() -> Self {
-        Self::Gpt4
-    }
 }
 
 impl Display for OpenAiModels {

@@ -1,6 +1,6 @@
 use crate::domain::aggregate::{Aggregate, AggregateName, AggregateTmp};
-use chrono::Utc;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 // #[tracing::instrument(name = "get_or_create_aggregate_by_user_and_name", skip_all)]
@@ -9,7 +9,7 @@ use uuid::Uuid;
 //     name: AggregateName,
 //     user_id: &Uuid,
 // ) -> anyhow::Result<Aggregate> {
-//     let now = Utc::now();
+//     let now = OffsetDateTime::now_utc();
 //     let id = Uuid::new_v4();
 //     let value = serde_json::Value::Null;
 //     let aggregate = sqlx::query_as!(
@@ -22,7 +22,7 @@ use uuid::Uuid;
 //         RETURNING id, created_at, user_id, name, value, updated_at
 //         "#,
 //         id,
-//         now.clone(),
+//         now,
 //         user_id,
 //         name.to_string(),
 //         value,
@@ -39,7 +39,7 @@ pub async fn get_or_create_aggregate_by_user_and_name(
     name: AggregateName,
     user_id: &Uuid,
 ) -> anyhow::Result<Aggregate> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let id = Uuid::new_v4();
     let value = serde_json::Value::Null;
     let aggregate = sqlx::query_as!(
@@ -64,7 +64,7 @@ SELECT id,created_at,user_id,name,value,updated_at
 FROM extant;
 "#,
         id,
-        now.clone(),
+        now,
         user_id,
         name.to_string(),
         value
@@ -88,7 +88,7 @@ pub async fn get_or_create_aggregate_by_user_and_name_str(
     name: &str,
     user_id: &Uuid,
 ) -> anyhow::Result<Aggregate> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let id = Uuid::new_v4();
     let value = serde_json::Value::Null;
     let aggregate = sqlx::query_as!(
@@ -113,7 +113,7 @@ SELECT id,created_at,user_id,name,value,updated_at
 FROM extant;
 "#,
         id,
-        now.clone(),
+        now,
         user_id,
         name.to_string(),
         value

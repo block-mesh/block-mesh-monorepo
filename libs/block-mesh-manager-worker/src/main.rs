@@ -3,7 +3,6 @@ use crate::pg_listener::start_listening;
 use axum::{Extension, Router};
 use block_mesh_common::constants::BLOCKMESH_PG_NOTIFY_WORKER;
 use block_mesh_common::env::load_dotenv::load_dotenv;
-use chrono::NaiveDate;
 use database_utils::utils::connection::channel_pool::channel_pool;
 use database_utils::utils::connection::unlimited_pool::unlimited_pool;
 use database_utils::utils::connection::write_pool::write_pool;
@@ -13,6 +12,7 @@ use std::collections::HashSet;
 use std::net::SocketAddr;
 use std::sync::Arc;
 use std::{env, mem, process};
+use time::Date;
 use tokio::net::TcpListener;
 use tokio::sync::RwLock;
 use tokio::task::JoinHandle;
@@ -104,8 +104,7 @@ async fn run() -> anyhow::Result<()> {
             .unwrap_or(5000),
     );
 
-    let queue: Arc<RwLock<HashSet<(Uuid, Uuid, NaiveDate)>>> =
-        Arc::new(RwLock::new(HashSet::new()));
+    let queue: Arc<RwLock<HashSet<(Uuid, Uuid, Date)>>> = Arc::new(RwLock::new(HashSet::new()));
 
     let ref_bonus_cron_task = tokio::spawn(ref_bonus_cron(
         db_pool.clone(),

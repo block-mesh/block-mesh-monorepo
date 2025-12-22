@@ -1,8 +1,8 @@
-use chrono::{DateTime, Utc};
 use rand::Rng;
 use secret::Secret;
 use serde::{Deserialize, Serialize};
 use std::iter;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
@@ -10,7 +10,8 @@ const CHARSET: &[u8] = b"ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789";
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
 pub struct Nonce {
     pub id: Uuid,
-    pub created_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
     pub user_id: Uuid,
     #[serde(skip)]
     pub nonce: Secret<String>,

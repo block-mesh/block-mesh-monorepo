@@ -1,5 +1,5 @@
-use chrono::Utc;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 pub async fn create_user(
@@ -8,7 +8,7 @@ pub async fn create_user(
     email: &str,
     password: &str,
 ) -> anyhow::Result<Uuid> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let id = Uuid::new_v4();
     sqlx::query!(
         r#"INSERT INTO users (id, created_at, wallet_address, email, password) VALUES ($1, $2, $3, $4, $5)"#,

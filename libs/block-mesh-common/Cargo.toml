@@ -19,7 +19,6 @@ tracing-subscriber = { workspace = true, features = ["env-filter", "time", "json
 tracing-serde = { workspace = true }
 http-body-util = { workspace = true, optional = true }
 solana-client = { workspace = true, optional = true }
-solana-client-wasm = { workspace = true, optional = true }
 bytes = { workspace = true, optional = true }
 thiserror = { workspace = true }
 bs58 = { workspace = true }
@@ -30,6 +29,7 @@ serde_json = { workspace = true }
 clap = { workspace = true, features = ["derive"], optional = true }
 solana-sdk = { workspace = true, optional = true }
 chrono = { workspace = true, features = ["clock", "serde"] }
+time = { workspace = true }
 anyhow = { workspace = true }
 once_cell = { workspace = true }
 lettre = { workspace = true, optional = true }

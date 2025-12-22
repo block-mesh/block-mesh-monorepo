@@ -1,7 +1,14 @@
+#![allow(deprecated)]
+use leptos::prelude::*;
 use leptos::*;
+#[cfg(any(feature = "csr", feature = "hydrate", feature = "ssr"))]
 use leptos_meta::*;
-use leptos_router::*;
+#[cfg(any(feature = "csr", feature = "hydrate", feature = "ssr"))]
+use leptos_router::components::{Route, Router, Routes};
+#[cfg(any(feature = "csr", feature = "hydrate", feature = "ssr"))]
+use leptos_router::path;
 
+#[cfg(any(feature = "csr", feature = "hydrate", feature = "ssr"))]
 #[component]
 pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
@@ -18,9 +25,9 @@ pub fn App() -> impl IntoView {
         // content for this welcome page
         <Router>
             <main>
-                <Routes>
-                    <Route path="" view=HomePage/>
-                    <Route path="/*any" view=NotFound/>
+                <Routes fallback=|| "Not found.">
+                    <Route path=path!("") view=HomePage/>
+                    <Route path=path!("/*any") view=NotFound/>
                 </Routes>
             </main>
         </Router>
@@ -28,6 +35,7 @@ pub fn App() -> impl IntoView {
 }
 
 /// Renders the home page of your application.
+#[cfg(any(feature = "csr", feature = "hydrate", feature = "ssr"))]
 #[component]
 fn HomePage() -> impl IntoView {
     // Creates a reactive value to update the button
@@ -41,6 +49,7 @@ fn HomePage() -> impl IntoView {
 }
 
 /// 404 - Not Found
+#[cfg(any(feature = "csr", feature = "hydrate", feature = "ssr"))]
 #[component]
 fn NotFound() -> impl IntoView {
     // set an HTTP status code 404

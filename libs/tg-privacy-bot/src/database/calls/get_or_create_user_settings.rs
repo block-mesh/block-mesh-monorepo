@@ -1,8 +1,8 @@
 use crate::database::models::message_mode::MessageMode;
 use crate::database::models::user_settings::UserSettings;
 use ai_interfaces::models::base::ModelName;
-use chrono::Utc;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 pub async fn get_or_create_user_settings(
@@ -10,7 +10,7 @@ pub async fn get_or_create_user_settings(
     user_id: &Uuid,
 ) -> anyhow::Result<UserSettings> {
     let id = Uuid::new_v4();
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let message_mode = MessageMode::default();
     let model_name = ModelName::default();
     let usage = sqlx::query_as!(

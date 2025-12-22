@@ -3,8 +3,9 @@ use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use crate::startup::application::AppState;
 use askama::Template;
-use askama_axum::IntoResponse;
+use askama_web::WebTemplate;
 use axum::extract::State;
+use axum::response::IntoResponse;
 use axum::Extension;
 use axum_login::AuthSession;
 use block_mesh_common::constants::{
@@ -17,7 +18,7 @@ use sqlx::PgPool;
 use std::sync::Arc;
 
 #[allow(dead_code)]
-#[derive(Template)]
+#[derive(Template, WebTemplate)]
 #[template(path = "invite_codes/edit_invite_code.html")]
 struct EditInviteCodeTemplate {
     pub current_invite_code: String,

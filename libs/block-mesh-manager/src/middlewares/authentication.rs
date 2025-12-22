@@ -4,7 +4,6 @@ use crate::errors::error::Error;
 use crate::utils::cache_envar::get_envar;
 use crate::utils::verify_cache::verify_with_cache;
 use anyhow::anyhow;
-use async_trait::async_trait;
 use axum_login::tower_sessions::cookie::time::Duration;
 use axum_login::{
     tower_sessions::{ExpiredDeletion, Expiry, SessionManagerLayer},
@@ -68,84 +67,91 @@ pub struct SessionUser {
     pub nonce: String,
 }
 
-#[async_trait]
 impl AuthnBackend for Backend {
     type User = SessionUser;
     type Credentials = Credentials;
     type Error = Error;
 
     #[tracing::instrument(name = "authenticate", skip_all)]
-    async fn authenticate(
+    fn authenticate(
         &self,
         creds: Self::Credentials,
-    ) -> Result<Option<Self::User>, Self::Error> {
-        let key = Backend::authenticate_key_with_password(&creds.email, &creds.password);
-        if let Ok(cache_user) = get_user_from_cache(&key).await {
-            return Ok(Some(cache_user));
-        }
+    ) -> impl std::future::Future<Output = Result<Option<Self::User>, Self::Error>> + Send {
         let pool = self.db.clone();
-        let mut transaction = create_txn(&pool).await?;
-        let user = match get_user_and_api_token_by_email(&mut transaction, &creds.email).await {
-            Ok(u) => u,
-            Err(e) => {
-                del_from_cache(&key).await;
-                return Err(Error::Auth(e.to_string()));
+        async move {
+            let key = Backend::authenticate_key_with_password(&creds.email, &creds.password);
+            if let Ok(cache_user) = get_user_from_cache(&key).await {
+                return Ok(Some(cache_user));
             }
-        };
-        commit_txn(transaction).await?;
-        let user = match user {
-            Some(u) => u,
-            None => {
-                del_from_cache(&key).await;
-                return Err(Error::Auth("User not found".to_string()));
+            let mut transaction = create_txn(&pool).await?;
+            let user = match get_user_and_api_token_by_email(&mut transaction, &creds.email).await {
+                Ok(u) => u,
+                Err(e) => {
+                    del_from_cache(&key).await;
+                    return Err(Error::Auth(e.to_string()));
+                }
+            };
+            commit_txn(transaction).await?;
+            let user = match user {
+                Some(u) => u,
+                None => {
+                    del_from_cache(&key).await;
+                    return Err(Error::Auth("User not found".to_string()));
+                }
+            };
+            if !verify_with_cache(creds.password.as_ref(), user.password.as_ref()).await {
+                return Err(Error::Auth("Invalid password".to_string()));
             }
-        };
-        if !verify_with_cache(creds.password.as_ref(), user.password.as_ref()).await {
-            return Err(Error::Auth("Invalid password".to_string()));
+            let session_user = SessionUser {
+                id: user.user_id,
+                nonce: creds.nonce,
+                email: user.email,
+            };
+            save_to_cache(&key, &session_user).await;
+            let key = Backend::authenticate_key_with_user_id(&user.user_id);
+            save_to_cache(&key, &session_user).await;
+            Ok(Option::from(session_user))
         }
-        let session_user = SessionUser {
-            id: user.user_id,
-            nonce: creds.nonce,
-            email: user.email,
-        };
-        save_to_cache(&key, &session_user).await;
-        let key = Backend::authenticate_key_with_user_id(&user.user_id);
-        save_to_cache(&key, &session_user).await;
-        Ok(Option::from(session_user))
     }
 
     #[tracing::instrument(name = "get_user", skip_all)]
-    async fn get_user(&self, user_id: &UserId<Self>) -> Result<Option<Self::User>, Self::Error> {
-        let key = Backend::authenticate_key_with_user_id(user_id);
-        if let Ok(cache_user) = get_user_from_cache(&user_id.to_string()).await {
-            return Ok(Some(cache_user));
-        }
+    fn get_user(
+        &self,
+        user_id: &UserId<Self>,
+    ) -> impl std::future::Future<Output = Result<Option<Self::User>, Self::Error>> + Send {
+        let user_id = *user_id;
         let pool = self.db.clone();
-        let mut transaction = create_txn(&pool).await?;
-        let user = match get_user_and_api_token_by_user_id(&mut transaction, user_id).await {
-            Ok(u) => u,
-            Err(e) => {
-                del_from_cache(&key).await;
-                return Err(Error::Auth(e.to_string()));
+        async move {
+            let key = Backend::authenticate_key_with_user_id(&user_id);
+            if let Ok(cache_user) = get_user_from_cache(&user_id.to_string()).await {
+                return Ok(Some(cache_user));
             }
-        };
+            let mut transaction = create_txn(&pool).await?;
+            let user = match get_user_and_api_token_by_user_id(&mut transaction, &user_id).await {
+                Ok(u) => u,
+                Err(e) => {
+                    del_from_cache(&key).await;
+                    return Err(Error::Auth(e.to_string()));
+                }
+            };
 
-        let user = match user {
-            Some(u) => u,
-            None => {
-                del_from_cache(&key).await;
-                return Err(Error::Auth("User not found".to_string()));
-            }
-        };
+            let user = match user {
+                Some(u) => u,
+                None => {
+                    del_from_cache(&key).await;
+                    return Err(Error::Auth("User not found".to_string()));
+                }
+            };
 
-        let session_user = SessionUser {
-            id: user.user_id,
-            email: user.email.clone(),
-            nonce: user.nonce.as_ref().to_string(),
-        };
-        save_to_cache(&key, &session_user).await;
-        commit_txn(transaction).await?;
-        Ok(Option::from(session_user))
+            let session_user = SessionUser {
+                id: user.user_id,
+                email: user.email.clone(),
+                nonce: user.nonce.as_ref().to_string(),
+            };
+            save_to_cache(&key, &session_user).await;
+            commit_txn(transaction).await?;
+            Ok(Option::from(session_user))
+        }
     }
 }
 

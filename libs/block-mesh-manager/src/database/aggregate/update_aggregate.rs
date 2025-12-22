@@ -1,6 +1,6 @@
-use chrono::Utc;
 use serde_json::Value;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[tracing::instrument(name = "update_aggregate", skip_all)]
@@ -9,7 +9,7 @@ pub async fn update_aggregate(
     id: &Uuid,
     value: &Value,
 ) -> anyhow::Result<Uuid> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     sqlx::query!(
         r#"UPDATE aggregates SET value = $1 , updated_at = $2  WHERE id = $3"#,
         value,

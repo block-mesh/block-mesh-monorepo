@@ -1,12 +1,12 @@
 use block_mesh_manager_database_domain::domain::daily_stat::DailyStat;
-use chrono::NaiveDate;
 use sqlx::{Postgres, Transaction};
+use time::Date;
 use uuid::Uuid;
 
 pub async fn get_daily_stat_by_user_id_and_day(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,
-    day: NaiveDate,
+    day: Date,
 ) -> anyhow::Result<Option<DailyStat>> {
     let daily_stat = sqlx::query_as!(
         DailyStat,

@@ -2,8 +2,9 @@ use crate::database::task::get_tasks_rpc_results::{get_tasks_rpc_results, RpcRes
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use askama::Template;
-use askama_axum::IntoResponse;
+use askama_web::WebTemplate;
 use axum::extract::State;
+use axum::response::IntoResponse;
 use axum::Extension;
 use block_mesh_common::constants::{
     BLOCK_MESH_APP_SERVER, BLOCK_MESH_CHROME_EXTENSION_LINK, BLOCK_MESH_GITBOOK, BLOCK_MESH_GITHUB,
@@ -14,7 +15,7 @@ use sqlx::PgPool;
 use std::sync::Arc;
 
 #[allow(dead_code)]
-#[derive(Template)]
+#[derive(Template, WebTemplate)]
 #[template(path = "rpc_dashboard/rpc_table.html")]
 struct RpcDashboardTemplate {
     pub chrome_extension_link: String,

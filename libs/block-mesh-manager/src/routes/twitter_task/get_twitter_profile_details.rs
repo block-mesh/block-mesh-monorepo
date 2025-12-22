@@ -7,15 +7,16 @@ use axum::Json;
 use block_mesh_common::constants::DeviceType;
 use block_mesh_common::interfaces::server_api::GetTwitterProfileDetails;
 use block_mesh_common::reqwest::http_client;
-use chrono::{DateTime, FixedOffset, NaiveDate};
+use chrono::Datelike;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use std::env;
 use std::sync::Arc;
+use time::Date;
 
 #[derive(Serialize, Deserialize, Debug)]
 pub struct TwitterApiProfileResponse {
-    pub created_at: NaiveDate,
+    pub created_at: Date,
     pub screen_name: String,
 }
 
@@ -72,9 +73,16 @@ pub async fn get_twitter_profile(username: &str) -> anyhow::Result<TwitterApiPro
         .ok_or(anyhow!("Cannot find created_at"))?
         .to_string();
     let created_at = created_at.replace('"', "");
-    let format = "%a %b %d %H:%M:%S %z %Y";
-    let created_at: DateTime<FixedOffset> = DateTime::parse_from_str(&created_at, format)?;
-    let created_at: NaiveDate = created_at.date_naive();
+    // Twitter format: "Sat Nov 04 00:00:00 +0000 2006"
+    // Parse using chrono first then convert to time::Date
+    let chrono_format = "%a %b %d %H:%M:%S %z %Y";
+    let chrono_dt: chrono::DateTime<chrono::FixedOffset> =
+        chrono::DateTime::parse_from_str(&created_at, chrono_format)?;
+    let created_at = Date::from_calendar_date(
+        chrono_dt.year(),
+        time::Month::try_from(chrono_dt.month() as u8)?,
+        chrono_dt.day() as u8,
+    )?;
     Ok(TwitterApiProfileResponse {
         screen_name,
         created_at,

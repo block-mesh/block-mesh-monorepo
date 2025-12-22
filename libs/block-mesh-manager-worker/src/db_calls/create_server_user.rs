@@ -1,7 +1,7 @@
 use bcrypt::{hash, DEFAULT_COST};
 use block_mesh_common::constants::{BLOCKMESH_SERVER_UUID_ENVAR, BLOCK_MESH_SUPPORT_EMAIL};
-use chrono::Utc;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[tracing::instrument(
@@ -14,7 +14,7 @@ use uuid::Uuid;
 pub(crate) async fn create_server_user(
     transaction: &mut Transaction<'_, Postgres>,
 ) -> anyhow::Result<Uuid> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let id = Uuid::parse_str(std::env::var(BLOCKMESH_SERVER_UUID_ENVAR).unwrap().as_str()).unwrap();
     let email = BLOCK_MESH_SUPPORT_EMAIL;
     let random = Uuid::new_v4().to_string();

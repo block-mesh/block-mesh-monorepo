@@ -18,8 +18,7 @@ serde = { workspace = true, features = ["derive"] }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
 serde_json = { workspace = true, features = ["raw_value"] }
-askama = { workspace = true, features = ["with-axum", "serde-json"] }
-askama_axum = { workspace = true }
+askama = { workspace = true, features = ["serde_json"] }
 tower-sessions-sqlx-store = { workspace = true, features = ["postgres"] }
 axum = { workspace = true, features = ["ws", "macros"] }
 tower = { workspace = true, features = ["util"] }
@@ -44,6 +43,7 @@ logger-general = { path = "../logger-general", features = ["sentry"] }
 http-body-util = { workspace = true }
 block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env"] }
 chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }
+time = { workspace = true, features = ["serde"] }
 
 [dependencies.rand]
 workspace = true

@@ -1,8 +1,9 @@
 use crate::middlewares::authentication::Backend;
 use crate::startup::application::AppState;
 use askama::Template;
-use askama_axum::IntoResponse;
+use askama_web::WebTemplate;
 use axum::extract::State;
+use axum::response::IntoResponse;
 use axum::response::Redirect;
 use axum::Extension;
 use axum_login::AuthSession;
@@ -12,11 +13,11 @@ use block_mesh_common::constants::{
     BLOCK_MESH_TWITTER, PCN_LOGO,
 };
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
-use chrono::{Duration, Utc};
 use std::sync::Arc;
+use time::{Duration, OffsetDateTime};
 
 #[allow(dead_code)]
-#[derive(Template)]
+#[derive(Template, WebTemplate)]
 #[template(path = "login_wallet.html")]
 struct LoginTemplate {
     pub chrome_extension_link: String,
@@ -41,7 +42,7 @@ pub async fn handler(
         Some(_) => Err(Redirect::to("/ui/dashboard")),
         None => {
             let nonce = Nonce::generate_nonce(128);
-            let date = Utc::now() + Duration::milliseconds(600_000);
+            let date = OffsetDateTime::now_utc() + Duration::milliseconds(600_000);
             state
                 .wallet_login_nonce
                 .insert(nonce.clone(), nonce.clone(), Some(date))

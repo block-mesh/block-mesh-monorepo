@@ -46,6 +46,7 @@ pub async fn read_flag(
 }
 
 #[derive(Serialize, Deserialize, Debug)]
+#[allow(dead_code)]
 pub struct FlagOut {
     name: String,
     value: Value,

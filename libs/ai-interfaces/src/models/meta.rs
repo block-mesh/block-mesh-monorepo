@@ -5,15 +5,10 @@ use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Sequence)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Sequence, Default)]
 pub enum MetaModels {
+    #[default]
     Llama31405G,
-}
-
-impl Default for MetaModels {
-    fn default() -> Self {
-        Self::Llama31405G
-    }
 }
 
 impl Display for MetaModels {

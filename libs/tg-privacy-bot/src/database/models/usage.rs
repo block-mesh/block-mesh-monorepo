@@ -1,5 +1,5 @@
-use chrono::{DateTime, NaiveDate, Utc};
 use serde::{Deserialize, Serialize};
+use time::{Date, OffsetDateTime};
 use uuid::Uuid;
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
@@ -8,9 +8,11 @@ pub struct Usage {
     pub user_id: Uuid,
     pub usage_limit: i64,
     pub usage: i64,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
-    pub day: NaiveDate,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339")]
+    pub updated_at: OffsetDateTime,
+    pub day: Date,
 }
 
 impl Usage {

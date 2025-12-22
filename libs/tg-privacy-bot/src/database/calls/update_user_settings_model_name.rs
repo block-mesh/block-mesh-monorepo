@@ -1,6 +1,6 @@
 use ai_interfaces::models::base::ModelName;
-use chrono::Utc;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 pub async fn update_user_settings_model_name(
@@ -8,7 +8,7 @@ pub async fn update_user_settings_model_name(
     id: &Uuid,
     model_name: &ModelName,
 ) -> anyhow::Result<()> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     sqlx::query!(
         r#"
         UPDATE user_settings SET model_name = $2, updated_at = $3 WHERE id = $1

@@ -185,10 +185,11 @@ impl TryFrom<&str> for MessageType {
     }
 }
 
-#[derive(Clone, Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Clone, Serialize, Deserialize, PartialEq, Debug, Default)]
 pub enum AuthStatus {
     LoggedIn,
     Registering,
+    #[default]
     LoggedOut,
     WaitingEmailVerification,
     UpdateVersion,
@@ -203,12 +204,6 @@ impl Display for AuthStatus {
             AuthStatus::WaitingEmailVerification => write!(f, "WaitingEmailVerification"),
             AuthStatus::UpdateVersion => write!(f, "UpdateVersion"),
         }
-    }
-}
-
-impl Default for AuthStatus {
-    fn default() -> Self {
-        Self::LoggedOut
     }
 }
 

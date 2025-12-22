@@ -1,9 +1,9 @@
 use std::error::Error;
 use std::fmt::Display;
 
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{Decode, Postgres};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 use secret::Secret;
@@ -42,15 +42,15 @@ impl sqlx::Type<Postgres> for ApiTokenStatus {
 impl sqlx::Encode<'_, Postgres> for ApiTokenStatus {
     fn encode_by_ref(
         &self,
-        buf: &mut <Postgres as sqlx::database::HasArguments<'_>>::ArgumentBuffer,
-    ) -> sqlx::encode::IsNull {
+        buf: &mut sqlx::postgres::PgArgumentBuffer,
+    ) -> Result<sqlx::encode::IsNull, Box<dyn Error + 'static + Send + Sync>> {
         <String as sqlx::Encode<Postgres>>::encode(self.to_string(), buf)
     }
 }
 
 impl sqlx::Decode<'_, Postgres> for ApiTokenStatus {
     fn decode(
-        value: <Postgres as sqlx::database::HasValueRef<'_>>::ValueRef,
+        value: sqlx::postgres::PgValueRef<'_>,
     ) -> Result<Self, Box<dyn Error + 'static + Send + Sync>> {
         let value = <&str as Decode<Postgres>>::decode(value)?;
         let value = value.to_string();
@@ -64,5 +64,6 @@ pub struct ApiToken {
     pub user_id: Uuid,
     pub token: Secret<Uuid>,
     pub status: ApiTokenStatus,
-    pub created_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
 }

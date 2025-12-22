@@ -3,8 +3,9 @@ use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use crate::startup::application::AppState;
 use askama::Template;
-use askama_axum::IntoResponse;
+use askama_web::WebTemplate;
 use axum::extract::State;
+use axum::response::IntoResponse;
 use axum::Extension;
 use axum_login::AuthSession;
 use block_mesh_common::constants::{
@@ -13,16 +14,16 @@ use block_mesh_common::constants::{
     BLOCK_MESH_TWITTER, PCN_LOGO,
 };
 use block_mesh_manager_database_domain::domain::task::{Task, TaskMethod, TaskStatus};
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::PgPool;
 use std::fmt::Display;
 use std::sync::Arc;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[allow(dead_code)]
-#[derive(Template)]
+#[derive(Template, WebTemplate)]
 #[template(path = "tasks/tasks_table.html")]
 struct TasksTableTemplate {
     tasks: Vec<TaskForTemplate>,
@@ -64,7 +65,8 @@ struct TaskForTemplate {
     pub status: TaskStatus,
     pub response_code: OptionWrapper<i32>,
     pub response_raw: OptionWrapper<String>,
-    pub created_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
 }
 
 impl From<Task> for TaskForTemplate {

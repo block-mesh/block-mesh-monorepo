@@ -1,4 +1,4 @@
-use crate::data_sink::{now_backup, DataSinkClickHouse};
+use crate::data_sink::DataSinkClickHouse;
 use crate::errors::Error;
 use crate::DataSinkAppState;
 use anyhow::anyhow;
@@ -9,7 +9,6 @@ use axum::{Json, Router};
 use block_mesh_common::interfaces::server_api::DigestDataRequest;
 use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use block_mesh_manager_database_domain::domain::user::UserAndApiToken;
-use chrono::{Duration, Utc};
 use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use database_utils::utils::health_check::health_check;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
@@ -18,6 +17,7 @@ use solana_sdk::signature::{Signature, Signer};
 use std::collections::HashSet;
 use std::str::FromStr;
 use std::sync::Arc;
+use time::{Duration, OffsetDateTime};
 use tokio::sync::{OnceCell, RwLock};
 use uuid::Uuid;
 use validator::validate_email;
@@ -109,7 +109,7 @@ pub async fn digest_data(
         }
     };
     if to_save {
-        let date = Utc::now() + Duration::milliseconds(600_000);
+        let date = OffsetDateTime::now_utc() + Duration::milliseconds(600_000);
         user_cache
             .write()
             .await
@@ -124,7 +124,7 @@ pub async fn digest_data(
         if cache.read().await.get(&key).is_some() {
             return Ok((StatusCode::ALREADY_REPORTED, "Already reported"));
         }
-        let now = Utc::now().timestamp_nanos_opt().unwrap_or(now_backup());
+        let now = OffsetDateTime::now_utc().unix_timestamp_nanos() as i64;
         let row = DataSinkClickHouse {
             id: Uuid::new_v4(),
             user_id: user.user_id,

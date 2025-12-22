@@ -49,15 +49,16 @@ reqwest = { workspace = true, default-features = false, features = [
 validator = { workspace = true, features = ["derive"] }
 sentry = { workspace = true, optional = true }
 url = { workspace = true }
-askama = { workspace = true, features = ["with-axum", "serde-json"] }
+askama = { workspace = true, features = ["serde_json"] }
+askama_web = { workspace = true }
 form_urlencoded = { workspace = true }
-askama_axum = { workspace = true }
 tokio-stream = { workspace = true, features = ["sync"], optional = true }
 http-body-util = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
 chrono = { workspace = true, features = ["clock", "serde", "wasmbind"] }
+time = { workspace = true }
 tracing = { workspace = true, optional = true }
 serde-aux = { workspace = true }
 config = { workspace = true }
@@ -83,8 +84,9 @@ bcrypt = { workspace = true }
 secret = { path = "../secret", features = ["sqlx"], optional = true }
 leptos_axum = { workspace = true, optional = true }
 leptos = { workspace = true }
-leptos_meta = { workspace = true }
-leptos_router = { workspace = true }
+leptos_config = { workspace = true, optional = true }
+leptos_meta = { workspace = true, optional = true }
+leptos_router = { workspace = true, optional = true }
 leptos-use = { workspace = true, features = ["math"] }
 cfg-if = { workspace = true }
 wasm-bindgen = { workspace = true }
@@ -125,7 +127,7 @@ features = [
   "macros",
   "postgres",
   "uuid",
-  "chrono",
+  "time",
   "migrate",
   "json",
   "bigdecimal",
@@ -149,8 +151,8 @@ crate-type = ["cdylib", "rlib"]
 hydrate = [
   "block-mesh-common/hydrate",
   "leptos/hydrate",
-  "leptos_meta/hydrate",
-  "leptos_router/hydrate",
+  "leptos_meta",
+  "leptos_router",
   "dep:logger-leptos"
 ]
 ssr = [
@@ -178,6 +180,7 @@ ssr = [
   "dep:tower-http",
   "dep:tracing-bunyan-formatter",
   "dep:leptos_axum",
+  "dep:leptos_config",
   "leptos/ssr",
   "leptos_meta/ssr",
   "leptos_router/ssr",

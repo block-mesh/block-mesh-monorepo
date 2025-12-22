@@ -31,6 +31,7 @@ use tokio;
 use tokio::time::sleep;
 use uuid::Uuid;
 
+#[allow(dead_code)]
 pub struct TestApp {
     pub address: String,
     pub port: u16,

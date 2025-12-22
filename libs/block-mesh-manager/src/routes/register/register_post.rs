@@ -76,7 +76,7 @@ pub async fn handler(
     }
 
     let spam_emails = get_spam_emails_cache().await;
-    let email_domain = match email.split('@').last() {
+    let email_domain = match email.split('@').next_back() {
         Some(d) => d.to_string(),
         None => {
             return Ok(Error::redirect(

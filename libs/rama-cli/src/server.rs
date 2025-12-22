@@ -48,6 +48,7 @@ use crate::cli::CliCommand;
 use crate::rama_state::RamaState;
 
 #[derive(Debug, Clone, Copy, Default)]
+#[allow(dead_code)]
 pub struct StorageAuthorized;
 
 pub async fn run(cfg: CliCommand, state: RamaState) -> anyhow::Result<()> {

@@ -1,8 +1,8 @@
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use crate::utils::verify_cache::verify_with_cache;
-use askama_axum::IntoResponse;
 use axum::extract::State;
+use axum::response::IntoResponse;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{
     GetTokenRequest, GetTokenResponse, GetTokenResponseEnum,

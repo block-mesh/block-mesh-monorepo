@@ -34,7 +34,7 @@ pub async fn handler(
     let user = auth.user.ok_or(Error::UserNotFound)?;
     let email = form.new_email.clone().to_ascii_lowercase();
     let spam_emails = get_spam_emails_cache().await;
-    let email_domain = match email.split('@').last() {
+    let email_domain = match email.split('@').next_back() {
         Some(d) => d.to_string(),
         None => {
             return Err(Error::Anyhow(anyhow!(

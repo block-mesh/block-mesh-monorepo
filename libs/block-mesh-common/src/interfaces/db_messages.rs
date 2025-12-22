@@ -1,7 +1,7 @@
 use crate::constants::DeviceType;
-use chrono::NaiveDate;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
+use time::Date;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -32,7 +32,7 @@ pub enum DBMessage {
 pub struct DailyStatRefBonus {
     pub user_id: Uuid,
     pub daily_stat_id: Uuid,
-    pub day: NaiveDate,
+    pub day: Date,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]

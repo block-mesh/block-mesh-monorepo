@@ -23,6 +23,7 @@ block-mesh-common = { path = "../block-mesh-common", features = ["env"] }
 axum = { workspace = true }
 redis = { workspace = true, features = ["tokio-comp", "tokio-rustls-comp", "tls-rustls-insecure"] }
 http-body-util = { workspace = true }
+time = { workspace = true }
 
 [dependencies.rand]
 workspace = true

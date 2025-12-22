@@ -25,9 +25,9 @@ pub async fn create_txn(pool: &PgPool) -> anyhow::Result<Transaction<'_, Postgre
     match timeout(duration, pool.begin()).await {
         Ok(txn) => match txn {
             Ok(transaction) => Ok(transaction),
-            Err(e) => Err(anyhow!("TXN => create_txn error {}", e.to_string())),
+            Err(e) => Err(anyhow!("TXN => create_txn error {e}")),
         },
-        Err(e) => Err(anyhow!("OTHER create_txn error {}", e.to_string())),
+        Err(e) => Err(anyhow!("OTHER create_txn error {e}")),
     }
 }
 
@@ -40,9 +40,9 @@ pub async fn create_txn_with_timeout(
     match timeout(duration, pool.begin()).await {
         Ok(txn) => match txn {
             Ok(transaction) => Ok(transaction),
-            Err(e) => Err(anyhow!("TXN => create_txn error {}", e.to_string())),
+            Err(e) => Err(anyhow!("TXN => create_txn error {e}")),
         },
-        Err(e) => Err(anyhow!("OTHER create_txn error {}", e.to_string())),
+        Err(e) => Err(anyhow!("OTHER create_txn error {e}")),
     }
 }
 
@@ -52,9 +52,9 @@ pub async fn commit_txn(txn: Transaction<'_, Postgres>) -> anyhow::Result<()> {
     match timeout(duration, txn.commit()).await {
         Ok(txn) => match txn {
             Ok(_) => Ok(()),
-            Err(e) => Err(anyhow!("TXN => commit_txn error {}", e.to_string())),
+            Err(e) => Err(anyhow!("TXN => commit_txn error {e}")),
         },
-        Err(e) => Err(anyhow!("OTHER commit_txn error {}", e.to_string())),
+        Err(e) => Err(anyhow!("OTHER commit_txn error {e}")),
     }
 }
 
@@ -67,8 +67,8 @@ pub async fn commit_txn_with_timeout(
     match timeout(duration, txn.commit()).await {
         Ok(txn) => match txn {
             Ok(_) => Ok(()),
-            Err(e) => Err(anyhow!("TXN => commit_txn error {}", e.to_string())),
+            Err(e) => Err(anyhow!("TXN => commit_txn error {e}")),
         },
-        Err(e) => Err(anyhow!("OTHER commit_txn error {}", e.to_string())),
+        Err(e) => Err(anyhow!("OTHER commit_txn error {e}")),
     }
 }

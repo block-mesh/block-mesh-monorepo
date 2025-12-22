@@ -1,5 +1,4 @@
 use block_mesh_common::date::date_range;
-use chrono::{DateTime, NaiveDate, Utc};
 use rand::Rng;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
@@ -7,7 +6,7 @@ use sqlx::{Decode, Postgres, Transaction};
 use std::env;
 use std::error::Error;
 use std::fmt::Display;
-use std::time::Duration;
+use time::{Date, Duration, OffsetDateTime};
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -50,15 +49,15 @@ impl sqlx::Type<Postgres> for TwitterTaskStatus {
 impl sqlx::Encode<'_, Postgres> for TwitterTaskStatus {
     fn encode_by_ref(
         &self,
-        buf: &mut <Postgres as sqlx::database::HasArguments<'_>>::ArgumentBuffer,
-    ) -> sqlx::encode::IsNull {
+        buf: &mut sqlx::postgres::PgArgumentBuffer,
+    ) -> Result<sqlx::encode::IsNull, Box<dyn Error + 'static + Send + Sync>> {
         <String as sqlx::Encode<Postgres>>::encode(self.to_string(), buf)
     }
 }
 
 impl sqlx::Decode<'_, Postgres> for TwitterTaskStatus {
     fn decode(
-        value: <Postgres as sqlx::database::HasValueRef<'_>>::ValueRef,
+        value: sqlx::postgres::PgValueRef<'_>,
     ) -> Result<Self, Box<dyn Error + 'static + Send + Sync>> {
         let value = <&str as Decode<Postgres>>::decode(value)?;
         let value = value.to_string();
@@ -72,20 +71,23 @@ pub struct TwitterTask {
     pub twitter_username: String,
     pub assigned_user_id: Option<Uuid>,
     pub status: TwitterTaskStatus,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
-    pub since: NaiveDate,
-    pub until: NaiveDate,
-    pub delay: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339")]
+    pub updated_at: OffsetDateTime,
+    pub since: Date,
+    pub until: Date,
+    #[serde(with = "time::serde::rfc3339")]
+    pub delay: OffsetDateTime,
     pub results: Value,
 }
 
 impl TwitterTask {
-    pub fn delay() -> DateTime<Utc> {
+    pub fn delay() -> OffsetDateTime {
         let mut rng = rand::thread_rng();
-        let random_number: u64 = rng.gen_range(1..=900);
-        let now = Utc::now();
-        now + Duration::from_secs(random_number)
+        let random_number: i64 = rng.gen_range(1..=900);
+        let now = OffsetDateTime::now_utc();
+        now + Duration::seconds(random_number)
     }
 
     pub async fn get_pending_tasks(
@@ -117,14 +119,14 @@ impl TwitterTask {
     pub async fn create_twitter_task(
         transaction: &mut Transaction<'_, Postgres>,
         twitter_username: &str,
-        since: &NaiveDate,
-        until: &NaiveDate,
+        since: &Date,
+        until: &Date,
     ) -> anyhow::Result<()> {
         let range = date_range(since, until);
         let v = Value::Null;
         let status = TwitterTaskStatus::Pending.to_string();
         for (s, u) in range {
-            let delay = Self::delay();
+            let delay_time = Self::delay();
             sqlx::query!(
                 r#"
                 INSERT INTO twitter_tasks
@@ -134,7 +136,7 @@ impl TwitterTask {
                 status,
                 s,
                 u,
-                delay,
+                delay_time,
                 v,
             )
             .execute(&mut **transaction)
@@ -150,7 +152,7 @@ impl TwitterTask {
         results: &Value,
         assigned_user_id: &Uuid,
     ) -> anyhow::Result<()> {
-        let now = Utc::now();
+        let now = OffsetDateTime::now_utc();
         sqlx::query!(
             r#"
                 UPDATE twitter_tasks SET

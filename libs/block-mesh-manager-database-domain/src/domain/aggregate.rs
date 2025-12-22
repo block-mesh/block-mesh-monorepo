@@ -1,9 +1,9 @@
-use chrono::{DateTime, Utc};
 use database_utils::utils::option_uuid::OptionUuid;
 use serde::{Deserialize, Serialize};
 use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
@@ -12,8 +12,10 @@ pub struct Aggregate {
     pub user_id: Uuid,
     pub name: AggregateName,
     pub value: serde_json::Value,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339")]
+    pub updated_at: OffsetDateTime,
 }
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
@@ -22,8 +24,10 @@ pub struct AggregateTmp {
     pub user_id: OptionUuid,
     pub name: Option<String>,
     pub value: Option<serde_json::Value>,
-    pub created_at: Option<DateTime<Utc>>,
-    pub updated_at: Option<DateTime<Utc>>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub created_at: Option<OffsetDateTime>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub updated_at: Option<OffsetDateTime>,
 }
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -140,15 +144,15 @@ impl sqlx::Type<Postgres> for AggregateName {
 impl sqlx::Encode<'_, Postgres> for AggregateName {
     fn encode_by_ref(
         &self,
-        buf: &mut <Postgres as sqlx::database::HasArguments<'_>>::ArgumentBuffer,
-    ) -> sqlx::encode::IsNull {
+        buf: &mut sqlx::postgres::PgArgumentBuffer,
+    ) -> Result<sqlx::encode::IsNull, Box<dyn Error + 'static + Send + Sync>> {
         <String as sqlx::Encode<Postgres>>::encode(self.to_string(), buf)
     }
 }
 
 impl sqlx::Decode<'_, Postgres> for AggregateName {
     fn decode(
-        value: <Postgres as sqlx::database::HasValueRef<'_>>::ValueRef,
+        value: sqlx::postgres::PgValueRef<'_>,
     ) -> Result<Self, Box<dyn Error + 'static + Send + Sync>> {
         let value = <&str as Decode<Postgres>>::decode(value)?;
         let value = value.to_string();

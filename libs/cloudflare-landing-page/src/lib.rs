@@ -1,4 +1,4 @@
-#![allow(unexpected_cfgs)]
+#![allow(unexpected_cfgs, clippy::unnecessary_unwrap)]
 
 use askama::Template;
 use serde_json::Value;

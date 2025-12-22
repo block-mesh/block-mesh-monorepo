@@ -1,6 +1,7 @@
 use askama::Template;
-use askama_axum::IntoResponse;
+use askama_web::WebTemplate;
 use axum::extract::State;
+use axum::response::IntoResponse;
 use axum::response::Redirect;
 use axum::Extension;
 use axum_login::AuthSession;
@@ -15,7 +16,7 @@ use crate::middlewares::authentication::Backend;
 use crate::startup::application::AppState;
 
 #[allow(dead_code)]
-#[derive(Template)]
+#[derive(Template, WebTemplate)]
 #[template(path = "login.html")]
 struct LoginTemplate {
     pub chrome_extension_link: String,

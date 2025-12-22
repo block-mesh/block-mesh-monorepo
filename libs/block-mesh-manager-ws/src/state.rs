@@ -12,7 +12,6 @@ use local_ip_address::local_ip;
 use redis::aio::ConnectionManager;
 use redis::{AsyncCommands, RedisResult};
 use serde::{Deserialize, Serialize};
-use sqlx::types::chrono::Utc;
 use sqlx::PgPool;
 use std::collections::{HashMap, HashSet};
 use std::net::IpAddr;
@@ -20,10 +19,91 @@ use std::str::FromStr;
 use std::sync::Arc;
 use std::time::Duration;
 use std::{env, process};
+use time::OffsetDateTime;
 use tokio::sync::RwLock;
 use tokio::task::JoinHandle;
 use tokio::time::sleep;
 use uuid::Uuid;
+
+pub struct RedisHelper;
+
+impl RedisHelper {
+    const MAX_RETRIES: u32 = 10;
+    const RETRY_DELAY_SECS: u64 = 5;
+
+    /// Connects to Redis with retry logic, trying secure mode first then insecure mode.
+    ///
+    /// # Arguments
+    /// * `redis_url` - The Redis URL (with or without #insecure suffix)
+    ///
+    /// # Returns
+    /// * `ConnectionManager` on success
+    ///
+    /// # Panics
+    /// * Panics after MAX_RETRIES failed attempts
+    #[tracing::instrument(name = "redis_connect", skip_all)]
+    pub async fn connect(redis_url: &str) -> ConnectionManager {
+        let redis_url_secure = if redis_url.ends_with("#insecure") {
+            redis_url.trim_end_matches("#insecure").to_string()
+        } else {
+            redis_url.to_string()
+        };
+        let redis_url_insecure = if redis_url.ends_with("#insecure") {
+            redis_url.to_string()
+        } else {
+            format!("{}#insecure", redis_url)
+        };
+
+        let mut attempt = 0;
+        loop {
+            attempt += 1;
+
+            // First try without #insecure (secure mode)
+            match Self::try_connect(&redis_url_secure).await {
+                Ok(conn) => {
+                    tracing::info!("Redis connection established (secure mode)");
+                    return conn;
+                }
+                Err(e) => {
+                    tracing::warn!(
+                        "Redis secure connection failed: {}, trying insecure mode",
+                        e
+                    );
+                }
+            }
+
+            // Then try with #insecure
+            match Self::try_connect(&redis_url_insecure).await {
+                Ok(conn) => {
+                    tracing::info!("Redis connection established (insecure mode)");
+                    return conn;
+                }
+                Err(e) => {
+                    if attempt >= Self::MAX_RETRIES {
+                        panic!(
+                            "Redis connection failed after {} attempts: {}",
+                            Self::MAX_RETRIES,
+                            e
+                        );
+                    }
+                    tracing::error!(
+                        "Redis connection failed (attempt {}/{}): {}, retrying in {} seconds",
+                        attempt,
+                        Self::MAX_RETRIES,
+                        e,
+                        Self::RETRY_DELAY_SECS
+                    );
+                    sleep(Duration::from_secs(Self::RETRY_DELAY_SECS)).await;
+                }
+            }
+        }
+    }
+
+    async fn try_connect(url: &str) -> Result<ConnectionManager, redis::RedisError> {
+        let client = redis::Client::open(url)?;
+        ConnectionManager::new(client).await
+    }
+}
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum WsCredsCache {
@@ -120,7 +200,7 @@ impl WsAppState {
 
     #[tracing::instrument(name = "get_task", skip_all)]
     pub async fn get_task(&self) -> Option<TwitterTask> {
-        let now = Utc::now();
+        let now = OffsetDateTime::now_utc();
         let pending_tasks = self.pending_twitter_tasks.read().await;
         pending_tasks
             .iter()
@@ -291,13 +371,7 @@ impl WsAppState {
         let follower_pool = follower_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
         let channel_pool = channel_pool(Some("CHANNEL_DATABASE_URL".to_string())).await;
         let redis_url = env::var("REDIS_URL").unwrap();
-        let redis_url = if redis_url.ends_with("#insecure") {
-            redis_url
-        } else {
-            format!("{}#insecure", redis_url)
-        };
-        let redis_client = redis::Client::open(redis_url).unwrap();
-        let redis = ConnectionManager::new(redis_client).await.unwrap();
+        let redis = RedisHelper::connect(&redis_url).await;
         Self {
             joiner_tx,
             workers,

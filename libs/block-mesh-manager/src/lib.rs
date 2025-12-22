@@ -1,8 +1,11 @@
-#![allow(unexpected_cfgs)]
+#![allow(unexpected_cfgs, clippy::unused_unit)]
+use leptos::*;
+#[component]
+pub fn App() -> impl IntoView {
+    view! {}
+}
 
 use cfg_if::cfg_if;
-
-pub mod frontends;
 
 cfg_if! { if #[cfg(feature = "ssr")] {
     pub mod utils;
@@ -19,11 +22,10 @@ cfg_if! { if #[cfg(feature = "ssr")] {
 }}
 
 cfg_if! { if #[cfg(feature = "hydrate")] {
-    use leptos::*;
+    use leptos::mount::mount_to_body;
     use wasm_bindgen::prelude::wasm_bindgen;
     // use logger_leptos::leptos_tracing::setup_leptos_tracing;
     // use block_mesh_common::constants::DeviceType;
-    use crate::frontends::app::App;
     #[wasm_bindgen]
     pub fn hydrate() {
         // initializes logging using the `log` crate

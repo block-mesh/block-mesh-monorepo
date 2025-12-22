@@ -1,10 +1,10 @@
 use anyhow::anyhow;
-use chrono::{Duration, Utc};
 use num_traits::abs;
 use sqlx::{PgPool, Postgres, Transaction};
 use std::cmp::max;
 use std::env;
 use std::sync::Arc;
+use time::{Duration, OffsetDateTime};
 use tokio::sync::OnceCell;
 #[allow(unused_imports)]
 use tracing::Level;
@@ -118,9 +118,9 @@ pub async fn dashboard_data_extractor(
         .iter()
         .find(|a| a.name == Tasks)
         .ok_or(anyhow!("Tasks not found"))?;
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let diff = now - uptime.updated_at;
-    let sec_diff = abs(diff.num_seconds());
+    let sec_diff = abs(diff.whole_seconds());
     let connected_buffer = get_envar("CONNECTED_BUFFER").await.parse().unwrap_or(10);
     let connected =
         sec_diff < connected_buffer * ((interval * 2.0) as i64).checked_div(1_000).unwrap_or(240);
@@ -194,7 +194,7 @@ pub async fn dashboard_data_extractor(
         .parse()
         .unwrap_or(10_000);
     if app_environment != "local" {
-        let date = Utc::now() + Duration::milliseconds(dashboard_cache);
+        let date = OffsetDateTime::now_utc() + Duration::milliseconds(dashboard_cache);
         cache
             .insert(user.email.clone(), response.clone(), Some(date))
             .await;

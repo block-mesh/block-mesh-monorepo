@@ -1,17 +1,17 @@
 use crate::domain::daily_stat::{DailyStat, DailyStatStatus, DailyStatTmp};
-use chrono::{NaiveDate, Utc};
 use sqlx::{Postgres, Transaction};
+use time::{Date, OffsetDateTime};
 use uuid::Uuid;
 #[tracing::instrument(name = "get_or_create_daily_stat", skip_all)]
 pub async fn get_or_create_daily_stat(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
-    input_day: Option<NaiveDate>,
+    input_day: Option<Date>,
 ) -> anyhow::Result<DailyStat> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let day = match input_day {
         Some(d) => d,
-        None => now.date_naive(),
+        None => now.date(),
     };
     let id = Uuid::new_v4();
     let daily_stat = sqlx::query_as!(

@@ -4,6 +4,7 @@ use uuid::Uuid;
 
 pub const CLICKHOUSE_TABLE_NAME: &str = "data_sinks_clickhouse";
 
+#[allow(dead_code)]
 pub fn now_backup() -> i64 {
     UNIX_EPOCH
         .elapsed()

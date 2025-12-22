@@ -1,13 +1,14 @@
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[allow(non_snake_case, non_camel_case_types)]
+#[derive(Default)]
 pub enum PerkName {
     Everlyn,
     Intract,
@@ -16,6 +17,7 @@ pub enum PerkName {
     FounderTwitter,
     XenoTwitter,
     WootzTwitter,
+    #[default]
     Invalid,
     ProofOfHumanity,
     Novice,
@@ -34,12 +36,6 @@ pub enum PerkName {
     PerceptronNTWK,
     MRRydon,
     Peter_thoc,
-}
-
-impl Default for PerkName {
-    fn default() -> Self {
-        Self::Invalid
-    }
 }
 
 impl Display for PerkName {
@@ -124,15 +120,15 @@ impl sqlx::Type<Postgres> for PerkName {
 impl sqlx::Encode<'_, Postgres> for PerkName {
     fn encode_by_ref(
         &self,
-        buf: &mut <Postgres as sqlx::database::HasArguments<'_>>::ArgumentBuffer,
-    ) -> sqlx::encode::IsNull {
+        buf: &mut sqlx::postgres::PgArgumentBuffer,
+    ) -> Result<sqlx::encode::IsNull, Box<dyn Error + 'static + Send + Sync>> {
         <String as sqlx::Encode<Postgres>>::encode(self.to_string(), buf)
     }
 }
 
 impl sqlx::Decode<'_, Postgres> for PerkName {
     fn decode(
-        value: <Postgres as sqlx::database::HasValueRef<'_>>::ValueRef,
+        value: sqlx::postgres::PgValueRef<'_>,
     ) -> Result<Self, Box<dyn Error + 'static + Send + Sync>> {
         let value = <&str as Decode<Postgres>>::decode(value)?;
         let value = value.to_string();
@@ -144,22 +140,26 @@ impl sqlx::Decode<'_, Postgres> for PerkName {
 pub struct Perk {
     pub id: Uuid,
     pub user_id: Uuid,
-    pub created_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
     pub multiplier: f64,
     pub one_time_bonus: f64,
     pub name: PerkName,
     pub data: Value,
-    pub updated_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub updated_at: OffsetDateTime,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PerkTmp {
     pub id: Option<Uuid>,
     pub user_id: Option<Uuid>,
-    pub created_at: Option<DateTime<Utc>>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub created_at: Option<OffsetDateTime>,
     pub multiplier: Option<f64>,
     pub one_time_bonus: Option<f64>,
     pub name: Option<String>,
     pub data: Option<Value>,
-    pub updated_at: Option<DateTime<Utc>>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub updated_at: Option<OffsetDateTime>,
 }

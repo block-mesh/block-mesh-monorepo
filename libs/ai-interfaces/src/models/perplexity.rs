@@ -5,8 +5,9 @@ use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Sequence)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Sequence, Default)]
 pub enum PerplexityModels {
+    #[default]
     Llama31SonarSmall128KOnline,
     Llama31SonarLarge128KOnline,
     Llama31SonarHuge128KOnline,
@@ -14,12 +15,6 @@ pub enum PerplexityModels {
     Llama31SonarLarge128KChat,
     Llama318BInstruct,
     Llama3170BInstruct,
-}
-
-impl Default for PerplexityModels {
-    fn default() -> Self {
-        Self::Llama31SonarSmall128KOnline
-    }
 }
 
 impl Display for PerplexityModels {

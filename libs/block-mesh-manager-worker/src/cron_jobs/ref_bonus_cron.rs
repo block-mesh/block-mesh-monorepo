@@ -1,11 +1,11 @@
 use block_mesh_manager_database_domain::domain::daily_stat_background_job::DailyStatsBackgroundJob;
-use chrono::NaiveDate;
 use flume::Sender;
 use sqlx::PgPool;
 use std::collections::HashSet;
 use std::env;
 use std::sync::Arc;
 use std::time::Duration;
+use time::Date;
 use tokio::sync::RwLock;
 use tokio::task::JoinHandle;
 use uuid::Uuid;
@@ -14,7 +14,7 @@ use uuid::Uuid;
 pub async fn ref_bonus_cron(
     pool: PgPool,
     joiner_tx: Sender<JoinHandle<()>>,
-    queue: Arc<RwLock<HashSet<(Uuid, Uuid, NaiveDate)>>>,
+    queue: Arc<RwLock<HashSet<(Uuid, Uuid, Date)>>>,
 ) -> Result<(), anyhow::Error> {
     let enable = env::var("REF_BONUS_CRON_ENABLE")
         .unwrap_or("false".to_string())

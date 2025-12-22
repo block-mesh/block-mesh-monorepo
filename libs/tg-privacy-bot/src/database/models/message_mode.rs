@@ -1,19 +1,15 @@
+#![allow(clippy::derivable_impls)]
 use serde::{Deserialize, Serialize};
 use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
 pub enum MessageMode {
+    #[default]
     ResetOnEachMessage,
     ResetOnModelChange,
     KeepAlways,
-}
-
-impl Default for MessageMode {
-    fn default() -> Self {
-        Self::ResetOnEachMessage
-    }
 }
 
 impl Display for MessageMode {
@@ -55,15 +51,15 @@ impl sqlx::Type<Postgres> for MessageMode {
 impl sqlx::Encode<'_, Postgres> for MessageMode {
     fn encode_by_ref(
         &self,
-        buf: &mut <Postgres as sqlx::database::HasArguments<'_>>::ArgumentBuffer,
-    ) -> sqlx::encode::IsNull {
+        buf: &mut sqlx::postgres::PgArgumentBuffer,
+    ) -> Result<sqlx::encode::IsNull, Box<dyn Error + 'static + Send + Sync>> {
         <String as sqlx::Encode<Postgres>>::encode(self.to_string(), buf)
     }
 }
 
 impl sqlx::Decode<'_, Postgres> for MessageMode {
     fn decode(
-        value: <Postgres as sqlx::database::HasValueRef<'_>>::ValueRef,
+        value: sqlx::postgres::PgValueRef<'_>,
     ) -> Result<Self, Box<dyn Error + 'static + Send + Sync>> {
         let value = <&str as Decode<Postgres>>::decode(value)?;
         let value = value.to_string();

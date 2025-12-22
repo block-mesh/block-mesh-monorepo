@@ -1,10 +1,10 @@
 use crate::db_calls::create_task::create_task;
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::{Decode, Postgres, Transaction};
 use std::error::Error;
 use std::fmt::Display;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
@@ -94,15 +94,15 @@ impl sqlx::Type<Postgres> for RpcName {
 impl sqlx::Encode<'_, Postgres> for RpcName {
     fn encode_by_ref(
         &self,
-        buf: &mut <Postgres as sqlx::database::HasArguments<'_>>::ArgumentBuffer,
-    ) -> sqlx::encode::IsNull {
+        buf: &mut sqlx::postgres::PgArgumentBuffer,
+    ) -> Result<sqlx::encode::IsNull, Box<dyn Error + 'static + Send + Sync>> {
         <String as sqlx::Encode<Postgres>>::encode(self.to_string(), buf)
     }
 }
 
 impl sqlx::Decode<'_, Postgres> for RpcName {
     fn decode(
-        value: <Postgres as sqlx::database::HasValueRef<'_>>::ValueRef,
+        value: sqlx::postgres::PgValueRef<'_>,
     ) -> Result<Self, Box<dyn Error + 'static + Send + Sync>> {
         let value = <&str as Decode<Postgres>>::decode(value)?;
         let value = value.to_string();
@@ -113,7 +113,8 @@ impl sqlx::Decode<'_, Postgres> for RpcName {
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
 pub struct Rpc {
     pub id: Uuid,
-    pub created_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
     pub token: String,
     pub host: String,
     pub name: RpcName,

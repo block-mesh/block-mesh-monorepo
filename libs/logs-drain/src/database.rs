@@ -3,6 +3,7 @@ use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, Transaction};
 use uuid::Uuid;
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
+#[allow(dead_code)]
 pub struct LogEntry {
     pub id: Uuid,
     pub created_at: DateTime<Utc>,

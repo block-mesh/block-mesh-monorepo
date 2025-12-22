@@ -1,7 +1,5 @@
 use serde::{Deserialize, Serialize};
 #[cfg(feature = "sqlx")]
-use sqlx::database::HasValueRef;
-#[cfg(feature = "sqlx")]
 use sqlx::{Decode, Postgres};
 #[cfg(feature = "sqlx")]
 use std::error::Error;
@@ -88,7 +86,7 @@ where
     for<'a> T: sqlx::Type<Postgres> + sqlx::Decode<'a, Postgres>,
 {
     fn decode(
-        value: <Postgres as HasValueRef<'_>>::ValueRef,
+        value: sqlx::postgres::PgValueRef<'_>,
     ) -> Result<Self, Box<dyn Error + 'static + Send + Sync>> {
         let value = <T as Decode<Postgres>>::decode(value)?;
         Ok(Secret::from(value))
@@ -103,8 +101,8 @@ where
 {
     fn encode_by_ref(
         &self,
-        buf: &mut <Postgres as sqlx::database::HasArguments<'_>>::ArgumentBuffer,
-    ) -> sqlx::encode::IsNull {
+        buf: &mut sqlx::postgres::PgArgumentBuffer,
+    ) -> Result<sqlx::encode::IsNull, Box<dyn Error + 'static + Send + Sync>> {
         <T as sqlx::Encode<Postgres>>::encode(self.as_ref().clone(), buf)
     }
 }

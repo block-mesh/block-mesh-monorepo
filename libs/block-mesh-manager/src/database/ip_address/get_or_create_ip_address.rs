@@ -1,13 +1,13 @@
 use crate::domain::ip_address::IpAddress;
-use chrono::Utc;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 pub async fn get_or_create_ip_address(
     transaction: &mut Transaction<'_, Postgres>,
     ip: &str,
 ) -> anyhow::Result<IpAddress> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let id = Uuid::new_v4();
     let out = sqlx::query_as!(
         IpAddress,

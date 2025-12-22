@@ -3,19 +3,21 @@ use crate::domain::daily_stat::DailyStat;
 use crate::domain::get_affiliate_tree_per_day::get_affiliate_tree_per_day;
 use crate::domain::get_daily_stat_by_id::get_daily_stats_by_id;
 use block_mesh_common::points::raw_points;
-use chrono::{DateTime, NaiveDate, Utc};
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use serde::{Deserialize, Serialize};
 use sqlx::{PgPool, Postgres, Transaction};
+use time::{Date, OffsetDateTime};
 use uuid::Uuid;
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
 pub struct DailyStatsBackgroundJob {
     pub id: Uuid,
     pub user_id: Uuid,
-    pub day: NaiveDate,
-    pub created_at: DateTime<Utc>,
-    pub updated_at: DateTime<Utc>,
+    pub day: Date,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
+    #[serde(with = "time::serde::rfc3339")]
+    pub updated_at: OffsetDateTime,
 }
 
 impl DailyStatsBackgroundJob {
@@ -96,7 +98,7 @@ impl DailyStatsBackgroundJob {
         pool: PgPool,
         user_id: Uuid,
         daily_stat_id: Uuid,
-        day: NaiveDate,
+        day: Date,
     ) -> anyhow::Result<()> {
         let mut transaction = create_txn(&pool).await?;
         let daily_stats = get_daily_stats_by_id(&mut transaction, &daily_stat_id).await?;
