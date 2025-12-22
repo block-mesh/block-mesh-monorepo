@@ -2,6 +2,7 @@ use crate::domain::perk::{Perk, PerkName, PerkTmp};
 use serde_json::Value;
 use sqlx::{Postgres, Transaction};
 use std::collections::HashMap;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 pub async fn update_user_perk(
@@ -38,11 +39,11 @@ pub async fn update_user_perk(
     Ok(Perk {
         id: perk.id.unwrap_or_default(),
         user_id: perk.user_id.unwrap_or_default(),
-        created_at: perk.created_at.unwrap_or_default(),
+        created_at: perk.created_at.unwrap_or(OffsetDateTime::UNIX_EPOCH),
         multiplier: perk.multiplier.unwrap_or_default(),
         one_time_bonus: perk.one_time_bonus.unwrap_or_default(),
         name: PerkName::from(perk.name.unwrap_or_default()),
         data: perk.data.unwrap_or_default(),
-        updated_at: perk.updated_at.unwrap_or_default(),
+        updated_at: perk.updated_at.unwrap_or(OffsetDateTime::UNIX_EPOCH),
     })
 }

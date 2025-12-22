@@ -1,5 +1,5 @@
-use chrono::{Duration, Utc};
 use sqlx::{Postgres, Transaction};
+use time::{Duration, OffsetDateTime};
 use uuid::Uuid;
 
 pub async fn count_user_tasks_in_period(
@@ -7,7 +7,7 @@ pub async fn count_user_tasks_in_period(
     user_id: &Uuid,
     duration: u64,
 ) -> anyhow::Result<u64> {
-    let since = Utc::now() - Duration::seconds(duration as i64);
+    let since = OffsetDateTime::now_utc() - Duration::seconds(duration as i64);
     let count: Option<i64> = sqlx::query_scalar!(
         r#"
         SELECT

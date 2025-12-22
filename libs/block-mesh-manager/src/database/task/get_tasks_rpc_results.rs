@@ -1,8 +1,7 @@
 use block_mesh_manager_database_domain::domain::task::TaskStatus;
-use chrono::Utc;
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, Transaction};
-use std::time::Duration;
+use time::{Duration, OffsetDateTime};
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize)]
 pub struct TmpRpcResults {
@@ -27,8 +26,8 @@ pub async fn get_tasks_rpc_results(
     transaction: &mut Transaction<'_, Postgres>,
     duration: u64,
 ) -> anyhow::Result<Vec<RpcResults>> {
-    let now = Utc::now();
-    let duration = now - Duration::from_secs(duration);
+    let now = OffsetDateTime::now_utc();
+    let duration = now - Duration::seconds(duration as i64);
     let status = [TaskStatus::Failed, TaskStatus::Completed]
         .iter()
         .map(|s| s.to_string())

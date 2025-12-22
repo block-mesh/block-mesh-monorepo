@@ -1,8 +1,8 @@
 use block_mesh_manager_database_domain::domain::task::TaskMethod;
 use block_mesh_manager_database_domain::domain::task::TaskStatus;
-use chrono::Utc;
 use sqlx::types::JsonValue;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 pub async fn create_task(
@@ -13,7 +13,7 @@ pub async fn create_task(
     headers: Option<JsonValue>,
     body: Option<JsonValue>,
 ) -> anyhow::Result<Uuid> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let id = Uuid::new_v4();
     sqlx::query!(
         r#"INSERT

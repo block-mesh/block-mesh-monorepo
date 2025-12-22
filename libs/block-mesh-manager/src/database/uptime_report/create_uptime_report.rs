@@ -1,5 +1,5 @@
-use chrono::Utc;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 pub async fn create_uptime_report(
@@ -7,7 +7,7 @@ pub async fn create_uptime_report(
     user_id: &Uuid,
     ip: &Option<String>,
 ) -> anyhow::Result<Uuid> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let id = Uuid::new_v4();
     let nonce = Uuid::new_v4();
     sqlx::query!(

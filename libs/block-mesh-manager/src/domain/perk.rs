@@ -1,9 +1,9 @@
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -144,22 +144,26 @@ impl sqlx::Decode<'_, Postgres> for PerkName {
 pub struct Perk {
     pub id: Uuid,
     pub user_id: Uuid,
-    pub created_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
     pub multiplier: f64,
     pub one_time_bonus: f64,
     pub name: PerkName,
     pub data: Value,
-    pub updated_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub updated_at: OffsetDateTime,
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct PerkTmp {
     pub id: Option<Uuid>,
     pub user_id: Option<Uuid>,
-    pub created_at: Option<DateTime<Utc>>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub created_at: Option<OffsetDateTime>,
     pub multiplier: Option<f64>,
     pub one_time_bonus: Option<f64>,
     pub name: Option<String>,
     pub data: Option<Value>,
-    pub updated_at: Option<DateTime<Utc>>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub updated_at: Option<OffsetDateTime>,
 }

@@ -1,5 +1,5 @@
-use chrono::{Duration, Utc};
 use sqlx::{Postgres, Transaction};
+use time::{Duration, OffsetDateTime};
 use uuid::Uuid;
 
 pub async fn delete_uptime_report_by_time(
@@ -7,7 +7,7 @@ pub async fn delete_uptime_report_by_time(
     user_id: Uuid,
     seconds: i64,
 ) -> anyhow::Result<()> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let diff = now - Duration::seconds(seconds);
     sqlx::query!(
         r#"
