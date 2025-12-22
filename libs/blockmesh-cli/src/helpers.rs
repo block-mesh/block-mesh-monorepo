@@ -1,3 +1,4 @@
+#![allow(dead_code)]
 use anyhow::{anyhow, Context};
 use block_mesh_common::constants::{DeviceType, BLOCKMESH_VPS};
 use block_mesh_common::feature_flag_client::get_flag_value;

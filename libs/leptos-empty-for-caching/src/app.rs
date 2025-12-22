@@ -1,4 +1,4 @@
-use leptos::prelude::ElementChild;
+use leptos::prelude::*;
 use leptos::*;
 use leptos_meta::*;
 use leptos_router::*;
