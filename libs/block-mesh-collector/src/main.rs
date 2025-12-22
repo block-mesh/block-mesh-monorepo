@@ -106,7 +106,7 @@ async fn run() -> anyhow::Result<()> {
         .expect("Failed to migrate database");
     let router = get_router(state);
     let cors = CorsLayer::permissive();
-    let app = Router::new().nest("/", router).layer(cors);
+    let app = Router::new().merge(router).layer(cors);
     let port = env::var("PORT").unwrap_or("8001".to_string());
     let listener = TcpListener::bind(format!("0.0.0.0:{}", port)).await?;
     let products_task = tokio::spawn(get_products(db_pool.clone()));

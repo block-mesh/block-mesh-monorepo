@@ -45,7 +45,7 @@ async fn main() -> anyhow::Result<()> {
     let flags_cache = Arc::new(flags_cache);
     let load_flags_cron_task = tokio::spawn(load_flags_cron(flags_cache.clone(), db_pool.clone()));
     let app = Router::new()
-        .nest("/", router)
+        .merge(router)
         .layer(cors)
         .layer(Extension(flags_cache))
         .layer(Extension(db_pool.clone()));

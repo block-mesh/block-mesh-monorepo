@@ -74,7 +74,7 @@ async fn run(is_with_sentry: bool) {
         .unwrap_or(false);
 
     let app = Router::new()
-        .nest("/", router)
+        .merge(router)
         .layer(Extension(follower_pool.clone()))
         .layer(Extension(check_token_map.clone()))
         .layer(Extension(get_token_map.clone()))

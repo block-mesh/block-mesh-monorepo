@@ -120,7 +120,7 @@ impl Application {
 
         let sentry_layer = get_sentry_layer();
         let backend = Router::new()
-            .nest("/", auth_router)
+            .merge(auth_router)
             .route_layer(login_required!(Backend, login_url = "/login"))
             .nest("/api", api_router.clone())
             .nest(
@@ -134,7 +134,7 @@ impl Application {
                 api_router.clone(),
             )
             .nest(&format!("/{}/api", DeviceType::Unknown), api_router.clone())
-            .nest("/", un_auth_router);
+            .merge(un_auth_router);
 
         let backend = backend
             .layer(Extension(application_base_url))
@@ -215,9 +215,9 @@ impl Application {
             .parse()
             .unwrap_or(false);
         let app = app
-            //.nest("/", leptos_router)
-            .nest("/", backend)
-            //.nest("/", leptos_pkg)
+            //.merge(leptos_router)
+            .merge(backend)
+            //.merge(leptos_pkg)
             .layer(Extension(Arc::new(Mutex::new(oauth_ctx))))
             .layer(auth_layer);
         let app = if enforce_csp {
