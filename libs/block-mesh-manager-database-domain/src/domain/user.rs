@@ -1,10 +1,10 @@
-use chrono::{DateTime, Utc};
 use database_utils::utils::option_uuid::OptionUuid;
 use secret::Secret;
 use serde::{Deserialize, Serialize};
 use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -73,7 +73,8 @@ pub struct User {
     pub role: UserRole,
     pub password: Secret<String>,
     pub wallet_address: Option<String>,
-    pub created_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
     pub invited_by: OptionUuid,
     pub verified_email: bool,
 }

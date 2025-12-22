@@ -1,6 +1,6 @@
 use crate::domain::daily_stat::DailyStat;
-use chrono::Utc;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[tracing::instrument(name = "get_daily_stat_of_user", skip_all)]
@@ -8,8 +8,8 @@ pub async fn get_daily_stat_of_user(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,
 ) -> anyhow::Result<DailyStat> {
-    let now = Utc::now();
-    let day = now.date_naive();
+    let now = OffsetDateTime::now_utc();
+    let day = now.date();
     let dail_stat = sqlx::query_as!(
         DailyStat,
         r#"

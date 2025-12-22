@@ -12,13 +12,12 @@ use block_mesh_common::interfaces::db_messages::{
 use block_mesh_common::interfaces::server_api::{
     ClientsMetadata, HandlerMode, ReportUptimeRequest, ReportUptimeResponse,
 };
-use chrono::Utc;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use http::StatusCode;
 use http_body_util::BodyExt;
-use num_traits::abs;
 use sqlx::PgPool;
 use std::env;
+use time::OffsetDateTime;
 
 #[allow(clippy::too_many_arguments)]
 #[tracing::instrument(name = "report_uptime_content", skip_all)]
@@ -77,9 +76,9 @@ pub async fn report_uptime_content(
     )
     .await?;
     commit_txn(transaction).await?;
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let diff = now - uptime.updated_at;
-    let sec_diff = abs(diff.num_seconds());
+    let sec_diff = diff.whole_seconds().abs();
     let connected_buffer = env::var("CONNECTED_BUFFER")
         .unwrap_or("10".to_string())
         .parse()
