@@ -1,6 +1,6 @@
 use block_mesh_common::constants::DeviceType;
-use chrono::Utc;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[tracing::instrument(name = "get_or_create_analytics", skip_all)]
@@ -11,7 +11,7 @@ pub async fn get_or_create_analytics(
     device_type: &DeviceType,
     version: &str,
 ) -> anyhow::Result<Uuid> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let id = Uuid::new_v4();
     sqlx::query!(
         r#"
@@ -25,7 +25,7 @@ pub async fn get_or_create_analytics(
         user_id,
         depin_aggregator,
         device_type.to_string(),
-        now.clone(),
+        now,
         now,
         id,
         version

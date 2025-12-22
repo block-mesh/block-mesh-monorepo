@@ -1,6 +1,6 @@
-use chrono::{Duration, Utc};
 use sqlx::{Postgres, Transaction};
 use std::env;
+use time::{Duration, OffsetDateTime};
 
 #[tracing::instrument(
     name = "bulk_delete_old_tasks",
@@ -12,7 +12,7 @@ use std::env;
 pub async fn bulk_delete_old_tasks(
     transaction: &mut Transaction<'_, Postgres>,
 ) -> anyhow::Result<()> {
-    let date = Utc::now() - Duration::days(1);
+    let date = OffsetDateTime::now_utc() - Duration::days(1);
     let bulk_delete_limit = env::var("BULK_DELETE_LIMIT")
         .unwrap_or("300".to_string())
         .parse()

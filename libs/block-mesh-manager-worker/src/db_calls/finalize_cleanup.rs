@@ -1,10 +1,10 @@
-use chrono::{Duration, Utc};
 use sqlx::{Postgres, Transaction};
+use time::{Duration, OffsetDateTime};
 
 #[tracing::instrument(name = "finalize_cleanup", skip_all, err)]
 pub async fn finalize_cleanup(transaction: &mut Transaction<'_, Postgres>) -> anyhow::Result<()> {
-    let now = Utc::now();
-    let day = now.date_naive() - Duration::days(2);
+    let now = OffsetDateTime::now_utc();
+    let day = now.date() - Duration::days(2);
     sqlx::query!(
         r#"
         DELETE

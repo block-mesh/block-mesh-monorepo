@@ -1,6 +1,6 @@
-use chrono::Utc;
 use sqlx::types::JsonValue;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[tracing::instrument(name = "Create Task", level = "trace", skip(transaction), ret, err)]
@@ -12,7 +12,7 @@ pub async fn create_task(
     headers: Option<JsonValue>,
     body: Option<JsonValue>,
 ) -> anyhow::Result<Uuid> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let id = Uuid::new_v4();
     sqlx::query!(
         r#"INSERT

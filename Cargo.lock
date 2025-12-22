@@ -1408,12 +1408,11 @@ dependencies = [
 
 [[package]]
 name = "axum-tws"
-version = "0.4.0"
+version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5e5f12af798db0f54fbc8ca1ddd298297246931b3a29fc6b58aa2cc94d273368"
+checksum = "04c07eb6231011913e0931761c807aecc917b3b1c14335219e3673d2853be903"
 dependencies = [
- "async-trait",
- "axum-core 0.4.5",
+ "axum-core 0.5.5",
  "base64 0.22.1",
  "bytes",
  "futures-util",
@@ -1852,6 +1851,7 @@ dependencies = [
  "serde_json",
  "sqlx",
  "thiserror 1.0.61",
+ "time",
  "tokio",
  "tower 0.4.13",
  "tower-http 0.5.2",
@@ -1899,6 +1899,7 @@ dependencies = [
  "testcontainers-modules",
  "thiserror 1.0.61",
  "tikv-jemallocator",
+ "time",
  "tokio",
  "tracing",
  "uuid",
@@ -9134,6 +9135,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "simdutf8"
+version = "0.1.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e3a9fe34e3e7a50316060351f37187a3f546bce95496156754b601a5fa71b76e"
+
+[[package]]
 name = "siphasher"
 version = "0.3.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -12237,9 +12244,9 @@ dependencies = [
 
 [[package]]
 name = "tokio-websockets"
-version = "0.10.1"
+version = "0.11.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "f591660438b3038dd04d16c938271c79e7e06260ad2ea2885a4861bfb238605d"
+checksum = "9fcaf159b4e7a376b05b5bfd77bfd38f3324f5fce751b4213bfc7eaa47affb4e"
 dependencies = [
  "base64 0.22.1",
  "bytes",
@@ -12248,6 +12255,7 @@ dependencies = [
  "http 1.4.0",
  "httparse",
  "ring",
+ "simdutf8",
  "tokio",
  "tokio-rustls 0.26.0",
  "tokio-util",

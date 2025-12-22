@@ -12,7 +12,6 @@ use local_ip_address::local_ip;
 use redis::aio::ConnectionManager;
 use redis::{AsyncCommands, RedisResult};
 use serde::{Deserialize, Serialize};
-use sqlx::types::chrono::Utc;
 use sqlx::PgPool;
 use std::collections::{HashMap, HashSet};
 use std::net::IpAddr;
@@ -20,6 +19,7 @@ use std::str::FromStr;
 use std::sync::Arc;
 use std::time::Duration;
 use std::{env, process};
+use time::OffsetDateTime;
 use tokio::sync::RwLock;
 use tokio::task::JoinHandle;
 use tokio::time::sleep;
@@ -200,7 +200,7 @@ impl WsAppState {
 
     #[tracing::instrument(name = "get_task", skip_all)]
     pub async fn get_task(&self) -> Option<TwitterTask> {
-        let now = Utc::now();
+        let now = OffsetDateTime::now_utc();
         let pending_tasks = self.pending_twitter_tasks.read().await;
         pending_tasks
             .iter()

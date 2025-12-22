@@ -1,10 +1,10 @@
 use crate::db_calls::create_task::create_task;
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use sqlx::{Decode, Postgres, Transaction};
 use std::error::Error;
 use std::fmt::Display;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, Default)]
@@ -113,7 +113,8 @@ impl sqlx::Decode<'_, Postgres> for RpcName {
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
 pub struct Rpc {
     pub id: Uuid,
-    pub created_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
     pub token: String,
     pub host: String,
     pub name: RpcName,
