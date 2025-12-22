@@ -37,7 +37,7 @@ block-mesh-manager-database-domain = { path = "../block-mesh-manager-database-do
 axum-tws = { workspace = true }
 http = { workspace = true }
 http-body-util = { workspace = true }
-redis = { workspace = true, features = ["tokio-comp", "tokio-rustls-comp", "tls-rustls-insecure"] }
+redis = { workspace = true, features = ["tokio-comp", "tokio-rustls-comp", "tls-rustls-insecure", "connection-manager"] }
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = { workspace = true, features = ["background_threads"] }
 

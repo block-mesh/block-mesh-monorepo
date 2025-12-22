@@ -9,7 +9,7 @@ use database_utils::utils::connection::follower_pool::follower_pool;
 use database_utils::utils::connection::write_pool::write_pool;
 use flume::Sender;
 use local_ip_address::local_ip;
-use redis::aio::MultiplexedConnection;
+use redis::aio::ConnectionManager;
 use redis::{AsyncCommands, RedisResult};
 use serde::{Deserialize, Serialize};
 use sqlx::types::chrono::Utc;
@@ -38,7 +38,7 @@ pub struct WsAppState {
     pub follower_pool: PgPool,
     pub channel_pool: PgPool,
     pub environment: Environment,
-    pub redis: MultiplexedConnection,
+    pub redis: ConnectionManager,
     pub tx: Sender<DBMessage>,
     pub emails: Arc<RwLock<HashSet<String>>>,
     pub user_ids: Arc<RwLock<HashSet<Uuid>>>,
@@ -297,10 +297,7 @@ impl WsAppState {
             format!("{}#insecure", redis_url)
         };
         let redis_client = redis::Client::open(redis_url).unwrap();
-        let redis = redis_client
-            .get_multiplexed_async_connection()
-            .await
-            .unwrap();
+        let redis = ConnectionManager::new(redis_client).await.unwrap();
         Self {
             joiner_tx,
             workers,
