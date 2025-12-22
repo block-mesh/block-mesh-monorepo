@@ -1,14 +1,14 @@
 use block_mesh_manager_database_domain::domain::daily_stat::{DailyStat, DailyStatStatus};
-use chrono::{Duration, Utc};
 use sqlx::{query_as, Postgres, Transaction};
+use time::{Duration, OffsetDateTime};
 use uuid::Uuid;
 
 pub async fn get_daily_stats_bonus_not_applied(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
 ) -> anyhow::Result<Vec<DailyStat>> {
-    let now = Utc::now() - Duration::days(1);
-    let day = now.date_naive();
+    let now = OffsetDateTime::now_utc() - Duration::days(1);
+    let day = now.date();
     let rows: Vec<DailyStat> = query_as!(
         DailyStat,
         r#"

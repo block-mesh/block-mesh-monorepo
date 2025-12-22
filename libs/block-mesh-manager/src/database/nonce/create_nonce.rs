@@ -1,6 +1,6 @@
-use chrono::Utc;
 use secret::Secret;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 pub async fn create_nonce(
@@ -8,7 +8,7 @@ pub async fn create_nonce(
     user_id: &Uuid,
     nonce: &Secret<String>,
 ) -> anyhow::Result<Uuid> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let id = Uuid::new_v4();
     sqlx::query!(
         r#"

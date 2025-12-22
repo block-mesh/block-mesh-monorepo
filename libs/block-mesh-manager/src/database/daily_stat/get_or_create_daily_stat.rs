@@ -1,15 +1,15 @@
 use block_mesh_manager_database_domain::domain::daily_stat::DailyStat;
 use block_mesh_manager_database_domain::domain::daily_stat::DailyStatStatus;
-use chrono::Utc;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 pub async fn get_or_create_daily_stat(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
 ) -> anyhow::Result<DailyStat> {
-    let now = Utc::now();
-    let day = now.date_naive();
+    let now = OffsetDateTime::now_utc();
+    let day = now.date();
     let id = Uuid::new_v4();
     let daily_stat = sqlx::query_as!(
         DailyStat,
@@ -21,7 +21,7 @@ pub async fn get_or_create_daily_stat(
         RETURNING id, created_at, user_id, tasks_count, status, day, uptime, updated_at, ref_bonus, ref_bonus_applied
         "#,
         id,
-        now.clone(),
+        now,
         user_id,
         0,
         DailyStatStatus::OnGoing.to_string(),

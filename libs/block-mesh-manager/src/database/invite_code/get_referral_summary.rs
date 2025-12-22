@@ -1,8 +1,8 @@
 use block_mesh_common::interfaces::server_api::{ReferralSummary, TmpReferralSummary};
-use chrono::{Duration, Utc};
 use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use sqlx::{Postgres, Transaction};
 use std::sync::Arc;
+use time::{Duration, OffsetDateTime};
 use tokio::sync::OnceCell;
 use uuid::Uuid;
 
@@ -39,7 +39,7 @@ pub async fn get_user_referrals_summary(
         total_verified_human: summary.total_verified_human.unwrap_or_default(),
         total_eligible: summary.total_eligible.unwrap_or_default(),
     };
-    let date = Utc::now() + Duration::milliseconds(600_000);
+    let date = OffsetDateTime::now_utc() + Duration::milliseconds(600_000);
     cache.insert(*user_id, output.clone(), Some(date)).await;
     Ok(output)
 }

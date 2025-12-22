@@ -1,6 +1,6 @@
 use block_mesh_common::interfaces::server_api::LeaderBoardUser;
-use chrono::{Duration, Utc};
 use sqlx::{Postgres, Transaction};
+use time::{Duration, OffsetDateTime};
 
 pub async fn get_daily_leaderboard(
     transaction: &mut Transaction<'_, Postgres>,
@@ -8,7 +8,7 @@ pub async fn get_daily_leaderboard(
     tasks_factor: f64,
     limit: i64,
 ) -> anyhow::Result<Vec<LeaderBoardUser>> {
-    let day = Utc::now().date_naive() - Duration::days(1);
+    let day = OffsetDateTime::now_utc().date() - Duration::days(1);
     let daily_stats = sqlx::query_as!(
         LeaderBoardUser,
         r#"

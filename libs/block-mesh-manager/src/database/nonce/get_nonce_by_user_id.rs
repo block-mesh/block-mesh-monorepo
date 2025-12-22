@@ -1,10 +1,10 @@
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
-use chrono::{Duration, Utc};
 use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use secret::Secret;
 use sqlx::{Postgres, Transaction};
 use std::env;
 use std::sync::Arc;
+use time::{Duration, OffsetDateTime};
 use tokio::sync::OnceCell;
 use uuid::Uuid;
 
@@ -44,7 +44,7 @@ pub async fn get_nonce_by_user_id(
     .fetch_optional(&mut **transaction)
     .await?;
     if cache_flag {
-        let date = Utc::now() + Duration::milliseconds(60_000);
+        let date = OffsetDateTime::now_utc() + Duration::milliseconds(60_000);
         cache.insert(*user_id, output.clone(), Some(date)).await;
     }
     Ok(output)
