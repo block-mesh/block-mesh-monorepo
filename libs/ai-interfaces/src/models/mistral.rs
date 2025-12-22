@@ -5,15 +5,10 @@ use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Sequence)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Sequence, Default)]
 pub enum MistralModels {
+    #[default]
     MistralSmallLatest,
-}
-
-impl Default for MistralModels {
-    fn default() -> Self {
-        Self::MistralSmallLatest
-    }
 }
 
 impl Display for MistralModels {

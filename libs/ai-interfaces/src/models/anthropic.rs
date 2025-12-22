@@ -5,17 +5,12 @@ use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Sequence)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Sequence, Default)]
 pub enum AnthropicModels {
+    #[default]
     Claude35HaikuLatest,
     Claude35SonnetLatest,
     Claude3OpusLatest,
-}
-
-impl Default for AnthropicModels {
-    fn default() -> Self {
-        Self::Claude35HaikuLatest
-    }
 }
 
 impl Display for AnthropicModels {

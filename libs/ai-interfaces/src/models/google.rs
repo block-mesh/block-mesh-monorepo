@@ -5,16 +5,11 @@ use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Sequence)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Sequence, Default)]
 pub enum GoogleModels {
+    #[default]
     Gemini15FlashLatest,
     Gemini15ProLatest,
-}
-
-impl Default for GoogleModels {
-    fn default() -> Self {
-        Self::Gemini15FlashLatest
-    }
 }
 
 impl Display for GoogleModels {
