@@ -12,14 +12,14 @@ actix-web = { workspace = true, optional = true, features = ["macros"] }
 console_error_panic_hook = { workspace = true }
 http = { workspace = true, optional = true }
 leptos = { workspace = true }
-leptos_meta = { workspace = true }
+leptos_meta = { workspace = true, optional = true }
 leptos_actix = { workspace = true, optional = true }
-leptos_router = { workspace = true }
+leptos_router = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true }
 
 [features]
-csr = ["leptos/csr", "leptos_meta/csr", "leptos_router/csr"]
-hydrate = ["leptos/hydrate", "leptos_meta/hydrate", "leptos_router/hydrate"]
+csr = ["leptos/csr", "leptos_meta", "leptos_router"]
+hydrate = ["leptos/hydrate", "leptos_meta", "leptos_router"]
 ssr = [
   "dep:actix-files",
   "dep:actix-web",

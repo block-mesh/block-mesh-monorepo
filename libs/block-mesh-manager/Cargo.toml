@@ -84,8 +84,8 @@ secret = { path = "../secret", features = ["sqlx"], optional = true }
 leptos_axum = { workspace = true, optional = true }
 leptos = { workspace = true }
 leptos_config = { workspace = true, optional = true }
-leptos_meta = { workspace = true }
-leptos_router = { workspace = true }
+leptos_meta = { workspace = true, optional = true }
+leptos_router = { workspace = true, optional = true }
 leptos-use = { workspace = true, features = ["math"] }
 cfg-if = { workspace = true }
 wasm-bindgen = { workspace = true }
@@ -150,8 +150,8 @@ crate-type = ["cdylib", "rlib"]
 hydrate = [
   "block-mesh-common/hydrate",
   "leptos/hydrate",
-  "leptos_meta/hydrate",
-  "leptos_router/hydrate",
+  "leptos_meta",
+  "leptos_router",
   "dep:logger-leptos"
 ]
 ssr = [

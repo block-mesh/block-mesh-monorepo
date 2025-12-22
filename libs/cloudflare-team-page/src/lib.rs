@@ -57,21 +57,21 @@ async fn main(req: Request, env: Env, _ctx: Context) -> Result<Response> {
     router
         .get_async("/", |_req, ctx| async move {
             let counter = ctx.kv("ab_testing")?.get("counter").json::<Value>().await?;
-            let counter = if counter.is_none() {
-                let value = serde_json::to_string(&Value::from(0))?;
-                ctx.kv("ab_testing")?
-                    .put("counter", value)?
-                    .execute()
-                    .await?;
-                0
-            } else {
-                let c = counter.unwrap().as_u64().unwrap();
+            let counter = if let Some(counter_val) = counter {
+                let c = counter_val.as_u64().unwrap();
                 let value = serde_json::to_string(&Value::from(c + 1))?;
                 ctx.kv("ab_testing")?
                     .put("counter", value)?
                     .execute()
                     .await?;
                 c + 1
+            } else {
+                let value = serde_json::to_string(&Value::from(0))?;
+                ctx.kv("ab_testing")?
+                    .put("counter", value)?
+                    .execute()
+                    .await?;
+                0
             };
             let mut use_cases: Vec<UseCase> = Vec::with_capacity(50);
             use_cases.push(UseCase {

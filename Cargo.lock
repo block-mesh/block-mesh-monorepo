@@ -1822,8 +1822,8 @@ dependencies = [
  "leptos-use",
  "leptos_axum",
  "leptos_config 0.8.8",
- "leptos_meta",
- "leptos_router",
+ "leptos_meta 0.8.5",
+ "leptos_router 0.8.11",
  "lettre",
  "log",
  "logger-general",
@@ -5493,7 +5493,7 @@ dependencies = [
  "httpdate",
  "itoa",
  "pin-project-lite",
- "socket2 0.4.10",
+ "socket2 0.5.10",
  "tokio",
  "tower-service",
  "tracing",
@@ -6213,7 +6213,6 @@ dependencies = [
  "tracing",
  "typed-builder 0.18.2",
  "typed-builder-macro 0.18.2",
- "wasm-bindgen",
  "web-sys",
 ]
 
@@ -6268,8 +6267,8 @@ dependencies = [
  "http 1.4.0",
  "leptos 0.8.15",
  "leptos_actix",
- "leptos_meta",
- "leptos_router",
+ "leptos_meta 0.8.5",
+ "leptos_router 0.8.11",
  "wasm-bindgen",
 ]
 
@@ -6311,8 +6310,8 @@ dependencies = [
  "leptos 0.6.14",
  "leptos_integration_utils",
  "leptos_macro 0.6.14",
- "leptos_meta",
- "leptos_router",
+ "leptos_meta 0.6.14",
+ "leptos_router 0.6.14",
  "parking_lot",
  "regex",
  "serde_json",
@@ -6334,8 +6333,8 @@ dependencies = [
  "leptos 0.6.14",
  "leptos_integration_utils",
  "leptos_macro 0.6.14",
- "leptos_meta",
- "leptos_router",
+ "leptos_meta 0.6.14",
+ "leptos_router 0.6.14",
  "once_cell",
  "parking_lot",
  "serde_json",
@@ -6463,7 +6462,7 @@ dependencies = [
  "leptos 0.6.14",
  "leptos_config 0.6.14",
  "leptos_hot_reload 0.6.14",
- "leptos_meta",
+ "leptos_meta 0.6.14",
  "tracing",
 ]
 
@@ -6529,6 +6528,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "leptos_meta"
+version = "0.8.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "2d489e38d3f541e9e43ecc2e3a815527840345a2afca629b3e23fcc1dd254578"
+dependencies = [
+ "futures",
+ "indexmap 2.12.1",
+ "leptos 0.8.15",
+ "or_poisoned",
+ "send_wrapper",
+ "wasm-bindgen",
+ "web-sys",
+]
+
+[[package]]
 name = "leptos_reactive"
 version = "0.6.14"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6538,7 +6552,6 @@ dependencies = [
  "cfg-if",
  "futures",
  "indexmap 2.12.1",
- "js-sys",
  "oco_ref 0.1.1",
  "paste",
  "pin-project",
@@ -6551,9 +6564,7 @@ dependencies = [
  "thiserror 1.0.61",
  "tokio",
  "tracing",
- "wasm-bindgen",
  "wasm-bindgen-futures",
- "web-sys",
 ]
 
 [[package]]
@@ -6570,7 +6581,7 @@ dependencies = [
  "lazy_static",
  "leptos 0.6.14",
  "leptos_integration_utils",
- "leptos_meta",
+ "leptos_meta 0.6.14",
  "linear-map",
  "lru 0.11.1",
  "once_cell",
@@ -6586,6 +6597,43 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
+]
+
+[[package]]
+name = "leptos_router"
+version = "0.8.11"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "01e573711f2fb9ab5d655ec38115220d359eaaf1dcb93cc0ea624543b6dba959"
+dependencies = [
+ "any_spawner",
+ "either_of",
+ "futures",
+ "gloo-net 0.6.0",
+ "js-sys",
+ "leptos 0.8.15",
+ "leptos_router_macro",
+ "or_poisoned",
+ "percent-encoding",
+ "reactive_graph",
+ "rustc_version",
+ "send_wrapper",
+ "tachys",
+ "thiserror 2.0.17",
+ "url",
+ "wasm-bindgen",
+ "web-sys",
+]
+
+[[package]]
+name = "leptos_router_macro"
+version = "0.8.6"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "409c0bd99f986c3cfa1a4db2443c835bc602ded1a12784e22ecb28c3ed5a2ae2"
+dependencies = [
+ "proc-macro-error2",
+ "proc-macro2",
+ "quote",
+ "syn 2.0.111",
 ]
 
 [[package]]
@@ -9625,7 +9673,7 @@ dependencies = [
  "security-framework 3.5.1",
  "security-framework-sys",
  "webpki-root-certs",
- "windows-sys 0.60.2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]

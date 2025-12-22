@@ -1,8 +1,12 @@
+#![allow(deprecated)]
 use leptos::prelude::*;
 use leptos::*;
+#[cfg(any(feature = "csr", feature = "hydrate", feature = "ssr"))]
 use leptos_meta::*;
+#[cfg(any(feature = "csr", feature = "hydrate", feature = "ssr"))]
 use leptos_router::*;
 
+#[cfg(any(feature = "csr", feature = "hydrate", feature = "ssr"))]
 #[component]
 pub fn App() -> impl IntoView {
     // Provides context that manages stylesheets, titles, meta tags, etc.
@@ -29,6 +33,7 @@ pub fn App() -> impl IntoView {
 }
 
 /// Renders the home page of your application.
+#[cfg(any(feature = "csr", feature = "hydrate", feature = "ssr"))]
 #[component]
 fn HomePage() -> impl IntoView {
     // Creates a reactive value to update the button
@@ -42,6 +47,7 @@ fn HomePage() -> impl IntoView {
 }
 
 /// 404 - Not Found
+#[cfg(any(feature = "csr", feature = "hydrate", feature = "ssr"))]
 #[component]
 fn NotFound() -> impl IntoView {
     // set an HTTP status code 404

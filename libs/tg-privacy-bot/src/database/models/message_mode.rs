@@ -1,19 +1,15 @@
+#![allow(clippy::derivable_impls)]
 use serde::{Deserialize, Serialize};
 use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
 
-#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq, Default)]
 pub enum MessageMode {
+    #[default]
     ResetOnEachMessage,
     ResetOnModelChange,
     KeepAlways,
-}
-
-impl Default for MessageMode {
-    fn default() -> Self {
-        Self::ResetOnEachMessage
-    }
 }
 
 impl Display for MessageMode {

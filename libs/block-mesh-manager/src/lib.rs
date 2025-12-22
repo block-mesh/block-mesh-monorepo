@@ -1,4 +1,4 @@
-#![allow(unexpected_cfgs)]
+#![allow(unexpected_cfgs, clippy::unused_unit)]
 use leptos::*;
 #[component]
 pub fn App() -> impl IntoView {
