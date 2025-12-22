@@ -1,13 +1,13 @@
-use chrono::{DateTime, Utc};
 use std::collections::HashMap;
 use std::hash::Hash;
 use std::sync::Arc;
 use std::time::Duration;
+use time::OffsetDateTime;
 use tokio::sync::RwLock;
 
 pub struct HashMapWithExpiry<K, V> {
     map: Arc<RwLock<HashMap<K, V>>>,
-    expiry: Arc<RwLock<HashMap<K, DateTime<Utc>>>>,
+    expiry: Arc<RwLock<HashMap<K, OffsetDateTime>>>,
     size_limit: usize,
 }
 
@@ -58,7 +58,7 @@ impl<'a, K: Eq + Hash + Clone + Sync + Send + 'static, V: Clone + Sync + Send + 
     pub async fn period_cleanup(
         size_limit: usize,
         map: Arc<RwLock<HashMap<K, V>>>,
-        expiry: Arc<RwLock<HashMap<K, DateTime<Utc>>>>,
+        expiry: Arc<RwLock<HashMap<K, OffsetDateTime>>>,
     ) {
         loop {
             let clear = map.read().await.len() >= size_limit;
@@ -84,7 +84,7 @@ impl<'a, K: Eq + Hash + Clone + Sync + Send + 'static, V: Clone + Sync + Send + 
         inst
     }
 
-    pub async fn insert(&self, key: K, value: V, expiry: Option<DateTime<Utc>>) -> Option<V> {
+    pub async fn insert(&self, key: K, value: V, expiry: Option<OffsetDateTime>) -> Option<V> {
         match expiry {
             Some(e) => {
                 self.expiry.write().await.insert(key.clone(), e);
@@ -113,7 +113,7 @@ impl<'a, K: Eq + Hash + Clone + Sync + Send + 'static, V: Clone + Sync + Send + 
         let e = self.expiry.read().await.get(key).cloned();
         let (v, expired) = match e {
             Some(expiry) => {
-                if Utc::now() > expiry {
+                if OffsetDateTime::now_utc() > expiry {
                     self.map.write().await.remove(key);
                     (None, true)
                 } else {
@@ -132,15 +132,15 @@ impl<'a, K: Eq + Hash + Clone + Sync + Send + 'static, V: Clone + Sync + Send + 
 #[cfg(test)]
 mod tests {
     use super::*;
-    use chrono::Duration as ChronoDuration;
     use std::time::Duration;
+    use time::Duration as TimeDuration;
     use tokio::time::sleep;
     use tracing_test::traced_test;
 
     #[tokio::test]
     #[traced_test]
     async fn no_expiry() {
-        let map: HashMapWithExpiry<u64, u64> = HashMapWithExpiry::new();
+        let map: HashMapWithExpiry<u64, u64> = HashMapWithExpiry::new(1_000);
         map.insert(10, 10, None).await;
         let v = map.get(&10).await.unwrap();
         assert_eq!(10, v);
@@ -149,8 +149,8 @@ mod tests {
     #[tokio::test]
     #[traced_test]
     async fn with_expiry() {
-        let map: HashMapWithExpiry<u64, u64> = HashMapWithExpiry::new();
-        let date = Utc::now() + ChronoDuration::milliseconds(1000);
+        let map: HashMapWithExpiry<u64, u64> = HashMapWithExpiry::new(1_000);
+        let date = OffsetDateTime::now_utc() + TimeDuration::milliseconds(1000);
         map.insert(10, 10, Some(date)).await;
         let v = map.get(&10).await.unwrap();
         assert_eq!(10, v);
@@ -163,7 +163,7 @@ mod tests {
     #[tokio::test]
     #[traced_test]
     async fn remove() {
-        let map: HashMapWithExpiry<u64, u64> = HashMapWithExpiry::new();
+        let map: HashMapWithExpiry<u64, u64> = HashMapWithExpiry::new(1_000);
         map.insert(10, 10, None).await;
         let v = map.get(&10).await.unwrap();
         assert_eq!(10, v);

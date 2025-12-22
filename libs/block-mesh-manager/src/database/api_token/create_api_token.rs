@@ -1,13 +1,13 @@
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
-use chrono::Utc;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 pub(crate) async fn create_api_token(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: Uuid,
 ) -> anyhow::Result<Uuid> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let id = Uuid::new_v4();
     let token = Uuid::new_v4();
     sqlx::query!(

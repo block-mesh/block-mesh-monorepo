@@ -1,6 +1,6 @@
-use chrono::{Duration, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{Postgres, Transaction};
+use time::{Duration, OffsetDateTime};
 use uuid::Uuid;
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
@@ -15,7 +15,7 @@ pub async fn get_latest_bandwidth_reports(
     user_id: Uuid,
     seconds: i64,
 ) -> anyhow::Result<BandwidthReportAvg> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let diff = now - Duration::seconds(seconds);
     let report = sqlx::query_as!(
         BandwidthReportAvg,

@@ -1,8 +1,8 @@
-use chrono::{DateTime, Utc};
 use serde::{Deserialize, Serialize};
 use sqlx::{Decode, Postgres};
 use std::error::Error;
 use std::fmt::Display;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -67,7 +67,8 @@ impl sqlx::Decode<'_, Postgres> for CallToActionName {
 pub struct CallToAction {
     pub id: Uuid,
     pub user_id: Uuid,
-    pub created_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
     pub status: bool,
     pub name: CallToActionName,
 }

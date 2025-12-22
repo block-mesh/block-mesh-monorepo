@@ -1,5 +1,5 @@
-use chrono::Utc;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 use crate::domain::call_to_action::CallToActionName;
@@ -10,7 +10,7 @@ pub async fn get_or_create_call_to_action(
     name: CallToActionName,
     status: bool,
 ) -> anyhow::Result<()> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let id = Uuid::new_v4();
     sqlx::query!(
         r#"

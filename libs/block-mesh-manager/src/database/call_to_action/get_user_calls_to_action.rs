@@ -1,8 +1,8 @@
 use crate::domain::call_to_action::CallToAction;
-use chrono::{Duration, Utc};
 use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use sqlx::{query_as, Postgres, Transaction};
 use std::sync::Arc;
+use time::{Duration, OffsetDateTime};
 use tokio::sync::{OnceCell, RwLock};
 use uuid::Uuid;
 
@@ -36,7 +36,7 @@ pub async fn get_user_call_to_action(
     )
     .fetch_all(&mut **transaction)
     .await?;
-    let date = Utc::now() + Duration::milliseconds(600_000);
+    let date = OffsetDateTime::now_utc() + Duration::milliseconds(600_000);
     cache
         .write()
         .await
