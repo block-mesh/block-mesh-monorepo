@@ -9,7 +9,7 @@ use crate::database::db_utils::get_pool;
 use crate::error::Error;
 use crate::handlers::callback::callback_handler;
 use crate::handlers::inline::inline_query_handler;
-use askama_axum::IntoResponse;
+use axum::response::IntoResponse;
 use axum::routing::get;
 use axum::{Extension, Router};
 use block_mesh_common::env::load_dotenv::load_dotenv;

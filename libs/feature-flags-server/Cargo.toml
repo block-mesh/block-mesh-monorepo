@@ -27,6 +27,7 @@ tracing-appender = { workspace = true }
 tracing-bunyan-formatter = { workspace = true }
 block-mesh-common = { path = "../block-mesh-common", features = ["ip-data", "feature-flag", "env", "solana"] }
 logger-general = { path = "../logger-general", features = ["sentry"] }
+time = { workspace = true, features = ["serde"] }
 
 [dependencies.rand]
 workspace = true

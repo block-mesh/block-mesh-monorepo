@@ -16,8 +16,8 @@ impl sqlx::Type<Postgres> for OptionUuid {
 impl sqlx::Encode<'_, Postgres> for OptionUuid {
     fn encode_by_ref(
         &self,
-        buf: &mut <Postgres as sqlx::database::HasArguments<'_>>::ArgumentBuffer,
-    ) -> sqlx::encode::IsNull {
+        buf: &mut sqlx::postgres::PgArgumentBuffer,
+    ) -> Result<sqlx::encode::IsNull, Box<dyn Error + 'static + Send + Sync>> {
         let value = match self.0 {
             Some(value) => value.to_string(),
             None => "null".to_string(),
@@ -28,7 +28,7 @@ impl sqlx::Encode<'_, Postgres> for OptionUuid {
 
 impl sqlx::Decode<'_, Postgres> for OptionUuid {
     fn decode(
-        value: <Postgres as sqlx::database::HasValueRef<'_>>::ValueRef,
+        value: sqlx::postgres::PgValueRef<'_>,
     ) -> Result<Self, Box<dyn Error + 'static + Send + Sync>> {
         let value = <Uuid as Decode<Postgres>>::decode(value)?;
         Ok(Self(Some(value)))

@@ -6,7 +6,6 @@ use axum::Router;
 use block_mesh_common::env::environment::Environment;
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use block_mesh_common::solana::{get_block_time, get_keypair};
-use chrono::{DateTime, Utc};
 use database_utils::utils::connection::write_pool::write_pool;
 use database_utils::utils::migrate::migrate;
 use database_utils::utils::option_uuid::OptionUuid;
@@ -18,6 +17,7 @@ use std::net::SocketAddr;
 use std::str::FromStr;
 use std::sync::Arc;
 use std::{env, mem, process};
+use time::OffsetDateTime;
 use tokio::net::TcpListener;
 use tokio::sync::RwLock;
 use tower_http::cors::CorsLayer;
@@ -79,7 +79,8 @@ pub struct Id {
     pub fp3: String,
     pub fp4: String,
     pub ip: String,
-    pub created_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
 }
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
@@ -92,7 +93,8 @@ pub struct IdTmp {
     pub fp3: Option<String>,
     pub fp4: Option<String>,
     pub ip: Option<String>,
-    pub created_at: Option<DateTime<Utc>>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub created_at: Option<OffsetDateTime>,
 }
 
 #[allow(clippy::too_many_arguments)]
@@ -107,7 +109,7 @@ pub async fn get_or_create_id(
     ip: &str,
 ) -> anyhow::Result<Id> {
     let uuid = Uuid::new_v4();
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let idtmp = sqlx::query_as!(
         IdTmp,
         r#"

@@ -3,8 +3,8 @@ use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use crate::startup::application::AppState;
 use askama::Template;
-use askama_axum::IntoResponse;
 use axum::extract::{Query, State};
+use axum::response::IntoResponse;
 use axum::Extension;
 use axum_login::AuthSession;
 use block_mesh_common::constants::{

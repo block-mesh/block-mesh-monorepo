@@ -1,6 +1,5 @@
 use crate::error::Error;
 use block_mesh_common::solana::get_block_time;
-use chrono::{DateTime, Utc};
 use dashmap::DashMap;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use database_utils::utils::option_uuid::OptionUuid;
@@ -10,6 +9,7 @@ use sqlx::Postgres;
 use sqlx::{PgPool, Transaction};
 use std::env;
 use std::sync::Arc;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
@@ -17,7 +17,8 @@ pub struct Flag {
     pub id: Uuid,
     pub name: String,
     pub value: Value,
-    pub created_at: Option<DateTime<Utc>>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub created_at: Option<OffsetDateTime>,
 }
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
@@ -25,7 +26,8 @@ pub struct FlagTmp {
     pub id: OptionUuid,
     pub name: Option<String>,
     pub value: Option<Value>,
-    pub created_at: Option<DateTime<Utc>>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub created_at: Option<OffsetDateTime>,
 }
 
 #[tracing::instrument(name = "get_flag", skip_all)]
@@ -97,7 +99,7 @@ pub async fn load_flags_cron(
 
 pub async fn get_or_create_flag(pool: &PgPool, name: &str, value: Value) -> anyhow::Result<Flag> {
     let id = Uuid::new_v4();
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let flag = sqlx::query_as!(
         FlagTmp,
         r#"
@@ -131,7 +133,7 @@ pub async fn get_or_create_flag(pool: &PgPool, name: &str, value: Value) -> anyh
 
 pub async fn create_flag(pool: &PgPool, name: &str, value: Value) -> anyhow::Result<()> {
     let id = Uuid::new_v4();
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     sqlx::query!(
         r#"
         INSERT INTO flags

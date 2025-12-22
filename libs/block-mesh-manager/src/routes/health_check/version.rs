@@ -1,4 +1,4 @@
-use askama_axum::IntoResponse;
+use axum::response::IntoResponse;
 use http::StatusCode;
 
 #[tracing::instrument(name = "version", skip_all)]

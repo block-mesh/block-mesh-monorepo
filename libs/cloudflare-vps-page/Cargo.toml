@@ -7,8 +7,7 @@ edition = "2021"
 crate-type = ["cdylib"]
 
 [dependencies]
-askama = { workspace = true, features = ["with-axum", "serde-json"] }
-askama_axum = { workspace = true }
+askama = { workspace = true, features = ["serde_json"] }
 worker = { workspace = true }
 tracing = { workspace = true }
 tracing-web = { workspace = true }

@@ -1,13 +1,13 @@
 use crate::collector_data::{CollectorDailyStats, CollectorData, ExportData};
 use aws_sdk_s3::Client;
 use aws_sdk_s3::primitives::ByteStream;
-use chrono::Utc;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use serde_json::Value;
 use sqlx::PgPool;
 use std::env;
 use std::sync::Arc;
 use std::time::Duration;
+use time::OffsetDateTime;
 use tokio::time::sleep;
 
 #[tracing::instrument(name = "get_items", skip_all, err)]
@@ -52,8 +52,8 @@ pub async fn upload_to_r2(pool: Arc<PgPool>, client: Arc<Client>) -> anyhow::Res
         .parse::<i64>()
         .unwrap_or(10_000);
     loop {
-        let now = Utc::now();
-        let day = now.date_naive();
+        let now = OffsetDateTime::now_utc();
+        let day = now.date();
         if let Ok(mut transaction) = create_txn(&pool).await {
             if let Ok(items) = CollectorData::get_day_data(&mut transaction, day, limit).await {
                 let export_items: Vec<ExportData> = items

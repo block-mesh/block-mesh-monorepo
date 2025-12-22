@@ -49,9 +49,8 @@ reqwest = { workspace = true, default-features = false, features = [
 validator = { workspace = true, features = ["derive"] }
 sentry = { workspace = true, optional = true }
 url = { workspace = true }
-askama = { workspace = true, features = ["with-axum", "serde-json"] }
+askama = { workspace = true, features = ["serde_json"] }
 form_urlencoded = { workspace = true }
-askama_axum = { workspace = true }
 tokio-stream = { workspace = true, features = ["sync"], optional = true }
 http-body-util = { workspace = true }
 serde = { workspace = true, features = ["derive"] }

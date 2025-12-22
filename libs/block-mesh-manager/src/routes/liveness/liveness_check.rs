@@ -1,8 +1,8 @@
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use anyhow::anyhow;
-use askama_axum::IntoResponse;
 use axum::extract::{Query, State};
+use axum::response::IntoResponse;
 use axum::Json;
 use block_mesh_common::feature_flag_client::{get_flag_value_from_map, FlagValue};
 use block_mesh_common::interfaces::db_messages::{

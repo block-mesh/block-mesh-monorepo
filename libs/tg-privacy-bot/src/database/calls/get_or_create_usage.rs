@@ -1,7 +1,7 @@
 use crate::database::models::usage::Usage;
-use chrono::Utc;
 use sqlx::{Postgres, Transaction};
 use std::env;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 pub async fn get_or_create_usage(
@@ -12,8 +12,8 @@ pub async fn get_or_create_usage(
         .unwrap_or("10".to_string())
         .parse::<i64>()?;
     let id = Uuid::new_v4();
-    let now = Utc::now();
-    let day = now.date_naive();
+    let now = OffsetDateTime::now_utc();
+    let day = now.date();
     let usage = sqlx::query_as!(
         Usage,
         r#"

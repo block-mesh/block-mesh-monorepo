@@ -1,6 +1,6 @@
 use askama::Template;
-use askama_axum::IntoResponse;
 use axum::extract::{Query, State};
+use axum::response::IntoResponse;
 use axum::Extension;
 use axum_login::AuthSession;
 use sqlx::PgPool;

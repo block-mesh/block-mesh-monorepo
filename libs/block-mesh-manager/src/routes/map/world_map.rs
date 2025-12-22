@@ -1,6 +1,6 @@
 use askama::Template;
-use askama_axum::IntoResponse;
 use axum::extract::State;
+use axum::response::IntoResponse;
 use axum::Extension;
 use serde::{Deserialize, Serialize};
 use sqlx::PgPool;

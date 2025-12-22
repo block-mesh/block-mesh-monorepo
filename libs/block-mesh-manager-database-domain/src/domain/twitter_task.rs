@@ -8,6 +8,7 @@ use std::env;
 use std::error::Error;
 use std::fmt::Display;
 use std::time::Duration;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
@@ -50,15 +51,15 @@ impl sqlx::Type<Postgres> for TwitterTaskStatus {
 impl sqlx::Encode<'_, Postgres> for TwitterTaskStatus {
     fn encode_by_ref(
         &self,
-        buf: &mut <Postgres as sqlx::database::HasArguments<'_>>::ArgumentBuffer,
-    ) -> sqlx::encode::IsNull {
+        buf: &mut sqlx::postgres::PgArgumentBuffer,
+    ) -> Result<sqlx::encode::IsNull, Box<dyn Error + 'static + Send + Sync>> {
         <String as sqlx::Encode<Postgres>>::encode(self.to_string(), buf)
     }
 }
 
 impl sqlx::Decode<'_, Postgres> for TwitterTaskStatus {
     fn decode(
-        value: <Postgres as sqlx::database::HasValueRef<'_>>::ValueRef,
+        value: sqlx::postgres::PgValueRef<'_>,
     ) -> Result<Self, Box<dyn Error + 'static + Send + Sync>> {
         let value = <&str as Decode<Postgres>>::decode(value)?;
         let value = value.to_string();
@@ -125,6 +126,7 @@ impl TwitterTask {
         let status = TwitterTaskStatus::Pending.to_string();
         for (s, u) in range {
             let delay = Self::delay();
+            let delay_time = OffsetDateTime::from_unix_timestamp(delay.timestamp()).unwrap();
             sqlx::query!(
                 r#"
                 INSERT INTO twitter_tasks
@@ -134,7 +136,7 @@ impl TwitterTask {
                 status,
                 s,
                 u,
-                delay,
+                delay_time,
                 v,
             )
             .execute(&mut **transaction)

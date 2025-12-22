@@ -1,8 +1,8 @@
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use askama::Template;
-use askama_axum::IntoResponse;
 use axum::extract::{Query, State};
+use axum::response::IntoResponse;
 use block_mesh_common::constants::{
     BLOCK_MESH_APP_SERVER, BLOCK_MESH_CHROME_EXTENSION_LINK, BLOCK_MESH_GITBOOK, BLOCK_MESH_GITHUB,
     BLOCK_MESH_LANDING_PAGE_IMAGE, BLOCK_MESH_SUPPORT_CHAT, BLOCK_MESH_SUPPORT_EMAIL,

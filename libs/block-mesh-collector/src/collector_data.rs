@@ -1,24 +1,26 @@
 use anyhow::{Context, anyhow};
-use chrono::{DateTime, NaiveDate, Utc};
 use database_utils::utils::option_uuid::OptionUuid;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use sqlx::{Postgres, Transaction};
+use time::{Date, OffsetDateTime};
 use uuid::Uuid;
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
 pub struct CollectorDailyStats {
     pub id: Uuid,
-    pub created_at: DateTime<Utc>,
-    pub day: NaiveDate,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
+    pub day: Date,
     pub count: i32,
 }
 
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
 pub struct CollectorDailyStatsTmp {
     pub id: OptionUuid,
-    pub created_at: Option<DateTime<Utc>>,
-    pub day: Option<NaiveDate>,
+    #[serde(with = "time::serde::rfc3339::option")]
+    pub created_at: Option<OffsetDateTime>,
+    pub day: Option<Date>,
     pub count: Option<i32>,
 }
 
@@ -28,8 +30,8 @@ impl CollectorDailyStats {
         transaction: &mut Transaction<'_, Postgres>,
         add_to_count: i32,
     ) -> anyhow::Result<()> {
-        let now = Utc::now();
-        let day = now.date_naive();
+        let now = OffsetDateTime::now_utc();
+        let day = now.date();
         sqlx::query!(
             r#"
             UPDATE collector_daily_stats
@@ -47,8 +49,8 @@ impl CollectorDailyStats {
     pub async fn get_or_create_collector_daily_stats(
         transaction: &mut Transaction<'_, Postgres>,
     ) -> anyhow::Result<CollectorDailyStats> {
-        let now = Utc::now();
-        let day = now.date_naive();
+        let now = OffsetDateTime::now_utc();
+        let day = now.date();
         let id = Uuid::new_v4();
         let collector_daily_stats = sqlx::query_as!(
             CollectorDailyStatsTmp,
@@ -92,7 +94,8 @@ impl CollectorDailyStats {
 #[derive(sqlx::FromRow, Debug, Serialize, Deserialize, Clone)]
 pub struct CollectorData {
     pub id: Uuid,
-    pub created_at: DateTime<Utc>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
     pub source: String,
     pub data: Value,
 }
@@ -109,7 +112,7 @@ pub struct ExportData {
     pub review_count: i64,
     pub rating: f64,
     pub in_stock: String,
-    pub last_seen: NaiveDate,
+    pub last_seen: Date,
 }
 
 impl CollectorData {
@@ -163,7 +166,7 @@ impl CollectorData {
             .as_str()
             .ok_or(anyhow!("(2) Cant find product_star_rating"))?
             .parse::<f64>()?;
-        let last_seen = self.created_at.date_naive();
+        let last_seen = self.created_at.date();
         Ok(ExportData {
             asin,
             url,
@@ -179,7 +182,7 @@ impl CollectorData {
     #[tracing::instrument(name = "get_day_data", skip_all, err)]
     pub async fn get_day_data(
         transaction: &mut Transaction<'_, Postgres>,
-        day: NaiveDate,
+        day: Date,
         limit: i64,
     ) -> anyhow::Result<Vec<Self>> {
         Ok(sqlx::query_as!(
@@ -204,7 +207,7 @@ impl CollectorData {
         source: &str,
         data: &Value,
     ) -> anyhow::Result<()> {
-        let now = Utc::now();
+        let now = OffsetDateTime::now_utc();
         let id = Uuid::new_v4();
         sqlx::query!(
             r#"

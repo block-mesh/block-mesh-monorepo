@@ -1,6 +1,6 @@
 use crate::database::models::message_mode::MessageMode;
-use chrono::Utc;
 use sqlx::{Postgres, Transaction};
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 pub async fn update_user_settings_message_mode(
@@ -8,7 +8,7 @@ pub async fn update_user_settings_message_mode(
     id: &Uuid,
     message_mode: &MessageMode,
 ) -> anyhow::Result<()> {
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     sqlx::query!(
         r#"
         UPDATE user_settings SET message_mode = $2, updated_at = $3 WHERE id = $1
