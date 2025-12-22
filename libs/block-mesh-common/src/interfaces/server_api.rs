@@ -357,7 +357,7 @@ pub struct CallToActionUI {
 }
 
 #[typeshare]
-#[derive(Default, Serialize, Deserialize, Debug, Clone, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 pub struct DailyStatForDashboard {
     #[typeshare(serialized_as = "number")]
     pub tasks_count: i64,
@@ -365,6 +365,17 @@ pub struct DailyStatForDashboard {
     #[typeshare(serialized_as = "Date")]
     pub day: Date,
     pub points: f64,
+}
+
+impl Default for DailyStatForDashboard {
+    fn default() -> Self {
+        Self {
+            tasks_count: 0,
+            uptime: 0.0,
+            day: time::Date::from_calendar_date(2000, time::Month::January, 1).unwrap(),
+            points: 0.0,
+        }
+    }
 }
 
 #[typeshare]
