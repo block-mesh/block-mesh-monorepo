@@ -1,4 +1,5 @@
 use askama::Template;
+use askama_web::WebTemplate;
 use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::Extension;
@@ -17,7 +18,7 @@ use crate::errors::error::Error;
 use crate::startup::application::AppState;
 
 #[allow(dead_code)]
-#[derive(Template)]
+#[derive(Template, WebTemplate)]
 #[template(path = "map.html")]
 struct MapTemplate {
     pub chrome_extension_link: String,

@@ -15,12 +15,12 @@ use block_mesh_common::interfaces::server_api::{
 };
 use block_mesh_common::intract::get_intract_user_details;
 use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
-use chrono::{Duration, Utc};
 use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use sqlx::PgPool;
 use std::env;
 use std::sync::Arc;
+use time::{Duration, OffsetDateTime};
 use tokio::sync::OnceCell;
 
 static RATE_LIMIT: OnceCell<HashMapWithExpiry<String, PerkResponse>> = OnceCell::const_new();
@@ -40,7 +40,7 @@ pub async fn add_to_cache(
     };
     let app_environment = env::var("APP_ENVIRONMENT").unwrap_or("local".to_string());
     if app_environment != "local" {
-        let date = Utc::now() + Duration::milliseconds(60_000);
+        let date = OffsetDateTime::now_utc() + Duration::milliseconds(60_000);
         cache
             .insert(email.to_string(), resp.clone(), Some(date))
             .await;

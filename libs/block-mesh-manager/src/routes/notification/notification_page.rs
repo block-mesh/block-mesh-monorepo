@@ -1,6 +1,7 @@
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use askama::Template;
+use askama_web::WebTemplate;
 use axum::extract::{Query, State};
 use axum::response::IntoResponse;
 use block_mesh_common::constants::{
@@ -18,7 +19,7 @@ pub struct NotificationQueryParams {
     pub go_to: String,
 }
 
-#[derive(Template, Debug, Serialize, Deserialize)]
+#[derive(Template, WebTemplate, Debug, Serialize, Deserialize)]
 #[template(path = "notification_page.html")]
 pub struct NotificationTemplate {
     pub summary: String,

@@ -1,6 +1,7 @@
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use askama::Template;
+use askama_web::WebTemplate;
 use axum::extract::{Query, State};
 use axum::response::IntoResponse;
 use block_mesh_common::constants::{
@@ -19,7 +20,7 @@ pub struct ErrorQueryParams {
     pub go_to: String,
 }
 
-#[derive(Template, Debug, Serialize, Deserialize)]
+#[derive(Template, WebTemplate, Debug, Serialize, Deserialize)]
 #[template(path = "error.html")]
 pub struct ErrorTemplate {
     pub code: u64,

@@ -5,14 +5,14 @@ use crate::middlewares::authentication::Backend;
 use axum::{Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::{DailyLeaderboard, LeaderBoardUser};
-use chrono::{Duration, NaiveDate, Utc};
 use sqlx::PgPool;
 use std::collections::HashMap;
 use std::sync::Arc;
+use time::{Date, Duration, OffsetDateTime};
 use tokio::sync::{OnceCell, RwLock};
 
 #[allow(dead_code)]
-type DailyLeaderBoardCache = Arc<RwLock<HashMap<NaiveDate, Vec<LeaderBoardUser>>>>;
+type DailyLeaderBoardCache = Arc<RwLock<HashMap<Date, Vec<LeaderBoardUser>>>>;
 #[allow(dead_code)]
 static CACHE: OnceCell<DailyLeaderBoardCache> = OnceCell::const_new();
 
@@ -22,7 +22,7 @@ pub async fn handler(
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<Json<DailyLeaderboard>, Error> {
     // let user = auth.user.ok_or(Error::UserNotFound)?;
-    let day = Utc::now().date_naive() - Duration::days(1);
+    let day = OffsetDateTime::now_utc().date() - Duration::days(1);
     Ok(Json(DailyLeaderboard {
         leaderboard_users: vec![],
         day,

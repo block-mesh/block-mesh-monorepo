@@ -1,7 +1,7 @@
-use chrono::{Duration, Utc};
 use num_traits::cast::ToPrimitive;
 use sqlx::types::BigDecimal;
 use sqlx::{Postgres, Transaction};
+use time::{Duration, OffsetDateTime};
 use uuid::Uuid;
 
 pub async fn get_user_uptime_in_duration(
@@ -9,7 +9,7 @@ pub async fn get_user_uptime_in_duration(
     user_id: Uuid,
     duration: u64,
 ) -> anyhow::Result<f64> {
-    let since = Utc::now() - Duration::seconds(duration as i64);
+    let since = OffsetDateTime::now_utc() - Duration::seconds(duration as i64);
     let count: Option<BigDecimal> = sqlx::query_scalar!(
         r#"
             SELECT

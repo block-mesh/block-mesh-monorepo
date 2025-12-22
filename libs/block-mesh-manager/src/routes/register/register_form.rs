@@ -1,6 +1,7 @@
 use crate::middlewares::authentication::Backend;
 use crate::startup::application::AppState;
 use askama::Template;
+use askama_web::WebTemplate;
 use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::response::Redirect;
@@ -15,7 +16,7 @@ use block_mesh_common::routes_enum::RoutesEnum;
 use std::sync::Arc;
 
 #[allow(dead_code)]
-#[derive(Template)]
+#[derive(Template, WebTemplate)]
 #[template(path = "register.html")]
 struct RegisterTemplate {
     pub chrome_extension_link: String,

@@ -3,6 +3,7 @@ use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use crate::startup::application::AppState;
 use askama::Template;
+use askama_web::WebTemplate;
 use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::Extension;
@@ -22,7 +23,7 @@ use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[allow(dead_code)]
-#[derive(Template)]
+#[derive(Template, WebTemplate)]
 #[template(path = "tasks/tasks_table.html")]
 struct TasksTableTemplate {
     tasks: Vec<TaskForTemplate>,

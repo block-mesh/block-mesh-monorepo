@@ -3,6 +3,7 @@ use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use crate::startup::application::AppState;
 use askama::Template;
+use askama_web::WebTemplate;
 use axum::extract::{Query, State};
 use axum::response::IntoResponse;
 use axum::Extension;
@@ -18,7 +19,7 @@ use std::sync::Arc;
 use uuid::Uuid;
 
 #[allow(dead_code)]
-#[derive(Template)]
+#[derive(Template, WebTemplate)]
 #[template(path = "tasks/view_task.html")]
 struct ViewTaskTemplate {
     pub raw_html: String,

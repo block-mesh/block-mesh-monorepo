@@ -6,10 +6,10 @@ use block_mesh_common::constants::{BLOCKMESH_SERVER_UUID_ENVAR, BLOCK_MESH_SUPPO
 use block_mesh_manager_database_domain::domain::api_token::ApiTokenStatus;
 use block_mesh_manager_database_domain::domain::nonce::Nonce;
 use block_mesh_manager_database_domain::domain::prep_user::prep_user;
-use chrono::Utc;
 use secret::Secret;
 use sqlx::PgPool;
 use std::env;
+use time::OffsetDateTime;
 use uuid::Uuid;
 
 #[tracing::instrument(name = "create_test_user", skip_all, ret, err)]
@@ -18,7 +18,7 @@ pub async fn create_test_user(pool: &PgPool) -> anyhow::Result<()> {
     if app_environment != "local" {
         return Ok(());
     }
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let user_id = Uuid::parse_str("5fdea056-1128-4659-a606-698acacc4cba").unwrap();
     let token = Uuid::parse_str("5fdea056-1128-4659-a606-698acacc4cba").unwrap();
     let email = "123@blockmesh.xyz";
@@ -66,7 +66,7 @@ pub async fn create_test_user(pool: &PgPool) -> anyhow::Result<()> {
     prep_user(&mut transaction, &user_id).await?;
     transaction.commit().await?;
 
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let server_user_id =
         Uuid::parse_str(env::var(BLOCKMESH_SERVER_UUID_ENVAR).unwrap().as_str()).unwrap();
     let email = BLOCK_MESH_SUPPORT_EMAIL;

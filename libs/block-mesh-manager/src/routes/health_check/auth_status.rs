@@ -8,10 +8,10 @@ use axum::{Extension, Json};
 use axum_login::AuthSession;
 use block_mesh_common::interfaces::server_api::{AuthStatusParams, AuthStatusResponse};
 use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
-use chrono::{Duration, Utc};
 use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use std::sync::Arc;
+use time::{Duration, OffsetDateTime};
 use tokio::sync::OnceCell;
 
 pub static AUTH_STATUS_RATE_LIMIT: OnceCell<HashMapWithExpiry<String, Json<AuthStatusResponse>>> =
@@ -81,7 +81,7 @@ pub async fn handler(
         logged_in: true,
         wallet_address,
     });
-    let date = Utc::now() + Duration::milliseconds(120_000);
+    let date = OffsetDateTime::now_utc() + Duration::milliseconds(120_000);
     cache
         .insert(user.email.clone(), response.clone(), Some(date))
         .await;
