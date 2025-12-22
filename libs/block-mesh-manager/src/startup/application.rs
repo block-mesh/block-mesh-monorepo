@@ -31,7 +31,6 @@ use std::sync::{Arc, RwLock};
 use std::time::Duration;
 use tokio::net::TcpListener;
 use tokio::sync::Mutex;
-use tower_governor::{governor::GovernorConfigBuilder, GovernorLayer};
 use tower_http::cors::CorsLayer;
 use tower_http::set_header::SetResponseHeaderLayer;
 use tower_http::timeout::TimeoutLayer;
@@ -150,6 +149,7 @@ impl Application {
             //         tracing::info!("Response status = {}, latency = {}ms", &response.status().as_u16(), latency.as_millis());
             //     }))
             .with_state(app_state.clone());
+        #[allow(deprecated)]
         let backend = if sentry_layer {
             backend
                 .layer(NewSentryLayer::<Request>::new_from_top())
@@ -174,45 +174,6 @@ impl Application {
         } else {
             app
         };
-        let gov_layer = env::var("GOV_LAYER")
-            .unwrap_or("false".to_string())
-            .parse()
-            .unwrap_or(false);
-
-        let app = if gov_layer {
-            let governor_conf = Arc::new(
-                GovernorConfigBuilder::default()
-                    .per_second(
-                        env::var("REQUEST_PER_SECOND")
-                            .unwrap_or("10".to_string())
-                            .parse()
-                            .unwrap_or(10),
-                    )
-                    .burst_size(
-                        env::var("REQUEST_PER_SECOND_BURST")
-                            .unwrap_or("30".to_string())
-                            .parse()
-                            .unwrap_or(30),
-                    )
-                    .finish()
-                    .unwrap(),
-            );
-            let governor_limiter = governor_conf.limiter().clone();
-            let interval = Duration::from_secs(60);
-            // a separate background task to clean up
-            std::thread::spawn(move || loop {
-                std::thread::sleep(interval);
-                tracing::info!("rate limiting storage size: {}", governor_limiter.len());
-                governor_limiter.retain_recent();
-                governor_limiter.shrink_to_fit();
-            });
-            app.layer(GovernorLayer {
-                config: governor_conf,
-            })
-        } else {
-            app
-        };
-
         let permissions = "'self' 'unsafe-eval' 'unsafe-inline' 'wasm-unsafe-eval' data: https://fonts.gstatic.com https://fonts.googleapis.com https://rsms.me https://opencollective.com https://cdn.jsdelivr.net https://*.cloudflare.com https://*.blockmesh.xyz https://*.perceptrons.xyz https://*.googletagmanager.com https://r2-images.blockmesh.xyz https://imagedelivery.net https://*.google-analytics.com chrome-extension://obfhoiefijlolgdmphcekifedagnkfjp ".to_string();
         let permissions = format!("{} {} ", permissions, "https://*.google.com https://*.hcaptcha.com https://*.cloudflareinsights.com https://*.hcaptcha.com https://*.gstatic.com https://*.cloudflare.com");
         let permissions = format!(
