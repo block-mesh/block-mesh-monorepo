@@ -1,0 +1,13 @@
+{
+  "name": "cloudflare-datainquiry-page",
+  "version": "0.0.0",
+  "private": true,
+  "scripts": {
+    "deploy": "wrangler deploy",
+    "dev": "wrangler dev --local"
+  },
+  "devDependencies": {
+    "wrangler": "4.53.0",
+    "undici": "5.28.4"
+  }
+}
