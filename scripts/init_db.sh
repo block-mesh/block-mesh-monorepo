@@ -152,9 +152,9 @@ ensure migrate
 export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:6998/rama"
 echo "create DB"
 ensure sqlx database create
-cd "${ROOT}/libs/rama-cli" || exit
-echo "migrate DB rama-cli"
-ensure migrate
+#cd "${ROOT}/libs/rama-cli" || exit
+#echo "migrate DB rama-cli"
+#ensure migrate
 >&2 echo "Postgres has been migrated, ready to go!"
 export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:6997/collector"
 echo "create DB"
