@@ -1,10 +1,10 @@
 use anyhow::anyhow;
 use block_mesh_common::interfaces::db_messages::DBMessage;
-use chrono::NaiveDate;
 use serde_json::Value;
 use std::collections::HashSet;
 use std::env;
 use std::sync::Arc;
+use time::Date;
 use tokio::sync::broadcast::error::RecvError;
 use tokio::sync::broadcast::Receiver;
 use tokio::sync::RwLock;
@@ -13,7 +13,7 @@ use uuid::Uuid;
 #[tracing::instrument(name = "queue_ref_bonus", skip_all)]
 pub async fn queue_ref_bonus(
     mut rx: Receiver<Value>,
-    queue: Arc<RwLock<HashSet<(Uuid, Uuid, NaiveDate)>>>,
+    queue: Arc<RwLock<HashSet<(Uuid, Uuid, Date)>>>,
 ) -> Result<(), anyhow::Error> {
     let enable = env::var("REF_BONUS_CRON_ENABLE")
         .unwrap_or("false".to_string())
