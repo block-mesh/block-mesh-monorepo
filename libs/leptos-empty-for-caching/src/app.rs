@@ -3,6 +3,7 @@ use leptos::prelude::*;
 use leptos::*;
 #[cfg(any(feature = "csr", feature = "hydrate", feature = "ssr"))]
 use leptos_meta::*;
+use leptos_router::components::Route;
 #[cfg(any(feature = "csr", feature = "hydrate", feature = "ssr"))]
 use leptos_router::*;
 
