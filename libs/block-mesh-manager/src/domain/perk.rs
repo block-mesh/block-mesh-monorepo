@@ -8,6 +8,7 @@ use uuid::Uuid;
 
 #[derive(Serialize, Deserialize, Debug, Clone, PartialEq)]
 #[allow(non_snake_case, non_camel_case_types)]
+#[derive(Default)]
 pub enum PerkName {
     Everlyn,
     Intract,
@@ -16,6 +17,7 @@ pub enum PerkName {
     FounderTwitter,
     XenoTwitter,
     WootzTwitter,
+    #[default]
     Invalid,
     ProofOfHumanity,
     Novice,
@@ -34,12 +36,6 @@ pub enum PerkName {
     PerceptronNTWK,
     MRRydon,
     Peter_thoc,
-}
-
-impl Default for PerkName {
-    fn default() -> Self {
-        Self::Invalid
-    }
 }
 
 impl Display for PerkName {
