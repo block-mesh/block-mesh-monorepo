@@ -81,7 +81,7 @@ pub async fn handler(
                 user_id: user.user_id,
                 email_type: "confirm_email".to_string(),
                 email_address: user.email,
-                nonce: user.nonce.to_string(),
+                nonce: user.nonce.expose_secret().clone(),
             })
             .send()
             .await
