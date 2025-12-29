@@ -56,6 +56,8 @@ pub enum RoutesEnum {
     Api_CreateTwitterTask,
     Api_GetTwitterProfileDetails,
     Api_CreateBulkTwitterTask,
+    Api_ResendConfirmationEmail,
+    Api_EmailConfirm,
 }
 
 impl Display for RoutesEnum {
@@ -118,6 +120,8 @@ impl Display for RoutesEnum {
             RoutesEnum::Api_CreateTwitterTask => write!(f, "/create_twitter_task"),
             RoutesEnum::Api_GetTwitterProfileDetails => write!(f, "/get_twitter_profile_details"),
             RoutesEnum::Api_CreateBulkTwitterTask => write!(f, "/create_bulk_twitter_task"),
+            RoutesEnum::Api_ResendConfirmationEmail => write!(f, "/resend_confirmation_email"),
+            RoutesEnum::Api_EmailConfirm => write!(f, "/email_confirm"),
         }
     }
 }
