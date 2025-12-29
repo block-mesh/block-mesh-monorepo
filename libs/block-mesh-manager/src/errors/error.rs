@@ -57,6 +57,8 @@ pub enum Error {
     TokenMismatch,
     #[error("Signature mismatch")]
     SignatureMismatch,
+    #[error("Bad request: {0}")]
+    BadRequest(String),
 }
 
 impl Error {
@@ -147,6 +149,7 @@ impl IntoResponse for Error {
             )
                 .into_response(),
             Error::Anyhow(s) => (StatusCode::INTERNAL_SERVER_ERROR, s.to_string()).into_response(),
+            Error::BadRequest(s) => (StatusCode::BAD_REQUEST, s).into_response(),
         }
     }
 }
@@ -181,6 +184,7 @@ impl From<Error> for StatusCode {
             Error::Redis(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Anyhow(_) => StatusCode::INTERNAL_SERVER_ERROR,
             Error::Reqwest(_) => StatusCode::INTERNAL_SERVER_ERROR,
+            Error::BadRequest(_) => StatusCode::BAD_REQUEST,
         }
     }
 }

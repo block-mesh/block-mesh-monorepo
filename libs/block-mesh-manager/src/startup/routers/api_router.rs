@@ -81,6 +81,14 @@ pub fn get_api_router() -> Router<Arc<AppState>> {
         .route(
             RoutesEnum::Api_CreateBulkTwitterTask.to_string().as_str(),
             get(routes::twitter_task::create_bulk_twitter_task::handler),
+        )
+        .route(
+            RoutesEnum::Api_ResendConfirmationEmail.to_string().as_str(),
+            post(routes::emails::resend_confirm_email_api::handler),
+        )
+        .route(
+            RoutesEnum::Api_EmailConfirm.to_string().as_str(),
+            get(routes::emails::email_confirm_api::handler),
         );
     api_router
 }
