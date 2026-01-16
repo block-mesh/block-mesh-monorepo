@@ -49,6 +49,12 @@ pub async fn ws_bulk_loop(pool: PgPool, broadcaster: Arc<Broadcaster>) -> anyhow
                         .map_err(|e| tracing::error!("ws_bulk_daily_stats error: {:?}", e));
                     let _ = commit_txn(transaction).await;
                 }
+                if let Ok(mut transaction) = create_txn(&pool).await {
+                    let _ = ws_bulk_uptime(&mut transaction, chunk, sec_diff as f64)
+                        .await
+                        .map_err(|e| tracing::error!("ws_bulk_uptime error: {:?}", e));
+                    let _ = commit_txn(transaction).await;
+                }
             }
             prev_time = Utc::now();
         }
