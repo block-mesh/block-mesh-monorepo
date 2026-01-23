@@ -109,7 +109,7 @@ upsert AS (
   INSERT INTO aggregates (id, created_at, user_id, name, value, updated_at, dummy_updated_at)
   SELECT id, created_at, user_id, name, value, created_at, created_at
   FROM input_data
-  ON CONFLICT (user_id, name) DO NOTHING
+  ON CONFLICT (user_id, name) DO UPDATE SET updated_at = NOW()
   RETURNING id, created_at, user_id, name, value, updated_at
 )
 SELECT id, created_at, user_id, name, value, updated_at FROM upsert

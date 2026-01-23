@@ -7,6 +7,7 @@ use block_mesh_common::interfaces::server_api::LoginForm;
 use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager_database_domain::domain::create_daily_stat::get_or_create_daily_stat;
 use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
+use block_mesh_manager_database_domain::domain::touch_user_aggregates::touch_user_aggregates;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use secret::Secret;
 use sqlx::PgPool;
@@ -22,6 +23,7 @@ pub async fn handler(
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
     let _ = get_or_create_daily_stat(&mut transaction, &user.user_id, None).await?;
+    let _ = touch_user_aggregates(&mut transaction, &user.user_id).await;
     commit_txn(transaction).await?;
     let creds: Credentials = Credentials {
         email: form.email.to_ascii_lowercase(),
