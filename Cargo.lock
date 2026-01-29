@@ -282,7 +282,7 @@ dependencies = [
 
 [[package]]
 name = "ai-interfaces"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "async-trait",
@@ -1450,7 +1450,7 @@ dependencies = [
 
 [[package]]
 name = "axum-ws-extractor"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "async-trait",
  "axum 0.8.8",
@@ -1636,7 +1636,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-collector"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "aws-config",
@@ -1663,7 +1663,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-common"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "aws-config",
@@ -1702,7 +1702,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "askama",
@@ -1794,7 +1794,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-api"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -1828,7 +1828,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-database-domain"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -1839,6 +1839,7 @@ dependencies = [
  "database-utils",
  "http 1.4.0",
  "http-body-util",
+ "moka",
  "num-traits",
  "rand 0.8.5",
  "redis",
@@ -1855,7 +1856,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-worker"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -1892,7 +1893,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-ws"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -1934,7 +1935,7 @@ dependencies = [
 
 [[package]]
 name = "blockmesh-cli"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -2455,7 +2456,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-adgrams-collector"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "askama",
  "block-mesh-common",
@@ -2471,7 +2472,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-affiliate-plan-page"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "askama",
  "block-mesh-common",
@@ -2487,7 +2488,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-api-token"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "askama",
  "bcrypt",
@@ -2505,7 +2506,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-captcha-page"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "askama",
  "block-mesh-common",
@@ -2521,7 +2522,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-feature-flags"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "askama",
  "block-mesh-common",
@@ -2536,7 +2537,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-images-gallery-page"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "askama",
@@ -2553,7 +2554,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-landing-page"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "askama",
  "block-mesh-common",
@@ -2569,7 +2570,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-new-landing-page"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "askama",
  "block-mesh-common",
@@ -2584,7 +2585,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-team-page"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "askama",
  "block-mesh-common",
@@ -2599,7 +2600,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-unpacked-extension"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "askama",
  "serde",
@@ -2613,7 +2614,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-vps-page"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "askama",
  "block-mesh-common",
@@ -2630,7 +2631,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-wallet-helper"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "askama",
  "block-mesh-common",
@@ -2645,7 +2646,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-cron"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -2662,7 +2663,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-echo-debug"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -2681,7 +2682,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-ip-data"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "block-mesh-common",
  "rustc-hash 1.1.0",
@@ -2696,7 +2697,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-logger-proxy"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -2713,7 +2714,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-logs-queue"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "chrono",
@@ -2733,7 +2734,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-solana-relay"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "rustc-hash 1.1.0",
  "serde",
@@ -2749,7 +2750,7 @@ dependencies = [
 
 [[package]]
 name = "cloudflare-worker-tauri-releases"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "reqwest 0.12.26",
@@ -3352,7 +3353,7 @@ dependencies = [
 
 [[package]]
 name = "dash-with-expiry"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "chrono",
  "dashmap 6.1.0",
@@ -3397,7 +3398,7 @@ checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 
 [[package]]
 name = "data-sink"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -3440,7 +3441,7 @@ dependencies = [
 
 [[package]]
 name = "database-utils"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -3461,7 +3462,7 @@ dependencies = [
 
 [[package]]
 name = "debug-area"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -3897,7 +3898,7 @@ checksum = "e079f19b08ca6239f47f8ba8509c11cf3ea30095831f7fed61441475edd8c449"
 
 [[package]]
 name = "emails"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -4101,7 +4102,7 @@ checksum = "9fc0510504f03c51ada170672ac806f1f105a88aa97a5281117e1ddc3368e51a"
 
 [[package]]
 name = "feature-flags-server"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -4404,6 +4405,21 @@ dependencies = [
  "pin-project-lite",
  "pin-utils",
  "slab",
+]
+
+[[package]]
+name = "generator"
+version = "0.8.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "52f04ae4152da20c76fe800fa48659201d5cf627c5149ca0b707b69d7eef6cf9"
+dependencies = [
+ "cc",
+ "cfg-if",
+ "libc",
+ "log",
+ "rustversion",
+ "windows-link",
+ "windows-result",
 ]
 
 [[package]]
@@ -5499,7 +5515,7 @@ dependencies = [
 
 [[package]]
 name = "ids"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -6327,7 +6343,7 @@ checksum = "5e5032e24019045c762d3c0f28f5b6b8bbf38563a65908389bf7978758920897"
 
 [[package]]
 name = "logger-general"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -6347,7 +6363,7 @@ dependencies = [
 
 [[package]]
 name = "logger-leptos"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -6368,7 +6384,7 @@ dependencies = [
 
 [[package]]
 name = "logs-drain"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -6404,6 +6420,19 @@ dependencies = [
  "url",
  "uuid",
  "validator",
+]
+
+[[package]]
+name = "loom"
+version = "0.7.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "419e0dc8046cb947daa77eb95ae174acfbddb7673b4151f56d1eed8e93fbfaca"
+dependencies = [
+ "cfg-if",
+ "generator",
+ "scoped-tls",
+ "tracing",
+ "tracing-subscriber",
 ]
 
 [[package]]
@@ -6562,6 +6591,28 @@ dependencies = [
  "log",
  "wasi 0.11.0+wasi-snapshot-preview1",
  "windows-sys 0.52.0",
+]
+
+[[package]]
+name = "moka"
+version = "0.12.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a9321642ca94a4282428e6ea4af8cc2ca4eac48ac7a6a4ea8f33f76d0ce70926"
+dependencies = [
+ "async-lock 3.4.2",
+ "crossbeam-channel",
+ "crossbeam-epoch",
+ "crossbeam-utils",
+ "event-listener 5.4.1",
+ "futures-util",
+ "loom",
+ "parking_lot",
+ "portable-atomic",
+ "rustc_version",
+ "smallvec",
+ "tagptr",
+ "thiserror 1.0.61",
+ "uuid",
 ]
 
 [[package]]
@@ -7241,7 +7292,7 @@ dependencies = [
 
 [[package]]
 name = "pg-notify-test"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "database-utils",
@@ -8526,6 +8577,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "scoped-tls"
+version = "1.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e1cf6437eb19a8f4a6cc0f7dca544973b0b78843adbfeb3683d1a94a0024a294"
+
+[[package]]
 name = "scopeguard"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8568,7 +8625,7 @@ dependencies = [
 
 [[package]]
 name = "secret"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "serde",
  "sqlx",
@@ -10983,7 +11040,7 @@ checksum = "6af261afb0e8c39252a04d026e3ea9c405342b08c871a2ad8aa5448e068c784c"
 
 [[package]]
 name = "solana-tiny-client"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "bincode",
@@ -11203,7 +11260,7 @@ dependencies = [
 
 [[package]]
 name = "speed-test"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "chrono",
@@ -11708,6 +11765,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "tagptr"
+version = "0.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7b2093cf4c8eb1e67749a6762251bc9cd836b6fc171623bd0a9d324d37af2417"
+
+[[package]]
 name = "tailwind_fuse"
 version = "0.3.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -11838,7 +11901,7 @@ dependencies = [
 
 [[package]]
 name = "test-proxy-endpoint"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "block-mesh-common",
  "bytes",
@@ -11857,7 +11920,7 @@ dependencies = [
 
 [[package]]
 name = "test-proxy-master"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -11944,7 +12007,7 @@ dependencies = [
 
 [[package]]
 name = "tg-privacy-bot"
-version = "0.0.593"
+version = "0.0.594"
 dependencies = [
  "ai-interfaces",
  "anyhow",

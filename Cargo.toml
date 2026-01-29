@@ -63,7 +63,7 @@ dead_code = "forbid"
 
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.593"
+version = "0.0.594"
 edition = "2024"
 rust-version = "1.85.0"
 
@@ -133,6 +133,7 @@ rsyslog = "0.1.5"
 rayon = { version = "1.10.0" }
 charming = { version = "0.3.1", features = ["wasm"] }
 dashmap = { version = "6.0.1" }
+moka = { version = "0.12", features = ["future"] }
 borsh = { version = "1.5.1" }
 sysinfo = { version = "0.30.12" }
 tikv-jemallocator = { version = "0.6.0", features = ["background_threads"] }

@@ -1,8 +1,18 @@
 use crate::domain::aggregate::{Aggregate, AggregateTmp};
 use block_mesh_common::rand::init_rand;
+use moka::future::Cache;
 use serde_json::Value;
 use sqlx::{Postgres, Transaction};
+use std::sync::LazyLock;
+use std::time::Duration;
 use uuid::Uuid;
+
+static AGGREGATE_CACHE: LazyLock<Cache<Uuid, Vec<Aggregate>>> = LazyLock::new(|| {
+    Cache::builder()
+        .max_capacity(50_000)
+        .time_to_live(Duration::from_secs(60))
+        .build()
+});
 
 #[tracing::instrument(name = "bulk_get_or_create_aggregate_by_user_and_name_old", skip_all)]
 pub async fn bulk_get_or_create_aggregate_by_user_and_name_old(
@@ -87,6 +97,9 @@ pub async fn bulk_get_or_create_aggregate_by_user_and_name(
     transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
 ) -> anyhow::Result<Vec<Aggregate>> {
+    if let Some(cached) = AGGREGATE_CACHE.get(user_id).await {
+        return Ok(cached);
+    }
     let zero = Value::from(0i32);
     let upload = Value::from(init_rand(1, 100));
     let download = Value::from(init_rand(1, 100));
@@ -131,7 +144,7 @@ WHERE NOT EXISTS (
     )
     .fetch_all(&mut **transaction)
     .await?;
-    let aggregates = aggregates
+    let aggregates: Vec<Aggregate> = aggregates
         .into_iter()
         .map(|aggregate| Aggregate {
             id: aggregate.id.expect("MISSING ID"),
@@ -142,5 +155,6 @@ WHERE NOT EXISTS (
             updated_at: aggregate.updated_at.expect("MISSING TIMESTAMP UPDATED_AT"),
         })
         .collect();
+    AGGREGATE_CACHE.insert(*user_id, aggregates.clone()).await;
     Ok(aggregates)
 }
