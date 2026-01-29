@@ -47,8 +47,13 @@ pub async fn handle_socket_light(
     let touch_cached = is_touch_cached(&user_id).await;
     if !agg_cached || !touch_cached {
         if let Ok(mut transaction) = create_txn(&state.pool).await {
-            let _ = bulk_get_or_create_aggregate_by_user_and_name(&mut transaction, &user_id).await;
-            let _ = touch_user_aggregates(&mut transaction, &user_id).await;
+            if !agg_cached {
+                let _ =
+                    bulk_get_or_create_aggregate_by_user_and_name(&mut transaction, &user_id).await;
+            }
+            if !touch_cached {
+                let _ = touch_user_aggregates(&mut transaction, &user_id).await;
+            }
             let _ = commit_txn(transaction).await;
         }
     }
