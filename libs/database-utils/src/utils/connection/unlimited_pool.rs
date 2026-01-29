@@ -1,3 +1,4 @@
+use crate::utils::connection::stale_txn_guard::stale_txn_guard;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use sqlx::{ConnectOptions, PgPool};
 use std::env;
@@ -60,6 +61,7 @@ pub async fn unlimited_pool(database_url_envar_name: Option<String>) -> PgPool {
                 .parse()
                 .unwrap_or(3600000),
         ))
+        .before_acquire(stale_txn_guard("unlimited_pool"))
         .test_before_acquire(true)
         .connect_with(settings.clone())
         .await

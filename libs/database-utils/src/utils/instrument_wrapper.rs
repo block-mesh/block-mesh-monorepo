@@ -5,6 +5,7 @@ use tokio::sync::OnceCell;
 use tokio::time::timeout;
 
 static DURATION: OnceCell<u64> = OnceCell::const_new();
+static COMMIT_DURATION: OnceCell<u64> = OnceCell::const_new();
 
 #[tracing::instrument(name = "get_timeout_duration", skip_all)]
 async fn get_timeout_duration() -> tokio::time::Duration {
@@ -14,6 +15,19 @@ async fn get_timeout_duration() -> tokio::time::Duration {
                 .unwrap_or("1000".to_string())
                 .parse()
                 .unwrap_or(1000)
+        })
+        .await;
+    tokio::time::Duration::from_millis(*duration)
+}
+
+#[tracing::instrument(name = "get_commit_timeout_duration", skip_all)]
+async fn get_commit_timeout_duration() -> tokio::time::Duration {
+    let duration = COMMIT_DURATION
+        .get_or_init(|| async {
+            env::var("COMMIT_TIMEOUT")
+                .unwrap_or("30000".to_string())
+                .parse()
+                .unwrap_or(30000)
         })
         .await;
     tokio::time::Duration::from_millis(*duration)
@@ -48,7 +62,7 @@ pub async fn create_txn_with_timeout(
 
 #[tracing::instrument(name = "commit_txn", skip_all, err)]
 pub async fn commit_txn(txn: Transaction<'_, Postgres>) -> anyhow::Result<()> {
-    let duration = get_timeout_duration().await;
+    let duration = get_commit_timeout_duration().await;
     match timeout(duration, txn.commit()).await {
         Ok(txn) => match txn {
             Ok(_) => Ok(()),

@@ -1,3 +1,4 @@
+use crate::utils::connection::stale_txn_guard::stale_txn_guard;
 use sqlx::postgres::{PgConnectOptions, PgPoolOptions};
 use sqlx::ConnectOptions;
 use sqlx::PgPool;
@@ -46,6 +47,7 @@ pub async fn channel_pool(database_url_envar_name: Option<String>) -> PgPool {
                 .parse()
                 .unwrap_or(1000000000000),
         ))
+        .before_acquire(stale_txn_guard("channel_pool"))
         .test_before_acquire(true)
         .connect_with(settings.clone())
         .await
