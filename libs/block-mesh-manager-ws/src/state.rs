@@ -105,7 +105,7 @@ impl RedisHelper {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub enum WsCredsCache {
     UserNotFound,
     TokenMismatch,

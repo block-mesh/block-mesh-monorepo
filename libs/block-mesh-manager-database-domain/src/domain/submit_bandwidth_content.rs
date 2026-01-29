@@ -1,5 +1,7 @@
 use crate::domain::aggregate::AggregateName::{Download, Latency, Upload};
-use crate::domain::bulk_get_or_create_aggregate_by_user_and_name::bulk_get_or_create_aggregate_by_user_and_name;
+use crate::domain::bulk_get_or_create_aggregate_by_user_and_name::{
+    bulk_get_or_create_aggregate_by_user_and_name, get_aggregates_from_cache,
+};
 use crate::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use crate::domain::notify_worker::notify_worker;
 use anyhow::{anyhow, Error};
@@ -25,7 +27,6 @@ pub async fn submit_bandwidth_content(
         commit_txn(follower_transaction).await?;
         return Err(anyhow!("Api Token Mismatch"));
     }
-    let mut transaction = create_txn(pool).await?;
     let download_speed = serde_json::Value::from(body.download_speed)
         .as_f64()
         .unwrap_or_default();
@@ -35,8 +36,17 @@ pub async fn submit_bandwidth_content(
     let latency_report = serde_json::Value::from(body.latency)
         .as_f64()
         .unwrap_or_default();
-    let aggregates =
-        bulk_get_or_create_aggregate_by_user_and_name(&mut transaction, &user.user_id).await?;
+    let aggregates = match get_aggregates_from_cache(&user.user_id).await {
+        Some(cached) => cached,
+        None => {
+            let mut transaction = create_txn(pool).await?;
+            let aggs =
+                bulk_get_or_create_aggregate_by_user_and_name(&mut transaction, &user.user_id)
+                    .await?;
+            commit_txn(transaction).await?;
+            aggs
+        }
+    };
     let upload = aggregates
         .iter()
         .find(|a| a.name == Upload)
@@ -73,7 +83,6 @@ pub async fn submit_bandwidth_content(
         }),
     ];
     let _ = notify_worker(channel_pool, &messages).await;
-    commit_txn(transaction).await?;
     Ok(Json(ReportBandwidthResponse {
         status_code: u16::from(StatusCode::OK),
     }))
