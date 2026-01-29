@@ -14,6 +14,10 @@ static AGGREGATE_CACHE: LazyLock<Cache<Uuid, Vec<Aggregate>>> = LazyLock::new(||
         .build()
 });
 
+pub async fn get_aggregates_from_cache(user_id: &Uuid) -> Option<Vec<Aggregate>> {
+    AGGREGATE_CACHE.get(user_id).await
+}
+
 #[tracing::instrument(name = "bulk_get_or_create_aggregate_by_user_and_name_old", skip_all)]
 pub async fn bulk_get_or_create_aggregate_by_user_and_name_old(
     transaction: &mut Transaction<'_, Postgres>,

@@ -6,8 +6,12 @@ use block_mesh_common::interfaces::db_messages::{
 use block_mesh_common::interfaces::server_api::GetTwitterData;
 use block_mesh_common::interfaces::ws_api::{WsClientMessage, WsServerMessage};
 use block_mesh_manager_database_domain::domain::aggregate::AggregateName;
-use block_mesh_manager_database_domain::domain::bulk_get_or_create_aggregate_by_user_and_name::bulk_get_or_create_aggregate_by_user_and_name;
-use block_mesh_manager_database_domain::domain::touch_user_aggregates::touch_user_aggregates;
+use block_mesh_manager_database_domain::domain::bulk_get_or_create_aggregate_by_user_and_name::{
+    bulk_get_or_create_aggregate_by_user_and_name, get_aggregates_from_cache,
+};
+use block_mesh_manager_database_domain::domain::touch_user_aggregates::{
+    is_touch_cached, touch_user_aggregates,
+};
 use block_mesh_manager_database_domain::domain::twitter_task::{TwitterTask, TwitterTaskStatus};
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use futures::{SinkExt, StreamExt};
@@ -39,10 +43,14 @@ pub async fn handle_socket_light(
         return;
     }
 
-    if let Ok(mut transaction) = create_txn(&state.pool).await {
-        let _ = bulk_get_or_create_aggregate_by_user_and_name(&mut transaction, &user_id).await;
-        let _ = touch_user_aggregates(&mut transaction, &user_id).await;
-        let _ = commit_txn(transaction).await;
+    let agg_cached = get_aggregates_from_cache(&user_id).await.is_some();
+    let touch_cached = is_touch_cached(&user_id).await;
+    if !agg_cached || !touch_cached {
+        if let Ok(mut transaction) = create_txn(&state.pool).await {
+            let _ = bulk_get_or_create_aggregate_by_user_and_name(&mut transaction, &user_id).await;
+            let _ = touch_user_aggregates(&mut transaction, &user_id).await;
+            let _ = commit_txn(transaction).await;
+        }
     }
 
     let tx_c = state.tx.clone();

@@ -12,6 +12,10 @@ static TOUCH_CACHE: LazyLock<Cache<Uuid, ()>> = LazyLock::new(|| {
         .build()
 });
 
+pub async fn is_touch_cached(user_id: &Uuid) -> bool {
+    TOUCH_CACHE.get(user_id).await.is_some()
+}
+
 #[tracing::instrument(name = "touch_user_aggregates", skip_all)]
 pub async fn touch_user_aggregates(
     transaction: &mut Transaction<'_, Postgres>,

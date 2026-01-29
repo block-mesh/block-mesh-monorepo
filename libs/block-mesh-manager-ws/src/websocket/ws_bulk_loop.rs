@@ -28,6 +28,12 @@ pub async fn ws_bulk_loop(pool: PgPool, broadcaster: Arc<Broadcaster>) -> anyhow
         .unwrap_or("100".to_string())
         .parse()
         .unwrap_or(100);
+    let chunk_sleep = Duration::from_millis(
+        env::var("WS_BULK_CHUNK_SLEEP")
+            .unwrap_or("100".to_string())
+            .parse()
+            .unwrap_or(100),
+    );
     let mut prev_time = Utc::now();
     loop {
         if enable_ws_bulk_loop {
@@ -40,21 +46,16 @@ pub async fn ws_bulk_loop(pool: PgPool, broadcaster: Arc<Broadcaster>) -> anyhow
                 if let Ok(mut transaction) = create_txn(&pool).await {
                     let _ = ws_bulk_create_daily_stats(&mut transaction, chunk)
                         .await
-                        .map_err(|e| tracing::error!("ws_bulk_create_daily_stats error: {:?}", e));
-                    let _ = commit_txn(transaction).await;
-                }
-                if let Ok(mut transaction) = create_txn(&pool).await {
+                        .map_err(|e| tracing::error!("ws_bulk_create_daily_stats error: {e:?}"));
                     let _ = ws_bulk_daily_stats(&mut transaction, chunk, sec_diff as f64)
                         .await
-                        .map_err(|e| tracing::error!("ws_bulk_daily_stats error: {:?}", e));
-                    let _ = commit_txn(transaction).await;
-                }
-                if let Ok(mut transaction) = create_txn(&pool).await {
+                        .map_err(|e| tracing::error!("ws_bulk_daily_stats error: {e:?}"));
                     let _ = ws_bulk_uptime(&mut transaction, chunk, sec_diff as f64)
                         .await
-                        .map_err(|e| tracing::error!("ws_bulk_uptime error: {:?}", e));
+                        .map_err(|e| tracing::error!("ws_bulk_uptime error: {e:?}"));
                     let _ = commit_txn(transaction).await;
                 }
+                tokio::time::sleep(chunk_sleep).await;
             }
             prev_time = Utc::now();
         }

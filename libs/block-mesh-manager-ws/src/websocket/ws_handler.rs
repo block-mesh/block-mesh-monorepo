@@ -170,11 +170,13 @@ pub async fn ws_handler(
         return Ok((StatusCode::ALREADY_REPORTED, "Already connected").into_response());
     }
     let creds_key = (email.clone(), api_token);
-    let mut creds_cache = state.creds_cache.write().await;
-    let cached_value = creds_cache.get(&creds_key);
+    let creds_cache = state.creds_cache.read().await;
+    let cached_value = creds_cache.get(&creds_key).cloned();
+    drop(creds_cache);
     let user: UserAndApiToken = match cached_value {
         None => match get_user_from_db(&state.follower_pool, &email).await {
             Ok(opt_user) => {
+                let mut creds_cache = state.creds_cache.write().await;
                 let user = match opt_user {
                     Some(user) => user,
                     None => {
@@ -183,6 +185,7 @@ pub async fn ws_handler(
                             .into_response());
                     }
                 };
+
                 if user.token.as_ref() != &api_token {
                     creds_cache.insert(creds_key, WsCredsCache::TokenMismatch);
                     return Ok((StatusCode::NO_CONTENT, "Api Token Mismatch").into_response());
@@ -206,7 +209,6 @@ pub async fn ws_handler(
             WsCredsCache::Found(u) => u.clone(),
         },
     };
-    drop(creds_cache);
     let tx_c = state.tx.clone();
     let _ = tx_c
         .send_async(DBMessage::UsersIpMessage(UsersIpMessage {
