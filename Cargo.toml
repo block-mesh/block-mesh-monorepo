@@ -32,7 +32,7 @@ exclude = [
   "programs/merkle-distributor",
   "libs/clickhouse-processing",
   "libs/twitter-scraping-helper",
-  "libs/rama-cli"
+  "libs/rama-cli",
 ]
 
 resolver = "2"
@@ -63,7 +63,7 @@ dead_code = "forbid"
 
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.596"
+version = "0.0.597"
 edition = "2024"
 rust-version = "1.85.0"
 
@@ -113,7 +113,11 @@ tracing-test = { version = "0.2.5" }
 actix-files = { version = "0.6" }
 actix-web = { version = "4", features = ["macros"] }
 leptos_actix = { version = "0.8.6" }
-teloxide = { version = "0.17.0", features = ["macros", "webhooks", "webhooks-axum"] }
+teloxide = { version = "0.17.0", features = [
+  "macros",
+  "webhooks",
+  "webhooks-axum",
+] }
 openai_api_rust = { version = "0.1.9" }
 pretty_env_logger = "0.5"
 matches = { version = "0.1.10" }
@@ -121,7 +125,10 @@ sentry-tower = { version = "0.46.0" }
 ureq = { version = "2.10.1" }
 reqwest-websocket = { version = "0.4.2" }
 fake = { version = "2.9.2", features = ["derive"] }
-flume = { version = "0.11.0", default-features = false, features = ["async", "select"] }
+flume = { version = "0.11.0", default-features = false, features = [
+  "async",
+  "select",
+] }
 twitter-v2 = "0.1.8"
 jni = "0.21.1"
 redis = { version = "0.32.0", features = ["uuid", "connection-manager"] }
@@ -150,7 +157,10 @@ tracing-subscriber-wasm = { version = "0.1.0" }
 num-traits = { version = "0.2.19" }
 sendgrid = { version = "0.21.0" }
 tracing-wasm = { version = "0.2.1" }
-tauri = { version = "2.0.0-beta", features = ["native-tls-vendored", "rustls-tls"] }
+tauri = { version = "2.0.0-beta", features = [
+  "native-tls-vendored",
+  "rustls-tls",
+] }
 tauri-build = { version = "2.0.0-beta", features = [] }
 tauri-plugin-autostart = "2.0.0-beta"
 tauri-plugin-single-instance = "2.0.0-beta"
@@ -221,14 +231,28 @@ hmac-sha512 = { version = "1.1.4" }
 axum = { version = "0.8.8", features = ["ws", "macros"] }
 axum-core = { version = "0.5.5" }
 futures = { version = "0.3" }
-futures-util = { version = "0.3", default-features = false, features = ["sink", "std"] }
+futures-util = { version = "0.3", default-features = false, features = [
+  "sink",
+  "std",
+] }
 headers = { version = "0.4.0" }
 tokio = { version = "1.44", features = ["full"] }
 tokio-tungstenite = { version = "0.26.1" }
 tower = { version = "0.4.13", features = ["util"] }
-tower-http = { version = "0.5.1", features = ["fs", "trace", "request-id", "util", "cors", "add-extension"] }
+tower-http = { version = "0.5.1", features = [
+  "fs",
+  "trace",
+  "request-id",
+  "util",
+  "cors",
+  "add-extension",
+] }
 tracing = { version = "0.1" }
-tracing-subscriber = { version = "0.3", features = ["env-filter", "time", "json"] }
+tracing-subscriber = { version = "0.3", features = [
+  "env-filter",
+  "time",
+  "json",
+] }
 tracing-serde = { version = "0.1.3" }
 chrono = { version = "0.4.22", features = ["clock", "serde", "wasmbind"] }
 hyper = { version = "1.1.0", features = ["full"] }
@@ -246,7 +270,9 @@ serde = { version = "1.0.164", features = ["derive"] }
 anyhow = { version = "1.0.71" }
 thiserror = { version = "1.0.40" }
 dotenv = { version = "0.15.0" }
-reqwest = { version = "0.12.5", default-features = false, features = ["cookies"] }
+reqwest = { version = "0.12.5", default-features = false, features = [
+  "cookies",
+] }
 bytes = { version = "1.5.0" }
 argon2 = { version = "0.5.0", features = ["std"] }
 validator = { version = "0.16", features = ["derive"] }
@@ -263,7 +289,11 @@ tracing-web = { version = "0.1" }
 time = { version = "0.3", features = ['wasm-bindgen', 'serde'] }
 ipgeolocate = { version = "0.3.5" }
 ipinfo = { version = "3.0.0" }
-cargo-husky = { version = "1.5.0", features = ["precommit-hook", "run-cargo-clippy", "run-cargo-fmt"] }
+cargo-husky = { version = "1.5.0", features = [
+  "precommit-hook",
+  "run-cargo-clippy",
+  "run-cargo-fmt",
+] }
 bcrypt = { version = "0.15" }
 cocoa = { version = "0.25.0" }
 testcontainers = { version = "0.23.1" }
@@ -280,7 +310,7 @@ features = [
   'RequestInit',
   'RequestMode',
   'Response',
-  "MessageEvent"
+  "MessageEvent",
 ]
 
 [workspace.dependencies.rand]
@@ -300,16 +330,15 @@ features = [
   "migrate",
   "json",
   "bigdecimal",
-  "tls-rustls"
+  "tls-rustls",
 ]
 
 [workspace.dependencies.uuid]
 version = "1.19.0"
 features = [
-  "v4", # Lets you generate random UUIDs
-  "fast-rng", # Use a faster (but still sufficiently random) RNG
+  "v4",                # Lets you generate random UUIDs
+  "fast-rng",          # Use a faster (but still sufficiently random) RNG
   "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
-  "serde", # Enable serialization/deserialization of UUIDs
-  "js", # Enable UUID generation in WebAssembly
+  "serde",             # Enable serialization/deserialization of UUIDs
+  "js",                # Enable UUID generation in WebAssembly
 ]
-
