@@ -3,14 +3,25 @@ use block_mesh_common::rand::init_rand;
 use moka::future::Cache;
 use serde_json::Value;
 use sqlx::{Postgres, Transaction};
+use std::env;
 use std::sync::LazyLock;
 use std::time::Duration;
 use uuid::Uuid;
 
+const DEFAULT_AGGREGATE_CACHE_TTL_SECONDS: u64 = 60;
+
+fn aggregate_cache_ttl_seconds() -> u64 {
+    env::var("AGGREGATE_CACHE_TTL_SECONDS")
+        .ok()
+        .and_then(|v| v.parse::<u64>().ok())
+        .filter(|ttl| *ttl > 0)
+        .unwrap_or(DEFAULT_AGGREGATE_CACHE_TTL_SECONDS)
+}
+
 static AGGREGATE_CACHE: LazyLock<Cache<Uuid, Vec<Aggregate>>> = LazyLock::new(|| {
     Cache::builder()
         .max_capacity(50_000)
-        .time_to_live(Duration::from_secs(60))
+        .time_to_live(Duration::from_secs(aggregate_cache_ttl_seconds()))
         .build()
 });
 
