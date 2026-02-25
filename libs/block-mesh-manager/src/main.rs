@@ -14,6 +14,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use database_utils::utils::connection::write_pool::write_pool;
     use block_mesh_common::email_client::client::EmailClient;
     use database_utils::utils::connection::channel_pool::channel_pool;
+    use database_utils::utils::connection::dashboard_pool::dashboard_pool;
     use database_utils::utils::connection::follower_pool::follower_pool;
     use database_utils::utils::connection::unlimited_pool::unlimited_pool;
     use block_mesh_common::constants::DeviceType;
@@ -137,6 +138,7 @@ async fn run() -> anyhow::Result<()> {
         .parse()
         .unwrap_or(false);
     let follower_pool = follower_pool(Some("FOLLOWER_DATABASE_URL".to_string())).await;
+    let dashboard_pool = dashboard_pool(None).await;
     let invite_codes = HashMapWithExpiry::new(1_000);
     let wallet_addresses = HashMapWithExpiry::new(1_000);
     let cf_site_key = env::var("CF_SITE_KEY")?;
@@ -188,6 +190,7 @@ async fn run() -> anyhow::Result<()> {
         email_client,
         pool: db_pool.clone(),
         follower_pool,
+        dashboard_pool,
         channel_pool,
         client: client.clone(),
         flags: flags.clone(),

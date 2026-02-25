@@ -16,6 +16,7 @@ use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use dash_with_expiry::hash_set_with_expiry::HashSetWithExpiry;
 use dashmap::DashMap;
 use database_utils::utils::connection::channel_pool::channel_pool;
+use database_utils::utils::connection::dashboard_pool::dashboard_pool;
 use database_utils::utils::connection::write_pool::write_pool;
 use database_utils::utils::migrate::migrate;
 use logger_general::tracing::setup_tracing_stdout_only;
@@ -56,6 +57,7 @@ pub async fn spawn_app() -> TestApp {
     let database_url = get_env_var_or_panic(AppEnvVar::DatabaseUrl);
     let _database_url = <EnvVar as AsRef<Secret<String>>>::as_ref(&database_url);
     let db_pool = write_pool(None).await;
+    let dashboard_pool = dashboard_pool(None).await;
     let channel_pool = channel_pool(Some("CHANNEL_DATABASE_URL".to_string())).await;
 
     migrate(&db_pool, "test".to_string())
@@ -105,6 +107,7 @@ pub async fn spawn_app() -> TestApp {
         email_client,
         pool: db_pool.clone(),
         follower_pool: db_pool.clone(),
+        dashboard_pool,
         channel_pool,
         client,
         flags,

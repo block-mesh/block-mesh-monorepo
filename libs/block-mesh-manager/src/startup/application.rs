@@ -65,6 +65,7 @@ pub struct AppState {
     pub wallet_addresses: HashMapWithExpiry<String, Option<String>>,
     pub pool: PgPool,
     pub follower_pool: PgPool,
+    pub dashboard_pool: PgPool,
     pub channel_pool: PgPool,
     pub email_client: Arc<EmailClient>,
     pub client: Client,
