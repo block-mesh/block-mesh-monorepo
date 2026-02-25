@@ -17,7 +17,6 @@ use block_mesh_common::intract::get_intract_user_details;
 use block_mesh_manager_database_domain::domain::get_user_and_api_token_by_email::get_user_and_api_token_by_email;
 use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
-use sqlx::PgPool;
 use std::env;
 use std::sync::Arc;
 use time::{Duration, OffsetDateTime};
@@ -51,7 +50,6 @@ pub async fn add_to_cache(
 #[tracing::instrument(name = "intract_perk", skip_all)]
 pub async fn handler(
     State(state): State<Arc<AppState>>,
-    Extension(pool): Extension<PgPool>,
     Extension(auth): Extension<AuthSession<Backend>>,
 ) -> Result<impl IntoResponse, Error> {
     let user = auth.user.ok_or(Error::UserNotFound)?;
@@ -62,7 +60,7 @@ pub async fn handler(
     if let Some(resp) = cache.get(&email).await {
         return Ok(Json(resp).into_response());
     }
-    let mut follower_transaction = create_txn(&state.follower_pool).await?;
+    let mut follower_transaction = create_txn(&state.dashboard_pool).await?;
     let user = get_user_and_api_token_by_email(&mut follower_transaction, &email)
         .await?
         .ok_or_else(|| Error::UserNotFound)?;
@@ -83,7 +81,7 @@ pub async fn handler(
         }
     };
     let new_data = serde_json::to_value(resp.clone()).map_err(|_| Error::InternalServer)?;
-    let mut transaction = create_txn(&pool).await?;
+    let mut transaction = create_txn(&state.dashboard_pool).await?;
     let user_perks = get_user_perks(&mut transaction, &user.user_id).await?;
     let perk = if let Some(perk) = user_perks.iter().find(|i| i.name == PerkName::Intract) {
         if new_data == perk.data {
@@ -111,8 +109,15 @@ pub async fn handler(
         .await?
     };
     commit_txn(transaction).await?;
-    let mut follower_transaction = create_txn(&state.follower_pool).await?;
-    dashboard_data_extractor(&pool, &mut follower_transaction, state.clone(), user, true).await?;
+    let mut follower_transaction = create_txn(&state.dashboard_pool).await?;
+    dashboard_data_extractor(
+        &state.dashboard_pool,
+        &mut follower_transaction,
+        state.clone(),
+        user,
+        true,
+    )
+    .await?;
     commit_txn(follower_transaction).await?;
     let mut resp = add_to_cache(&email, &perk, cache).await.clone();
     resp.cached = false;
