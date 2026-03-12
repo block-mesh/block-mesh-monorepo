@@ -141,6 +141,23 @@ pub struct CheckTokenRequest {
 
 #[typeshare]
 #[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ActivateExtensionRequest {
+    pub email: String,
+    #[typeshare(serialized_as = "string")]
+    pub api_token: Uuid,
+    pub signature: String,
+    pub msg: String,
+    pub timestamp: i64,
+}
+
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug, Clone)]
+pub struct ActivateExtensionResponse {
+    pub status_code: u16,
+}
+
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug, Clone)]
 pub struct GetTokenResponse {
     #[typeshare(serialized_as = "string")]
     pub api_token: Option<Uuid>,
