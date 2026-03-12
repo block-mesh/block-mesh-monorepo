@@ -56,6 +56,10 @@ pub fn get_api_router() -> Router<Arc<AppState>> {
             post(routes::api_token::check_token::handler),
         )
         .route(
+            RoutesEnum::Api_ActivateExtension.to_string().as_str(),
+            post(routes::api_token::activate_extension::handler),
+        )
+        .route(
             RoutesEnum::Api_Dashboard.to_string().as_str(),
             post(routes::dashboard::dashboard_api::handler),
         )

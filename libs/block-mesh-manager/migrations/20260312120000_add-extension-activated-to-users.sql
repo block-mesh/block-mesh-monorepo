@@ -1,0 +1,2 @@
+ALTER TABLE users
+    ADD COLUMN extension_activated BOOLEAN NOT NULL DEFAULT FALSE;
