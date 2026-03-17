@@ -12,7 +12,7 @@ incremental = false
 members = ["libs/*", "programs/*"]
 exclude = [
   "libs/cloudflare-datainquiry-page",
-  #  "libs/extension",
+  "libs/extension",
   "libs/cloudflare-privacy-page",
   "libs/cloudflare-delete-page",
   "libs/cloudflare-page-adgrams",
@@ -62,7 +62,7 @@ dead_code = "forbid"
 
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.599"
+version = "0.0.600"
 edition = "2024"
 rust-version = "1.85.0"
 

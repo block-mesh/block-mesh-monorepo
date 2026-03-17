@@ -1,4 +1,5 @@
 use crate::database::perks::add_perk_to_user::add_perk_to_user;
+use crate::database::user::get_extension_activated::get_extension_activated;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
 use crate::database::user::update_user_wallet::update_user_wallet;
 use crate::domain::perk::PerkName;
@@ -6,6 +7,7 @@ use crate::errors::error::Error;
 use crate::middlewares::authentication::Backend;
 use crate::routes::health_check::auth_status::AUTH_STATUS_RATE_LIMIT;
 use crate::startup::application::AppState;
+use crate::utils::snag::sync_wallet_update;
 use axum::extract::State;
 use axum::{Extension, Json};
 use axum_login::AuthSession;
@@ -35,6 +37,7 @@ pub async fn handler(
     let db_user = get_user_opt_by_email(&mut transaction, &user.email)
         .await?
         .ok_or(Error::UserNotFound)?;
+    let should_sync_snag = get_extension_activated(&mut transaction, &user.id).await?;
     let signature =
         Signature::try_from(body.signature.as_slice()).map_err(|_| Error::InternalServer)?;
     let pubkey = Pubkey::from_str(body.pubkey.as_str()).unwrap_or_default();
@@ -71,7 +74,7 @@ pub async fn handler(
                 }
                 state
                     .wallet_addresses
-                    .insert(user.email.clone(), Some(body.pubkey), None)
+                    .insert(user.email.clone(), Some(body.pubkey.clone()), None)
                     .await;
             }
             Some(wallet_address) => {
@@ -113,7 +116,7 @@ pub async fn handler(
                 }
                 state
                     .wallet_addresses
-                    .insert(user.email.clone(), Some(body.pubkey), None)
+                    .insert(user.email.clone(), Some(body.pubkey.clone()), None)
                     .await;
             }
         }
@@ -128,6 +131,18 @@ pub async fn handler(
         .get_or_init(|| async { HashMapWithExpiry::new(1_000) })
         .await;
     cache.remove(&user.email).await;
+    if should_sync_snag {
+        let client = state.client.clone();
+        let snag = state.snag.clone();
+        let user_id = user.id;
+        let email = user.email.clone();
+        let wallet = body.pubkey.clone();
+        tokio::spawn(async move {
+            if let Err(error) = sync_wallet_update(client, snag, user_id, email, wallet).await {
+                tracing::warn!("failed to sync wallet update to Snag: {error}");
+            }
+        });
+    }
     Ok(Json(ConnectWalletResponse {
         status: 200,
         message: None,
