@@ -2,6 +2,7 @@ use crate::configuration::settings::Settings;
 use crate::middlewares::authentication::{authentication_layer, Backend};
 use crate::routes::twitter::context::Oauth2Ctx;
 use crate::startup::routers::api_router::get_api_router;
+use crate::utils::snag::SnagConfig;
 //use crate::startup::routers::leptos_router::get_leptos_router;
 use crate::startup::routers::static_auth_router::get_static_auth_router;
 use crate::startup::routers::static_un_auth_router::get_static_un_auth_router;
@@ -69,6 +70,7 @@ pub struct AppState {
     pub channel_pool: PgPool,
     pub email_client: Arc<EmailClient>,
     pub client: Client,
+    pub snag: SnagConfig,
     pub flags: Arc<RwLock<HashMap<String, FlagValue>>>,
     pub redis: MultiplexedConnection,
 }

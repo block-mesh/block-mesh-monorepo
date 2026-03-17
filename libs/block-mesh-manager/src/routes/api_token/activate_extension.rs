@@ -1,5 +1,8 @@
 use crate::database::user::update_extension_activated::update_extension_activated;
 use crate::errors::error::Error;
+use crate::startup::application::AppState;
+use crate::utils::snag::sync_first_activation;
+use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::{Extension, Json};
 use block_mesh_common::interfaces::server_api::{
@@ -14,9 +17,11 @@ use solana_sdk::signature::{Signature, Signer};
 use sqlx::PgPool;
 use std::env;
 use std::str::FromStr;
+use std::sync::Arc;
 
 #[tracing::instrument(name = "activate_extension", skip_all)]
 pub async fn handler(
+    State(state): State<Arc<AppState>>,
     Extension(pool): Extension<PgPool>,
     Json(body): Json<ActivateExtensionRequest>,
 ) -> Result<impl IntoResponse, Error> {
@@ -55,8 +60,24 @@ pub async fn handler(
         return Err(Error::Unauthorized);
     }
 
-    update_extension_activated(&mut transaction, &user_and_api_token.user_id, true).await?;
+    let activated_now =
+        update_extension_activated(&mut transaction, &user_and_api_token.user_id, true).await?;
     commit_txn(transaction).await?;
+
+    if activated_now {
+        let client = state.client.clone();
+        let snag = state.snag.clone();
+        let user_id = user_and_api_token.user_id;
+        let user_email = user_and_api_token.email.clone();
+        let wallet_address = user_and_api_token.wallet_address.clone();
+        tokio::spawn(async move {
+            if let Err(error) =
+                sync_first_activation(client, snag, user_id, user_email, wallet_address).await
+            {
+                tracing::warn!("failed to sync first activation to Snag: {error}");
+            }
+        });
+    }
 
     Ok((
         StatusCode::OK,

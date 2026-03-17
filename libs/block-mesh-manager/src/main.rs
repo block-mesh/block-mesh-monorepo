@@ -36,6 +36,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     #[allow(unused_imports)]
     use logger_general::tracing::setup_tracing_stdout_only;
     use block_mesh_common::feature_flag_client::get_all_flags;
+    use block_mesh_manager::utils::snag::SnagConfig;
     #[cfg(not(target_env = "msvc"))]
     use tikv_jemallocator::Jemalloc;
     #[cfg(not(target_env = "msvc"))]
@@ -165,6 +166,19 @@ async fn run() -> anyhow::Result<()> {
         .unwrap_or("false".to_string())
         .parse()
         .unwrap_or(false);
+    let snag = SnagConfig {
+        base_url: env::var("SNAG_BASE_URL")
+            .expect("could not find SNAG_BASE_URL")
+            .trim_end_matches('/')
+            .to_string(),
+        api_key: env::var("SNAG_API_KEY").expect("could not find SNAG_API_KEY"),
+        external_rule_extension: env::var("SNAG_EXTERNAL_RULE_EXTENSION")
+            .expect("could not find SNAG_EXTERNAL_RULE_EXTENSION"),
+        external_rule_wallet: env::var("SNAG_EXTERNAL_RULE_WALLET")
+            .expect("could not find SNAG_EXTERNAL_RULE_WALLET"),
+        external_rule_mobile: env::var("SNAG_EXTERNAL_RULE_MOBILE")
+            .expect("could not find SNAG_EXTERNAL_RULE_MOBILE"),
+    };
     let app_state = Arc::new(AppState {
         wallet_login_nonce: HashMapWithExpiry::new(1_000),
         rate_limiter: HashSetWithExpiry::new(),
@@ -193,6 +207,7 @@ async fn run() -> anyhow::Result<()> {
         dashboard_pool,
         channel_pool,
         client: client.clone(),
+        snag,
         flags: flags.clone(),
         redis,
     });

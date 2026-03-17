@@ -1,5 +1,6 @@
 pub mod create_test_user;
 pub mod create_user;
+pub mod get_extension_activated;
 pub mod get_user_by_email;
 pub mod get_user_by_wallet;
 pub mod update_email;

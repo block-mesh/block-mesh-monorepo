@@ -12,6 +12,7 @@ use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager::configuration::get_configuration::get_configuration;
 use block_mesh_manager::configuration::settings::Settings;
 use block_mesh_manager::startup::application::{AppState, Application};
+use block_mesh_manager::utils::snag::SnagConfig;
 use dash_with_expiry::hash_map_with_expiry::HashMapWithExpiry;
 use dash_with_expiry::hash_set_with_expiry::HashSetWithExpiry;
 use dashmap::DashMap;
@@ -110,6 +111,13 @@ pub async fn spawn_app() -> TestApp {
         dashboard_pool,
         channel_pool,
         client,
+        snag: SnagConfig {
+            base_url: "https://snag.example.com".to_string(),
+            api_key: "test-api-key".to_string(),
+            external_rule_extension: "test-extension-rule".to_string(),
+            external_rule_wallet: "test-wallet-rule".to_string(),
+            external_rule_mobile: "test-mobile-rule".to_string(),
+        },
         flags,
         redis: redis.clone(),
         check_token_map,
