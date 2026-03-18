@@ -1,0 +1,1 @@
+CREATE INDEX IF NOT EXISTS users_extension_activated ON users (extension_activated);

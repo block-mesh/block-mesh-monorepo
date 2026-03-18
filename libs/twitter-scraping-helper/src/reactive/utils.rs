@@ -7,10 +7,7 @@ pub fn text_to_num(text: String) -> Option<u32> {
     if text.is_empty() {
         Some(0)
     } else {
-        match text.parse() {
-            Ok(i) => Some(i),
-            Err(_) => None,
-        }
+        text.parse().ok()
     }
 }
 
