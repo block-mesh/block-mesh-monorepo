@@ -1,4 +1,5 @@
 use crate::database::user::update_extension_activated::update_extension_activated;
+use crate::database::user::update_extension_activated_sent::update_extension_activated_sent;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
 use crate::utils::snag::sync_first_activation;
@@ -67,14 +68,30 @@ pub async fn handler(
     if activated_now {
         let client = state.client.clone();
         let snag = state.snag.clone();
+        let pool = pool.clone();
         let user_id = user_and_api_token.user_id;
         let user_email = user_and_api_token.email.clone();
         let wallet_address = user_and_api_token.wallet_address.clone();
         tokio::spawn(async move {
-            if let Err(error) =
-                sync_first_activation(client, snag, user_id, user_email, wallet_address).await
-            {
-                tracing::warn!("failed to sync first activation to Snag: {error}");
+            match sync_first_activation(client, snag, user_id, user_email, wallet_address).await {
+                Ok(()) => {
+                    if let Ok(mut tx) = create_txn(&pool).await {
+                        if let Err(error) =
+                            update_extension_activated_sent(&mut tx, &user_id, true).await
+                        {
+                            tracing::warn!(
+                                "failed to mark extension_activated_sent for {user_id}: {error}"
+                            );
+                        } else if let Err(error) = commit_txn(tx).await {
+                            tracing::warn!(
+                                "failed to commit extension_activated_sent for {user_id}: {error}"
+                            );
+                        }
+                    }
+                }
+                Err(error) => {
+                    tracing::warn!("failed to sync first activation to Snag: {error}");
+                }
             }
         });
     }
