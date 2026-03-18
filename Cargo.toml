@@ -12,7 +12,7 @@ incremental = false
 members = ["libs/*", "programs/*"]
 exclude = [
   "libs/cloudflare-datainquiry-page",
-  "libs/extension",
+  #  "libs/extension",
   "libs/cloudflare-privacy-page",
   "libs/cloudflare-delete-page",
   "libs/cloudflare-page-adgrams",
@@ -42,27 +42,9 @@ unsafe_code = "forbid"
 unused = "forbid"
 dead_code = "forbid"
 
-[workspace.lints.clippy]
-#all = { level = "deny", priority = 5 }
-## cargo = { level = "warn", priority = 5 }
-#pedantic = { level = "deny", priority = 5 }
-#nursery = { level = "forbid", priority = 5 }
-## restriction = { level = "warn", priority = 5 }
-#unwrap_used = { level = "forbid", priority = 5 }
-#empty_structs_with_brackets = { level = "allow", priority = 5 }
-#pub_use = { level = "allow", priority = 5 }
-#missing_errors_doc = { level = "allow", priority = 5 }
-#multiple_crate_versions = { level = "allow", priority = 5 }
-#must_use_candidate = { level = "allow", priority = 5 }
-#needless_pass_by_value = { level = "allow", priority = 5 }
-#module_name_repetitions = { level = "allow", priority = 5 }
-#future_not_send = { level = "allow", priority = 5 }
-#redundant_closure_for_method_calls = { level = "allow", priority = 5 }
-#unused_async = { level = "allow", priority = 5 } # Only here until IndexedDB refactor
-
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.601"
+version = "0.0.602"
 edition = "2024"
 rust-version = "1.85.0"
 
@@ -335,9 +317,9 @@ features = [
 [workspace.dependencies.uuid]
 version = "1.19.0"
 features = [
-  "v4", # Lets you generate random UUIDs
-  "fast-rng", # Use a faster (but still sufficiently random) RNG
+  "v4",                # Lets you generate random UUIDs
+  "fast-rng",          # Use a faster (but still sufficiently random) RNG
   "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
-  "serde", # Enable serialization/deserialization of UUIDs
-  "js", # Enable UUID generation in WebAssembly
+  "serde",             # Enable serialization/deserialization of UUIDs
+  "js",                # Enable UUID generation in WebAssembly
 ]

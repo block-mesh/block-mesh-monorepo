@@ -1,12 +1,14 @@
 use crate::database::perks::add_perk_to_user::add_perk_to_user;
 use crate::database::user::get_extension_activated::get_extension_activated;
+use crate::database::user::get_extension_activated_sent::get_extension_activated_sent;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
+use crate::database::user::update_extension_activated_sent::update_extension_activated_sent;
 use crate::database::user::update_user_wallet::update_user_wallet;
 use crate::domain::perk::PerkName;
 use crate::errors::error::Error;
 use crate::routes::health_check::auth_status::AUTH_STATUS_RATE_LIMIT;
 use crate::startup::application::AppState;
-use crate::utils::snag::sync_wallet_update;
+use crate::utils::snag::{sync_first_activation, sync_wallet_update};
 use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::{Extension, Json};
@@ -51,8 +53,10 @@ pub async fn handler(
     let db_user = get_user_opt_by_email(&mut transaction, &user_and_api_token.email)
         .await?
         .ok_or(Error::UserNotFound)?;
-    let should_sync_snag =
+    let extension_activated =
         get_extension_activated(&mut transaction, &user_and_api_token.user_id).await?;
+    let extension_activated_sent =
+        get_extension_activated_sent(&mut transaction, &user_and_api_token.user_id).await?;
     let signature =
         Signature::try_from(body.signature.as_slice()).map_err(|_| Error::InternalServer)?;
     let pubkey = Pubkey::from_str(body.pubkey.as_str()).unwrap_or_default();
@@ -166,7 +170,38 @@ pub async fn handler(
         .get_or_init(|| async { HashMapWithExpiry::new(1_000) })
         .await;
     cache.remove(&user_and_api_token.email).await;
-    if should_sync_snag {
+    if extension_activated && !extension_activated_sent {
+        let client = state.client.clone();
+        let snag = state.snag.clone();
+        let pool = pool.clone();
+        let user_id = user_and_api_token.user_id;
+        let email = user_and_api_token.email.clone();
+        let wallet = body.pubkey.clone();
+        tokio::spawn(async move {
+            match sync_first_activation(client, snag, user_id, email, Some(wallet)).await {
+                Ok(()) => {
+                    if let Ok(mut tx) = create_txn(&pool).await {
+                        if let Err(error) =
+                            update_extension_activated_sent(&mut tx, &user_id, true).await
+                        {
+                            tracing::warn!(
+                                "failed to mark extension_activated_sent for {user_id}: {error}"
+                            );
+                        } else if let Err(error) = commit_txn(tx).await {
+                            tracing::warn!(
+                                "failed to commit extension_activated_sent for {user_id}: {error}"
+                            );
+                        }
+                    }
+                }
+                Err(error) => {
+                    tracing::warn!(
+                        "failed to retry first activation sync to Snag after wallet connect: {error}"
+                    );
+                }
+            }
+        });
+    } else if extension_activated {
         let client = state.client.clone();
         let snag = state.snag.clone();
         let user_id = user_and_api_token.user_id;
