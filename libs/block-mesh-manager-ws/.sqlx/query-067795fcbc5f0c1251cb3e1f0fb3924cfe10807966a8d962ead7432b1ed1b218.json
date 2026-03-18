@@ -1,0 +1,56 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nWITH extant AS (\n\tSELECT id,created_at,user_id,name,value,updated_at\n\tFROM aggregates\n\tWHERE (user_id, name) = ($3,$4)\n),\ninserted AS (\nINSERT INTO aggregates (id,\tcreated_at,\tuser_id, name, value, updated_at, dummy_updated_at)\nSELECT $1,$2,$3,$4,$5,$2,$2\nWHERE\n\tNOT EXISTS (SELECT\tFROM extant)\n\tRETURNING id, created_at,user_id, name, value, updated_at\n)\nSELECT id,created_at,user_id,name,value,updated_at\nFROM inserted\nUNION ALL\nSELECT id,created_at,user_id,name,value,updated_at\nFROM extant;\n",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 2,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 3,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "value",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 5,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Uuid",
+        "Text",
+        "Jsonb"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "067795fcbc5f0c1251cb3e1f0fb3924cfe10807966a8d962ead7432b1ed1b218"
+}
