@@ -12,7 +12,7 @@ incremental = false
 members = ["libs/*", "programs/*"]
 exclude = [
   "libs/cloudflare-datainquiry-page",
-  #  "libs/extension",
+  "libs/extension",
   "libs/cloudflare-privacy-page",
   "libs/cloudflare-delete-page",
   "libs/cloudflare-page-adgrams",
