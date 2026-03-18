@@ -32,6 +32,33 @@ exclude = [
   "programs/merkle-distributor",
   "libs/clickhouse-processing",
   "libs/rama-cli",
+  "libs/leptos-empty-for-caching",
+  "libs/ai-interfaces",
+  "libs/solana-tiny-client",
+  "libs/axum-ws-extractor",
+  "libs/cloudflare-worker-logs-queue",
+  "libs/cloudflare-worker-tauri-releases",
+  "libs/cloudflare-unpacked-extension",
+  "libs/cloudflare-worker-solana-relay",
+  "libs/cloudflare-wallet-helper",
+  "libs/cloudflare-captcha-page",
+  "libs/cloudflare-worker-echo-debug",
+  "libs/cloudflare-images-gallery-page",
+  "libs/cloudflare-new-landing-page",
+  "libs/cloudflare-adgrams-collector",
+  "libs/cloudflare-worker-cron",
+  "libs/cloudflare-worker-logger-proxy",
+  "libs/cloudflare-api-token",
+  "libs/cloudflare-worker-ip-data",
+  "libs/cloudflare-vps-page",
+  "libs/cloudflare-feature-flags",
+  "libs/cloudflare-affiliate-plan-page",
+  "libs/cloudflare-team-page",
+  "libs/tg-privacy-bot",
+  "libs/blockmesh-cli",
+  "libs/test-proxy-endpoint",
+  "libs/test-proxy-master",
+  "libs/cloudflare-landing-page"
 ]
 
 resolver = "2"
@@ -317,9 +344,9 @@ features = [
 [workspace.dependencies.uuid]
 version = "1.19.0"
 features = [
-  "v4",                # Lets you generate random UUIDs
-  "fast-rng",          # Use a faster (but still sufficiently random) RNG
+  "v4", # Lets you generate random UUIDs
+  "fast-rng", # Use a faster (but still sufficiently random) RNG
   "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
-  "serde",             # Enable serialization/deserialization of UUIDs
-  "js",                # Enable UUID generation in WebAssembly
+  "serde", # Enable serialization/deserialization of UUIDs
+  "js", # Enable UUID generation in WebAssembly
 ]
