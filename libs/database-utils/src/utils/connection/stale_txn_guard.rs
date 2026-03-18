@@ -1,6 +1,7 @@
 use std::future::Future;
 use std::pin::Pin;
 
+#[allow(clippy::type_complexity)]
 pub fn stale_txn_guard(
     pool_name: &'static str,
 ) -> impl for<'c> Fn(
