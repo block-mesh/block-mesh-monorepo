@@ -1,3 +1,4 @@
+use crate::database::user::get_extension_activated_sent::get_extension_activated_sent;
 use crate::database::user::update_extension_activated::update_extension_activated;
 use crate::database::user::update_extension_activated_sent::update_extension_activated_sent;
 use crate::errors::error::Error;
@@ -63,9 +64,11 @@ pub async fn handler(
 
     let activated_now =
         update_extension_activated(&mut transaction, &user_and_api_token.user_id, true).await?;
+    let extension_activated_sent =
+        get_extension_activated_sent(&mut transaction, &user_and_api_token.user_id).await?;
     commit_txn(transaction).await?;
 
-    if activated_now {
+    if activated_now || !extension_activated_sent {
         let client = state.client.clone();
         let snag = state.snag.clone();
         let pool = pool.clone();

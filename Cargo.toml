@@ -32,6 +32,33 @@ exclude = [
   "programs/merkle-distributor",
   "libs/clickhouse-processing",
   "libs/rama-cli",
+  "libs/leptos-empty-for-caching",
+  "libs/ai-interfaces",
+  "libs/solana-tiny-client",
+  "libs/axum-ws-extractor",
+  "libs/cloudflare-worker-logs-queue",
+  "libs/cloudflare-worker-tauri-releases",
+  "libs/cloudflare-unpacked-extension",
+  "libs/cloudflare-worker-solana-relay",
+  "libs/cloudflare-wallet-helper",
+  "libs/cloudflare-captcha-page",
+  "libs/cloudflare-worker-echo-debug",
+  "libs/cloudflare-images-gallery-page",
+  "libs/cloudflare-new-landing-page",
+  "libs/cloudflare-adgrams-collector",
+  "libs/cloudflare-worker-cron",
+  "libs/cloudflare-worker-logger-proxy",
+  "libs/cloudflare-api-token",
+  "libs/cloudflare-worker-ip-data",
+  "libs/cloudflare-vps-page",
+  "libs/cloudflare-feature-flags",
+  "libs/cloudflare-affiliate-plan-page",
+  "libs/cloudflare-team-page",
+  "libs/tg-privacy-bot",
+  "libs/blockmesh-cli",
+  "libs/test-proxy-endpoint",
+  "libs/test-proxy-master",
+  "libs/cloudflare-landing-page"
 ]
 
 resolver = "2"
@@ -42,27 +69,9 @@ unsafe_code = "forbid"
 unused = "forbid"
 dead_code = "forbid"
 
-[workspace.lints.clippy]
-#all = { level = "deny", priority = 5 }
-## cargo = { level = "warn", priority = 5 }
-#pedantic = { level = "deny", priority = 5 }
-#nursery = { level = "forbid", priority = 5 }
-## restriction = { level = "warn", priority = 5 }
-#unwrap_used = { level = "forbid", priority = 5 }
-#empty_structs_with_brackets = { level = "allow", priority = 5 }
-#pub_use = { level = "allow", priority = 5 }
-#missing_errors_doc = { level = "allow", priority = 5 }
-#multiple_crate_versions = { level = "allow", priority = 5 }
-#must_use_candidate = { level = "allow", priority = 5 }
-#needless_pass_by_value = { level = "allow", priority = 5 }
-#module_name_repetitions = { level = "allow", priority = 5 }
-#future_not_send = { level = "allow", priority = 5 }
-#redundant_closure_for_method_calls = { level = "allow", priority = 5 }
-#unused_async = { level = "allow", priority = 5 } # Only here until IndexedDB refactor
-
 [workspace.package]
 authors = ["Ohad Dahan <ohaddahan@gmail.com>"]
-version = "0.0.601"
+version = "0.0.602"
 edition = "2024"
 rust-version = "1.85.0"
 
