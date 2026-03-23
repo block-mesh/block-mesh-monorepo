@@ -87,5 +87,7 @@ pub struct UserAndApiToken {
     pub password: Secret<String>,
     pub nonce: Secret<String>,
     pub wallet_address: Option<String>,
+    #[serde(with = "time::serde::rfc3339")]
+    pub created_at: OffsetDateTime,
     pub verified_email: bool,
 }

@@ -37,6 +37,7 @@ pub async fn get_user_and_api_token_by_email(
         users.password as "password: Secret<String>",
         nonces.nonce as "nonce: Secret<String>",
         users.wallet_address as wallet_address,
+        users.created_at as created_at,
         users.verified_email as verified_email
         FROM users
         JOIN api_tokens ON users.id = api_tokens.user_id
