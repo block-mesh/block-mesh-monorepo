@@ -1,9 +1,8 @@
-use crate::database::user::get_extension_activated_sent::get_extension_activated_sent;
 use crate::database::user::update_extension_activated::update_extension_activated;
 use crate::database::user::update_extension_activated_sent::update_extension_activated_sent;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
-use crate::utils::snag::sync_first_activation;
+use crate::utils::snag::{is_snag_eligible_user, sync_first_activation};
 use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::{Extension, Json};
@@ -64,11 +63,9 @@ pub async fn handler(
 
     let activated_now =
         update_extension_activated(&mut transaction, &user_and_api_token.user_id, true).await?;
-    let extension_activated_sent =
-        get_extension_activated_sent(&mut transaction, &user_and_api_token.user_id).await?;
     commit_txn(transaction).await?;
 
-    if activated_now || !extension_activated_sent {
+    if activated_now && is_snag_eligible_user(user_and_api_token.created_at) {
         let client = state.client.clone();
         let snag = state.snag.clone();
         let pool = pool.clone();

@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nWITH locked_task AS (\n    SELECT id\n    FROM tasks\n    WHERE id = $3\n    FOR UPDATE SKIP LOCKED\n)\nUPDATE tasks\nSET\n    assigned_user_id = $1,\n    status = $2\nWHERE\n    id IN (SELECT id FROM locked_task)\n    ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "d2c6cb7834539584bd849e581b233033d50996fd78881c85f9e2f35e14f603bb"
+}

@@ -118,49 +118,49 @@ ensure migrate
 cd "${ROOT}/libs/database-utils" || exit
 echo "migrate DB database-utils"
 ensure migrate
-export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:5551/tg-bot"
-echo "create DB"
-ensure sqlx database create
-cd "${ROOT}/libs/tg-privacy-bot" || exit
-echo "migrate DB tg-privacy-bot"
-ensure migrate
+#export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:5551/tg-bot"
+#echo "create DB"
+#ensure sqlx database create
+#cd "${ROOT}/libs/tg-privacy-bot" || exit
+#echo "migrate DB tg-privacy-bot"
+#ensure migrate
 #export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:5552/data-sink"
 export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:5559/block-mesh"
 echo "create DB"
 ensure sqlx database create
-cd "${ROOT}/libs/data-sink" || exit
-echo "migrate DB data-sink"
-ensure migrate
-export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:5553/emails"
-echo "create DB"
-ensure sqlx database create
-cd "${ROOT}/libs/emails" || exit
-echo "migrate DB emails"
-ensure migrate
-export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:5554/logs-drain"
-echo "create DB"
-ensure sqlx database create
-cd "${ROOT}/libs/logs-drain" || exit
-echo "migrate DB logs-drain"
-ensure migrate
-export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:6999/ids"
-echo "create DB"
-ensure sqlx database create
-cd "${ROOT}/libs/ids" || exit
-echo "migrate DB ids"
-ensure migrate
-export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:6998/rama"
-echo "create DB"
-ensure sqlx database create
+#cd "${ROOT}/libs/data-sink" || exit
+#echo "migrate DB data-sink"
+#ensure migrate
+#export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:5553/emails"
+#echo "create DB"
+#ensure sqlx database create
+#cd "${ROOT}/libs/emails" || exit
+#echo "migrate DB emails"
+#ensure migrate
+#export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:5554/logs-drain"
+#echo "create DB"
+#ensure sqlx database create
+#cd "${ROOT}/libs/logs-drain" || exit
+#echo "migrate DB logs-drain"
+#ensure migrate
+#export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:6999/ids"
+#echo "create DB"
+#ensure sqlx database create
+#cd "${ROOT}/libs/ids" || exit
+#echo "migrate DB ids"
+#ensure migrate
+#export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:6998/rama"
+#echo "create DB"
+#ensure sqlx database create
 #cd "${ROOT}/libs/rama-cli" || exit
 #echo "migrate DB rama-cli"
 #ensure migrate
->&2 echo "Postgres has been migrated, ready to go!"
-export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:6997/collector"
-echo "create DB"
-ensure sqlx database create
-cd "${ROOT}/libs/block-mesh-collector" || exit
-echo "migrate DB block-mesh-collector"
-ensure migrate
->&2 echo "Postgres has been migrated, ready to go!"
+#>&2 echo "Postgres has been migrated, ready to go!"
+#export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:6997/collector"
+#echo "create DB"
+#ensure sqlx database create
+#cd "${ROOT}/libs/block-mesh-collector" || exit
+#echo "migrate DB block-mesh-collector"
+#ensure migrate
+#>&2 echo "Postgres has been migrated, ready to go!"
 cd "${_PWD}"
