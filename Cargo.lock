@@ -1514,7 +1514,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-collector"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "aws-config",
@@ -1541,7 +1541,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-common"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "aws-config",
@@ -1580,7 +1580,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "askama",
@@ -1672,7 +1672,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-api"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -1706,7 +1706,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-database-domain"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -1734,7 +1734,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-worker"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -1771,7 +1771,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-ws"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -2871,7 +2871,7 @@ dependencies = [
 
 [[package]]
 name = "dash-with-expiry"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "chrono",
  "dashmap 6.1.0",
@@ -2916,7 +2916,7 @@ checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 
 [[package]]
 name = "data-sink"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -2959,7 +2959,7 @@ dependencies = [
 
 [[package]]
 name = "database-utils"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -2980,7 +2980,7 @@ dependencies = [
 
 [[package]]
 name = "debug-area"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -3404,7 +3404,7 @@ checksum = "e079f19b08ca6239f47f8ba8509c11cf3ea30095831f7fed61441475edd8c449"
 
 [[package]]
 name = "emails"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -3585,7 +3585,7 @@ checksum = "9fc0510504f03c51ada170672ac806f1f105a88aa97a5281117e1ddc3368e51a"
 
 [[package]]
 name = "feature-flags-server"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -5023,7 +5023,7 @@ dependencies = [
 
 [[package]]
 name = "ids"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -5769,7 +5769,7 @@ checksum = "5e5032e24019045c762d3c0f28f5b6b8bbf38563a65908389bf7978758920897"
 
 [[package]]
 name = "logger-general"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -5789,7 +5789,7 @@ dependencies = [
 
 [[package]]
 name = "logger-leptos"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -5810,7 +5810,7 @@ dependencies = [
 
 [[package]]
 name = "logs-drain"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -6741,7 +6741,7 @@ dependencies = [
 
 [[package]]
 name = "pg-notify-test"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "database-utils",
@@ -8121,7 +8121,7 @@ dependencies = [
 
 [[package]]
 name = "secret"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "serde",
  "sqlx",
@@ -10754,7 +10754,7 @@ dependencies = [
 
 [[package]]
 name = "speed-test"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "chrono",
@@ -12324,7 +12324,7 @@ dependencies = [
 
 [[package]]
 name = "twitter-scraping-helper"
-version = "0.0.606"
+version = "0.0.607"
 dependencies = [
  "anyhow",
  "block-mesh-common",
