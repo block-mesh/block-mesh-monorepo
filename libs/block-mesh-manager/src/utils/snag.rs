@@ -37,7 +37,7 @@ enum SnagRuleKind {
 }
 
 impl SnagRuleKind {
-    fn external_rule_id<'a>(self, config: &'a SnagConfig) -> &'a str {
+    fn external_rule_id(self, config: &SnagConfig) -> &str {
         match self {
             Self::Extension => &config.external_rule_extension,
             Self::Wallet => &config.external_rule_wallet,
