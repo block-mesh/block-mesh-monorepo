@@ -1,0 +1,14 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n            DELETE FROM daily_stats_background_jobs WHERE id = $1\n            ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "34ac48c66fa7c5153fb377cc43d86f6137c713dcbaf12a7c1d29b526a2e5dad7"
+}

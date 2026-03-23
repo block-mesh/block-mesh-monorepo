@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE daily_stats\n        SET\n            ref_bonus = $1,\n            ref_bonus_applied = true\n         WHERE\n            id = $2\n            AND ref_bonus_applied = false\n         ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Float8",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "e2f429186c6d495803025c8fe72afd20f62ffe7c61ae8ff05409c82bfe1e5530"
+}
