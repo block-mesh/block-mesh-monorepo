@@ -13,6 +13,33 @@ pub struct SnagConfig {
     pub external_rule_extension: String,
     pub external_rule_wallet: String,
     pub external_rule_mobile: String,
+    pub website_id: String,
+    pub organization_id: String,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+pub struct SnagWalletVerification {
+    message: Option<String>,
+    signature: Option<String>,
+    verified_locally: bool,
+}
+
+impl SnagWalletVerification {
+    pub fn verified_solana(message: String, signature: String) -> Self {
+        Self {
+            message: Some(message),
+            signature: Some(signature),
+            verified_locally: true,
+        }
+    }
+
+    pub fn verified_locally_only() -> Self {
+        Self {
+            message: None,
+            signature: None,
+            verified_locally: true,
+        }
+    }
 }
 
 #[derive(Serialize)]
@@ -23,6 +50,7 @@ struct SnagUserMetadataRequest {
     wallet_address: String,
     email_address: String,
     display_name: String,
+    user_group_external_identifier: String,
 }
 
 #[derive(Serialize)]
@@ -31,10 +59,47 @@ struct SnagRuleCompleteRequest {
     wallet_address: String,
 }
 
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SnagConnectUserRequest {
+    website_id: String,
+    organization_id: String,
+    wallet_type: &'static str,
+    wallet_address: String,
+    verification_data: SnagConnectVerificationRequest,
+    user_id: Uuid,
+    confirm_disconnect: bool,
+}
+
+#[derive(Serialize)]
+#[serde(rename_all = "camelCase")]
+struct SnagConnectVerificationRequest {
+    #[serde(skip_serializing_if = "Option::is_none")]
+    message: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    signature: Option<String>,
+    verified_locally: bool,
+}
+
 #[derive(Deserialize)]
 struct SnagUserMetadataResponse {
     success: Option<bool>,
     message: Option<String>,
+}
+
+#[derive(Debug, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "camelCase")]
+struct SnagUsersResponse {
+    #[serde(default)]
+    data: Vec<SnagUserLookup>,
+}
+
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "camelCase")]
+struct SnagUserLookup {
+    id: Uuid,
+    #[serde(default)]
+    wallet_address: Option<String>,
 }
 
 #[derive(Deserialize)]
@@ -120,6 +185,14 @@ pub fn is_snag_eligible_user(created_at: OffsetDateTime) -> bool {
     created_at >= snag_cutoff_date()
 }
 
+fn external_identifier(user_id: Uuid) -> String {
+    user_id.to_string()
+}
+
+fn user_group_external_identifier(user_id: Uuid) -> String {
+    format!("bm-user-group:{user_id}")
+}
+
 fn build_user_metadata_request(
     user_id: Uuid,
     email: String,
@@ -127,10 +200,32 @@ fn build_user_metadata_request(
 ) -> SnagUserMetadataRequest {
     SnagUserMetadataRequest {
         id: user_id.to_string(),
-        external_identifier: user_id.to_string(),
+        external_identifier: external_identifier(user_id),
         wallet_address,
         email_address: email.clone(),
         display_name: email,
+        user_group_external_identifier: user_group_external_identifier(user_id),
+    }
+}
+
+fn build_connect_user_request(
+    config: &SnagConfig,
+    user_id: Uuid,
+    wallet_address: String,
+    verification: SnagWalletVerification,
+) -> SnagConnectUserRequest {
+    SnagConnectUserRequest {
+        website_id: config.website_id.clone(),
+        organization_id: config.organization_id.clone(),
+        wallet_type: "solana",
+        wallet_address,
+        verification_data: SnagConnectVerificationRequest {
+            message: verification.message,
+            signature: verification.signature,
+            verified_locally: verification.verified_locally,
+        },
+        user_id,
+        confirm_disconnect: true,
     }
 }
 
@@ -168,6 +263,56 @@ fn is_accepted_complete_rule_response(status: reqwest::StatusCode, body: &str) -
         || is_supported_complete_rule_bad_request(status, body)
 }
 
+fn is_accepted_connect_user_response(status: reqwest::StatusCode) -> bool {
+    status.is_success() || status == reqwest::StatusCode::CONFLICT
+}
+
+async fn find_user_by_external_identifier(
+    client: &Client,
+    config: &SnagConfig,
+    user_id: Uuid,
+) -> anyhow::Result<Option<SnagUserLookup>> {
+    let external_identifier = external_identifier(user_id);
+    let response = client
+        .get(format!("{}/api/users", config.base_url))
+        .header("X-API-KEY", &config.api_key)
+        .query(&[
+            ("externalIdentifier", external_identifier.as_str()),
+            ("websiteId", config.website_id.as_str()),
+            ("organizationId", config.organization_id.as_str()),
+            ("limit", "2"),
+        ])
+        .send()
+        .await?;
+    let status = response.status();
+    let response_body = response.text().await.unwrap_or_default();
+    if !status.is_success() {
+        return Err(anyhow!(
+            "Snag user lookup failed with status {}: {}",
+            status,
+            response_body
+        ));
+    }
+
+    let mut parsed =
+        serde_json::from_str::<SnagUsersResponse>(&response_body).map_err(|error| {
+            anyhow!(
+                "failed to parse Snag user lookup response: {}; body: {}",
+                error,
+                response_body
+            )
+        })?;
+    match parsed.data.len() {
+        0 => Ok(None),
+        1 => Ok(parsed.data.pop()),
+        count => Err(anyhow!(
+            "expected at most one Snag user for external identifier {}, got {}",
+            external_identifier,
+            count
+        )),
+    }
+}
+
 async fn send_create_or_update_user(
     client: &Client,
     config: &SnagConfig,
@@ -195,6 +340,41 @@ async fn send_create_or_update_user(
     }
     Err(anyhow!(
         "Snag user upsert failed with status {}: {}",
+        status,
+        response_body
+    ))
+}
+
+async fn send_connect_user(
+    client: &Client,
+    config: &SnagConfig,
+    user_id: Uuid,
+    wallet_address: &str,
+    verification: SnagWalletVerification,
+) -> anyhow::Result<()> {
+    let response = client
+        .post(format!("{}/api/users/connect", config.base_url))
+        .header("X-API-KEY", &config.api_key)
+        .header("Content-Type", "application/json")
+        .json(&build_connect_user_request(
+            config,
+            user_id,
+            wallet_address.to_string(),
+            verification,
+        ))
+        .send()
+        .await?;
+    let status = response.status();
+    let response_body = response.text().await.unwrap_or_default();
+    if is_accepted_connect_user_response(status) {
+        if status == reqwest::StatusCode::CONFLICT {
+            tracing::warn!("Snag user connect returned conflict: {}", response_body);
+        }
+        return Ok(());
+    }
+
+    Err(anyhow!(
+        "Snag user connect failed with status {}: {}",
         status,
         response_body
     ))
@@ -254,6 +434,46 @@ pub async fn sync_user_metadata(
 }
 
 #[tracing::instrument(
+    name = "snag_sync_connected_wallet",
+    skip(client, config, wallet_address, verification)
+)]
+pub async fn sync_connected_wallet(
+    client: Client,
+    config: SnagConfig,
+    user_id: Uuid,
+    email: String,
+    wallet_address: String,
+    verification: SnagWalletVerification,
+) -> anyhow::Result<()> {
+    match find_user_by_external_identifier(&client, &config, user_id).await? {
+        Some(existing_user)
+            if existing_user.wallet_address.as_deref() == Some(wallet_address.as_str()) => {}
+        Some(existing_user) => {
+            send_connect_user(
+                &client,
+                &config,
+                existing_user.id,
+                &wallet_address,
+                verification,
+            )
+            .await?;
+        }
+        None => {
+            sync_user_metadata(
+                client.clone(),
+                config.clone(),
+                user_id,
+                email,
+                wallet_address.clone(),
+            )
+            .await?;
+        }
+    }
+
+    complete_wallet_rule(client, config, wallet_address).await
+}
+
+#[tracing::instrument(
     name = "snag_complete_extension_rule",
     skip(client, config, wallet_address)
 )]
@@ -285,6 +505,17 @@ pub async fn sync_first_activation(
     email: String,
     wallet_address: Option<String>,
 ) -> anyhow::Result<()> {
+    if let Some(existing_user) = find_user_by_external_identifier(&client, &config, user_id).await?
+    {
+        let wallet_address = existing_user.wallet_address.ok_or_else(|| {
+            anyhow!(
+                "Snag user {} is missing a wallet address for extension sync",
+                existing_user.id
+            )
+        })?;
+        return complete_extension_rule(client, config, wallet_address).await;
+    }
+
     let wallet_address = wallet_address.unwrap_or_else(generated_wallet_address);
     sync_user_metadata(
         client.clone(),
@@ -300,6 +531,25 @@ pub async fn sync_first_activation(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use serde_json::{json, Value};
+    use wiremock::matchers::{header, method, path, query_param};
+    use wiremock::{Mock, MockServer, ResponseTemplate};
+
+    fn test_config(server: &MockServer) -> SnagConfig {
+        SnagConfig {
+            base_url: server.uri(),
+            api_key: "api-key".to_string(),
+            external_rule_extension: "extension-rule".to_string(),
+            external_rule_wallet: "wallet-rule".to_string(),
+            external_rule_mobile: "mobile-rule".to_string(),
+            website_id: Uuid::from_u128(1).to_string(),
+            organization_id: Uuid::from_u128(2).to_string(),
+        }
+    }
+
+    fn request_body_json(body: &[u8]) -> Value {
+        serde_json::from_slice(body).unwrap()
+    }
 
     #[test]
     fn serializes_user_metadata_payload_in_camel_case() {
@@ -309,6 +559,7 @@ mod tests {
             wallet_address: "wallet".to_string(),
             email_address: "user@example.com".to_string(),
             display_name: "user@example.com".to_string(),
+            user_group_external_identifier: "group-id".to_string(),
         };
 
         let json = serde_json::to_value(payload).unwrap();
@@ -317,6 +568,37 @@ mod tests {
         assert_eq!(json["walletAddress"], "wallet");
         assert_eq!(json["emailAddress"], "user@example.com");
         assert_eq!(json["displayName"], "user@example.com");
+        assert_eq!(json["userGroupExternalIdentifier"], "group-id");
+    }
+
+    #[test]
+    fn serializes_connect_user_payload_with_optional_verification_fields() {
+        let config = SnagConfig {
+            base_url: "https://snag.example.com".to_string(),
+            api_key: "api-key".to_string(),
+            external_rule_extension: "extension-rule".to_string(),
+            external_rule_wallet: "wallet-rule".to_string(),
+            external_rule_mobile: "mobile-rule".to_string(),
+            website_id: "website-id".to_string(),
+            organization_id: "organization-id".to_string(),
+        };
+        let payload = build_connect_user_request(
+            &config,
+            Uuid::nil(),
+            "wallet".to_string(),
+            SnagWalletVerification::verified_locally_only(),
+        );
+
+        let json = serde_json::to_value(payload).unwrap();
+        assert_eq!(json["websiteId"], "website-id");
+        assert_eq!(json["organizationId"], "organization-id");
+        assert_eq!(json["walletType"], "solana");
+        assert_eq!(json["walletAddress"], "wallet");
+        assert_eq!(json["userId"], Uuid::nil().to_string());
+        assert_eq!(json["confirmDisconnect"], true);
+        assert_eq!(json["verificationData"]["verifiedLocally"], true);
+        assert!(json["verificationData"].get("message").is_none());
+        assert!(json["verificationData"].get("signature").is_none());
     }
 
     #[test]
@@ -367,6 +649,8 @@ mod tests {
             external_rule_extension: "extension-rule".to_string(),
             external_rule_wallet: "wallet-rule".to_string(),
             external_rule_mobile: "mobile-rule".to_string(),
+            website_id: "website-id".to_string(),
+            organization_id: "organization-id".to_string(),
         };
 
         assert_eq!(
@@ -422,5 +706,389 @@ mod tests {
         let wallet = generated_wallet_address();
         assert!(!wallet.is_empty());
         assert!(wallet.len() >= 32);
+    }
+
+    #[tokio::test]
+    async fn find_user_by_external_identifier_errors_when_multiple_users_are_returned() {
+        let server = MockServer::start().await;
+        let config = test_config(&server);
+        let client = Client::new();
+        let user_id = Uuid::from_u128(42);
+
+        Mock::given(method("GET"))
+            .and(path("/api/users"))
+            .and(query_param("externalIdentifier", user_id.to_string()))
+            .and(query_param("websiteId", config.website_id.clone()))
+            .and(query_param(
+                "organizationId",
+                config.organization_id.clone(),
+            ))
+            .and(query_param("limit", "2"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "data": [
+                    {
+                        "id": Uuid::from_u128(10),
+                        "walletAddress": "wallet-a"
+                    },
+                    {
+                        "id": Uuid::from_u128(11),
+                        "walletAddress": "wallet-b"
+                    }
+                ],
+                "hasNextPage": false
+            })))
+            .mount(&server)
+            .await;
+
+        let error = find_user_by_external_identifier(&client, &config, user_id)
+            .await
+            .unwrap_err();
+        assert!(error.to_string().contains("expected at most one Snag user"));
+    }
+
+    #[tokio::test]
+    async fn sync_first_activation_creates_placeholder_user_when_missing() {
+        let server = MockServer::start().await;
+        let config = test_config(&server);
+        let client = Client::new();
+        let user_id = Uuid::from_u128(42);
+
+        Mock::given(method("GET"))
+            .and(path("/api/users"))
+            .and(query_param("externalIdentifier", user_id.to_string()))
+            .and(query_param("websiteId", config.website_id.clone()))
+            .and(query_param(
+                "organizationId",
+                config.organization_id.clone(),
+            ))
+            .and(query_param("limit", "2"))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(json!({"data": [], "hasNextPage": false})),
+            )
+            .mount(&server)
+            .await;
+        Mock::given(method("POST"))
+            .and(path("/api/users/metadatas"))
+            .and(header("x-api-key", "api-key"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"id": "ok"})))
+            .mount(&server)
+            .await;
+        Mock::given(method("POST"))
+            .and(path("/api/loyalty/rules/extension-rule/complete"))
+            .and(header("x-api-key", "api-key"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "message": "Completion request added to queue",
+                "data": {}
+            })))
+            .mount(&server)
+            .await;
+
+        sync_first_activation(
+            client,
+            config.clone(),
+            user_id,
+            "user@example.com".to_string(),
+            None,
+        )
+        .await
+        .unwrap();
+
+        let requests = server.received_requests().await.unwrap();
+        assert_eq!(requests.len(), 3);
+
+        let metadata_request = requests
+            .iter()
+            .find(|request| request.url.path() == "/api/users/metadatas")
+            .unwrap();
+        let metadata_body = request_body_json(&metadata_request.body);
+        let created_wallet = metadata_body["walletAddress"].as_str().unwrap().to_string();
+        assert!(!created_wallet.is_empty());
+        assert_eq!(metadata_body["externalIdentifier"], user_id.to_string());
+        assert_eq!(
+            metadata_body["userGroupExternalIdentifier"],
+            format!("bm-user-group:{user_id}")
+        );
+
+        let complete_request = requests
+            .iter()
+            .find(|request| request.url.path() == "/api/loyalty/rules/extension-rule/complete")
+            .unwrap();
+        let complete_body = request_body_json(&complete_request.body);
+        assert_eq!(complete_body["walletAddress"], created_wallet);
+    }
+
+    #[tokio::test]
+    async fn sync_first_activation_reuses_existing_snag_wallet() {
+        let server = MockServer::start().await;
+        let config = test_config(&server);
+        let client = Client::new();
+        let user_id = Uuid::from_u128(42);
+        let placeholder_wallet = "placeholder-wallet";
+
+        Mock::given(method("GET"))
+            .and(path("/api/users"))
+            .and(query_param("externalIdentifier", user_id.to_string()))
+            .and(query_param("websiteId", config.website_id.clone()))
+            .and(query_param(
+                "organizationId",
+                config.organization_id.clone(),
+            ))
+            .and(query_param("limit", "2"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "data": [
+                    {
+                        "id": Uuid::from_u128(10),
+                        "walletAddress": placeholder_wallet
+                    }
+                ],
+                "hasNextPage": false
+            })))
+            .mount(&server)
+            .await;
+        Mock::given(method("POST"))
+            .and(path("/api/loyalty/rules/extension-rule/complete"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "message": "Completion request added to queue",
+                "data": {}
+            })))
+            .mount(&server)
+            .await;
+
+        sync_first_activation(
+            client,
+            config,
+            user_id,
+            "user@example.com".to_string(),
+            Some("real-wallet".to_string()),
+        )
+        .await
+        .unwrap();
+
+        let requests = server.received_requests().await.unwrap();
+        assert_eq!(requests.len(), 2);
+        assert!(!requests
+            .iter()
+            .any(|request| request.url.path() == "/api/users/metadatas"));
+
+        let complete_request = requests
+            .iter()
+            .find(|request| request.url.path() == "/api/loyalty/rules/extension-rule/complete")
+            .unwrap();
+        let complete_body = request_body_json(&complete_request.body);
+        assert_eq!(complete_body["walletAddress"], placeholder_wallet);
+    }
+
+    #[tokio::test]
+    async fn sync_connected_wallet_creates_user_when_missing() {
+        let server = MockServer::start().await;
+        let config = test_config(&server);
+        let client = Client::new();
+        let user_id = Uuid::from_u128(42);
+        let wallet_address = "real-wallet";
+
+        Mock::given(method("GET"))
+            .and(path("/api/users"))
+            .and(query_param("externalIdentifier", user_id.to_string()))
+            .and(query_param("websiteId", config.website_id.clone()))
+            .and(query_param(
+                "organizationId",
+                config.organization_id.clone(),
+            ))
+            .and(query_param("limit", "2"))
+            .respond_with(
+                ResponseTemplate::new(200).set_body_json(json!({"data": [], "hasNextPage": false})),
+            )
+            .mount(&server)
+            .await;
+        Mock::given(method("POST"))
+            .and(path("/api/users/metadatas"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"id": "ok"})))
+            .mount(&server)
+            .await;
+        Mock::given(method("POST"))
+            .and(path("/api/loyalty/rules/wallet-rule/complete"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "message": "Completion request added to queue",
+                "data": {}
+            })))
+            .mount(&server)
+            .await;
+
+        sync_connected_wallet(
+            client,
+            config,
+            user_id,
+            "user@example.com".to_string(),
+            wallet_address.to_string(),
+            SnagWalletVerification::verified_locally_only(),
+        )
+        .await
+        .unwrap();
+
+        let requests = server.received_requests().await.unwrap();
+        assert_eq!(requests.len(), 3);
+        assert!(!requests
+            .iter()
+            .any(|request| request.url.path() == "/api/users/connect"));
+
+        let metadata_request = requests
+            .iter()
+            .find(|request| request.url.path() == "/api/users/metadatas")
+            .unwrap();
+        let metadata_body = request_body_json(&metadata_request.body);
+        assert_eq!(metadata_body["walletAddress"], wallet_address);
+        assert_eq!(metadata_body["externalIdentifier"], user_id.to_string());
+        assert_eq!(
+            metadata_body["userGroupExternalIdentifier"],
+            format!("bm-user-group:{user_id}")
+        );
+    }
+
+    #[tokio::test]
+    async fn sync_connected_wallet_connects_real_wallet_to_existing_user_group() {
+        let server = MockServer::start().await;
+        let config = test_config(&server);
+        let client = Client::new();
+        let user_id = Uuid::from_u128(42);
+        let existing_user_id = Uuid::from_u128(77);
+        let wallet_address = "real-wallet";
+
+        Mock::given(method("GET"))
+            .and(path("/api/users"))
+            .and(query_param("externalIdentifier", user_id.to_string()))
+            .and(query_param("websiteId", config.website_id.clone()))
+            .and(query_param(
+                "organizationId",
+                config.organization_id.clone(),
+            ))
+            .and(query_param("limit", "2"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "data": [
+                    {
+                        "id": existing_user_id,
+                        "walletAddress": "placeholder-wallet"
+                    }
+                ],
+                "hasNextPage": false
+            })))
+            .mount(&server)
+            .await;
+        Mock::given(method("POST"))
+            .and(path("/api/users/connect"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "id": existing_user_id,
+                "walletAddress": wallet_address,
+                "createdAt": "2026-03-25T00:00:00Z",
+                "updatedAt": "2026-03-25T00:00:00Z"
+            })))
+            .mount(&server)
+            .await;
+        Mock::given(method("POST"))
+            .and(path("/api/loyalty/rules/wallet-rule/complete"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "message": "Completion request added to queue",
+                "data": {}
+            })))
+            .mount(&server)
+            .await;
+
+        sync_connected_wallet(
+            client,
+            config.clone(),
+            user_id,
+            "user@example.com".to_string(),
+            wallet_address.to_string(),
+            SnagWalletVerification::verified_solana(
+                "signed-message".to_string(),
+                "signed-signature".to_string(),
+            ),
+        )
+        .await
+        .unwrap();
+
+        let requests = server.received_requests().await.unwrap();
+        assert_eq!(requests.len(), 3);
+        assert!(!requests
+            .iter()
+            .any(|request| request.url.path() == "/api/users/metadatas"));
+
+        let connect_request = requests
+            .iter()
+            .find(|request| request.url.path() == "/api/users/connect")
+            .unwrap();
+        let connect_body = request_body_json(&connect_request.body);
+        assert_eq!(connect_body["websiteId"], config.website_id);
+        assert_eq!(connect_body["organizationId"], config.organization_id);
+        assert_eq!(connect_body["walletType"], "solana");
+        assert_eq!(connect_body["walletAddress"], wallet_address);
+        assert_eq!(connect_body["userId"], existing_user_id.to_string());
+        assert_eq!(connect_body["confirmDisconnect"], true);
+        assert_eq!(
+            connect_body["verificationData"]["message"],
+            "signed-message"
+        );
+        assert_eq!(
+            connect_body["verificationData"]["signature"],
+            "signed-signature"
+        );
+        assert_eq!(connect_body["verificationData"]["verifiedLocally"], true);
+    }
+
+    #[tokio::test]
+    async fn sync_connected_wallet_skips_connect_when_wallet_already_matches() {
+        let server = MockServer::start().await;
+        let config = test_config(&server);
+        let client = Client::new();
+        let user_id = Uuid::from_u128(42);
+        let wallet_address = "real-wallet";
+
+        Mock::given(method("GET"))
+            .and(path("/api/users"))
+            .and(query_param("externalIdentifier", user_id.to_string()))
+            .and(query_param("websiteId", config.website_id.clone()))
+            .and(query_param(
+                "organizationId",
+                config.organization_id.clone(),
+            ))
+            .and(query_param("limit", "2"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "data": [
+                    {
+                        "id": Uuid::from_u128(77),
+                        "walletAddress": wallet_address
+                    }
+                ],
+                "hasNextPage": false
+            })))
+            .mount(&server)
+            .await;
+        Mock::given(method("POST"))
+            .and(path("/api/loyalty/rules/wallet-rule/complete"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "message": "Completion request added to queue",
+                "data": {}
+            })))
+            .mount(&server)
+            .await;
+
+        sync_connected_wallet(
+            client,
+            config,
+            user_id,
+            "user@example.com".to_string(),
+            wallet_address.to_string(),
+            SnagWalletVerification::verified_locally_only(),
+        )
+        .await
+        .unwrap();
+
+        let requests = server.received_requests().await.unwrap();
+        assert_eq!(requests.len(), 2);
+        assert!(!requests
+            .iter()
+            .any(|request| request.url.path() == "/api/users/connect"));
+        assert!(!requests
+            .iter()
+            .any(|request| request.url.path() == "/api/users/metadatas"));
     }
 }

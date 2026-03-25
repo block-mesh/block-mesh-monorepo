@@ -179,6 +179,9 @@ async fn run() -> anyhow::Result<()> {
             .expect("could not find SNAG_EXTERNAL_RULE_WALLET"),
         external_rule_mobile: env::var("SNAG_EXTERNAL_RULE_MOBILE")
             .expect("could not find SNAG_EXTERNAL_RULE_MOBILE"),
+        website_id: env::var("SNAG_WEBSITE_ID").expect("could not find SNAG_WEBSITE_ID"),
+        organization_id: env::var("SNAG_ORGANIZATION_ID")
+            .expect("could not find SNAG_ORGANIZATION_ID"),
     };
     let app_state = Arc::new(AppState {
         wallet_login_nonce: HashMapWithExpiry::new(1_000),

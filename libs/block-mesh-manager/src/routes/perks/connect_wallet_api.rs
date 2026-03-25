@@ -6,7 +6,7 @@ use crate::domain::perk::PerkName;
 use crate::errors::error::Error;
 use crate::routes::health_check::auth_status::AUTH_STATUS_RATE_LIMIT;
 use crate::startup::application::AppState;
-use crate::utils::snag::{complete_wallet_rule, is_snag_eligible_user, sync_user_metadata};
+use crate::utils::snag::{is_snag_eligible_user, sync_connected_wallet, SnagWalletVerification};
 use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::{Extension, Json};
@@ -173,21 +173,20 @@ pub async fn handler(
         let user_id = user_and_api_token.user_id;
         let email = user_and_api_token.email.clone();
         let wallet = body.pubkey.clone();
+        let verification =
+            SnagWalletVerification::verified_solana(body.message.clone(), signature.to_string());
         tokio::spawn(async move {
-            if let Err(error) =
-                sync_user_metadata(client.clone(), snag.clone(), user_id, email, wallet.clone())
-                    .await
+            if let Err(error) = sync_connected_wallet(
+                client.clone(),
+                snag.clone(),
+                user_id,
+                email,
+                wallet.clone(),
+                verification,
+            )
+            .await
             {
-                tracing::warn!(
-                    "failed to sync wallet metadata to Snag after new wallet connect: {error}"
-                );
-                return;
-            }
-
-            if let Err(error) = complete_wallet_rule(client, snag, wallet).await {
-                tracing::warn!(
-                    "failed to complete wallet rule in Snag after new wallet connect: {error}"
-                );
+                tracing::warn!("failed to sync connected wallet to Snag: {error}");
                 return;
             }
 

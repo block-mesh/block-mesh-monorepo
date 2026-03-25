@@ -7,7 +7,7 @@ use crate::database::user::get_wallet_connected_not_sent_users::{
 use crate::database::user::update_extension_activated_sent::update_extension_activated_sent;
 use crate::database::user::update_wallet_connected_sent::update_wallet_connected_sent;
 use crate::utils::snag::{
-    complete_wallet_rule, sync_first_activation, sync_user_metadata, SnagConfig,
+    sync_connected_wallet, sync_first_activation, SnagConfig, SnagWalletVerification,
 };
 use anyhow::Context;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
@@ -84,18 +84,16 @@ async fn retry_pending_wallet_snag_sync_for_user(
     pool: &PgPool,
     user: &WalletConnectedNotSentUser,
 ) -> anyhow::Result<()> {
-    sync_user_metadata(
+    sync_connected_wallet(
         client.clone(),
         snag.clone(),
         user.user_id,
         user.email.clone(),
         user.wallet_address.clone(),
+        SnagWalletVerification::verified_locally_only(),
     )
     .await
-    .with_context(|| format!("failed to sync wallet metadata for {}", user.user_id))?;
-    complete_wallet_rule(client.clone(), snag.clone(), user.wallet_address.clone())
-        .await
-        .with_context(|| format!("failed to complete wallet rule for {}", user.user_id))?;
+    .with_context(|| format!("failed to sync connected wallet for {}", user.user_id))?;
     mark_wallet_connected_sent(pool, user).await?;
     Ok(())
 }

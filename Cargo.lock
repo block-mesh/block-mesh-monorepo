@@ -563,6 +563,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "assert-json-diff"
+version = "2.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "47e4f2b81832e72834d7518d8487a0396a28cc408186a2e8854c0f98011faf12"
+dependencies = [
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "async-channel"
 version = "1.9.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1050,7 +1060,7 @@ version = "0.63.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3b92b62199921f10685c6b588fdbeb81168ae4e7950ae3e5f50145a01bb5f1ad"
 dependencies = [
- "assert-json-diff",
+ "assert-json-diff 1.1.0",
  "aws-smithy-runtime-api",
  "base64-simd",
  "cbor-diag",
@@ -1514,7 +1524,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-collector"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "aws-config",
@@ -1541,7 +1551,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-common"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "aws-config",
@@ -1580,7 +1590,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "askama",
@@ -1668,11 +1678,12 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
+ "wiremock",
 ]
 
 [[package]]
 name = "block-mesh-manager-api"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -1706,7 +1717,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-database-domain"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -1734,7 +1745,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-worker"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -1771,7 +1782,7 @@ dependencies = [
 
 [[package]]
 name = "block-mesh-manager-ws"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -2871,7 +2882,7 @@ dependencies = [
 
 [[package]]
 name = "dash-with-expiry"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "chrono",
  "dashmap 6.1.0",
@@ -2916,7 +2927,7 @@ checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
 
 [[package]]
 name = "data-sink"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -2959,7 +2970,7 @@ dependencies = [
 
 [[package]]
 name = "database-utils"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -2979,8 +2990,26 @@ dependencies = [
 ]
 
 [[package]]
+name = "deadpool"
+version = "0.12.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "0be2b1d1d6ec8d846f05e137292d0b89133caf95ef33695424c09568bdd39b1b"
+dependencies = [
+ "deadpool-runtime",
+ "lazy_static",
+ "num_cpus",
+ "tokio",
+]
+
+[[package]]
+name = "deadpool-runtime"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "092966b41edc516079bdf31ec78a2e0588d1d0c08f78b91d8307215928642b2b"
+
+[[package]]
 name = "debug-area"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -3404,7 +3433,7 @@ checksum = "e079f19b08ca6239f47f8ba8509c11cf3ea30095831f7fed61441475edd8c449"
 
 [[package]]
 name = "emails"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -3585,7 +3614,7 @@ checksum = "9fc0510504f03c51ada170672ac806f1f105a88aa97a5281117e1ddc3368e51a"
 
 [[package]]
 name = "feature-flags-server"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -5023,7 +5052,7 @@ dependencies = [
 
 [[package]]
 name = "ids"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -5769,7 +5798,7 @@ checksum = "5e5032e24019045c762d3c0f28f5b6b8bbf38563a65908389bf7978758920897"
 
 [[package]]
 name = "logger-general"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -5789,7 +5818,7 @@ dependencies = [
 
 [[package]]
 name = "logger-leptos"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -5810,7 +5839,7 @@ dependencies = [
 
 [[package]]
 name = "logs-drain"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "axum 0.8.8",
@@ -6741,7 +6770,7 @@ dependencies = [
 
 [[package]]
 name = "pg-notify-test"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "database-utils",
@@ -8121,7 +8150,7 @@ dependencies = [
 
 [[package]]
 name = "secret"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "serde",
  "sqlx",
@@ -10754,7 +10783,7 @@ dependencies = [
 
 [[package]]
 name = "speed-test"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "chrono",
@@ -12324,7 +12353,7 @@ dependencies = [
 
 [[package]]
 name = "twitter-scraping-helper"
-version = "0.0.609"
+version = "0.0.610"
 dependencies = [
  "anyhow",
  "block-mesh-common",
@@ -13328,6 +13357,29 @@ checksum = "524e57b2c537c0f9b1e69f1965311ec12182b4122e45035b1508cd24d2adadb1"
 dependencies = [
  "cfg-if",
  "windows-sys 0.48.0",
+]
+
+[[package]]
+name = "wiremock"
+version = "0.6.5"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "08db1edfb05d9b3c1542e521aea074442088292f00b5f28e435c714a98f85031"
+dependencies = [
+ "assert-json-diff 2.0.2",
+ "base64 0.22.1",
+ "deadpool",
+ "futures",
+ "http 1.4.0",
+ "http-body-util",
+ "hyper 1.8.1",
+ "hyper-util",
+ "log",
+ "once_cell",
+ "regex",
+ "serde",
+ "serde_json",
+ "tokio",
+ "url",
 ]
 
 [[package]]

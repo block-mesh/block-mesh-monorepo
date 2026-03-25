@@ -117,6 +117,8 @@ pub async fn spawn_app() -> TestApp {
             external_rule_extension: "test-extension-rule".to_string(),
             external_rule_wallet: "test-wallet-rule".to_string(),
             external_rule_mobile: "test-mobile-rule".to_string(),
+            website_id: Uuid::nil().to_string(),
+            organization_id: Uuid::nil().to_string(),
         },
         flags,
         redis: redis.clone(),
