@@ -1,6 +1,6 @@
 use anyhow::anyhow;
 use reqwest::Client;
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use solana_sdk::signature::{Keypair, Signer};
 use std::env;
 use time::{Date, Month, OffsetDateTime, Time};
@@ -29,6 +29,18 @@ struct SnagUserMetadataRequest {
 #[serde(rename_all = "camelCase")]
 struct SnagRuleCompleteRequest {
     wallet_address: String,
+}
+
+#[derive(Deserialize)]
+struct SnagUserMetadataResponse {
+    success: Option<bool>,
+    message: Option<String>,
+}
+
+#[derive(Deserialize)]
+struct SnagRuleCompleteResponse {
+    message: Option<String>,
+    rewarded: Option<bool>,
 }
 
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
@@ -122,6 +134,40 @@ fn build_user_metadata_request(
     }
 }
 
+fn is_supported_user_metadata_bad_request(status: reqwest::StatusCode, body: &str) -> bool {
+    if status != reqwest::StatusCode::BAD_REQUEST {
+        return false;
+    }
+
+    serde_json::from_str::<SnagUserMetadataResponse>(body).is_ok_and(|response| {
+        response.success == Some(false)
+            && response.message.as_deref() == Some("User already exists")
+    })
+}
+
+fn is_supported_complete_rule_bad_request(status: reqwest::StatusCode, body: &str) -> bool {
+    if status != reqwest::StatusCode::BAD_REQUEST {
+        return false;
+    }
+
+    serde_json::from_str::<SnagRuleCompleteResponse>(body).is_ok_and(|response| {
+        response.rewarded == Some(true)
+            && response.message.as_deref() == Some("You have already been rewarded")
+    })
+}
+
+fn is_accepted_user_metadata_response(status: reqwest::StatusCode, body: &str) -> bool {
+    status.is_success()
+        || status == reqwest::StatusCode::CONFLICT
+        || is_supported_user_metadata_bad_request(status, body)
+}
+
+fn is_accepted_complete_rule_response(status: reqwest::StatusCode, body: &str) -> bool {
+    status.is_success()
+        || status == reqwest::StatusCode::CONFLICT
+        || is_supported_complete_rule_bad_request(status, body)
+}
+
 async fn send_create_or_update_user(
     client: &Client,
     config: &SnagConfig,
@@ -136,9 +182,14 @@ async fn send_create_or_update_user(
     let response = request.send().await?;
     let status = response.status();
     let response_body = response.text().await.unwrap_or_default();
-    if status.is_success() || status == reqwest::StatusCode::CONFLICT {
+    if is_accepted_user_metadata_response(status, &response_body) {
         if status == reqwest::StatusCode::CONFLICT {
             tracing::warn!("Snag user upsert returned conflict: {}", response_body);
+        } else if is_supported_user_metadata_bad_request(status, &response_body) {
+            tracing::warn!(
+                "Snag user upsert returned supported bad request response: {}",
+                response_body
+            );
         }
         return Ok(());
     }
@@ -169,10 +220,15 @@ async fn send_complete_rule(
     let response = request.send().await?;
     let status = response.status();
     let response_body = response.text().await.unwrap_or_default();
-    if status.is_success() || status == reqwest::StatusCode::CONFLICT {
+    if is_accepted_complete_rule_response(status, &response_body) {
         if status == reqwest::StatusCode::CONFLICT {
             tracing::warn!(
                 "Snag loyalty completion returned conflict: {}",
+                response_body
+            );
+        } else if is_supported_complete_rule_bad_request(status, &response_body) {
+            tracing::warn!(
+                "Snag loyalty completion returned supported bad request response: {}",
                 response_body
             );
         }
@@ -261,6 +317,46 @@ mod tests {
         assert_eq!(json["walletAddress"], "wallet");
         assert_eq!(json["emailAddress"], "user@example.com");
         assert_eq!(json["displayName"], "user@example.com");
+    }
+
+    #[test]
+    fn supports_duplicate_user_metadata_bad_request() {
+        assert!(is_supported_user_metadata_bad_request(
+            reqwest::StatusCode::BAD_REQUEST,
+            r#"{"success": false, "message": "User already exists"}"#
+        ));
+    }
+
+    #[test]
+    fn supports_already_rewarded_complete_rule_bad_request() {
+        assert!(is_supported_complete_rule_bad_request(
+            reqwest::StatusCode::BAD_REQUEST,
+            r#"{"message": "You have already been rewarded", "rewarded": true}"#
+        ));
+    }
+
+    #[test]
+    fn rejects_unknown_user_metadata_bad_request() {
+        assert!(!is_supported_user_metadata_bad_request(
+            reqwest::StatusCode::BAD_REQUEST,
+            r#"{"success": false, "message": "Something else"}"#
+        ));
+    }
+
+    #[test]
+    fn rejects_unrewarded_complete_rule_bad_request() {
+        assert!(!is_supported_complete_rule_bad_request(
+            reqwest::StatusCode::BAD_REQUEST,
+            r#"{"message": "You have already been rewarded", "rewarded": false}"#
+        ));
+    }
+
+    #[test]
+    fn accepts_complete_rule_queued_success_response() {
+        assert!(is_accepted_complete_rule_response(
+            reqwest::StatusCode::OK,
+            r#"{"message": "Completion request added to queue", "data": {}}"#
+        ));
     }
 
     #[test]
