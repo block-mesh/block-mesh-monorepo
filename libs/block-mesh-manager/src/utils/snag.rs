@@ -2,6 +2,7 @@ use anyhow::anyhow;
 use reqwest::Client;
 use serde::Serialize;
 use solana_sdk::signature::{Keypair, Signer};
+use std::env;
 use time::{Date, Month, OffsetDateTime, Time};
 use uuid::Uuid;
 
@@ -49,11 +50,58 @@ fn generated_wallet_address() -> String {
     Keypair::new().pubkey().to_string()
 }
 
+const SNAG_CUTOFF_DATE_ENV: &str = "SNAG_CUTOFF_DATE";
+const DEFAULT_SNAG_CUTOFF_DATE: &str = "2026-03-24";
+
+fn build_cutoff_date(year: i32, month: Month, day: u8) -> Option<OffsetDateTime> {
+    Date::from_calendar_date(year, month, day)
+        .ok()
+        .map(|date| date.with_time(Time::MIDNIGHT).assume_utc())
+}
+
+fn default_snag_cutoff_date() -> OffsetDateTime {
+    build_cutoff_date(2026, Month::March, 24).expect("valid default Snag cutoff date")
+}
+
+fn parse_snag_cutoff_date(raw: &str) -> Option<OffsetDateTime> {
+    let mut parts = raw.trim().split('-');
+    let year = parts.next()?.parse::<i32>().ok()?;
+    let month = Month::try_from(parts.next()?.parse::<u8>().ok()?).ok()?;
+    let day = parts.next()?.parse::<u8>().ok()?;
+    if parts.next().is_some() {
+        return None;
+    }
+
+    build_cutoff_date(year, month, day)
+}
+
 pub fn snag_cutoff_date() -> OffsetDateTime {
-    Date::from_calendar_date(2026, Month::March, 26)
-        .expect("valid Snag cutoff date")
-        .with_time(Time::MIDNIGHT)
-        .assume_utc()
+    match env::var(SNAG_CUTOFF_DATE_ENV) {
+        Ok(raw) => match parse_snag_cutoff_date(&raw) {
+            Some(date) => date,
+            None => {
+                tracing::warn!(
+                    "invalid {} value {:?}, expected YYYY-MM-DD; falling back to {}",
+                    SNAG_CUTOFF_DATE_ENV,
+                    raw,
+                    DEFAULT_SNAG_CUTOFF_DATE
+                );
+                default_snag_cutoff_date()
+            }
+        },
+        Err(_) => default_snag_cutoff_date(),
+    }
+}
+
+#[cfg(test)]
+fn resolve_snag_cutoff_date(raw: Option<&str>) -> OffsetDateTime {
+    raw.and_then(parse_snag_cutoff_date)
+        .unwrap_or_else(default_snag_cutoff_date)
+}
+
+#[cfg(test)]
+fn utc_midnight(year: i32, month: Month, day: u8) -> OffsetDateTime {
+    build_cutoff_date(year, month, day).expect("valid test date")
 }
 
 pub fn is_snag_eligible_user(created_at: OffsetDateTime) -> bool {
@@ -233,6 +281,44 @@ mod tests {
             SnagRuleKind::Wallet.external_rule_id(&config),
             "wallet-rule"
         );
+    }
+
+    #[test]
+    fn snag_cutoff_date_uses_default_when_env_is_missing() {
+        assert_eq!(
+            resolve_snag_cutoff_date(None),
+            utc_midnight(2026, Month::March, 24)
+        );
+    }
+
+    #[test]
+    fn snag_cutoff_date_parses_env_override() {
+        assert_eq!(
+            resolve_snag_cutoff_date(Some("2026-03-25")),
+            utc_midnight(2026, Month::March, 25)
+        );
+    }
+
+    #[test]
+    fn snag_cutoff_date_falls_back_to_default_when_env_is_invalid() {
+        assert_eq!(
+            resolve_snag_cutoff_date(Some("march-24-2026")),
+            utc_midnight(2026, Month::March, 24)
+        );
+    }
+
+    #[test]
+    fn users_created_on_default_snag_rollout_day_are_eligible() {
+        let created_at = utc_midnight(2026, Month::March, 24);
+
+        assert!(created_at >= resolve_snag_cutoff_date(None));
+    }
+
+    #[test]
+    fn users_created_before_default_snag_rollout_day_are_not_eligible() {
+        let created_at = utc_midnight(2026, Month::March, 23);
+
+        assert!(created_at < resolve_snag_cutoff_date(None));
     }
 
     #[test]
