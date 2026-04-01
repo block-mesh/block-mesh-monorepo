@@ -24,9 +24,8 @@ pub async fn get_pending_snag_email_reward_users(
             email,
             wallet_address
         FROM users
-        WHERE snag_email_reward_pending = TRUE
+        WHERE created_at >= $1
           AND snag_email_reward_consumed = FALSE
-          AND created_at >= $1
         ORDER BY created_at ASC
         LIMIT $2
         "#,
