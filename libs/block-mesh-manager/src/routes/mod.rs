@@ -16,6 +16,7 @@ pub mod password;
 pub mod perks;
 pub mod register;
 pub mod rpc;
+pub mod snag_sync;
 pub mod tasks;
 pub mod twitter;
 pub mod uptime_report;
