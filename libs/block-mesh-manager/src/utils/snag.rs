@@ -49,6 +49,12 @@ pub enum SnagEmailRewardOutcome {
     Consumed,
 }
 
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum SnagFirstActivationOutcome {
+    Pending,
+    Consumed,
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct SnagUserMetadataRequest {
@@ -438,6 +444,22 @@ async fn resolve_snag_user(
         .map(SnagUserLookup::into_resolved))
 }
 
+async fn resolve_snag_user_by_email(
+    client: &Client,
+    config: &SnagConfig,
+    email: &str,
+) -> anyhow::Result<Option<ResolvedSnagUser>> {
+    let email_matches = find_users_by_email(client, config, email).await?;
+    if let Some(user) = email_matches.iter().find(|user| user.email_verified()) {
+        return Ok(Some(user.clone().into_resolved()));
+    }
+
+    Ok(email_matches
+        .into_iter()
+        .next()
+        .map(SnagUserLookup::into_resolved))
+}
+
 async fn send_create_or_update_user(
     client: &Client,
     config: &SnagConfig,
@@ -680,10 +702,10 @@ pub async fn sync_first_activation(
     user_id: Uuid,
     email: String,
     wallet_address: Option<String>,
-) -> anyhow::Result<()> {
-    if let Some(existing_user) = resolve_snag_user(&client, &config, user_id, &email).await? {
-        return complete_extension_rule(client, config, SnagRuleTarget::User(existing_user.id))
-            .await;
+) -> anyhow::Result<SnagFirstActivationOutcome> {
+    if let Some(existing_user) = resolve_snag_user_by_email(&client, &config, &email).await? {
+        complete_extension_rule(client, config, SnagRuleTarget::User(existing_user.id)).await?;
+        return Ok(SnagFirstActivationOutcome::Consumed);
     }
 
     let wallet_address = wallet_address.unwrap_or_else(generated_wallet_address);
@@ -695,7 +717,7 @@ pub async fn sync_first_activation(
         wallet_address.clone(),
     )
     .await?;
-    complete_extension_rule(client, config, SnagRuleTarget::Wallet(wallet_address)).await
+    Ok(SnagFirstActivationOutcome::Pending)
 }
 
 #[cfg(test)]
@@ -976,7 +998,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn sync_first_activation_creates_placeholder_user_when_missing() {
+    async fn sync_first_activation_creates_placeholder_user_when_missing_and_leaves_pending() {
         let server = MockServer::start().await;
         let config = test_config(&server);
         let client = Client::new();
@@ -989,30 +1011,14 @@ mod tests {
             json!({"data": [], "hasNextPage": false}),
         )
         .await;
-        mount_external_lookup(
-            &server,
-            &config,
-            user_id,
-            json!({"data": [], "hasNextPage": false}),
-        )
-        .await;
         Mock::given(method("POST"))
             .and(path("/api/users/metadatas"))
             .and(header("x-api-key", "api-key"))
             .respond_with(ResponseTemplate::new(200).set_body_json(json!({"id": "ok"})))
             .mount(&server)
             .await;
-        Mock::given(method("POST"))
-            .and(path("/api/loyalty/rules/extension-rule/complete"))
-            .and(header("x-api-key", "api-key"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
-                "message": "Completion request added to queue",
-                "data": {}
-            })))
-            .mount(&server)
-            .await;
 
-        sync_first_activation(
+        let outcome = sync_first_activation(
             client,
             config.clone(),
             user_id,
@@ -1021,9 +1027,10 @@ mod tests {
         )
         .await
         .unwrap();
+        assert_eq!(outcome, SnagFirstActivationOutcome::Pending);
 
         let requests = server.received_requests().await.unwrap();
-        assert_eq!(requests.len(), 4);
+        assert_eq!(requests.len(), 2);
 
         let metadata_request = requests
             .iter()
@@ -1037,39 +1044,28 @@ mod tests {
             metadata_body["userGroupExternalIdentifier"],
             format!("bm-user-group:{user_id}")
         );
-
-        let complete_request = requests
+        assert!(!requests
             .iter()
-            .find(|request| request.url.path() == "/api/loyalty/rules/extension-rule/complete")
-            .unwrap();
-        let complete_body = request_body_json(&complete_request.body);
-        assert_eq!(complete_body["walletAddress"], created_wallet);
+            .any(|request| request.url.path() == "/api/loyalty/rules/extension-rule/complete"));
     }
 
     #[tokio::test]
-    async fn sync_first_activation_reuses_existing_snag_wallet() {
+    async fn sync_first_activation_completes_rule_for_existing_email_user() {
         let server = MockServer::start().await;
         let config = test_config(&server);
         let client = Client::new();
         let user_id = Uuid::from_u128(42);
-        let placeholder_wallet = "placeholder-wallet";
+        let snag_user_id = Uuid::from_u128(10);
 
         mount_email_lookup(
             &server,
             &config,
             "user@example.com",
-            json!({"data": [], "hasNextPage": false}),
-        )
-        .await;
-        mount_external_lookup(
-            &server,
-            &config,
-            user_id,
             json!({
                 "data": [
                     {
-                        "id": Uuid::from_u128(10),
-                        "walletAddress": placeholder_wallet
+                        "id": snag_user_id,
+                        "walletAddress": "wallet-a"
                     }
                 ],
                 "hasNextPage": false
@@ -1085,7 +1081,7 @@ mod tests {
             .mount(&server)
             .await;
 
-        sync_first_activation(
+        let outcome = sync_first_activation(
             client,
             config,
             user_id,
@@ -1094,9 +1090,10 @@ mod tests {
         )
         .await
         .unwrap();
+        assert_eq!(outcome, SnagFirstActivationOutcome::Consumed);
 
         let requests = server.received_requests().await.unwrap();
-        assert_eq!(requests.len(), 3);
+        assert_eq!(requests.len(), 2);
         assert!(!requests
             .iter()
             .any(|request| request.url.path() == "/api/users/metadatas"));
@@ -1106,7 +1103,7 @@ mod tests {
             .find(|request| request.url.path() == "/api/loyalty/rules/extension-rule/complete")
             .unwrap();
         let complete_body = request_body_json(&complete_request.body);
-        assert_eq!(complete_body["userId"], Uuid::from_u128(10).to_string());
+        assert_eq!(complete_body["userId"], snag_user_id.to_string());
         assert!(complete_body.get("walletAddress").is_none());
     }
 

@@ -12,7 +12,7 @@ use crate::database::user::update_snag_email_reward_state::update_snag_email_rew
 use crate::database::user::update_wallet_connected_sent::update_wallet_connected_sent;
 use crate::utils::snag::{
     sync_connected_wallet, sync_first_activation, sync_registered_email_reward, SnagConfig,
-    SnagEmailRewardOutcome, SnagWalletVerification,
+    SnagEmailRewardOutcome, SnagFirstActivationOutcome, SnagWalletVerification,
 };
 use anyhow::Context;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
@@ -101,7 +101,7 @@ async fn retry_pending_snag_sync_for_user(
     pool: &PgPool,
     user: &ExtensionActivatedNotSentUser,
 ) -> anyhow::Result<()> {
-    sync_first_activation(
+    let outcome = sync_first_activation(
         client.clone(),
         snag.clone(),
         user.user_id,
@@ -110,7 +110,9 @@ async fn retry_pending_snag_sync_for_user(
     )
     .await
     .with_context(|| format!("failed to sync first activation for {}", user.user_id))?;
-    mark_extension_activated_sent(pool, user).await?;
+    if outcome == SnagFirstActivationOutcome::Consumed {
+        mark_extension_activated_sent(pool, user).await?;
+    }
     Ok(())
 }
 

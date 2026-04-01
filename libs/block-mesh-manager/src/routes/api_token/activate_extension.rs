@@ -2,7 +2,9 @@ use crate::database::user::update_extension_activated::update_extension_activate
 use crate::database::user::update_extension_activated_sent::update_extension_activated_sent;
 use crate::errors::error::Error;
 use crate::startup::application::AppState;
-use crate::utils::snag::{is_snag_eligible_user, sync_first_activation};
+use crate::utils::snag::{
+    is_snag_eligible_user, sync_first_activation, SnagFirstActivationOutcome,
+};
 use axum::extract::State;
 use axum::response::IntoResponse;
 use axum::{Extension, Json};
@@ -74,7 +76,7 @@ pub async fn handler(
         let wallet_address = user_and_api_token.wallet_address.clone();
         tokio::spawn(async move {
             match sync_first_activation(client, snag, user_id, user_email, wallet_address).await {
-                Ok(()) => {
+                Ok(SnagFirstActivationOutcome::Consumed) => {
                     if let Ok(mut tx) = create_txn(&pool).await {
                         if let Err(error) =
                             update_extension_activated_sent(&mut tx, &user_id, true).await
@@ -89,6 +91,7 @@ pub async fn handler(
                         }
                     }
                 }
+                Ok(SnagFirstActivationOutcome::Pending) => {}
                 Err(error) => {
                     tracing::warn!("failed to sync first activation to Snag: {error}");
                 }
