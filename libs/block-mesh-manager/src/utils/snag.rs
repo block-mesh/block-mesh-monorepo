@@ -10,6 +10,7 @@ use uuid::Uuid;
 pub struct SnagConfig {
     pub base_url: String,
     pub api_key: String,
+    pub external_rule_email_registered: String,
     pub external_rule_extension: String,
     pub external_rule_wallet: String,
     pub external_rule_mobile: String,
@@ -42,6 +43,12 @@ impl SnagWalletVerification {
     }
 }
 
+#[derive(Copy, Clone, Debug, Eq, PartialEq)]
+pub enum SnagEmailRewardOutcome {
+    Pending,
+    Consumed,
+}
+
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct SnagUserMetadataRequest {
@@ -56,7 +63,10 @@ struct SnagUserMetadataRequest {
 #[derive(Serialize)]
 #[serde(rename_all = "camelCase")]
 struct SnagRuleCompleteRequest {
-    wallet_address: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    wallet_address: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    user_id: Option<Uuid>,
 }
 
 #[derive(Serialize)]
@@ -100,6 +110,12 @@ struct SnagUserLookup {
     id: Uuid,
     #[serde(default)]
     wallet_address: Option<String>,
+    #[serde(default)]
+    email_address: Option<String>,
+    #[serde(default)]
+    email_verified_at: Option<String>,
+    #[serde(default)]
+    user_metadata: Vec<SnagUserMetadataLookup>,
 }
 
 #[derive(Deserialize)]
@@ -108,8 +124,25 @@ struct SnagRuleCompleteResponse {
     rewarded: Option<bool>,
 }
 
+#[derive(Clone, Debug, Deserialize, Eq, PartialEq)]
+#[serde(rename_all = "camelCase")]
+struct SnagUserMetadataLookup {
+    #[serde(default)]
+    email_address: Option<String>,
+    #[serde(default)]
+    email_verified_at: Option<String>,
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+struct ResolvedSnagUser {
+    id: Uuid,
+    wallet_address: Option<String>,
+    email_verified: bool,
+}
+
 #[derive(Copy, Clone, Debug, Eq, PartialEq)]
 enum SnagRuleKind {
+    EmailRegistered,
     Extension,
     Wallet,
 }
@@ -117,10 +150,17 @@ enum SnagRuleKind {
 impl SnagRuleKind {
     fn external_rule_id(self, config: &SnagConfig) -> &str {
         match self {
+            Self::EmailRegistered => &config.external_rule_email_registered,
             Self::Extension => &config.external_rule_extension,
             Self::Wallet => &config.external_rule_wallet,
         }
     }
+}
+
+#[derive(Clone, Debug, Eq, PartialEq)]
+enum SnagRuleTarget {
+    Wallet(String),
+    User(Uuid),
 }
 
 fn generated_wallet_address() -> String {
@@ -229,6 +269,35 @@ fn build_connect_user_request(
     }
 }
 
+impl SnagUserLookup {
+    fn email_verified(&self) -> bool {
+        self.email_verified_at.is_some()
+            || self
+                .user_metadata
+                .iter()
+                .any(|metadata| metadata.email_verified_at.is_some())
+    }
+
+    fn into_resolved(self) -> ResolvedSnagUser {
+        let email_verified = self.email_verified();
+        ResolvedSnagUser {
+            id: self.id,
+            wallet_address: self.wallet_address,
+            email_verified,
+        }
+    }
+}
+
+fn canonical_wallet_address(
+    resolved_user: Option<&ResolvedSnagUser>,
+    wallet_address: Option<String>,
+) -> String {
+    resolved_user
+        .and_then(|user| user.wallet_address.clone())
+        .or(wallet_address)
+        .unwrap_or_else(generated_wallet_address)
+}
+
 fn is_supported_user_metadata_bad_request(status: reqwest::StatusCode, body: &str) -> bool {
     if status != reqwest::StatusCode::BAD_REQUEST {
         return false;
@@ -265,6 +334,43 @@ fn is_accepted_complete_rule_response(status: reqwest::StatusCode, body: &str) -
 
 fn is_accepted_connect_user_response(status: reqwest::StatusCode) -> bool {
     status.is_success() || status == reqwest::StatusCode::CONFLICT
+}
+
+async fn find_users_by_email(
+    client: &Client,
+    config: &SnagConfig,
+    email: &str,
+) -> anyhow::Result<Vec<SnagUserLookup>> {
+    let response = client
+        .get(format!("{}/api/users", config.base_url))
+        .header("X-API-KEY", &config.api_key)
+        .query(&[
+            ("emailAddress", email),
+            ("websiteId", config.website_id.as_str()),
+            ("organizationId", config.organization_id.as_str()),
+            ("limit", "20"),
+        ])
+        .send()
+        .await?;
+    let status = response.status();
+    let response_body = response.text().await.unwrap_or_default();
+    if !status.is_success() {
+        return Err(anyhow!(
+            "Snag email lookup failed with status {}: {}",
+            status,
+            response_body
+        ));
+    }
+
+    serde_json::from_str::<SnagUsersResponse>(&response_body)
+        .map(|response| response.data)
+        .map_err(|error| {
+            anyhow!(
+                "failed to parse Snag email lookup response: {}; body: {}",
+                error,
+                response_body
+            )
+        })
 }
 
 async fn find_user_by_external_identifier(
@@ -311,6 +417,25 @@ async fn find_user_by_external_identifier(
             count
         )),
     }
+}
+
+async fn resolve_snag_user(
+    client: &Client,
+    config: &SnagConfig,
+    user_id: Uuid,
+    email: &str,
+) -> anyhow::Result<Option<ResolvedSnagUser>> {
+    let email_matches = find_users_by_email(client, config, email).await?;
+    if let Some(user) = email_matches.iter().find(|user| user.email_verified()) {
+        return Ok(Some(user.clone().into_resolved()));
+    }
+    if let Some(user) = email_matches.into_iter().next() {
+        return Ok(Some(user.into_resolved()));
+    }
+
+    Ok(find_user_by_external_identifier(client, config, user_id)
+        .await?
+        .map(SnagUserLookup::into_resolved))
 }
 
 async fn send_create_or_update_user(
@@ -384,7 +509,7 @@ async fn send_complete_rule(
     client: &Client,
     config: &SnagConfig,
     rule: SnagRuleKind,
-    wallet_address: &str,
+    target: SnagRuleTarget,
 ) -> anyhow::Result<()> {
     let request = client
         .post(format!(
@@ -394,8 +519,15 @@ async fn send_complete_rule(
         ))
         .header("X-API-KEY", &config.api_key)
         .header("Content-Type", "application/json")
-        .json(&SnagRuleCompleteRequest {
-            wallet_address: wallet_address.to_string(),
+        .json(&match target {
+            SnagRuleTarget::Wallet(wallet_address) => SnagRuleCompleteRequest {
+                wallet_address: Some(wallet_address),
+                user_id: None,
+            },
+            SnagRuleTarget::User(user_id) => SnagRuleCompleteRequest {
+                wallet_address: None,
+                user_id: Some(user_id),
+            },
         });
     let response = request.send().await?;
     let status = response.status();
@@ -433,6 +565,50 @@ pub async fn sync_user_metadata(
     send_create_or_update_user(&client, &config, &body).await
 }
 
+#[tracing::instrument(name = "snag_sync_confirmed_email", skip(client, config))]
+pub async fn sync_confirmed_email(
+    client: Client,
+    config: SnagConfig,
+    user_id: Uuid,
+    email: String,
+    wallet_address: Option<String>,
+) -> anyhow::Result<()> {
+    let resolved_user = resolve_snag_user(&client, &config, user_id, &email).await?;
+    let wallet_address = canonical_wallet_address(resolved_user.as_ref(), wallet_address);
+
+    sync_user_metadata(client, config, user_id, email, wallet_address).await
+}
+
+#[tracing::instrument(name = "snag_sync_registered_email_reward", skip(client, config))]
+pub async fn sync_registered_email_reward(
+    client: Client,
+    config: SnagConfig,
+    user_id: Uuid,
+    email: String,
+    wallet_address: Option<String>,
+) -> anyhow::Result<SnagEmailRewardOutcome> {
+    let resolved_user = resolve_snag_user(&client, &config, user_id, &email).await?;
+
+    if let Some(resolved_user) = resolved_user {
+        if resolved_user.email_verified {
+            send_complete_rule(
+                &client,
+                &config,
+                SnagRuleKind::EmailRegistered,
+                SnagRuleTarget::User(resolved_user.id),
+            )
+            .await?;
+            return Ok(SnagEmailRewardOutcome::Consumed);
+        }
+
+        return Ok(SnagEmailRewardOutcome::Pending);
+    }
+
+    let wallet_address = wallet_address.unwrap_or_else(generated_wallet_address);
+    sync_user_metadata(client, config, user_id, email, wallet_address).await?;
+    Ok(SnagEmailRewardOutcome::Pending)
+}
+
 #[tracing::instrument(
     name = "snag_sync_connected_wallet",
     skip(client, config, wallet_address, verification)
@@ -445,9 +621,13 @@ pub async fn sync_connected_wallet(
     wallet_address: String,
     verification: SnagWalletVerification,
 ) -> anyhow::Result<()> {
-    match find_user_by_external_identifier(&client, &config, user_id).await? {
+    let resolved_user = resolve_snag_user(&client, &config, user_id, &email).await?;
+    let target = match resolved_user {
         Some(existing_user)
-            if existing_user.wallet_address.as_deref() == Some(wallet_address.as_str()) => {}
+            if existing_user.wallet_address.as_deref() == Some(wallet_address.as_str()) =>
+        {
+            SnagRuleTarget::User(existing_user.id)
+        }
         Some(existing_user) => {
             send_connect_user(
                 &client,
@@ -457,6 +637,7 @@ pub async fn sync_connected_wallet(
                 verification,
             )
             .await?;
+            SnagRuleTarget::User(existing_user.id)
         }
         None => {
             sync_user_metadata(
@@ -467,34 +648,29 @@ pub async fn sync_connected_wallet(
                 wallet_address.clone(),
             )
             .await?;
+            SnagRuleTarget::Wallet(wallet_address.clone())
         }
-    }
+    };
 
-    complete_wallet_rule(client, config, wallet_address).await
+    complete_wallet_rule(client, config, target).await
 }
 
-#[tracing::instrument(
-    name = "snag_complete_extension_rule",
-    skip(client, config, wallet_address)
-)]
-pub async fn complete_extension_rule(
+#[tracing::instrument(name = "snag_complete_extension_rule", skip(client, config, target))]
+async fn complete_extension_rule(
     client: Client,
     config: SnagConfig,
-    wallet_address: String,
+    target: SnagRuleTarget,
 ) -> anyhow::Result<()> {
-    send_complete_rule(&client, &config, SnagRuleKind::Extension, &wallet_address).await
+    send_complete_rule(&client, &config, SnagRuleKind::Extension, target).await
 }
 
-#[tracing::instrument(
-    name = "snag_complete_wallet_rule",
-    skip(client, config, wallet_address)
-)]
-pub async fn complete_wallet_rule(
+#[tracing::instrument(name = "snag_complete_wallet_rule", skip(client, config, target))]
+async fn complete_wallet_rule(
     client: Client,
     config: SnagConfig,
-    wallet_address: String,
+    target: SnagRuleTarget,
 ) -> anyhow::Result<()> {
-    send_complete_rule(&client, &config, SnagRuleKind::Wallet, &wallet_address).await
+    send_complete_rule(&client, &config, SnagRuleKind::Wallet, target).await
 }
 
 #[tracing::instrument(name = "snag_sync_first_activation", skip(client, config))]
@@ -505,15 +681,9 @@ pub async fn sync_first_activation(
     email: String,
     wallet_address: Option<String>,
 ) -> anyhow::Result<()> {
-    if let Some(existing_user) = find_user_by_external_identifier(&client, &config, user_id).await?
-    {
-        let wallet_address = existing_user.wallet_address.ok_or_else(|| {
-            anyhow!(
-                "Snag user {} is missing a wallet address for extension sync",
-                existing_user.id
-            )
-        })?;
-        return complete_extension_rule(client, config, wallet_address).await;
+    if let Some(existing_user) = resolve_snag_user(&client, &config, user_id, &email).await? {
+        return complete_extension_rule(client, config, SnagRuleTarget::User(existing_user.id))
+            .await;
     }
 
     let wallet_address = wallet_address.unwrap_or_else(generated_wallet_address);
@@ -525,7 +695,7 @@ pub async fn sync_first_activation(
         wallet_address.clone(),
     )
     .await?;
-    complete_extension_rule(client, config, wallet_address).await
+    complete_extension_rule(client, config, SnagRuleTarget::Wallet(wallet_address)).await
 }
 
 #[cfg(test)]
@@ -539,6 +709,7 @@ mod tests {
         SnagConfig {
             base_url: server.uri(),
             api_key: "api-key".to_string(),
+            external_rule_email_registered: "email-registered-rule".to_string(),
             external_rule_extension: "extension-rule".to_string(),
             external_rule_wallet: "wallet-rule".to_string(),
             external_rule_mobile: "mobile-rule".to_string(),
@@ -549,6 +720,46 @@ mod tests {
 
     fn request_body_json(body: &[u8]) -> Value {
         serde_json::from_slice(body).unwrap()
+    }
+
+    async fn mount_email_lookup(
+        server: &MockServer,
+        config: &SnagConfig,
+        email: &str,
+        body: Value,
+    ) {
+        Mock::given(method("GET"))
+            .and(path("/api/users"))
+            .and(query_param("emailAddress", email))
+            .and(query_param("websiteId", config.website_id.clone()))
+            .and(query_param(
+                "organizationId",
+                config.organization_id.clone(),
+            ))
+            .and(query_param("limit", "20"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(body))
+            .mount(server)
+            .await;
+    }
+
+    async fn mount_external_lookup(
+        server: &MockServer,
+        config: &SnagConfig,
+        user_id: Uuid,
+        body: Value,
+    ) {
+        Mock::given(method("GET"))
+            .and(path("/api/users"))
+            .and(query_param("externalIdentifier", user_id.to_string()))
+            .and(query_param("websiteId", config.website_id.clone()))
+            .and(query_param(
+                "organizationId",
+                config.organization_id.clone(),
+            ))
+            .and(query_param("limit", "2"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(body))
+            .mount(server)
+            .await;
     }
 
     #[test]
@@ -576,6 +787,7 @@ mod tests {
         let config = SnagConfig {
             base_url: "https://snag.example.com".to_string(),
             api_key: "api-key".to_string(),
+            external_rule_email_registered: "email-registered-rule".to_string(),
             external_rule_extension: "extension-rule".to_string(),
             external_rule_wallet: "wallet-rule".to_string(),
             external_rule_mobile: "mobile-rule".to_string(),
@@ -599,6 +811,18 @@ mod tests {
         assert_eq!(json["verificationData"]["verifiedLocally"], true);
         assert!(json["verificationData"].get("message").is_none());
         assert!(json["verificationData"].get("signature").is_none());
+    }
+
+    #[test]
+    fn serializes_complete_rule_payload_with_user_id() {
+        let payload = SnagRuleCompleteRequest {
+            wallet_address: None,
+            user_id: Some(Uuid::nil()),
+        };
+
+        let json = serde_json::to_value(payload).unwrap();
+        assert_eq!(json["userId"], Uuid::nil().to_string());
+        assert!(json.get("walletAddress").is_none());
     }
 
     #[test]
@@ -646,6 +870,7 @@ mod tests {
         let config = SnagConfig {
             base_url: "https://snag.example.com".to_string(),
             api_key: "api-key".to_string(),
+            external_rule_email_registered: "email-registered-rule".to_string(),
             external_rule_extension: "extension-rule".to_string(),
             external_rule_wallet: "wallet-rule".to_string(),
             external_rule_mobile: "mobile-rule".to_string(),
@@ -653,6 +878,10 @@ mod tests {
             organization_id: "organization-id".to_string(),
         };
 
+        assert_eq!(
+            SnagRuleKind::EmailRegistered.external_rule_id(&config),
+            "email-registered-rule"
+        );
         assert_eq!(
             SnagRuleKind::Extension.external_rule_id(&config),
             "extension-rule"
@@ -753,20 +982,20 @@ mod tests {
         let client = Client::new();
         let user_id = Uuid::from_u128(42);
 
-        Mock::given(method("GET"))
-            .and(path("/api/users"))
-            .and(query_param("externalIdentifier", user_id.to_string()))
-            .and(query_param("websiteId", config.website_id.clone()))
-            .and(query_param(
-                "organizationId",
-                config.organization_id.clone(),
-            ))
-            .and(query_param("limit", "2"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_json(json!({"data": [], "hasNextPage": false})),
-            )
-            .mount(&server)
-            .await;
+        mount_email_lookup(
+            &server,
+            &config,
+            "user@example.com",
+            json!({"data": [], "hasNextPage": false}),
+        )
+        .await;
+        mount_external_lookup(
+            &server,
+            &config,
+            user_id,
+            json!({"data": [], "hasNextPage": false}),
+        )
+        .await;
         Mock::given(method("POST"))
             .and(path("/api/users/metadatas"))
             .and(header("x-api-key", "api-key"))
@@ -794,7 +1023,7 @@ mod tests {
         .unwrap();
 
         let requests = server.received_requests().await.unwrap();
-        assert_eq!(requests.len(), 3);
+        assert_eq!(requests.len(), 4);
 
         let metadata_request = requests
             .iter()
@@ -825,16 +1054,18 @@ mod tests {
         let user_id = Uuid::from_u128(42);
         let placeholder_wallet = "placeholder-wallet";
 
-        Mock::given(method("GET"))
-            .and(path("/api/users"))
-            .and(query_param("externalIdentifier", user_id.to_string()))
-            .and(query_param("websiteId", config.website_id.clone()))
-            .and(query_param(
-                "organizationId",
-                config.organization_id.clone(),
-            ))
-            .and(query_param("limit", "2"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+        mount_email_lookup(
+            &server,
+            &config,
+            "user@example.com",
+            json!({"data": [], "hasNextPage": false}),
+        )
+        .await;
+        mount_external_lookup(
+            &server,
+            &config,
+            user_id,
+            json!({
                 "data": [
                     {
                         "id": Uuid::from_u128(10),
@@ -842,9 +1073,9 @@ mod tests {
                     }
                 ],
                 "hasNextPage": false
-            })))
-            .mount(&server)
-            .await;
+            }),
+        )
+        .await;
         Mock::given(method("POST"))
             .and(path("/api/loyalty/rules/extension-rule/complete"))
             .respond_with(ResponseTemplate::new(200).set_body_json(json!({
@@ -865,7 +1096,7 @@ mod tests {
         .unwrap();
 
         let requests = server.received_requests().await.unwrap();
-        assert_eq!(requests.len(), 2);
+        assert_eq!(requests.len(), 3);
         assert!(!requests
             .iter()
             .any(|request| request.url.path() == "/api/users/metadatas"));
@@ -875,7 +1106,220 @@ mod tests {
             .find(|request| request.url.path() == "/api/loyalty/rules/extension-rule/complete")
             .unwrap();
         let complete_body = request_body_json(&complete_request.body);
-        assert_eq!(complete_body["walletAddress"], placeholder_wallet);
+        assert_eq!(complete_body["userId"], Uuid::from_u128(10).to_string());
+        assert!(complete_body.get("walletAddress").is_none());
+    }
+
+    #[tokio::test]
+    async fn sync_confirmed_email_creates_placeholder_user_when_missing() {
+        let server = MockServer::start().await;
+        let config = test_config(&server);
+        let client = Client::new();
+        let user_id = Uuid::from_u128(52);
+
+        mount_email_lookup(
+            &server,
+            &config,
+            "user@example.com",
+            json!({"data": [], "hasNextPage": false}),
+        )
+        .await;
+        mount_external_lookup(
+            &server,
+            &config,
+            user_id,
+            json!({"data": [], "hasNextPage": false}),
+        )
+        .await;
+        Mock::given(method("POST"))
+            .and(path("/api/users/metadatas"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"id": "ok"})))
+            .mount(&server)
+            .await;
+
+        sync_confirmed_email(
+            client,
+            config,
+            user_id,
+            "user@example.com".to_string(),
+            None,
+        )
+        .await
+        .unwrap();
+
+        let requests = server.received_requests().await.unwrap();
+        assert_eq!(requests.len(), 3);
+        let metadata_request = requests
+            .iter()
+            .find(|request| request.url.path() == "/api/users/metadatas")
+            .unwrap();
+        let metadata_body = request_body_json(&metadata_request.body);
+        assert_eq!(metadata_body["externalIdentifier"], user_id.to_string());
+        assert_eq!(metadata_body["emailAddress"], "user@example.com");
+        assert!(!metadata_body["walletAddress"]
+            .as_str()
+            .unwrap_or_default()
+            .is_empty());
+    }
+
+    #[tokio::test]
+    async fn sync_confirmed_email_reuses_existing_snag_wallet() {
+        let server = MockServer::start().await;
+        let config = test_config(&server);
+        let client = Client::new();
+        let user_id = Uuid::from_u128(62);
+        let placeholder_wallet = "placeholder-wallet";
+
+        mount_email_lookup(
+            &server,
+            &config,
+            "user@example.com",
+            json!({"data": [], "hasNextPage": false}),
+        )
+        .await;
+        mount_external_lookup(
+            &server,
+            &config,
+            user_id,
+            json!({
+                "data": [
+                    {
+                        "id": Uuid::from_u128(12),
+                        "walletAddress": placeholder_wallet
+                    }
+                ],
+                "hasNextPage": false
+            }),
+        )
+        .await;
+        Mock::given(method("POST"))
+            .and(path("/api/users/metadatas"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"id": "ok"})))
+            .mount(&server)
+            .await;
+
+        sync_confirmed_email(
+            client,
+            config,
+            user_id,
+            "user@example.com".to_string(),
+            Some("real-wallet".to_string()),
+        )
+        .await
+        .unwrap();
+
+        let requests = server.received_requests().await.unwrap();
+        assert_eq!(requests.len(), 3);
+        let metadata_request = requests
+            .iter()
+            .find(|request| request.url.path() == "/api/users/metadatas")
+            .unwrap();
+        let metadata_body = request_body_json(&metadata_request.body);
+        assert_eq!(metadata_body["walletAddress"], placeholder_wallet);
+    }
+
+    #[tokio::test]
+    async fn sync_registered_email_reward_completes_with_first_verified_email_match() {
+        let server = MockServer::start().await;
+        let config = test_config(&server);
+        let client = Client::new();
+        let user_id = Uuid::from_u128(72);
+        let verified_user_id = Uuid::from_u128(73);
+
+        mount_email_lookup(
+            &server,
+            &config,
+            "user@example.com",
+            json!({
+                "data": [
+                    {
+                        "id": Uuid::from_u128(71),
+                        "emailVerifiedAt": null
+                    },
+                    {
+                        "id": verified_user_id,
+                        "emailVerifiedAt": "2026-03-25T00:00:00Z"
+                    }
+                ],
+                "hasNextPage": false
+            }),
+        )
+        .await;
+        Mock::given(method("POST"))
+            .and(path("/api/loyalty/rules/email-registered-rule/complete"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+                "message": "Completion request added to queue",
+                "data": {}
+            })))
+            .mount(&server)
+            .await;
+
+        let outcome = sync_registered_email_reward(
+            client,
+            config,
+            user_id,
+            "user@example.com".to_string(),
+            None,
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(outcome, SnagEmailRewardOutcome::Consumed);
+        let requests = server.received_requests().await.unwrap();
+        assert_eq!(requests.len(), 2);
+        let complete_request = requests
+            .iter()
+            .find(|request| {
+                request.url.path() == "/api/loyalty/rules/email-registered-rule/complete"
+            })
+            .unwrap();
+        let complete_body = request_body_json(&complete_request.body);
+        assert_eq!(complete_body["userId"], verified_user_id.to_string());
+    }
+
+    #[tokio::test]
+    async fn sync_registered_email_reward_creates_metadata_and_stays_pending_when_missing() {
+        let server = MockServer::start().await;
+        let config = test_config(&server);
+        let client = Client::new();
+        let user_id = Uuid::from_u128(82);
+
+        mount_email_lookup(
+            &server,
+            &config,
+            "user@example.com",
+            json!({"data": [], "hasNextPage": false}),
+        )
+        .await;
+        mount_external_lookup(
+            &server,
+            &config,
+            user_id,
+            json!({"data": [], "hasNextPage": false}),
+        )
+        .await;
+        Mock::given(method("POST"))
+            .and(path("/api/users/metadatas"))
+            .respond_with(ResponseTemplate::new(200).set_body_json(json!({"id": "ok"})))
+            .mount(&server)
+            .await;
+
+        let outcome = sync_registered_email_reward(
+            client,
+            config,
+            user_id,
+            "user@example.com".to_string(),
+            None,
+        )
+        .await
+        .unwrap();
+
+        assert_eq!(outcome, SnagEmailRewardOutcome::Pending);
+        let requests = server.received_requests().await.unwrap();
+        assert_eq!(requests.len(), 3);
+        assert!(!requests.iter().any(|request| {
+            request.url.path() == "/api/loyalty/rules/email-registered-rule/complete"
+        }));
     }
 
     #[tokio::test]
@@ -886,20 +1330,20 @@ mod tests {
         let user_id = Uuid::from_u128(42);
         let wallet_address = "real-wallet";
 
-        Mock::given(method("GET"))
-            .and(path("/api/users"))
-            .and(query_param("externalIdentifier", user_id.to_string()))
-            .and(query_param("websiteId", config.website_id.clone()))
-            .and(query_param(
-                "organizationId",
-                config.organization_id.clone(),
-            ))
-            .and(query_param("limit", "2"))
-            .respond_with(
-                ResponseTemplate::new(200).set_body_json(json!({"data": [], "hasNextPage": false})),
-            )
-            .mount(&server)
-            .await;
+        mount_email_lookup(
+            &server,
+            &config,
+            "user@example.com",
+            json!({"data": [], "hasNextPage": false}),
+        )
+        .await;
+        mount_external_lookup(
+            &server,
+            &config,
+            user_id,
+            json!({"data": [], "hasNextPage": false}),
+        )
+        .await;
         Mock::given(method("POST"))
             .and(path("/api/users/metadatas"))
             .respond_with(ResponseTemplate::new(200).set_body_json(json!({"id": "ok"})))
@@ -926,7 +1370,7 @@ mod tests {
         .unwrap();
 
         let requests = server.received_requests().await.unwrap();
-        assert_eq!(requests.len(), 3);
+        assert_eq!(requests.len(), 4);
         assert!(!requests
             .iter()
             .any(|request| request.url.path() == "/api/users/connect"));
@@ -942,6 +1386,13 @@ mod tests {
             metadata_body["userGroupExternalIdentifier"],
             format!("bm-user-group:{user_id}")
         );
+
+        let complete_request = requests
+            .iter()
+            .find(|request| request.url.path() == "/api/loyalty/rules/wallet-rule/complete")
+            .unwrap();
+        let complete_body = request_body_json(&complete_request.body);
+        assert_eq!(complete_body["walletAddress"], wallet_address);
     }
 
     #[tokio::test]
@@ -953,16 +1404,18 @@ mod tests {
         let existing_user_id = Uuid::from_u128(77);
         let wallet_address = "real-wallet";
 
-        Mock::given(method("GET"))
-            .and(path("/api/users"))
-            .and(query_param("externalIdentifier", user_id.to_string()))
-            .and(query_param("websiteId", config.website_id.clone()))
-            .and(query_param(
-                "organizationId",
-                config.organization_id.clone(),
-            ))
-            .and(query_param("limit", "2"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+        mount_email_lookup(
+            &server,
+            &config,
+            "user@example.com",
+            json!({"data": [], "hasNextPage": false}),
+        )
+        .await;
+        mount_external_lookup(
+            &server,
+            &config,
+            user_id,
+            json!({
                 "data": [
                     {
                         "id": existing_user_id,
@@ -970,9 +1423,9 @@ mod tests {
                     }
                 ],
                 "hasNextPage": false
-            })))
-            .mount(&server)
-            .await;
+            }),
+        )
+        .await;
         Mock::given(method("POST"))
             .and(path("/api/users/connect"))
             .respond_with(ResponseTemplate::new(200).set_body_json(json!({
@@ -1007,7 +1460,7 @@ mod tests {
         .unwrap();
 
         let requests = server.received_requests().await.unwrap();
-        assert_eq!(requests.len(), 3);
+        assert_eq!(requests.len(), 4);
         assert!(!requests
             .iter()
             .any(|request| request.url.path() == "/api/users/metadatas"));
@@ -1032,6 +1485,14 @@ mod tests {
             "signed-signature"
         );
         assert_eq!(connect_body["verificationData"]["verifiedLocally"], true);
+
+        let complete_request = requests
+            .iter()
+            .find(|request| request.url.path() == "/api/loyalty/rules/wallet-rule/complete")
+            .unwrap();
+        let complete_body = request_body_json(&complete_request.body);
+        assert_eq!(complete_body["userId"], existing_user_id.to_string());
+        assert!(complete_body.get("walletAddress").is_none());
     }
 
     #[tokio::test]
@@ -1042,16 +1503,18 @@ mod tests {
         let user_id = Uuid::from_u128(42);
         let wallet_address = "real-wallet";
 
-        Mock::given(method("GET"))
-            .and(path("/api/users"))
-            .and(query_param("externalIdentifier", user_id.to_string()))
-            .and(query_param("websiteId", config.website_id.clone()))
-            .and(query_param(
-                "organizationId",
-                config.organization_id.clone(),
-            ))
-            .and(query_param("limit", "2"))
-            .respond_with(ResponseTemplate::new(200).set_body_json(json!({
+        mount_email_lookup(
+            &server,
+            &config,
+            "user@example.com",
+            json!({"data": [], "hasNextPage": false}),
+        )
+        .await;
+        mount_external_lookup(
+            &server,
+            &config,
+            user_id,
+            json!({
                 "data": [
                     {
                         "id": Uuid::from_u128(77),
@@ -1059,9 +1522,9 @@ mod tests {
                     }
                 ],
                 "hasNextPage": false
-            })))
-            .mount(&server)
-            .await;
+            }),
+        )
+        .await;
         Mock::given(method("POST"))
             .and(path("/api/loyalty/rules/wallet-rule/complete"))
             .respond_with(ResponseTemplate::new(200).set_body_json(json!({
@@ -1083,12 +1546,20 @@ mod tests {
         .unwrap();
 
         let requests = server.received_requests().await.unwrap();
-        assert_eq!(requests.len(), 2);
+        assert_eq!(requests.len(), 3);
         assert!(!requests
             .iter()
             .any(|request| request.url.path() == "/api/users/connect"));
         assert!(!requests
             .iter()
             .any(|request| request.url.path() == "/api/users/metadatas"));
+
+        let complete_request = requests
+            .iter()
+            .find(|request| request.url.path() == "/api/loyalty/rules/wallet-rule/complete")
+            .unwrap();
+        let complete_body = request_body_json(&complete_request.body);
+        assert_eq!(complete_body["userId"], Uuid::from_u128(77).to_string());
+        assert!(complete_body.get("walletAddress").is_none());
     }
 }
