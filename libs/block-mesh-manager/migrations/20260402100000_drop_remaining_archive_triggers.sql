@@ -1,0 +1,17 @@
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_proxy_masters ON proxy_masters;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_users ON users;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_nonces ON nonces;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_tasks ON tasks;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_daily_stats ON daily_stats;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_api_tokens ON api_tokens;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_invite_codes ON invite_codes;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_uptime_reports ON invite_codes;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_uptime_reports ON uptime_reports;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_bandwidth_reports ON bandwidth_reports;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_aggregates ON aggregates;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_rpcs ON rpcs;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_perks ON perks;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_users_ip ON users_ip;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_ip_addresses ON ip_addresses;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_analytics ON analytics;
+DROP TRIGGER IF EXISTS trg_make_archive_of_changes_for_call_to_action ON call_to_actions;
