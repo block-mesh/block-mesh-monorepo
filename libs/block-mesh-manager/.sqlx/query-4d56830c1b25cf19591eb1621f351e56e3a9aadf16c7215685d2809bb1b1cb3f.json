@@ -1,0 +1,35 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            id AS user_id,\n            email,\n            wallet_address\n        FROM users\n        WHERE snag_email_reward_pending = TRUE\n          AND snag_email_reward_consumed = FALSE\n          AND created_at >= $1\n        ORDER BY created_at ASC\n        LIMIT $2\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "email",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 2,
+        "name": "wallet_address",
+        "type_info": "Text"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Timestamptz",
+        "Int8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      true
+    ]
+  },
+  "hash": "4d56830c1b25cf19591eb1621f351e56e3a9aadf16c7215685d2809bb1b1cb3f"
+}
