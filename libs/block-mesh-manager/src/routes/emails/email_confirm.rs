@@ -1,13 +1,18 @@
 use crate::database::nonce::get_nonce_by_nonce::get_nonce_by_nonce;
 use crate::database::nonce::update_nonce::update_nonce;
 use crate::database::spam_email::get_spam_emails::get_spam_emails_cache;
+use crate::database::user::get_snag_email_reward_state::get_snag_email_reward_state;
 use crate::database::user::update_email::update_email;
+use crate::database::user::update_snag_email_reward_state::update_snag_email_reward_state;
 use crate::database::user::update_verified_email::update_verified_email;
 use crate::domain::spam_email::SpamEmail;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::{del_from_cache, Backend};
 use crate::notification::notification_redirect::NotificationRedirect;
-use axum::extract::Query;
+use crate::routes::snag_sync::spawn_snag_email_reward_sync;
+use crate::startup::application::AppState;
+use crate::utils::snag::is_snag_eligible_user;
+use axum::extract::{Query, State};
 use axum::response::Redirect;
 use axum::Extension;
 use axum_login::AuthSession;
@@ -15,8 +20,10 @@ use block_mesh_common::interfaces::server_api::ConfirmEmailRequest;
 use block_mesh_common::routes_enum::RoutesEnum;
 use block_mesh_manager_database_domain::domain::get_user_opt_by_id::get_user_opt_by_id;
 use sqlx::PgPool;
+use std::sync::Arc;
 
 pub async fn handler(
+    State(state): State<Arc<AppState>>,
     Extension(pool): Extension<PgPool>,
     Extension(mut auth): Extension<AuthSession<Backend>>,
     Query(query): Query<ConfirmEmailRequest>,
@@ -93,6 +100,11 @@ pub async fn handler(
                     ));
                 }
                 let user = user.unwrap();
+                let reward_state = get_snag_email_reward_state(&mut transaction, &user.id)
+                    .await
+                    .map_err(Error::from)?;
+                let should_sync_to_snag =
+                    is_snag_eligible_user(user.created_at) && !reward_state.consumed;
                 match update_verified_email(&mut transaction, &user.id, true)
                     .await
                     .map_err(Error::from)
@@ -139,6 +151,19 @@ pub async fn handler(
                         ));
                     }
                 }
+                if should_sync_to_snag {
+                    if update_snag_email_reward_state(&mut transaction, &user.id, true, false)
+                        .await
+                        .is_err()
+                    {
+                        return Ok(Error::redirect(
+                            500,
+                            "Failed to update reward state",
+                            "Failed to update reward state",
+                            RoutesEnum::Static_UnAuth_Root.to_string().as_str(),
+                        ));
+                    }
+                }
                 match transaction.commit().await {
                     Ok(_) => {}
                     Err(_) => {
@@ -149,6 +174,9 @@ pub async fn handler(
                             RoutesEnum::Static_UnAuth_Root.to_string().as_str(),
                         ));
                     }
+                }
+                if should_sync_to_snag {
+                    spawn_snag_email_reward_sync(state, pool, user.id, email, user.wallet_address);
                 }
                 Ok(NotificationRedirect::redirect(
                     "Please Login",

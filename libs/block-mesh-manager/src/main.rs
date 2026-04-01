@@ -173,6 +173,8 @@ async fn run() -> anyhow::Result<()> {
             .trim_end_matches('/')
             .to_string(),
         api_key: env::var("SNAG_API_KEY").expect("could not find SNAG_API_KEY"),
+        external_rule_email_registered: env::var("SNAG_EXTERNAL_RULE_EMAIL_REGISTERED")
+            .expect("could not find SNAG_EXTERNAL_RULE_EMAIL_REGISTERED"),
         external_rule_extension: env::var("SNAG_EXTERNAL_RULE_EXTENSION")
             .expect("could not find SNAG_EXTERNAL_RULE_EXTENSION"),
         external_rule_wallet: env::var("SNAG_EXTERNAL_RULE_WALLET")
