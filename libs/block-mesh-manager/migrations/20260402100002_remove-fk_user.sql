@@ -1,0 +1,28 @@
+ALTER TABLE aggregates
+    DROP CONSTRAINT IF EXISTS fk_user;
+ALTER TABLE analytics
+    DROP CONSTRAINT IF EXISTS fk_user;
+ALTER TABLE api_tokens
+    DROP CONSTRAINT IF EXISTS fk_user;
+ALTER TABLE bandwidth_reports
+    DROP CONSTRAINT IF EXISTS fk_user;
+ALTER TABLE call_to_actions
+    DROP CONSTRAINT IF EXISTS fk_user;
+ALTER TABLE daily_stats
+    DROP CONSTRAINT IF EXISTS fk_user;
+ALTER TABLE invite_codes
+    DROP CONSTRAINT IF EXISTS fk_user;
+ALTER TABLE nonces
+    DROP CONSTRAINT IF EXISTS fk_user;
+ALTER TABLE perks
+    DROP CONSTRAINT IF EXISTS fk_user;
+ALTER TABLE tasks
+    DROP CONSTRAINT IF EXISTS fk_user;
+ALTER TABLE uptime_reports
+    DROP CONSTRAINT IF EXISTS fk_user;
+ALTER TABLE users_ip
+    DROP CONSTRAINT fk_ip;
+ALTER TABLE users_ip
+    DROP CONSTRAINT IF EXISTS fk_user;
+ALTER TABLE daily_stats_background_jobs
+    DROP CONSTRAINT IF EXISTS fk_user;
