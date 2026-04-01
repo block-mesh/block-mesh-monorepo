@@ -151,18 +151,17 @@ pub async fn handler(
                         ));
                     }
                 }
-                if should_sync_to_snag {
-                    if update_snag_email_reward_state(&mut transaction, &user.id, true, false)
+                if should_sync_to_snag
+                    && update_snag_email_reward_state(&mut transaction, &user.id, true, false)
                         .await
                         .is_err()
-                    {
-                        return Ok(Error::redirect(
-                            500,
-                            "Failed to update reward state",
-                            "Failed to update reward state",
-                            RoutesEnum::Static_UnAuth_Root.to_string().as_str(),
-                        ));
-                    }
+                {
+                    return Ok(Error::redirect(
+                        500,
+                        "Failed to update reward state",
+                        "Failed to update reward state",
+                        RoutesEnum::Static_UnAuth_Root.to_string().as_str(),
+                    ));
                 }
                 match transaction.commit().await {
                     Ok(_) => {}
