@@ -1,0 +1,16 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE users\n        SET snag_email_reward_pending = $1,\n            snag_email_reward_consumed = $2\n        WHERE id = $3\n          AND (\n              snag_email_reward_pending IS DISTINCT FROM $1\n              OR snag_email_reward_consumed IS DISTINCT FROM $2\n          )\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Bool",
+        "Bool",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "c1a3ea18584e99fde58ef9b530b5e2b9bec307eb8def3ea6379c49d5a08f05a5"
+}
