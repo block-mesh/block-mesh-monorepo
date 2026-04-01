@@ -1,0 +1,2 @@
+ALTER TABLE users
+    ADD COLUMN email_confirmed_sent BOOLEAN NOT NULL DEFAULT FALSE;

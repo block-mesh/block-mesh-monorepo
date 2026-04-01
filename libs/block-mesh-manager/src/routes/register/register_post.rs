@@ -18,6 +18,7 @@ use dash_with_expiry::dash_set_with_expiry::DashSetWithExpiry;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use secret::Secret;
 use sqlx::PgPool;
+use time::OffsetDateTime;
 use tokio::sync::OnceCell;
 use uuid::Uuid;
 use validator::validate_email;
@@ -30,14 +31,17 @@ use crate::database::spam_email::get_spam_emails::get_spam_emails_cache;
 use crate::database::uptime_report::create_uptime_report::create_uptime_report;
 use crate::database::user::create_user::create_user;
 use crate::database::user::get_user_by_email::get_user_opt_by_email;
+use crate::database::user::update_snag_email_reward_state::update_snag_email_reward_state;
 use crate::database::user::update_user_invited_by::update_user_invited_by;
 use crate::domain::spam_email::SpamEmail;
 use crate::errors::error::Error;
 use crate::middlewares::authentication::{Backend, Credentials};
 use crate::routes::register::spammers::SpammersHelper;
+use crate::routes::snag_sync::spawn_snag_email_reward_sync;
 use crate::startup::application::AppState;
 use crate::utils::cache_envar::get_envar;
 use crate::utils::cftoken::check_cf_token;
+use crate::utils::snag::is_snag_eligible_user;
 
 static RATE_LIMIT_IP: OnceCell<DashSetWithExpiry<String>> = OnceCell::const_new();
 
@@ -205,6 +209,12 @@ pub async fn handler(
             RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
         ));
     }
+    let should_attempt_snag_reward = is_snag_eligible_user(OffsetDateTime::now_utc());
+    if should_attempt_snag_reward {
+        update_snag_email_reward_state(&mut transaction, &user_id, true, false)
+            .await
+            .map_err(Error::from)?;
+    }
     match commit_txn(transaction).await {
         Ok(_) => {}
         Err(_) => {
@@ -215,6 +225,10 @@ pub async fn handler(
                 RoutesEnum::Static_UnAuth_Register.to_string().as_str(),
             ))
         }
+    }
+
+    if should_attempt_snag_reward {
+        spawn_snag_email_reward_sync(state.clone(), pool.clone(), user_id, email.clone(), None);
     }
 
     let creds: Credentials = Credentials {

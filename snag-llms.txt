@@ -1,0 +1,378 @@
+# Snag Docs
+
+## Docs
+
+- [Using AI Coding Assistants?](https://docs.snagsolutions.io/ai-coding-assistant.md): Connect Cursor, Claude Code, or Copilot to Snag Docs via MCP server or llms.txt for context-aware API coding help and Web3 development support.
+- [Snag vs Alternatives](https://docs.snagsolutions.io/ai-context/alternatives.md): How Snag compares to other Web3 loyalty and quest platforms including Galxe, Layer3, Zealy, QuestN, Intract, Smile.io, and LoyaltyLion.
+- [Snag Glossary](https://docs.snagsolutions.io/ai-context/glossary.md): Definitions of all Snag platform terms, Web3 loyalty concepts, and technical terminology used across Snag documentation.
+- [Snag Integration Map](https://docs.snagsolutions.io/ai-context/integration-map.md): Complete directory of every blockchain, wallet, social platform, authentication provider, and service that Snag integrates with.
+- [Snag Platform Overview](https://docs.snagsolutions.io/ai-context/platform-overview.md): Comprehensive overview of Snag, the leading onchain loyalty and engagement platform for Web3 brands. Features, supported chains, integrations, and use cases.
+- [Snag Use Cases](https://docs.snagsolutions.io/ai-context/use-cases.md): Real-world use cases for Snag's onchain loyalty platform including NFT communities, DeFi protocols, GameFi, DAOs, and brand Web3 activations.
+- [Api changelog](https://docs.snagsolutions.io/api-reference/api-changelog.md): Changelog of Snag API updates, new endpoints, and breaking changes.
+- [Get Asset upload URL](https://docs.snagsolutions.io/api-reference/asset/get-asset-upload-url.md): This endpoint enables you to upload a file to the resource. Returns a presigned URL and the asset's public URL. Call PUT with the file as the body to upload the asset using the presigned URL.
+- [Get auction bids](https://docs.snagsolutions.io/api-reference/auction/get-auction-bids.md): Returns a list of auction bids with optional filtering and pagination.
+- [Get auction items](https://docs.snagsolutions.io/api-reference/auction/get-auction-items.md): Returns a paginated list of auction items for the given auction ID(s).
+- [Get auctions](https://docs.snagsolutions.io/api-reference/auction/get-auctions.md): Returns a list of auctions with optional filtering and pagination.
+- [Create new badge](https://docs.snagsolutions.io/api-reference/badge/create-new-badge.md): This endpoint allows you to configure a new badge
+- [Delete badge (by id)](https://docs.snagsolutions.io/api-reference/badge/delete-badge-by-id.md): This endpoint allows you to delete a badge.
+- [Get badges (all or by id)](https://docs.snagsolutions.io/api-reference/badge/get-badges-all-or-by-id.md): This endpoint allows you to fetch badge(s) data.
+- [Get users for a badge](https://docs.snagsolutions.io/api-reference/badge/get-users-for-a-badge.md): This endpoint allows you to fetch users for a specific badge.
+- [Revoke badge from account](https://docs.snagsolutions.io/api-reference/badge/revoke-badge-from-account.md): This endpoint allows you to revoke a badge from an account
+- [Reward badge for account](https://docs.snagsolutions.io/api-reference/badge/reward-badge-for-account.md): This endpoint allows you to reward a badge for an account
+- [Update badge (by id)](https://docs.snagsolutions.io/api-reference/badge/update-badge-by-id.md): This endpoint allows you to update an existing badge.
+- [Changelog 2025 11 07T18:32:23Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-11-07T18:32:23Z.md)
+- [Changelog 2025 11 08T16:32:20Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-11-08T16:32:20Z.md)
+- [Changelog 2025 11 10T07:16:00Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-11-10T07:16:00Z.md)
+- [Changelog 2025 11 11T22:04:22Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-11-11T22:04:22Z.md)
+- [Changelog 2025 11 12T07:12:51Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-11-12T07:12:51Z.md)
+- [Changelog 2025 11 14T09:38:20Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-11-14T09:38:20Z.md)
+- [Changelog 2025 11 14T12:25:30Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-11-14T12:25:30Z.md)
+- [Changelog 2025 11 18T10:17:06Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-11-18T10:17:06Z.md)
+- [Changelog 2025 11 18T10:57:07Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-11-18T10:57:07Z.md)
+- [Changelog 2025 11 19T23:13:32Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-11-19T23:13:32Z.md)
+- [Changelog 2025 11 21T11:58:17Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-11-21T11:58:17Z.md)
+- [Changelog 2025 11 25T12:08:04Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-11-25T12:08:04Z.md)
+- [Changelog 2025 11 26T15:53:10Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-11-26T15:53:10Z.md)
+- [Changelog 2025 12 01T12:08:42Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-01T12:08:42Z.md)
+- [Changelog 2025 12 01T12:38:06Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-01T12:38:06Z.md)
+- [Changelog 2025 12 01T13:59:07Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-01T13:59:07Z.md)
+- [Changelog 2025 12 02T10:46:09Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-02T10:46:09Z.md)
+- [Changelog 2025 12 04T09:41:18Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-04T09:41:18Z.md)
+- [Changelog 2025 12 04T09:53:05Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-04T09:53:05Z.md)
+- [Changelog 2025 12 09T10:05:38Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-09T10:05:38Z.md)
+- [Changelog 2025 12 11T15:05:26Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-11T15:05:26Z.md)
+- [Changelog 2025 12 11T16:06:51Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-11T16:06:51Z.md)
+- [Changelog 2025 12 15T13:33:03Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-15T13:33:03Z.md)
+- [Changelog 2025 12 15T15:51:37Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-15T15:51:37Z.md)
+- [Changelog 2025 12 15T15:57:43Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-15T15:57:43Z.md)
+- [Changelog 2025 12 15T16:17:45Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-15T16:17:45Z.md)
+- [Changelog 2025 12 15T17:03:16Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-15T17:03:16Z.md)
+- [Changelog 2025 12 16T10:44:00Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-16T10:44:00Z.md)
+- [Changelog 2025 12 16T11:59:18Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-16T11:59:18Z.md)
+- [Changelog 2025 12 17T21:00:21Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-17T21:00:21Z.md)
+- [Changelog 2025 12 22T14:13:19Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-22T14:13:19Z.md)
+- [Changelog 2025 12 22T14:29:59Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-22T14:29:59Z.md)
+- [Changelog 2025 12 22T15:04:37Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-22T15:04:37Z.md)
+- [Changelog 2025 12 23T11:36:15Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-23T11:36:15Z.md)
+- [Changelog 2025 12 25T13:28:04Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-25T13:28:04Z.md)
+- [Changelog 2025 12 25T13:40:06Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-25T13:40:06Z.md)
+- [Changelog 2025 12 26T11:56:07Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-26T11:56:07Z.md)
+- [Changelog 2025 12 30T13:13:53Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2025-12-30T13:13:53Z.md)
+- [Changelog 2026 01 05T07:10:05Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-05T07:10:05Z.md)
+- [Changelog 2026 01 05T11:37:26Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-05T11:37:26Z.md)
+- [Changelog 2026 01 05T13:51:52Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-05T13:51:52Z.md)
+- [Changelog 2026 01 05T14:19:05Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-05T14:19:05Z.md)
+- [Changelog 2026 01 06T14:01:11Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-06T14:01:11Z.md)
+- [Changelog 2026 01 06T15:09:46Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-06T15:09:46Z.md)
+- [Changelog 2026 01 06T19:53:22Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-06T19:53:22Z.md)
+- [Changelog 2026 01 07T15:07:15Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-07T15:07:15Z.md)
+- [Changelog 2026 01 08T09:47:50Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-08T09:47:50Z.md)
+- [Changelog 2026 01 08T11:30:53Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-08T11:30:53Z.md)
+- [Changelog 2026 01 08T14:14:41Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-08T14:14:41Z.md)
+- [Changelog 2026 01 09T15:53:03Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-09T15:53:03Z.md)
+- [Changelog 2026 01 09T19:23:34Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-09T19:23:34Z.md)
+- [Changelog 2026 01 14T11:01:48Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-14T11:01:48Z.md)
+- [Changelog 2026 01 15T11:23:38Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-15T11:23:38Z.md)
+- [Changelog 2026 01 17T13:35:28Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-17T13:35:28Z.md)
+- [Changelog 2026 01 20T13:10:48Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-20T13:10:48Z.md)
+- [Changelog 2026 01 20T18:39:14Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-20T18:39:14Z.md)
+- [Changelog 2026 01 21T17:44:14Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-21T17:44:14Z.md)
+- [Changelog 2026 01 21T17:51:30Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-21T17:51:30Z.md)
+- [Changelog 2026 01 21T17:55:58Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-21T17:55:58Z.md)
+- [Changelog 2026 01 22T10:19:43Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-22T10:19:43Z.md)
+- [Changelog 2026 01 22T13:12:32Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-22T13:12:32Z.md)
+- [Changelog 2026 01 22T16:52:36Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-22T16:52:36Z.md)
+- [Changelog 2026 01 22T17:14:17Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-22T17:14:17Z.md)
+- [Changelog 2026 01 22T17:18:35Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-22T17:18:35Z.md)
+- [Changelog 2026 01 23T04:47:17Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-23T04:47:17Z.md)
+- [Changelog 2026 01 23T09:44:16Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-23T09:44:16Z.md)
+- [Changelog 2026 01 23T19:15:39Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-23T19:15:39Z.md)
+- [Changelog 2026 01 23T19:52:36Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-23T19:52:36Z.md)
+- [Changelog 2026 01 23T20:24:57Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-23T20:24:57Z.md)
+- [Changelog 2026 01 26T13:18:22Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-26T13:18:22Z.md)
+- [Changelog 2026 01 26T21:16:05Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-26T21:16:05Z.md)
+- [Changelog 2026 01 27T20:04:43Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-27T20:04:43Z.md)
+- [Changelog 2026 01 27T20:29:49Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-27T20:29:49Z.md)
+- [Changelog 2026 01 27T20:39:10Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-27T20:39:10Z.md)
+- [Changelog 2026 01 28T14:44:56Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-01-28T14:44:56Z.md)
+- [Changelog 2026 02 02T09:07:19Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-02T09:07:19Z.md)
+- [Changelog 2026 02 02T13:46:46Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-02T13:46:46Z.md)
+- [Changelog 2026 02 03T07:37:27Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-03T07:37:27Z.md)
+- [Changelog 2026 02 09T12:09:07Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-09T12:09:07Z.md)
+- [Changelog 2026 02 09T12:18:00Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-09T12:18:00Z.md)
+- [Changelog 2026 02 09T12:53:18Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-09T12:53:18Z.md)
+- [Changelog 2026 02 10T14:34:32Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-10T14:34:32Z.md)
+- [Changelog 2026 02 11T10:38:24Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-11T10:38:24Z.md)
+- [Changelog 2026 02 11T11:03:15Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-11T11:03:15Z.md)
+- [Changelog 2026 02 11T11:08:51Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-11T11:08:51Z.md)
+- [Changelog 2026 02 11T11:46:31Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-11T11:46:31Z.md)
+- [Changelog 2026 02 11T14:04:59Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-11T14:04:59Z.md)
+- [Changelog 2026 02 11T14:17:49Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-11T14:17:49Z.md)
+- [Changelog 2026 02 11T18:32:38Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-11T18:32:38Z.md)
+- [Changelog 2026 02 12T17:02:21Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-12T17:02:21Z.md)
+- [Changelog 2026 02 16T09:57:05Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-16T09:57:05Z.md)
+- [Changelog 2026 02 18T10:04:20Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-18T10:04:20Z.md)
+- [Changelog 2026 02 18T10:31:34Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-18T10:31:34Z.md)
+- [Changelog 2026 02 19T15:46:37Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-19T15:46:37Z.md)
+- [Changelog 2026 02 20T12:38:14Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-20T12:38:14Z.md)
+- [Changelog 2026 02 20T16:22:04Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-20T16:22:04Z.md)
+- [Changelog 2026 02 23T11:43:23Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-23T11:43:23Z.md)
+- [Changelog 2026 02 23T14:31:57Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-23T14:31:57Z.md)
+- [Changelog 2026 02 23T16:34:44Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-23T16:34:44Z.md)
+- [Changelog 2026 02 23T21:42:13Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-23T21:42:13Z.md)
+- [Changelog 2026 02 23T22:30:56Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-23T22:30:56Z.md)
+- [Changelog 2026 02 24T19:09:08Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-24T19:09:08Z.md)
+- [Changelog 2026 02 24T22:16:17Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-24T22:16:17Z.md)
+- [Changelog 2026 02 25T20:08:02Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-25T20:08:02Z.md)
+- [Changelog 2026 02 27T10:05:08Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-27T10:05:08Z.md)
+- [Changelog 2026 02 27T11:18:55Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-02-27T11:18:55Z.md)
+- [Changelog 2026 03 03T12:04:58Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-03-03T12:04:58Z.md)
+- [Changelog 2026 03 03T12:20:25Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-03-03T12:20:25Z.md)
+- [Changelog 2026 03 03T17:01:18Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-03-03T17:01:18Z.md)
+- [Changelog 2026 03 03T21:53:44Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-03-03T21:53:44Z.md)
+- [Changelog 2026 03 04T23:51:07Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-03-04T23:51:07Z.md)
+- [Changelog 2026 03 05T11:32:30Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-03-05T11:32:30Z.md)
+- [Changelog 2026 03 05T17:42:27Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-03-05T17:42:27Z.md)
+- [Changelog 2026 03 10T11:01:38Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-03-10T11:01:38Z.md)
+- [Changelog 2026 03 10T11:46:47Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-03-10T11:46:47Z.md)
+- [Changelog 2026 03 10T18:58:59Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-03-10T18:58:59Z.md)
+- [Changelog 2026 03 12T05:19:23Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-03-12T05:19:23Z.md)
+- [Changelog 2026 03 13T16:38:55Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-03-13T16:38:55Z.md)
+- [Changelog 2026 03 19T15:44:44Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-03-19T15:44:44Z.md)
+- [Changelog 2026 03 24T14:36:15Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-03-24T14:36:15Z.md)
+- [Changelog 2026 03 31T10:37:03Z](https://docs.snagsolutions.io/api-reference/changelog-reports/changelog_2026-03-31T10:37:03Z.md)
+- [API Deprecation](https://docs.snagsolutions.io/api-reference/deprecation.md): This is a list of deprecated APIs and arguments with a timeline for removal.
+- [Connect a user to User Group](https://docs.snagsolutions.io/api-reference/identity/connect-a-user-to-user-group.md): This endpoint allows you to connect a user to a user group
+- [Connect Auth](https://docs.snagsolutions.io/api-reference/identity/connect-auth.md): This endpoint allows you to connect your auth account to a Snag account
+- [Connect Auth Verify](https://docs.snagsolutions.io/api-reference/identity/connect-auth-verify.md): endpoint to verify and complete connecting an auth account to a Snag account
+- [Create a new website user attribute](https://docs.snagsolutions.io/api-reference/identity/create-a-new-website-user-attribute.md): Create a new website user attribute
+- [Create a new website user attribute value](https://docs.snagsolutions.io/api-reference/identity/create-a-new-website-user-attribute-value.md): Create a new website user attribute value
+- [Create user device](https://docs.snagsolutions.io/api-reference/identity/create-user-device.md): This endpoint is used to create user devices for fraud tracking
+- [Create user metadata](https://docs.snagsolutions.io/api-reference/identity/create-user-metadata.md): This endpoint is used to create user metadata
+- [Delete a website user attribute](https://docs.snagsolutions.io/api-reference/identity/delete-a-website-user-attribute.md): Delete a website user attribute
+- [Disconnect a user from User Group](https://docs.snagsolutions.io/api-reference/identity/disconnect-a-user-from-user-group.md): This endpoint allows you to disconnect a user from another user
+- [Disconnect Phone](https://docs.snagsolutions.io/api-reference/identity/disconnect-phone.md): Disconnects the phone number from the user profile and clears associated badges.
+- [Get all website user attributes](https://docs.snagsolutions.io/api-reference/identity/get-all-website-user-attributes.md): Get all website user attributes
+- [Get user metadata](https://docs.snagsolutions.io/api-reference/identity/get-user-metadata.md): This endpoint is used to get user metadata
+- [Get users](https://docs.snagsolutions.io/api-reference/identity/get-users.md): This endpoint allows you to get users
+- [Get values for a website user attribute](https://docs.snagsolutions.io/api-reference/identity/get-values-for-a-website-user-attribute.md): Get values for a website user attribute
+- [Post apiusersverify](https://docs.snagsolutions.io/api-reference/identity/post-apiusersverify.md): Transfers a social account from one user to another when a conflict is detected. Disconnects the account from the previous user and connects it to the current user's profile. Used when a social account is already linked to a different user (MAXIMUM_ACCOUNT_LINKED error).
+- [Send Phone Verification Code](https://docs.snagsolutions.io/api-reference/identity/send-phone-verification-code.md): Initiates phone number verification by sending an OTP code via SMS using Twilio Verify.
+- [User count](https://docs.snagsolutions.io/api-reference/identity/user-count.md): This endpoint returns the total user count
+- [Verify Phone OTP and Connect](https://docs.snagsolutions.io/api-reference/identity/verify-phone-otp-and-connect.md): Verifies the OTP code and connects the phone number to the user profile.
+- [Snag API](https://docs.snagsolutions.io/api-reference/introduction.md): Integrate Snag's REST API into your Web3 app. Authenticate with API keys, configure custom hostnames, and access loyalty, minting, and rewards endpoints.
+- [Get page sections](https://docs.snagsolutions.io/api-reference/landing-page/get-page-sections.md): This endpoint allows you to fetch page sections
+- [Complete Loyalty Rule](https://docs.snagsolutions.io/api-reference/loyalty/complete-loyalty-rule.md): Verify a loyalty rule based on user action and reward them if applicable. This endpoint currently only supports following rule types: code_entry, text_input, link_click, external_rule, connect_wallet, check_in, connected_twitter, drip_x_follow, drip_x_new_tweet, drip_x_text_in_bio, drip_x_text_in_na…
+- [Create a loyalty currency](https://docs.snagsolutions.io/api-reference/loyalty/create-a-loyalty-currency.md): Create a loyalty currency
+- [Create Loyalty Multiplier](https://docs.snagsolutions.io/api-reference/loyalty/create-loyalty-multiplier.md): Create a new loyalty multiplier for a wallet.
+- [Create Loyalty Rule](https://docs.snagsolutions.io/api-reference/loyalty/create-loyalty-rule.md): Create a new Loyalty Rule
+- [Create Loyalty Rule Chain](https://docs.snagsolutions.io/api-reference/loyalty/create-loyalty-rule-chain.md): Create a new loyalty rule chain
+- [Create Loyalty Rule Groups](https://docs.snagsolutions.io/api-reference/loyalty/create-loyalty-rule-groups.md): Create a new loyalty rule groups
+- [Create Loyalty Transaction](https://docs.snagsolutions.io/api-reference/loyalty/create-loyalty-transaction.md): Create a loyalty transaction to update account balances.
+- [Delete a loyalty currency](https://docs.snagsolutions.io/api-reference/loyalty/delete-a-loyalty-currency.md): Delete a loyalty currency
+- [Delete Loyalty Multiplier by External Identifier](https://docs.snagsolutions.io/api-reference/loyalty/delete-loyalty-multiplier-by-external-identifier.md): Delete a loyalty multiplier by its external identifier.
+- [Delete Loyalty Multiplier by ID](https://docs.snagsolutions.io/api-reference/loyalty/delete-loyalty-multiplier-by-id.md): Delete a loyalty multiplier by its ID.
+- [Delete Loyalty Rule](https://docs.snagsolutions.io/api-reference/loyalty/delete-loyalty-rule.md): Delete an existing Loyalty Rule
+- [Delete Loyalty Rule Chain](https://docs.snagsolutions.io/api-reference/loyalty/delete-loyalty-rule-chain.md): Delete a loyalty rule chain
+- [Delete Loyalty Rule Group](https://docs.snagsolutions.io/api-reference/loyalty/delete-loyalty-rule-group.md): Delete loyalty rule group by ID
+- [Get loyalty account streaks](https://docs.snagsolutions.io/api-reference/loyalty/get-loyalty-account-streaks.md): Get loyalty account streaks
+- [Get loyalty accounts](https://docs.snagsolutions.io/api-reference/loyalty/get-loyalty-accounts.md): Get loyalty accounts
+- [Get loyalty currencies](https://docs.snagsolutions.io/api-reference/loyalty/get-loyalty-currencies.md): Get loyalty currencies
+- [Get Loyalty Multipliers](https://docs.snagsolutions.io/api-reference/loyalty/get-loyalty-multipliers.md): Get Loyalty Multipliers
+- [Get Loyalty Rule Chains](https://docs.snagsolutions.io/api-reference/loyalty/get-loyalty-rule-chains.md): Retrieve configured loyalty rule chains
+- [Get Loyalty Rule Chains Status](https://docs.snagsolutions.io/api-reference/loyalty/get-loyalty-rule-chains-status.md): Get the status of a loyalty rule chains
+- [Get Loyalty Rule Edits](https://docs.snagsolutions.io/api-reference/loyalty/get-loyalty-rule-edits.md): Retrieve configured loyalty rule edits with optional pagination and filters
+- [Get Loyalty Rule Groups](https://docs.snagsolutions.io/api-reference/loyalty/get-loyalty-rule-groups.md): Retrieve configured loyalty rule groups
+- [Get Loyalty Rule Statuses](https://docs.snagsolutions.io/api-reference/loyalty/get-loyalty-rule-statuses.md): Retrieve loyalty rule statuses
+- [Get Loyalty Rules](https://docs.snagsolutions.io/api-reference/loyalty/get-loyalty-rules.md): Retrieve configured loyalty rules with optional pagination and filters
+- [Get Loyalty Transaction Entries](https://docs.snagsolutions.io/api-reference/loyalty/get-loyalty-transaction-entries.md): Fetch loyalty transaction entries for wallets or users, representing account balance changes.
+- [Get loyalty website page sections](https://docs.snagsolutions.io/api-reference/loyalty/get-loyalty-website-page-sections.md): Get loyalty website page sections
+- [Get Processing status and progress data for a specific user on loyalty rules](https://docs.snagsolutions.io/api-reference/loyalty/get-processing-status-and-progress-data-for-a-specific-user-on-loyalty-rules.md): This will return the processing status of quests for a specific user and also the progress of the loyalty rule
+- [Get the rank of a user based on their loyalty points](https://docs.snagsolutions.io/api-reference/loyalty/get-the-rank-of-a-user-based-on-their-loyalty-points.md): This api can only return the rank upto 5000, after that it will return '5000+'. Returns the user's rank determined by their loyalty points for the specified loyalty currency. This can be a slow operation for large organizations. We recommend caching when possible.
+- [Reset Loyalty Currency](https://docs.snagsolutions.io/api-reference/loyalty/reset-loyalty-currency.md): Reset Loyalty Currency of a website
+- [Restore Loyalty Rule Edit](https://docs.snagsolutions.io/api-reference/loyalty/restore-loyalty-rule-edit.md): Restore a loyalty rule from a rule edit
+- [Update Loyalty Multiplier](https://docs.snagsolutions.io/api-reference/loyalty/update-loyalty-multiplier.md): Update an existing loyalty multiplier.
+- [Update Loyalty Rule](https://docs.snagsolutions.io/api-reference/loyalty/update-loyalty-rule.md): Update an existing Loyalty Rule
+- [Update Loyalty Rule Chain](https://docs.snagsolutions.io/api-reference/loyalty/update-loyalty-rule-chain.md): Update a loyalty rule chain
+- [Update Loyalty Rule Group](https://docs.snagsolutions.io/api-reference/loyalty/update-loyalty-rule-group.md): Update loyalty rule group by ID
+- [Update Loyalty Rule Status](https://docs.snagsolutions.io/api-reference/loyalty/update-loyalty-rule-status.md): Update a loyalty rule status
+- [Update loyalty website page sections](https://docs.snagsolutions.io/api-reference/loyalty/update-loyalty-website-page-sections.md): Update loyalty website page sections
+- [Get mint status](https://docs.snagsolutions.io/api-reference/minting/get-mint-status.md): Get the status of a mint
+- [Get minting allowlist](https://docs.snagsolutions.io/api-reference/minting/get-minting-allowlist.md): Fetch allowlist entries for a minting contract asset
+- [Get minting assets](https://docs.snagsolutions.io/api-reference/minting/get-minting-assets.md): Returns minting assets and any relevant context
+- [Get minting contracts](https://docs.snagsolutions.io/api-reference/minting/get-minting-contracts.md): Get minting contracts
+- [Get token gate status](https://docs.snagsolutions.io/api-reference/minting/get-token-gate-status.md): Pass in to see if a token is eligible for minting
+- [Mint an asset](https://docs.snagsolutions.io/api-reference/minting/mint-an-asset.md): Generates a signature for minting an asset on a given contract
+- [Update mint status](https://docs.snagsolutions.io/api-reference/minting/update-mint-status.md): Update the status of a mint
+- [Upsert minting allowlist entries](https://docs.snagsolutions.io/api-reference/minting/upsert-minting-allowlist-entries.md): Create or update allowlist entries for a minting contract asset (max 25 entries per request). If an entry already exists, it will be updated with the new quantity.
+- [Create a new question](https://docs.snagsolutions.io/api-reference/question/create-a-new-question.md): This endpoint allows you to create a new question.
+- [Get questions for a loyalty rule](https://docs.snagsolutions.io/api-reference/question/get-questions-for-a-loyalty-rule.md): This endpoint allows you to fetch questions for a loyalty rule.
+- [Get user's question responses](https://docs.snagsolutions.io/api-reference/question/get-users-question-responses.md): Retrieve responses submitted by the authenticated user, optionally filtered by question IDs
+- [Submit a response to a question](https://docs.snagsolutions.io/api-reference/question/submit-a-response-to-a-question.md): This endpoint allows you to submit a response to a question.
+- [Update an existing question](https://docs.snagsolutions.io/api-reference/question/update-an-existing-question.md): This endpoint allows you to update an existing question.
+- [Rate Limits](https://docs.snagsolutions.io/api-reference/rate-limits.md): This document outlines the rate limiting policies implemented across our API endpoints to ensure fair usage and system stability.
+- [Create referral code](https://docs.snagsolutions.io/api-reference/referrals/create-referral-code.md): This endpoint allows you to create a referral code
+- [Create referral user](https://docs.snagsolutions.io/api-reference/referrals/create-referral-user.md): This endpoint allows you to create a referral user
+- [Get referrals](https://docs.snagsolutions.io/api-reference/referrals/get-referrals.md): This endpoint allows you to get referrals
+- [Snag SDK](https://docs.snagsolutions.io/api-reference/sdk.md): Install and use the Snag TypeScript SDK for type-safe access to loyalty, minting, and rewards APIs. Supports retries, timeouts, and custom fetch clients.
+- [Get social posts](https://docs.snagsolutions.io/api-reference/social-posts/get-social-posts.md): Fetch social posts with pagination and filtering options. Note: Rank is calculated for top 20,000 posts only. Posts beyond this threshold will have a null rank.
+- [Reward a social post](https://docs.snagsolutions.io/api-reference/social-posts/reward-a-social-post.md): Reward a user for their social post.
+- [Get a token claim](https://docs.snagsolutions.io/api-reference/token-claims/get-a-token-claim.md): Get a token claim by id
+- [Get token claim eligibility](https://docs.snagsolutions.io/api-reference/token-claims/get-token-claim-eligibility.md): Check if a wallet address is eligible for a token claim
+- [Get token claim proof](https://docs.snagsolutions.io/api-reference/token-claims/get-token-claim-proof.md): Get a token claim proof for a given wallet address
+- [Get token claim users](https://docs.snagsolutions.io/api-reference/token-claims/get-token-claim-users.md): Get all users part of a token claim
+- [Get token claims](https://docs.snagsolutions.io/api-reference/token-claims/get-token-claims.md): Get all available token claims for a given website and organization
+- [Update user claim](https://docs.snagsolutions.io/api-reference/token-claims/update-user-claim.md): Update a user claim status after a user has claimed
+- [Assign roles to users for a website](https://docs.snagsolutions.io/api-reference/website/assign-roles-to-users-for-a-website.md): Assign roles to users for a specific website
+- [Create website](https://docs.snagsolutions.io/api-reference/website/create-website.md): Creates a new website. `adminWalletAddress` can only be used when authenticating with an organization API key.
+- [Get roles of users for a website](https://docs.snagsolutions.io/api-reference/website/get-roles-of-users-for-a-website.md): Retrieves roles of users for a specific website. If userId is provided, retrieves the role of that specific user for the website.
+- [Get websites](https://docs.snagsolutions.io/api-reference/website/get-websites.md): Returns a list of websites. Includes optional query parameters for filtering and pagination.
+- [Media Guidelines](https://docs.snagsolutions.io/best-practices/media-guide.md): Recommended media formats and dimensions used across the Snag admin tool.
+- [Billing cycle](https://docs.snagsolutions.io/billing/billing-cycle.md): Snag uses recurring billing cycles to manage subscription charges and usage charges. Your billing cycle depends on your selected plan and payment term.
+- [Change or cancel your plan](https://docs.snagsolutions.io/billing/change-cancel-plan.md): You can upgrade, downgrade, switch billing frequency, or cancel your subscription at any time.
+- [Billing FAQ](https://docs.snagsolutions.io/billing/faq.md): Answers to common Snag billing questions: usage tracking, record limits, payment methods, plan cancellation, invoices, and overage billing explained.
+- [Payment methods & billing info](https://docs.snagsolutions.io/billing/payment-methods-billing-info.md): All subscription and usage payments, payment methods and billing details are handled securely through Stripe.
+- [Plans & features](https://docs.snagsolutions.io/billing/plans-features.md): Compare Snag pricing plans and features including Free, Growth, and Enterprise tiers.
+- [Usage](https://docs.snagsolutions.io/billing/usage.md): Usage refers to the number of records your project generates during a billing cycle. Records represent state-changing actions performed by users or the system. All plans (except Free) include a monthly record limit, and any records beyond that limit are billed at the plan's per-record rate.
+- [Badges](https://docs.snagsolutions.io/create/badges.md): Create achievement badges to gamify your Web3 loyalty program. Set conditions based on rules, points, or other badges, and track user progress via the API.
+- [Claim Page](https://docs.snagsolutions.io/create/claim-page.md): The following is a quickstart guide to creating fully branded claim pages.
+- [Page Builder](https://docs.snagsolutions.io/create/page-builder.md): Build custom landing pages and app hubs with Snag's no-code page builder. Use carousels, strips, featured sections, and app grids to showcase your ecosystem.
+- [Rewards Shop](https://docs.snagsolutions.io/create/rewards-shop.md): Create NFT contracts, mint assets, and list them for purchase, auction, or sweepstakes in your Snag rewards shop. Supports ERC-721 and ERC-1155.
+- [Snag Reporting (Looker) Overview](https://docs.snagsolutions.io/data/snag-reporting.md): Access Snag's Looker-powered dashboards for loyalty analytics. View transactions, accounts, referrals, minting data, and user engagement insights.
+- [Code Blocks](https://docs.snagsolutions.io/essentials/code.md): Display inline code and code blocks
+- [Images and Embeds](https://docs.snagsolutions.io/essentials/images.md): Add image, video, and other HTML elements
+- [Markdown Syntax](https://docs.snagsolutions.io/essentials/markdown.md): Text, title, and styling in standard markdown
+- [Navigation](https://docs.snagsolutions.io/essentials/navigation.md): The navigation field in mint.json defines the pages that go in the navigation menu
+- [Reusable Snippets](https://docs.snagsolutions.io/essentials/reusable-snippets.md): Reusable, custom snippets to keep content in sync
+- [Global Settings](https://docs.snagsolutions.io/essentials/settings.md): Mintlify gives you complete control over the look and feel of your documentation using the mint.json file
+- [Available loyalty rules](https://docs.snagsolutions.io/loyalty/available-loyalty-rules.md): Explore 50+ loyalty rules in Snag: social quests (X, Discord, Telegram), onchain actions (mint, hold, swap), gaming integrations, and custom function rules.
+- [Blocking users](https://docs.snagsolutions.io/loyalty/blocking-users.md): The blocked users feature allows you to exclude specific wallet addresses from earning rewards through any loyalty rules. This is useful for blocking known bots, suspicious accounts or specific users.
+- [Checking Rule Completion Status](https://docs.snagsolutions.io/loyalty/check-rule-completion-status.md): Learn how to verify/check if a user has completed specific loyalty rules and received rewards
+- [Create loyalty rules using API](https://docs.snagsolutions.io/loyalty/create-rule-using-api.md): Learn how to create different types of loyalty rules through the API with the correct parameters and metadata
+- [Create your first rule](https://docs.snagsolutions.io/loyalty/create-your-first-rule.md): Create your first Snag loyalty rule in minutes. Open the admin dashboard, pick a rule type, configure reward settings, and start tracking user engagement.
+- [Custom Rewards API](https://docs.snagsolutions.io/loyalty/custom-rewards-api.md): Configure dynamic rewards for tokens using external APIs or CSV files
+- [Connect social accounts](https://docs.snagsolutions.io/loyalty/development/connect-social-accounts.md): Learn how to integrate social media platforms with your users using Snag's OAuth flow or by passing social handles directly
+- [Create users](https://docs.snagsolutions.io/loyalty/development/create-users.md): Learn how to create and manage users in Snag using the metadata endpoint, including wallet address requirements and supported wallet types
+- [Generate wallet addresses](https://docs.snagsolutions.io/loyalty/development/generate-wallet-addresses.md): Learn how to programmatically generate wallet addresses for your users using viem library or smart contract wallet providers
+- [Getting started](https://docs.snagsolutions.io/loyalty/development/getting-started.md): Learn how to sign up, access the admin dashboard, and create your first API key to start integrating Snag loyalty rules
+- [List loyalty rules and sections](https://docs.snagsolutions.io/loyalty/development/list-loyalty-rules.md): Render rule sections (rule groups) and their rules in your frontend using official APIs with pagination.
+- [Manage user groups](https://docs.snagsolutions.io/loyalty/development/manage-user-groups.md): Learn how to handle multiple wallet addresses per user using Snag's user group feature for seamless multi-wallet support
+- [Migrate users](https://docs.snagsolutions.io/loyalty/development/migrate-users.md): Step-by-step guide for migrating your existing users to Snag, including handling users without wallet addresses
+- [External rule](https://docs.snagsolutions.io/loyalty/external-rules.md): This recipe explains the concept of an external rule, how to configure it with Snag and how to issue rewards to your users.
+- [Handling images and asset uploads](https://docs.snagsolutions.io/loyalty/handling-image-assets-and-upload.md): How Snag validates image sources, when external URLs are allowed, and how to upload assets for use in objects like Users, Loyalty Rules, Pages, and Badges etc.
+- [Internal currency integration](https://docs.snagsolutions.io/loyalty/internal-currency-integration.md): Learn how to create external loyalty rules with progress tracking and multiple reward tiers
+- [Leaderboards](https://docs.snagsolutions.io/loyalty/leaderboards.md): Build dynamic leaderboards with the Snag API. Fetch sorted user balances, paginate large datasets, and display rankings with profile metadata.
+- [Loyalty overview](https://docs.snagsolutions.io/loyalty/loyalty-overview.md): Set up your Web3 loyalty program with Snag. Configure currencies, create reward rules across 50+ rule types, and track user engagement onchain and offchain.
+- [Loyalty rule progress tracking](https://docs.snagsolutions.io/loyalty/loyalty-rule-progress.md): Learn how to create external loyalty rules with progress tracking and multiple reward tiers
+- [Manage rule-level points on your side](https://docs.snagsolutions.io/loyalty/manage-rule-level-points.md): Snag does not store or expose per-rule point totals. Learn how to track and query rule-level points in your own storage using webhooks and periodic sync.
+- [Managing social accounts](https://docs.snagsolutions.io/loyalty/managing-social-accounts.md): This recipe explains how to use Snag social integration API to let your users connect their social accounts to their Snag profile.
+- [Managing user accounts](https://docs.snagsolutions.io/loyalty/managing-user-accounts.md): This recipe explains how to create or update user accounts via the Snag API.
+- [Multi-wallet support](https://docs.snagsolutions.io/loyalty/multi-wallet-support.md): Connect multiple wallets to aggregate points, earnings, and holdings to enhance your loyalty experience.
+- [Multipliers](https://docs.snagsolutions.io/loyalty/multipliers.md): Configure point multipliers to boost rewards for specific actions, time periods, or user segments.
+- [Snag Template App](https://docs.snagsolutions.io/loyalty/nextjs-template.md): A production-ready Next.js + Tailwind Web3 starter template with loyalty program and user profiles designed for Web3 projects
+- [Program settings](https://docs.snagsolutions.io/loyalty/program-settings.md): The Loyalty Builder tab in Snag's admin tool allows you to customize your loyalty program page, manage currencies and balances and configure advanced leaderboard settings. Use this tool to tailor your loyalty experience and drive deeper engagement with your community.
+- [Quality Social Farming](https://docs.snagsolutions.io/loyalty/quality-social-farming.md): Spotlight and reward meaningful user-generated content by displaying posts from users who have completed relevant social quests.
+- [Quest chaining](https://docs.snagsolutions.io/loyalty/quest-chaining.md): Create multi-step quest flows by chaining rules together with prerequisites and conditional logic.
+- [Rules configuration](https://docs.snagsolutions.io/loyalty/rules-configuration.md): These fields are common across all loyalty rules and define the general properties of a rule.
+- [Check In](https://docs.snagsolutions.io/loyalty/rules/check-in.md): Daily check-in loyalty rule. Reward users for returning to your platform each day.
+- [Enter a Code](https://docs.snagsolutions.io/loyalty/rules/code-entry.md): Code entry loyalty rule. Reward users for entering promotional or secret codes.
+- [Complete Profile Details](https://docs.snagsolutions.io/loyalty/rules/complete-profile.md): Profile completion loyalty rule. Reward users for filling out their profile information.
+- [Connect Discord](https://docs.snagsolutions.io/loyalty/rules/connect-discord.md): Discord connection loyalty rule. Reward users for linking their Discord account.
+- [Connect Email](https://docs.snagsolutions.io/loyalty/rules/connect-email.md): Email connection loyalty rule. Reward users for verifying their email address.
+- [Connect Epic](https://docs.snagsolutions.io/loyalty/rules/connect-epic.md): Epic Games connection loyalty rule. Reward users for linking their Epic Games account.
+- [Connect GitHub](https://docs.snagsolutions.io/loyalty/rules/connect-github.md): GitHub connection loyalty rule. Reward users for linking their GitHub account.
+- [Connect Instagram](https://docs.snagsolutions.io/loyalty/rules/connect-instagram.md): Instagram connection loyalty rule. Reward users for linking their Instagram account.
+- [Connect Reddit](https://docs.snagsolutions.io/loyalty/rules/connect-reddit.md): Reddit connection loyalty rule. Reward users for linking their Reddit account.
+- [Connect Steam](https://docs.snagsolutions.io/loyalty/rules/connect-steam.md): Steam connection loyalty rule. Reward users for linking their Steam account.
+- [Connect Telegram](https://docs.snagsolutions.io/loyalty/rules/connect-telegram.md): Telegram connection loyalty rule. Reward users for linking their Telegram account.
+- [Connect Tiktok](https://docs.snagsolutions.io/loyalty/rules/connect-tiktok.md): TikTok connection loyalty rule. Reward users for linking their TikTok account.
+- [Connect X](https://docs.snagsolutions.io/loyalty/rules/connect-twitter.md): X (Twitter) connection loyalty rule. Reward users for linking their X account to your Web3 loyalty program.
+- [Connect Wallet](https://docs.snagsolutions.io/loyalty/rules/connect-wallet.md): Wallet connection loyalty rule. Reward users for connecting their crypto wallet.
+- [Connect YouTube](https://docs.snagsolutions.io/loyalty/rules/connect-youtube.md): YouTube connection loyalty rule. Reward users for linking their YouTube account.
+- [Smart Contract Event](https://docs.snagsolutions.io/loyalty/rules/contract-event.md): Smart contract event loyalty rule. Reward users for triggering specific onchain events.
+- [Create Partner Account](https://docs.snagsolutions.io/loyalty/rules/create-partner-account.md): Partner account creation loyalty rule. Reward users for creating accounts on partner platforms.
+- [dApp Activity Rules](https://docs.snagsolutions.io/loyalty/rules/dapp-rules.md): Reward dApp deployers based on on-chain performance metrics like gas usage, active users, new users, and transaction volume.
+- [Grant Discord Role](https://docs.snagsolutions.io/loyalty/rules/discord-grant-role.md): Discord role grant loyalty rule. Automatically assign Discord roles based on loyalty achievements.
+- [Get Discord Role](https://docs.snagsolutions.io/loyalty/rules/discord-member-role.md): Discord member role loyalty rule. Reward users who hold specific Discord server roles.
+- [Send Discord Messages](https://docs.snagsolutions.io/loyalty/rules/discord-messages.md): Discord messages loyalty rule. Reward users for engaging in Discord conversations.
+- [Follow X Account](https://docs.snagsolutions.io/loyalty/rules/follow-x-account.md): Follow X account loyalty rule. Reward users for following specific X (Twitter) accounts.
+- [Merge a GitHub PR](https://docs.snagsolutions.io/loyalty/rules/github-merge-pr.md): GitHub PR merge loyalty rule. Reward users for getting pull requests merged into your repository.
+- [Become a GitHub Repository Collaborator](https://docs.snagsolutions.io/loyalty/rules/github-repo-collaborator.md): GitHub collaborator loyalty rule. Reward users who are collaborators on your repository.
+- [Fork a GitHub Repository](https://docs.snagsolutions.io/loyalty/rules/github-repo-fork.md): GitHub repo fork loyalty rule. Reward users for forking your GitHub repository.
+- [Star a GitHub Repository](https://docs.snagsolutions.io/loyalty/rules/github-repo-star.md): GitHub repo star loyalty rule. Reward users for starring your GitHub repository.
+- [Post on Instagram](https://docs.snagsolutions.io/loyalty/rules/instagram-post.md): Instagram post loyalty rule. Reward users for creating Instagram content about your brand.
+- [Click a Link](https://docs.snagsolutions.io/loyalty/rules/link-click.md): Link click loyalty rule. Reward users for visiting specific URLs.
+- [Liquidity: Uniswap V2 & V3](https://docs.snagsolutions.io/loyalty/rules/liquidity-uniswap.md): Reward liquidity activity across most EVM DEXes by targeting Uniswap V2/V3-compatible pools with configurable rewards and safeguards.
+- [Answer a Poll](https://docs.snagsolutions.io/loyalty/rules/poll.md): This recipe explains the concept of a poll rule, how to configure it with Snag and how to issue rewards to your users.
+- [Answer a Quiz](https://docs.snagsolutions.io/loyalty/rules/quiz.md): This recipe explains the concept of a quiz rule, how to configure it with Snag and how to issue rewards to your users.
+- [Comment on a Reddit Post](https://docs.snagsolutions.io/loyalty/rules/reddit-comment.md): Reddit comment loyalty rule. Reward users for commenting in specific subreddits.
+- [Refer a Friend](https://docs.snagsolutions.io/loyalty/rules/refer-friends.md): Referral loyalty rule. Reward users for inviting friends to join your platform.
+- [Participate in Governance Vote](https://docs.snagsolutions.io/loyalty/rules/snapshot-governance.md): Snapshot governance loyalty rule. Reward users for voting on DAO governance proposals via Snapshot.
+- [Spend in Shopify Store](https://docs.snagsolutions.io/loyalty/rules/spend-in-shopify-store.md): Shopify purchase loyalty rule. Reward users for spending in your Shopify store.
+- [Add an Item to Steam Wishlist](https://docs.snagsolutions.io/loyalty/rules/steam-wishlist.md): Steam wishlist loyalty rule. Reward users for adding games to their Steam wishlist.
+- [Custom Function Rule](https://docs.snagsolutions.io/loyalty/rules/stratus-function.md): Create custom loyalty rules using JavaScript functions to evaluate complex conditions and determine rewards dynamically.
+- [Swap Tokens](https://docs.snagsolutions.io/loyalty/rules/swap.md): Token swap loyalty rule. Reward users for swapping tokens on supported DEXs.
+- [Join Telegram Group](https://docs.snagsolutions.io/loyalty/rules/telegram-join.md): Telegram join loyalty rule. Reward users for joining your Telegram group or channel.
+- [Send Telegram Messages](https://docs.snagsolutions.io/loyalty/rules/telegram-messages.md): Telegram messages loyalty rule. Reward users for engaging in Telegram conversations.
+- [Submit Text Input](https://docs.snagsolutions.io/loyalty/rules/text-input.md): Text input loyalty rule. Collect and reward free-form text responses from users.
+- [Follow a TikTok Account](https://docs.snagsolutions.io/loyalty/rules/tiktok-follow.md): TikTok follow loyalty rule. Reward users for following your TikTok account.
+- [Post on TikTok](https://docs.snagsolutions.io/loyalty/rules/tiktok-post.md): TikTok post loyalty rule. Reward users for creating TikTok content about your brand.
+- [Hold an NFT](https://docs.snagsolutions.io/loyalty/rules/token-hold.md): NFT hold loyalty rule. Reward users for holding specific NFTs in their wallet.
+- [Hold a Fungible Token](https://docs.snagsolutions.io/loyalty/rules/token-hold-erc20.md): ERC-20 token hold loyalty rule. Reward users for holding specific ERC-20 tokens in their wallet.
+- [Mint an NFT](https://docs.snagsolutions.io/loyalty/rules/token-mint.md): Token mint loyalty rule. Reward users for minting tokens or NFTs.
+- [Purchase an NFT](https://docs.snagsolutions.io/loyalty/rules/token-purchase.md): Token purchase loyalty rule. Reward users for purchasing specific tokens.
+- [Sale an NFT](https://docs.snagsolutions.io/loyalty/rules/token-sale.md): Token sale loyalty rule. Track and reward participation in token sales.
+- [Reach X followers](https://docs.snagsolutions.io/loyalty/rules/x-followers.md): X follower count loyalty rule. Reward users based on their X (Twitter) follower count.
+- [Post on X](https://docs.snagsolutions.io/loyalty/rules/x-new-tweet.md): New tweet loyalty rule. Reward users for posting new tweets on X.
+- [Get X Post Impressions](https://docs.snagsolutions.io/loyalty/rules/x-post-impression.md): X post impression loyalty rule. Reward users based on the reach and impressions of their posts.
+- [React to an X Post](https://docs.snagsolutions.io/loyalty/rules/x-post-reaction.md): X post reaction loyalty rule. Reward users for liking, retweeting, or engaging with specific posts.
+- [Add Text to X Bio](https://docs.snagsolutions.io/loyalty/rules/x-text-in-bio.md): X bio text loyalty rule. Reward users for adding specific text to their X profile bio.
+- [Comment on an X Post with Text](https://docs.snagsolutions.io/loyalty/rules/x-text-in-comment.md): X comment text loyalty rule. Reward users for commenting with specific text on posts.
+- [Add Text to X Username](https://docs.snagsolutions.io/loyalty/rules/x-text-in-username.md): X username text loyalty rule. Reward users for including specific text in their X username.
+- [Comment on a YouTube Video](https://docs.snagsolutions.io/loyalty/rules/youtube-comment.md): YouTube comment loyalty rule. Reward users for commenting on YouTube videos.
+- [Subscribe to a YouTube Channel](https://docs.snagsolutions.io/loyalty/rules/youtube-subscriber.md): YouTube subscriber loyalty rule. Reward users for subscribing to your YouTube channel.
+- [Set up loyalty currency](https://docs.snagsolutions.io/loyalty/set-up-loyalty-currency.md): After you have enabled loyalty program on your admin page, you will need to create a loyalty currency.
+- [Smart contract event rule](https://docs.snagsolutions.io/loyalty/smart-contract-event.md): This recipe explains what the smart contract event rule is, how it can be used to track complex on-chain user behaviour and includes a simple example for how to set it up.
+- [Updating & reseting balances](https://docs.snagsolutions.io/loyalty/updating-balances.md): This recipe explains how to manually update user loyalty points balances (i.e. not as part of a rule completion or spend action; an example use-case is to reset all user point balances to 0).
+- [Verifying rule completion](https://docs.snagsolutions.io/loyalty/verifying-rule-completion.md): This recipe explains how to submit and verify loyalty rule completion via the Snag API.
+- [X rules logic](https://docs.snagsolutions.io/loyalty/x-rules-logic.md): Additional context for X (Twitter) rules logic
+- [README](https://docs.snagsolutions.io/mintlify/README.md)
+- [Development](https://docs.snagsolutions.io/mintlify/development.md): Preview changes locally to update your docs
+- [Quickstart](https://docs.snagsolutions.io/mintlify/quickstart.md): Start building awesome documentation in under 5 minutes
+- [Customization](https://docs.snagsolutions.io/setup/customization.md): Snag gives partners powerful tools to customize their platform's branding, layout, and theme—no code required. This guide walks through all available customization options to help you tailor your white-labeled experience to your brand and community.
+- [Hostname](https://docs.snagsolutions.io/setup/hostname.md): Configure a custom domain or hostname for your Snag-powered loyalty experience.
+- [Permissions](https://docs.snagsolutions.io/setup/permissions.md): Manage admin roles and team access by adding wallet addresses and setting permissions. Control who can manage your platform and receive important updates.
+- [Set up overview](https://docs.snagsolutions.io/setup/setup-overview.md): Launch your Web3 loyalty platform with Snag. Follow the setup checklist: configure branding, install your hostname, build your program, and go live.
+- [User profiles](https://docs.snagsolutions.io/setup/user-profiles.md): The following will guide you through creating a user profile and the functionality available within profiles.
+- [Write a Stratus function for loyalty rule completion](https://docs.snagsolutions.io/stratus/function-loyalty-rule.md): Learn the input/output contract and build a handler that awards points or badges when a loyalty rule is completed.
+- [Function templates](https://docs.snagsolutions.io/stratus/function-templates.md): Pre-built Stratus function templates for common use cases like airdrops and token gating.
+- [Functions](https://docs.snagsolutions.io/stratus/functions.md): Write and deploy serverless JavaScript functions on Snag Stratus. Schedule via cron, trigger via webhooks, or chain to onchain subscriptions for custom reward logic.
+- [Onchain points](https://docs.snagsolutions.io/stratus/onchain-points.md): Deploy or import onchain points (ERC-20) through Stratus.
+- [Relayers](https://docs.snagsolutions.io/stratus/relayers.md): Use Snag's transaction relayers for gasless transactions and sponsored onchain actions.
+- [Stratus overview](https://docs.snagsolutions.io/stratus/stratus-overview.md): Stratus is Snag's onchain cloud: serverless functions, event subscriptions, gasless relayers, and ERC-20 token sync. Build custom Web3 backend logic.
+- [Subscriptions](https://docs.snagsolutions.io/stratus/subscriptions.md): Managing Stratus Subscription
+- [Function syntax](https://docs.snagsolutions.io/stratus/syntax.md): Reference guide for the Stratus function scripting syntax and available APIs.
+- [Webhooks](https://docs.snagsolutions.io/stratus/webhooks.md): Configure webhooks to receive real-time notifications for onchain events and loyalty actions.
+- [User Support Tool](https://docs.snagsolutions.io/support/user-support.md): Get help with Snag including support channels, documentation, and contact information.
+- [User authentication overview](https://docs.snagsolutions.io/user-auth/auth-overview.md): Connect wallet, email, and social login to your Snag platform. Supports Dynamic, Thirdweb, Privy, Immutable, Sequence, and Auth0 providers.
+- [Auth0](https://docs.snagsolutions.io/user-auth/auth0.md): Integrate Auth0 as your authentication provider for enterprise-grade identity management.
+- [Dynamic](https://docs.snagsolutions.io/user-auth/dynamic.md): Integrate Dynamic as your authentication provider for embedded wallets and social login.
+- [Immutable Passport](https://docs.snagsolutions.io/user-auth/immutable.md): Integrate Immutable Passport as your authentication provider for gaming-focused Web3 apps.
+- [Privy](https://docs.snagsolutions.io/user-auth/privy.md): Integrate Privy as your authentication provider for embedded wallets and email login.
+- [Sequence Wallet](https://docs.snagsolutions.io/user-auth/sequence.md): Integrate Sequence as your authentication provider for smart wallet support.
+- [Thirdweb](https://docs.snagsolutions.io/user-auth/thirdweb.md): Integrate Thirdweb as your authentication provider for wallet and social login.
+- [Delegate.cash integration](https://docs.snagsolutions.io/users/delegate-cash.md): Enable delegate.cash support so users can participate in loyalty programs through delegated wallets.
+- [Custom user attributes](https://docs.snagsolutions.io/users/website-user-attributes.md): Define custom profile fields, let users edit them, fetch them from the Users API, and save updates.
+- [Welcome to Snag Docs](https://docs.snagsolutions.io/welcome.md): Snag is the leading onchain loyalty platform, helping Web3 brands incentivize engagement, automate rewards and track user contributions. Power growth with customizable point-based programs and integrated marketplace features.
+
+## OpenAPI Specs
+
+- [openapi](https://docs.snagsolutions.io/api-reference/openapi.json)
+- [openapi.documented](https://docs.snagsolutions.io/api-reference/openapi.documented.json)
+
+## Optional
+
+- [Contact Us](https://www.snagsolutions.io/contact)
+
+
+Built with [Mintlify](https://mintlify.com).
