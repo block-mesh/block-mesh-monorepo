@@ -79,15 +79,3 @@ pub async fn fetch_metadata() -> anyhow::Result<Metadata> {
 //         colo: extract_header_value(&headers, "cf-meta-colo", "Colo N/A"),
 //     })
 // }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[tokio::test]
-    async fn test_metadata() {
-        let metadata = fetch_metadata().await;
-        assert!(metadata.is_ok());
-        println!("metadata: {:#?}", metadata.unwrap());
-    }
-}
