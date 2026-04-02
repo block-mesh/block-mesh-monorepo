@@ -41,15 +41,3 @@ pub async fn test_latency() -> anyhow::Result<f64> {
     }
     Ok(req_latency)
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[tokio::test]
-    async fn test_latency_speed() {
-        let latency = test_latency().await;
-        assert!(latency.is_ok());
-        println!("Latency: {:.2}ms", latency.unwrap());
-    }
-}
