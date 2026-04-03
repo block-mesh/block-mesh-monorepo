@@ -5,6 +5,6 @@ docker run \
 --network=blockmesh_network \
 -e APP_ENVIRONMENT=local \
 -e REDIS_URL="redis://127.0.0.1:6379" \
--e DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh" \
+-e DATABASE_URL="postgres://postgres:password@localhost:9559/block-mesh" \
 -e MAILGUN_SEND_KEY="" \
 -t blockmesh/feature-flags-server:latest-amd64

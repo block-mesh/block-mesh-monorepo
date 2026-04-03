@@ -32,10 +32,10 @@ fi
 DB_USER="${POSTGRES_USER:=postgres}"
 DB_PASSWORD="${POSTGRES_PASSWORD:=password}"
 #DB_NAME="${POSTGRES_DB:=block-mesh}"
-#DB_PORT="${POSTGRES_PORT:=5559}"
+#DB_PORT="${POSTGRES_PORT:=9559}"
 
 function remove_pg() {
-   DOCKERS="$(docker ps -a -q --filter ancestor=postgres:15.3-alpine3.18 --format="{{.ID}}")"
+   DOCKERS="$(docker ps -a --filter ancestor=postgres:18-alpine --format="{{.ID}}")"
     if [ -n "$DOCKERS" ]
     then
       ensure docker rm --force --volumes $DOCKERS
@@ -52,7 +52,7 @@ function start_db() {
       -e POSTGRES_DB=${DB_NAME} \
       -e POSTGRES_PORT=${DB_PORT} \
       -p "${DB_PORT}:${DB_PORT}" \
-      -d postgres:15.3-alpine3.18 \
+      -d postgres:18-alpine \
       postgres -p ${DB_PORT} -N 1000
       export PGPASSWORD=password
       until psql -h "localhost" -p "${DB_PORT}" -U "${DB_USER}" -d postgres -c '\q'
@@ -65,16 +65,14 @@ function start_db() {
 if [ "${SKIP_DOCKER}" != "yes" ]
 then
   remove_pg
-  start_db tg-bot 5551
-  start_db data-sink 5552
-  start_db emails 5553
-  start_db logs-drain 5554
-  start_db block-mesh 5559
-  start_db ids 6999
-  start_db rama 6998
-  start_db collector 6997
-
-
+#  start_db tg-bot 5551
+#  start_db data-sink 5552
+#  start_db emails 5553
+#  start_db logs-drain 5554
+  start_db block-mesh 9559
+#  start_db ids 6999
+#  start_db rama 6998
+#  start_db collector 6997
 
   DOCKERS="$(docker ps -a -q --filter ancestor=redis:alpine3.20 --format="{{.ID}}")"
   if [ -n "$DOCKERS" ]
@@ -95,23 +93,23 @@ function migrate() {
 >&2 echo "Postgres is up and running on port ${DB_PORT}!"
 set -x
 
-export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:5559/block-mesh"
+export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:9559/block-mesh"
 echo "create DB"
 ensure sqlx database create
 echo "migrate DB block-mesh-manager"
 ensure migrate
-cd "${ROOT}/libs/block-mesh-manager-worker" || exit
-echo "migrate DB block-mesh-manager-worker"
-ensure migrate
-cd "${ROOT}/libs/block-mesh-manager-api" || exit
-echo "migrate DB block-mesh-manager-api"
-ensure migrate
-cd "${ROOT}/libs/block-mesh-manager-ws" || exit
-echo "migrate DB block-mesh-manager-ws"
-ensure migrate
-cd "${ROOT}/libs/feature-flags-server" || exit
-echo "migrate DB feature-flags-server"
-ensure migrate
+#cd "${ROOT}/libs/block-mesh-manager-worker" || exit
+#echo "migrate DB block-mesh-manager-worker"
+#ensure migrate
+#cd "${ROOT}/libs/block-mesh-manager-api" || exit
+#echo "migrate DB block-mesh-manager-api"
+#ensure migrate
+#cd "${ROOT}/libs/block-mesh-manager-ws" || exit
+#echo "migrate DB block-mesh-manager-ws"
+#ensure migrate
+#cd "${ROOT}/libs/feature-flags-server" || exit
+#echo "migrate DB feature-flags-server"
+#ensure migrate
 cd "${ROOT}/libs/block-mesh-manager-database-domain" || exit
 echo "migrate DB block-mesh-manager-database-domain"
 ensure migrate
@@ -125,7 +123,7 @@ ensure migrate
 #echo "migrate DB tg-privacy-bot"
 #ensure migrate
 #export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:5552/data-sink"
-export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:5559/block-mesh"
+export DATABASE_URL="postgres://${DB_USER}:${DB_PASSWORD}@localhost:9559/block-mesh"
 echo "create DB"
 ensure sqlx database create
 #cd "${ROOT}/libs/data-sink" || exit

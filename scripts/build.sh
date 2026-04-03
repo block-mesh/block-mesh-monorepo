@@ -7,7 +7,7 @@ ensure cd "${ROOT}" && typeshare . --lang=typescript --output-file="${ROOT}/libs
 cd "${ROOT}/libs/block-mesh-manager" || exit
 set +x
 if [ -n "${DATABASE_URL+1}" ]; then
-  export DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
+  export DATABASE_URL="postgres://postgres:password@localhost:9559/block-mesh"
 fi
 if [ -f "${ROOT}/.env" ] ; then
   source "${ROOT}/.env"
