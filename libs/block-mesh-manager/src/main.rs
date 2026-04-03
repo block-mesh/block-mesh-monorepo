@@ -143,6 +143,7 @@ async fn run() -> anyhow::Result<()> {
     let dashboard_pool = dashboard_pool(None).await;
     let invite_codes = HashMapWithExpiry::new(1_000);
     let wallet_addresses = HashMapWithExpiry::new(1_000);
+    let team_api_key = env::var("TEAM_API_KEY").expect("could not find TEAM_API_KEY");
     let cf_site_key = env::var("CF_SITE_KEY")?;
     let cf_secret_key = env::var("CF_SECRET_KEY")?;
     let cf_enforce = env::var("CF_ENFORCE")
@@ -186,6 +187,7 @@ async fn run() -> anyhow::Result<()> {
             .expect("could not find SNAG_ORGANIZATION_ID"),
     };
     let app_state = Arc::new(AppState {
+        team_api_key,
         wallet_login_nonce: HashMapWithExpiry::new(1_000),
         rate_limiter: HashSetWithExpiry::new(),
         enable_hcaptcha,

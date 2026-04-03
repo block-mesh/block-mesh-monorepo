@@ -20,6 +20,12 @@ pub fn get_static_un_auth_router() -> Router<Arc<AppState>> {
             get(routes::referrals::admin_referral::handler),
         )
         .route(
+            RoutesEnum::Static_Admin_RestoreUserFromArchive
+                .to_string()
+                .as_str(),
+            get(routes::admin::restore_user_from_archive_form::handler),
+        )
+        .route(
             RoutesEnum::Static_UnAuth_DbHealth.to_string().as_str(),
             get(routes::health_check::health::db_health_handler),
         )

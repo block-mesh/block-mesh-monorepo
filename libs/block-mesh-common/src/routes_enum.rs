@@ -5,6 +5,7 @@ pub enum RoutesEnum {
     Static_Robots,
     Static_Admin_Debug,
     Static_Admin_Referral,
+    Static_Admin_RestoreUserFromArchive,
     Static_UnAuth_Map,
     Static_UnAuth_AuthStatus,
     Static_UnAuth_RpcDashboard,
@@ -59,6 +60,7 @@ pub enum RoutesEnum {
     Api_CreateBulkTwitterTask,
     Api_ResendConfirmationEmail,
     Api_EmailConfirm,
+    Api_RestoreUserFromArchive,
 }
 
 impl Display for RoutesEnum {
@@ -67,6 +69,9 @@ impl Display for RoutesEnum {
             RoutesEnum::Static_Robots => write!(f, "/robots.txt"),
             RoutesEnum::Static_Admin_Debug => write!(f, "/admin_debug"),
             RoutesEnum::Static_Admin_Referral => write!(f, "/admin_referral"),
+            RoutesEnum::Static_Admin_RestoreUserFromArchive => {
+                write!(f, "/admin/restore_user_from_archive")
+            }
             RoutesEnum::Api_ReferralBonus => write!(f, "/referral_bonus"),
             RoutesEnum::Static_Auth_Proof_Of_Humanity => write!(f, "/proof_of_humanity"),
             RoutesEnum::Static_UnAuth_Version => write!(f, "/version"),
@@ -124,6 +129,9 @@ impl Display for RoutesEnum {
             RoutesEnum::Api_CreateBulkTwitterTask => write!(f, "/create_bulk_twitter_task"),
             RoutesEnum::Api_ResendConfirmationEmail => write!(f, "/resend_confirmation_email"),
             RoutesEnum::Api_EmailConfirm => write!(f, "/email_confirm"),
+            RoutesEnum::Api_RestoreUserFromArchive => {
+                write!(f, "/admin/restore_user_from_archive")
+            }
         }
     }
 }

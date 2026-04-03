@@ -1,0 +1,207 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-dark-blue text-off-white">
+    <div class="mx-auto flex min-h-screen max-w-6xl flex-col px-4 py-10 sm:px-6 lg:px-8">
+        <div class="mb-8 overflow-hidden rounded-xl border border-cyan/30 bg-slate-950/70 shadow-[0_0_80px_rgba(34,211,238,0.08)] backdrop-blur">
+            <div class="grid gap-0 lg:grid-cols-[1.1fr_0.9fr]">
+                <section class="relative overflow-hidden border-b border-cyan/20 p-8 lg:border-b-0 lg:border-r lg:p-12">
+                    <div class="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(249,115,22,0.12),transparent_35%),radial-gradient(circle_at_bottom_right,rgba(34,211,238,0.12),transparent_40%)]"></div>
+                    <div class="relative">
+                        <div class="mb-6 inline-flex items-center gap-3 rounded-lg border border-cyan/30 bg-slate-900/80 px-4 py-2 text-xs uppercase tracking-[0.35em] text-cyan">
+                            <span class="h-2 w-2 rounded-full bg-orange"></span>
+                            Archive Recovery Console
+                        </div>
+                        <h1 class="font-bebas-neue text-5xl leading-none tracking-[0.08em] text-off-white sm:text-6xl">
+                            Restore Archived Users
+                        </h1>
+                        <p class="mt-6 max-w-2xl font-open-sans text-sm leading-7 text-slate-300 sm:text-base">
+                            Pull the latest archived snapshot for an email and attempt to recreate the user row.
+                        </p>
+                    </div>
+                </section>
+
+                <section class="p-8 lg:p-12">
+                    <form id="restore-user-form" class="space-y-6">
+                        <div>
+                            <label class="mb-2 block font-bebas-neue text-xl tracking-[0.08em] text-off-white" for="admin_key">
+                                Admin Team API Key
+                            </label>
+                            <input
+                                id="admin_key"
+                                name="admin_key"
+                                type="password"
+                                autocomplete="current-password"
+                                placeholder="Enter Admin/Team Key"
+                                style="color: black !important; background-color: white !important;"
+                                class="w-full rounded-lg border border-cyan/20 px-4 py-3 font-mono text-sm outline-none transition focus:border-cyan focus:ring-2 focus:ring-cyan/30"
+                                required
+                            />
+                        </div>
+
+                        <div>
+                            <label class="mb-2 block font-bebas-neue text-xl tracking-[0.08em] text-off-white" for="email">
+                                User Email
+                            </label>
+                            <input
+                                id="email"
+                                name="email"
+                                type="email"
+                                autocomplete="email"
+                                placeholder="user@example.com"
+                                style="color: black !important; background-color: white !important;"
+                                class="w-full rounded-lg border border-cyan/20 px-4 py-3 font-open-sans text-base outline-none transition focus:border-cyan focus:ring-2 focus:ring-cyan/30"
+                                required
+                            />
+                        </div>
+
+                        <div class="flex flex-col gap-4 mt-8 sm:flex-row">
+                            <button
+                                id="submit-button"
+                                type="submit"
+                                class="inline-flex items-center justify-center rounded-lg border border-orange bg-orange px-6 py-3 font-bebas-neue text-xl tracking-[0.08em] text-slate-950 transition hover:brightness-105 disabled:cursor-not-allowed disabled:opacity-60"
+                            >
+                                Restore User
+                            </button>
+                            <button
+                                id="reset-button"
+                                type="button"
+                                class="inline-flex items-center justify-center rounded-lg border border-cyan/30 bg-transparent px-6 py-3 font-bebas-neue text-xl tracking-[0.08em] text-cyan transition hover:border-cyan hover:bg-cyan/10"
+                            >
+                                Reset Form
+                            </button>
+                        </div>
+                    </form>
+
+                    <div id="result-container" class="mt-8 hidden rounded-lg border border-white/10 bg-slate-900/80 p-6">
+                        <div class="flex items-center justify-between gap-4 border-b border-white/10 pb-4">
+                            <div>
+                                <div class="font-bebas-neue text-2xl tracking-[0.08em] text-off-white">Restore Result</div>
+                                <div id="result-status" class="mt-1 font-open-sans text-sm text-slate-400"></div>
+                            </div>
+                            <div id="result-badge" class="rounded-full px-3 py-1 text-xs uppercase tracking-[0.25em]"></div>
+                        </div>
+
+                        <div id="human-friendly-result" class="mt-6 space-y-4">
+                            <!-- Friendly result items will be injected here -->
+                        </div>
+
+                        <details class="mt-6">
+                            <summary class="cursor-pointer font-open-sans text-xs text-slate-500 hover:text-slate-300">
+                                View Raw JSON Response
+                            </summary>
+                            <pre id="result-json" class="mt-4 overflow-x-auto rounded-md border border-white/5 bg-black/30 p-4 font-mono text-xs leading-6 text-slate-400"></pre>
+                        </details>
+                    </div>
+                </section>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    const form = document.getElementById("restore-user-form");
+    const submitButton = document.getElementById("submit-button");
+    const resetButton = document.getElementById("reset-button");
+    const resultContainer = document.getElementById("result-container");
+    const resultStatus = document.getElementById("result-status");
+    const resultBadge = document.getElementById("result-badge");
+    const resultJson = document.getElementById("result-json");
+    const humanResult = document.getElementById("human-friendly-result");
+    const apiPath = "{{ api_path }}";
+
+    function setResultBadge(label, type) {
+        let classes = "rounded-full px-3 py-1 text-xs uppercase tracking-[0.25em] ";
+        if (type === "success") {
+            classes += "border border-emerald-400/40 bg-emerald-400/10 text-emerald-300";
+        } else if (type === "warning") {
+            classes += "border border-orange/40 bg-orange/10 text-orange";
+        } else if (type === "error") {
+            classes += "border border-red-400/40 bg-red-400/10 text-red-300";
+        } else {
+            classes += "border border-slate-700 text-slate-400";
+        }
+        resultBadge.className = classes;
+        resultBadge.textContent = label;
+    }
+
+    function addInfoRow(label, value, isSuccess = false) {
+        const div = document.createElement("div");
+        div.className = "flex flex-col gap-1 sm:flex-row sm:justify-between sm:items-center p-3 rounded-md bg-white/5 border border-white/5";
+        div.innerHTML = `
+            <span class="text-xs uppercase tracking-wider text-slate-500 font-semibold">${label}</span>
+            <span class="font-mono text-sm ${isSuccess ? 'text-emerald-400' : 'text-slate-200'} break-all">${value}</span>
+        `;
+        humanResult.appendChild(div);
+    }
+
+    function clearResults() {
+        resultContainer.classList.add("hidden");
+        humanResult.innerHTML = "";
+        resultJson.textContent = "";
+    }
+
+    form.addEventListener("submit", async (event) => {
+        event.preventDefault();
+
+        const adminKey = document.getElementById("admin_key").value;
+        const email = document.getElementById("email").value.trim();
+
+        submitButton.disabled = true;
+        submitButton.textContent = "Processing...";
+        clearResults();
+        resultContainer.classList.remove("hidden");
+        resultStatus.textContent = "Communicating with restore API...";
+        setResultBadge("Running", "info");
+
+        try {
+            const response = await fetch(apiPath, {
+                method: "POST",
+                headers: {
+                    "content-type": "application/json"
+                },
+                body: JSON.stringify({
+                    code: adminKey,
+                    email: email,
+                    team_api_key: adminKey
+                })
+            });
+
+            const payload = await response.json().catch(() => ({}));
+            resultJson.textContent = JSON.stringify(payload, null, 2);
+
+            if (response.ok) {
+                if (payload.restored) {
+                    resultStatus.textContent = "Operation successful.";
+                    setResultBadge("Restored", "success");
+                    addInfoRow("Status", "User has been successfully restored", true);
+                    if (payload.user_id) addInfoRow("User ID", payload.user_id);
+                    addInfoRow("Email", email);
+                } else {
+                    resultStatus.textContent = payload.message || "No changes were made.";
+                    setResultBadge("Skipped", "warning");
+                    addInfoRow("Note", payload.message || "User already exists or restore not needed");
+                    addInfoRow("Email", email);
+                }
+            } else {
+                resultStatus.textContent = "The request could not be completed.";
+                setResultBadge("Error", "error");
+                addInfoRow("Error Message", payload.message || "Unauthorized or invalid request");
+                addInfoRow("HTTP Status", response.status);
+            }
+        } catch (error) {
+            resultStatus.textContent = "A network error occurred.";
+            setResultBadge("Network Error", "error");
+            addInfoRow("Error", error.message);
+        } finally {
+            submitButton.disabled = false;
+            submitButton.textContent = "Restore User";
+        }
+    });
+
+    resetButton.addEventListener("click", () => {
+        form.reset();
+        clearResults();
+    });
+</script>
+{% endblock %}
