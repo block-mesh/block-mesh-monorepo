@@ -8,6 +8,7 @@ pub mod get_snag_email_reward_state;
 pub mod get_user_by_email;
 pub mod get_user_by_wallet;
 pub mod get_wallet_connected_not_sent_users;
+pub mod restore_user_from_archive;
 pub mod update_email;
 pub mod update_extension_activated;
 pub mod update_extension_activated_sent;

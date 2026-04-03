@@ -73,6 +73,10 @@ pub fn get_api_router() -> Router<Arc<AppState>> {
                 .post(routes::admin::reports_queue::change_settings::handler),
         )
         .route(
+            RoutesEnum::Api_RestoreUserFromArchive.to_string().as_str(),
+            post(routes::admin::restore_user_from_archive_api::handler),
+        )
+        .route(
             RoutesEnum::Api_CreateTwitterTask.to_string().as_str(),
             get(routes::twitter_task::create_twitter_task::handler),
         )
