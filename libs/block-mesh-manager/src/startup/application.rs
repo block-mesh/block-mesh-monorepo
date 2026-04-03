@@ -43,6 +43,7 @@ pub struct Application {
 }
 
 pub struct AppState {
+    pub team_api_key: String,
     pub wallet_login_nonce: HashMapWithExpiry<String, String>,
     pub rate_limiter: HashSetWithExpiry<String>,
     pub enable_hcaptcha: bool,

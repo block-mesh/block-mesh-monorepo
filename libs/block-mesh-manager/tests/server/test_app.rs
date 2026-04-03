@@ -113,6 +113,7 @@ async fn spawn_app_inner(snag_base_url: Option<String>) -> TestApp {
     let invite_codes = HashMapWithExpiry::new(1_000);
 
     let app_state = Arc::new(AppState {
+        team_api_key: "tmp".to_string(),
         wallet_login_nonce: HashMapWithExpiry::new(1_000),
         rate_limiter: HashSetWithExpiry::new(),
         enable_hcaptcha: false,
