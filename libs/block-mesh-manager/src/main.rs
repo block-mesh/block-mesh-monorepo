@@ -20,6 +20,7 @@ cfg_if! { if #[cfg(feature = "ssr")] {
     use block_mesh_common::constants::DeviceType;
     use block_mesh_manager::worker::update_feature_flags::feature_flags_loop;
     use block_mesh_manager::worker::retry_pending_snag_sync::retry_pending_snag_sync_loop;
+    use block_mesh_manager_database_domain::domain::bulk_get_or_create_aggregate_by_user_and_name::flush_aggregate_liveness_loop;
     use block_mesh_manager::utils::cache_envar::get_envar;
     use database_utils::utils::migrate::migrate;
     use std::process;
@@ -228,11 +229,14 @@ async fn run() -> anyhow::Result<()> {
         app_state.snag.clone(),
         db_pool.clone(),
     ));
+    let aggregate_liveness_flush_task =
+        tokio::spawn(flush_aggregate_liveness_loop(db_pool.clone()));
 
     tokio::select! {
         o = application_task => panic!("API {:?}", o),
         o = feature_flags_update_task => panic!("feature_flags_update_task {:?}", o),
-        o = pending_snag_sync_task => panic!("pending_snag_sync_task {:?}", o)
+        o = pending_snag_sync_task => panic!("pending_snag_sync_task {:?}", o),
+        o = aggregate_liveness_flush_task => panic!("aggregate_liveness_flush_task {:?}", o)
     }
 }
 

@@ -188,6 +188,9 @@
                 setResultBadge("Error", "error");
                 addInfoRow("Error Message", payload.message || "Unauthorized or invalid request");
                 addInfoRow("HTTP Status", response.status);
+                if (payload.conflict_field) addInfoRow("Conflict Field", payload.conflict_field);
+                if (payload.conflict_value) addInfoRow("Conflict Value", payload.conflict_value);
+                if (payload.conflicting_user_id) addInfoRow("Conflicting User ID", payload.conflicting_user_id);
             }
         } catch (error) {
             resultStatus.textContent = "A network error occurred.";

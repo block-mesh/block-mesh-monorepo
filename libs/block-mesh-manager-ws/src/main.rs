@@ -4,6 +4,7 @@ use anyhow::Context;
 use block_mesh_common::constants::BLOCKMESH_SERVER_UUID_ENVAR;
 use block_mesh_common::env::load_dotenv::load_dotenv;
 use block_mesh_common::interfaces::db_messages::DBMessage;
+use block_mesh_manager_database_domain::domain::bulk_get_or_create_aggregate_by_user_and_name::flush_aggregate_liveness_loop;
 use block_mesh_manager_ws::app::app;
 use block_mesh_manager_ws::get_pending_twitter_tasks_loop::get_pending_twitter_tasks_loop;
 use block_mesh_manager_ws::joiner_loop::joiner_loop;
@@ -77,6 +78,8 @@ async fn run() -> anyhow::Result<()> {
     let update_block_time_loop_task = tokio::spawn(update_block_time_loop(state.clone()));
     let joiner_task = tokio::spawn(joiner_loop(joiner_rx));
     let redis_task = tokio::spawn(redis_loop(state.clone()));
+    let aggregate_liveness_flush_task =
+        tokio::spawn(flush_aggregate_liveness_loop(state.pool.clone()));
     let collect_messages_task = tokio::spawn(collect_messages(
         joiner_tx,
         rx,
@@ -92,6 +95,7 @@ async fn run() -> anyhow::Result<()> {
         o = get_pending_twitter_tasks_loop_task => panic!("get_pending_twitter_tasks_loop_task {:?}", o),
         o = redis_task => panic!("redis_task {:?}", o),
         o = joiner_task => panic!("joiner_task {:?}", o),
+        o = aggregate_liveness_flush_task => panic!("aggregate_liveness_flush_task {:?}", o),
         o = server_task => panic!("server_task {:?}", o),
         o = collect_messages_task => panic!("collect_messages_task {:?}", o)
     }
