@@ -121,13 +121,29 @@ jobs:
           - target: "x86_64-unknown-linux-gnu"
             os: "ubuntu-latest"
     runs-on: ${{ matrix.os }}
+    services:
+      postgres:
+        image: postgres:18-alpine
+        env:
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: password
+          POSTGRES_DB: block-mesh
+        ports:
+          - 9559:5432
+        options: >-
+          --health-cmd "pg_isready -U postgres -d block-mesh"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+    env:
+      DATABASE_URL: postgres://postgres:password@localhost:9559/block-mesh
     steps:
       - name: "Check out the repo"
         uses: actions/checkout@v4
       - name: "Install deps"
         run: |
           sudo apt-get update
-          sudo apt-get install -y pkg-config openssl libssl-dev
+          sudo apt-get install -y pkg-config openssl libssl-dev postgresql-client
       - uses: dtolnay/rust-toolchain@stable
         with:
           toolchain: ${{ vars.RUSTC_VERSION }}
@@ -137,6 +153,11 @@ jobs:
         with:
           key: upload-assets-worker-${{ matrix.target }}
           cache-all-crates: true
+      - name: "Prepare SQLx schema"
+        run: |
+          for migration in libs/block-mesh-manager/migrations/*.sql; do
+            psql "$DATABASE_URL" -v ON_ERROR_STOP=1 -f "$migration"
+          done
       - name: "Build Worker"
         run: |
           cargo build -p block-mesh-manager-worker --release
