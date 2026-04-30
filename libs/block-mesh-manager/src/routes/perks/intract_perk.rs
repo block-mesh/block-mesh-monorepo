@@ -81,7 +81,7 @@ pub async fn handler(
         }
     };
     let new_data = serde_json::to_value(resp.clone()).map_err(|_| Error::InternalServer)?;
-    let mut transaction = create_txn(&state.dashboard_pool).await?;
+    let mut transaction = create_txn(&state.pool).await?;
     let user_perks = get_user_perks(&mut transaction, &user.user_id).await?;
     let perk = if let Some(perk) = user_perks.iter().find(|i| i.name == PerkName::Intract) {
         if new_data == perk.data {
@@ -111,7 +111,7 @@ pub async fn handler(
     commit_txn(transaction).await?;
     let mut follower_transaction = create_txn(&state.dashboard_pool).await?;
     dashboard_data_extractor(
-        &state.dashboard_pool,
+        &state.pool,
         &mut follower_transaction,
         state.clone(),
         user,
