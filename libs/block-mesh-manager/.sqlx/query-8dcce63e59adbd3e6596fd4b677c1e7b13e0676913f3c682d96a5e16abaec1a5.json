@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "UPDATE ip_addresses SET\n           latitude = $1 ,\n           longitude = $2 ,\n           city = $3 ,\n           region = $4 ,\n           country = $5 ,\n           timezone = $6 ,\n           isp = $7,\n           enriched = $8\n           WHERE id = $9",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Float8",
+        "Float8",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Text",
+        "Bool",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "8dcce63e59adbd3e6596fd4b677c1e7b13e0676913f3c682d96a5e16abaec1a5"
+}

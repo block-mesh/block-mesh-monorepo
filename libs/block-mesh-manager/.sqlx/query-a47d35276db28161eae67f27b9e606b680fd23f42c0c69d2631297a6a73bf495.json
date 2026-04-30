@@ -1,0 +1,50 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        WITH\n            extant AS (\n                SELECT id, user_id, name, created_at, status FROM call_to_actions WHERE user_id = $3 AND name = $4\n            ),\n            inserted AS (\n                INSERT INTO call_to_actions (id , created_at, user_id, name, status)\n                SELECT $1, $2, $3, $4,  $5\n                WHERE NOT EXISTS (SELECT FROM extant)\n                RETURNING id, user_id, name, created_at, status\n            )\n        SELECT id, user_id, name, created_at, status FROM inserted\n        UNION ALL\n        SELECT id, user_id, name, created_at, status FROM extant\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 3,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 4,
+        "name": "status",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Uuid",
+        "Text",
+        "Bool"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "a47d35276db28161eae67f27b9e606b680fd23f42c0c69d2631297a6a73bf495"
+}

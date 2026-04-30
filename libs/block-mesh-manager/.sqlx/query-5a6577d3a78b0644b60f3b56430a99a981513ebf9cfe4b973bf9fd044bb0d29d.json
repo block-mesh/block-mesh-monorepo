@@ -1,0 +1,67 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        UPDATE perks\n        SET\n            data = $3,\n            one_time_bonus = $4\n        WHERE user_id = $1 AND name = $2\n        RETURNING id, user_id, created_at, name, multiplier, one_time_bonus, data, updated_at\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "user_id",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 2,
+        "name": "created_at",
+        "type_info": "Timestamptz"
+      },
+      {
+        "ordinal": 3,
+        "name": "name",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 4,
+        "name": "multiplier",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 5,
+        "name": "one_time_bonus",
+        "type_info": "Float8"
+      },
+      {
+        "ordinal": 6,
+        "name": "data",
+        "type_info": "Jsonb"
+      },
+      {
+        "ordinal": 7,
+        "name": "updated_at",
+        "type_info": "Timestamptz"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Text",
+        "Jsonb",
+        "Float8"
+      ]
+    },
+    "nullable": [
+      false,
+      false,
+      false,
+      false,
+      false,
+      false,
+      true,
+      false
+    ]
+  },
+  "hash": "5a6577d3a78b0644b60f3b56430a99a981513ebf9cfe4b973bf9fd044bb0d29d"
+}

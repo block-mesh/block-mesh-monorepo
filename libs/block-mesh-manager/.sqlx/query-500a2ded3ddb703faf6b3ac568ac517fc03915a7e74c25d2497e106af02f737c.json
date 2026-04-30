@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        DELETE FROM uptime_reports WHERE id in (\n            SELECT id FROM uptime_reports\n            WHERE\n                created_at < $1\n            AND\n                user_id = $2\n            LIMIT 10000\n        )\n        ",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "Timestamptz",
+        "Uuid"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "500a2ded3ddb703faf6b3ac568ac517fc03915a7e74c25d2497e106af02f737c"
+}

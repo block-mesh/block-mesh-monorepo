@@ -1,0 +1,28 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n            snag_email_reward_pending AS \"pending!\",\n            snag_email_reward_consumed AS \"consumed!\"\n        FROM users\n        WHERE id = $1\n        LIMIT 1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "pending!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 1,
+        "name": "consumed!",
+        "type_info": "Bool"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      false,
+      false
+    ]
+  },
+  "hash": "7b5d8d20d9f644abadbc42eb3dd5ae5f85d2e49899cbbaab59c582fcf621cfc2"
+}

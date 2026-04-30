@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        SELECT\n        id\n        FROM daily_stats\n        WHERE day < $1\n        LIMIT 10000\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Date"
+      ]
+    },
+    "nullable": [
+      false
+    ]
+  },
+  "hash": "eec92d3ec1350f4063f7ef35065c04d7b083e80b4434684f1cfbca277d64a443"
+}

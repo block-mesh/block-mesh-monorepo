@@ -1,0 +1,26 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        WITH\n            extant AS (\n                SELECT id FROM users WHERE id = $1\n            ),\n            inserted AS (\n                INSERT INTO users (id, created_at, wallet_address, email, password, invited_by, verified_email, role)\n                SELECT $1, $2, $3, $4, $5, null , true, 'admin'\n                WHERE NOT EXISTS (SELECT FROM extant)\n                RETURNING id\n            )\n        SELECT id FROM inserted\n        UNION ALL\n        SELECT id FROM extant\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "id",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid",
+        "Timestamptz",
+        "Text",
+        "Text",
+        "Text"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "10fbfefbba3d3b526836792320fa4682bd15a48f6ed99ebaa721dcc0ca2a49b2"
+}

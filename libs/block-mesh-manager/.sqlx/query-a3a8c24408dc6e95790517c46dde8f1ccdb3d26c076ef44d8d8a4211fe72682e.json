@@ -1,0 +1,22 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        WITH user_totals AS (\n            SELECT\n                e1.user_id,\n                SUM(EXTRACT(EPOCH FROM (e2.created_at - e1.created_at))) AS total_seconds_get_user_uptime_rank\n            FROM\n                uptime_reports e1\n            JOIN\n                uptime_reports e2 ON e1.created_at < e2.created_at\n            AND\n                ABS(EXTRACT(EPOCH FROM (e1.created_at - e2.created_at))) <= 60\n            GROUP BY\n                e1.user_id\n        ),\n        ranked_users AS (\n            SELECT\n                user_id,\n                total_seconds_get_user_uptime_rank,\n                RANK() OVER (ORDER BY total_seconds_get_user_uptime_rank DESC) AS user_rank\n            FROM\n                user_totals\n        )\n        SELECT\n            COALESCE(MAX(user_rank), 0) AS user_rank\n        FROM\n            ranked_users\n        WHERE\n            user_id = $1\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "user_rank",
+        "type_info": "Int8"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Uuid"
+      ]
+    },
+    "nullable": [
+      null
+    ]
+  },
+  "hash": "a3a8c24408dc6e95790517c46dde8f1ccdb3d26c076ef44d8d8a4211fe72682e"
+}
