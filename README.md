@@ -42,7 +42,6 @@ export TWITTER_CLIENT_SECRET=""
 
 Install the following:
 
-* `cargo install cargo-leptos --version=0.2.20`
 * `cargo install sqlx-cli --version=0.7.3`
 * `cargo install wasm-pack --version=0.12.1`
 * `rustup target add wasm32-unknown-unknown`
@@ -99,10 +98,9 @@ echo '+cargo test --package tg-privacy-bot'
 export DATABASE_URL="postgres://postgres:password@localhost:5551/tg-bot"
 cargo test --package tg-privacy-bot
 export DATABASE_URL="postgres://postgres:password@localhost:5559/block-mesh"
-echo '+cargo clippy --all  --features ssr,hydrate -- -D warnings'
+echo '+cargo clippy --all --features ssr -- -D warnings'
 unset DATABASE_URL
-cargo clippy --all --features ssr,hydrate -- -D warnings
+cargo clippy --all --features ssr -- -D warnings
 echo '+cargo fmt --all -- --check'
 cargo fmt --all -- --check
 ```
-
