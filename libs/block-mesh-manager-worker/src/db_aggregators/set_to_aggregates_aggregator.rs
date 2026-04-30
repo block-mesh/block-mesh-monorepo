@@ -8,6 +8,7 @@ use sqlx::postgres::PgQueryResult;
 use sqlx::{PgPool, Postgres, Transaction};
 use std::collections::HashMap;
 use std::env;
+use time::OffsetDateTime;
 use tokio::sync::broadcast::error::RecvError;
 use tokio::sync::broadcast::Receiver;
 use tokio::task::JoinHandle;
@@ -30,7 +31,7 @@ async fn set_to_aggregates_bulk_update(
     if calls.is_empty() {
         return Ok(0);
     }
-    let now = Utc::now();
+    let now = OffsetDateTime::now_utc();
     let mut user_ids = Vec::with_capacity(calls.len());
     let mut names = Vec::with_capacity(calls.len());
     let mut values = Vec::with_capacity(calls.len());
