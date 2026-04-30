@@ -236,7 +236,13 @@ WITH input_data(user_id, name) AS (
     ($1::uuid, 'Latency'),
     ($1::uuid, 'Tasks')
 )
-SELECT a.id, a.created_at, a.user_id, a.name, a.value, a.updated_at
+SELECT
+    a.id AS "id?",
+    a.created_at AS "created_at?",
+    a.user_id AS "user_id?",
+    a.name AS "name?",
+    a.value AS "value?",
+    a.updated_at AS "updated_at?"
 FROM aggregates a
 JOIN input_data i USING (user_id, name)
 "#,
