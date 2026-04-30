@@ -4,6 +4,7 @@ use chrono::{NaiveDate, Utc};
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use flume::Sender;
 use serde_json::Value;
+use sqlx::postgres::PgQueryResult;
 use sqlx::{PgPool, Postgres, Transaction};
 use std::collections::HashSet;
 use std::env;
@@ -47,7 +48,7 @@ async fn create_daily_stats_bulk_insert(
         return Ok(0);
     }
 
-    let result = sqlx::query!(
+    let result: PgQueryResult = sqlx::query!(
         r#"
         WITH input AS (
             SELECT DISTINCT user_id
