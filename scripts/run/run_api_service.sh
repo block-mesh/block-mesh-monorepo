@@ -18,7 +18,6 @@ if [ -f "${ROOT}/.env" ] ; then
 fi
 #ensure "${ROOT}/scripts/build.sh"
 #"${ROOT}/target/debug/block-mesh-manager" &
-export LEPTOS_HASH_FILES=false
 #export RUST_LOG=sqlx=trace
 export AGGREGATE_AGG_SIZE=1
 cd "${ROOT}/libs/block-mesh-manager-api" || exit 1

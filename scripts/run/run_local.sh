@@ -29,9 +29,14 @@ if [ -f "${ROOT}/.env" ] ; then
   source "${ROOT}/.env"
 fi
 ensure "${ROOT}/scripts/init_db.sh"
-#ensure "${ROOT}/scripts/build.sh"
-#"${ROOT}/target/debug/block-mesh-manager" &
-export LEPTOS_HASH_FILES=false
 #export RUST_LOG=sqlx=trace
 export AGGREGATE_AGG_SIZE=1
-ensure "${ROOT}/scripts/run/run_leptos.sh"
+cargo watch --watch libs --shell "cargo run -p block-mesh-manager --features ssr" | bunyan &
+export backend=$!
+function cleanup()
+{
+  echo "Killing ${backend}"
+  kill "${backend}"
+}
+trap cleanup SIGINT EXIT
+wait "${backend}"
