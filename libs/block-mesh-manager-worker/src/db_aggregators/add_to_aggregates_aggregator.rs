@@ -4,6 +4,7 @@ use chrono::Utc;
 use database_utils::utils::instrument_wrapper::{commit_txn, create_txn};
 use flume::Sender;
 use serde_json::Value;
+use sqlx::postgres::PgQueryResult;
 use sqlx::{PgPool, Postgres, Transaction};
 use std::collections::HashMap;
 use std::env;
@@ -42,7 +43,7 @@ async fn add_to_aggregates_bulk_update(
         updated_ats.push(now);
     }
 
-    let result = sqlx::query!(
+    let result: PgQueryResult = sqlx::query!(
         r#"
         WITH updates AS (
             SELECT *
