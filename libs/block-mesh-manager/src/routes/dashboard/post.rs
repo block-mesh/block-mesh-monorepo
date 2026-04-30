@@ -41,7 +41,7 @@ pub async fn handler(
         .ok_or_else(|| Error::UserNotFound)?;
     let user_id = user.user_id;
     let data = dashboard_data_extractor(
-        &state.dashboard_pool,
+        &state.pool,
         &mut follower_transaction,
         state.clone(),
         user,
@@ -49,7 +49,7 @@ pub async fn handler(
     )
     .await?;
     commit_txn(follower_transaction).await?;
-    let mut transaction = create_txn(&state.dashboard_pool).await?;
+    let mut transaction = create_txn(&state.pool).await?;
     prep_user(&mut transaction, &user_id).await?;
     commit_txn(transaction).await?;
     Ok(Json(data))

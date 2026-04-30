@@ -25,7 +25,7 @@ pub async fn handler(
         return Err(Error::ApiTokenNotFound);
     }
     let data = dashboard_data_extractor(
-        &state.dashboard_pool,
+        &state.pool,
         &mut follower_transaction,
         state.clone(),
         user,
