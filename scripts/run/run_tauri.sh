@@ -11,5 +11,4 @@ export DATABASE_URL="postgres://postgres:password@localhost:9559/block-mesh"
 if [ -f "${ROOT}/.env" ] ; then
   source "${ROOT}/.env"
 fi
-export LEPTOS_HASH_FILES=false
 cargo tauri dev

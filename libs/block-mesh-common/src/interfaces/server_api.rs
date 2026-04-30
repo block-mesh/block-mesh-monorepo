@@ -102,6 +102,20 @@ pub struct DashboardRequest {
 
 #[typeshare]
 #[derive(Serialize, Deserialize, Debug)]
+pub struct GetUserOverallPointsRequest {
+    pub email: String,
+    pub api_key: String,
+}
+
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug)]
+pub struct GetUserOverallPointsResponse {
+    pub email: String,
+    pub overall_points: f64,
+}
+
+#[typeshare]
+#[derive(Serialize, Deserialize, Debug)]
 pub struct ReportUptimeResponse {
     pub status_code: u16,
 }

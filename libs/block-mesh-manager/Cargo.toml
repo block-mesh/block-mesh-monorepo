@@ -24,11 +24,6 @@ tower_governor = { workspace = true, optional = true }
 aws-config = { workspace = true, optional = true }
 aws-sdk-sesv2 = { workspace = true, optional = true }
 rayon = { workspace = true }
-charming = { workspace = true, features = ["wasm"] }
-js-sys = { workspace = true }
-gloo-utils = { workspace = true }
-wasm-bindgen-futures = { workspace = true }
-serde-wasm-bindgen = { workspace = true }
 solana-sdk = { workspace = true, optional = true }
 clap = { workspace = true, features = ["derive"] }
 dashmap = { workspace = true }
@@ -36,7 +31,6 @@ futures-util = { workspace = true }
 
 [target.'cfg(not(target_env = "msvc"))'.dependencies]
 tikv-jemallocator = { workspace = true, optional = true, features = ["background_threads"] }
-logger-leptos = { path = "../logger-leptos", optional = true }
 logger-general = { path = "../logger-general", optional = true, features = ["sentry"] }
 tracing-subscriber-wasm = { workspace = true }
 console-subscriber = { workspace = true, optional = true }
@@ -83,18 +77,8 @@ tracing-log = { workspace = true }
 http = { workspace = true }
 bcrypt = { workspace = true }
 secret = { path = "../secret", features = ["sqlx"], optional = true }
-leptos_axum = { workspace = true, optional = true }
-leptos = { workspace = true }
-leptos_config = { workspace = true, optional = true }
-leptos_meta = { workspace = true, optional = true }
-leptos_router = { workspace = true, optional = true }
-leptos-use = { workspace = true, features = ["math"] }
 cfg-if = { workspace = true }
-wasm-bindgen = { workspace = true }
-console_error_panic_hook = { workspace = true }
-console_log = { workspace = true }
 log = { workspace = true }
-tailwind_fuse = { version = "0.3", features = ["variant"] }
 block-mesh-manager-database-domain = { path = "../block-mesh-manager-database-domain", optional = true }
 sentry-tower = { workspace = true, optional = true, features = ["axum", "http", "axum-matched-path"] }
 
@@ -104,22 +88,6 @@ workspace = true
 [dependencies.rand]
 workspace = true
 features = ["min_const_gen"]
-
-[dependencies.web-sys]
-workspace = true
-features = [
-  "console",
-  "WorkerGlobalScope",
-  "Window",
-  'Headers',
-  'Request',
-  'RequestInit',
-  'RequestMode',
-  'Response',
-  "Clipboard",
-  "Navigator",
-  "MessageEvent"
-]
 
 [dependencies.sqlx]
 workspace = true
@@ -144,21 +112,13 @@ features = [
   "v4", # Lets you generate random UUIDs
   "fast-rng", # Use a faster (but still sufficiently random) RNG
   "macro-diagnostics", # Enable better diagnostics for compile-time UUIDs
-  "serde", # Enable serialization/deserialization of UUIDs
-  "js"
+  "serde" # Enable serialization/deserialization of UUIDs
 ]
 
 [lib]
-crate-type = ["cdylib", "rlib"]
+crate-type = ["rlib"]
 
 [features]
-hydrate = [
-  "block-mesh-common/hydrate",
-  "leptos/hydrate",
-  "leptos_meta",
-  "leptos_router",
-  "dep:logger-leptos"
-]
 ssr = [
   "dep:dash-with-expiry",
   "block-mesh-common/intract",
@@ -183,12 +143,6 @@ ssr = [
   "dep:tower",
   "dep:tower-http",
   "dep:tracing-bunyan-formatter",
-  "dep:leptos_axum",
-  "dep:leptos_config",
-  "leptos/ssr",
-  "leptos_meta/ssr",
-  "leptos_router/ssr",
-  "leptos-use/ssr",
   "dep:sqlx",
   "dep:tracing",
   "dep:tower-sessions-sqlx-store",
@@ -197,80 +151,3 @@ ssr = [
   "dep:logger-general",
   "dep:sentry"
 ]
-
-[package.metadata.leptos]
-# Enables additional file hashes on outputted css, js, and wasm files
-#
-# Optional: Defaults to false. Can also be set with the LEPTOS_HASH_FILES=false env var (must be set at runtime too)
-hash-files = true
-hash-file-name = "hash.txt"
-
-# The name used by wasm-bindgen/cargo-leptos for the JS/WASM bundle. Defaults to the crate name
-output-name = "block-mesh-manager"
-
-# The site root folder is where cargo-leptos generate all output. WARNING: all content of this folder will be erased on a rebuild. Use it in your server setup.
-site-root = "target/site"
-
-# The site-root relative folder where all compiled output (JS, WASM and CSS) is written
-# Defaults to pkg
-site-pkg-dir = "pkg"
-
-# [Optional] The source CSS file. If it ends with .sass or .scss then it will be compiled by dart-sass into CSS. The CSS is optimized by Lightning CSS before being written to <site-root>/<site-pkg>/app.css
-# style-file = "style/main.scss"
-# Assets source dir. All files found here will be copied and synchronized to site-root.
-# The assets-dir cannot have a sub directory with the same name/path as site-pkg-dir.
-#
-# Optional. Env: LEPTOS_ASSETS_DIR.
-assets-dir = "public"
-
-# The IP and port (ex: 127.0.0.1:3000) where the server serves the content. Use it in your server setup.
-site-addr = "127.0.0.1:8000"
-
-js-dir = "js-src"
-watch-additional-files = ["js-src/connectors.js", "templates/base.html"]
-
-# The port to use for automatic reload monitoring
-reload-port = 3001
-
-# [Optional] Command to use when running end2end tests. It will run in the end2end dir.
-#   [Windows] for non-WSL use "npx.cmd playwright test"
-#   This binary name can be checked in Powershell with Get-Command npx
-end2end-cmd = "npx playwright test"
-end2end-dir = "end2end"
-
-#  The browserlist query used for optimizing the CSS.
-browserquery = "defaults"
-
-# Set by cargo-leptos watch when building with that tool. Controls whether autoreload JS will be included in the head
-watch = false
-
-# The environment Leptos will run in, usually either "DEV" or "PROD"
-env = "DEV"
-
-# The features to use when compiling the bin target
-#
-# Optional. Can be over-ridden with the command line parameter --bin-features
-bin-features = ["ssr"]
-
-# If the --no-default-features flag should be used when compiling the bin target
-#
-# Optional. Defaults to false.
-bin-default-features = false
-
-# The features to use when compiling the lib target
-#
-# Optional. Can be over-ridden with the command line parameter --lib-features
-lib-features = ["hydrate"]
-
-# If the --no-default-features flag should be used when compiling the lib target
-#
-# Optional. Defaults to false.
-lib-default-features = false
-
-# The profile to use for the lib target when compiling for release
-#
-# Optional. Defaults to "release".
-lib-profile-release = "release"
-
-# Tailwind
-#style-file = "../../output-server.css"

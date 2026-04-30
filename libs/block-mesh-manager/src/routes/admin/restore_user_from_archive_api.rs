@@ -25,6 +25,9 @@ pub struct RestoreUserFromArchiveResponse {
     pub restored: bool,
     pub user_id: Option<Uuid>,
     pub message: Option<String>,
+    pub conflict_field: Option<String>,
+    pub conflict_value: Option<String>,
+    pub conflicting_user_id: Option<Uuid>,
 }
 
 #[tracing::instrument(name = "restore_user_from_archive_api", skip_all)]
@@ -53,6 +56,9 @@ pub async fn handler(
                 restored: true,
                 user_id: Some(user_id),
                 message: Some("User restored from archive".to_string()),
+                conflict_field: None,
+                conflict_value: None,
+                conflicting_user_id: None,
             },
         ),
         RestoreUserFromArchiveResult::AlreadyExists => (
@@ -62,6 +68,9 @@ pub async fn handler(
                 restored: false,
                 user_id: None,
                 message: Some("User already exists".to_string()),
+                conflict_field: None,
+                conflict_value: None,
+                conflicting_user_id: None,
             },
         ),
         RestoreUserFromArchiveResult::ArchiveNotFound => (
@@ -71,15 +80,31 @@ pub async fn handler(
                 restored: false,
                 user_id: None,
                 message: Some("Archived user not found".to_string()),
+                conflict_field: None,
+                conflict_value: None,
+                conflicting_user_id: None,
             },
         ),
-        RestoreUserFromArchiveResult::Conflict => (
+        RestoreUserFromArchiveResult::Conflict(conflict) => (
             StatusCode::CONFLICT,
             RestoreUserFromArchiveResponse {
                 status: ResponseStatus::Failure,
                 restored: false,
                 user_id: None,
-                message: Some("Archived user conflicts with an existing unique value".to_string()),
+                message: Some(match &conflict.value {
+                    Some(value) => format!(
+                        "Archived user conflicts with an existing {}: {}",
+                        conflict.field.as_str(),
+                        value
+                    ),
+                    None => format!(
+                        "Archived user conflicts with an existing {}",
+                        conflict.field.as_str()
+                    ),
+                }),
+                conflict_field: Some(conflict.field.as_str().to_string()),
+                conflict_value: conflict.value,
+                conflicting_user_id: conflict.conflicting_user_id,
             },
         ),
     };

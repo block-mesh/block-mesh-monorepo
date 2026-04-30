@@ -1,9 +1,9 @@
+use crate::domain::bulk_get_or_create_aggregate_by_user_and_name::record_aggregate_liveness;
 use moka::future::Cache;
 use sqlx::{Postgres, Transaction};
 use std::env;
 use std::sync::LazyLock;
 use std::time::Duration;
-use time::OffsetDateTime;
 use uuid::Uuid;
 
 const DEFAULT_TOUCH_CACHE_TTL_SECONDS: u64 = 60;
@@ -29,20 +29,13 @@ pub async fn is_touch_cached(user_id: &Uuid) -> bool {
 
 #[tracing::instrument(name = "touch_user_aggregates", skip_all)]
 pub async fn touch_user_aggregates(
-    transaction: &mut Transaction<'_, Postgres>,
+    _transaction: &mut Transaction<'_, Postgres>,
     user_id: &Uuid,
 ) -> anyhow::Result<()> {
     if TOUCH_CACHE.get(user_id).await.is_some() {
         return Ok(());
     }
-    let now = OffsetDateTime::now_utc();
-    sqlx::query!(
-        r#"UPDATE aggregates SET updated_at = $1 WHERE user_id = $2"#,
-        now,
-        user_id,
-    )
-    .execute(&mut **transaction)
-    .await?;
+    record_aggregate_liveness(user_id).await;
     TOUCH_CACHE.insert(*user_id, ()).await;
     Ok(())
 }
