@@ -197,7 +197,7 @@ pub async fn bulk_get_or_create_aggregate_by_user_and_name(
     let download = Value::from(init_rand(1, 100));
     let latency = Value::from(init_rand(1, 100));
     let value = Value::Null;
-    sqlx::query(
+    sqlx::query!(
         r#"
 WITH input_data(id, created_at, updated_at, user_id, name, value) AS (
   VALUES
@@ -214,16 +214,17 @@ SELECT id, created_at, user_id, name, value, created_at, created_at
 FROM input_data
 ON CONFLICT (user_id, name) DO NOTHING
 "#,
+        user_id,
+        value,
+        upload,
+        download,
+        latency,
+        zero
     )
-    .bind(user_id)
-    .bind(value)
-    .bind(upload)
-    .bind(download)
-    .bind(latency)
-    .bind(zero)
     .execute(&mut **transaction)
     .await?;
-    let aggregates: Vec<AggregateTmp> = sqlx::query_as(
+    let aggregates: Vec<AggregateTmp> = sqlx::query_as!(
+        AggregateTmp,
         r#"
 WITH input_data(user_id, name) AS (
   VALUES
@@ -239,8 +240,8 @@ SELECT a.id, a.created_at, a.user_id, a.name, a.value, a.updated_at
 FROM aggregates a
 JOIN input_data i USING (user_id, name)
 "#,
+        user_id
     )
-    .bind(user_id)
     .fetch_all(&mut **transaction)
     .await?;
     let aggregates: Vec<Aggregate> = aggregates
