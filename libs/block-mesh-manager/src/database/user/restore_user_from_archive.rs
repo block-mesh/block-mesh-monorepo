@@ -54,7 +54,8 @@ pub async fn restore_user_from_archive(
             WHERE a.table_name = 'users'
               AND a.record_type = 'User'
               AND a.most_recent = TRUE
-              AND COALESCE(a.new_values, a.old_values) ->> 'email' = $1
+              AND lower(COALESCE(a.new_values, a.old_values) ->> 'email') = $1
+            ORDER BY a.created_at DESC
             LIMIT 1
         ),
         inserted AS (
