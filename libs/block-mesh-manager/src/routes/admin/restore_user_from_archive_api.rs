@@ -16,7 +16,9 @@ use uuid::Uuid;
 #[derive(Debug, Deserialize)]
 pub struct RestoreUserFromArchiveRequest {
     pub email: String,
-    pub team_api_key: String,
+    pub team_api_key: Option<String>,
+    pub api_key: Option<String>,
+    pub code: Option<String>,
 }
 
 #[derive(Debug, Serialize)]
@@ -35,7 +37,16 @@ pub async fn handler(
     State(state): State<Arc<AppState>>,
     Json(body): Json<RestoreUserFromArchiveRequest>,
 ) -> Result<impl IntoResponse, Error> {
-    if body.team_api_key.is_empty() || body.team_api_key != state.team_api_key.as_str() {
+    let admin_key = body
+        .team_api_key
+        .as_deref()
+        .into_iter()
+        .chain(body.api_key.as_deref())
+        .chain(body.code.as_deref())
+        .map(str::trim)
+        .find(|key| !key.is_empty())
+        .unwrap_or("");
+    if admin_key.is_empty() || admin_key != state.team_api_key.trim() {
         return Err(Error::Unauthorized);
     }
 
