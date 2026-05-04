@@ -31,7 +31,7 @@ impl RestoreUserFromArchiveConflictField {
     }
 }
 
-#[derive(sqlx::FromRow, Debug)]
+#[derive(Debug)]
 struct RestoreUserFromArchiveRow {
     restored_id: Option<Uuid>,
     archive_found: bool,
@@ -46,7 +46,8 @@ pub async fn restore_user_from_archive(
     transaction: &mut Transaction<'_, Postgres>,
     email: &str,
 ) -> Result<RestoreUserFromArchiveResult, sqlx::Error> {
-    let row = sqlx::query_as::<_, RestoreUserFromArchiveRow>(
+    let row = sqlx::query_as!(
+        RestoreUserFromArchiveRow,
         r#"
         WITH archived_user AS (
             SELECT COALESCE(a.new_values, a.old_values) AS snapshot
@@ -134,8 +135,8 @@ pub async fn restore_user_from_archive(
                 LIMIT 1
             ) AS "wallet_conflicting_user_id?"
         "#,
+        email,
     )
-    .bind(email)
     .fetch_one(&mut **transaction)
     .await?;
 

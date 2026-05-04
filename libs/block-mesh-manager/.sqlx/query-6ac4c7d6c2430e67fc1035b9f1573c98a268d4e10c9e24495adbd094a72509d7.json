@@ -1,0 +1,58 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\n        WITH archived_user AS (\n            SELECT COALESCE(a.new_values, a.old_values) AS snapshot\n            FROM archives a\n            WHERE a.table_name = 'users'\n              AND a.record_type = 'User'\n              AND a.most_recent = TRUE\n              AND lower(COALESCE(a.new_values, a.old_values) ->> 'email') = $1\n            ORDER BY a.created_at DESC\n            LIMIT 1\n        ),\n        inserted AS (\n            INSERT INTO users (\n                id,\n                email,\n                password,\n                wallet_address,\n                created_at,\n                role,\n                invited_by,\n                verified_email,\n                status,\n                comments,\n                proof_of_humanity,\n                extension_activated,\n                extension_activated_sent,\n                wallet_connected_sent,\n                email_confirmed_sent,\n                snag_email_reward_pending,\n                snag_email_reward_consumed\n            )\n            SELECT\n                (snapshot ->> 'id')::uuid,\n                snapshot ->> 'email',\n                snapshot ->> 'password',\n                NULLIF(snapshot ->> 'wallet_address', ''),\n                COALESCE((snapshot ->> 'created_at')::timestamptz, now()),\n                COALESCE(snapshot ->> 'role', 'user'),\n                NULLIF(snapshot ->> 'invited_by', '')::uuid,\n                COALESCE((snapshot ->> 'verified_email')::boolean, FALSE),\n                snapshot ->> 'status',\n                snapshot ->> 'comments',\n                COALESCE((snapshot ->> 'proof_of_humanity')::boolean, FALSE),\n                COALESCE((snapshot ->> 'extension_activated')::boolean, FALSE),\n                COALESCE((snapshot ->> 'extension_activated_sent')::boolean, FALSE),\n                COALESCE((snapshot ->> 'wallet_connected_sent')::boolean, FALSE),\n                COALESCE((snapshot ->> 'email_confirmed_sent')::boolean, FALSE),\n                COALESCE((snapshot ->> 'snag_email_reward_pending')::boolean, FALSE),\n                COALESCE((snapshot ->> 'snag_email_reward_consumed')::boolean, FALSE)\n            FROM archived_user\n            ON CONFLICT DO NOTHING\n            RETURNING id\n        )\n        SELECT\n            (SELECT id FROM inserted LIMIT 1) AS \"restored_id?\",\n            EXISTS(SELECT 1 FROM archived_user) AS \"archive_found!\",\n            EXISTS(\n                SELECT 1\n                FROM users u\n                JOIN archived_user au ON u.email = au.snapshot ->> 'email'\n            ) AS \"email_exists!\",\n            EXISTS(\n                SELECT 1\n                FROM users u\n                JOIN archived_user au ON u.id = (au.snapshot ->> 'id')::uuid\n            ) AS \"id_exists!\",\n            EXISTS(\n                SELECT 1\n                FROM users u\n                JOIN archived_user au\n                  ON NULLIF(au.snapshot ->> 'wallet_address', '') IS NOT NULL\n                 AND u.wallet_address = NULLIF(au.snapshot ->> 'wallet_address', '')\n            ) AS \"wallet_exists!\",\n            (\n                SELECT NULLIF(au.snapshot ->> 'wallet_address', '')\n                FROM archived_user au\n                LIMIT 1\n            ) AS \"archived_wallet_address?\",\n            (\n                SELECT u.id\n                FROM users u\n                JOIN archived_user au\n                  ON NULLIF(au.snapshot ->> 'wallet_address', '') IS NOT NULL\n                 AND u.wallet_address = NULLIF(au.snapshot ->> 'wallet_address', '')\n                LIMIT 1\n            ) AS \"wallet_conflicting_user_id?\"\n        ",
+  "describe": {
+    "columns": [
+      {
+        "ordinal": 0,
+        "name": "restored_id?",
+        "type_info": "Uuid"
+      },
+      {
+        "ordinal": 1,
+        "name": "archive_found!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 2,
+        "name": "email_exists!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 3,
+        "name": "id_exists!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 4,
+        "name": "wallet_exists!",
+        "type_info": "Bool"
+      },
+      {
+        "ordinal": 5,
+        "name": "archived_wallet_address?",
+        "type_info": "Text"
+      },
+      {
+        "ordinal": 6,
+        "name": "wallet_conflicting_user_id?",
+        "type_info": "Uuid"
+      }
+    ],
+    "parameters": {
+      "Left": [
+        "Text"
+      ]
+    },
+    "nullable": [
+      null,
+      null,
+      null,
+      null,
+      null,
+      null,
+      null
+    ]
+  },
+  "hash": "6ac4c7d6c2430e67fc1035b9f1573c98a268d4e10c9e24495adbd094a72509d7"
+}
