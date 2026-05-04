@@ -144,7 +144,7 @@
     form.addEventListener("submit", async (event) => {
         event.preventDefault();
 
-        const adminKey = document.getElementById("admin_key").value;
+        const adminKey = document.getElementById("admin_key").value.trim();
         const email = document.getElementById("email").value.trim();
 
         submitButton.disabled = true;
@@ -167,7 +167,13 @@
                 })
             });
 
-            const payload = await response.json().catch(() => ({}));
+            const responseText = await response.text();
+            let payload = {};
+            try {
+                payload = responseText ? JSON.parse(responseText) : {};
+            } catch (_) {
+                payload = { message: responseText };
+            }
             resultJson.textContent = JSON.stringify(payload, null, 2);
 
             if (response.ok) {

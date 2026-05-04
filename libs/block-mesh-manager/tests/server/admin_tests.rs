@@ -182,3 +182,36 @@ async fn test_restore_user_from_archive_returns_wallet_conflict_details() {
         .unwrap();
     assert_eq!(restored_count, 0);
 }
+
+#[tokio::test]
+async fn test_restore_user_from_archive_accepts_trimmed_code_key() {
+    let app = spawn_app().await;
+    let user_id = Uuid::new_v4();
+    let email = format!("restore-code-{}@example.com", Uuid::new_v4());
+
+    insert_archived_user_snapshot(
+        &app,
+        user_id,
+        "DELETE",
+        None,
+        Some(archived_user_snapshot(user_id, &email, None)),
+    )
+    .await;
+
+    let response = app
+        .client
+        .post(format!(
+            "{}/api{}",
+            app.address,
+            RoutesEnum::Api_RestoreUserFromArchive
+        ))
+        .json(&json!({
+            "email": email,
+            "code": " tmp "
+        }))
+        .send()
+        .await
+        .unwrap();
+
+    assert_eq!(response.status(), StatusCode::CREATED);
+}
