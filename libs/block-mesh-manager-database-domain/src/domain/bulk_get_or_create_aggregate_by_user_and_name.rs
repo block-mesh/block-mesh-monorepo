@@ -2,7 +2,7 @@ use crate::domain::aggregate::{Aggregate, AggregateTmp};
 use block_mesh_common::rand::init_rand;
 use moka::future::Cache;
 use serde_json::Value;
-use sqlx::{PgPool, Postgres, QueryBuilder, Transaction};
+use sqlx::{PgPool, Postgres, Transaction};
 use std::collections::HashMap;
 use std::env;
 use std::sync::LazyLock;
@@ -52,31 +52,32 @@ pub async fn flush_aggregate_liveness(pool: &PgPool) -> anyhow::Result<u64> {
         std::mem::take(&mut *touches)
     };
 
-    let mut query_builder = QueryBuilder::<Postgres>::new(
-        r#"
-        UPDATE aggregates_uptime a
-        SET updated_at = v.last_seen_at
-        FROM (VALUES
-        "#,
-    );
-    let mut separated = query_builder.separated(",");
-    for (user_id, last_seen_at) in touches {
-        separated
-            .push("(")
-            .push_bind(user_id)
-            .push(",")
-            .push_bind(last_seen_at)
-            .push(")");
-    }
-    query_builder.push(
-        r#"
-        ) AS v(user_id, last_seen_at)
-        WHERE a.user_id = v.user_id
-        AND a.updated_at < v.last_seen_at
-        "#,
-    );
+    flush_aggregate_liveness_touches(pool, touches).await
+}
 
-    let result = query_builder.build().execute(pool).await?;
+async fn flush_aggregate_liveness_touches<I>(pool: &PgPool, touches: I) -> anyhow::Result<u64>
+where
+    I: IntoIterator<Item = (Uuid, OffsetDateTime)>,
+{
+    let (user_ids, last_seen_ats): (Vec<Uuid>, Vec<OffsetDateTime>) = touches.into_iter().unzip();
+    if user_ids.is_empty() {
+        return Ok(0);
+    }
+
+    let result = sqlx::query!(
+        r#"
+UPDATE aggregates_uptime a
+SET updated_at = v.last_seen_at
+FROM unnest($1::uuid[], $2::timestamptz[]) AS v(user_id, last_seen_at)
+WHERE a.user_id = v.user_id
+AND a.updated_at < v.last_seen_at
+"#,
+        &user_ids,
+        &last_seen_ats
+    )
+    .execute(pool)
+    .await?;
+
     Ok(result.rows_affected())
 }
 
@@ -264,4 +265,187 @@ JOIN input_data i USING (user_id, name)
     AGGREGATE_CACHE.insert(*user_id, aggregates.clone()).await;
     record_aggregate_liveness(user_id).await;
     Ok(aggregates)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use sqlx::postgres::PgPoolOptions;
+    use sqlx::{PgPool, QueryBuilder};
+
+    async fn flush_aggregate_liveness_touches_with_query_builder<I>(
+        pool: &PgPool,
+        touches: I,
+    ) -> anyhow::Result<u64>
+    where
+        I: IntoIterator<Item = (Uuid, OffsetDateTime)>,
+    {
+        let mut query_builder = build_flush_aggregate_liveness_query_with_query_builder(touches);
+        let result = query_builder.build().execute(pool).await?;
+        Ok(result.rows_affected())
+    }
+
+    fn build_flush_aggregate_liveness_query_with_query_builder<I>(
+        touches: I,
+    ) -> QueryBuilder<'static, Postgres>
+    where
+        I: IntoIterator<Item = (Uuid, OffsetDateTime)>,
+    {
+        let mut query_builder = QueryBuilder::<Postgres>::new(
+            r#"
+        UPDATE aggregates_uptime a
+        SET updated_at = v.last_seen_at
+        FROM (
+        "#,
+        );
+        query_builder.push_values(touches, |mut row, (user_id, last_seen_at)| {
+            row.push_bind(user_id).push_bind(last_seen_at);
+        });
+        query_builder.push(
+            r#"
+        ) AS v(user_id, last_seen_at)
+        WHERE a.user_id = v.user_id
+        AND a.updated_at < v.last_seen_at
+        "#,
+        );
+        query_builder
+    }
+
+    #[test]
+    fn aggregate_liveness_query_uses_valid_values_tuples() {
+        let now = OffsetDateTime::from_unix_timestamp(1_700_000_000).unwrap();
+        let query_builder = build_flush_aggregate_liveness_query_with_query_builder(vec![
+            (Uuid::nil(), now),
+            (Uuid::nil(), now),
+        ]);
+
+        let sql = query_builder.sql();
+
+        assert!(sql.contains("FROM (\n        VALUES ($1, $2), ($3, $4)"));
+        assert!(!sql.contains("VALUES\n        (,$1"));
+        assert!(!sql.contains("VALUES (,"));
+    }
+
+    #[tokio::test]
+    async fn macro_liveness_update_matches_query_builder_implementation() -> anyhow::Result<()> {
+        let Ok(database_url) = env::var("DATABASE_URL") else {
+            eprintln!("skipping database comparison test because DATABASE_URL is not set");
+            return Ok(());
+        };
+
+        let pool = PgPoolOptions::new()
+            .max_connections(1)
+            .connect(&database_url)
+            .await?;
+        sqlx::query(
+            r#"
+CREATE TEMP TABLE aggregates_uptime (
+    id uuid PRIMARY KEY,
+    user_id uuid NOT NULL UNIQUE,
+    updated_at timestamptz NOT NULL
+) ON COMMIT PRESERVE ROWS
+"#,
+        )
+        .execute(&pool)
+        .await?;
+
+        let first_user_id = Uuid::new_v4();
+        let second_user_id = Uuid::new_v4();
+        let untouched_user_id = Uuid::new_v4();
+        let initial_time = OffsetDateTime::from_unix_timestamp(1_700_000_000).unwrap();
+        let newer_time = OffsetDateTime::from_unix_timestamp(1_700_000_100).unwrap();
+        let older_time = OffsetDateTime::from_unix_timestamp(1_699_999_900).unwrap();
+        let touches = vec![(first_user_id, newer_time), (second_user_id, older_time)];
+
+        seed_aggregate_liveness_rows(
+            &pool,
+            first_user_id,
+            second_user_id,
+            untouched_user_id,
+            initial_time,
+        )
+        .await?;
+        let query_builder_rows =
+            flush_aggregate_liveness_touches_with_query_builder(&pool, touches.clone()).await?;
+        let query_builder_state = fetch_aggregate_liveness_rows(&pool).await?;
+
+        reset_aggregate_liveness_rows(
+            &pool,
+            first_user_id,
+            second_user_id,
+            untouched_user_id,
+            initial_time,
+        )
+        .await?;
+        let macro_rows = flush_aggregate_liveness_touches(&pool, touches).await?;
+        let macro_state = fetch_aggregate_liveness_rows(&pool).await?;
+
+        assert_eq!(query_builder_rows, macro_rows);
+        assert_eq!(query_builder_state, macro_state);
+        assert_eq!(macro_rows, 1);
+
+        Ok(())
+    }
+
+    async fn seed_aggregate_liveness_rows(
+        pool: &PgPool,
+        first_user_id: Uuid,
+        second_user_id: Uuid,
+        untouched_user_id: Uuid,
+        initial_time: OffsetDateTime,
+    ) -> anyhow::Result<()> {
+        sqlx::query(
+            r#"
+INSERT INTO aggregates_uptime (id, user_id, updated_at)
+VALUES ($1, $2, $3), ($4, $5, $6), ($7, $8, $9)
+"#,
+        )
+        .bind(Uuid::new_v4())
+        .bind(first_user_id)
+        .bind(initial_time)
+        .bind(Uuid::new_v4())
+        .bind(second_user_id)
+        .bind(initial_time)
+        .bind(Uuid::new_v4())
+        .bind(untouched_user_id)
+        .bind(initial_time)
+        .execute(pool)
+        .await?;
+        Ok(())
+    }
+
+    async fn reset_aggregate_liveness_rows(
+        pool: &PgPool,
+        first_user_id: Uuid,
+        second_user_id: Uuid,
+        untouched_user_id: Uuid,
+        initial_time: OffsetDateTime,
+    ) -> anyhow::Result<()> {
+        sqlx::query("TRUNCATE aggregates_uptime")
+            .execute(pool)
+            .await?;
+        seed_aggregate_liveness_rows(
+            pool,
+            first_user_id,
+            second_user_id,
+            untouched_user_id,
+            initial_time,
+        )
+        .await
+    }
+
+    async fn fetch_aggregate_liveness_rows(
+        pool: &PgPool,
+    ) -> anyhow::Result<Vec<(Uuid, OffsetDateTime)>> {
+        let rows = sqlx::query_as::<_, (Uuid, OffsetDateTime)>(
+            r#"
+SELECT user_id, updated_at
+FROM aggregates_uptime
+ORDER BY user_id
+"#,
+        )
+        .fetch_all(pool)
+        .await?;
+        Ok(rows)
+    }
 }
