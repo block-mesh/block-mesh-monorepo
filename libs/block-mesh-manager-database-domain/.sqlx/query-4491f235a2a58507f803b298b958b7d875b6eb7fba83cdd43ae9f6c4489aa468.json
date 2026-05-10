@@ -1,0 +1,15 @@
+{
+  "db_name": "PostgreSQL",
+  "query": "\nUPDATE aggregates_uptime a\nSET updated_at = v.last_seen_at\nFROM unnest($1::uuid[], $2::timestamptz[]) AS v(user_id, last_seen_at)\nWHERE a.user_id = v.user_id\nAND a.updated_at < v.last_seen_at\n",
+  "describe": {
+    "columns": [],
+    "parameters": {
+      "Left": [
+        "UuidArray",
+        "TimestamptzArray"
+      ]
+    },
+    "nullable": []
+  },
+  "hash": "4491f235a2a58507f803b298b958b7d875b6eb7fba83cdd43ae9f6c4489aa468"
+}
